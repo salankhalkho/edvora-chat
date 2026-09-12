@@ -1,0 +1,410 @@
+<!-- Page Header -->
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
+                    <div>
+                        <h2 style="font-family: var(--brand-font-display); font-size: 18px; font-weight: 700; color: #092F2E; margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <span>📁</span> Lead-Magnet Assets &amp; Documents
+                        </h2>
+                        <p style="font-size: 12px; color: #4F7470; margin-top: 4px;">
+                            Upload official college brochures, fee schedules, scholarship criteria, and placement reports. The AI assistant dynamically offers these assets to capture verified student emails and phone numbers.
+                        </p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button type="button" class="brand-btn-secondary brand-btn-sm" onclick="loadAssets()" style="height: 36px; padding: 0 14px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                            <span>↻</span> Refresh
+                        </button>
+                        <button type="button" class="brand-btn-primary" onclick="openAssetUploadModal()" style="height: 36px; padding: 0 20px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);">
+                            <span>➕</span> Upload New Asset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Staff Scoped Permission Notice (Shown only for staff users) -->
+                <div id="staffAssetNotice" class="brand-card" style="display: none; margin-bottom: 20px; padding: 14px 18px; border: 1px solid rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.08);">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 20px;">🛡️</span>
+                        <div>
+                            <strong style="font-size: 13px; font-weight: 700; color: var(--brand-cyan-300);">Departmental Asset Management Scope</strong>
+                            <p id="staffAssetNoticeText" style="font-size: 12px; color: #4F7470; margin: 2px 0 0 0;">
+                                You can upload and manage assets mapped to your assigned departments, as well as view org-wide college assets.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats Grid -->
+                <div class="stats-grid" style="margin-bottom: 20px;">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Assets</div>
+                        <div class="stat-value" id="statTotalAssets">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Org-Wide Assets</div>
+                        <div class="stat-value" id="statOrgWideAssets">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Department Mapped</div>
+                        <div class="stat-value" id="statDeptAssets">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Downloads</div>
+                        <div class="stat-value" id="statTotalDownloads">0</div>
+                    </div>
+                </div>
+
+                <!-- Filters & Search Toolbar -->
+                <div class="brand-card" style="padding: 14px 18px; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                        <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 260px;">
+                            <input type="text" id="assetSearchInput" class="brand-input" placeholder="🔍 Search assets by title, category, trigger or filename..." oninput="filterAssetsList()" style="height: 36px; font-size: 12px;" />
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <select id="assetCategoryFilter" class="brand-input" onchange="filterAssetsList()" style="height: 36px; font-size: 12px; min-width: 170px; background-color: #FFFFFF; color: #063D3B;">
+                                <option value="">📁 All Categories</option>
+                                <option value="brochure">📄 Official Brochure / Prospectus</option>
+                                <option value="fee_structure">💰 Fee Structure &amp; Installments</option>
+                                <option value="scholarship_guide">🏆 Scholarship Matrix</option>
+                                <option value="placement_report">📈 Placement &amp; Salary Report</option>
+                                <option value="curriculum">📚 Curriculum &amp; Syllabus</option>
+                                <option value="hostel_guide">🏡 Hostel &amp; Campus Life</option>
+                                <option value="exam_cutoff">🎯 Cutoff &amp; Exam Prep Kit</option>
+                                <option value="international_guide">🌍 International / NRI Guide</option>
+                                <option value="other">📑 Other Resources</option>
+                            </select>
+
+                            <select id="assetDeptFilter" class="brand-input" onchange="filterAssetsList()" style="height: 36px; font-size: 12px; min-width: 170px; background-color: #FFFFFF; color: #063D3B;">
+                                <option value="">🏢 All Scopes</option>
+                                <option value="org">🌐 Org-wide Only</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Assets Roster Table -->
+                <div class="brand-card" style="margin-bottom: 30px;">
+                    <div class="brand-panel-header">
+                        <div class="brand-panel-title" style="display: flex; align-items: center; gap: 8px;">
+                            <span>📑</span>
+                            <span>Active Lead-Magnet Documents</span>
+                            <span id="assetCountBadge" class="badge" style="background: rgba(99, 102, 241, 0.15); color: var(--brand-indigo-400); border: 1px solid rgba(99, 102, 241, 0.3); font-size: 10px;">0 Assets</span>
+                        </div>
+                    </div>
+                    <div class="brand-table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Asset Title &amp; Description</th>
+                                    <th>Category</th>
+                                    <th>Scope / Department</th>
+                                    <th>File Details</th>
+                                    <th>AI Intent Trigger</th>
+                                    <th>Status</th>
+                                    <th>Downloads</th>
+                                    <th style="text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="assetsTableBody">
+                                <!-- Populated dynamically via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════════════════════════════════════
+                     COMPREHENSIVE EDUCATIONAL WRITEUP (AT THE END OF THE PAGE)
+                     ══════════════════════════════════════════════════════════════ -->
+                <div class="brand-card" style="margin-top: 36px; padding: 28px; border: 1px solid rgba(99, 102, 241, 0.35); background: linear-gradient(180deg, rgba(99, 102, 241, 0.05) 0%, rgba(15, 23, 42, 0.6) 100%);">
+                    
+                    <!-- Section 1: The Lead Generation Engine Explanation -->
+                    <div style="margin-bottom: 32px;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <span style="width: 36px; height: 36px; border-radius: 8px; background: var(--brand-grad-brand); display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff;">💡</span>
+                            <div>
+                                <h3 style="font-family: var(--brand-font-display); font-size: 18px; font-weight: 800; color: #092F2E; margin: 0;">
+                                    How Lead-Magnet Assets Generate High-Intent Student Leads
+                                </h3>
+                                <div style="font-size: 12px; color: var(--brand-indigo-300); margin-top: 2px;">
+                                    Understanding the Psychology of Frictionless Contact Capture for College Admissions
+                                </div>
+                            </div>
+                        </div>
+
+                        <p style="font-size: 13px; color: #4F7470; line-height: 1.7; margin: 0 0 16px 0;">
+                            Over <strong>92% of prospective students and parents</strong> who visit your college website browse passively and bounce anonymously without ever filling out a generic "Contact Us" or "Apply Now" form. In today's digital admissions landscape, high-intent prospective applicants demand instant, authoritative answers before committing their personal contact information.
+                        </p>
+
+                        <!-- 3-Column Mechanism Grid -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin: 20px 0;">
+                            
+                            <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid #DDE9E3; border-radius: var(--brand-radius-sm); padding: 18px;">
+                                <div style="font-size: 20px; margin-bottom: 8px;">🎯</div>
+                                <strong style="font-size: 13px; color: #092F2E; display: block; margin-bottom: 6px;">1. The Value Exchange Principle</strong>
+                                <p style="font-size: 12px; color: #648781; margin: 0; line-height: 1.5;">
+                                    Students will gladly exchange their verified phone number (WhatsApp) and email address when offered a high-value asset (e.g. <em>Official Fee Installment Matrix</em> or <em>Placement Salary Report</em>) that solves their immediate hesitation.
+                                </p>
+                            </div>
+
+                            <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid #DDE9E3; border-radius: var(--brand-radius-sm); padding: 18px;">
+                                <div style="font-size: 20px; margin-bottom: 8px;">🤖</div>
+                                <strong style="font-size: 13px; color: #092F2E; display: block; margin-bottom: 6px;">2. Contextual Conversational AI Triggers</strong>
+                                <p style="font-size: 12px; color: #648781; margin: 0; line-height: 1.5;">
+                                    Instead of intrusive popup forms, the Edvora AI assistant detects user intent dynamically during conversation (e.g., when a student asks <em>"What is the MBA hostel fee?"</em>) and offers the relevant handbook natively in chat.
+                                </p>
+                            </div>
+
+                            <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid #DDE9E3; border-radius: var(--brand-radius-sm); padding: 18px;">
+                                <div style="font-size: 20px; margin-bottom: 8px;">📊</div>
+                                <strong style="font-size: 13px; color: #092F2E; display: block; margin-bottom: 6px;">3. Automated Lead Routing &amp; Attribution</strong>
+                                <p style="font-size: 12px; color: #648781; margin: 0; line-height: 1.5;">
+                                    Captured leads are instantly logged in your <strong>Student Leads CRM</strong>, tagged with the exact asset requested, and automatically routed to the mapped department counselor for immediate phone or WhatsApp follow-up.
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <!-- Live Dialogue Example Box -->
+                        <div style="background: rgba(15, 23, 42, 0.8); border: 1px dashed rgba(99, 102, 241, 0.4); border-radius: var(--brand-radius-sm); padding: 16px 20px; margin-top: 16px;">
+                            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--brand-indigo-300); margin-bottom: 10px;">
+                                💬 Example: Conversational Lead Capture in Action
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 10px; font-size: 12px;">
+                                <div style="display: flex; align-items: flex-start; gap: 8px;">
+                                    <span style="font-weight: 700; color: var(--brand-indigo-400); white-space: nowrap;">Student:</span>
+                                    <span style="color: #092F2E;">"Are there any scholarship schemes for B.Tech students scoring above 90% in 12th?"</span>
+                                </div>
+                                <div style="display: flex; align-items: flex-start; gap: 8px;">
+                                    <span style="font-weight: 700; color: var(--brand-emerald-400); white-space: nowrap;">Edvora AI:</span>
+                                    <span style="color: #4F7470; line-height: 1.5;">
+                                        "Yes! We offer up to 100% tuition waivers for &gt;95% and 50% for &gt;90% scores. I have our official <strong>2026-27 Merit Scholarship &amp; Fee Installment Matrix (PDF)</strong> with full eligibility criteria and application deadlines. Would you like me to send it directly to your WhatsApp or Email?"
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Divider -->
+                    <div style="height: 1px; background: var(--brand-border-subtle); margin: 28px 0;"></div>
+
+                    <!-- Section 2: 10 Comprehensive Suggested Lead-Magnet Asset Blueprints -->
+                    <div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                            <div>
+                                <h3 style="font-family: var(--brand-font-display); font-size: 17px; font-weight: 800; color: #092F2E; margin: 0; display: flex; align-items: center; gap: 8px;">
+                                    <span>📚</span> 10 Recommended Lead-Magnet Asset Blueprints for Your College
+                                </h3>
+                                <div style="font-size: 12px; color: #648781; margin-top: 2px;">
+                                    Ready-to-use document ideas proven to convert prospective student inquiries into qualified admissions leads.
+                                </div>
+                            </div>
+                            <span class="badge" style="background: rgba(52, 211, 153, 0.12); color: var(--brand-emerald-400); border: 1px solid rgba(52, 211, 153, 0.25); font-size: 11px; padding: 4px 10px;">
+                                ⚡ Click "Use Blueprint" to pre-fill upload form
+                            </span>
+                        </div>
+
+                        <!-- 10 Blueprints Grid -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;">
+                            
+                            <!-- Blueprint 1 -->
+                            <div class="brand-card" style="padding: 16px; background: rgba(0, 0, 0, 0.35); border: 1px solid #DDE9E3; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <span style="font-size: 24px;">🎓</span>
+                                        <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: var(--brand-indigo-300); font-size: 9px; font-weight: 700;">ORG-WIDE / GENERAL</span>
+                                    </div>
+                                    <strong style="font-size: 13px; color: #092F2E; display: block; margin-bottom: 4px;">1. Official College Prospectus &amp; Academic Handbook</strong>
+                                    <p style="font-size: 11px; color: #648781; line-height: 1.5; margin: 0 0 10px 0;">
+                                        Comprehensive overview of degrees, accreditation, campus facilities, faculty credentials, and admission timelines.
+                                    </p>
+                                    <div style="font-size: 10px; color: var(--brand-cyan-400); font-family: var(--brand-font-mono); margin-bottom: 12px;">
+                                        Trigger: prospectus, overview, admission brochure, courses list
+                                    </div>
+                                </div>
+                                <button type="button" class="brand-btn-secondary brand-btn-sm" onclick="applyAssetBlueprint('prospectus')" style="width: 100%; height: 30px; font-size: 11px; font-weight: 600; justify-content: center;">
+                                    ⚡ Use Blueprint
+                                </button>
+                            </div>
+
+                            <!-- Blueprint 2 -->
+                            <div class="brand-card" style="padding: 16px; background: rgba(0, 0, 0, 0.35); border: 1px solid #DDE9E3; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <span style="font-size: 24px;">💰</span>
+                                        <span class="badge" style="background: rgba(251, 191, 36, 0.15); color: var(--brand-amber-300); font-size: 9px; font-weight: 700;">HIGH-CONVERTING</span>
+                                    </div>
+                                    <strong style="font-size: 13px; color: #092F2E; display: block; margin-bottom: 4px;">2. 2026-27 Fee Structure &amp; Installment Payment Guide</strong>
+                                    <p style="font-size: 11px; color: #648781; line-height: 1.5; margin: 0 0 10px 0;">
+                                        Detailed breakdown of tuition, lab, exam, hostel fees, installment schedule, and tie-up bank education loan terms.
+                                    </p>
+                                    <div style="font-size: 10px; color: var(--brand-cyan-400); font-family: var(--brand-font-mono); margin-bottom: 12px;">
+                                        Trigger: fee structure, installments, education loan, total cost
+                                    </div>
+                                </div>
+                                <button type="button" class="brand-btn-secondary brand-btn-sm" onclick="applyAssetBlueprint('fee_structure')" style="width: 100%; height: 30px; font-size: 11px; font-weight: 600; justify-content: center;">
+                                    ⚡ Use Blueprint
+                                </button>
+                            </div>
+
+                            <!-- Blueprint 3 -->
+                            <div class="brand-card" style="padding: 16px; background: rgba(0, 0, 0, 0.35); border: 1px solid #DDE9E3; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <span style="font-size: 24px;">🏆</span>
+                                        <span class="badge" style="background: rgba(52, 211, 153, 0.15); color: var(--brand-emerald-300); font-size: 9px; font-weight: 700;">FINANCIAL AID</span>
+                                    </div>
+                                    <strong style="font-size: 13px; color: #092F2E; display: block; margin-bottom: 4px;">3. Merit &amp; Need-Based Scholarship Eligibility Matrix</strong>
+                                    <p style="font-size: 11px; color: #648781; line-height: 1.5; margin: 0 0 10px 0;">
+                                        Cutoffs and waiver percentages based on 12th/Graduation marks, entrance exam percentiles, sports quota, and sibling discounts.
+                                    </p>
+                                    <div style="font-size: 10px; color: var(--brand-cyan-400); font-family: var(--brand-font-mono); margin-bottom: 12px;">
+                                        Trigger: scholarship criteria, fee waiver, financial aid, merit discount
+                                    </div>
+                                </div>
+                                <button type="button" class="brand-btn-secondary brand-btn-sm" onclick="applyAssetBlueprint('scholarship')" style="width: 100%; height: 30px; font-size: 11px; font-weight: 600; justify-content: center;">
+                                    ⚡ Use Blueprint
+                                </button>
+                            </div>
+
+                            <!-- Blueprint 4 -->
+                            <div class="brand-card" style="padding: 16px; background: rgba(0, 0, 0, 0.35); border: 1px solid #DDE9E3; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <span style="font-size: 24px;">📈</span>
+                                        <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: var(--brand-cyan-300); font-size: 9px; font-weight: 700;">PLACEMENT DESK</span>
+                                    </div>
+                                    <strong style="font-size: 13px; color: #092F2E; display: block; margin-bottom: 4px;">4. Annual Campus Placement &amp; Top Recruiters Salary Report</strong>
+                                    <p style="font-size: 11px; color: #648781; line-height: 1.5; margin: 0 0 10px 0;">
+                                        Highest and average CTC packages, Fortune 500 hiring partners list, branch-wise placement stats, and alumni career paths.
+                                    </p>
+                                    <div style="font-size: 10px; color: var(--brand-cyan-400); font-family: var(--brand-font-mono); margin-bottom: 12px;">
+                                        Trigger: placement report, average salary, highest package, recruiters
+                                    </div>
+                                </div>
+                                <button type="button" class="brand-btn-secondary brand-btn-sm" onclick="applyAssetBlueprint('placement')" style="width: 100%; height: 30px; font-size: 11px; font-weight: 600; justify-content: center;">
+                                    ⚡ Use Blueprint
+                                </button>
+                            </div>
+
+                            <!-- Blueprint 5 -->
+                            <div class="brand-card" style="padding: 16px; background: rgba(0, 0, 0, 0.35); border: 1px solid #DDE9E3; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <span style="font-size: 24px;">🏡</span>
+                                        <span class="badge" style="background: rgba(168, 85, 247, 0.15); color: #c084fc; font-size: 9px; font-weight: 700;">CAMPUS LIFE</span>
+                                    </div>
+                                    <strong style="font-size: 13px; color: #092F2E; display: block; margin-bottom: 4px;">5. Hostel Amenities, Room Types &amp; Mess Menu Handbook</strong>
+                                    <p style="font-size: 11px; color: #648781; line-height: 1.5; margin: 0 0 10px 0;">
+                                        AC/Non-AC room configurations, laundry, Wi-Fi, security protocols, weekly dining hall menu, and curfew timings for outstation students.
+                                    </p>
+                                    <div style="font-size: 10px; color: var(--brand-cyan-400); font-family: var(--brand-font-mono); margin-bottom: 12px;">
+                                        Trigger: hostel fee, mess food, accommodation, room types
+                                    </div>
+                                </div>
+                                <button type="button" class="brand-btn-secondary brand-btn-sm" onclick="applyAssetBlueprint('hostel')" style="width: 100%; height: 30px; font-size: 11px; font-weight: 600; justify-content: center;">
+                                    ⚡ Use Blueprint
+                                </button>
+                            </div>
+
+                            <!-- Blueprint 6 -->
+                            <div class="brand-card" style="padding: 16px; background: rgba(0, 0, 0, 0.35); border: 1px solid #DDE9E3; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <span style="font-size: 24px;">📚</span>
+                                        <span class="badge" style="background: rgba(236, 72, 153, 0.15); color: #f472b6; font-size: 9px; font-weight: 700;">DEPARTMENT SCOPED</span>
+                                    </div>
+                                    <strong style="font-size: 13px; color: #092F2E; display: block; margin-bottom: 4px;">6. Semester-wise Syllabus &amp; Curriculum Structure</strong>
+                                    <p style="font-size: 11px; color: #648781; line-height: 1.5; margin: 0 0 10px 0;">
+                                        Detailed elective tracks, lab modules, industry certifications, and capstone project guidelines mapped per department.
+                                    </p>
+                                    <div style="font-size: 10px; color: var(--brand-cyan-400); font-family: var(--brand-font-mono); margin-bottom: 12px;">
+                                        Trigger: syllabus, curriculum, subjects list, course modules
+                                    </div>
+                                </div>
+                                <button type="button" class="brand-btn-secondary brand-btn-sm" onclick="applyAssetBlueprint('curriculum')" style="width: 100%; height: 30px; font-size: 11px; font-weight: 600; justify-content: center;">
+                                    ⚡ Use Blueprint
+                                </button>
+                            </div>
+
+                            <!-- Blueprint 7 -->
+                            <div class="brand-card" style="padding: 16px; background: rgba(0, 0, 0, 0.35); border: 1px solid #DDE9E3; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <span style="font-size: 24px;">🎯</span>
+                                        <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: var(--brand-indigo-300); font-size: 9px; font-weight: 700;">ADMISSIONS OFFICE</span>
+                                    </div>
+                                    <strong style="font-size: 13px; color: #092F2E; display: block; margin-bottom: 4px;">7. Previous Year Cutoff Marks &amp; Exam Prep Kit</strong>
+                                    <p style="font-size: 11px; color: #648781; line-height: 1.5; margin: 0 0 10px 0;">
+                                        Historical opening/closing ranks across categories (General, OBC, SC/ST, EWS) and sample question papers for entrance tests.
+                                    </p>
+                                    <div style="font-size: 10px; color: var(--brand-cyan-400); font-family: var(--brand-font-mono); margin-bottom: 12px;">
+                                        Trigger: cutoff marks, entrance exam syllabus, minimum score, rank
+                                    </div>
+                                </div>
+                                <button type="button" class="brand-btn-secondary brand-btn-sm" onclick="applyAssetBlueprint('cutoff')" style="width: 100%; height: 30px; font-size: 11px; font-weight: 600; justify-content: center;">
+                                    ⚡ Use Blueprint
+                                </button>
+                            </div>
+
+                            <!-- Blueprint 8 -->
+                            <div class="brand-card" style="padding: 16px; background: rgba(0, 0, 0, 0.35); border: 1px solid #DDE9E3; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <span style="font-size: 24px;">🌍</span>
+                                        <span class="badge" style="background: rgba(14, 165, 233, 0.15); color: #38bdf8; font-size: 9px; font-weight: 700;">INTERNATIONAL ADMISSIONS</span>
+                                    </div>
+                                    <strong style="font-size: 13px; color: #092F2E; display: block; margin-bottom: 4px;">8. International Students &amp; NRI Admissions Handbook</strong>
+                                    <p style="font-size: 11px; color: #648781; line-height: 1.5; margin: 0 0 10px 0;">
+                                        Visa guidance, AIU equivalency verification, English proficiency criteria, foreign currency fee structure, and dedicated arrival support.
+                                    </p>
+                                    <div style="font-size: 10px; color: var(--brand-cyan-400); font-family: var(--brand-font-mono); margin-bottom: 12px;">
+                                        Trigger: NRI quota, international admission, foreign student visa
+                                    </div>
+                                </div>
+                                <button type="button" class="brand-btn-secondary brand-btn-sm" onclick="applyAssetBlueprint('international')" style="width: 100%; height: 30px; font-size: 11px; font-weight: 600; justify-content: center;">
+                                    ⚡ Use Blueprint
+                                </button>
+                            </div>
+
+                            <!-- Blueprint 9 -->
+                            <div class="brand-card" style="padding: 16px; background: rgba(0, 0, 0, 0.35); border: 1px solid #DDE9E3; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <span style="font-size: 24px;">🔬</span>
+                                        <span class="badge" style="background: rgba(139, 92, 246, 0.15); color: #a78bfa; font-size: 9px; font-weight: 700;">R&amp;D &amp; PG PROGRAMS</span>
+                                    </div>
+                                    <strong style="font-size: 13px; color: #092F2E; display: block; margin-bottom: 4px;">9. Research Facilities, Labs &amp; Incubation Portfolio</strong>
+                                    <p style="font-size: 11px; color: #648781; line-height: 1.5; margin: 0 0 10px 0;">
+                                        State-of-the-art laboratory infrastructure, sponsored grant projects, patent filings, and startup seed funding opportunities.
+                                    </p>
+                                    <div style="font-size: 10px; color: var(--brand-cyan-400); font-family: var(--brand-font-mono); margin-bottom: 12px;">
+                                        Trigger: research labs, phd guide, incubation center, startup grants
+                                    </div>
+                                </div>
+                                <button type="button" class="brand-btn-secondary brand-btn-sm" onclick="applyAssetBlueprint('research')" style="width: 100%; height: 30px; font-size: 11px; font-weight: 600; justify-content: center;">
+                                    ⚡ Use Blueprint
+                                </button>
+                            </div>
+
+                            <!-- Blueprint 10 -->
+                            <div class="brand-card" style="padding: 16px; background: rgba(0, 0, 0, 0.35); border: 1px solid #DDE9E3; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <span style="font-size: 24px;">🏅</span>
+                                        <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; font-size: 9px; font-weight: 700;">STUDENT AFFAIRS</span>
+                                    </div>
+                                    <strong style="font-size: 13px; color: #092F2E; display: block; margin-bottom: 4px;">10. Sports, Arts &amp; Cultural Quota Admissions Guide</strong>
+                                    <p style="font-size: 11px; color: #648781; line-height: 1.5; margin: 0 0 10px 0;">
+                                        Trial schedules, national/state certificate weightage, sports scholarship seats, and cultural society membership perks.
+                                    </p>
+                                    <div style="font-size: 10px; color: var(--brand-cyan-400); font-family: var(--brand-font-mono); margin-bottom: 12px;">
+                                        Trigger: sports quota, trials date, cultural quota, extracurricular seat
+                                    </div>
+                                </div>
+                                <button type="button" class="brand-btn-secondary brand-btn-sm" onclick="applyAssetBlueprint('sports')" style="width: 100%; height: 30px; font-size: 11px; font-weight: 600; justify-content: center;">
+                                    ⚡ Use Blueprint
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>

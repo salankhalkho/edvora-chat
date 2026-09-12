@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edvora.chat — Branding Guidelines Logo Palette Lab (Teal & Pistachio)</title>
+    
+    <!-- Google Fonts: Plus Jakarta Sans, Outfit, Inter, Fira Code -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* ── Official Edvora Brand Palette (from EDVORA_DESIGN_BIBLE.md & landing.html) ── */
+            --e-teal:           #063D3B; /* Deep Forest Teal (Primary Brand Color) */
+            --e-teal-rich:      #094E4B; /* Mid-tone Teal */
+            --e-pistachio:      #C8FF63; /* Signature Pistachio Accent (Bright Neon Lime) */
+            --e-pistachio-hover:#d4ff70; /* Hover state */
+            --e-soft-pistachio: #E6F7D2; /* Soft Tint Accent */
+            --e-sage:           #B9D7C7; /* Secondary Muted Green */
+            --e-mist:           #F1F7F4; /* Primary Page Background */
+            --e-border:         #DDE9E3; /* Subtle Border standard */
+            --e-text:           #092F2E; /* Primary Deep Teal Text */
+            --e-muted:          #71817D; /* Muted Supporting Text */
+            --e-forest-accent:  #047857; /* High-contrast emerald for small text on light bg */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #F1F7F4;
+            color: #092F2E;
+            line-height: 1.5;
+            padding-bottom: 80px;
+        }
+
+        .container {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Top Sticky Lab Bar */
+        .lab-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--e-border);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(6, 61, 59, 0.04);
+        }
+        .lab-header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .lab-title-group h1 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--e-teal);
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .lab-badge {
+            background: var(--e-soft-pistachio);
+            color: var(--e-teal);
+            font-size: 11px;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid var(--e-sage);
+        }
+        .lab-subtitle {
+            font-size: 13px;
+            color: var(--e-muted);
+            margin-top: 3px;
+        }
+
+        /* Surface Background Switcher */
+        .bg-switcher {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #ffffff;
+            padding: 4px;
+            border-radius: 12px;
+            border: 1px solid var(--e-border);
+            box-shadow: 0 2px 8px rgba(6, 61, 59, 0.04);
+        }
+        .bg-btn {
+            border: none;
+            background: transparent;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--e-muted);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .bg-btn .color-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 1px solid rgba(0,0,0,0.15);
+        }
+        .bg-btn.active {
+            background: var(--e-teal);
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(6, 61, 59, 0.2);
+        }
+        .bg-btn.active .color-dot {
+            border-color: #ffffff;
+        }
+
+        /* Section Headings */
+        .section-title-wrap {
+            margin: 40px 0 18px 0;
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+        }
+        .section-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--e-teal);
+            letter-spacing: -0.4px;
+        }
+        .section-desc {
+            font-size: 13.5px;
+            color: var(--e-muted);
+        }
+
+        /* Palette Card Grid */
+        .logo-options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 20px;
+        }
+
+        .option-card {
+            background: #ffffff;
+            border: 1.5px solid var(--e-border);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(6, 61, 59, 0.04);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            position: relative;
+        }
+        .option-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(6, 61, 59, 0.08);
+            border-color: var(--e-sage);
+        }
+        .option-card.recommended {
+            border-color: var(--e-teal);
+            box-shadow: 0 0 0 1px var(--e-teal), 0 8px 24px rgba(6, 61, 59, 0.1);
+        }
+        .rec-pill {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--e-pistachio);
+            color: var(--e-teal);
+            font-size: 10.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            z-index: 10;
+            border: 1px solid rgba(6, 61, 59, 0.15);
+        }
+
+        .option-canvas {
+            padding: 36px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease;
+            min-height: 140px;
+            border-bottom: 1px solid var(--e-border);
+        }
+
+        .option-info {
+            padding: 20px 24px;
+            background: #ffffff;
+        }
+        .option-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .option-name {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--e-teal);
+        }
+        .contrast-badge {
+            font-family: 'Fira Code', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 6px;
+            background: var(--e-soft-pistachio);
+            color: var(--e-teal);
+            border: 1px solid var(--e-sage);
+        }
+        .option-explanation {
+            font-size: 12.5px;
+            color: var(--e-muted);
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+        .color-breakdown {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--e-border);
+            font-size: 11px;
+            color: var(--e-teal);
+            font-family: 'Fira Code', monospace;
+            flex-wrap: wrap;
+        }
+        .color-sample {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .swatch {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            border: 1px solid rgba(0,0,0,0.15);
+        }
+
+        /* ── LOGO COMPONENT DEFINITIONS ── */
+        .logo-lockup {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            user-select: none;
+            text-decoration: none;
+            line-height: 1;
+        }
+
+        /* SQUIRCLE ICON SVG */
+        .logo-icon-wrap {
+            width: 38px;
+            height: 38px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .logo-icon-wrap svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* WORDMARK TYPOGRAPHY */
+        .logo-text {
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            font-weight: 800;
+            font-size: 25px;
+            letter-spacing: -0.6px;
+            line-height: 1;
+            display: flex;
+            align-items: baseline;
+        }
+
+        /* ── THEME 1: DEEP TEAL SQUIRCLE + PISTACHIO SPARKLE (HERO IDENTITY) ── */
+        .logo-t1 .logo-icon-wrap svg {
+            filter: drop-shadow(0 4px 12px rgba(6, 61, 59, 0.22));
+        }
+        .logo-t1 .logo-text {
+            color: var(--e-teal);
+        }
+        .logo-t1 .logo-text span {
+            color: #0d6e6a; /* Rich Teal Accent */
+            font-weight: 700;
+        }
+
+        /* ── THEME 2: DEEP TEAL SQUIRCLE + PISTACHIO SPARKLE + PISTACHIO DOT ── */
+        .logo-t2 .logo-text {
+            color: var(--e-teal);
+        }
+        .logo-t2 .logo-text span.brand-dot {
+            color: var(--e-pistachio);
+            font-weight: 900;
+            font-size: 32px;
+            line-height: 0;
+            margin: 0 1px;
+            text-shadow: 0 0 12px rgba(200, 255, 99, 0.8);
+        }
+        .logo-t2 .logo-text span.brand-chat {
+            color: var(--e-teal);
+            font-weight: 700;
+        }
+
+        /* ── THEME 3: PISTACHIO SQUIRCLE + DEEP TEAL SPARKLE (INVERTED HIGH VISIBILITY) ── */
+        .logo-t3 .logo-icon-wrap svg {
+            filter: drop-shadow(0 4px 14px rgba(200, 255, 99, 0.45));
+        }
+        .logo-t3 .logo-text {
+            color: var(--e-teal);
+        }
+        .logo-t3 .logo-text span {
+            color: #0b5753;
+            font-weight: 700;
+        }
+
+        /* ── THEME 4: DEEP TEAL SQUIRCLE + CRISP WHITE SPARKLE + PISTACHIO RIM ── */
+        .logo-t4 .logo-text {
+            color: var(--e-teal);
+        }
+        .logo-t4 .logo-text span {
+            color: #047857; /* Forest Emerald Accent */
+            font-weight: 700;
+        }
+
+        /* ── THEME 5: DEEP TEAL CAPSULE PILL (EXCELLENT FOR LIGHT HERO / NAV) ── */
+        .logo-t5-pill {
+            background: var(--e-teal);
+            border: 1px solid rgba(200, 255, 99, 0.25);
+            padding: 8px 18px;
+            border-radius: 100px;
+            box-shadow: 0 8px 24px rgba(6, 61, 59, 0.2);
+            display: inline-flex;
+            align-items: center;
+            gap: 11px;
+        }
+        .logo-t5-pill .logo-text {
+            color: #ffffff;
+            font-size: 21px;
+        }
+        .logo-t5-pill .logo-text span {
+            color: var(--e-pistachio);
+        }
+        .logo-t5-pill .logo-icon-wrap {
+            width: 30px;
+            height: 30px;
+        }
+
+        /* ── THEME 6: LOWERCASE DOMAIN edvora.chat (PISTACHIO DOT) ── */
+        .logo-t6-domain .logo-text {
+            color: var(--e-teal);
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.4px;
+        }
+        .logo-t6-domain .logo-text span.dot {
+            color: var(--e-pistachio);
+            font-weight: 900;
+            text-shadow: 0 0 8px rgba(6, 61, 59, 0.2);
+        }
+        .logo-t6-domain .logo-text span.tld {
+            color: var(--e-teal);
+            font-weight: 600;
+        }
+
+        /* ── INTERACTIVE CONTEXT SIMULATION ── */
+        .mockup-frame {
+            background: #ffffff;
+            border: 1.5px solid var(--e-border);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 16px 40px rgba(6, 61, 59, 0.06);
+            margin-top: 24px;
+        }
+        .mockup-header-bar {
+            background: #ffffff;
+            border-bottom: 1px solid var(--e-border);
+            padding: 10px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .mockup-dots {
+            display: flex;
+            gap: 6px;
+        }
+        .mockup-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        .mockup-dot.r { background: #FF5F56; }
+        .mockup-dot.y { background: #FFBD2E; }
+        .mockup-dot.g { background: #27C93F; }
+        .mockup-url {
+            background: var(--e-mist);
+            border: 1px solid var(--e-border);
+            border-radius: 6px;
+            padding: 3px 14px;
+            font-size: 11px;
+            font-family: 'Fira Code', monospace;
+            color: var(--e-muted);
+            width: 320px;
+            text-align: center;
+        }
+
+        /* Real Navbar Live Simulation */
+        .sim-navbar {
+            background: rgba(241, 247, 244, 0.94);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--e-border);
+            padding: 14px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .sim-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            list-style: none;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--e-muted);
+        }
+        .sim-nav-links a {
+            color: var(--e-muted);
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+        .sim-nav-links a:hover { color: var(--e-teal); }
+        .sim-nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .sim-btn-ghost {
+            background: transparent;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--e-teal);
+            padding: 8px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .sim-btn-ghost:hover {
+            background: rgba(6, 61, 59, 0.06);
+        }
+        .sim-btn-secondary {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1.5px solid var(--e-border);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--e-teal);
+            padding: 8px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .sim-btn-secondary:hover {
+            background: #ffffff;
+            border-color: var(--e-sage);
+        }
+        .sim-btn-primary {
+            background: var(--e-pistachio);
+            border: none;
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--e-teal);
+            padding: 9px 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(200, 255, 99, 0.4);
+            transition: all 0.15s;
+        }
+        .sim-btn-primary:hover {
+            background: var(--e-pistachio-hover);
+            transform: translateY(-1px);
+        }
+
+        /* Real Hero Section Simulation */
+        .sim-hero {
+            background: radial-gradient(circle at 10% 10%, rgba(200, 255, 99, 0.14), transparent 35%), radial-gradient(circle at 85% 90%, rgba(185, 215, 199, 0.25), transparent 40%), #F1F7F4;
+            padding: 56px 28px;
+            text-align: center;
+        }
+        .sim-hero-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(200, 255, 99, 0.22);
+            border: 1px solid rgba(200, 255, 99, 0.5);
+            padding: 5px 14px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--e-teal);
+            margin-bottom: 18px;
+        }
+        .sim-hero-h1 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 38px;
+            font-weight: 800;
+            color: var(--e-teal);
+            line-height: 1.15;
+            letter-spacing: -0.8px;
+            margin-bottom: 14px;
+        }
+        .sim-hero-h1 span {
+            color: #D97706; /* Amber highlight from landing page */
+        }
+        .sim-hero-p {
+            font-size: 14.5px;
+            color: var(--e-teal);
+            max-width: 680px;
+            margin: 0 auto 28px auto;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        /* Scales Grid */
+        .scales-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .scale-box {
+            background: #ffffff;
+            border: 1px solid var(--e-border);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .scale-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--e-muted);
+        }
+
+        /* Direct Switcher for Live Demo */
+        .live-toggle-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .live-toggle-btn {
+            background: #ffffff;
+            border: 1.5px solid var(--e-border);
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--e-teal);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .live-toggle-btn.active {
+            background: var(--e-teal);
+            color: #ffffff;
+            border-color: var(--e-teal);
+            box-shadow: 0 4px 14px rgba(6, 61, 59, 0.25);
+        }
+
+        /* Dark Section Showcase (Footer / Dark Mode simulation) */
+        .dark-showcase-box {
+            background: var(--e-teal);
+            border-radius: 16px;
+            padding: 32px 28px;
+            margin-top: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ── TOP STICKY LAB BAR ── -->
+    <header class="lab-header">
+        <div class="container">
+            <div class="lab-header-content">
+                <div class="lab-title-group">
+                    <h1>
+                        Edvora Logo Branding Lab 2
+                        <span class="lab-badge">Teal &amp; Pistachio Edition</span>
+                    </h1>
+                    <div class="lab-subtitle">
+                        Same squircle + star logo geometry, re-themed with official Landing Page CSS guidelines (Deep Teal #063D3B + Pistachio #C8FF63).
+                    </div>
+                </div>
+
+                <!-- Surface Background Switcher -->
+                <div class="bg-switcher">
+                    <button class="bg-btn" onclick="setCanvasBackground('white')">
+                        <span class="color-dot" style="background:#ffffff"></span> Pure White
+                    </button>
+                    <button class="bg-btn active" onclick="setCanvasBackground('mist')">
+                        <span class="color-dot" style="background:#F1F7F4"></span> Edvora Mist
+                    </button>
+                    <button class="bg-btn" onclick="setCanvasBackground('teal')">
+                        <span class="color-dot" style="background:#063D3B"></span> Deep Teal
+                    </button>
+                    <button class="bg-btn" onclick="setCanvasBackground('dark')">
+                        <span class="color-dot" style="background:#060913"></span> Studio Dark
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- 1. COLOR VARIATION CARDS (TEAL & PISTACHIO BRAND PALETTE) -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <div class="section-title-wrap">
+            <div>
+                <h2 class="section-title">1. Logo Variations in Official Landing Page Palette</h2>
+                <div class="section-desc">Preserving the exact dashboard icon shape (squircle + 4-pointed star) with brand-coherent coloring.</div>
+            </div>
+        </div>
+
+        <div class="logo-options-grid">
+
+            <!-- ── CARD 1: DEEP TEAL SQUIRCLE + PISTACHIO SPARKLE (RECOMMENDED) ── -->
+            <div class="option-card recommended">
+                <span class="rec-pill">Recommended</span>
+                <div class="option-canvas logo-canvas" id="canvas-t1" style="background: #F1F7F4;">
+                    <a href="javascript:void(0)" class="logo-lockup logo-t1">
+                        <div class="logo-icon-wrap">
+                            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="40" height="40" rx="11" fill="url(#gradTealT1)"/>
+                                <path d="M20 6C20 13.732 13.732 20 6 20C13.732 20 20 26.268 20 34C20 26.268 26.268 20 34 20C26.268 20 20 13.732 20 6Z" fill="#C8FF63"/>
+                                <defs>
+                                    <linearGradient id="gradTealT1" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                                        <stop stop-color="#063D3B"/>
+                                        <stop offset="1" stop-color="#0B524F"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                        <span class="logo-text">Edvora<span>Chat</span></span>
+                    </a>
+                </div>
+                <div class="option-info">
+                    <div class="option-header-row">
+                        <span class="option-name">Theme 1: Deep Teal + Pistachio Sparkle</span>
+                        <span class="contrast-badge">AAA 13.9:1</span>
+                    </div>
+                    <p class="option-explanation">
+                        <strong>Deep Forest Teal (`#063D3B`) squircle</strong> housing a glowing <strong>Pistachio (`#C8FF63`) sparkle</strong>. Wordmark in Deep Teal (`#063D3B`) + Rich Pine (`#0D6E6A`). Perfect harmony with landing page.
+                    </p>
+                    <div class="color-breakdown">
+                        <div class="color-sample"><span class="swatch" style="background:#063D3B;"></span> #063D3B Teal</div>
+                        <div class="color-sample"><span class="swatch" style="background:#C8FF63;"></span> #C8FF63 Star</div>
+                        <div class="color-sample"><span class="swatch" style="background:#0D6E6A;"></span> #0D6E6A Chat</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── CARD 2: PISTACHIO ACCENT DOT & TWO-TONE ── -->
+            <div class="option-card">
+                <div class="option-canvas logo-canvas" id="canvas-t2" style="background: #F1F7F4;">
+                    <a href="javascript:void(0)" class="logo-lockup logo-t2">
+                        <div class="logo-icon-wrap">
+                            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="40" height="40" rx="11" fill="#063D3B"/>
+                                <path d="M20 6C20 13.732 13.732 20 6 20C13.732 20 20 26.268 20 34C20 26.268 26.268 20 34 20C26.268 20 20 13.732 20 6Z" fill="#C8FF63"/>
+                            </svg>
+                        </div>
+                        <span class="logo-text">Edvora<span class="brand-dot">.</span><span class="brand-chat">Chat</span></span>
+                    </a>
+                </div>
+                <div class="option-info">
+                    <div class="option-header-row">
+                        <span class="option-name">Theme 2: Pistachio Dot Connection</span>
+                        <span class="contrast-badge">AAA 13.9:1</span>
+                    </div>
+                    <p class="option-explanation">
+                        Teal &amp; Pistachio squircle paired with a radiant <strong>Pistachio period dot</strong> (`.`) between "Edvora" and "Chat", uniting the website domain and brand title.
+                    </p>
+                    <div class="color-breakdown">
+                        <div class="color-sample"><span class="swatch" style="background:#063D3B;"></span> #063D3B</div>
+                        <div class="color-sample"><span class="swatch" style="background:#C8FF63;"></span> #C8FF63 Dot/Star</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── CARD 3: VIBRANT PISTACHIO SQUIRCLE + TEAL STAR ── -->
+            <div class="option-card">
+                <div class="option-canvas logo-canvas" id="canvas-t3" style="background: #F1F7F4;">
+                    <a href="javascript:void(0)" class="logo-lockup logo-t3">
+                        <div class="logo-icon-wrap">
+                            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="40" height="40" rx="11" fill="#C8FF63" stroke="#A7E635" stroke-width="1.5"/>
+                                <path d="M20 6C20 13.732 13.732 20 6 20C13.732 20 20 26.268 20 34C20 26.268 26.268 20 34 20C26.268 20 20 13.732 20 6Z" fill="#063D3B"/>
+                            </svg>
+                        </div>
+                        <span class="logo-text">Edvora<span>Chat</span></span>
+                    </a>
+                </div>
+                <div class="option-info">
+                    <div class="option-header-row">
+                        <span class="option-name">Theme 3: Pistachio High-Vis Squircle</span>
+                        <span class="contrast-badge">High Energy</span>
+                    </div>
+                    <p class="option-explanation">
+                        Inverts the colors: <strong>Vibrant Pistachio (`#C8FF63`) icon</strong> with a sharp Deep Teal (`#063D3B`) star inside. High energy, maximum immediate visibility on light and dark surfaces alike.
+                    </p>
+                    <div class="color-breakdown">
+                        <div class="color-sample"><span class="swatch" style="background:#C8FF63;"></span> #C8FF63 Icon</div>
+                        <div class="color-sample"><span class="swatch" style="background:#063D3B;"></span> #063D3B Star/Text</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── CARD 4: FOREST EMERALD ACCENT WORDMARK ── -->
+            <div class="option-card">
+                <div class="option-canvas logo-canvas" id="canvas-t4" style="background: #F1F7F4;">
+                    <a href="javascript:void(0)" class="logo-lockup logo-t4">
+                        <div class="logo-icon-wrap">
+                            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="40" height="40" rx="11" fill="#063D3B" stroke="rgba(200, 255, 99, 0.4)" stroke-width="1.5"/>
+                                <path d="M20 6C20 13.732 13.732 20 6 20C13.732 20 20 26.268 20 34C20 26.268 26.268 20 34 20C26.268 20 20 13.732 20 6Z" fill="#FFFFFF"/>
+                            </svg>
+                        </div>
+                        <span class="logo-text">Edvora<span>Chat</span></span>
+                    </a>
+                </div>
+                <div class="option-info">
+                    <div class="option-header-row">
+                        <span class="option-name">Theme 4: Forest Accent + White Star</span>
+                        <span class="contrast-badge">Institutional</span>
+                    </div>
+                    <p class="option-explanation">
+                        Crisp White star on Deep Teal squircle with a delicate Pistachio accent border. "Chat" in Forest Emerald (`#047857`). Clean, academic, and serious.
+                    </p>
+                    <div class="color-breakdown">
+                        <div class="color-sample"><span class="swatch" style="background:#063D3B;"></span> #063D3B</div>
+                        <div class="color-sample"><span class="swatch" style="background:#FFFFFF;"></span> #FFFFFF Star</div>
+                        <div class="color-sample"><span class="swatch" style="background:#047857;"></span> #047857 Chat</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── CARD 5: DEEP TEAL CAPSULE PILL ── -->
+            <div class="option-card">
+                <div class="option-canvas logo-canvas" id="canvas-t5" style="background: #F1F7F4;">
+                    <div class="logo-t5-pill">
+                        <div class="logo-icon-wrap">
+                            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="40" height="40" rx="11" fill="rgba(255, 255, 255, 0.1)"/>
+                                <path d="M20 6C20 13.732 13.732 20 6 20C13.732 20 20 26.268 20 34C20 26.268 26.268 20 34 20C26.268 20 20 13.732 20 6Z" fill="#C8FF63"/>
+                            </svg>
+                        </div>
+                        <span class="logo-text">Edvora<span>Chat</span></span>
+                    </div>
+                </div>
+                <div class="option-info">
+                    <div class="option-header-row">
+                        <span class="option-name">Theme 5: Deep Teal Floating Pill</span>
+                        <span class="contrast-badge">Badge Mode</span>
+                    </div>
+                    <p class="option-explanation">
+                        Encapsulates the logo in a Deep Teal (`#063D3B`) pill badge with white typography and Pistachio highlights. Stands out effortlessly on light pages.
+                    </p>
+                    <div class="color-breakdown">
+                        <div class="color-sample"><span class="swatch" style="background:#063D3B;"></span> #063D3B Pill</div>
+                        <div class="color-sample"><span class="swatch" style="background:#FFFFFF;"></span> #FFFFFF Text</div>
+                        <div class="color-sample"><span class="swatch" style="background:#C8FF63;"></span> #C8FF63 Star/Chat</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── CARD 6: LOWERCASE DOMAIN EDVORA.CHAT ── -->
+            <div class="option-card">
+                <div class="option-canvas logo-canvas" id="canvas-t6" style="background: #F1F7F4;">
+                    <a href="javascript:void(0)" class="logo-lockup logo-t6-domain">
+                        <div class="logo-icon-wrap">
+                            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="40" height="40" rx="11" fill="#063D3B"/>
+                                <path d="M20 6C20 13.732 13.732 20 6 20C13.732 20 20 26.268 20 34C20 26.268 26.268 20 34 20C26.268 20 20 13.732 20 6Z" fill="#C8FF63"/>
+                            </svg>
+                        </div>
+                        <span class="logo-text">edvora<span class="dot">.</span><span class="tld">chat</span></span>
+                    </a>
+                </div>
+                <div class="option-info">
+                    <div class="option-header-row">
+                        <span class="option-name">Theme 6: Lowercase Domain Style</span>
+                        <span class="contrast-badge">Brand Bible</span>
+                    </div>
+                    <p class="option-explanation">
+                        Matches Section 24 of the Edvora Design Bible: lowercase `edvora.chat` in Deep Teal with the glowing Pistachio sparkle squircle.
+                    </p>
+                    <div class="color-breakdown">
+                        <div class="color-sample"><span class="swatch" style="background:#063D3B;"></span> #063D3B</div>
+                        <div class="color-sample"><span class="swatch" style="background:#C8FF63;"></span> #C8FF63 Star/Dot</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- 2. LIVE INTERACTIVE LANDING PAGE SIMULATION -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <div class="section-title-wrap" style="margin-top: 56px;">
+            <div>
+                <h2 class="section-title">2. Live Landing Page Integration Simulation</h2>
+                <div class="section-desc">Click any button below to switch the logo inside the live website navigation bar and hero preview.</div>
+            </div>
+        </div>
+
+        <!-- Switcher for live simulation -->
+        <div class="live-toggle-toolbar">
+            <span style="font-size: 12px; font-weight: 800; color: var(--e-teal); margin-right: 4px; text-transform: uppercase;">SELECT THEME:</span>
+            <button class="live-toggle-btn active" onclick="switchLiveSimulation('t1')">Theme 1: Deep Teal + Pistachio Star ⭐</button>
+            <button class="live-toggle-btn" onclick="switchLiveSimulation('t2')">Theme 2: Pistachio Dot</button>
+            <button class="live-toggle-btn" onclick="switchLiveSimulation('t3')">Theme 3: Pistachio Squircle</button>
+            <button class="live-toggle-btn" onclick="switchLiveSimulation('t4')">Theme 4: Forest Accent</button>
+            <button class="live-toggle-btn" onclick="switchLiveSimulation('t5')">Theme 5: Deep Teal Pill</button>
+            <button class="live-toggle-btn" onclick="switchLiveSimulation('t6')">Theme 6: Domain (edvora.chat)</button>
+        </div>
+
+        <div class="mockup-frame">
+            <div class="mockup-header-bar">
+                <div class="mockup-dots">
+                    <div class="mockup-dot r"></div>
+                    <div class="mockup-dot y"></div>
+                    <div class="mockup-dot g"></div>
+                </div>
+                <div class="mockup-url">https://edvora.chat</div>
+                <div style="width: 42px;"></div>
+            </div>
+
+            <!-- SIMULATED NAVBAR -->
+            <nav class="sim-navbar">
+                <!-- DYNAMIC LOGO CONTAINER -->
+                <div id="liveNavLogoTarget">
+                    <a href="javascript:void(0)" class="logo-lockup logo-t1" style="gap: 9px;">
+                        <div class="logo-icon-wrap" style="width: 30px; height: 30px;">
+                            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="40" height="40" rx="11" fill="#063D3B"/>
+                                <path d="M20 6C20 13.732 13.732 20 6 20C13.732 20 20 26.268 20 34C20 26.268 26.268 20 34 20C26.268 20 20 13.732 20 6Z" fill="#C8FF63"/>
+                            </svg>
+                        </div>
+                        <span class="logo-text" style="font-size: 19px;">Edvora<span>Chat</span></span>
+                    </a>
+                </div>
+
+                <ul class="sim-nav-links">
+                    <li><a href="javascript:void(0)">Platform</a></li>
+                    <li><a href="javascript:void(0)">How It Works</a></li>
+                    <li><a href="javascript:void(0)">Trust &amp; Security</a></li>
+                    <li><a href="javascript:void(0)">Pricing</a></li>
+                </ul>
+
+                <div class="sim-nav-actions">
+                    <button class="sim-btn-ghost">Sign In</button>
+                    <button class="sim-btn-secondary">Register College</button>
+                    <button class="sim-btn-primary">Book a Demo &rarr;</button>
+                </div>
+            </nav>
+
+            <!-- SIMULATED HERO -->
+            <section class="sim-hero">
+                <div class="sim-hero-pill">
+                    <span class="w-2 h-2 rounded-full" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#063D3B"></span> AI Admissions Conversion Engine
+                </div>
+                <h1 class="sim-hero-h1">
+                    Your Admissions Team’s New<br>
+                    <span>Conversion Engine.</span>
+                </h1>
+                <p class="sim-hero-p">
+                    Edvora turns every student interaction into an admissions opportunity—answering questions, capturing intent, qualifying prospects, and connecting high-value applicants with your admissions team.
+                </p>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 14px;">
+                    <button class="sim-btn-primary" style="padding: 13px 28px; font-size: 15px;">Book an Institutional Demo &rarr;</button>
+                    <button class="sim-btn-secondary" style="padding: 13px 24px; font-size: 15px;">Explore Platform</button>
+                </div>
+            </section>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- 3. DARK SURFACE / FOOTER SHOWCASE -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <div class="section-title-wrap" style="margin-top: 56px;">
+            <div>
+                <h2 class="section-title">3. Performance on Dark Brand Containers (#063D3B Deep Teal)</h2>
+                <div class="section-desc">Testing how Theme 1 performs when placed over dark footers or the video player bar.</div>
+            </div>
+        </div>
+
+        <div class="dark-showcase-box">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <div class="logo-lockup" style="gap: 12px;">
+                    <div class="logo-icon-wrap" style="width: 38px; height: 38px;">
+                        <svg viewBox="0 0 40 40" fill="none">
+                            <rect width="40" height="40" rx="11" fill="rgba(255,255,255,0.08)" stroke="rgba(200,255,99,0.3)" stroke-width="1.5"/>
+                            <path d="M20 6C20 13.732 13.732 20 6 20C13.732 20 20 26.268 20 34C20 26.268 26.268 20 34 20C26.268 20 20 13.732 20 6Z" fill="#C8FF63"/>
+                        </svg>
+                    </div>
+                    <span class="logo-text" style="color: #ffffff; font-size: 24px;">
+                        Edvora<span style="color: #C8FF63; margin-left: 2px;">Chat</span>
+                    </span>
+                </div>
+                <div style="border-left: 1px solid rgba(255,255,255,0.15); padding-left: 16px; font-size: 12.5px; color: #B9D7C7; max-width: 380px;">
+                    On dark teal (`#063D3B`), "Edvora" stays pure white while "Chat" and the star shine in signature Pistachio (`#C8FF63`).
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button class="sim-btn-primary" style="padding: 10px 20px; font-size: 13px;">Experience Conversion Engine</button>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- 4. SCALES & SIZES MATRIX -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <div class="section-title-wrap" style="margin-top: 56px;">
+            <div>
+                <h2 class="section-title">4. Multi-Scale Legibility (Theme 1)</h2>
+                <div class="section-desc">Checking clarity from small favicon/mobile icon up to large display branding.</div>
+            </div>
+        </div>
+
+        <div class="scales-grid">
+            <div class="scale-box">
+                <span class="scale-label">Favicon / Mobile (18px icon)</span>
+                <div class="logo-lockup logo-t1" style="gap: 6px;">
+                    <div class="logo-icon-wrap" style="width: 20px; height: 20px;">
+                        <svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="#063D3B"/><path d="M20 6C20 13.732 13.732 20 6 20C13.732 20 20 26.268 20 34C20 26.268 26.268 20 34 20C26.268 20 20 13.732 20 6Z" fill="#C8FF63"/></svg>
+                    </div>
+                    <span class="logo-text" style="font-size: 14px;">Edvora<span>Chat</span></span>
+                </div>
+            </div>
+
+            <div class="scale-box">
+                <span class="scale-label">Navbar Standard (26px icon)</span>
+                <div class="logo-lockup logo-t1" style="gap: 8px;">
+                    <div class="logo-icon-wrap" style="width: 28px; height: 28px;">
+                        <svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="#063D3B"/><path d="M20 6C20 13.732 13.732 20 6 20C13.732 20 20 26.268 20 34C20 26.268 26.268 20 34 20C26.268 20 20 13.732 20 6Z" fill="#C8FF63"/></svg>
+                    </div>
+                    <span class="logo-text" style="font-size: 18px;">Edvora<span>Chat</span></span>
+                </div>
+            </div>
+
+            <div class="scale-box">
+                <span class="scale-label">Sub-panel / Card Header (34px icon)</span>
+                <div class="logo-lockup logo-t1" style="gap: 10px;">
+                    <div class="logo-icon-wrap" style="width: 34px; height: 34px;">
+                        <svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="11" fill="#063D3B"/><path d="M20 6C20 13.732 13.732 20 6 20C13.732 20 20 26.268 20 34C20 26.268 26.268 20 34 20C26.268 20 20 13.732 20 6Z" fill="#C8FF63"/></svg>
+                    </div>
+                    <span class="logo-text" style="font-size: 23px;">Edvora<span>Chat</span></span>
+                </div>
+            </div>
+
+            <div class="scale-box">
+                <span class="scale-label">Hero / Display Mark (48px icon)</span>
+                <div class="logo-lockup logo-t1" style="gap: 12px;">
+                    <div class="logo-icon-wrap" style="width: 48px; height: 48px;">
+                        <svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="13" fill="#063D3B"/><path d="M20 6C20 13.732 13.732 20 6 20C13.732 20 20 26.268 20 34C20 26.268 26.268 20 34 20C26.268 20 20 13.732 20 6Z" fill="#C8FF63"/></svg>
+                    </div>
+                    <span class="logo-text" style="font-size: 32px;">Edvora<span>Chat</span></span>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        function setCanvasBackground(type) {
+            const bgMap = {
+                'white': '#ffffff',
+                'mist': '#F1F7F4',
+                'teal': '#063D3B',
+                'dark': '#060913'
+            };
+            const color = bgMap[type] || '#F1F7F4';
+
+            document.querySelectorAll('.logo-canvas').forEach(canvas => {
+                canvas.style.background = color;
+            });
+
+            document.querySelectorAll('.bg-btn').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            // If background is dark/teal, adapt wordmarks so they are visible
+            const isDark = (type === 'teal' || type === 'dark');
+            document.querySelectorAll('.logo-lockup:not(.logo-t5-pill)').forEach(logo => {
+                if (isDark) {
+                    logo.querySelector('.logo-text').style.color = '#ffffff';
+                } else {
+                    logo.querySelector('.logo-text').style.color = '';
+                }
+            });
+        }
+
+        function switchLiveSimulation(themeId) {
+            document.querySelectorAll('.live-toggle-btn').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            const container = document.getElementById('liveNavLogoTarget');
+            
+            if (themeId === 't1') {
+                container.innerHTML = `
+                    <a href="javascript:void(0)" class="logo-lockup logo-t1" style="gap: 9px;">
+                        <div class="logo-icon-wrap" style="width: 30px; height: 30px;">
+                            <svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="11" fill="#063D3B"/><path d="M20 6C20 13.732 13.732 20 6 20C13.732 20 20 26.268 20 34C20 26.268 26.268 20 34 20C26.268 20 20 13.732 20 6Z" fill="#C8FF63"/></svg>
+                        </div>
+                        <span class="logo-text" style="font-size: 19px;">Edvora<span>Chat</span></span>
+                    </a>
+                `;
+            } else if (themeId === 't2') {
+                container.innerHTML = `
+                    <a href="javascript:void(0)" class="logo-lockup logo-t2" style="gap: 9px;">
+                        <div class="logo-icon-wrap" style="width: 30px; height: 30px;">
+                            <svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="11" fill="#063D3B"/><path d="M20 6C20 13.732 13.732 20 6 20C13.732 20 20 26.268 20 34C20 26.268 26.268 20 34 20C26.268 20 20 13.732 20 6Z" fill="#C8FF63"/></svg>
+                        </div>
+                        <span class="logo-text" style="font-size: 19px;">Edvora<span class="brand-dot">.</span><span class="brand-chat">Chat</span></span>
+                    </a>
+                `;
+            } else if (themeId === 't3') {
+                container.innerHTML = `
+                    <a href="javascript:void(0)" class="logo-lockup logo-t3" style="gap: 9px;">
+                        <div class="logo-icon-wrap" style="width: 30px; height: 30px;">
+                            <svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="11" fill="#C8FF63" stroke="#A7E635" stroke-width="1.5"/><path d="M20 6C20 13.732 13.732 20 6 20C13.732 20 20 26.268 20 34C20 26.268 26.268 20 34 20C26.268 20 20 13.732 20 6Z" fill="#063D3B"/></svg>
+                        </div>
+                        <span class="logo-text" style="font-size: 19px;">Edvora<span>Chat</span></span>
+                    </a>
+                `;
+            } else if (themeId === 't4') {
+                container.innerHTML = `
+                    <a href="javascript:void(0)" class="logo-lockup logo-t4" style="gap: 9px;">
+                        <div class="logo-icon-wrap" style="width: 30px; height: 30px;">
+                            <svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="11" fill="#063D3B" stroke="rgba(200, 255, 99, 0.4)" stroke-width="1.5"/><path d="M20 6C20 13.732 13.732 20 6 20C13.732 20 20 26.268 20 34C20 26.268 26.268 20 34 20C26.268 20 20 13.732 20 6Z" fill="#FFFFFF"/></svg>
+                        </div>
+                        <span class="logo-text" style="font-size: 19px;">Edvora<span>Chat</span></span>
+                    </a>
+                `;
+            } else if (themeId === 't5') {
+                container.innerHTML = `
+                    <div class="logo-t5-pill" style="padding: 5px 14px;">
+                        <div class="logo-icon-wrap" style="width: 24px; height: 24px;">
+                            <svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="11" fill="rgba(255,255,255,0.1)"/><path d="M20 6C20 13.732 13.732 20 6 20C13.732 20 20 26.268 20 34C20 26.268 26.268 20 34 20C26.268 20 20 13.732 20 6Z" fill="#C8FF63"/></svg>
+                        </div>
+                        <span class="logo-text" style="font-size: 17px;">Edvora<span>Chat</span></span>
+                    </div>
+                `;
+            } else if (themeId === 't6') {
+                container.innerHTML = `
+                    <a href="javascript:void(0)" class="logo-lockup logo-t6-domain" style="gap: 9px;">
+                        <div class="logo-icon-wrap" style="width: 30px; height: 30px;">
+                            <svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="11" fill="#063D3B"/><path d="M20 6C20 13.732 13.732 20 6 20C13.732 20 20 26.268 20 34C20 26.268 26.268 20 34 20C26.268 20 20 13.732 20 6Z" fill="#C8FF63"/></svg>
+                        </div>
+                        <span class="logo-text" style="font-size: 18px;">edvora<span class="dot">.</span><span class="tld">chat</span></span>
+                    </a>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

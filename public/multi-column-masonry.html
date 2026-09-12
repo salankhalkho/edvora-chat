@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Multi-Column Masonry — edvora.chat Design Lab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/theme-branding.css">
+    <style>
+        :root {
+            --e-teal: #063D3B;
+            --e-teal-dark: #0A524F;
+            --e-teal-text: #092F2E;
+            --e-pistachio: #C8FF63;
+            --e-soft-pistachio: #E6F7D2;
+            --e-sage: #B9D7C7;
+            --e-mist: #F1F7F4;
+            --e-border: #DDE9E3;
+            --e-card-border: #DCE9E5;
+            --e-hover-bg: #F4FAF7;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--e-mist);
+            color: var(--e-teal-text);
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 13px;
+            line-height: 1.5;
+            min-height: 100vh;
+            padding: 24px 28px 80px 28px;
+        }
+
+        .masonry-shell {
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        /* Top Header Navigation Banner */
+        .masonry-header-card {
+            background: #FFFFFF;
+            border: 1.5px solid var(--e-card-border);
+            border-radius: 18px;
+            padding: 24px 30px;
+            margin-bottom: 26px;
+            box-shadow: 0 16px 40px -12px rgba(6, 61, 59, 0.07), 0 4px 16px rgba(6, 61, 59, 0.03);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 18px;
+        }
+
+        .header-meta h1 {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--e-teal);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.4px;
+        }
+
+        .header-meta p {
+            font-size: 13px;
+            color: #526360;
+            margin-top: 6px;
+            max-width: 820px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .spec-badge {
+            background: var(--e-soft-pistachio);
+            color: var(--e-teal);
+            border: 1px solid var(--e-sage);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .action-btn {
+            background: #FFFFFF;
+            color: var(--e-teal);
+            border: 1.5px solid var(--e-border);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            cursor: pointer;
+        }
+
+        .action-btn:hover {
+            background: var(--e-hover-bg);
+            border-color: var(--e-sage);
+            color: var(--e-teal-dark);
+            transform: translateY(-1px);
+        }
+
+        .action-btn-primary {
+            background: var(--e-teal);
+            color: var(--e-pistachio);
+            border-color: var(--e-teal);
+        }
+
+        .action-btn-primary:hover {
+            background: var(--e-teal-dark);
+            color: #FFFFFF;
+            box-shadow: 0 4px 14px rgba(6, 61, 59, 0.15);
+        }
+
+        /* Controls / Metrics Ribbon */
+        .controls-ribbon {
+            background: #FFFFFF;
+            border: 1.5px solid var(--e-border);
+            border-radius: 12px;
+            padding: 14px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        .ribbon-stats {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 12px;
+            color: #526360;
+            flex-wrap: wrap;
+        }
+
+        .ribbon-stats strong {
+            color: var(--e-teal);
+            font-weight: 800;
+        }
+
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toggle-pill {
+            background: #F8FBFA;
+            border: 1px solid var(--e-border);
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--e-teal-text);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .toggle-pill.active {
+            background: var(--e-teal);
+            color: var(--e-pistachio);
+            border-color: var(--e-teal);
+        }
+
+        /* ========================================================
+           CSS MULTI-COLUMN MASONRY CORE ENGINE (SPECIFICATION)
+           Natural Vertical Packing Flow:
+           - column-count: 2;
+           - column-gap: 20px;
+           - break-inside: avoid;
+           ======================================================== */
+        .masonry-layout {
+            column-count: 2;
+            column-gap: 20px;
+            width: 100%;
+        }
+
+        /* Dynamic breakpoint for ultra-small mobile displays */
+        @media (max-width: 768px) {
+            .masonry-layout {
+                column-count: 1;
+                column-gap: 0;
+            }
+        }
+
+        /* Multi-column item with natural vertical packing */
+        .masonry-card {
+            break-inside: avoid;
+            page-break-inside: avoid;
+            -webkit-column-break-inside: avoid;
+            background: #FFFFFF;
+            border: 1.5px solid var(--e-card-border);
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(6, 61, 59, 0.03);
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .masonry-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(6, 61, 59, 0.08);
+            border-color: var(--e-sage);
+        }
+
+        /* Card Elements */
+        .card-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            gap: 10px;
+        }
+
+        .card-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            color: #648781;
+            background: #F1F7F4;
+            padding: 2px 7px;
+            border-radius: 4px;
+            border: 1px solid var(--e-border);
+        }
+
+        .card-category {
+            font-size: 10.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #526360;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--e-teal);
+            margin-bottom: 8px;
+            line-height: 1.35;
+        }
+
+        .card-desc {
+            font-size: 12px;
+            color: #4B5E5B;
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+
+        .card-footer-meta {
+            margin-top: auto;
+            padding-top: 12px;
+            border-top: 1px solid #EEF5F2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #648781;
+        }
+
+        /* Status Pills */
+        .badge-live {
+            background: #ECFDF5;
+            color: #047857;
+            border: 1px solid #A7F3D0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 10px;
+        }
+
+        .badge-warning {
+            background: #FEF3C7;
+            color: #B45309;
+            border: 1px solid #FDE68A;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 10px;
+        }
+
+        .badge-info {
+            background: #F5F3FF;
+            color: #7C3AED;
+            border: 1px solid #DDD6FE;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 10px;
+        }
+
+        .badge-accent {
+            background: var(--e-soft-pistachio);
+            color: var(--e-teal);
+            border: 1px solid var(--e-sage);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 10px;
+        }
+
+        /* Micro UI Widgets Inside Cards */
+        .metric-banner {
+            background: #F8FBFA;
+            border: 1px solid var(--e-border);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin: 10px 0;
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+        }
+
+        .metric-big {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--e-teal);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .metric-delta {
+            font-size: 11px;
+            font-weight: 700;
+            color: #047857;
+        }
+
+        .code-snippet {
+            background: #063D3B;
+            color: #C8FF63;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            line-height: 1.4;
+            overflow-x: auto;
+        }
+
+        .quote-box {
+            border-left: 3px solid var(--e-teal);
+            padding-left: 12px;
+            font-style: italic;
+            color: #2F4F4E;
+            margin: 10px 0;
+            font-size: 12px;
+        }
+
+        .tags-cluster {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 10px 0;
+        }
+
+        .tag-pill {
+            background: #F1F7F4;
+            border: 1px solid var(--e-border);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--e-teal-text);
+        }
+
+        .progress-bar-bg {
+            background: #E2EBE7;
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .progress-bar-fill {
+            background: var(--e-teal);
+            height: 100%;
+            border-radius: 3px;
+        }
+
+        /* Distinct Height Variants for Demonstration */
+        .card-theme-accent {
+            background: linear-gradient(180deg, #FFFFFF 0%, #FAFDFB 100%);
+            border-left: 4px solid var(--e-teal);
+        }
+
+        .card-theme-dark {
+            background: #063D3B;
+            color: #FFFFFF;
+            border-color: #0A524F;
+        }
+
+        .card-theme-dark .card-title {
+            color: #FFFFFF;
+        }
+
+        .card-theme-dark .card-desc {
+            color: #D1E5DE;
+        }
+
+        .card-theme-dark .card-number {
+            background: rgba(255, 255, 255, 0.1);
+            color: #C8FF63;
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .card-theme-dark .card-category {
+            color: #C8FF63;
+        }
+
+        .card-theme-dark .card-footer-meta {
+            border-top-color: rgba(255, 255, 255, 0.1);
+            color: #B9D7C7;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="masonry-shell">
+        
+        <!-- Header Banner -->
+        <header class="masonry-header-card">
+            <div class="header-meta">
+                <h1><span>🧱</span> CSS Multi-Column Masonry</h1>
+                <p>
+                    Demonstrating <strong>Natural Vertical Packing</strong> with 50 variable-height cards.
+                    Instead of rigid Left vs Right columns, this layout uses native CSS multi-column flow:
+                    <code>column-count: 2; column-gap: 20px;</code> paired with <code>break-inside: avoid;</code> on all cards to eliminate awkward gaps.
+                </p>
+            </div>
+            <div class="header-actions">
+                <span class="spec-badge">column-count: 2</span>
+                <span class="spec-badge">column-gap: 20px</span>
+                <span class="spec-badge">50 Cards Pack</span>
+                <a href="/superadmin/" class="action-btn">← Back to SuperAdmin</a>
+            </div>
+        </header>
+
+        <!-- Controls & Inspection Ribbon -->
+        <div class="controls-ribbon">
+            <div class="ribbon-stats">
+                <span>Total Cards: <strong>50 Units</strong></span>
+                <span>•</span>
+                <span>Packaging Method: <strong>Native Multi-Column CSS</strong></span>
+                <span>•</span>
+                <span>Break Rule: <code>break-inside: avoid</code></span>
+                <span>•</span>
+                <span>Heights: <strong>Dynamically Distributed (110px – 480px)</strong></span>
+            </div>
+            <div class="toggle-group">
+                <span style="font-size: 11px; font-weight: 700; color: #526360; margin-right: 4px;">Column Layout:</span>
+                <button class="toggle-pill active" onclick="setColumnCount(2, this)">2 Columns (Standard)</button>
+                <button class="toggle-pill" onclick="setColumnCount(3, this)">3 Columns</button>
+                <button class="toggle-pill" onclick="setColumnCount(1, this)">1 Column (Stack)</button>
+            </div>
+        </div>
+
+        <!-- Masonry Container with 50 Variable Height Cards -->
+        <main class="masonry-layout" id="masonryContainer">
+            <!-- 50 Cards dynamically generated with varied heights & rich content -->
+        </main>
+
+    </div>
+
+    <script>
+        // Content generator for 50 diverse cards with realistic higher-ed AI chatbot telemetry & operational data
+        const cardTemplates = [
+            {
+                category: "Admissions Conversion",
+                title: "Accelerated Early Decision Inquiry Inflow",
+                desc: "High volume of early decision inquiries detected following the national college fair outreach campaign. The automated AI conversational agent answered 1,420 questions about tuition deadliness without staff intervention.",
+                type: "metric",
+                val: "1,420",
+                delta: "+34.2% YoY",
+                badge: "Live / Inflow",
+                badgeClass: "badge-live",
+                extra: "tags",
+                tags: ["Early Decision", "Financial Aid", "Fall 2026", "Automated"]
+            },
+            {
+                category: "Architecture & CSS",
+                title: "Multi-Column Packing Rule Enforcement",
+                desc: "Unlike CSS Grid which aligns items along horizontal rows (creating vertical dead space when cards have varying heights), multi-column flow stacks each item directly underneath its predecessor.",
+                type: "code",
+                code: ".masonry-layout {\n  column-count: 2;\n  column-gap: 20px;\n}\n.masonry-card {\n  break-inside: avoid;\n}",
+                badge: "CSS Engine",
+                badgeClass: "badge-accent"
+            },
+            {
+                category: "Student Sentiment",
+                title: "Financial Aid Calculator Usability Quote",
+                desc: "Qualitative feedback captured by the interactive counselor callback trigger during scholarship evaluation sessions.",
+                type: "quote",
+                quote: "“The chatbot broke down my merit scholarship eligibility in under 30 seconds before my high school counselor even replied to my email.”",
+                badge: "Student Voice",
+                badgeClass: "badge-info"
+            },
+            {
+                category: "Knowledge Vault",
+                title: "Undergraduate Course Catalog Indexing (PDF Sync)",
+                desc: "Official poppler pdftotext extraction parsed 428 catalog pages into FULLTEXT MariaDB index.",
+                type: "progress",
+                progress: 88,
+                badge: "Sync 88%",
+                badgeClass: "badge-live"
+            },
+            {
+                category: "System Telemetry",
+                title: "Primary LLM Failover Latency Verification",
+                desc: "Simulated failover from OpenAI GPT-4o-Mini to Google Gemini 1.5 Flash completed in 420ms with 0 dropped sockets.",
+                type: "metric",
+                val: "420ms",
+                delta: "Zero Loss",
+                badge: "Healthy",
+                badgeClass: "badge-live"
+            },
+            {
+                category: "Campus Visit Coordination",
+                title: "Weekend Walking Tour Roster Capacity",
+                desc: "Student Ambassador guided tours for the Engineering & Design Quad reached 96% RSVP capacity. Automated SMS confirmations dispatched via Twilio webhook gateway.",
+                type: "simple",
+                badge: "Campus Ops",
+                badgeClass: "badge-warning"
+            },
+            {
+                category: "Brand Integrity",
+                title: "Dark Luxury vs Light Luxury Contrast Ratios",
+                desc: "Deep Forest Teal (#063D3B) against Misty Sage Canvas (#F1F7F4) satisfies WCAG 2.1 AAA accessibility contrast guidelines for all academic leadership dashboards.",
+                type: "dark",
+                badge: "Design Bible",
+                badgeClass: "badge-accent"
+            },
+            {
+                category: "International Admissions",
+                title: "Multilingual Language Translation Matrix",
+                desc: "Automated real-time translation pipelines serving prospective students from 48 countries across Spanish, Mandarin, Hindi, Arabic, and French.",
+                type: "tags",
+                tags: ["English (Native)", "Spanish (99.2%)", "Mandarin (98.9%)", "Hindi (99.1%)", "Arabic (97.8%)"],
+                badge: "48 Locales",
+                badgeClass: "badge-info"
+            }
+        ];
+
+        const container = document.getElementById('masonryContainer');
+        const totalCards = 50;
+
+        for (let i = 1; i <= totalCards; i++) {
+            const template = cardTemplates[(i - 1) % cardTemplates.length];
+            const card = document.createElement('article');
+            card.className = 'masonry-card';
+            
+            // Apply varied themes
+            if (i % 7 === 0) {
+                card.classList.add('card-theme-dark');
+            } else if (i % 4 === 0) {
+                card.classList.add('card-theme-accent');
+            }
+
+            // Varied heights by injecting additional dynamic contents
+            let innerContent = '';
+            
+            if (template.type === 'metric') {
+                innerContent = `
+                    <div class="metric-banner">
+                        <div>
+                            <div style="font-size: 10px; text-transform: uppercase; color: #648781; font-weight: 700;">Measured Metric</div>
+                            <div class="metric-big">${template.val}</div>
+                        </div>
+                        <span class="metric-delta">${template.delta}</span>
+                    </div>
+                `;
+            } else if (template.type === 'code') {
+                innerContent = `
+                    <div class="code-snippet">${template.code}</div>
+                `;
+            } else if (template.type === 'quote') {
+                innerContent = `
+                    <div class="quote-box">${template.quote}</div>
+                `;
+            } else if (template.type === 'progress') {
+                innerContent = `
+                    <div style="margin: 10px 0;">
+                        <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:700;">
+                            <span>Parsing Progress</span>
+                            <span>${template.progress}%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" style="width: ${template.progress}%;"></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Inject varied tags or additional notes for height randomness
+            if (template.tags || i % 3 === 0) {
+                const tags = template.tags || ["Admissions", "Lead Capture", "Live Roster", "FERPA Compliant"];
+                innerContent += `
+                    <div class="tags-cluster">
+                        ${tags.map(t => `<span class="tag-pill">${t}</span>`).join('')}
+                    </div>
+                `;
+            }
+
+            // Extra paragraphs on certain cards to create natural vertical height variation
+            let extraParagraph = '';
+            if (i % 5 === 0) {
+                extraParagraph = `<p style="font-size: 11.5px; color: #526360; margin-top: 8px; border-top: 1px dashed var(--e-border); padding-top: 8px;">
+                    <strong>Operational Insight:</strong> When prospective students interact after 10:00 PM local time, automated lead qualification conversion increases by 41.8% compared to static inquiry web forms.
+                </p>`;
+            } else if (i % 9 === 0) {
+                extraParagraph = `<div style="background: #F8FBFA; padding: 8px 10px; border-radius: 6px; font-size: 11px; margin-top: 8px; border: 1px solid var(--e-border);">
+                    ⚡ Latency Budget: Max 1,200ms per conversational generation under peak campus admission traffic loads.
+                </div>`;
+            }
+
+            card.innerHTML = `
+                <div class="card-header-row">
+                    <span class="card-number">#${String(i).padStart(2, '0')}</span>
+                    <span class="card-category">${template.category}</span>
+                    <span class="${template.badgeClass || 'badge-accent'}">${template.badge || 'Verified'}</span>
+                </div>
+                <h2 class="card-title">${template.title} (Node ${i})</h2>
+                <p class="card-desc">${template.desc}</p>
+                ${innerContent}
+                ${extraParagraph}
+                <div class="card-footer-meta">
+                    <span>Flow: Natural Vertical Pack</span>
+                    <span>Node ID: edv-${(1000 + i * 17).toString(16)}</span>
+                </div>
+            `;
+
+            container.appendChild(card);
+        }
+
+        // Layout toggle function
+        function setColumnCount(count, btn) {
+            document.querySelectorAll('.toggle-pill').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            container.style.columnCount = count;
+        }
+    </script>
+
+</body>
+</html>

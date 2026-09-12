@@ -1,0 +1,392 @@
+<!-- Dedicated User Profile & Security Command Frame -->
+<div id="view-profile" class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
+    
+    <!-- Top Control Bar (Inside the Big Card) -->
+    <div class="ops-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 24px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important;">
+        <div class="ops-dash-title-group" style="display: flex !important; align-items: center !important; gap: 12px !important;">
+            <span class="ops-live-dot"></span>
+            <div>
+                <div class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important; letter-spacing: -0.01em !important; line-height: 1.25 !important;">
+                    My Profile &amp; Security
+                </div>
+                <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">
+                    Manage your personal identity, login email, and authentication credentials
+                </div>
+            </div>
+        </div>
+
+        <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
+            <div class="ckh-ctrl-pill" id="profileTabRolePill" style="font-size: 11px !important; font-weight: 700 !important; color: var(--e-teal, #063D3B) !important; background: #F4FAF7 !important; border: 1px solid #D1E5DE !important; border-radius: 8px !important; padding: 5px 11px !important; display: inline-flex !important; align-items: center !important; gap: 6px !important;">
+                <span id="profileTabRoleText">Role: Administrator</span>
+            </div>
+            <div class="ckh-ctrl-pill" id="profileTabOrgPill" style="font-size: 11px !important; font-weight: 700 !important; color: #047857 !important; background: #ECFDF5 !important; border: 1px solid #A7F3D0 !important; border-radius: 8px !important; padding: 5px 11px !important; display: inline-flex !important; align-items: center !important; gap: 6px !important;">
+                <span id="profileTabOrgText">Your Institution</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inside the Big Card: Content Area with left-aligned form bounded to max 880px -->
+    <div style="padding: 28px 32px 48px 32px; box-sizing: border-box; width: 100%;">
+        <div style="max-width: 880px; width: 100%; margin: 0; box-sizing: border-box;">
+            
+            <form id="userProfileForm" onsubmit="handleUserProfileSubmit(event)">
+                
+                <!-- SECTION 1: Identity & Account Hero Card (Redesigned Executive Layout) -->
+                <div style="margin-bottom: 28px; background: #FFFFFF; border: 1.5px solid #DCE9E5; border-radius: 14px; padding: 24px 28px; box-shadow: 0 4px 16px -2px rgba(6, 61, 59, 0.05);">
+                    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+                        
+                        <!-- Left: Avatar + Details Stack -->
+                        <div style="display: flex; align-items: flex-start; gap: 20px; flex: 1; min-width: 280px;">
+                            <!-- Large Circular Avatar -->
+                            <div id="profileSummaryAvatar" style="width: 72px; height: 72px; border-radius: 50%; background: var(--e-teal, #063D3B); color: var(--e-pistachio, #C8FF63); font-size: 26px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; letter-spacing: -0.02em; border: 3px solid #E2EFEA; box-shadow: 0 6px 18px rgba(6, 61, 59, 0.12);">
+                                SK
+                            </div>
+
+                            <div style="flex: 1; min-width: 0;">
+                                <!-- User Full Name -->
+                                <div id="profileSummaryName" style="font-size: 21px; font-weight: 800; color: #092F2E; letter-spacing: -0.02em; line-height: 1.2;">
+                                    Salan Khalkho
+                                </div>
+
+                                <!-- Institution Name directly under User Name -->
+                                <div style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #047857; margin-top: 4px;">
+                                    <span style="font-size: 13px;">🏛️</span>
+                                    <span id="profileHeroOrg">Your Institution</span>
+                                </div>
+
+                                <!-- App Privilege Pill & Member Since Row -->
+                                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
+                                    <span id="profileHeroPrivilege" style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #063D3B; background: #F4FAF7; border: 1px solid #D1E5DE; padding: 4px 10px; border-radius: 6px;">
+                                        <span id="profileHeroPrivilegeIcon">🛡️</span>
+                                        <span id="profileHeroPrivilegeText">App Privilege: Full Administrator</span>
+                                    </span>
+                                    <span id="profileHeroMemberSince" style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: #4F7470; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 4px 10px; border-radius: 6px;">
+                                        <span>📅</span>
+                                        <span id="profileHeroMemberSinceText">Member Since: September 2024</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Verified Account Status Badge -->
+                        <div style="display: flex; align-items: center; gap: 6px; background: #ECFDF5; border: 1px solid #A7F3D0; color: #047857; font-size: 11.5px; font-weight: 700; padding: 5px 12px; border-radius: 999px; white-space: nowrap; flex-shrink: 0; box-shadow: 0 1px 3px rgba(4, 120, 87, 0.08);">
+                            <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #10B981;"></span>
+                            <span>Verified Account</span>
+                        </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div style="height: 1px; background: #E6F0EC; margin: 18px 0 16px 0;"></div>
+
+                    <!-- Assigned Departments Section -->
+                    <div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #648781;">
+                                Assigned Campus Units &amp; Departments
+                            </span>
+                            <span style="font-size: 11px; color: #648781;" id="profileHeroDeptCount">Active Roster</span>
+                        </div>
+                        <div id="profileHeroDepartments" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            <!-- Populated dynamically via loadProfileData() -->
+                        </div>
+                    </div>
+
+                    <!-- Contact Footer Row with Mail Icon and Active Session Security -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 16px; padding-top: 14px; border-top: 1px solid #F1F5F3; flex-wrap: wrap; font-size: 12px; color: #648781;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            <span style="color: #648781;">Official Email:</span>
+                            <span id="profileHeroEmail" style="font-weight: 700; color: #092F2E;">salan.khalkho@edvora.chat</span>
+                        </div>
+
+                        <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: #1D4ED8; background: #EFF6FF; border: 1px solid #BFDBFE; padding: 4px 10px; border-radius: 6px;">
+                            <span style="font-size: 11px;">🔒</span>
+                            <span>Active Session: TLS 1.3 / AES-256 Encrypted</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 2: Personal Profile Details -->
+                <div style="margin-bottom: 28px;">
+                    <div style="font-size: 13px; font-weight: 800; color: #092F2E; display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
+                        <span>👤</span> Personal Profile Details
+                    </div>
+                    
+                    <div style="max-width: 540px;">
+                        <label for="profile_name" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                            Display Name <span style="color: #EF4444;">*</span>
+                        </label>
+                        <input type="text" id="profile_name" name="name" class="brand-input" placeholder="e.g. Salan Khalkho" required style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        <span style="font-size: 10.5px; color: #648781; margin-top: 4px; display: block;">
+                            Your name as displayed across counselor queues, student callback logs, and activity records.
+                        </span>
+                    </div>
+                </div>
+
+                <!-- SECTION 3: Account Login Email -->
+                <div style="margin-bottom: 28px;">
+                    <div style="font-size: 13px; font-weight: 800; color: #092F2E; display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
+                        <span>✉️</span> Account Login Email
+                    </div>
+
+                    <div style="max-width: 540px;">
+                        <label for="profile_email" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                            Email Address <span style="color: #EF4444;">*</span>
+                        </label>
+                        <input type="email" id="profile_email" name="email" class="brand-input" placeholder="name@college.edu" required style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        
+                        <div style="display: flex; align-items: center; gap: 8px; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 6px; padding: 8px 12px; margin-top: 8px; font-size: 11px; color: #92400E;">
+                            <span>⚠️</span>
+                            <span><strong>Security Policy:</strong> Modifying your login email address strictly requires entering your <strong>Current Password</strong> below for verification.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 4: Authentication Credentials & Password -->
+                <div style="margin-bottom: 32px; background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 10px; padding: 22px; max-width: 580px;">
+                    <div style="font-size: 13px; font-weight: 800; color: #092F2E; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px;">
+                        <span style="display: flex; align-items: center; gap: 8px;"><span>🔐</span> Authentication Credentials &amp; Password</span>
+                    </div>
+                    <p style="font-size: 11px; color: #648781; margin: 0 0 18px 0; line-height: 1.4;">
+                        Leave new password fields blank if you only want to change your display name.
+                    </p>
+
+                    <!-- Current Password -->
+                    <div style="margin-bottom: 18px;">
+                        <label for="profile_current_password" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                            Current Password <span id="currentPwdRequiredNotice" style="color: #648781; font-weight: 500; text-transform: none;">(Required to change Email or Password)</span>
+                        </label>
+                        <div style="position: relative; width: 100%;">
+                            <input type="password" id="profile_current_password" name="current_password" class="brand-input" placeholder="Enter current password..." autocomplete="current-password" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 38px 0 12px;" />
+                            <button type="button" onclick="togglePasswordVisibility('profile_current_password', this)" title="Show/Hide Password" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; color: #648781; padding: 4px; display: flex; align-items: center; justify-content: center;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- New Password -->
+                    <div style="margin-bottom: 14px;">
+                        <label for="profile_new_password" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                            New Password
+                        </label>
+                        <div style="position: relative; width: 100%;">
+                            <input type="password" id="profile_new_password" name="new_password" class="brand-input" placeholder="Create new strong password..." autocomplete="new-password" oninput="evaluatePasswordStrength(this.value)" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 38px 0 12px;" />
+                            <button type="button" onclick="togglePasswordVisibility('profile_new_password', this)" title="Show/Hide Password" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; color: #648781; padding: 4px; display: flex; align-items: center; justify-content: center;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                        </div>
+
+                        <!-- PASSWORD STRENGTH STATUS BAND (Exact Reference Image 1) -->
+                        <div id="pwdStrengthCard" style="margin-top: 12px; padding: 12px 14px; background: #F8FAF9; border: 1px solid #E6F0EC; border-radius: 8px; display: none;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                <span style="font-size: 12px; font-weight: 700; color: #092F2E;">Password Strength</span>
+                                <span id="pwdStrengthBadge" style="font-size: 12px; font-weight: 700; color: #EF4444; display: inline-flex; align-items: center; gap: 4px;">Poor 😩</span>
+                            </div>
+                            
+                            <!-- Progress Bar Track & Fill -->
+                            <div style="width: 100%; height: 6px; background: #E2EFEA; border-radius: 999px; overflow: hidden; margin-bottom: 6px;">
+                                <div id="pwdStrengthBar" style="width: 25%; height: 100%; background: #EF4444; border-radius: 999px; transition: width 0.25s ease, background-color 0.25s ease;"></div>
+                            </div>
+                            
+                            <!-- Helper Subtext -->
+                            <div id="pwdStrengthHelper" style="font-size: 11px; color: #648781; margin-bottom: 12px;">
+                                Your password is easily guessable. You can do better.
+                            </div>
+
+                            <!-- LIVE CRITERIA CHECKLIST (Exact Reference Image 2) -->
+                            <div id="pwdChecklistTitle" style="font-size: 11.5px; font-weight: 700; color: #092F2E; margin-bottom: 8px;">
+                                Medium password. Must contain:
+                            </div>
+
+                            <div style="display: flex; flex-direction: column; gap: 6px; font-size: 11.5px;">
+                                <div id="ruleItemLength" style="display: flex; align-items: center; gap: 8px; color: #94A3B8; transition: color 0.15s ease;">
+                                    <span class="rule-icon" style="font-weight: 800; font-size: 12px; width: 14px;">✕</span>
+                                    <span>At least 8 characters</span>
+                                </div>
+                                <div id="ruleItemNumber" style="display: flex; align-items: center; gap: 8px; color: #94A3B8; transition: color 0.15s ease;">
+                                    <span class="rule-icon" style="font-weight: 800; font-size: 12px; width: 14px;">✕</span>
+                                    <span>At least 1 number</span>
+                                </div>
+                                <div id="ruleItemLower" style="display: flex; align-items: center; gap: 8px; color: #94A3B8; transition: color 0.15s ease;">
+                                    <span class="rule-icon" style="font-weight: 800; font-size: 12px; width: 14px;">✕</span>
+                                    <span>At least 1 lowercase letter</span>
+                                </div>
+                                <div id="ruleItemUpper" style="display: flex; align-items: center; gap: 8px; color: #94A3B8; transition: color 0.15s ease;">
+                                    <span class="rule-icon" style="font-weight: 800; font-size: 12px; width: 14px;">✕</span>
+                                    <span>At least 1 uppercase letter</span>
+                                </div>
+                                <div id="ruleItemSpecial" style="display: flex; align-items: center; gap: 8px; color: #94A3B8; transition: color 0.15s ease;">
+                                    <span class="rule-icon" style="font-weight: 800; font-size: 12px; width: 14px;">✕</span>
+                                    <span>At least 1 special character</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Confirm New Password -->
+                    <div>
+                        <label for="profile_confirm_password" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                            Confirm New Password
+                        </label>
+                        <div style="position: relative; width: 100%;">
+                            <input type="password" id="profile_confirm_password" name="confirm_password" class="brand-input" placeholder="Re-type new password..." autocomplete="new-password" oninput="checkPasswordMatch()" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 38px 0 12px;" />
+                            <button type="button" onclick="togglePasswordVisibility('profile_confirm_password', this)" title="Show/Hide Password" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; color: #648781; padding: 4px; display: flex; align-items: center; justify-content: center;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                        </div>
+                        <div id="pwdMatchNotice" style="font-size: 11px; margin-top: 4px; display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- Error Notice Box -->
+                <div id="profileFormErrorNotice" style="display: none; background: #FEF2F2; border: 1.5px solid #FECACA; border-radius: 6px; padding: 10px 14px; margin-bottom: 20px; font-size: 12px; color: #B91C1C; max-width: 580px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span>⚠️</span>
+                        <span id="profileFormErrorText">Error message goes here</span>
+                    </div>
+                </div>
+
+                <!-- Action Bar -->
+                <div style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 10px 0;">
+                    <button type="submit" id="btnSaveProfile" class="brand-btn-primary" style="height: 38px; padding: 0 24px; font-size: 12.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                        <span>💾</span> Save Profile Changes
+                    </button>
+                    <button type="button" onclick="loadProfileData()" class="brand-btn-secondary" style="height: 38px; padding: 0 16px; font-size: 12px;">
+                        Reset Changes
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Password Visibility Toggle Utility
+    function togglePasswordVisibility(fieldId, btnEl) {
+        const input = document.getElementById(fieldId);
+        if (!input) return;
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        if (btnEl) {
+            btnEl.style.color = isPassword ? '#047857' : '#648781';
+        }
+    }
+
+    // Dynamic Password Strength Evaluation Engine (Reference Images 1 & 2)
+    function evaluatePasswordStrength(val) {
+        const card = document.getElementById('pwdStrengthCard');
+        if (!card) return;
+
+        if (!val || val.length === 0) {
+            card.style.display = 'none';
+            checkPasswordMatch();
+            return;
+        }
+
+        card.style.display = 'block';
+
+        // 5 Real-Time Validation Rules
+        const hasLength = val.length >= 8;
+        const hasNumber = /[0-9]/.test(val);
+        const hasLower = /[a-z]/.test(val);
+        const hasUpper = /[A-Z]/.test(val);
+        const hasSpecial = /[^a-zA-Z0-9]/.test(val);
+
+        // Update 5-Point Checklist Visuals
+        updateRuleVisual('ruleItemLength', hasLength);
+        updateRuleVisual('ruleItemNumber', hasNumber);
+        updateRuleVisual('ruleItemLower', hasLower);
+        updateRuleVisual('ruleItemUpper', hasUpper);
+        updateRuleVisual('ruleItemSpecial', hasSpecial);
+
+        const score = [hasLength, hasNumber, hasLower, hasUpper, hasSpecial].filter(Boolean).length;
+
+        const badge = document.getElementById('pwdStrengthBadge');
+        const bar = document.getElementById('pwdStrengthBar');
+        const helper = document.getElementById('pwdStrengthHelper');
+        const title = document.getElementById('pwdChecklistTitle');
+
+        if (score <= 2) {
+            // POOR State (Image 1 top)
+            badge.innerHTML = 'Poor 😩';
+            badge.style.color = '#EF4444';
+            bar.style.width = '25%';
+            bar.style.backgroundColor = '#EF4444';
+            helper.innerText = 'Your password is easily guessable. You can do better.';
+            helper.style.color = '#648781';
+            title.innerText = 'Weak password. Must contain:';
+        } else if (score <= 4) {
+            // AVERAGE State (Image 1 middle / Image 2)
+            badge.innerHTML = 'Average 😐';
+            badge.style.color = '#F59E0B';
+            bar.style.width = '60%';
+            bar.style.backgroundColor = '#F59E0B';
+            helper.innerText = 'Your password is easily guessable. You can do better.';
+            helper.style.color = '#648781';
+            title.innerText = 'Medium password. Must contain:';
+        } else {
+            // STRONG State (Image 1 bottom)
+            badge.innerHTML = 'Strong 😎';
+            badge.style.color = '#10B981';
+            bar.style.width = '100%';
+            bar.style.backgroundColor = '#10B981';
+            helper.innerText = 'Your password is great. Nice work!';
+            helper.style.color = '#047857';
+            title.innerText = 'Strong password. All criteria met!';
+        }
+
+        checkPasswordMatch();
+    }
+
+    function updateRuleVisual(elementId, isMet) {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+        const iconSpan = el.querySelector('.rule-icon');
+        if (isMet) {
+            el.style.color = '#059669';
+            el.style.fontWeight = '600';
+            if (iconSpan) {
+                iconSpan.innerText = '✓';
+                iconSpan.style.color = '#059669';
+            }
+        } else {
+            el.style.color = '#94A3B8';
+            el.style.fontWeight = '400';
+            if (iconSpan) {
+                iconSpan.innerText = '✕';
+                iconSpan.style.color = '#94A3B8';
+            }
+        }
+    }
+
+    // Confirm Password Matching Indicator
+    function checkPasswordMatch() {
+        const newPwd = document.getElementById('profile_new_password')?.value || '';
+        const confirmPwd = document.getElementById('profile_confirm_password')?.value || '';
+        const notice = document.getElementById('pwdMatchNotice');
+        if (!notice) return;
+
+        if (!confirmPwd) {
+            notice.style.display = 'none';
+            return;
+        }
+
+        notice.style.display = 'block';
+        if (newPwd === confirmPwd) {
+            notice.style.color = '#059669';
+            notice.innerText = '✓ Passwords match';
+        } else {
+            notice.style.color = '#EF4444';
+            notice.innerText = '✕ Passwords do not match';
+        }
+    }
+
+    // Auto-invoke populate if loaded
+    if (typeof loadProfileData === 'function') {
+        loadProfileData();
+    }
+</script>

@@ -1,0 +1,351 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DB Schema Info — edvora.chat</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/theme-branding.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #080c14;
+            color: #e2e8f0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 12px;
+            min-height: 100vh;
+        }
+        #pageHeader {
+            height: 48px;
+            background: #0e1320;
+            border-bottom: 1px solid #1f2937;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-logo { font-size: 14px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
+        .header-logo .logo-dot { color: #6366f1; }
+        .header-meta { font-size: 11px; color: #6b7280; margin-left: auto; display: flex; align-items: center; gap: 16px; }
+        #headerGeneratedAt { font-family: 'JetBrains Mono', monospace; }
+        .header-badge { background: rgba(16,185,129,0.12); color: #34d399; border: 1px solid rgba(16,185,129,0.3); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+        #controlsBar {
+            background: #0b0f19;
+            border-bottom: 1px solid #1f2937;
+            padding: 10px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        #searchInput {
+            height: 30px; padding: 0 10px;
+            background: #111827; border: 1px solid #1f2937; border-radius: 6px;
+            color: #fff; font-size: 12px; font-family: inherit; outline: none; width: 280px;
+            transition: border-color 0.15s;
+        }
+        #searchInput:focus { border-color: #6366f1; }
+        .ctrl-btn {
+            height: 30px; padding: 0 12px;
+            background: rgba(255,255,255,0.06); border: 1px solid #1f2937; border-radius: 6px;
+            color: #d1d5db; font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s;
+        }
+        .ctrl-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .ctrl-btn.primary { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.4); color: #a5b4fc; }
+        .ctrl-btn.primary:hover { background: rgba(99,102,241,0.25); }
+        #statsBar { margin-left: auto; display: flex; gap: 16px; align-items: center; font-size: 11px; color: #6b7280; }
+        #statsBar strong { color: #e2e8f0; }
+        #pageBody { display: flex; min-height: calc(100vh - 100px); }
+        #tableIndex {
+            width: 220px; min-width: 220px;
+            background: #0e1320; border-right: 1px solid #1f2937;
+            overflow-y: auto; position: sticky; top: 100px; height: calc(100vh - 100px);
+        }
+        #tableIndex .index-header {
+            padding: 10px 14px; font-size: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.6px; color: #6b7280;
+            border-bottom: 1px solid #1f2937;
+        }
+        .index-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 7px 14px; font-size: 11px; font-family: 'JetBrains Mono', monospace;
+            color: #9ca3af; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03);
+            transition: all 0.12s; text-decoration: none;
+        }
+        .index-item:hover { background: rgba(99,102,241,0.08); color: #c7d2fe; }
+        .index-item.active { background: rgba(99,102,241,0.14); color: #818cf8; font-weight: 600; }
+        .index-item .idx-count { font-size: 10px; color: #4b5563; background: rgba(255,255,255,0.04); padding: 1px 5px; border-radius: 4px; }
+        .index-hidden { display: none !important; }
+        #mainContent { flex: 1; padding: 24px; overflow: hidden; }
+        .table-card { background: #0f1623; border: 1px solid #1f2937; border-radius: 10px; margin-bottom: 28px; overflow: hidden; }
+        .card-header {
+            background: #111827; padding: 14px 18px;
+            display: flex; align-items: center; gap: 12px;
+            border-bottom: 1px solid #1f2937; flex-wrap: wrap;
+        }
+        .card-table-name { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: #818cf8; display: flex; align-items: center; gap: 8px; }
+        .card-meta-pills { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .meta-pill { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #9ca3af; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 500; }
+        .meta-pill.engine { color: #fbbf24; border-color: rgba(251,191,36,0.25); background: rgba(251,191,36,0.07); }
+        .meta-pill.rows   { color: #34d399; border-color: rgba(52,211,153,0.25);  background: rgba(52,211,153,0.07); }
+        .meta-pill.size   { color: #60a5fa; border-color: rgba(96,165,250,0.25);  background: rgba(96,165,250,0.07); }
+        .meta-pill.cols   { color: #c084fc; border-color: rgba(192,132,252,0.25); background: rgba(192,132,252,0.07); }
+        .card-comment { font-size: 11px; color: #6b7280; font-style: italic; margin-left: auto; max-width: 320px; text-align: right; }
+        .card-toggle-btn { background: none; border: none; cursor: pointer; color: #6b7280; font-size: 16px; padding: 0 4px; line-height: 1; transition: transform 0.2s; margin-left: auto; }
+        .card-toggle-btn.collapsed { transform: rotate(-90deg); }
+        .schema-wrap { overflow-x: auto; background: #090d16; }
+        .schema-table { width: 100%; border-collapse: collapse; font-size: 11.5px; font-family: 'JetBrains Mono','Fira Code',monospace; white-space: nowrap; }
+        .schema-table th { background: #0d1322; color: #64748b; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 12px; text-align: left; border-bottom: 2px solid #1e293b; border-right: 1px solid #1e293b; }
+        .schema-table th:first-child { width: 40px; text-align: center; }
+        .schema-table td { padding: 7px 12px; border-bottom: 1px solid #141c2c; border-right: 1px solid #141c2c; color: #cbd5e1; background: #090d16; vertical-align: middle; }
+        .schema-table td:first-child { text-align: center; color: #374151; font-size: 10px; background: #0b0f19; border-right: 2px solid #1e293b; user-select: none; }
+        .schema-table tr:hover td { background: #101828; }
+        .schema-table tr:hover td:first-child { background: #0d1220; }
+        .field-name-cell { color: #e2e8f0; font-weight: 600; }
+        .field-name-cell.is-pk { color: #fbbf24; }
+        .type-cell { color: #93c5fd; }
+        .key-badge { display: inline-flex; align-items: center; gap: 3px; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+        .key-pk  { background: rgba(251,191,36,0.12); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+        .key-mul { background: rgba(96,165,250,0.12);  color: #60a5fa; border: 1px solid rgba(96,165,250,0.3); }
+        .key-uni { background: rgba(167,139,250,0.12); color: #c084fc; border: 1px solid rgba(167,139,250,0.3); }
+        .null-yes { color: #f87171; }
+        .null-no  { color: #34d399; font-weight: 600; }
+        .default-cell { color: #a78bfa; }
+        .default-null { color: #374151; font-style: italic; }
+        .extra-cell   { color: #6ee7b7; font-size: 11px; }
+        #loadingOverlay { position: fixed; inset: 0; background: #080c14; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; z-index: 9999; }
+        .spinner { width: 48px; height: 48px; border: 3px solid #1f2937; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.7s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { color: #6b7280; font-size: 13px; }
+        #errorBanner { display: none; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.3); border-radius: 10px; padding: 32px; max-width: 500px; margin: 40px auto; text-align: center; }
+        #errorBanner h2 { color: #f87171; margin-bottom: 8px; font-size: 16px; }
+        #errorBanner p  { color: #9ca3af; font-size: 12px; line-height: 1.6; }
+        #noResultsMsg { display: none; text-align: center; color: #374151; padding: 60px 24px; font-size: 14px; }
+        @media print {
+            #pageHeader,#controlsBar,#tableIndex,.card-toggle-btn { display: none !important; }
+            #pageBody { display: block; }
+            #mainContent { padding: 0; }
+            .table-card { break-inside: avoid; border: 1px solid #ccc; margin-bottom: 20px; }
+            body { background: #fff; color: #000; }
+            .schema-table th,.schema-table td { border: 1px solid #ccc; color: #000 !important; background: #fff !important; }
+            .field-name-cell,.type-cell,.extra-cell,.null-yes,.null-no,.default-cell { color: #000 !important; }
+            .key-badge { border: 1px solid #999; color: #000 !important; background: #eee !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Loading database schema…</div>
+</div>
+
+<header id="pageHeader" style="display:none">
+    <div class="header-logo">
+        <span>🗄️</span>
+        <span><span class="logo-dot">edvora</span>.chat</span>
+        <span style="font-size:11px;font-weight:400;color:#4b5563;"> / DB Schema Reference</span>
+    </div>
+    <div class="header-meta">
+        <span>Generated: <strong id="headerGeneratedAt">—</strong></span>
+        <span>Database: <strong id="headerDbName">—</strong></span>
+        <span class="header-badge">● Live</span>
+    </div>
+</header>
+
+<div id="controlsBar" style="display:none">
+    <input id="searchInput" type="text" placeholder="🔍  Search tables or field names…" oninput="applySearch()" />
+    <button class="ctrl-btn" onclick="expandAll()">Expand All</button>
+    <button class="ctrl-btn" onclick="collapseAll()">Collapse All</button>
+    <button class="ctrl-btn" onclick="window.print()">🖨️ Print</button>
+    <div id="statsBar">
+        <span>Tables: <strong id="statTables">—</strong></span>
+        <span>Fields: <strong id="statFields">—</strong></span>
+    </div>
+</div>
+
+<div id="pageBody" style="display:none">
+    <nav id="tableIndex">
+        <div class="index-header">Tables Index</div>
+        <div id="indexList"></div>
+    </nav>
+    <main id="mainContent">
+        <div id="tableCardsContainer"></div>
+        <div id="noResultsMsg">🔍 No tables or fields match your search.</div>
+        <div id="errorBanner">
+            <h2>⚠️ Failed to Load Schema</h2>
+            <p id="errorMsg">Could not connect to the API.</p>
+            <button class="ctrl-btn primary" onclick="location.reload()" style="margin-top:16px">↺ Retry</button>
+        </div>
+    </main>
+</div>
+
+<script>
+    function esc(s){
+        if(s===null||s===undefined)return'';
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function fmtDefault(v){
+        if(v===null||v===undefined)return'<span class="default-null">NULL</span>';
+        if(v==='')return'<span class="default-null">""</span>';
+        return'<span class="default-cell">'+esc(v)+'</span>';
+    }
+    function keyBadge(k){
+        if(!k)return'<span style="color:#374151">—</span>';
+        if(k==='PRI')return'<span class="key-badge key-pk">🔑 PK</span>';
+        if(k==='MUL')return'<span class="key-badge key-mul">⚓ MUL</span>';
+        if(k==='UNI')return'<span class="key-badge key-uni">◇ UNI</span>';
+        return'<span style="color:#6b7280">'+esc(k)+'</span>';
+    }
+
+    function renderAll(data){
+        const tables=data.tables||[];
+        document.getElementById('headerGeneratedAt').textContent=data.generated_at||'—';
+        document.getElementById('headerDbName').textContent=data.database||'—';
+        let tf=0; tables.forEach(t=>{tf+=(t.columns||[]).length;});
+        document.getElementById('statTables').textContent=tables.length;
+        document.getElementById('statFields').textContent=tf;
+
+        const idxList=document.getElementById('indexList');
+        const cont=document.getElementById('tableCardsContainer');
+        idxList.innerHTML=''; cont.innerHTML='';
+
+        tables.forEach(tbl=>{
+            const anchor='tbl-'+tbl.table_name;
+            const a=document.createElement('a');
+            a.className='index-item'; a.href='#'+anchor;
+            a.setAttribute('data-table',tbl.table_name);
+            a.innerHTML='<span style="overflow:hidden;text-overflow:ellipsis;max-width:150px;display:inline-block">'+esc(tbl.table_name)+'</span>'+
+                         '<span class="idx-count">'+(tbl.column_count||0)+'</span>';
+            a.addEventListener('click',()=>{
+                document.querySelectorAll('.index-item').forEach(i=>i.classList.remove('active'));
+                a.classList.add('active');
+            });
+            idxList.appendChild(a);
+
+            const cols=tbl.columns||[];
+            let rows='';
+            if(!cols.length){
+                rows='<tr><td colspan="9" style="text-align:center;padding:18px;color:#374151">No columns returned</td></tr>';
+            } else {
+                cols.forEach((col,ci)=>{
+                    const pk=col.Key==='PRI';
+                    rows+='<tr>'+
+                        '<td>'+(ci+1)+'</td>'+
+                        '<td class="field-name-cell'+(pk?' is-pk':'')+'">'+esc(col.Field)+'</td>'+
+                        '<td class="type-cell">'+esc(col.Type)+'</td>'+
+                        '<td class="'+(col.Null==='YES'?'null-yes':'null-no')+'">'+esc(col.Null)+'</td>'+
+                        '<td>'+keyBadge(col.Key)+'</td>'+
+                        '<td>'+fmtDefault(col.Default)+'</td>'+
+                        '<td class="extra-cell">'+(esc(col.Extra)||'<span style="color:#374151">—</span>')+'</td>'+
+                        '<td style="color:#6b7280;font-size:10.5px">'+(esc(col.Collation)||'<span style="color:#374151">—</span>')+'</td>'+
+                        '<td style="color:#4b5563;font-size:10.5px;font-style:italic;white-space:normal;min-width:120px">'+(esc(col.Comment)||'')+'</td>'+
+                    '</tr>';
+                });
+            }
+
+            const card=document.createElement('div');
+            card.className='table-card'; card.id=anchor;
+            card.setAttribute('data-table',tbl.table_name);
+            card.innerHTML=
+                '<div class="card-header">'+
+                    '<div class="card-table-name"><span style="color:#4b5563;font-size:14px">▤</span> '+esc(tbl.table_name)+'</div>'+
+                    '<div class="card-meta-pills">'+
+                        '<span class="meta-pill rows">⬤ '+Number(tbl.exact_rows||0).toLocaleString()+' rows</span>'+
+                        '<span class="meta-pill cols">◫ '+(tbl.column_count||0)+' cols</span>'+
+                        '<span class="meta-pill engine">'+(esc(tbl.engine)||'InnoDB')+'</span>'+
+                        '<span class="meta-pill size">⬡ '+(esc(tbl.size_formatted)||'0 B')+'</span>'+
+                    '</div>'+
+                    (tbl.table_comment?'<div class="card-comment">'+esc(tbl.table_comment)+'</div>':'')+
+                    '<button class="card-toggle-btn" onclick="toggleCard(this,\''+esc(tbl.table_name)+'\')" title="Toggle">▾</button>'+
+                '</div>'+
+                '<div class="schema-wrap" data-body="'+esc(tbl.table_name)+'">'+
+                    '<table class="schema-table">'+
+                        '<thead><tr>'+
+                            '<th>#</th><th>Field Name</th><th>Type</th><th>Null</th>'+
+                            '<th>Key</th><th>Default</th><th>Extra / Attributes</th>'+
+                            '<th>Collation</th><th>Comment</th>'+
+                        '</tr></thead>'+
+                        '<tbody>'+rows+'</tbody>'+
+                    '</table>'+
+                '</div>';
+            cont.appendChild(card);
+        });
+
+        document.getElementById('loadingOverlay').style.display='none';
+        document.getElementById('pageHeader').style.display='';
+        document.getElementById('controlsBar').style.display='';
+        document.getElementById('pageBody').style.display='';
+
+        const firstIdx=idxList.querySelector('.index-item');
+        if(firstIdx) firstIdx.classList.add('active');
+
+        const obs=new IntersectionObserver(entries=>{
+            entries.forEach(e=>{
+                if(e.isIntersecting){
+                    const t=e.target.getAttribute('data-table');
+                    document.querySelectorAll('.index-item').forEach(i=>
+                        i.classList.toggle('active',i.getAttribute('data-table')===t));
+                }
+            });
+        },{threshold:0.05,rootMargin:'-80px 0px 0px 0px'});
+        document.querySelectorAll('.table-card').forEach(c=>obs.observe(c));
+    }
+
+    function toggleCard(btn,tableName){
+        const b=document.querySelector('.schema-wrap[data-body="'+tableName+'"]');
+        if(!b)return;
+        const hidden=b.style.display==='none';
+        b.style.display=hidden?'':'none';
+        btn.classList.toggle('collapsed',!hidden);
+    }
+    function expandAll(){
+        document.querySelectorAll('.schema-wrap').forEach(b=>b.style.display='');
+        document.querySelectorAll('.card-toggle-btn').forEach(b=>b.classList.remove('collapsed'));
+    }
+    function collapseAll(){
+        document.querySelectorAll('.schema-wrap').forEach(b=>b.style.display='none');
+        document.querySelectorAll('.card-toggle-btn').forEach(b=>b.classList.add('collapsed'));
+    }
+
+    function applySearch(){
+        const q=document.getElementById('searchInput').value.trim().toLowerCase();
+        let vis=0;
+        document.querySelectorAll('.table-card').forEach(card=>{
+            const t=card.getAttribute('data-table').toLowerCase();
+            let ok=!q||t.includes(q);
+            if(!ok) card.querySelectorAll('.field-name-cell,.type-cell').forEach(c=>{
+                if(c.textContent.toLowerCase().includes(q)) ok=true;
+            });
+            card.style.display=ok?'':'none';
+            if(ok) vis++;
+        });
+        document.querySelectorAll('.index-item').forEach(i=>{
+            i.classList.toggle('index-hidden',!!q&&!i.getAttribute('data-table').toLowerCase().includes(q));
+        });
+        document.getElementById('noResultsMsg').style.display=(vis===0&&q)?'':'none';
+    }
+
+    async function init(){
+        try{
+            const res=await fetch('/v1/public/db-info');
+            const json=await res.json();
+            if(!json||json.status!=='success'||!json.data) throw new Error((json&&json.message)||'API error');
+            renderAll(json.data);
+        } catch(err){
+            document.getElementById('loadingOverlay').style.display='none';
+            document.getElementById('pageHeader').style.display='';
+            document.getElementById('pageBody').style.display='';
+            document.getElementById('errorMsg').textContent=err.message||'Unknown error.';
+            document.getElementById('errorBanner').style.display='';
+        }
+    }
+    init();
+</script>
+</body>
+</html>

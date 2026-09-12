@@ -1,0 +1,273 @@
+<!-- Page Header -->
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
+                    <div>
+                        <h2 style="font-family: var(--brand-font-display); font-size: 18px; font-weight: 700; color: #092F2E; margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <span>📊</span> Admissions & Revenue Intelligence Analytics
+                        </h2>
+                        <p style="font-size: 12px; color: #4F7470; margin-top: 4px;">
+                            Real-time conversion funnels, student acquisition velocity, program demand metrics, and tuition pipeline projections.
+                        </p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <select id="analyticsTimeRange" class="brand-input" style="height: 38px; font-size: 12px; padding: 0 12px; min-width: 150px;" onchange="loadAdmissionsAnalytics()">
+                            <option value="7d">Last 7 Days</option>
+                            <option value="30d" selected>Last 30 Days</option>
+                            <option value="90d">This Quarter (90D)</option>
+                            <option value="cycle">Current Admission Cycle</option>
+                        </select>
+                        <button type="button" class="brand-btn-secondary" onclick="exportAnalyticsReport()" style="height: 38px; font-size: 12px; padding: 0 16px; display: inline-flex; align-items: center; gap: 6px;">
+                            📥 Export Executive Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Top Executive KPI Summary Cards -->
+                <div class="stats-grid" style="margin-bottom: 22px;">
+                    <div class="stat-card" style="border-top: 3px solid var(--brand-indigo-500);">
+                        <div class="stat-label">Total Student Inquiries</div>
+                        <div class="stat-value" id="anTotalInquiries" style="color: var(--brand-indigo-400);">1,482</div>
+                        <div style="font-size: 11px; color: var(--brand-emerald-400); margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+                            <span>↑ +18.4%</span> <span style="color: #648781;">vs previous cycle</span>
+                        </div>
+                    </div>
+                    <div class="stat-card" style="border-top: 3px solid var(--brand-cyan-500);">
+                        <div class="stat-label">Verified Leads Captured</div>
+                        <div class="stat-value" id="anCapturedLeads" style="color: var(--brand-cyan-400);">628</div>
+                        <div style="font-size: 11px; color: var(--brand-emerald-400); margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+                            <span>42.3%</span> <span style="color: #648781;">lead capture conversion</span>
+                        </div>
+                    </div>
+                    <div class="stat-card" style="border-top: 3px solid var(--brand-purple-500);">
+                        <div class="stat-label">High-Intent Actions (Tours/Calls)</div>
+                        <div class="stat-value" id="anHighIntentCount" style="color: #c084fc;">314</div>
+                        <div style="font-size: 11px; color: #648781; margin-top: 4px;">
+                            186 Tours • 128 Callbacks
+                        </div>
+                    </div>
+                    <div class="stat-card" style="border-top: 3px solid var(--brand-emerald-500);">
+                        <div class="stat-label">Projected Tuition Pipeline</div>
+                        <div class="stat-value" id="anTuitionPipeline" style="color: var(--brand-emerald-400);">₹ 4.82 Cr</div>
+                        <div style="font-size: 11px; color: var(--brand-emerald-400); margin-top: 4px;">
+                            Based on ₹1.2L avg annual fee
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Analytics Visual Grid: Funnel & Program Demand -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 22px;">
+                    
+                    <!-- 1. Admissions Conversion Funnel -->
+                    <div class="brand-card" style="padding: 20px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                            <h4 style="font-family: var(--brand-font-display); font-size: 14px; font-weight: 700; color: #092F2E; margin: 0;">
+                                🎯 Full-Funnel Student Conversion
+                            </h4>
+                            <span style="font-size: 11px; color: #648781;">Inquiry → Enrolled</span>
+                        </div>
+
+                        <!-- Funnel Steps -->
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <!-- Stage 1 -->
+                            <div style="background: #F1F7F4; padding: 10px 14px; border-radius: 6px; border-left: 4px solid var(--brand-indigo-500);">
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                                    <span style="font-weight: 600; color: #092F2E;">1. Website Chatbot Visitors</span>
+                                    <span style="font-weight: 700; color: var(--brand-indigo-400);">1,482 (100%)</span>
+                                </div>
+                                <div style="height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden;">
+                                    <div style="width: 100%; height: 100%; background: var(--brand-indigo-500);"></div>
+                                </div>
+                            </div>
+
+                            <!-- Stage 2 -->
+                            <div style="background: #F1F7F4; padding: 10px 14px; border-radius: 6px; border-left: 4px solid var(--brand-cyan-500);">
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                                    <span style="font-weight: 600; color: #092F2E;">2. Engaged Prospects (Course/Fees Queries)</span>
+                                    <span style="font-weight: 700; color: var(--brand-cyan-400);">954 (64.3%)</span>
+                                </div>
+                                <div style="height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden;">
+                                    <div style="width: 64.3%; height: 100%; background: var(--brand-cyan-500);"></div>
+                                </div>
+                            </div>
+
+                            <!-- Stage 3 -->
+                            <div style="background: #F1F7F4; padding: 10px 14px; border-radius: 6px; border-left: 4px solid #c084fc;">
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                                    <span style="font-weight: 600; color: #092F2E;">3. Verified Leads (Phone + Email Captured)</span>
+                                    <span style="font-weight: 700; color: #c084fc;">628 (42.3%)</span>
+                                </div>
+                                <div style="height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden;">
+                                    <div style="width: 42.3%; height: 100%; background: #c084fc;"></div>
+                                </div>
+                            </div>
+
+                            <!-- Stage 4 -->
+                            <div style="background: #F1F7F4; padding: 10px 14px; border-radius: 6px; border-left: 4px solid var(--brand-amber-500);">
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                                    <span style="font-weight: 600; color: #092F2E;">4. High-Intent Actions (Tour Booked / Counselor Callback)</span>
+                                    <span style="font-weight: 700; color: var(--brand-amber-400);">314 (21.1%)</span>
+                                </div>
+                                <div style="height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden;">
+                                    <div style="width: 21.1%; height: 100%; background: var(--brand-amber-500);"></div>
+                                </div>
+                            </div>
+
+                            <!-- Stage 5 -->
+                            <div style="background: #F1F7F4; padding: 10px 14px; border-radius: 6px; border-left: 4px solid var(--brand-emerald-500);">
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                                    <span style="font-weight: 600; color: #092F2E;">5. Final Admissions / Fees Deposited</span>
+                                    <span style="font-weight: 700; color: var(--brand-emerald-400);">142 (9.5%)</span>
+                                </div>
+                                <div style="height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden;">
+                                    <div style="width: 9.5%; height: 100%; background: var(--brand-emerald-500);"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Program Demand & Seat Fill Rate -->
+                    <div class="brand-card" style="padding: 20px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                            <h4 style="font-family: var(--brand-font-display); font-size: 14px; font-weight: 700; color: #092F2E; margin: 0;">
+                                🎓 Academic Program Demand & Seat Fill Rate
+                            </h4>
+                            <span style="font-size: 11px; color: #648781;">Inquiries vs Capacity</span>
+                        </div>
+
+                        <div class="brand-table-container">
+                            <table class="table" style="font-size: 12px;">
+                                <thead>
+                                    <tr>
+                                        <th>Program / Course</th>
+                                        <th>Inquiries</th>
+                                        <th>Leads</th>
+                                        <th>Seat Fill %</th>
+                                        <th>Pipeline Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>MBA (Marketing & Finance)</strong></td>
+                                        <td>482</td>
+                                        <td>214</td>
+                                        <td><span class="badge" style="background: rgba(52,211,153,0.15); color: var(--brand-emerald-400);">86% Fill</span></td>
+                                        <td>₹ 1.84 Cr</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>B.Tech Computer Science & AI</strong></td>
+                                        <td>396</td>
+                                        <td>178</td>
+                                        <td><span class="badge" style="background: rgba(52,211,153,0.15); color: var(--brand-emerald-400);">92% Fill</span></td>
+                                        <td>₹ 1.42 Cr</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>BBA (Digital Business)</strong></td>
+                                        <td>264</td>
+                                        <td>106</td>
+                                        <td><span class="badge" style="background: rgba(251,191,36,0.15); color: var(--brand-amber-400);">64% Fill</span></td>
+                                        <td>₹ 85.0 L</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>B.Pharma & Clinical Research</strong></td>
+                                        <td>192</td>
+                                        <td>78</td>
+                                        <td><span class="badge" style="background: rgba(251,191,36,0.15); color: var(--brand-amber-400);">58% Fill</span></td>
+                                        <td>₹ 46.8 L</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>LL.B / Integrated Law</strong></td>
+                                        <td>148</td>
+                                        <td>52</td>
+                                        <td><span class="badge" style="background: rgba(239,68,68,0.15); color: var(--brand-rose-400);">42% Fill</span></td>
+                                        <td>₹ 24.2 L</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Secondary Intelligence Grid: Geographic Catchment, Leakage & Counselor Velocity -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+                    
+                    <!-- 3. Geographic Catchment Areas -->
+                    <div class="brand-card" style="padding: 20px;">
+                        <h4 style="font-family: var(--brand-font-display); font-size: 14px; font-weight: 700; color: #092F2E; margin: 0 0 12px 0;">
+                            📍 Top Geographic Student Catchment
+                        </h4>
+                        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px;">
+                            <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1.5px solid #E6F0EC;">
+                                <span>1. Patna & Central Bihar</span>
+                                <strong style="color: var(--brand-indigo-400);">46% of leads</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1.5px solid #E6F0EC;">
+                                <span>2. Ranchi / Jharkhand</span>
+                                <strong style="color: var(--brand-indigo-400);">24% of leads</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1.5px solid #E6F0EC;">
+                                <span>3. Varanasi & Eastern UP</span>
+                                <strong style="color: var(--brand-indigo-400);">16% of leads</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1.5px solid #E6F0EC;">
+                                <span>4. Delhi NCR & North Zone</span>
+                                <strong style="color: var(--brand-indigo-400);">9% of leads</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 6px 0;">
+                                <span>5. Other / International</span>
+                                <strong style="color: var(--brand-indigo-400);">5% of leads</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Inquiry Leakage & Unresolved Queries -->
+                    <div class="brand-card" style="padding: 20px; display: flex; flex-direction: column;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <h4 style="font-family: var(--brand-font-display); font-size: 14px; font-weight: 700; color: #092F2E; margin: 0;">
+                                ⚠️ Inquiry Leakage & Knowledge Gaps
+                            </h4>
+                            <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: var(--brand-rose-400); font-size: 10px;">High Urgency</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; flex: 1;">
+                            <div style="background: rgba(239, 68, 68, 0.08); padding: 8px 10px; border-radius: 6px; border-left: 3px solid var(--brand-rose-500);">
+                                <strong style="display: block; color: var(--brand-rose-400); margin-bottom: 2px;">Hostel AC vs Non-AC Fee Structure</strong>
+                                <span style="font-size: 11px; color: #648781;">Asked 84 times • 62% abandoned without lead capture</span>
+                            </div>
+                            <div style="background: rgba(251, 191, 36, 0.08); padding: 8px 10px; border-radius: 6px; border-left: 3px solid var(--brand-amber-500);">
+                                <strong style="display: block; color: var(--brand-amber-400); margin-bottom: 2px;">Education Loan & Bank Tie-ups</strong>
+                                <span style="font-size: 11px; color: #648781;">Asked 66 times • Recommended: Add Loan FAQ doc</span>
+                            </div>
+                            <div style="background: rgba(99, 102, 241, 0.08); padding: 8px 10px; border-radius: 6px; border-left: 3px solid var(--brand-indigo-500);">
+                                <strong style="display: block; color: var(--brand-indigo-300); margin-bottom: 2px;">Lateral Entry Eligibility for Poly-Diploma</strong>
+                                <span style="font-size: 11px; color: #648781;">Asked 42 times • Resolved by Admissions Scope</span>
+                            </div>
+                        </div>
+                        <button type="button" class="brand-btn-primary brand-btn-sm" style="margin-top: 14px; width: 100%; justify-content: center; font-size: 11.5px; font-weight: 600; padding: 7px 12px; display: inline-flex; align-items: center; gap: 6px;" onclick="switchNavTab('knowledge-gaps')">
+                            🔍 View Full GAP Breakup & Intelligence →
+                        </button>
+                    </div>
+
+                    <!-- 5. Admissions Counselor Velocity & SLA -->
+                    <div class="brand-card" style="padding: 20px;">
+                        <h4 style="font-family: var(--brand-font-display); font-size: 14px; font-weight: 700; color: #092F2E; margin: 0 0 12px 0;">
+                            ⚡ Counselor Response Velocity
+                        </h4>
+                        <div style="display: flex; flex-direction: column; gap: 10px; font-size: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Average Callback Response Time:</span>
+                                <strong style="color: var(--brand-emerald-400); font-size: 13px;">18 mins</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Campus Tour Attendance Rate:</span>
+                                <strong style="color: var(--brand-cyan-400); font-size: 13px;">88.2%</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Peak Student Inquiry Hours:</span>
+                                <strong style="color: var(--brand-indigo-400); font-size: 13px;">7:00 PM – 11:30 PM</strong>
+                            </div>
+                            <div style="margin-top: 6px; padding: 8px; background: #F1F7F4; border-radius: 6px; font-size: 11px; color: #4F7470; line-height: 1.4;">
+                                💡 <strong>Insight:</strong> 64% of inquiries arrive outside working hours. 24/7 AI chatbot captured <strong>₹ 2.4 Cr</strong> worth of leads while offices were closed.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>

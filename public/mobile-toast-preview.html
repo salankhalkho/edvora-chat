@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile Event Toast Visualizer — Edvora Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <style>
+    :root {
+      --e-teal: #063D3B;
+      --e-pistachio: #C8FF63;
+      --e-mist: #F1F7F4;
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background: #0d1518;
+      color: #f1f5f9;
+      min-height: 100vh;
+      margin: 0;
+      padding: 24px 16px 60px 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Base Floating Toast Container inside widget */
+    .preview-toast-container {
+      position: absolute;
+      top: 50px;
+      left: 10px;
+      right: 10px;
+      z-index: 50;
+      pointer-events: none;
+    }
+
+    /* Common Card Structure */
+    .preview-toast {
+      border-radius: 13px;
+      padding: 9px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      transform: translateY(-16px) scale(0.85);
+      transition: none;
+      position: relative;
+      overflow: hidden;
+      pointer-events: auto;
+    }
+
+    /* Active Spring Entrance Animation */
+    .preview-toast.toast-active {
+      animation: springEntrance 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+                 ambientGlowPulse 2s ease-in-out infinite 0.55s;
+    }
+
+    @keyframes springEntrance {
+      0% {
+        opacity: 0;
+        transform: translateY(-22px) scale(0.85);
+      }
+      65% {
+        opacity: 1;
+        transform: translateY(2px) scale(1.04);
+      }
+      85% {
+        transform: translateY(-1px) scale(0.99);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* Flash sweep overlay across the card face */
+    .preview-toast.toast-active::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -120%;
+      width: 80%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      transform: skewX(-25deg);
+      animation: flashSweep 0.5s ease-out 0.05s forwards;
+      pointer-events: none;
+    }
+    @keyframes flashSweep {
+      100% { left: 200%; }
+    }
+
+    /* Animated SVG Checkmark */
+    .toast-check-svg {
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+    .check-circle {
+      stroke-dasharray: 80;
+      stroke-dashoffset: 80;
+      transition: stroke-dashoffset 0.35s ease-out;
+    }
+    .check-tick {
+      stroke-dasharray: 24;
+      stroke-dashoffset: 24;
+      transition: stroke-dashoffset 0.28s ease-out 0.2s;
+    }
+    .preview-toast.toast-active .check-circle {
+      stroke-dashoffset: 0;
+    }
+    .preview-toast.toast-active .check-tick {
+      stroke-dashoffset: 0;
+    }
+
+    /* ------------------------------------------------------------- */
+    /* THEME A: ELECTRIC SOLAR GOLD (HIGH INTENT & VIP FEEL)         */
+    /* ------------------------------------------------------------- */
+    .theme-gold {
+      background: rgba(10, 18, 18, 0.96);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1.5px solid #F59E0B;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 18px rgba(245, 158, 11, 0.45), 0 0 0 1px rgba(251, 191, 36, 0.2);
+    }
+    @keyframes goldGlowPulse {
+      0%, 100% {
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 16px rgba(245, 158, 11, 0.4);
+      }
+      50% {
+        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6), 0 0 28px rgba(245, 158, 11, 0.75), 0 0 0 1.5px rgba(251, 191, 36, 0.5);
+      }
+    }
+    .theme-gold.toast-active {
+      animation: springEntrance 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+                 goldGlowPulse 2.2s ease-in-out infinite 0.55s;
+    }
+    .theme-gold .toast-tag-badge {
+      background: rgba(245, 158, 11, 0.18);
+      color: #FBBF24;
+      border: 1px solid rgba(245, 158, 11, 0.45);
+    }
+    .theme-gold .toast-title-text {
+      color: #ffffff;
+      font-weight: 700;
+    }
+    .theme-gold .toast-desc-text {
+      color: #FDE68A;
+    }
+    .theme-gold .check-circle { stroke: #F59E0B; }
+    .theme-gold .check-tick { stroke: #FDE68A; }
+    .theme-gold .toast-icon-box {
+      background: rgba(245, 158, 11, 0.16);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #FBBF24;
+    }
+
+    /* ------------------------------------------------------------- */
+    /* THEME B: CYBER EMERALD / HIGH-VOLTAGE MINT                    */
+    /* ------------------------------------------------------------- */
+    .theme-emerald {
+      background: rgba(8, 18, 16, 0.96);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1.5px solid #10B981;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 18px rgba(16, 185, 129, 0.45), 0 0 0 1px rgba(52, 211, 153, 0.2);
+    }
+    @keyframes emeraldGlowPulse {
+      0%, 100% {
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 16px rgba(16, 185, 129, 0.4);
+      }
+      50% {
+        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6), 0 0 28px rgba(16, 185, 129, 0.75), 0 0 0 1.5px rgba(52, 211, 153, 0.5);
+      }
+    }
+    .theme-emerald.toast-active {
+      animation: springEntrance 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+                 emeraldGlowPulse 2.2s ease-in-out infinite 0.55s;
+    }
+    .theme-emerald .toast-tag-badge {
+      background: rgba(16, 185, 129, 0.18);
+      color: #34D399;
+      border: 1px solid rgba(16, 185, 129, 0.45);
+    }
+    .theme-emerald .toast-title-text {
+      color: #ffffff;
+      font-weight: 700;
+    }
+    .theme-emerald .toast-desc-text {
+      color: #A7F3D0;
+    }
+    .theme-emerald .check-circle { stroke: #10B981; }
+    .theme-emerald .check-tick { stroke: #6EE7B7; }
+    .theme-emerald .toast-icon-box {
+      background: rgba(16, 185, 129, 0.16);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34D399;
+    }
+
+    /* ------------------------------------------------------------- */
+    /* THEME C: ELECTRIC INDIGO & CYBER CYAN                         */
+    /* ------------------------------------------------------------- */
+    .theme-cyber {
+      background: rgba(13, 16, 35, 0.96);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1.5px solid #6366F1;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 18px rgba(99, 102, 241, 0.5), 0 0 0 1px rgba(129, 140, 248, 0.25);
+    }
+    @keyframes cyberGlowPulse {
+      0%, 100% {
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 16px rgba(99, 102, 241, 0.45);
+      }
+      50% {
+        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.65), 0 0 30px rgba(99, 102, 241, 0.8), 0 0 0 1.5px rgba(6, 182, 212, 0.6);
+      }
+    }
+    .theme-cyber.toast-active {
+      animation: springEntrance 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+                 cyberGlowPulse 2.2s ease-in-out infinite 0.55s;
+    }
+    .theme-cyber .toast-tag-badge {
+      background: rgba(99, 102, 241, 0.22);
+      color: #A5B4FC;
+      border: 1px solid rgba(99, 102, 241, 0.5);
+    }
+    .theme-cyber .toast-title-text {
+      color: #ffffff;
+      font-weight: 700;
+    }
+    .theme-cyber .toast-desc-text {
+      color: #67E8F9;
+    }
+    .theme-cyber .check-circle { stroke: #6366F1; }
+    .theme-cyber .check-tick { stroke: #22D3EE; }
+    .theme-cyber .toast-icon-box {
+      background: rgba(99, 102, 241, 0.2);
+      border: 1px solid rgba(99, 102, 241, 0.45);
+      color: #A5B4FC;
+    }
+
+    /* Interactive Phone Frame Simulator */
+    .mobile-phone-mockup {
+      width: 100%;
+      max-width: 400px;
+      background: #F3F8F6;
+      border-radius: 28px;
+      border: 3px solid #063D3B;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .edvora-header {
+      background: #063D3B;
+      color: #ffffff;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(6, 61, 59, 0.25);
+    }
+
+    .chat-bubble-assistant {
+      background: #f1f5f9;
+      color: #1e293b;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px 12px 12px 2px;
+      padding: 9px 12px;
+      font-size: 12px;
+      line-height: 1.45;
+      max-width: 85%;
+      margin-bottom: 10px;
+    }
+
+    .chat-bubble-user {
+      background: #063D3B;
+      color: #ffffff;
+      border-radius: 12px 12px 2px 12px;
+      padding: 8px 13px;
+      font-size: 12.5px;
+      line-height: 1.4;
+      max-width: 80%;
+      margin-left: auto;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 6px rgba(6, 61, 59, 0.2);
+    }
+
+    .theme-selector-btn {
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .theme-selector-btn.active {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.25);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="max-w-4xl mx-auto text-center mb-8">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-xs font-bold mb-3">
+      <span>📱 Mobile Experience Lab</span>
+    </div>
+    <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-2">
+      Mobile Event Toast Visualizer &amp; Decision Lab
+    </h1>
+    <p class="text-sm text-slate-400 max-w-xl mx-auto">
+      Test the 3 high-attention neon directions with bouncy spring physics, outer glow, and animated SVG checkmark directly on this live mobile frame simulator.
+    </p>
+  </div>
+
+  <!-- CONTROL PANEL: THEME SWITCHER -->
+  <div class="max-w-2xl mx-auto mb-8 bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl">
+    <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 text-center">
+      Step 1: Pick a Color Direction to Test
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <!-- Option A -->
+      <button onclick="setTheme('theme-gold')" id="btnThemeGold" class="theme-selector-btn active p-3 rounded-xl border-2 border-amber-500 bg-amber-950/40 text-left">
+        <div class="flex items-center justify-between mb-1">
+          <span class="w-4 h-4 rounded-full bg-amber-400 shadow-[0_0_10px_#F59E0B]"></span>
+          <span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">Option A</span>
+        </div>
+        <div class="text-sm font-bold text-amber-200">Electric Solar Gold</div>
+        <div class="text-[11px] text-amber-300/70">VIP High-Intent Lead Feel</div>
+      </button>
+
+      <!-- Option B -->
+      <button onclick="setTheme('theme-emerald')" id="btnThemeEmerald" class="theme-selector-btn p-3 rounded-xl border border-slate-700 bg-slate-800/40 text-left hover:border-emerald-500/60">
+        <div class="flex items-center justify-between mb-1">
+          <span class="w-4 h-4 rounded-full bg-emerald-400 shadow-[0_0_10px_#10B981]"></span>
+          <span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Option B</span>
+        </div>
+        <div class="text-sm font-bold text-emerald-200">Cyber Emerald</div>
+        <div class="text-[11px] text-emerald-300/70">Vivid Success &amp; Verified</div>
+      </button>
+
+      <!-- Option C -->
+      <button onclick="setTheme('theme-cyber')" id="btnThemeCyber" class="theme-selector-btn p-3 rounded-xl border border-slate-700 bg-slate-800/40 text-left hover:border-indigo-500/60">
+        <div class="flex items-center justify-between mb-1">
+          <span class="w-4 h-4 rounded-full bg-indigo-400 shadow-[0_0_10px_#6366F1]"></span>
+          <span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300">Option C</span>
+        </div>
+        <div class="text-sm font-bold text-indigo-200">Indigo &amp; Cyan</div>
+        <div class="text-[11px] text-indigo-300/70">High-Tech AI Intelligence</div>
+      </button>
+    </div>
+
+    <!-- Step 2: Trigger Events -->
+    <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mt-5 mb-2 text-center">
+      Step 2: Trigger Live Event Popups
+    </div>
+    <div class="flex flex-wrap items-center justify-center gap-2">
+      <button onclick="triggerToast('email')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700">
+        ✉️ Email Captured
+      </button>
+      <button onclick="triggerToast('doc')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700">
+        📄 PDF Dispatched
+      </button>
+      <button onclick="triggerToast('phone')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700">
+        📱 Phone Captured
+      </button>
+      <button onclick="triggerToast('counselor')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700">
+        📞 Counselor Assigned
+      </button>
+      <button onclick="triggerToast('tour')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700">
+        🎓 Campus Tour Booked
+      </button>
+    </div>
+  </div>
+
+  <!-- INTERACTIVE PHONE MOCKUP -->
+  <div class="mobile-phone-mockup">
+    <!-- Top Notch / Speaker -->
+    <div class="w-full bg-[#063D3B] pt-2 pb-1 flex justify-center items-center">
+      <div class="w-16 h-1 bg-black/40 rounded-full"></div>
+    </div>
+
+    <!-- Chatbot Header -->
+    <div class="edvora-header">
+      <div class="flex items-center gap-2">
+        <div class="relative w-7 h-7">
+          <img src="/template/avatar1.png" alt="Assistant" class="w-full h-full rounded-full object-cover border border-[#C8FF63]">
+          <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-[#C8FF63] border border-[#063D3B]"></span>
+        </div>
+        <div>
+          <div class="text-[13px] font-bold leading-tight">Pacific Crest University</div>
+          <div class="text-[9.5px] text-[#C8FF63]">Online Now • Admissions AI</div>
+        </div>
+      </div>
+      <button class="w-5 h-5 rounded-full bg-white/10 text-white flex items-center justify-center text-xs">&times;</button>
+    </div>
+
+    <!-- MAIN CHAT SCREEN WITH FLOATING TOAST -->
+    <div class="relative h-[380px] bg-[#f9fafb] p-3 overflow-y-auto flex flex-col justify-end" id="chatArea">
+      
+      <!-- FLOATING TOAST COMPONENT (Position: top 50px as requested) -->
+      <div class="preview-toast-container">
+        <div id="liveToastCard" class="preview-toast theme-gold">
+          <!-- Animated SVG Checkmark Icon -->
+          <svg class="toast-check-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle class="check-circle" cx="16" cy="16" r="13" stroke-width="2.5" stroke-linecap="round"/>
+            <path class="check-tick" d="M10 16.5L14 20.5L22 12.5" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+
+          <!-- Text Information -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-1 mb-0.5">
+              <span class="toast-tag-badge text-[8.5px] font-extrabold uppercase px-1.5 py-0.5 rounded tracking-wide" id="toastTag">
+                CRM SYNC
+              </span>
+              <span class="text-[8px] text-slate-400 font-medium">Just now</span>
+            </div>
+            <div class="toast-title-text text-[11.5px] font-bold leading-tight truncate" id="toastTitle">
+              Email Captured: alex@email.com
+            </div>
+            <div class="toast-desc-text text-[9.5px] leading-tight truncate mt-0.5" id="toastDesc">
+              ⚡ Viewbook &amp; Scholarship Guide Dispatched
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sample Chat Conversation -->
+      <div class="chat-bubble-assistant">
+        <p class="font-bold text-[#063D3B] mb-0.5">Taylor (Admissions)</p>
+        <p>I can send you the 2026-2027 MBA viewbook and scholarship guide. What’s the best email?</p>
+      </div>
+
+      <div class="chat-bubble-user">
+        alex@email.com
+      </div>
+
+      <div class="chat-bubble-assistant">
+        <p>Sent! It should be in your inbox in a couple of minutes. 📩</p>
+        <p class="mt-1">Would you also like our advisor Sarah to give you a quick 10-min callback?</p>
+      </div>
+    </div>
+
+    <!-- Input Bar -->
+    <div class="p-2 bg-white border-t border-slate-200 flex items-center gap-2">
+      <input type="text" value="Sure, tomorrow afternoon works best!" readonly class="flex-1 text-xs py-1.5 px-3 rounded-full border border-slate-300 bg-slate-50 text-slate-700 outline-none">
+      <button class="w-7 h-7 rounded-full bg-[#063D3B] text-[#C8FF63] flex items-center justify-center text-xs">
+        &uarr;
+      </button>
+    </div>
+  </div>
+
+  <!-- SIDE-BY-SIDE COMPARISON CARDS FOR STATIC INSPECTION -->
+  <div class="max-w-2xl mx-auto mt-12">
+    <h3 class="text-base font-bold text-center text-slate-300 mb-4">
+      Compare All 3 Color Schemes Side-by-Side (Static View)
+    </h3>
+
+    <div class="flex flex-col gap-3">
+      <!-- Card A -->
+      <div class="p-3 rounded-xl theme-gold border-2 border-amber-500 flex items-center gap-3 shadow-lg">
+        <svg class="w-7 h-7 flex-shrink-0" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="13" stroke="#F59E0B" stroke-width="2.5"/>
+          <path d="M10 16.5L14 20.5L22 12.5" stroke="#FDE68A" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between">
+            <span class="text-[8.5px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">OPTION A: ELECTRIC SOLAR GOLD (RECOMMENDED)</span>
+            <span class="text-[8px] text-amber-200/60">High Intent</span>
+          </div>
+          <div class="text-[12px] font-bold text-white mt-0.5">Email Captured: alex@email.com</div>
+          <div class="text-[10px] text-amber-200">⚡ Viewbook &amp; Scholarship Guide Dispatched (42p PDF)</div>
+        </div>
+      </div>
+
+      <!-- Card B -->
+      <div class="p-3 rounded-xl theme-emerald border-2 border-emerald-500 flex items-center gap-3 shadow-lg">
+        <svg class="w-7 h-7 flex-shrink-0" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="13" stroke="#10B981" stroke-width="2.5"/>
+          <path d="M10 16.5L14 20.5L22 12.5" stroke="#6EE7B7" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between">
+            <span class="text-[8.5px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">OPTION B: CYBER EMERALD</span>
+            <span class="text-[8px] text-emerald-200/60">Verified</span>
+          </div>
+          <div class="text-[12px] font-bold text-white mt-0.5">Counselor Assigned: Sarah Jenkins</div>
+          <div class="text-[10px] text-emerald-200">Callback scheduled for tomorrow afternoon (+1 555 •••• 8901)</div>
+        </div>
+      </div>
+
+      <!-- Card C -->
+      <div class="p-3 rounded-xl theme-cyber border-2 border-indigo-500 flex items-center gap-3 shadow-lg">
+        <svg class="w-7 h-7 flex-shrink-0" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="13" stroke="#6366F1" stroke-width="2.5"/>
+          <path d="M10 16.5L14 20.5L22 12.5" stroke="#22D3EE" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between">
+            <span class="text-[8.5px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">OPTION C: INDIGO &amp; CYBER CYAN</span>
+            <span class="text-[8px] text-indigo-200/60">AI Action</span>
+          </div>
+          <div class="text-[12px] font-bold text-white mt-0.5">Campus Tour Booked: Saturday 11:00 AM</div>
+          <div class="text-[10px] text-cyan-200">Calendar invite &amp; parking pass dispatched to alex@email.com</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentTheme = 'theme-gold';
+    const toastCard = document.getElementById('liveToastCard');
+    const toastTag = document.getElementById('toastTag');
+    const toastTitle = document.getElementById('toastTitle');
+    const toastDesc = document.getElementById('toastDesc');
+
+    const EVENTS = {
+      email: {
+        tag: 'EMAIL CAPTURED',
+        title: 'alex@email.com',
+        desc: '⚡ Viewbook & Scholarship Guide Dispatched (42p PDF)',
+        confettiColor: ['#F59E0B', '#FBBF24', '#FFFFFF', '#10B981']
+      },
+      doc: {
+        tag: 'DOCUMENT DISPATCHED',
+        title: '2026-2027 MBA Viewbook',
+        desc: 'Sent to alex@email.com (42 pages • PDF)',
+        confettiColor: ['#EF4444', '#F59E0B', '#FFFFFF']
+      },
+      phone: {
+        tag: 'PHONE CAPTURED',
+        title: '+1 (555) 342-8901',
+        desc: 'SMS confirmation & CRM lead sync dispatched',
+        confettiColor: ['#38BDF8', '#818CF8', '#FFFFFF']
+      },
+      counselor: {
+        tag: 'COUNSELOR ASSIGNED',
+        title: 'Sarah Jenkins Assigned',
+        desc: 'Callback scheduled for tomorrow afternoon',
+        confettiColor: ['#10B981', '#C8FF63', '#FFFFFF']
+      },
+      tour: {
+        tag: 'CAMPUS TOUR BOOKED',
+        title: 'Saturday • 11:00 AM Confirmed! 🎉',
+        desc: 'Pass & calendar invite sent to alex@email.com',
+        confettiColor: ['#F59E0B', '#10B981', '#6366F1', '#EC4899', '#C8FF63']
+      }
+    };
+
+    function setTheme(theme) {
+      currentTheme = theme;
+      document.querySelectorAll('.theme-selector-btn').forEach(btn => {
+        btn.classList.remove('active', 'border-amber-500', 'border-emerald-500', 'border-indigo-500');
+        btn.classList.add('border-slate-700');
+      });
+
+      if (theme === 'theme-gold') {
+        const b = document.getElementById('btnThemeGold');
+        b.classList.add('active', 'border-amber-500');
+        b.classList.remove('border-slate-700');
+      } else if (theme === 'theme-emerald') {
+        const b = document.getElementById('btnThemeEmerald');
+        b.classList.add('active', 'border-emerald-500');
+        b.classList.remove('border-slate-700');
+      } else if (theme === 'theme-cyber') {
+        const b = document.getElementById('btnThemeCyber');
+        b.classList.add('active', 'border-indigo-500');
+        b.classList.remove('border-slate-700');
+      }
+
+      toastCard.className = `preview-toast ${currentTheme}`;
+      triggerToast('email');
+    }
+
+    function triggerToast(type) {
+      const data = EVENTS[type] || EVENTS.email;
+      toastCard.classList.remove('toast-active');
+      void toastCard.offsetWidth; // Reflow to restart animation
+
+      toastTag.textContent = data.tag;
+      toastTitle.textContent = data.title;
+      toastDesc.textContent = data.desc;
+
+      toastCard.className = `preview-toast ${currentTheme} toast-active`;
+
+      // Shoot confetti from toast
+      try {
+        const rect = toastCard.getBoundingClientRect();
+        const x = (rect.left + rect.width / 2) / window.innerWidth;
+        const y = (rect.top + rect.height / 2) / window.innerHeight;
+        confetti({
+          particleCount: 24,
+          spread: 55,
+          origin: { x: x, y: y },
+          colors: data.confettiColor,
+          ticks: 120,
+          gravity: 1.1,
+          scalar: 0.8
+        });
+      } catch (e) {}
+    }
+
+    // Auto-trigger email on load
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => triggerToast('email'), 400);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,374 @@
+<!-- Client-Approved Student Leads Command Console -->
+<div class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
+    
+    <!-- Top Control Bar (Matches Overview, Knowledge & Departments) -->
+    <div class="ops-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 24px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important;">
+        <div class="ops-dash-title-group" style="display: flex !important; align-items: center !important; gap: 12px !important;">
+            <span class="ops-live-dot"></span>
+            <div>
+                <div class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important; letter-spacing: -0.01em !important; line-height: 1.25 !important;">
+                    Student Leads &amp; Admissions Pipeline
+                </div>
+                <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">
+                    Real-time prospective student contacts, omnichannel inquiries &amp; CRM conversion tracking
+                </div>
+            </div>
+        </div>
+
+        <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important; flex-wrap: wrap;">
+            <!-- Time Window Selector Pill Group -->
+            <div class="ckh-ctrl-pill" style="padding: 3px !important; display: inline-flex !important; align-items: center !important; gap: 3px !important; background: #F1F7F4 !important; border: 1.5px solid #D1E5DE !important; border-radius: 8px !important;">
+                <button type="button" id="leadsTimeBtn24h" onclick="changeLeadsTimeWindow('24h')" style="border: none; background: transparent; padding: 4px 9px; font-size: 11px; font-weight: 700; color: #4F7470; border-radius: 6px; cursor: pointer; transition: all 0.15s ease;">24H</button>
+                <button type="button" id="leadsTimeBtn7d" onclick="changeLeadsTimeWindow('7d')" style="border: none; background: transparent; padding: 4px 9px; font-size: 11px; font-weight: 700; color: #4F7470; border-radius: 6px; cursor: pointer; transition: all 0.15s ease;">7D</button>
+                <button type="button" id="leadsTimeBtn30d" onclick="changeLeadsTimeWindow('30d')" style="border: none; background: #063D3B; color: #FFFFFF; padding: 4px 10px; font-size: 11px; font-weight: 700; border-radius: 6px; cursor: pointer; box-shadow: 0 1px 3px rgba(6, 61, 59, 0.2);">30D</button>
+                <button type="button" id="leadsTimeBtn3m" onclick="changeLeadsTimeWindow('3m')" style="border: none; background: transparent; padding: 4px 9px; font-size: 11px; font-weight: 700; color: #4F7470; border-radius: 6px; cursor: pointer; transition: all 0.15s ease;">3M</button>
+                <button type="button" id="leadsTimeBtn6m" onclick="changeLeadsTimeWindow('6m')" style="border: none; background: transparent; padding: 4px 9px; font-size: 11px; font-weight: 700; color: #4F7470; border-radius: 6px; cursor: pointer; transition: all 0.15s ease;">6M</button>
+                <button type="button" id="leadsTimeBtnAll" onclick="changeLeadsTimeWindow('all')" style="border: none; background: transparent; padding: 4px 9px; font-size: 11px; font-weight: 700; color: #4F7470; border-radius: 6px; cursor: pointer; transition: all 0.15s ease;">All Time</button>
+                <button type="button" id="leadsTimeBtnCustom" onclick="toggleLeadsCustomDatePicker()" style="border: none; background: transparent; padding: 4px 9px; font-size: 11px; font-weight: 700; color: #4F7470; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s ease;">
+                    <span>📅</span>
+                    <span>Custom</span>
+                </button>
+            </div>
+
+            <!-- Export Buttons -->
+            <button type="button" onclick="exportLeadsFile('csv')" class="dept-btn-secondary" title="Export student contacts as CSV (IST)" style="height: 32px !important; padding: 0 12px !important; font-size: 11.5px !important; font-weight: 700 !important; border-radius: 8px !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; gap: 6px !important; background: #FFFFFF !important; border: 1.5px solid #DDE9E3 !important; color: #063D3B !important; transition: all 0.15s ease !important;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <span>Export CSV</span>
+            </button>
+            <button type="button" onclick="exportLeadsFile('json')" class="dept-btn-secondary" title="Export GDPR / Portability JSON" style="height: 32px !important; padding: 0 12px !important; font-size: 11.5px !important; font-weight: 700 !important; border-radius: 8px !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; gap: 6px !important; background: #FFFFFF !important; border: 1.5px solid #DDE9E3 !important; color: #063D3B !important; transition: all 0.15s ease !important;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                <span>Export JSON</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Expandable Custom Calendar Date Picker Bar -->
+    <div id="leadsCustomDatePickerBar" style="display: none; background: #F4FAF7; border-bottom: 1.5px solid #D1E5DE; padding: 10px 24px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 12px;">
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <div style="font-weight: 700; color: #063D3B; display: flex; align-items: center; gap: 6px;">
+                <span>📅</span>
+                <span>Custom Date Range (IST):</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <label for="leadsCustomStartDate" style="font-size: 11px; font-weight: 600; color: #648781;">From:</label>
+                <input type="date" id="leadsCustomStartDate" class="brand-input" style="height: 30px; font-size: 11.5px; font-weight: 600; padding: 0 8px; border: 1.5px solid #DDE9E3; border-radius: 6px; background: #FFFFFF; color: #063D3B;">
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <label for="leadsCustomEndDate" style="font-size: 11px; font-weight: 600; color: #648781;">To:</label>
+                <input type="date" id="leadsCustomEndDate" class="brand-input" style="height: 30px; font-size: 11.5px; font-weight: 600; padding: 0 8px; border: 1.5px solid #DDE9E3; border-radius: 6px; background: #FFFFFF; color: #063D3B;">
+            </div>
+            <button type="button" onclick="applyLeadsCustomDateRange()" class="dept-btn-primary" style="height: 30px; padding: 0 14px; font-size: 11.5px; font-weight: 700; border-radius: 6px;">
+                Apply Range
+            </button>
+            <button type="button" onclick="resetLeadsTimeWindow()" class="dept-btn-secondary" style="height: 30px; padding: 0 10px; font-size: 11.5px; font-weight: 700; border-radius: 6px; color: #648781;">
+                Reset (30D)
+            </button>
+        </div>
+        <div id="leadsActiveRangeIndicator" style="font-size: 11px; font-weight: 700; color: #047857; background: #E6F4EA; padding: 3px 9px; border-radius: 5px; border: 1px solid #A7F3D0;">
+            Active Window: Last 30 Days
+        </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <div style="padding: 20px 24px; display: flex; flex-direction: column; gap: 20px; background: #FAFDFB;">
+
+        <!-- 4 Interactive High-Intent Channel Overview Cards -->
+        <div class="leads-channel-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
+            
+            <!-- Card 1: Counselor Callbacks -->
+            <a href="#callbacks" onclick="event.preventDefault(); switchNavTab('callbacks');" class="lead-portal-card card-callbacks" style="background: #FFFFFF !important; border: 1.5px solid #8CA89F !important; border-top: 3.5px solid #F43F5E !important; border-radius: 12px !important; padding: 18px !important; text-decoration: none !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.03) !important;">
+                <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 34px; height: 34px; border-radius: 8px; background: #FFF1F2; border: 1px solid #FFE4E6; display: flex; align-items: center; justify-content: center; font-size: 15px;">
+                                📞
+                            </div>
+                            <span style="font-size: 13.5px; font-weight: 700; color: #063D3B;">Counselor Callbacks</span>
+                        </div>
+                        <span style="background: #FFF1F2; color: #E11D48; border: 1px solid #FECDD3; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px;">Priority Queue</span>
+                    </div>
+                    <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px;">
+                        <span class="stat-value" id="leadsCardCallbacksCount" style="color: #E11D48; font-size: 26px; font-weight: 800; font-family: 'JetBrains Mono', monospace; line-height: 1;">...</span>
+                        <span style="font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.5px;">Requests</span>
+                    </div>
+                    <div style="font-size: 11.5px; color: #4F7470; line-height: 1.45; margin-top: 4px;">
+                        Inbound phone callback requests with assigned counselor follow-ups.
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; font-size: 11px; margin-top: 12px; padding: 7px 10px; background: #F8FBFA; border-radius: 8px; border: 1px solid #E6F0EC;">
+                        <span style="color: #648781; font-weight: 600;">Status:</span>
+                        <span style="color: #E11D48; font-weight: 700;" id="leadsCardCallbacksStatus">Loading...</span>
+                        <span style="color: #CBD5E1;">•</span>
+                        <span style="color: #047857; font-weight: 700;" id="leadsCardCallbacksDone">...</span>
+                    </div>
+                </div>
+                <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #EEF5F2; display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; font-weight: 700; color: #E11D48;">
+                    <span>Open Callbacks Queue</span>
+                    <span class="lead-portal-arrow" style="font-size: 14px;">→</span>
+                </div>
+            </a>
+
+            <!-- Card 2: Campus Tours -->
+            <a href="#campus-tours" onclick="event.preventDefault(); switchNavTab('campus-tours');" class="lead-portal-card card-tours" style="background: #FFFFFF !important; border: 1.5px solid #8CA89F !important; border-top: 3.5px solid #8B5CF6 !important; border-radius: 12px !important; padding: 18px !important; text-decoration: none !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.03) !important;">
+                <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 34px; height: 34px; border-radius: 8px; background: #F5F3FF; border: 1px solid #EDE9FE; display: flex; align-items: center; justify-content: center; font-size: 15px;">
+                                🏫
+                            </div>
+                            <span style="font-size: 13.5px; font-weight: 700; color: #063D3B;">Campus Tours</span>
+                        </div>
+                        <span style="background: #F5F3FF; color: #7C3AED; border: 1px solid #DDD6FE; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px;">Visit Pipeline</span>
+                    </div>
+                    <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px;">
+                        <span class="stat-value" id="leadsCardToursCount" style="color: #7C3AED; font-size: 26px; font-weight: 800; font-family: 'JetBrains Mono', monospace; line-height: 1;">...</span>
+                        <span style="font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.5px;">Bookings</span>
+                    </div>
+                    <div style="font-size: 11.5px; color: #4F7470; line-height: 1.45; margin-top: 4px;">
+                        Scheduled in-person and virtual guided campus tours and walk-in visits.
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; font-size: 11px; margin-top: 12px; padding: 7px 10px; background: #F8FBFA; border-radius: 8px; border: 1px solid #E6F0EC;">
+                        <span style="color: #648781; font-weight: 600;">Visits:</span>
+                        <span style="color: #7C3AED; font-weight: 700;" id="leadsCardToursStatus">Loading...</span>
+                        <span style="color: #CBD5E1;">•</span>
+                        <span style="color: #047857; font-weight: 700;" id="leadsCardToursDone">...</span>
+                    </div>
+                </div>
+                <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #EEF5F2; display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; font-weight: 700; color: #7C3AED;">
+                    <span>Manage Campus Tours</span>
+                    <span class="lead-portal-arrow" style="font-size: 14px;">→</span>
+                </div>
+            </a>
+
+            <!-- Card 3: Scholarships & Aid -->
+            <a href="#scholarships" onclick="event.preventDefault(); switchNavTab('scholarships');" class="lead-portal-card card-scholarships" style="background: #FFFFFF !important; border: 1.5px solid #8CA89F !important; border-top: 3.5px solid #D97706 !important; border-radius: 12px !important; padding: 18px !important; text-decoration: none !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.03) !important;">
+                <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 34px; height: 34px; border-radius: 8px; background: #FFFBEB; border: 1px solid #FEF3C7; display: flex; align-items: center; justify-content: center; font-size: 15px;">
+                                💰
+                            </div>
+                            <span style="font-size: 13.5px; font-weight: 700; color: #063D3B;">Scholarships &amp; Aid</span>
+                        </div>
+                        <span style="background: #FFFBEB; color: #B45309; border: 1px solid #FDE68A; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px;">Merit Engine</span>
+                    </div>
+                    <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px;">
+                        <span class="stat-value" id="leadsCardScholarshipsCount" style="color: #B45309; font-size: 26px; font-weight: 800; font-family: 'JetBrains Mono', monospace; line-height: 1;">...</span>
+                        <span style="font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.5px;">Programs</span>
+                    </div>
+                    <div style="font-size: 11.5px; color: #4F7470; line-height: 1.45; margin-top: 4px;">
+                        Merit waiver slabs, entrance exam cutoffs, and booster quota rules.
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; font-size: 11px; margin-top: 12px; padding: 7px 10px; background: #F8FBFA; border-radius: 8px; border: 1px solid #E6F0EC;">
+                        <span style="color: #648781; font-weight: 600;">Engine:</span>
+                        <span style="color: #047857; font-weight: 700;" id="leadsCardScholarshipsEngine">Active</span>
+                        <span style="color: #CBD5E1;">•</span>
+                        <span style="color: #B45309; font-weight: 700;" id="leadsCardScholarshipsLeads">...</span>
+                    </div>
+                </div>
+                <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #EEF5F2; display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; font-weight: 700; color: #B45309;">
+                    <span>Configure Aid Rules</span>
+                    <span class="lead-portal-arrow" style="font-size: 14px;">→</span>
+                </div>
+            </a>
+
+            <!-- Card 4: Lead-Magnet Assets -->
+            <a href="#assets" onclick="event.preventDefault(); switchNavTab('assets');" class="lead-portal-card card-assets" style="background: #FFFFFF !important; border: 1.5px solid #8CA89F !important; border-top: 3.5px solid #0284C7 !important; border-radius: 12px !important; padding: 18px !important; text-decoration: none !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.03) !important;">
+                <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 34px; height: 34px; border-radius: 8px; background: #F0F9FF; border: 1px solid #BAE6FD; display: flex; align-items: center; justify-content: center; font-size: 15px;">
+                                📁
+                            </div>
+                            <span style="font-size: 13.5px; font-weight: 700; color: #063D3B;">Lead-Magnet Assets</span>
+                        </div>
+                        <span style="background: #F0F9FF; color: #0369A1; border: 1px solid #BAE6FD; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px;">Gated Content</span>
+                    </div>
+                    <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px;">
+                        <span class="stat-value" id="leadsCardAssetsCount" style="color: #0284C7; font-size: 26px; font-weight: 800; font-family: 'JetBrains Mono', monospace; line-height: 1;">...</span>
+                        <span style="font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.5px;">Assets</span>
+                    </div>
+                    <div style="font-size: 11.5px; color: #4F7470; line-height: 1.45; margin-top: 4px;">
+                        Official prospectuses, syllabus PDFs, and placement reports.
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; font-size: 11px; margin-top: 12px; padding: 7px 10px; background: #F8FBFA; border-radius: 8px; border: 1px solid #E6F0EC;">
+                        <span style="color: #648781; font-weight: 600;">Impact:</span>
+                        <span style="color: #0284C7; font-weight: 700;" id="leadsCardAssetsDownloads">Loading...</span>
+                        <span style="color: #CBD5E1;">•</span>
+                        <span style="color: #047857; font-weight: 700;" id="leadsCardAssetsScope">...</span>
+                    </div>
+                </div>
+                <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #EEF5F2; display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; font-weight: 700; color: #0284C7;">
+                    <span>Manage Assets &amp; Documents</span>
+                    <span class="lead-portal-arrow" style="font-size: 14px;">→</span>
+                </div>
+            </a>
+
+        </div>
+
+        <!-- Student Leads Data Table Card -->
+        <div class="brand-card" style="background: #FFFFFF !important; border: 1.5px solid #E6F0EC !important; border-radius: 12px !important; overflow: hidden !important; box-shadow: 0 4px 16px rgba(6, 61, 59, 0.03) !important;">
+            <div class="brand-panel-header" style="height: 46px !important; padding: 0 20px !important; background: #FAFDFB !important; border-bottom: 1.5px solid #E6F0EC !important; display: flex !important; align-items: center !important; justify-content: space-between !important;">
+                <div class="brand-panel-title" style="font-size: 13.5px !important; font-weight: 800 !important; color: #063D3B !important; display: flex !important; align-items: center !important; gap: 8px !important;">
+                    <span>🎓</span>
+                    <span>Captured Prospective Student Leads</span>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button type="button" onclick="exportLeadsFile('csv')" class="dept-btn-secondary" style="height: 30px !important; padding: 0 11px !important; font-size: 11.5px !important; font-weight: 700 !important; border-radius: 7px !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; gap: 5px !important;">
+                        <span>📥 Export CSV</span>
+                    </button>
+                    <button type="button" onclick="exportLeadsFile('json')" class="dept-btn-secondary" style="height: 30px !important; padding: 0 11px !important; font-size: 11.5px !important; font-weight: 700 !important; border-radius: 7px !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; gap: 5px !important;">
+                        <span>📦 Export JSON</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Compliance / FERPA Banner -->
+            <div style="padding: 11px 20px; background: #F0FDF4; border-bottom: 1.5px solid #DCFCE7; display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 11.5px; color: #065F46; flex-wrap: wrap;">
+                <span style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 14px;">🛡️</span> 
+                    <span><strong>FERPA / GDPR / PIPEDA Compliant:</strong> Student inquiry data is ring-fenced to your institution. Full data portability and permanent Right to Erasure deletion requests are supported per record.</span>
+                </span>
+                <a href="/privacy" target="_blank" style="color: #047857; text-decoration: underline; font-weight: 700; font-size: 11.5px;">Data Processing Agreement &rarr;</a>
+            </div>
+
+            <!-- FILTER & SEARCH TOOLBAR -->
+            <div class="ckh-toolbar">
+                <div class="ckh-tabs-group" id="leadsStatusTabsContainer">
+                    <button class="ckh-tab-btn active" data-leads-filter="all" onclick="setLeadsStatusFilter('all', this)">
+                        <span>All Leads</span>
+                        <span class="ckh-tab-count" id="leadsTabCountAll">0</span>
+                    </button>
+                    <button class="ckh-tab-btn" data-leads-filter="new" onclick="setLeadsStatusFilter('new', this)" style="color: #4F46E5;">
+                        <span style="width:6px; height:6px; border-radius:50%; background:#6366F1; display:inline-block;"></span>
+                        <span>New</span>
+                        <span class="ckh-tab-count" id="leadsTabCountNew" style="background: rgba(99, 102, 241, 0.12); color: #4F46E5;">0</span>
+                    </button>
+                    <button class="ckh-tab-btn" data-leads-filter="contacted" onclick="setLeadsStatusFilter('contacted', this)" style="color: #D97706;">
+                        <span style="width:6px; height:6px; border-radius:50%; background:#F59E0B; display:inline-block;"></span>
+                        <span>Contacted</span>
+                        <span class="ckh-tab-count" id="leadsTabCountContacted" style="background: rgba(245, 158, 11, 0.12); color: #B45309;">0</span>
+                    </button>
+                    <button class="ckh-tab-btn" data-leads-filter="converted" onclick="setLeadsStatusFilter('converted', this)" style="color: #059669;">
+                        <span style="width:6px; height:6px; border-radius:50%; background:#10B981; display:inline-block;"></span>
+                        <span>Converted</span>
+                        <span class="ckh-tab-count" id="leadsTabCountConverted" style="background: rgba(16, 185, 129, 0.12); color: #047857;">0</span>
+                    </button>
+                    <button class="ckh-tab-btn" data-leads-filter="callbacks" onclick="setLeadsStatusFilter('callbacks', this)" style="color: #E11D48;">
+                        <span style="width:6px; height:6px; border-radius:50%; background:#F43F5E; display:inline-block;"></span>
+                        <span>Callbacks</span>
+                        <span class="ckh-tab-count" id="leadsTabCountCallbacks" style="background: rgba(244, 63, 94, 0.12); color: #BE123C;">0</span>
+                    </button>
+                    <button class="ckh-tab-btn" data-leads-filter="campus_tours" onclick="setLeadsStatusFilter('campus_tours', this)" style="color: #7C3AED;">
+                        <span style="width:6px; height:6px; border-radius:50%; background:#8B5CF6; display:inline-block;"></span>
+                        <span>Campus Tours</span>
+                        <span class="ckh-tab-count" id="leadsTabCountTours" style="background: rgba(139, 92, 246, 0.12); color: #6D28D9;">0</span>
+                    </button>
+                    <button class="ckh-tab-btn" data-leads-filter="scholarships" onclick="setLeadsStatusFilter('scholarships', this)" style="color: #0D9488;">
+                        <span style="width:6px; height:6px; border-radius:50%; background:#14B8A6; display:inline-block;"></span>
+                        <span>Scholarships</span>
+                        <span class="ckh-tab-count" id="leadsTabCountScholarships" style="background: rgba(20, 184, 166, 0.12); color: #0F766E;">0</span>
+                    </button>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <!-- Department Filter Dropdown -->
+                    <select id="leadsDeptFilter" onchange="filterLeadsTable()" style="font-size: 11.5px; font-weight: 600; color: #063D3B; background: #ffffff; border: 1.5px solid #D1E5DE; border-radius: 8px; padding: 6px 12px; outline: none; cursor: pointer;">
+                        <option value="all">All Departments</option>
+                    </select>
+
+                    <!-- Type / Intent Filter Dropdown -->
+                    <select id="leadsTypeFilter" onchange="filterLeadsTable()" style="font-size: 11.5px; font-weight: 600; color: #063D3B; background: #ffffff; border: 1.5px solid #D1E5DE; border-radius: 8px; padding: 6px 12px; outline: none; cursor: pointer;">
+                        <option value="all">All Lead Types</option>
+                        <option value="general">General Inquiries</option>
+                        <option value="callback">Counselor Callbacks</option>
+                        <option value="tour">Campus Tours</option>
+                        <option value="scholarship">Scholarship Inquiries</option>
+                        <option value="asset">Lead Magnets / Documents</option>
+                    </select>
+
+                    <!-- Search Input -->
+                    <div class="ckh-search-box" style="flex: 1; min-width: 260px;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#648781" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input type="text" id="leadsSearchInput" class="ckh-search-input" placeholder="Search student name, email, phone, program, department, notes..." oninput="filterLeadsTable()" style="width: 100%;">
+                        <span style="font-size: 9.5px; font-family: 'JetBrains Mono', monospace; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: #F1F7F4; color: #648781; border: 1px solid #DCE9E5;">⌘K</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table Container -->
+            <div class="brand-table-container" style="overflow-x: auto; width: 100%;">
+                <table class="table" style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #F8FBFA; border-bottom: 1.5px solid #E6F0EC;">
+                            <th style="padding: 12px 18px; text-align: left; font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.5px; min-width: 180px;">Student Name</th>
+                            <th style="padding: 12px 18px; text-align: left; font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.5px; min-width: 135px; white-space: nowrap;">Phone</th>
+                            <th style="padding: 12px 18px; text-align: left; font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.5px;">Department</th>
+                            <th style="padding: 12px 18px; text-align: left; font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.5px;">Assigned To</th>
+                            <th style="padding: 12px 18px; text-align: left; font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.5px;">Program Interest</th>
+                            <th style="padding: 12px 18px; text-align: left; font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.5px;">Lead Type / Tier</th>
+                            <th style="padding: 12px 18px; text-align: left; font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.5px;">Status</th>
+                            <th style="padding: 12px 18px; text-align: left; font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;">Date &amp; Time (IST)</th>
+                            <th style="padding: 12px 18px; text-align: right; font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.5px; min-width: 100px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leadsTableBody">
+                        <tr>
+                            <td colspan="9" style="text-align: center; color: #648781; padding: 48px 24px;">
+                                <div style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: #F4FAF7; border: 1.5px solid #D1E5DE; margin-bottom: 12px;">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#063D3B" stroke-width="2.5" class="brand-spin" style="animation: spin 0.9s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                                </div>
+                                <div style="font-weight: 700; font-size: 14px; color: #063D3B; letter-spacing: -0.01em;">Loading student admissions leads...</div>
+                                <div style="font-size: 11.5px; color: #648781; margin-top: 4px;">Retrieving captured inquiries and multi-channel pipeline records from database</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Table Pagination Bar -->
+            <div class="brand-panel-footer" style="padding: 12px 20px !important; background: #FAFDFB !important; border-top: 1.5px solid #E6F0EC !important; display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 12px !important; font-size: 11.5px !important; color: #648781 !important;">
+                <!-- Left: Record range & Total -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span id="leadsPaginationInfo" style="font-weight: 600; color: #063D3B;">Showing 0 to 0 of 0 student leads</span>
+                </div>
+
+                <!-- Middle: Page Size Selector -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <label for="leadsPerPageSelect" style="font-size: 11px; font-weight: 600; color: #648781;">Rows per page:</label>
+                    <select id="leadsPerPageSelect" onchange="changeLeadsPageSize(this.value)" class="brand-input" style="height: 28px; font-size: 11.5px; font-weight: 700; padding: 0 8px; width: 75px; background: #FFFFFF; color: #063D3B; border: 1.5px solid #DDE9E3; border-radius: 6px; cursor: pointer;">
+                        <option value="25">25</option>
+                        <option value="50" selected>50</option>
+                        <option value="100">100</option>
+                        <option value="250">250</option>
+                    </select>
+                </div>
+
+                <!-- Right: Navigation controls -->
+                <div style="display: flex; align-items: center; gap: 6px;" id="leadsPaginationControls">
+                    <button type="button" id="leadsFirstBtn" onclick="goToLeadsPage(1)" class="dept-btn-secondary" style="height: 28px !important; padding: 0 9px !important; font-size: 11px !important; font-weight: 700 !important; border-radius: 6px !important; cursor: pointer !important;" title="First Page" disabled>
+                        ⇤ First
+                    </button>
+                    <button type="button" id="leadsPrevBtn" onclick="goToLeadsPage(leadsCurrentPage - 1)" class="dept-btn-secondary" style="height: 28px !important; padding: 0 10px !important; font-size: 11px !important; font-weight: 700 !important; border-radius: 6px !important; cursor: pointer !important;" disabled>
+                        ◀ Prev
+                    </button>
+                    <span id="leadsPageIndicator" style="font-weight: 700; color: #063D3B; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; padding: 0 6px;">
+                        Page 1 of 1
+                    </span>
+                    <button type="button" id="leadsNextBtn" onclick="goToLeadsPage(leadsCurrentPage + 1)" class="dept-btn-secondary" style="height: 28px !important; padding: 0 10px !important; font-size: 11px !important; font-weight: 700 !important; border-radius: 6px !important; cursor: pointer !important;" disabled>
+                        Next ▶
+                    </button>
+                    <button type="button" id="leadsLastBtn" onclick="goToLeadsPage(leadsTotalPages)" class="dept-btn-secondary" style="height: 28px !important; padding: 0 9px !important; font-size: 11px !important; font-weight: 700 !important; border-radius: 6px !important; cursor: pointer !important;" title="Last Page" disabled>
+                        Last ⇥
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    if (typeof loadLeads === 'function' && typeof token !== 'undefined' && token) {
+        loadLeads();
+    }
+</script>

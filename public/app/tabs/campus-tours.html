@@ -1,0 +1,80 @@
+<!-- Page Header -->
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
+                    <div>
+                        <h2 style="font-family: var(--brand-font-display); font-size: 18px; font-weight: 700; color: #092F2E; margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <span>🏫</span> Campus Tours & Visit Management
+                        </h2>
+                        <p style="font-size: 12px; color: #4F7470; margin-top: 4px;">
+                            Schedule, coordinate, and assign student campus visits. Automated feedback and improvement surveys are dispatched upon visit completion.
+                        </p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button class="brand-btn-secondary brand-btn-sm" onclick="loadCampusTours()" style="display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px;">
+                            <span>🔄</span> Refresh Tours
+                        </button>
+                        <a id="exportCampusToursBtn" href="/v1/campus-tours/export" target="_blank" class="brand-btn-primary brand-btn-sm" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px;">
+                            📥 Export CSV (IST)
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Campus Tour Metrics Summary Cards -->
+                <div class="stats-grid" style="margin-bottom: 24px;">
+                    <div class="stat-card" style="border-left: 3px solid #A78BFA;">
+                        <div class="stat-label">Pending Bookings <span class="stat-badge" style="background: rgba(124, 58, 237, 0.15); color: #A78BFA;">Action Needed</span></div>
+                        <div class="stat-value" id="statPendingTours" style="color: #A78BFA;">0</div>
+                    </div>
+                    <div class="stat-card" style="border-left: 3px solid var(--brand-amber-400);">
+                        <div class="stat-label">Confirmed Upcoming <span class="stat-badge" style="background: rgba(251, 191, 36, 0.15); color: var(--brand-amber-400);">Scheduled</span></div>
+                        <div class="stat-value" id="statConfirmedTours" style="color: var(--brand-amber-400);">0</div>
+                    </div>
+                    <div class="stat-card" style="border-left: 3px solid var(--brand-emerald-400);">
+                        <div class="stat-label">Completed Tours <span class="stat-badge" style="background: rgba(52, 211, 153, 0.15); color: var(--brand-emerald-400);">Visited</span></div>
+                        <div class="stat-value" id="statCompletedTours" style="color: var(--brand-emerald-400);">0</div>
+                    </div>
+                    <div class="stat-card" style="border-left: 3px solid var(--brand-indigo-400);">
+                        <div class="stat-label">Total Visits <span class="stat-badge">All-Time</span></div>
+                        <div class="stat-value" id="statTotalTours">0</div>
+                    </div>
+                </div>
+
+                <!-- Main Tours Card & Filters -->
+                <div class="brand-card">
+                    <div style="padding: 10px 16px; background: #FFFFFF; border-bottom: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13px; color: #092F2E; font-family: var(--brand-font-display);">
+                            <span>📅</span> Guided Tours Schedule
+                        </div>
+
+                        <!-- Single-line Compact Filter Controls -->
+                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            <select id="filterTourStatus" onchange="loadCampusTours()" class="brand-input" style="height: 30px; font-size: 11px; padding: 0 8px; width: 175px; background-color: #FFFFFF; color: #063D3B;">
+                                <option value="all">Status: All Tours</option>
+                                <option value="pending" selected>🟣 Pending Approval</option>
+                                <option value="confirmed">🟡 Confirmed</option>
+                                <option value="completed">🟢 Completed</option>
+                                <option value="cancelled">⚫ Cancelled</option>
+                                <option value="no_show">⚪ No Show</option>
+                            </select>
+
+                            <input type="text" id="filterTourSearch" onkeyup="debounceTourSearch()" placeholder="🔍 Search student, email, phone..." class="brand-input" style="height: 30px; font-size: 11px; width: 220px; padding: 0 10px;" />
+                        </div>
+                    </div>
+
+                    <div class="brand-table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Student & Contacts</th>
+                                    <th>Department / Interest</th>
+                                    <th>Preferred Date & Slot</th>
+                                    <th>Group Size</th>
+                                    <th>Assigned Guide</th>
+                                    <th>Status</th>
+                                    <th>Booked On (IST)</th>
+                                    <th style="text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="campusToursTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>

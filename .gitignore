@@ -1,0 +1,22 @@
+﻿# Environment & Secrets
+.env
+credentials.md
+
+# Archives & Temporary Deployment Bundles
+*.tar.gz
+*.zip
+*.rar
+
+# Storage & Uploads
+/storage/uploads/*
+!/storage/uploads/.gitkeep
+/storage/logs/*
+!/storage/logs/.gitkeep
+/scratch/
+/trash/
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

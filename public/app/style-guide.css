@@ -1,0 +1,154 @@
+/* ═══════════════════════════════════════════════════════════════════
+   EDVORA CHAT — OFFICIAL DESIGN SYSTEM & STYLE GUIDE
+   File: public/app/style-guide.css
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── 1. GLOBAL LAYOUT DIMENSIONS ── */
+  --brand-top-navbar-height: 52px;       /* Fixed global top application bar */
+  --brand-sidebar-width: 230px;          /* Left navigation sidebar */
+  --brand-footer-height: 32px;           /* Footer status bar */
+
+  /* ── 2. CONSOLE & PANEL HEADER SPECIFICATIONS (RED BOX) ── */
+  --ops-dash-header-height: 64px;        /* Admissions Console / Dashboard Topbar Header */
+  --ops-dash-header-min-height: 64px;    /* Minimum height ensuring vertical balance */
+  --ops-dash-header-padding: 14px 20px;  /* Symmetrical inner padding */
+  --brand-panel-header-height: 38px;     /* Secondary sub-panel headers */
+
+  /* ── 3. COLOR PALETTE ── */
+  --e-teal: #063D3B;                     /* Primary deep luxury teal */
+  --e-teal-hover: #094F4D;               /* Hover state for dark teal elements */
+  --e-pistachio: #C8FF63;                /* Vibrant electric pistachio green accent */
+  --e-pistachio-hover: #B8F250;          /* Pistachio button hover */
+  --e-mist: #F1F7F4;                     /* Primary soft workspace canvas */
+  --e-card-bg: #FFFFFF;                  /* Pure white card backgrounds */
+  --e-card-border: #DCE9E5;              /* Clean structural card border */
+  --e-divider: #E6F0EC;                  /* 1px subtle divider lines */
+
+  /* Neutral Text Colors */
+  --e-text-primary: #063D3B;             /* Primary text */
+  --e-text-secondary: #648781;           /* Secondary metadata & subheadings */
+  --e-text-muted: #8FA8A2;               /* Captions & helper text */
+  --e-text-disabled: #B4C6C2;            /* Disabled state */
+
+  /* Status Colors */
+  --e-status-active: #059669;            /* Active green */
+  --e-status-active-bg: #ECFDF5;         /* Active green soft background */
+  --e-status-active-border: #A7F3D0;     /* Active green border */
+  --e-status-warning: #D97706;           /* Warning amber */
+  --e-status-warning-bg: #FFFBEB;         /* Warning amber soft background */
+  --e-status-warning-border: #FDE68A;    /* Warning amber border */
+  --e-status-danger: #DC2626;            /* Expired / Error red */
+  --e-status-danger-bg: #FEF2F2;          /* Expired soft red background */
+  --e-status-danger-border: #FECACA;     /* Expired red border */
+
+  /* ── 4. TYPOGRAPHY ── */
+  --brand-font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --brand-font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --brand-font-mono: 'JetBrains Mono', monospace;
+
+  /* ── 5. SHADOWS & ELEVATION ── */
+  --e-shadow-card: 0 16px 50px -10px rgba(6, 61, 59, 0.08), 0 4px 16px rgba(6, 61, 59, 0.03);
+  --e-shadow-subtle: 0 2px 8px rgba(6, 61, 59, 0.04);
+  --e-shadow-modal: 0 32px 80px rgba(6, 61, 59, 0.25);
+
+  /* ── 6. CORNER RADII ── */
+  --e-radius-sm: 6px;
+  --e-radius-md: 8px;
+  --e-radius-lg: 14px;
+  --e-radius-xl: 18px;
+  --e-radius-pill: 9999px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   COMPONENT LEVEL STYLES DERIVED FROM STYLE GUIDE TOKENS
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── CONSOLE TOPBAR HEADER (AS MARKED IN USER RED BOX) ── */
+.ops-dash-topbar,
+.dept-dash-topbar,
+.ckh-topbar {
+  min-height: var(--ops-dash-header-height, 64px) !important;
+  height: auto !important;
+  background: var(--e-card-bg, #FFFFFF) !important;
+  border-bottom: 1.5px solid var(--e-divider, #E6F0EC) !important;
+  border-top-left-radius: var(--e-radius-xl, 18px) !important;
+  border-top-right-radius: var(--e-radius-xl, 18px) !important;
+  padding: var(--ops-dash-header-padding, 14px 20px) !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: nowrap !important;
+  gap: 12px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+
+.ops-dash-title-group {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  min-width: 0 !important;
+  flex-shrink: 1 !important;
+}
+
+.ops-dash-main-title {
+  font-family: var(--brand-font-sans) !important;
+  font-size: 14.5px !important;
+  font-weight: 800 !important;
+  color: var(--e-teal) !important;
+  letter-spacing: -0.01em !important;
+  line-height: 1.25 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.ops-dash-sub-title {
+  font-family: var(--brand-font-sans) !important;
+  font-size: 11px !important;
+  color: var(--e-text-secondary) !important;
+  font-weight: 500 !important;
+  margin-top: 2px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.ops-dash-controls {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  flex-wrap: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+/* Console Header Action Pills */
+.ops-ctrl-pill,
+.ops-ctrl-btn {
+  font-family: var(--brand-font-sans) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: var(--e-teal) !important;
+  background: #F4FAF7 !important;
+  border: 1px solid #D1E5DE !important;
+  border-radius: var(--e-radius-md, 8px) !important;
+  padding: 4px 8px !important;
+  height: 28px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  cursor: pointer !important;
+  text-decoration: none !important;
+  box-sizing: border-box !important;
+  transition: all 0.2s ease !important;
+}
+
+.ops-ctrl-pill:hover,
+.ops-ctrl-btn:hover {
+  background: #E8F5EF !important;
+  border-color: #B8DCD0 !important;
+}

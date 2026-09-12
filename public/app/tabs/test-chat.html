@@ -1,0 +1,54 @@
+<!-- Page Header Bar -->
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
+                    <div>
+                        <h2 style="font-family: var(--brand-font-display); font-size: 20px; font-weight: 800; color: #092F2E; margin: 0 0 4px 0; display: flex; align-items: center; gap: 10px;">
+                            <span>🧪</span> Test Chat Widget
+                        </h2>
+                        <p class="studio-page-subtitle">Test your AI assistant in real-time at the organization level or department level with zero quota pollution.</p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button type="button" class="brand-btn-secondary brand-btn-sm" onclick="resetTestChatSession()" style="height: 36px; font-size: 12px; padding: 0 14px;">
+                            <span>🔄</span> Reset Chat Session
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Scope / Bot Selector & Shareable Link Panel -->
+                <div class="brand-panel" style="padding: 20px 24px; border: 1px solid #DDE9E3; background: #FFFFFF; border-radius: 14px; margin-bottom: 20px;">
+                    <!-- Scope Selector Cards (Org-Wide + Departments - No dropdown) -->
+                    <div>
+                        <div style="font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
+                            Select Persona / Department to Test:
+                        </div>
+                        <div class="test-bot-cards-grid" id="testBotCardsGrid">
+                            <!-- Dynamically injected cards -->
+                        </div>
+                    </div>
+
+                    <!-- Public Shareable Link Box -->
+                    <div style="margin-top: 18px; padding-top: 16px; border-top: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                        <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 260px;">
+                            <span style="font-size: 11px; font-weight: 600; color: #4F7470; white-space: nowrap;">🔗 Public Shareable Link:</span>
+                            <div style="flex: 1; position: relative;">
+                                <input type="text" readonly id="testShareUrlInput" class="brand-input" style="font-family: var(--brand-font-mono); font-size: 11px; height: 32px; width: 100%; padding-right: 8px;" value="">
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <button type="button" class="brand-btn-primary brand-btn-sm" id="testCopyLinkBtn" onclick="copyTestShareUrl()" style="height: 32px; padding: 0 14px; font-size: 11px;">
+                                <span id="testCopyBtnIcon">📋</span> <span id="testCopyBtnText">Copy Link</span>
+                            </button>
+                            <a href="#" target="_blank" id="testOpenNewTabBtn" class="brand-btn-secondary brand-btn-sm" style="height: 32px; padding: 0 14px; font-size: 11px; display: inline-flex; align-items: center; text-decoration: none;">
+                                <span>↗</span> Open Standalone
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Interactive Preview Canvas Frame -->
+                <div class="test-canvas-wrapper" id="testCanvasWrapper">
+                    <div class="test-canvas-loading" id="testCanvasLoading" style="display: none;">
+                        <div class="test-spinner"></div>
+                        <div style="font-size: 13px; font-weight: 600; color: #4F7470; margin-top: 14px;">Loading Chatbot Environment...</div>
+                    </div>
+                    <iframe id="testChatIframe" src="about:blank" style="width: 100%; height: 620px; border: none; background: #090d16; display: block;"></iframe>
+                </div>

@@ -1,0 +1,218 @@
+<!-- Dedicated Campus Editor Studio Frame (1 Unified Big Card matching Settings, Knowledge-Editor & Overview) -->
+<div id="view-campus-editor" class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
+    
+    <!-- Top Control Bar (Inside the Big Card) -->
+    <div class="ops-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 24px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important; flex-wrap: wrap; gap: 12px;">
+        <div class="ops-dash-title-group" style="display: flex !important; align-items: center !important; gap: 14px !important;">
+            <button type="button" class="brand-btn-secondary" style="height: 34px; padding: 0 12px; font-size: 11.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border-radius: 6px; background: #F4FAF7; border: 1.5px solid #D1E5DE; color: var(--e-teal, #063D3B);" onclick="closeCampusEditor()">
+                <span>&larr;</span> Back to Campuses
+            </button>
+            <div style="height: 24px; width: 1.5px; background: #E2E8F0;"></div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span id="campusPageHeaderIcon" style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: #ECFDF5; font-size: 18px; font-weight: 800; color: #047857; border: 1px solid #A7F3D0;">🏫</span>
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span id="campusPageHeaderTitle" class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important; letter-spacing: -0.01em !important; line-height: 1.25 !important; max-width: 480px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            Edit Campus
+                        </span>
+                        <span id="campusPageTypeBadge" style="display: inline-flex !important; align-items: center !important; gap: 6px !important; padding: 3px 10px !important; border-radius: 9999px !important; font-size: 11px !important; font-weight: 700 !important; background: #F0FDF4; border: 1px solid #BBF7D0; color: #166534;">
+                            ● Operational
+                        </span>
+                    </div>
+                    <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">
+                        Campus Record ID: <strong id="campusPageIdTag" style="color: #063D3B;">—</strong> &bull; Multi-Tenant Isolated
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
+            <button type="button" class="brand-btn-secondary" style="height: 34px; padding: 0 14px; font-size: 11.5px; font-weight: 600; border-radius: 6px;" onclick="closeCampusEditor()">Cancel</button>
+            <button type="button" id="btnSaveCampusPageTop" class="brand-btn-primary" style="height: 34px; padding: 0 18px; font-size: 11.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; border-radius: 6px; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.2);" onclick="document.getElementById('campusPageFormSubmitBtn').click()">
+                <span>💾</span> Save Campus Changes
+            </button>
+        </div>
+    </div>
+
+    <!-- Inside the Big Card: Content Area with left-aligned form bounded to 900px -->
+    <div style="padding: 28px 32px 48px 32px; box-sizing: border-box; width: 100%;">
+        <div style="max-width: 900px; width: 100%; margin: 0; box-sizing: border-box;">
+            
+            <form id="campusPageForm" onsubmit="handleCampusPageSubmit(event)">
+                <input type="hidden" id="campus_page_id" value="" />
+
+                <!-- SECTION 1: Core Campus Identity & Academic Status -->
+                <div style="margin-bottom: 28px;">
+                    <div style="font-size: 15px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                        <span style="font-size: 16px;">🏛️</span> Campus Identity &amp; Operational Classification
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px;">
+                        <div>
+                            <label for="cp_name" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Official Campus Name <span style="color: #EF4444;">*</span>
+                            </label>
+                            <input type="text" id="cp_name" required placeholder="e.g. Bangalore Main Campus / North City Center" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        </div>
+                        <div>
+                            <label for="cp_short_name" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Short Code / Acronym
+                            </label>
+                            <input type="text" id="cp_short_name" placeholder="e.g. AMC / NC-01" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #F8FCFA; border: 1.5px solid #E6F0EC; padding: 14px 16px; border-radius: 8px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="cp_is_primary" style="width: 17px; height: 17px; accent-color: #047857; cursor: pointer;" />
+                            <div>
+                                <label for="cp_is_primary" style="font-size: 12.5px; font-weight: 700; color: #063D3B; cursor: pointer; display: block;">
+                                    ⭐ Primary Flagship Campus
+                                </label>
+                                <span style="font-size: 11px; color: #648781;">Designates this location as the main university headquarters.</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="cp_status" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 4px;">Operational Status</label>
+                            <select id="cp_status" class="brand-input" style="width: 100%; height: 34px; font-size: 12px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 10px; background: #FFFFFF;">
+                                <option value="active">Active Operational</option>
+                                <option value="inactive">Inactive / Under Construction</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 2: Physical Infrastructure, Land Area & Living Facilities -->
+                <div style="margin-bottom: 28px;">
+                    <div style="font-size: 15px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                        <span style="font-size: 16px;">🌳</span> Physical Infrastructure &amp; Living Accommodations
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                        <div>
+                            <label for="cp_area" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Campus Land Area (Acres / Hectares)
+                            </label>
+                            <input type="text" id="cp_area" placeholder="e.g. 150 Acres or 50 Hectares" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                            <span style="font-size: 10.5px; color: #648781; margin-top: 3px; display: block;">Used by admissions bot to describe campus facilities and sprawling grounds.</span>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Residential Hostel Facilities
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 12px; background: #FAFCFB; border: 1.5px solid #DCE9E5; border-radius: 6px;">
+                                <input type="checkbox" id="cp_has_hostel" style="width: 17px; height: 17px; accent-color: #7C3AED; cursor: pointer;" />
+                                <label for="cp_has_hostel" style="font-size: 12px; font-weight: 700; color: #063D3B; cursor: pointer;">
+                                    🛏️ On-Campus Hostels &amp; Dining Available
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="cp_virtual_tour_url" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                            🌐 Virtual 3D Tour URL / Interactive Walkthrough Link
+                        </label>
+                        <input type="url" id="cp_virtual_tour_url" placeholder="https://matterport.com/tour/your-campus or https://apex.edu/virtual-tour" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        <span style="font-size: 10.5px; color: #648781; margin-top: 3px; display: block;">Shared automatically by chatbot during campus tour inquiries and prospective student chats.</span>
+                    </div>
+                </div>
+
+                <!-- SECTION 3: Physical Address & Geographic Location -->
+                <div style="margin-bottom: 28px;">
+                    <div style="font-size: 15px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                        <span style="font-size: 16px;">📍</span> Address, Coordinates &amp; Regional Presence
+                    </div>
+
+                    <div style="margin-bottom: 16px;">
+                        <label for="cp_address_line" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                            Street Address &amp; Gate Landmark
+                        </label>
+                        <input type="text" id="cp_address_line" placeholder="e.g. 100 University Boulevard, Electronic City Phase 1" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px;">
+                        <div>
+                            <label for="cp_city" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">City / Town</label>
+                            <input type="text" id="cp_city" placeholder="Bengaluru" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        </div>
+                        <div>
+                            <label for="cp_state" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">State / Province</label>
+                            <input type="text" id="cp_state" placeholder="Karnataka" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        </div>
+                        <div>
+                            <label for="cp_pincode" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">PIN / Postal Code</label>
+                            <input type="text" id="cp_pincode" placeholder="560100" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        </div>
+                        <div>
+                            <label for="cp_country" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">Country</label>
+                            <input type="text" id="cp_country" value="India" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 4: Local Campus Helpdesk & Admissions Contact -->
+                <div style="margin-bottom: 28px;">
+                    <div style="font-size: 15px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                        <span style="font-size: 16px;">📞</span> Local Reception &amp; Admissions Desk
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div>
+                            <label for="cp_contact_email" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">Campus Email</label>
+                            <input type="email" id="cp_contact_email" placeholder="campus@apex.edu" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        </div>
+                        <div>
+                            <label for="cp_contact_phone" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">Campus Telephone</label>
+                            <input type="text" id="cp_contact_phone" placeholder="+91 80 4129 8800" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 5: Academic Programs & Courses Offered (Bidirectional Campus-Course Mapping) -->
+                <div style="margin-bottom: 32px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                        <div style="font-size: 15px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 16px;">🎓</span> Academic Programs &amp; Courses Offered
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span id="campusEditorCoursesBadge" style="font-size: 11px; font-weight: 700; color: #047857; background: #ECFDF5; border: 1px solid #A7F3D0; padding: 3px 9px; border-radius: 6px;">
+                                0 Courses Offered
+                            </span>
+                            <button type="button" onclick="switchNavTab('departments')" class="brand-btn-secondary" style="height: 28px; padding: 0 10px; font-size: 11px; font-weight: 600; border-radius: 6px;" title="Go to Departments to manage programs structure">
+                                + Add More Programs in Departments ↗
+                            </button>
+                        </div>
+                    </div>
+                    <p style="font-size: 11.5px; color: #648781; margin: 0 0 12px 0;">
+                        Select the specific degree programs offered at this campus location. Academic departments are <strong>automatically derived</strong> based on these offerings.
+                    </p>
+
+                    <!-- Derived Departments Ribbon -->
+                    <div id="campusDerivedDeptsContainer" style="margin-bottom: 14px; padding: 10px 14px; background: #F8FCFA; border: 1.5px solid #E6F0EC; border-radius: 8px; font-size: 11.5px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <span style="font-weight: 700; color: #063D3B;">🏛️ Derived Departments:</span>
+                        <span id="campusDerivedDeptsList" style="color: #648781;">Select courses below to derive active campus departments...</span>
+                    </div>
+
+                    <!-- Grouped Departments and Courses Checklist Container -->
+                    <div id="campusCoursesGroupContainer" style="display: flex; flex-direction: column; gap: 14px; max-height: 400px; overflow-y: auto; border: 1.5px solid #DCE9E5; border-radius: 8px; padding: 14px; background: #FFFFFF;">
+                        <div style="text-align: center; padding: 20px; color: #648781; font-size: 12px;">
+                            Loading academic programs catalog...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Bottom Action Buttons -->
+                <div style="padding-top: 20px; border-top: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: flex-end; gap: 12px;">
+                    <button type="button" onclick="closeCampusEditor()" class="brand-btn-secondary" style="height: 38px; padding: 0 18px; font-size: 12px; font-weight: 700; border-radius: 6px;">
+                        Cancel
+                    </button>
+                    <button type="submit" id="campusPageFormSubmitBtn" class="brand-btn-primary" style="height: 38px; padding: 0 24px; font-size: 12px; font-weight: 700; border-radius: 6px; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.25);">
+                        Save Campus
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>

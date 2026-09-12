@@ -1,0 +1,540 @@
+<!-- Dedicated Department Editor Studio Frame (1 Unified Big Card matching Campus-Editor, Knowledge-Editor, Settings & Overview) -->
+<div id="view-department-editor" class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
+    
+    <!-- Top Control Bar (Inside the Unified Card) -->
+    <div class="ops-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 24px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important; flex-wrap: wrap; gap: 12px;">
+        <div class="ops-dash-title-group" style="display: flex !important; align-items: center !important; gap: 14px !important;">
+            <button type="button" class="brand-btn-secondary" style="height: 34px; padding: 0 12px; font-size: 11.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border-radius: 6px; background: #F4FAF7; border: 1.5px solid #D1E5DE; color: var(--e-teal, #063D3B);" onclick="closeDepartmentModal()">
+                <span>&larr;</span> Back to Departments
+            </button>
+            <div style="height: 24px; width: 1.5px; background: #E2E8F0;"></div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span id="modalDeptIcon" style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: #ECFDF5; font-size: 18px; font-weight: 800; color: #047857; border: 1px solid #A7F3D0;">🏫</span>
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span id="modalDeptTitle" class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important; letter-spacing: -0.01em !important; line-height: 1.25 !important; max-width: 480px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            Configure Department
+                        </span>
+                        <span id="editorStatusBadge" style="display: none !important;"></span>
+                    </div>
+                    <div class="ops-dash-sub-title" id="modalDeptSubtitle" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">
+                        Edit contact info, staff assignments, knowledge scope &amp; escalation rules
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
+            <button type="button" class="brand-btn-secondary" style="height: 34px; padding: 0 14px; font-size: 11.5px; font-weight: 600; border-radius: 6px;" onclick="closeDepartmentModal()">Cancel</button>
+            <button type="button" class="brand-btn-primary" style="height: 34px; padding: 0 18px; font-size: 11.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; border-radius: 6px; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.2);" onclick="document.getElementById('deptFormSubmitBtn').click()">
+                <span>💾</span> Save Configuration
+            </button>
+        </div>
+    </div>
+
+    <!-- Inside the Unified Card: Content Area with left-aligned form bounded to 900px -->
+    <div style="padding: 28px 32px 48px 32px; box-sizing: border-box; width: 100%;">
+        <div style="max-width: 900px; width: 100%; margin: 0; box-sizing: border-box;">
+            
+            <form id="deptForm">
+                <input type="hidden" id="editDeptId" />
+
+                <style>
+                    .dept-pill-toggle {
+                        position: relative;
+                        display: inline-flex;
+                        align-items: center;
+                        width: 48px;
+                        height: 24px;
+                        cursor: pointer;
+                        flex-shrink: 0;
+                        user-select: none;
+                        margin: 0;
+                    }
+                    .dept-pill-toggle input {
+                        opacity: 0;
+                        width: 0;
+                        height: 0;
+                        position: absolute;
+                    }
+                    .dept-pill-slider {
+                        position: absolute;
+                        inset: 0;
+                        background-color: #E2E8F0;
+                        border: 1px solid #CBD5E1;
+                        border-radius: 24px;
+                        transition: all 0.25s ease;
+                        display: flex;
+                        align-items: center;
+                        justify-content: flex-end;
+                        padding-right: 6px;
+                    }
+                    .dept-pill-slider::before {
+                        position: absolute;
+                        content: "";
+                        height: 18px;
+                        width: 18px;
+                        left: 2px;
+                        bottom: 2px;
+                        background-color: #64748B;
+                        border-radius: 50%;
+                        transition: all 0.25s ease;
+                        box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+                    }
+                    .dept-pill-slider::after {
+                        content: "OFF";
+                        font-size: 8.5px;
+                        font-weight: 700;
+                        color: #64748B;
+                        letter-spacing: 0.5px;
+                    }
+                    .dept-pill-toggle input:checked + .dept-pill-slider {
+                        background: #047857;
+                        border-color: #059669;
+                        justify-content: flex-start;
+                        padding-left: 6px;
+                    }
+                    .dept-pill-toggle input:checked + .dept-pill-slider::before {
+                        transform: translateX(24px);
+                        background-color: #ffffff;
+                    }
+                    .dept-pill-toggle input:checked + .dept-pill-slider::after {
+                        content: "ON";
+                        color: #ffffff;
+                    }
+                </style>
+
+                <!-- SECTION 1: Dedicated Department Chat-Widget Provisioning -->
+                <div style="margin-bottom: 28px;">
+                    <input type="checkbox" id="deptIsActiveInput" style="display: none;" />
+                    <div id="editorWidgetBox" style="background: #F8FCFA; border: 1.5px solid #D1E5DE; border-radius: 8px; padding: 18px 20px;">
+                        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                                    <span style="font-size: 16px;">⚡</span>
+                                    <span style="font-size: 15px; font-weight: 800; color: #063D3B; letter-spacing: -0.01em;" id="editorWidgetBoxTitle">Separate Chat-Widget for this Department</span>
+                                </div>
+                                <div style="font-size: 11.5px; color: #648781; line-height: 1.55;">
+                                    Toggle <strong>ON</strong> only if this department requires its own standalone, dedicated chat-widget instance (e.g. to embed on specific departmental web pages such as <code>/mba</code> or <code>/engineering</code>). When enabled, this provisions a dedicated embed code (with <code>data-dept-id</code>) and enables department-specific branding &amp; prompt chips in the <a href="#chatbot" onclick="event.preventDefault(); goToDeptChatbotSettings();" style="color: #047857; text-decoration: underline; font-weight: 700; cursor: pointer;">Chatbot Widget Design Studio</a>. Keep <strong>OFF</strong> if this department is handled centrally by your main institutional chatbot. Default is <strong>OFF</strong>.
+                                </div>
+                            </div>
+                            <label class="dept-pill-toggle" title="Toggle Separate Chat-Widget" style="margin-top: 4px; flex-shrink: 0;">
+                                <input type="checkbox" id="deptEnableDedicatedWidgetInput" />
+                                <span class="dept-pill-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 2: Identity & Contact Details -->
+                <div style="margin-bottom: 28px;">
+                    <div style="font-size: 15px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                        <span style="font-size: 16px;">🏛️</span> About Department
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 140px 1fr; gap: 16px; margin-bottom: 16px; position: relative;">
+                        <div style="position: relative;">
+                            <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">Icon</label>
+                            
+                            <!-- Hidden Input to store the actual emoji value -->
+                            <input type="hidden" id="deptIconInput" value="🏫" required />
+
+                            <!-- Interactive Emoji Trigger Button -->
+                            <button type="button" id="deptIconPickerBtn" onclick="toggleDeptEmojiPicker(event)" class="brand-input" style="display: flex; align-items: center; justify-content: space-between; height: 38px; width: 100%; padding: 0 10px; cursor: pointer; background: #F8FCFA; border: 1.5px solid #DCE9E5; border-radius: 6px; box-sizing: border-box;">
+                                <span id="deptIconPreview" style="font-size: 20px; line-height: 1;">🏫</span>
+                                <span style="font-size: 11px; color: #648781; display: flex; align-items: center; gap: 3px; font-weight: 600;">
+                                    Emoji <span style="font-size: 8px;">▼</span>
+                                </span>
+                            </button>
+
+                            <!-- Floating Emoji Picker Popover -->
+                            <div id="deptEmojiPickerPopover" style="display: none; position: absolute; top: calc(100% + 6px); left: 0; z-index: 1050; width: 380px; background: #FFFFFF; border: 1.5px solid #DCE9E5; border-radius: 8px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2); padding: 14px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1.5px solid #E6F0EC;">
+                                    <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #4F7470; letter-spacing: 0.5px;">Select Department Icon</span>
+                                    <button type="button" onclick="closeDeptEmojiPicker()" style="background: none; border: none; color: #648781; cursor: pointer; font-size: 14px; padding: 0 4px; line-height: 1;">✕</button>
+                                </div>
+
+                                <div id="deptEmojiGrid" style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; padding: 2px;">
+                                    <!-- Populated by JS -->
+                                </div>
+
+                                <div id="deptEmojiHoverLabel" style="font-size: 11px; color: #047857; min-height: 28px; margin-top: 10px; padding: 6px 10px; background: #ECFDF5; border-radius: 4px; border: 1px solid #A7F3D0; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.3;">
+                                    <span style="color: #648781;">Hover an emoji to see suggested department</span>
+                                </div>
+
+                                <div style="margin-top: 10px; padding-top: 8px; border-top: 1.5px solid #E6F0EC; display: flex; align-items: center; gap: 6px;">
+                                    <span style="font-size: 11px; color: #648781; white-space: nowrap;">Custom:</span>
+                                    <input type="text" id="customEmojiInput" maxlength="4" placeholder="e.g. 🎯" oninput="onCustomEmojiEntered(this.value)" class="brand-input" style="height: 28px; font-size: 14px; text-align: center; padding: 2px 6px; width: 50px; border: 1.5px solid #DCE9E5; border-radius: 4px;" />
+                                    <span style="font-size: 10.5px; color: #648781;">or paste any custom emoji</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="deptNameInput" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Department Name <span style="color: #EF4444;">*</span>
+                            </label>
+                            <input type="text" id="deptNameInput" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" placeholder="e.g. Admissions & Outreach" required />
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 16px;">
+                        <label for="deptDescInput" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">Description / Scope</label>
+                        <textarea id="deptDescInput" class="brand-textarea" rows="2" style="width: 100%; box-sizing: border-box; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 8px 12px;" placeholder="Briefly describe what inquiries this department handles..."></textarea>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
+                        <div>
+                            <label for="deptEmailInput" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">Department Email</label>
+                            <input type="email" id="deptEmailInput" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" placeholder="admissions@college.edu" />
+                        </div>
+                        <div>
+                            <label for="deptPhoneInput" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">Phone Number</label>
+                            <input type="text" id="deptPhoneInput" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" placeholder="+91 98765 43210" />
+                        </div>
+                        <div>
+                            <label for="deptWhatsappInput" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">WhatsApp Handle</label>
+                            <input type="text" id="deptWhatsappInput" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" placeholder="+919876543210" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 3: Academic Programs & Offered Courses -->
+                <div id="sectionDeptCourses" style="margin-bottom: 28px; scroll-margin-top: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div style="font-size: 15px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 16px;">🎓</span> Academic Programs &amp; Offered Courses
+                        </div>
+                        <button type="button" class="brand-btn-secondary" style="height: 30px; padding: 0 12px; font-size: 11.5px; font-weight: 700; border-radius: 6px;" onclick="addCourseRow()">+ Add Courses</button>
+                    </div>
+                    <p style="font-size: 11.5px; color: #648781; margin: 0 0 12px 0;">
+                        Add programs and courses offered under this department. Used by the AI chatbot to guide prospective students to relevant curricula and eligibility terms.
+                    </p>
+
+                    <div id="deptCoursesContainer" style="display: flex; flex-direction: column; gap: 10px; min-height: 80px; max-height: 320px; overflow-y: auto;">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+
+                <input type="hidden" id="deptGreetingInput" value="" />
+
+                <!-- SECTION 4: Team Member Assignments -->
+                <div style="margin-bottom: 28px;">
+                    <div style="font-size: 15px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <span style="font-size: 16px;">👥</span> Assigned Staff &amp; On-Duty Lead Handlers
+                    </div>
+                    <p style="font-size: 11.5px; color: #648781; margin: 0 0 12px 0;">
+                        Assign team members who receive lead alerts, counselor callback escalations, and handle live student inquiries for this department.
+                    </p>
+
+                    <div id="deptStaffChecklist" style="display: flex; flex-direction: column; gap: 8px; min-height: 100px; max-height: 240px; overflow-y: auto; padding: 12px; background: #F8FCFA; border-radius: 6px; border: 1.5px solid #DCE9E5;">
+                        <!-- Populated dynamically -->
+                    </div>
+
+                    <div style="margin-top: 10px; padding: 10px 14px; border: 1.5px solid #D1E5DE; background: #F4FAF7; border-radius: 6px; display: flex; align-items: center; gap: 10px; font-size: 11px; color: #063D3B;">
+                        <span>💡</span>
+                        <span>Checked members receive instant email notifications, live WhatsApp alerts, and counselor callback assignments when inquiries are routed to <strong id="staffNoticeDeptName">this department</strong>.</span>
+                    </div>
+                </div>
+
+                <!-- SECTION 5: Department Knowledge Scope -->
+                <div style="margin-bottom: 28px;">
+                    <div style="font-size: 15px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <span style="font-size: 16px;">📚</span> Department Knowledge Scope &amp; Reference Documents
+                    </div>
+                    <p style="font-size: 11.5px; color: #648781; margin: 0 0 14px 0;">
+                        Add prospectus documents, course guidelines, eligibility criteria, or web links scoped specifically to this department.
+                    </p>
+
+                    <!-- Current Department Knowledge Sources List -->
+                    <div style="margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #4F7470; letter-spacing: 0.3px;">Attached Knowledge Documents</span>
+                            <span id="deptKsCountBadge" style="display: inline-flex; align-items: padding: 2px 8px; border-radius: 9999px; font-size: 10.5px; font-weight: 700; background: #ECFDF5; border: 1px solid #A7F3D0; color: #047857;">0 Documents</span>
+                        </div>
+                        <div id="deptKsList" style="display: flex; flex-direction: column; gap: 8px; min-height: 70px; max-height: 200px; overflow-y: auto; padding: 12px; background: #F8FCFA; border-radius: 6px; border: 1.5px solid #DCE9E5;">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Add Knowledge Box -->
+                    <div style="background: #FFFFFF; border: 1.5px solid #D1E5DE; border-radius: 8px; padding: 16px;">
+                        <div style="font-size: 12px; font-weight: 800; color: #063D3B; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                            <span>➕</span> Add Department Knowledge Source
+                        </div>
+
+                        <!-- Mode selector -->
+                        <div style="display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;">
+                            <button type="button" class="brand-btn-secondary dept-ks-mode-btn active" data-mode="text" onclick="switchDeptKsMode('text')" style="height: 30px; font-size: 11px; font-weight: 700; padding: 0 12px; border-radius: 6px;">📝 Text / Prospectus</button>
+                            <button type="button" class="brand-btn-secondary dept-ks-mode-btn" data-mode="file" onclick="switchDeptKsMode('file')" style="height: 30px; font-size: 11px; font-weight: 700; padding: 0 12px; border-radius: 6px;">📁 Upload File (PDF / DOCX)</button>
+                            <button type="button" class="brand-btn-secondary dept-ks-mode-btn" data-mode="url" onclick="switchDeptKsMode('url')" style="height: 30px; font-size: 11px; font-weight: 700; padding: 0 12px; border-radius: 6px;">🌐 Add Web URL</button>
+                        </div>
+
+                        <!-- Mode 1: Text -->
+                        <div id="deptKsModeText" class="dept-ks-mode-panel">
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 4px;">Topic / Document Title</label>
+                                <input type="text" id="deptKsTitleText" class="brand-input" placeholder="e.g. Eligibility Guidelines & Fee Structure" style="width: 100%; box-sizing: border-box; height: 36px; font-size: 12px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 10px;" />
+                            </div>
+                            <div style="margin-bottom: 12px;">
+                                <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 4px;">Content / Details</label>
+                                <textarea id="deptKsContentText" class="brand-textarea" rows="3" placeholder="Paste prospectus text, eligibility criteria, admission timeline..." style="width: 100%; box-sizing: border-box; font-size: 12px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 8px 10px;"></textarea>
+                            </div>
+                            <button type="button" class="brand-btn-primary" style="height: 32px; padding: 0 16px; font-size: 11.5px; font-weight: 700; border-radius: 6px;" onclick="addDeptKnowledgeText()">Add Text Knowledge</button>
+                        </div>
+
+                        <!-- Mode 2: File -->
+                        <div id="deptKsModeFile" class="dept-ks-mode-panel" style="display: none;">
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 4px;">Document Title (Optional)</label>
+                                <input type="text" id="deptKsTitleFile" class="brand-input" placeholder="e.g. 2026 Prospectus PDF" style="width: 100%; box-sizing: border-box; height: 36px; font-size: 12px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 10px;" />
+                            </div>
+                            <div style="margin-bottom: 12px;">
+                                <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 4px;">Select File (.pdf, .docx, .txt)</label>
+                                <input type="file" id="deptKsFileInput" accept=".pdf,.docx,.txt" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; padding: 6px 10px; font-size: 12px; border: 1.5px solid #DCE9E5; border-radius: 6px; background: #FFFFFF;" />
+                            </div>
+                            <button type="button" class="brand-btn-primary" style="height: 32px; padding: 0 16px; font-size: 11.5px; font-weight: 700; border-radius: 6px;" onclick="addDeptKnowledgeFile()">Upload &amp; Add File</button>
+                        </div>
+
+                        <!-- Mode 3: URL -->
+                        <div id="deptKsModeUrl" class="dept-ks-mode-panel" style="display: none;">
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 4px;">Document Title (Optional)</label>
+                                <input type="text" id="deptKsTitleUrl" class="brand-input" placeholder="e.g. Admissions Overview Page" style="width: 100%; box-sizing: border-box; height: 36px; font-size: 12px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 10px;" />
+                            </div>
+                            <div style="margin-bottom: 12px;">
+                                <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 4px;">Web Page URL</label>
+                                <input type="url" id="deptKsUrlInput" class="brand-input" placeholder="https://college.edu/admissions" style="width: 100%; box-sizing: border-box; height: 36px; font-size: 12px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 10px;" />
+                            </div>
+                            <button type="button" class="brand-btn-primary" style="height: 32px; padding: 0 16px; font-size: 11.5px; font-weight: 700; border-radius: 6px;" onclick="addDeptKnowledgeUrl()">Add Web Page</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 6: Operating Hours & Auto-Away Automation -->
+                <div id="sectionDeptOperatingHours" style="margin-bottom: 28px; scroll-margin-top: 20px;">
+                    <div style="font-size: 15px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                        <span style="font-size: 16px;">⏱️</span> Operating Hours &amp; Auto-Away Automation
+                    </div>
+                    <p style="font-size: 11.5px; color: #648781; margin: 0 0 16px 0;">
+                        Configure weekly operating hours, institutional timezone, and the automated response delivered when students ask questions outside desk hours.
+                    </p>
+
+                    <!-- Top Row: Presets & Timezone -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                        <div>
+                            <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">Quick Schedule Presets</label>
+                            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                <button type="button" class="brand-btn-secondary" style="height: 32px; font-size: 11px; font-weight: 600; padding: 0 10px; border-radius: 6px;" onclick="applyDeptHoursPreset('mon_sat')" title="Set Monday to Saturday 9:00 AM - 6:00 PM">Mon – Sat (9am-6pm)</button>
+                                <button type="button" class="brand-btn-secondary" style="height: 32px; font-size: 11px; font-weight: 600; padding: 0 10px; border-radius: 6px;" onclick="applyDeptHoursPreset('mon_fri')" title="Set Monday to Friday 9:00 AM - 5:00 PM">Mon – Fri (9am-5pm)</button>
+                                <button type="button" class="brand-btn-secondary" style="height: 32px; font-size: 11px; font-weight: 600; padding: 0 10px; border-radius: 6px;" onclick="applyDeptHoursPreset('24_7')" title="Set All 7 Days Open 24 Hours">24 / 7 Always Open</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="deptTimezoneInput" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">Institutional Timezone</label>
+                            <select id="deptTimezoneInput" class="brand-input" style="width: 100%; box-sizing: border-box; height: 34px; font-size: 12px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 10px; background: #FFFFFF;">
+                                <optgroup label="United States &amp; Canada">
+                                    <option value="America/New_York" selected>Eastern Time (ET • New York, Toronto, Miami)</option>
+                                    <option value="America/Chicago">Central Time (CT • Chicago, Dallas, Winnipeg)</option>
+                                    <option value="America/Denver">Mountain Time (MT • Denver, Phoenix, Calgary)</option>
+                                    <option value="America/Los_Angeles">Pacific Time (PT • Los Angeles, Vancouver, Seattle)</option>
+                                    <option value="America/Anchorage">Alaska Time (AKT • Anchorage)</option>
+                                    <option value="Pacific/Honolulu">Hawaii Time (HST • Honolulu)</option>
+                                    <option value="America/Halifax">Atlantic Time (AT • Halifax)</option>
+                                </optgroup>
+                                <optgroup label="International">
+                                    <option value="Europe/London">London (GMT/BST • UTC+00:00)</option>
+                                    <option value="Europe/Paris">Central Europe (CET • Paris, Berlin • UTC+01:00)</option>
+                                    <option value="Asia/Dubai">Gulf Standard (GST • Dubai • UTC+04:00)</option>
+                                    <option value="Asia/Kolkata">India Standard (IST • New Delhi • UTC+05:30)</option>
+                                    <option value="Asia/Singapore">Singapore / Malaysia (SGT • UTC+08:00)</option>
+                                    <option value="UTC">UTC (Coordinated Universal Time)</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Day-by-Day Schedule Grid -->
+                    <div style="background: #F8FCFA; border: 1.5px solid #DCE9E5; border-radius: 8px; padding: 14px 16px; margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #E6F0EC;">
+                            <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #4F7470;">Weekly Desk Schedule</span>
+                            <span style="font-size: 11px; color: #648781;">Check days when staff counselors are actively available</span>
+                        </div>
+
+                        <div id="deptHoursScheduleRows" style="display: flex; flex-direction: column; gap: 8px;">
+                            <!-- Monday -->
+                            <div class="dept-schedule-row" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 8px; border-radius: 6px; background: #FFFFFF; border: 1px solid #E6F0EC;">
+                                <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: #092F2E; min-width: 110px; cursor: pointer;">
+                                    <input type="checkbox" id="deptHourActive_mon" checked onchange="onDeptHourToggle('mon')" style="width: 16px; height: 16px; accent-color: #047857;" />
+                                    <span>Monday</span>
+                                </label>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="time" id="deptHourOpen_mon" value="09:00" class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px;" />
+                                    <span style="font-size: 11px; color: #648781;">to</span>
+                                    <input type="time" id="deptHourClose_mon" value="18:00" class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px;" />
+                                </div>
+                                <span id="deptHourStatus_mon" style="font-size: 10.5px; font-weight: 700; min-width: 75px; text-align: right; color: #047857; background: #ECFDF5; padding: 2px 8px; border-radius: 4px; border: 1px solid #A7F3D0;">Open</span>
+                            </div>
+
+                            <!-- Tuesday -->
+                            <div class="dept-schedule-row" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 8px; border-radius: 6px; background: #FFFFFF; border: 1px solid #E6F0EC;">
+                                <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: #092F2E; min-width: 110px; cursor: pointer;">
+                                    <input type="checkbox" id="deptHourActive_tue" checked onchange="onDeptHourToggle('tue')" style="width: 16px; height: 16px; accent-color: #047857;" />
+                                    <span>Tuesday</span>
+                                </label>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="time" id="deptHourOpen_tue" value="09:00" class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px;" />
+                                    <span style="font-size: 11px; color: #648781;">to</span>
+                                    <input type="time" id="deptHourClose_tue" value="18:00" class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px;" />
+                                </div>
+                                <span id="deptHourStatus_tue" style="font-size: 10.5px; font-weight: 700; min-width: 75px; text-align: right; color: #047857; background: #ECFDF5; padding: 2px 8px; border-radius: 4px; border: 1px solid #A7F3D0;">Open</span>
+                            </div>
+
+                            <!-- Wednesday -->
+                            <div class="dept-schedule-row" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 8px; border-radius: 6px; background: #FFFFFF; border: 1px solid #E6F0EC;">
+                                <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: #092F2E; min-width: 110px; cursor: pointer;">
+                                    <input type="checkbox" id="deptHourActive_wed" checked onchange="onDeptHourToggle('wed')" style="width: 16px; height: 16px; accent-color: #047857;" />
+                                    <span>Wednesday</span>
+                                </label>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="time" id="deptHourOpen_wed" value="09:00" class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px;" />
+                                    <span style="font-size: 11px; color: #648781;">to</span>
+                                    <input type="time" id="deptHourClose_wed" value="18:00" class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px;" />
+                                </div>
+                                <span id="deptHourStatus_wed" style="font-size: 10.5px; font-weight: 700; min-width: 75px; text-align: right; color: #047857; background: #ECFDF5; padding: 2px 8px; border-radius: 4px; border: 1px solid #A7F3D0;">Open</span>
+                            </div>
+
+                            <!-- Thursday -->
+                            <div class="dept-schedule-row" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 8px; border-radius: 6px; background: #FFFFFF; border: 1px solid #E6F0EC;">
+                                <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: #092F2E; min-width: 110px; cursor: pointer;">
+                                    <input type="checkbox" id="deptHourActive_thu" checked onchange="onDeptHourToggle('thu')" style="width: 16px; height: 16px; accent-color: #047857;" />
+                                    <span>Thursday</span>
+                                </label>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="time" id="deptHourOpen_thu" value="09:00" class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px;" />
+                                    <span style="font-size: 11px; color: #648781;">to</span>
+                                    <input type="time" id="deptHourClose_thu" value="18:00" class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px;" />
+                                </div>
+                                <span id="deptHourStatus_thu" style="font-size: 10.5px; font-weight: 700; min-width: 75px; text-align: right; color: #047857; background: #ECFDF5; padding: 2px 8px; border-radius: 4px; border: 1px solid #A7F3D0;">Open</span>
+                            </div>
+
+                            <!-- Friday -->
+                            <div class="dept-schedule-row" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 8px; border-radius: 6px; background: #FFFFFF; border: 1px solid #E6F0EC;">
+                                <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: #092F2E; min-width: 110px; cursor: pointer;">
+                                    <input type="checkbox" id="deptHourActive_fri" checked onchange="onDeptHourToggle('fri')" style="width: 16px; height: 16px; accent-color: #047857;" />
+                                    <span>Friday</span>
+                                </label>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="time" id="deptHourOpen_fri" value="09:00" class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px;" />
+                                    <span style="font-size: 11px; color: #648781;">to</span>
+                                    <input type="time" id="deptHourClose_fri" value="18:00" class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px;" />
+                                </div>
+                                <span id="deptHourStatus_fri" style="font-size: 10.5px; font-weight: 700; min-width: 75px; text-align: right; color: #047857; background: #ECFDF5; padding: 2px 8px; border-radius: 4px; border: 1px solid #A7F3D0;">Open</span>
+                            </div>
+
+                            <!-- Saturday -->
+                            <div class="dept-schedule-row" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 8px; border-radius: 6px; background: #FFFFFF; border: 1px solid #E6F0EC;">
+                                <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: #092F2E; min-width: 110px; cursor: pointer;">
+                                    <input type="checkbox" id="deptHourActive_sat" checked onchange="onDeptHourToggle('sat')" style="width: 16px; height: 16px; accent-color: #047857;" />
+                                    <span>Saturday</span>
+                                </label>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="time" id="deptHourOpen_sat" value="09:00" class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px;" />
+                                    <span style="font-size: 11px; color: #648781;">to</span>
+                                    <input type="time" id="deptHourClose_sat" value="18:00" class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px;" />
+                                </div>
+                                <span id="deptHourStatus_sat" style="font-size: 10.5px; font-weight: 700; min-width: 75px; text-align: right; color: #047857; background: #ECFDF5; padding: 2px 8px; border-radius: 4px; border: 1px solid #A7F3D0;">Open</span>
+                            </div>
+
+                            <!-- Sunday -->
+                            <div class="dept-schedule-row" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 8px; border-radius: 6px; background: #FFFFFF; border: 1px solid #E6F0EC;">
+                                <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: #092F2E; min-width: 110px; cursor: pointer;">
+                                    <input type="checkbox" id="deptHourActive_sun" onchange="onDeptHourToggle('sun')" style="width: 16px; height: 16px; accent-color: #047857;" />
+                                    <span>Sunday</span>
+                                </label>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="time" id="deptHourOpen_sun" value="09:00" disabled class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px; opacity: 0.6;" />
+                                    <span style="font-size: 11px; color: #648781;">to</span>
+                                    <input type="time" id="deptHourClose_sun" value="18:00" disabled class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px; opacity: 0.6;" />
+                                </div>
+                                <span id="deptHourStatus_sun" style="font-size: 10.5px; font-weight: 700; min-width: 75px; text-align: right; color: #648781; background: #F1F5F9; padding: 2px 8px; border-radius: 4px; border: 1px solid #CBD5E1;">Closed</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Auto-Away Automation Message & Priority Queueing -->
+                    <div style="background: #FFFFFF; border: 1.5px solid #D1E5DE; border-radius: 8px; padding: 14px 16px; margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <div>
+                                <label for="deptAwayMessageInput" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470;">Off-Hours Auto-Away Response</label>
+                                <span style="font-size: 11px; color: #648781;">Delivered by the AI chatbot whenever inquiries arrive outside active desk hours</span>
+                            </div>
+                            <button type="button" class="brand-btn-secondary" style="height: 26px; padding: 0 10px; font-size: 10.5px; font-weight: 700; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;" onclick="applyDeptAwayTemplate()">
+                                <span>⚡ Load Recommended Template</span>
+                            </button>
+                        </div>
+                        <textarea id="deptAwayMessageInput" class="brand-textarea" rows="2" style="width: 100%; box-sizing: border-box; font-size: 12px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 8px 12px; line-height: 1.45;" placeholder="Our department desk is currently closed for the evening. Your inquiry has been prioritized. A counselor will reach out tomorrow morning at 09:15 AM."></textarea>
+                    </div>
+                </div>
+
+                <!-- SECTION 6B: Escalations & Lead Assignment Policy -->
+                <div id="sectionDeptEscalations" style="margin-bottom: 28px; scroll-margin-top: 20px;">
+                    <div style="font-size: 15px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                        <span style="font-size: 16px;">⚡</span> Escalations &amp; Lead Assignment Policy
+                    </div>
+
+                    <div style="margin-bottom: 16px;">
+                        <label for="leadAssignmentSelect" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">Lead Auto-Assignment Logic</label>
+                        <select id="leadAssignmentSelect" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+                            <option value="round_robin">Round-Robin (Equally distribute incoming leads across staff)</option>
+                            <option value="direct">Direct Assignment (Assign all leads to Department Lead)</option>
+                        </select>
+                    </div>
+
+                    <div style="background: #F8FCFA; border: 1.5px solid #DCE9E5; border-radius: 8px; padding: 14px 16px; margin-bottom: 16px;">
+                        <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 8px;">Escalation Handoff Triggers</label>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="font-size: 12px; color: #092F2E; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600;">
+                                <input type="checkbox" id="escalateEmailCheck" checked style="width: 16px; height: 16px; accent-color: #047857;" /> Send instant Email notification to assigned staff on student escalation
+                            </label>
+                            <label style="font-size: 12px; color: #092F2E; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600;">
+                                <input type="checkbox" id="escalateWhatsappCheck" checked style="width: 16px; height: 16px; accent-color: #047857;" /> Send instant WhatsApp alert to department desk on escalation
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Counselor Callbacks Integration Note -->
+                    <div style="padding: 12px 14px; border: 1.5px solid #BFDBFE; background: #EFF6FF; border-radius: 6px; display: flex; align-items: flex-start; gap: 10px;">
+                        <span style="font-size: 16px; line-height: 1;">📞</span>
+                        <div style="font-size: 11.5px; color: #1E3A8A; line-height: 1.45;">
+                            <strong>Counselor Callbacks Queue Active:</strong> Student requests for human phone consultations are automatically routed to on-duty staff and logged under the Counselor Callbacks dashboard with 1-click dial &amp; WhatsApp features.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 7: Starter FAQs & Quick Chips (Hidden) -->
+                <div style="margin-bottom: 28px; display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div style="font-size: 15px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 16px;">❓</span> Starter FAQs &amp; Quick Chips
+                        </div>
+                        <button type="button" class="brand-btn-secondary" style="height: 30px; padding: 0 12px; font-size: 11.5px; font-weight: 700; border-radius: 6px;" onclick="addFaqRow()">+ Add FAQ</button>
+                    </div>
+                    <p style="font-size: 11.5px; color: #648781; margin: 0 0 12px 0;">
+                        Department FAQs appear as quick chips in the chatbot menu to guide student inquiries.
+                    </p>
+
+                    <div id="deptFaqsContainer" style="display: flex; flex-direction: column; gap: 10px; min-height: 80px; max-height: 320px; overflow-y: auto;">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Bottom Save / Cancel Controls -->
+                <div style="margin-top: 28px; padding-top: 20px; border-top: 1.5px solid #E6F0EC; display: flex; justify-content: flex-end; gap: 12px;">
+                    <button type="button" class="brand-btn-secondary" style="height: 36px; padding: 0 20px; font-size: 12px; font-weight: 600; border-radius: 6px;" onclick="closeDepartmentModal()">Cancel</button>
+                    <button type="submit" id="deptFormSubmitBtn" class="brand-btn-primary" style="height: 36px; padding: 0 24px; font-size: 12px; font-weight: 700; border-radius: 6px; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.2);">Save Configuration</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>

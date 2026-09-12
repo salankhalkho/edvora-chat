@@ -1,0 +1,599 @@
+<!-- Chatbot Widget Design Studio & Live Customizer -->
+<div class="ops-dashboard-frame" style="width: 100%; min-width: 0; box-sizing: border-box;">
+
+    <!-- Top Header Control Bar -->
+    <div class="ops-dash-topbar" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; min-height: 64px; height: 64px; padding: 14px 24px; box-sizing: border-box; width: 100%; background: #FFFFFF; border-bottom: 1.5px solid #E6F0EC;">
+        <div class="ops-dash-title-group" style="display: flex; align-items: center; gap: 12px;">
+            <button type="button" onclick="switchNavTab('org-settings')" class="brand-btn-secondary" style="height: 32px; padding: 0 11px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; border-radius: 6px; background: #F4FAF7; border: 1.5px solid #D1E5DE; color: var(--e-teal, #063D3B);" title="Return to Control Panel">
+                &larr; Control Panel
+            </button>
+            <span class="ops-live-dot"></span>
+            <div>
+                <div class="ops-dash-main-title" style="font-size: 15px; font-weight: 800; color: var(--e-teal, #063D3B); letter-spacing: -0.01em; line-height: 1.25;">
+                    Chatbot Widget Design Studio
+                </div>
+                <div class="ops-dash-subtitle" style="font-size: 11.5px; color: #648781; font-weight: 500; margin-top: 1px;">
+                    Customize branding, colors, launcher, and preview widget in real-time.
+                </div>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span id="studioSaveStatus" style="font-size: 12px; color: #059669; display: none; font-weight: 600;">✓ Changes Saved!</span>
+            <button type="button" class="brand-btn-primary" id="saveWidgetConfigBtn" style="height: 38px; padding: 0 20px; font-size: 12px; font-weight: 700; background: #063D3B; color: #C8FF63; border: 1.5px solid #063D3B; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;" onclick="saveWidgetCustomization()">
+                💾 Save &amp; Apply Customization
+            </button>
+        </div>
+    </div>
+
+    <!-- Sub-Navigation Toolbar Strip (3 Approved Tabs) -->
+    <div class="dept-control-strip" style="background: #F9FCFB; border-bottom: 1.5px solid #E6F0EC; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+        <div class="dept-filter-tabs" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <a href="javascript:void(0)" class="dept-filter-pill studio-subnav-link active" id="subtabLinkWidget" onclick="switchStudioSubtab('widget')" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; font-size: 12px; font-weight: 600; border-radius: 20px; cursor: pointer;">
+                <span>⚙️</span> Widget Customization
+            </a>
+            <a href="javascript:void(0)" class="dept-filter-pill studio-subnav-link" id="subtabLinkEmbed" onclick="switchStudioSubtab('embed')" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; font-size: 12px; font-weight: 600; border-radius: 20px; cursor: pointer;">
+                <span>💻</span> Embed Code
+            </a>
+            <a href="javascript:void(0)" class="dept-filter-pill studio-subnav-link" id="subtabLinkTest" onclick="openStandaloneTestChat()" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; font-size: 12px; font-weight: 600; border-radius: 20px; cursor: pointer;" title="Open live chatbot test page in new tab">
+                <span>🧪</span> Test Chat
+            </a>
+        </div>
+        <div class="dept-kpi-ribbon" style="display: flex; align-items: center; gap: 8px;">
+            <div class="dept-kpi-chip" style="font-size: 11px; padding: 4px 10px; background: #E6F7D2; border: 1px solid #C8FF63; border-radius: 12px; color: #063D3B; font-weight: 600;">
+                <span>⚡</span> Real-Time Sync: <strong>Active</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Body -->
+    <div class="dept-body-pad" style="padding: 24px; background: #FAFDFB; box-sizing: border-box; min-height: 720px;">
+        
+        <!-- SUBTAB 1: Widget Customization (Active) -->
+        <div id="subtabViewWidget" style="display: block;">
+            <div class="wc-layout" id="wcLayout">
+
+                <!-- LEFT: CONTROLS PANEL -->
+                <div class="wc-controls-col">
+
+                    <!-- Scope Selector -->
+                    <div class="wc-scope-bar">
+                        <div class="wc-scope-label">Customization Scope</div>
+                        <div class="wc-scope-btns">
+                            <button class="wc-scope-btn active" id="wcScopeOrgBtn" onclick="onWcScopeChange('org')">🏛️ Org-Wide</button>
+                            <button class="wc-scope-btn" id="wcScopeDeptBtn" onclick="onWcScopeChange('dept')">🏢 Department</button>
+                        </div>
+                        <div id="wcDeptRow" style="display:none;" class="wc-dept-row">
+                            <select id="wcDeptSelect" class="brand-input" style="flex:1; height:32px; font-size:11px;" onchange="onWcDeptChange(this.value)"></select>
+                            <span id="wcOverrideBadge" class="wc-override-badge" style="display:none;">🔵 Dept Override Active</span>
+                        </div>
+                    </div>
+
+                    <!-- Section 1: Header Branding -->
+                    <div class="wc-section" id="wcSecHeader">
+                        <div class="wc-section-header" onclick="toggleWcSection('wcSecHeader')">
+                            <div class="wc-section-title"><span class="sec-icon">🏛️</span> Header Branding</div>
+                            <span class="wc-section-chevron">▼</span>
+                        </div>
+                        <div class="wc-section-body">
+                            <div>
+                                <div class="wc-field-label">College Name / Header Title</div>
+                                <input type="text" id="wc_header_bot_name" class="brand-input" value="" style="height:34px; font-size:12px;" oninput="onWcText('header_bot_name', this.value)" placeholder="Enter College or University Name">
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <div class="wc-field-label">Subtitle / Online Status Text</div>
+                                <input type="text" id="wc_header_subtitle" class="brand-input" value="Online Now" style="height:34px; font-size:12px;" oninput="onWcText('header_subtitle', this.value)" placeholder="e.g. Online Now or Instant Answers">
+                            </div>
+                            <div class="wc-row-2" style="margin-top: 10px;">
+                                <div>
+                                    <div class="wc-field-label">Header Background</div>
+                                    <div class="wc-color-row">
+                                        <div class="wc-color-swatch"><input type="color" id="wc_header_bg_picker" oninput="onWcColor('header_bg', this.value)" onchange="onWcColor('header_bg', this.value)"></div>
+                                        <input class="wc-hex-input" id="wc_header_bg_hex" value="#063D3B" maxlength="30" oninput="onWcHex('header_bg', 'wc_header_bg_picker', this.value)">
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="wc-field-label">Header Text Color</div>
+                                    <div class="wc-color-row">
+                                        <div class="wc-color-swatch"><input type="color" id="wc_header_text_picker" oninput="onWcColor('header_text_color', this.value)" onchange="onWcColor('header_text_color', this.value)"></div>
+                                        <input class="wc-hex-input" id="wc_header_text_hex" value="#ffffff" maxlength="30" oninput="onWcHex('header_text_color', 'wc_header_text_picker', this.value)">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Organization Logo Upload -->
+                            <div style="margin-top: 10px;">
+                                <div class="wc-field-label">Organization Logo (Header)</div>
+                                <div class="wc-logo-upload-row">
+                                    <label for="wcLogoFileInput" style="cursor:pointer;">
+                                        <button type="button" class="brand-btn-secondary brand-btn-sm" onclick="document.getElementById('wcLogoFileInput').click()">☁ Upload Logo</button>
+                                    </label>
+                                    <input type="file" id="wcLogoFileInput" accept="image/jpeg,image/png,image/webp,image/svg+xml" style="display:none" onchange="onWcLogoUpload(this)">
+                                    <img id="wcLogoPreviewImg" class="wc-logo-preview" style="display:inline-block;" src="/default_logo.png" alt="logo">
+                                    <button type="button" class="wc-remove-btn" id="wcLogoRemoveBtn" style="display:none;" onclick="removeWcLogo()">✕ Remove</button>
+                                    <span id="wcLogoStatusText" style="font-size:10px; color:var(--brand-text-muted);">Default institution logo active</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: AI Chat Profile & Welcome -->
+                    <div class="wc-section collapsed" id="wcSecAvatar">
+                        <div class="wc-section-header" onclick="toggleWcSection('wcSecAvatar')">
+                            <div class="wc-section-title"><span class="sec-icon">🤖</span> AI Chat Profile &amp; Welcome</div>
+                            <span class="wc-section-chevron">▼</span>
+                        </div>
+                        <div class="wc-section-body">
+                            <div>
+                                <div class="wc-field-label">Initial Welcome Message</div>
+                                <textarea id="wc_welcome_message" class="brand-textarea" rows="4" style="font-size:12px; line-height:1.45; resize:vertical;" placeholder="Enter custom welcome greeting..." oninput="onWcText('welcome_message', this.value)"></textarea>
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <div class="wc-field-label" style="margin-bottom:8px;">Choose Bot Avatar</div>
+                                <div class="wc-avatar-picker">
+                                    <div class="wc-avatar-upload-opt" onclick="document.getElementById('wcAvatarFileInput').click()" title="Upload custom avatar">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.6)" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                    </div>
+                                    <input type="file" id="wcAvatarFileInput" accept="image/jpeg,image/png,image/webp,image/svg+xml" style="display:none" onchange="onWcAvatarUpload(this)">
+                                    <div class="wc-avatar-opt active" id="wcAv1" onclick="selectWcAvatarPreset(1)" title="Avatar 1">
+                                        <img src="/avatars/avatar1.png" alt="Avatar 1">
+                                        <div class="wc-avatar-check">✓</div>
+                                    </div>
+                                    <div class="wc-avatar-opt" id="wcAv2" onclick="selectWcAvatarPreset(2)" title="Avatar 2">
+                                        <img src="/avatars/avatar2.png" alt="Avatar 2">
+                                        <div class="wc-avatar-check">✓</div>
+                                    </div>
+                                    <div class="wc-avatar-opt" id="wcAv3" onclick="selectWcAvatarPreset(3)" title="Avatar 3">
+                                        <img src="/avatars/avatar3.png" alt="Avatar 3">
+                                        <div class="wc-avatar-check">✓</div>
+                                    </div>
+                                    <div class="wc-avatar-opt" id="wcAv4" onclick="selectWcAvatarPreset(4)" title="Avatar 4">
+                                        <img src="/avatars/avatar4.png" alt="Avatar 4">
+                                        <div class="wc-avatar-check">✓</div>
+                                    </div>
+                                    <div class="wc-avatar-opt" id="wcAv5" onclick="selectWcAvatarPreset(5)" title="Avatar 5">
+                                        <img src="/avatars/avatar5.png" alt="Avatar 5">
+                                        <div class="wc-avatar-check">✓</div>
+                                    </div>
+                                    <div class="wc-avatar-opt" id="wcAv6" onclick="selectWcAvatarPreset(6)" title="Avatar 6">
+                                        <img src="/avatars/avatar6.png" alt="Avatar 6">
+                                        <div class="wc-avatar-check">✓</div>
+                                    </div>
+                                    <div class="wc-avatar-opt" id="wcAv7" onclick="selectWcAvatarPreset(7)" title="Avatar 7">
+                                        <img src="/avatars/avatar7.png" alt="Avatar 7">
+                                        <div class="wc-avatar-check">✓</div>
+                                    </div>
+                                    <div class="wc-avatar-opt" id="wcAv8" onclick="selectWcAvatarPreset(8)" title="Avatar 8">
+                                        <img src="/avatars/avatar8.png" alt="Avatar 8">
+                                        <div class="wc-avatar-check">✓</div>
+                                    </div>
+                                    <div class="wc-avatar-opt" id="wcAv9" onclick="selectWcAvatarPreset(9)" title="Avatar 9">
+                                        <img src="/avatars/avatar9.png" alt="Avatar 9">
+                                        <div class="wc-avatar-check">✓</div>
+                                    </div>
+                                    <div class="wc-avatar-opt" id="wcAv10" onclick="selectWcAvatarPreset(10)" title="Avatar 10">
+                                        <img src="/avatars/avatar10.png" alt="Avatar 10">
+                                        <div class="wc-avatar-check">✓</div>
+                                    </div>
+                                    <div class="wc-avatar-opt" id="wcAv11" onclick="selectWcAvatarPreset(11)" title="Avatar 11">
+                                        <img src="/avatars/avatar11.png" alt="Avatar 11">
+                                        <div class="wc-avatar-check">✓</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <div class="wc-field-label">Avatar appears in</div>
+                                <div class="wc-radio-group" id="wcAvatarLocationGroup">
+                                    <label class="wc-radio-btn active" data-val="bubbles" onclick="onWcAvatarLocation('bubbles', this)">
+                                        <span class="wc-radio-dot"></span> Message Bubbles
+                                    </label>
+                                    <label class="wc-radio-btn" data-val="header" onclick="onWcAvatarLocation('header', this)">
+                                        <span class="wc-radio-dot"></span> Header Only
+                                    </label>
+                                    <label class="wc-radio-btn" data-val="both" onclick="onWcAvatarLocation('both', this)">
+                                        <span class="wc-radio-dot"></span> Both
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Window Styling -->
+                    <div class="wc-section collapsed" id="wcSecWindow">
+                        <div class="wc-section-header" onclick="toggleWcSection('wcSecWindow')">
+                            <div class="wc-section-title"><span class="sec-icon">🪟</span> Window Styling</div>
+                            <span class="wc-section-chevron">▼</span>
+                        </div>
+                        <div class="wc-section-body">
+                            <div class="wc-row-2">
+                                <div>
+                                    <div class="wc-field-label">Window Background</div>
+                                    <div class="wc-color-row">
+                                        <div class="wc-color-swatch"><input type="color" id="wc_window_bg_picker" oninput="onWcColor('window_bg_color', this.value)" onchange="onWcColor('window_bg_color', this.value)"></div>
+                                        <input class="wc-hex-input" id="wc_window_bg_hex" value="#ffffff" maxlength="30" oninput="onWcHex('window_bg_color', 'wc_window_bg_picker', this.value)">
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="wc-field-label">Border Color</div>
+                                    <div class="wc-color-row">
+                                        <div class="wc-color-swatch"><input type="color" id="wc_border_color_picker" oninput="onWcColor('window_border_color', this.value)" onchange="onWcColor('window_border_color', this.value)"></div>
+                                        <input class="wc-hex-input" id="wc_border_color_hex" value="#e2e8f0" maxlength="30" oninput="onWcHex('window_border_color', 'wc_border_color_picker', this.value)">
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 12px;">
+                                <div class="wc-field-label" style="display:flex; align-items:center; justify-content:space-between;">
+                                    <span>Corner Radius</span>
+                                    <span id="wc_border_radius_val" style="font-weight:700; color:#063D3B; text-transform:none; letter-spacing:0;">16px</span>
+                                </div>
+                                <div class="wc-slider-row">
+                                    <input type="range" class="wc-slider" id="wc_border_radius" min="0" max="32" value="16" oninput="onWcSlider('window_border_radius', this.value, 'wc_border_radius_val', 'px')">
+                                </div>
+                            </div>
+
+                            <div class="wc-row-2" style="margin-top: 12px;">
+                                <div>
+                                    <div class="wc-field-label" style="display:flex; align-items:center; justify-content:space-between;">
+                                        <span>Window Width</span>
+                                        <span id="wc_window_width_val" style="font-weight:700; color:#063D3B; text-transform:none; letter-spacing:0;">380px</span>
+                                    </div>
+                                    <div class="wc-slider-row">
+                                        <input type="range" class="wc-slider" id="wc_window_width" min="300" max="650" value="380" oninput="onWcSlider('window_width', this.value, 'wc_window_width_val', 'px')">
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="wc-field-label" style="display:flex; align-items:center; justify-content:space-between;">
+                                        <span>Window Height</span>
+                                        <span id="wc_window_height_val" style="font-weight:700; color:#063D3B; text-transform:none; letter-spacing:0;">550px</span>
+                                    </div>
+                                    <div class="wc-slider-row">
+                                        <input type="range" class="wc-slider" id="wc_window_height" min="350" max="800" value="550" oninput="onWcSlider('window_height', this.value, 'wc_window_height_val', 'px')">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: Message Bubbles -->
+                    <div class="wc-section collapsed" id="wcSecBubbles">
+                        <div class="wc-section-header" onclick="toggleWcSection('wcSecBubbles')">
+                            <div class="wc-section-title"><span class="sec-icon">💬</span> Message Bubbles</div>
+                            <span class="wc-section-chevron">▼</span>
+                        </div>
+                        <div class="wc-section-body">
+                            <div class="wc-row-2">
+                                <div>
+                                    <div class="wc-field-label">Bot Bubble BG</div>
+                                    <div class="wc-color-row">
+                                        <div class="wc-color-swatch"><input type="color" id="wc_bot_bubble_bg_picker" oninput="onWcColor('bot_bubble_bg', this.value)" onchange="onWcColor('bot_bubble_bg', this.value)"></div>
+                                        <input class="wc-hex-input" id="wc_bot_bubble_bg_hex" value="#f1f5f9" maxlength="30" oninput="onWcHex('bot_bubble_bg', 'wc_bot_bubble_bg_picker', this.value)">
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="wc-field-label">Bot Bubble Text</div>
+                                    <div class="wc-color-row">
+                                        <div class="wc-color-swatch"><input type="color" id="wc_bot_bubble_text_picker" oninput="onWcColor('bot_bubble_text', this.value)" onchange="onWcColor('bot_bubble_text', this.value)"></div>
+                                        <input class="wc-hex-input" id="wc_bot_bubble_text_hex" value="#1e293b" maxlength="30" oninput="onWcHex('bot_bubble_text', 'wc_bot_bubble_text_picker', this.value)">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="wc-row-2" style="margin-top: 10px;">
+                                <div>
+                                    <div class="wc-field-label">User Bubble BG</div>
+                                    <div class="wc-color-row">
+                                        <div class="wc-color-swatch"><input type="color" id="wc_user_bubble_bg_picker" oninput="onWcColor('user_bubble_bg', this.value)" onchange="onWcColor('user_bubble_bg', this.value)"></div>
+                                        <input class="wc-hex-input" id="wc_user_bubble_bg_hex" value="#063D3B" maxlength="30" oninput="onWcHex('user_bubble_bg', 'wc_user_bubble_bg_picker', this.value)">
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="wc-field-label">User Bubble Text</div>
+                                    <div class="wc-color-row">
+                                        <div class="wc-color-swatch"><input type="color" id="wc_user_bubble_text_picker" oninput="onWcColor('user_bubble_text', this.value)" onchange="onWcColor('user_bubble_text', this.value)"></div>
+                                        <input class="wc-hex-input" id="wc_user_bubble_text_hex" value="#ffffff" maxlength="30" oninput="onWcHex('user_bubble_text', 'wc_user_bubble_text_picker', this.value)">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 5: Launcher Button -->
+                    <div class="wc-section collapsed" id="wcSecLauncher">
+                        <div class="wc-section-header" onclick="toggleWcSection('wcSecLauncher')">
+                            <div class="wc-section-title"><span class="sec-icon">🚀</span> Launcher Button</div>
+                            <span class="wc-section-chevron">▼</span>
+                        </div>
+                        <div class="wc-section-body">
+                            <div class="wc-row-2">
+                                <div>
+                                    <div class="wc-field-label">Launcher Background</div>
+                                    <div class="wc-color-row">
+                                        <div class="wc-color-swatch"><input type="color" id="wc_launcher_bg_picker" oninput="onWcColor('launcher_bg', this.value)" onchange="onWcColor('launcher_bg', this.value)"></div>
+                                        <input class="wc-hex-input" id="wc_launcher_bg_hex" value="#063D3B" maxlength="30" oninput="onWcHex('launcher_bg', 'wc_launcher_bg_picker', this.value)">
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="wc-field-label">Icon Color</div>
+                                    <div class="wc-color-row">
+                                        <div class="wc-color-swatch"><input type="color" id="wc_launcher_icon_color_picker" oninput="onWcColor('launcher_icon_color', this.value)" onchange="onWcColor('launcher_icon_color', this.value)"></div>
+                                        <input class="wc-hex-input" id="wc_launcher_icon_color_hex" value="#C8FF63" maxlength="30" oninput="onWcHex('launcher_icon_color', 'wc_launcher_icon_color_picker', this.value)">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 6: Quick Prompt Chips -->
+                    <div class="wc-section collapsed" id="wcSecChips">
+                        <div class="wc-section-header" onclick="toggleWcSection('wcSecChips')">
+                            <div class="wc-section-title"><span class="sec-icon">🏷️</span> Quick Prompt Chips</div>
+                            <span class="wc-section-chevron">▼</span>
+                        </div>
+                        <div class="wc-section-body">
+                            <div>
+                                <div class="wc-field-label">Prompt Chips (comma-separated)</div>
+                                <input type="text" id="quickChipsInput" class="brand-input" value="" style="height:34px; font-size:12px;" oninput="onWcText('quick_chips', this.value)" placeholder="e.g. Fees, Courses, Campus Tour (leave blank for none)">
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 14px;">
+                        <button type="button" class="brand-btn-secondary" style="height: 36px; padding: 0 16px; font-size: 12px;" onclick="resetWcConfig()">
+                            ↺ Reset to Defaults
+                        </button>
+                        <button type="button" class="brand-btn-primary" id="wcSaveBtn" style="height: 36px; padding: 0 20px; font-size: 12px; font-weight: 700; background: #063D3B; color: #C8FF63; border: 1.5px solid #063D3B; border-radius: 8px;" onclick="saveWidgetCustomization()">
+                            💾 Save &amp; Apply
+                        </button>
+                    </div>
+
+                </div>
+                <!-- END LEFT COLUMN -->
+
+                <!-- RIGHT: LIVE PREVIEW -->
+                <div class="wc-preview-col" id="wcPreviewCol">
+                    <div class="wc-preview-label">Live Preview — updates instantly</div>
+                    <div class="wc-browser-chrome">
+                        <div class="wc-browser-bar">
+                            <div class="wc-browser-dots">
+                                <div class="wc-browser-dot r"></div>
+                                <div class="wc-browser-dot y"></div>
+                                <div class="wc-browser-dot g"></div>
+                            </div>
+                            <div class="wc-browser-url" id="wcBrowserUrl">https://yourcollege.edu</div>
+                        </div>
+                        <div class="wc-browser-body" id="wcBrowserBody">
+                            <div class="wc-site-bg">
+                                <div class="wc-site-lines">
+                                    <div class="wc-site-line wc-site-logo"></div>
+                                    <div class="wc-site-line wc-site-hero"></div>
+                                    <div class="wc-site-line wc-site-body" style="width:95%"></div>
+                                    <div class="wc-site-line wc-site-body" style="width:80%"></div>
+                                    <div class="wc-site-line wc-site-body" style="width:88%"></div>
+                                    <div class="wc-site-line wc-site-body" style="width:72%"></div>
+                                    <div class="wc-site-line wc-site-body" style="width:90%"></div>
+                                </div>
+                            </div>
+
+
+                            <!-- Chat Window -->
+                            <div class="wc-chat-window" id="wcChatWindow">
+                                <!-- Studio Loading Overlay -->
+                                <div id="wcChatLoadingOverlay" style="position:absolute; inset:0; background:#FFFFFF; z-index:50; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:16px; gap:8px;">
+                                    <div style="width:28px; height:28px; border:3px solid #E6F0EC; border-top-color:#063D3B; border-radius:50%; animation:wcSpin 0.7s linear infinite;"></div>
+                                    <span style="font-size:11.5px; font-weight:600; color:#063D3B;">Syncing Chatbot Studio...</span>
+                                </div>
+                                <style>
+                                    @keyframes wcSpin { to { transform: rotate(360deg); } }
+                                </style>
+                                <!-- Header -->
+                                <div class="wc-widget-header" id="wcPreviewHeader" style="background: #063D3B; color: #FFFFFF;">
+                                    <div class="wc-header-logo" id="wcPreviewAvatarBox" style="display: flex; background: #FFFFFF; border: 1px solid #FFFFFF; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.12); padding: 0;">
+                                        <img src="/default_logo.png" alt="logo" id="wcPreviewAvatarImg" style="width:100%;height:100%;object-fit:contain;border-radius:3px;display:block;">
+                                    </div>
+                                    <div class="wc-header-info">
+                                        <div class="wc-header-name" id="wcPreviewBotName" style="color: #FFFFFF;">AI Admissions Assistant</div>
+                                        <div class="wc-header-sub" style="color: #FFFFFF;"><span class="wc-online-dot"></span><span id="wcPreviewSubtitle" style="color: #FFFFFF;">Online Now</span></div>
+                                    </div>
+                                    <button class="wc-header-close" id="wcPreviewClose" style="color: #FFFFFF;">✕</button>
+                                </div>
+                                <!-- Messages Area -->
+                                <div class="wc-messages-area" id="wcPreviewMessages">
+                                    <!-- Bot welcome message -->
+                                    <div class="wc-msg-row bot">
+                                        <div class="wc-msg-avatar" id="wcMsgAv1"><img src="/avatars/avatar1.png" alt="bot" id="wcMsgAv1Img" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></div>
+                                        <div class="wc-bubble" id="wcPreviewWelcomeBubble" style="background:#f1f5f9; color:#1e293b; border-radius:14px 14px 14px 3px; font-size:13px;">Hi there! 👋 Welcome to our admissions assistant. How can I help you today?</div>
+                                    </div>
+                                    <!-- Chips (blank by default) -->
+                                    <div class="wc-chips-row" id="wcPreviewChips" style="display:none;"></div>
+                                    <!-- User sample message -->
+                                    <div class="wc-msg-row user">
+                                        <div class="wc-bubble" id="wcPreviewUserBubble" style="background:#063D3B; color:#ffffff; border-radius:14px 14px 3px 14px; font-size:13px;">What programs and degrees are offered?</div>
+                                    </div>
+                                    <!-- Bot reply -->
+                                    <div class="wc-msg-row bot">
+                                        <div class="wc-msg-avatar" id="wcMsgAv2"><img src="/avatars/avatar1.png" alt="bot" id="wcMsgAv2Img" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></div>
+                                        <div class="wc-bubble" id="wcPreviewBotReply" style="background:#f1f5f9; color:#1e293b; border-radius:14px 14px 14px 3px; font-size:13px;">We offer undergraduate and graduate degree programs across multiple academic colleges. How can I help you explore? 🎓</div>
+                                    </div>
+                                </div>
+
+                                <!-- Input Bar -->
+                                <div class="wc-input-row" id="wcPreviewInputRow" style="background:#ffffff; border-top-color:#e2e8f0;">
+                                    <input id="wcPreviewInput" class="wc-input-field" placeholder="Ask me anything..." style="background:#ffffff; border-color:#e2e8f0; color:#1e293b; border-radius:24px;" onkeydown="wcHandleKey(event)">
+                                    <button class="wc-send-btn" id="wcPreviewSendBtn" style="background:#063D3B; color:#ffffff;" onclick="wcSendMessage()">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                                    </button>
+                                </div>
+                                <!-- Branding -->
+                                <div class="wc-branding-bar" id="wcPreviewBranding" style="background:#ffffff; color:#64748b;">⚡ Powered by Edvora Chat</div>
+                            </div>
+
+                            <!-- Floating Launcher Button -->
+                            <div class="wc-launcher style-circle pos-bottom-right" id="wcPreviewLauncher" style="width:60px; height:60px; background:#063D3B; color:#ffffff;">
+                                <span class="wc-launcher-icon" id="wcPreviewLauncherIcon">💬</span>
+                                <span class="wc-launcher-text" id="wcPreviewLauncherText" style="display:none; color:#ffffff;">Ask AI</span>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <!-- END RIGHT COLUMN -->
+
+            </div>
+        </div>
+    </div>
+
+    <!-- SUBTAB 2: Embed Code -->
+    <div id="subtabViewEmbed" style="display: none;">
+            <div style="max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px;">
+                
+                <!-- Main Script Snippet Card -->
+                <div class="brand-card" style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.04);">
+                    <div class="brand-panel-header" style="background: #F9FCFB; border-bottom: 1.5px solid #E6F0EC; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 16px;">💻</span>
+                            <div>
+                                <span style="font-weight: 700; color: #063D3B; font-size: 13px;">Standard Web Integration Script</span>
+                                <span style="font-size: 11px; color: #648781; margin-left: 8px; font-weight: 500;">(Single Line Installation)</span>
+                            </div>
+                        </div>
+                        <span style="background: #E6F7D2; color: #063D3B; border: 1px solid #C8FF63; font-size: 10.5px; font-weight: 700; padding: 3px 10px; border-radius: 20px;">Async &amp; Lightweight (&lt;25KB)</span>
+                    </div>
+                    <div style="padding: 24px;">
+                        <!-- Embed Target Selector: Org vs Department -->
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; padding: 12px 16px; background: #F4FAF7; border: 1.5px solid #D1E5DE; border-radius: 8px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 13px; font-weight: 700; color: #063D3B;">Select Target Widget:</span>
+                                <select id="embedTargetSelect" class="brand-input" style="height: 32px; font-size: 12px; font-weight: 600; color: #063D3B; padding: 0 10px; border-radius: 6px;" onchange="onEmbedTargetChange(this.value)">
+                                    <option value="org">🏛️ Main Organization Widget</option>
+                                </select>
+                            </div>
+                            <div id="embedDeptStatusBadge" style="font-size: 11px; color: #047857; font-weight: 600;">
+                                🌐 Organization-wide general concierge widget
+                            </div>
+                        </div>
+
+                        <p style="font-size: 13px; color: #4B635E; margin: 0 0 14px 0; line-height: 1.6;">
+                            Add your AI chatbot to any website by copying the code snippet below and pasting it just before the closing <code>&lt;/body&gt;</code> tag on your web pages:
+                        </p>
+                        <div style="position: relative; background: #063D3B; border-radius: 8px; padding: 18px 22px; color: #C8FF63; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; font-size: 12.5px; border: 1px solid #032827; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);">
+                            <button type="button" class="brand-btn-secondary" id="copyScriptBtn" onclick="copyEmbedScript()" style="position: absolute; top: 12px; right: 12px; height: 32px; padding: 0 14px; font-size: 11.5px; background: #FFFFFF; color: #063D3B; border: 1px solid #C8FF63; border-radius: 6px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.15); transition: all 0.15s ease;">
+                                <span>📋</span> <span>Copy Code</span>
+                            </button>
+                            <div id="embedCodeBox" style="word-break: break-all; line-height: 1.7; padding-right: 110px; user-select: all;">
+                                &lt;script src="https://edvora.chat/widget.js" data-bot-token="..." async&gt;&lt;/script&gt;
+                            </div>
+                        </div>
+
+                        <!-- Quick Verification Toolbar -->
+                        <div style="margin-top: 18px; padding-top: 16px; border-top: 1px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                            <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #527570;">
+                                <span>🔑</span>
+                                <span>Your Bot Token: <strong id="embedBotTokenDisplay" style="font-family: monospace; color: #063D3B; background: #F4FAF7; padding: 2px 6px; border-radius: 4px; border: 1px solid #D1E5DE;">...</strong></span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <button type="button" onclick="openStandaloneTestChat()" class="brand-btn-secondary" style="height: 30px; padding: 0 12px; font-size: 11px; font-weight: 700; border-radius: 6px; background: #F4FAF7; border: 1.5px solid #D1E5DE; color: #063D3B; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                                    <span>🧪</span> Test Bot Live
+                                </button>
+                                <a href="#settings" onclick="switchNavTab('org-settings')" style="text-decoration: none; font-size: 11.5px; color: #047857; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                                    <span>🛡️ Whitelist Domains &rarr;</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step-by-Step Installation Guides Grid -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px;">
+                    
+                    <!-- Card 1: HTML / Custom CMS -->
+                    <div class="brand-card" style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 10px; padding: 18px; box-shadow: 0 1px 4px rgba(6, 61, 59, 0.03);">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                            <span style="font-size: 18px;">🌐</span>
+                            <div style="font-size: 13px; font-weight: 700; color: #063D3B;">Standard HTML / PHP</div>
+                        </div>
+                        <p style="font-size: 11.5px; color: #648781; line-height: 1.5; margin: 0 0 10px 0;">
+                            Insert snippet directly in your main template or footer template file (<code>footer.php</code>, <code>index.html</code>, or layout component) right before <code>&lt;/body&gt;</code>.
+                        </p>
+                        <div style="font-size: 11px; color: #047857; font-weight: 600; background: #F0FDF4; padding: 6px 10px; border-radius: 6px; border: 1px solid #BBF7D0;">
+                            ✓ Loads non-blocking without slowing down page load
+                        </div>
+                    </div>
+
+                    <!-- Card 2: WordPress -->
+                    <div class="brand-card" style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 10px; padding: 18px; box-shadow: 0 1px 4px rgba(6, 61, 59, 0.03);">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                            <span style="font-size: 18px;">📝</span>
+                            <div style="font-size: 13px; font-weight: 700; color: #063D3B;">WordPress Sites</div>
+                        </div>
+                        <p style="font-size: 11.5px; color: #648781; line-height: 1.5; margin: 0 0 10px 0;">
+                            1. In WP Admin, navigate to <strong>Plugins &rarr; Add New</strong>.<br>
+                            2. Install <em>WPCode</em> or <em>Header and Footer Scripts</em>.<br>
+                            3. Paste the embed script into the <strong>Footer</strong> section and save.
+                        </p>
+                        <div style="font-size: 11px; color: #063D3B; font-weight: 600; background: #F4FAF7; padding: 6px 10px; border-radius: 6px; border: 1px solid #D1E5DE;">
+                            ✓ Works across all WordPress themes &amp; builders
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Google Tag Manager / Webflow / Wix -->
+                    <div class="brand-card" style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 10px; padding: 18px; box-shadow: 0 1px 4px rgba(6, 61, 59, 0.03);">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                            <span style="font-size: 18px;">🏷️</span>
+                            <div style="font-size: 13px; font-weight: 700; color: #063D3B;">GTM, Webflow &amp; Wix</div>
+                        </div>
+                        <p style="font-size: 11.5px; color: #648781; line-height: 1.5; margin: 0 0 10px 0;">
+                            <strong>Google Tag Manager:</strong> Add a <em>Custom HTML</em> Tag, paste snippet, set Trigger to <em>All Pages</em>.<br>
+                            <strong>Webflow / Wix:</strong> Paste in <em>Custom Code &rarr; Body (End)</em> under Project Settings.
+                        </p>
+                        <div style="font-size: 11px; color: #063D3B; font-weight: 600; background: #F4FAF7; padding: 6px 10px; border-radius: 6px; border: 1px solid #D1E5DE;">
+                            ✓ Instant publishing without editing core theme files
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Best Practices & Domain Whitelisting Tip -->
+                <div style="background: #F0FDF4; border: 1.5px solid #A7F3D0; border-radius: 10px; padding: 16px 20px; display: flex; align-items: flex-start; gap: 14px;">
+                    <div style="font-size: 20px; line-height: 1; margin-top: 2px;">🛡️</div>
+                    <div style="font-size: 12px; color: #065F46; line-height: 1.6;">
+                        <strong style="color: #064E3B; font-size: 12.5px;">Domain Whitelisting &amp; Security:</strong><br>
+                        By default, the widget will load on any domain using your token. To prevent unauthorized websites from embedding your chatbot, specify your authorized production domain (e.g. <code>apexuniversity.edu</code>) in <strong>Organization &rarr; Security Settings</strong>.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        (function() {
+            // Immediate synchronous hydration from in-memory state to prevent any wrong default flash
+            const orgName = window.currentOrgName || '';
+            if (orgName) {
+                const nameInp = document.getElementById('wc_header_bot_name');
+                if (nameInp && !nameInp.value) nameInp.value = orgName;
+                const prevName = document.getElementById('wcPreviewBotName');
+                if (prevName) prevName.textContent = orgName;
+            }
+            const orgWeb = (window.currentOrgProfile && window.currentOrgProfile.website_url) || window.currentOrgWebsite || localStorage.getItem('edvora_org_website') || '';
+            if (orgWeb) {
+                const urlBar = document.getElementById('wcBrowserUrl');
+                if (urlBar) urlBar.textContent = orgWeb.startsWith('http') ? orgWeb : 'https://' + orgWeb;
+            }
+            const orgColor = (window.currentOrgProfile && window.currentOrgProfile.primary_color) || '#063D3B';
+            const hdr = document.getElementById('wcPreviewHeader');
+            if (hdr) hdr.style.background = orgColor;
+            const lnch = document.getElementById('wcPreviewLauncher');
+            if (lnch) lnch.style.background = orgColor;
+
+            const savedSubtab = localStorage.getItem('edvora_studio_subtab');
+            if (savedSubtab === 'embed' && typeof switchStudioSubtab === 'function') {
+                switchStudioSubtab('embed', false);
+            } else if (typeof loadWidgetCustomization === 'function') {
+                loadWidgetCustomization();
+            } else if (typeof applyWcToPreview === 'function' && typeof wcState !== 'undefined') {
+                applyWcToPreview(wcState.config);
+            }
+        })();
+    </script>
+</div>
+

@@ -1,0 +1,189 @@
+﻿<!-- Dedicated Read-Only Document Viewer (Unified Frame matching Settings & Overview) -->
+<div id="view-knowledge-view" class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
+    
+    <!-- Top Control Bar -->
+    <div class="ops-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 24px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important; flex-wrap: wrap; gap: 12px;">
+        <div class="ops-dash-title-group" style="display: flex !important; align-items: center !important; gap: 14px !important;">
+            <button type="button" class="brand-btn-secondary" style="height: 36px; padding: 0 14px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;" onclick="closeKnowledgeView()">
+                <span>←</span> Back to Knowledge Hub
+            </button>
+            <div style="height: 24px; width: 1px; background: #E2E8F0;"></div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span id="viewDocTypeIcon" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #F1F5F9; font-size: 16px; font-weight: 800; color: #475569;">📄</span>
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span id="viewDocHeaderTitle" class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important; letter-spacing: -0.01em !important; line-height: 1.25 !important; max-width: 520px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            Loading Document...
+                        </span>
+                        <span id="viewDocStatusBadge" style="display: inline-flex !important; align-items: center !important; gap: 7px !important; padding: 5px 14px !important; border-radius: 9999px !important; font-size: 11.5px !important; font-weight: 800 !important; background: #ECFDF5; border: 1.5px solid #34D399; color: #047857; box-shadow: 0 1px 3px rgba(0,0,0,0.06); flex-shrink: 0 !important;">
+                            <span style="width: 7px; height: 7px; border-radius: 50%; background: #10B981; display: inline-block;"></span>
+                            <span>Active &amp; Live</span>
+                        </span>
+                    </div>
+                    <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">
+                        Document ID: <strong id="viewDocIdTag" style="color: #063D3B;">—</strong> &bull; Governed by Freshness Shield
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
+            <button type="button" class="brand-btn-secondary" style="height: 36px; padding: 0 16px; font-size: 12px; font-weight: 600;" onclick="closeKnowledgeView()">Done</button>
+            <button type="button" id="btnViewDocEditTop" class="brand-btn-primary" style="display: none; height: 36px; padding: 0 20px; font-size: 12px; font-weight: 700; align-items: center; gap: 6px;" onclick="viewDocGoToEditor()">
+                <span>✏️</span> Edit Document
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div style="padding: 28px 32px 48px 32px; box-sizing: border-box; width: 100%;">
+        <div style="max-width: 920px; width: 100%; margin: 0; box-sizing: border-box;">
+
+            <!-- View-Only Informational Banner (Shown when user has view-only rights) -->
+            <div id="viewOnlyNoticeBanner" style="display: none; background: #F0FDF4; border: 1.5px solid #86EFAC; border-radius: 8px; padding: 14px 18px; margin-bottom: 22px; align-items: center; gap: 12px;">
+                <span style="font-size: 20px; flex-shrink: 0;">📖</span>
+                <div style="font-size: 12.5px; color: #14532D; line-height: 1.45;">
+                    <strong>View Only:</strong> This document belongs to <strong id="viewOnlyDeptName">—</strong>. You can view all information and policy content here. Contact your administrator to request edit access.
+                </div>
+            </div>
+
+            <!-- Global Document Notice Banner (Shown for global docs to staff) -->
+            <div id="viewGlobalNoticeBanner" style="display: none; background: #EFF6FF; border: 1.5px solid #93C5FD; border-radius: 8px; padding: 14px 18px; margin-bottom: 22px; align-items: center; gap: 12px;">
+                <span style="font-size: 20px; flex-shrink: 0;">🌐</span>
+                <div style="font-size: 12.5px; color: #1E40AF; line-height: 1.45;">
+                    <strong>Institutional Document:</strong> This document is globally available across the institution and managed by administrators.
+                </div>
+            </div>
+
+            <!-- SECTION 1: Document Core Identity & Department Scope -->
+            <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 8px; padding: 22px 24px; margin-bottom: 24px;">
+                <div style="font-size: 13.5px; font-weight: 800; color: #092F2E; display: flex; align-items: center; gap: 8px; margin-bottom: 18px;">
+                    <span>📋</span> Document Core Identity &amp; Department Scope
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                        Document Title
+                    </label>
+                    <div id="view_doc_title" style="font-size: 14px; font-weight: 700; color: #063D3B; padding: 8px 12px; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 6px;">—</div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 18px;">
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                            Institutional Category
+                        </label>
+                        <div id="view_doc_category" style="font-size: 12.5px; font-weight: 600; color: #334155; padding: 8px 12px; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 6px;">—</div>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                            Academic Version / Cycle
+                        </label>
+                        <div id="view_doc_academic_version" style="font-size: 12.5px; font-weight: 600; color: #334155; padding: 8px 12px; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 6px;">—</div>
+                    </div>
+                </div>
+
+                <!-- Assigned Department Badges -->
+                <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 8px;">
+                        Assigned Department(s) Scope
+                    </label>
+                    <div id="viewDocDeptContainer" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 6px; min-height: 44px; align-items: center;">
+                        <span style="font-size: 12px; color: #94A3B8;">Global (Institution-wide)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: Freshness Shield & Validity Governance -->
+            <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 8px; padding: 22px 24px; margin-bottom: 24px;">
+                <div style="font-size: 13.5px; font-weight: 800; color: #092F2E; display: flex; align-items: center; gap: 8px; margin-bottom: 18px;">
+                    <span>🛡️</span> Freshness Shield &amp; Temporal Validity
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 16px;">
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                            Effective Start Date (Activation)
+                        </label>
+                        <div id="view_doc_effective_from" style="font-size: 12.5px; font-weight: 600; color: #334155; padding: 8px 12px; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 6px;">—</div>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                            Expiration Date (Freshness Shield)
+                        </label>
+                        <div id="view_doc_expires_on" style="font-size: 12.5px; font-weight: 600; color: #334155; padding: 8px 12px; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 6px;">—</div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                            Review Cadence
+                        </label>
+                        <div id="view_doc_review_freq" style="font-size: 12.5px; font-weight: 600; color: #334155; padding: 8px 12px; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 6px;">—</div>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                            Last Audited &amp; Confirmed
+                        </label>
+                        <div id="view_doc_last_reviewed" style="font-size: 12.5px; font-weight: 600; color: #334155; padding: 8px 12px; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 6px;">—</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: Content Chunks, Raw Policy & Semantic Keywords -->
+            <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 8px; padding: 22px 24px; margin-bottom: 24px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; gap: 8px;">
+                    <div style="font-size: 13.5px; font-weight: 800; color: #092F2E; display: flex; align-items: center; gap: 8px;">
+                        <span>🧠</span> AI Knowledge Engine Content &amp; Keywords
+                    </div>
+                    <span id="viewDocWordCountBadge" class="badge" style="font-size: 11px; font-weight: 600; padding: 3px 8px; background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0;">
+                        0 words
+                    </span>
+                </div>
+
+                <!-- URL Source Display (if type === 'url') -->
+                <div id="viewDocUrlRow" style="display: none; margin-bottom: 16px;">
+                    <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                        Target Web Page Address (URL)
+                    </label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="url" id="view_doc_source_url" readonly class="brand-input" style="flex: 1; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #F8FAFC;" />
+                        <a id="btnViewDocOpenUrl" href="#" target="_blank" class="brand-btn-secondary" style="height: 38px; padding: 0 14px; font-size: 12px; display: inline-flex; align-items: center; text-decoration: none;">
+                            ↗ Visit URL
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Semantic Keywords Display -->
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                        AI Strategic Semantic Search Keywords
+                    </label>
+                    <div id="viewDocKeywordsContainer" style="display: flex; flex-wrap: wrap; gap: 6px; padding: 10px; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 6px; min-height: 36px; align-items: center;">
+                        <span style="font-size: 12px; color: #94A3B8;">None specified</span>
+                    </div>
+                </div>
+
+                <!-- Raw Content Display -->
+                <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                        Document Policy Content
+                    </label>
+                    <pre id="view_doc_raw_content" style="width: 100%; box-sizing: border-box; font-family: var(--brand-font-mono, monospace); font-size: 12px; line-height: 1.6; padding: 14px; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 6px; white-space: pre-wrap; word-break: break-word; max-height: 400px; overflow-y: auto; color: #1E293B; margin: 0;"></pre>
+                </div>
+            </div>
+
+            <!-- Bottom Navigation Bar -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0;">
+                <button type="button" onclick="closeKnowledgeView()" class="brand-btn-secondary" style="height: 40px; padding: 0 20px; font-size: 13px; font-weight: 600;">
+                    ← Back to Knowledge Hub
+                </button>
+                <button type="button" id="btnViewDocEditBottom" class="brand-btn-primary" style="display: none; height: 40px; padding: 0 24px; font-size: 13px; font-weight: 700; align-items: center; gap: 6px;" onclick="viewDocGoToEditor()">
+                    <span>✏️</span> Edit Document
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

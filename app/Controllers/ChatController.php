@@ -1,0 +1,408 @@
+<?php
+
+namespace App\Controllers;
+
+use App\Config\Database;
+use App\Core\Request;
+use App\Core\Response;
+use App\Services\ContentEngine;
+use App\Services\IntentClassifier;
+use App\Services\LlmService;
+use App\Services\PromptBuilder;
+use App\Services\QueryTranslator;
+use PDO;
+use Throwable;
+
+class ChatController
+{
+    /**
+     * GET /v1/widget/config/{bot_token} — Public widget configuration endpoint
+     */
+    public function widgetConfig(Request $request, array $params = []): void
+    {
+        $botToken = trim($params['bot_token'] ?? '');
+        if (empty($botToken)) {
+            Response::error('Bot token is required.', 400);
+        }
+
+        $db = Database::getConnection();
+        $stmt = $db->prepare("
+            SELECT c.*, o.name as org_name, o.logo_url as org_logo, o.primary_color as org_color
+            FROM chatbots c
+            JOIN organizations o ON c.organization_id = o.id
+            WHERE c.bot_token = :token AND c.is_active = 1
+        ");
+        $stmt->execute([':token' => $botToken]);
+        $bot = $stmt->fetch();
+
+        if (!$bot) {
+            Response::error('Chatbot not found or inactive.', 404);
+        }
+
+        // Load widget customization with cascade: dept → org → defaults
+        $deptId = $request->get('dept_id') ? (int)$request->get('dept_id') : (isset($bot['department_id']) ? (int)$bot['department_id'] : null);
+        $deptInfo = null;
+        if ($deptId) {
+            $stmtDept = $db->prepare("SELECT id, name, icon, greeting_message FROM departments WHERE id = :did AND organization_id = :oid AND (is_active = 1 OR enable_dedicated_widget = 1)");
+            $stmtDept->execute([':did' => $deptId, ':oid' => (int)$bot['organization_id']]);
+            $deptInfo = $stmtDept->fetch();
+        }
+
+        $customization = \App\Controllers\WidgetCustomizationController::cascadeLookup(
+            $db,
+            (int)$bot['id'],
+            (int)$bot['organization_id'],
+            $deptId
+        );
+
+        $botDisplayName = !empty($customization['header_bot_name']) ? $customization['header_bot_name'] : ($deptInfo ? ($deptInfo['name'] . ' Assistant') : ($bot['name'] ?: $bot['org_name']));
+        $welcomeMsg = !empty($customization['welcome_message']) ? $customization['welcome_message'] : ($deptInfo['greeting_message'] ?? ($bot['welcome_message'] ?: "Hi there! 👋 Welcome to {$bot['org_name']}. How can I assist you with admissions, programs, or campus life today?"));
+
+        // Check authoritative counts for passive lead capture action badges
+        $hasAssets = (int)$db->query("SELECT COUNT(*) FROM lead_assets WHERE organization_id = " . (int)$bot['organization_id'] . " AND is_active = 1")->fetchColumn() > 0;
+        $hasCampuses = (int)$db->query("SELECT COUNT(*) FROM campuses WHERE organization_id = " . (int)$bot['organization_id'] . " AND status = 'active'")->fetchColumn() > 0;
+        // Check if callbacks are actually configured: has department phone OR assigned staff
+        $orgIdInt = (int)$bot['organization_id'];
+        $hasPhoneOrStaff = (int)$db->query("SELECT COUNT(*) FROM departments WHERE organization_id = {$orgIdInt} AND is_active = 1 AND (phone IS NOT NULL AND phone != '')")->fetchColumn() > 0;
+        $hasStaff = (int)$db->query("SELECT COUNT(*) FROM department_staff ds JOIN departments d ON ds.department_id = d.id WHERE d.organization_id = {$orgIdInt}")->fetchColumn() > 0;
+        $hasCallbacks = ((bool)$bot['lead_capture_enabled']) && ($hasPhoneOrStaff || $hasStaff);
+
+        $quickChips = [];
+        if ($deptId) {
+            $stmtFaqs = $db->prepare("SELECT question, answer FROM department_faqs WHERE department_id = ? ORDER BY sort_order ASC LIMIT 5");
+            $stmtFaqs->execute([$deptId]);
+            $deptFaqs = $stmtFaqs->fetchAll();
+            if (!empty($deptFaqs)) {
+                $quickChips = array_map(function($f) {
+                    return [
+                        'label' => $f['question'],
+                        'message' => $f['question']
+                    ];
+                }, $deptFaqs);
+            }
+        }
+        if (isset($customization['quick_chips'])) {
+            $rawCustChips = $customization['quick_chips'];
+            if (is_array($rawCustChips) && !empty($rawCustChips)) {
+                $quickChips = array_map(function($c) {
+                    $lbl = is_array($c) ? ($c['label'] ?? $c['message'] ?? '') : (string)$c;
+                    return ['label' => $lbl, 'message' => $lbl];
+                }, $rawCustChips);
+            } else if (is_string($rawCustChips) && trim($rawCustChips) !== '') {
+                $chipsParts = array_filter(array_map('trim', explode(',', $rawCustChips)));
+                $quickChips = array_map(function($c) {
+                    return ['label' => $c, 'message' => $c];
+                }, $chipsParts);
+            } else {
+                $quickChips = [];
+            }
+        } else if (!empty($bot['quick_chips'])) {
+            $rawBotChips = is_string($bot['quick_chips']) ? (json_decode($bot['quick_chips'], true) ?: []) : $bot['quick_chips'];
+            if (is_array($rawBotChips)) {
+                $quickChips = array_map(function($c) {
+                    if (is_array($c)) {
+                        return [
+                            'label' => $c['label'] ?? $c['message'] ?? '',
+                            'message' => $c['message'] ?? $c['label'] ?? ''
+                        ];
+                    }
+                    return ['label' => (string)$c, 'message' => (string)$c];
+                }, $rawBotChips);
+            }
+        }
+
+        Response::success([
+            'bot_id' => (int)$bot['id'],
+            'department_id' => $deptId,
+            'department_name' => $deptInfo['name'] ?? null,
+            'organization_name' => $bot['org_name'],
+            'name' => $botDisplayName,
+            'welcome_message' => $welcomeMsg,
+            'primary_color' => $customization['header_bg'] ?? ($bot['primary_color'] ?: ($bot['org_color'] ?: '#6366F1')),
+            'secondary_color' => $bot['secondary_color'] ?? '#38BDF8',
+            'bot_avatar' => $customization['avatar_url'] ?? ($bot['bot_avatar_url'] ?: ($bot['org_logo'] ?: null)),
+            'lead_capture_enabled' => (bool)$bot['lead_capture_enabled'],
+            'widget_style' => $bot['widget_style'] ?? 'glassmorphism',
+            'theme_mode' => $customization['theme'] ?? ($bot['theme_mode'] ?? 'dark'),
+            'header_subtitle' => $customization['header_subtitle'] ?? ($bot['header_subtitle'] ?? 'Online • Replies instantly'),
+            'launcher_icon' => $customization['launcher_icon'] ?? ($bot['launcher_icon'] ?? 'chat'),
+            'launcher_text' => $customization['launcher_text'] ?? ($bot['launcher_text'] ?? 'Ask AI'),
+            'border_radius' => $bot['border_radius'] ?? 'curved',
+            'avatar_icon' => $bot['avatar_icon'] ?? '🤖',
+            'quick_chips' => $quickChips,
+            'has_assets' => $hasAssets,
+            'has_campuses' => $hasCampuses,
+            'has_callbacks' => $hasCallbacks,
+            'customization' => $customization,
+            'min_turns_before_lead' => 2,
+            'passive_lead_bar_enabled' => ($hasAssets || $hasCampuses || $hasCallbacks)
+        ]);
+    }
+
+    /**
+     * POST /v1/chat/completions — Public widget chat endpoint
+     */
+    public function complete(Request $request, array $params = []): void
+    {
+        $botToken = trim((string)($request->get('bot_token') ?? ''));
+        $visitorId = trim((string)($request->get('visitor_id') ?? ''));
+        if (empty($visitorId)) {
+            $visitorId = 'mob_' . substr(md5(uniqid((string)mt_rand(), true)), 0, 16);
+        }
+        $userMessage = trim((string)($request->get('message') ?? $request->get('query') ?? $request->get('prompt') ?? ''));
+        $isTest = (int)(bool)($request->get('is_test') ?? false);
+        $deptId = $request->get('department_id') ? (int)$request->get('department_id') : null;
+
+        if (empty($botToken) || empty($userMessage)) {
+            Response::error('bot_token and message are required fields.', 422);
+        }
+
+        $db = Database::getConnection();
+
+        // 1. Authenticate chatbot token & active status
+        $stmtBot = $db->prepare("
+            SELECT c.*, o.name as org_name, o.subscription_status
+            FROM chatbots c
+            JOIN organizations o ON c.organization_id = o.id
+            WHERE c.bot_token = :token AND c.is_active = 1
+        ");
+        $stmtBot->execute([':token' => $botToken]);
+        $bot = $stmtBot->fetch();
+
+        if (!$bot) {
+            Response::error('Invalid or inactive chatbot token.', 403);
+        }
+
+        $orgId = (int)$bot['organization_id'];
+        $botId = (int)$bot['id'];
+
+        // 2. Find or Create Conversation Session & check existing Lead Status
+        $stmtConv = $db->prepare("
+            SELECT id, is_test, lead_name_collected, lead_email_collected, lead_phone_collected,
+                   visitor_name, visitor_email, visitor_phone, lead_captured_at
+            FROM conversations
+            WHERE organization_id = :org_id AND chatbot_id = :bot_id AND visitor_id = :visitor_id
+            ORDER BY id DESC LIMIT 1
+        ");
+        $stmtConv->execute([
+            ':org_id' => $orgId,
+            ':bot_id' => $botId,
+            ':visitor_id' => $visitorId
+        ]);
+        $conv = $stmtConv->fetch();
+
+        $leadCaptured = false;
+        $visitorEmail = null;
+        $visitorName = null;
+
+        if (!$conv) {
+            $stmtNewConv = $db->prepare("
+                INSERT INTO conversations (organization_id, chatbot_id, department_id, visitor_id, is_test, page_url, page_title, started_at, last_message_at)
+                VALUES (:org_id, :bot_id, :dept_id, :visitor_id, :is_test, :page_url, :page_title, NOW(), NOW())
+            ");
+            $stmtNewConv->execute([
+                ':org_id' => $orgId,
+                ':bot_id' => $botId,
+                ':dept_id' => $deptId,
+                ':visitor_id' => $visitorId,
+                ':is_test' => $isTest,
+                ':page_url' => $request->get('page_url'),
+                ':page_title' => $request->get('page_title')
+            ]);
+            $convId = (int)$db->lastInsertId();
+        } else {
+            $convId = (int)$conv['id'];
+            $isTest = (int)($conv['is_test'] ?? $isTest);
+            $leadCaptured = (!empty($conv['lead_captured_at']) || !empty($conv['lead_email_collected']) || !empty($conv['visitor_email']));
+            $visitorEmail = $conv['visitor_email'] ?? null;
+            $visitorName = $conv['visitor_name'] ?? null;
+            $db->exec("UPDATE conversations SET last_message_at = NOW() WHERE id = {$convId}");
+        }
+
+        // 3. Save User Message to DB
+        $stmtUserMsg = $db->prepare("
+            INSERT INTO messages (conversation_id, organization_id, role, content, created_at)
+            VALUES (:conv_id, :org_id, 'user', :content, NOW())
+        ");
+        $stmtUserMsg->execute([
+            ':conv_id' => $convId,
+            ':org_id' => $orgId,
+            ':content' => $userMessage
+        ]);
+
+        // 4. Calculate Current Turn Count (number of user messages in this session)
+        $stmtTurns = $db->prepare("SELECT COUNT(*) FROM messages WHERE conversation_id = :cid AND role = 'user'");
+        $stmtTurns->execute([':cid' => $convId]);
+        $turnCount = (int)$stmtTurns->fetchColumn();
+
+        $minTurns = 2; // Recommended minimum turns before proactive lead triggers
+
+        // 5. Fetch Recent Conversation History (last 6 messages including current user message)
+        $stmtHistory = $db->prepare("
+            SELECT role, content FROM messages
+            WHERE conversation_id = :conv_id
+            ORDER BY id DESC LIMIT 6
+        ");
+        $stmtHistory->execute([':conv_id' => $convId]);
+        $history = array_reverse($stmtHistory->fetchAll());
+
+        // Previous messages prior to the current turn
+        $prevHistory = array_slice($history, 0, -1);
+
+        // 6. Stage 1: Deterministic Intent Classification with conversational context
+        $intentTier = IntentClassifier::classify($userMessage, $prevHistory);
+
+        $contextSources = [];
+        if ($intentTier === IntentClassifier::TIER_KNOWLEDGE_QUERY) {
+            $retrievalTarget = $userMessage;
+            // If user responded affirmatively (e.g., "yes", "sure", "please do"), retrieve context using previous assistant message
+            if (IntentClassifier::isAffirmativeResponse($userMessage, $prevHistory) && !empty($prevHistory)) {
+                for ($hIdx = count($prevHistory) - 1; $hIdx >= 0; $hIdx--) {
+                    if (($prevHistory[$hIdx]['role'] ?? '') === 'assistant') {
+                        $retrievalTarget = $prevHistory[$hIdx]['content'] ?? $userMessage;
+                        break;
+                    }
+                }
+            }
+            // Translate Visitor Query to English for retrieval if non-English
+            $englishQuery = QueryTranslator::translateToEnglish($retrievalTarget);
+            // Retrieve Top 1–3 Knowledge Context Sources
+            $contextSources = ContentEngine::selectContext($orgId, $englishQuery, $botId);
+        }
+
+        // 7. Build System Prompt with Counselor Brain & Intent Tier
+        $systemPrompt = PromptBuilder::build(
+            $orgId,
+            $contextSources,
+            $bot['system_prompt_override'],
+            $intentTier,
+            $turnCount,
+            $leadCaptured,
+            $minTurns
+        );
+
+        // 8. Invoke LLM Service
+        try {
+            $llmResult = LlmService::complete($systemPrompt, $userMessage, $history);
+            $rawAiResponse = $llmResult['text'];
+            $tokensUsed = $llmResult['tokens_used'];
+
+            // 9. Parse and strip structured [LEAD_TRIGGER:type] tag
+            $leadTriggerPayload = null;
+            $aiResponseText = $rawAiResponse;
+
+            if (preg_match('/\[LEAD_TRIGGER:([a-z_]+)\]\s*$/i', $rawAiResponse, $matches)) {
+                $rawTriggerType = strtolower(trim($matches[1]));
+                // Strip tag from user-facing text
+                $aiResponseText = trim(preg_replace('/\[LEAD_TRIGGER:[a-z_]+\]\s*$/i', '', $rawAiResponse));
+
+                // Only generate a trigger form if lead is NOT yet captured AND turn count >= minTurns
+                if (!$leadCaptured && $turnCount >= $minTurns && (bool)$bot['lead_capture_enabled']) {
+                    $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, $deptId, $rawTriggerType, $userMessage);
+                }
+            }
+
+            $sourceIdsUsed = array_map(fn($s) => $s['id'], $contextSources);
+
+            // 10. Save AI Response Message to DB
+            $stmtAiMsg = $db->prepare("
+                INSERT INTO messages (conversation_id, organization_id, role, content, knowledge_sources_used, tokens_used, created_at)
+                VALUES (:conv_id, :org_id, 'assistant', :content, :sources, :tokens, NOW())
+            ");
+            $stmtAiMsg->execute([
+                ':conv_id' => $convId,
+                ':org_id' => $orgId,
+                ':content' => $aiResponseText,
+                ':sources' => json_encode($sourceIdsUsed),
+                ':tokens' => $tokensUsed
+            ]);
+
+            // 11. Update Monthly Usage Logs (Skip test conversations)
+            if ($isTest === 0) {
+                $period = date('Y-m');
+                $db->exec("
+                    INSERT INTO usage_logs (organization_id, period, messages_count, tokens_used)
+                    VALUES ({$orgId}, '{$period}', 1, {$tokensUsed})
+                    ON DUPLICATE KEY UPDATE
+                    messages_count = messages_count + 1,
+                    tokens_used = tokens_used + {$tokensUsed}
+                ");
+            }
+
+            // Build masked email for returning visitor if captured
+            $maskedEmail = null;
+            if ($leadCaptured && $visitorEmail) {
+                $parts = explode('@', $visitorEmail);
+                $maskedUser = substr($parts[0], 0, 2) . str_repeat('*', max(3, strlen($parts[0]) - 2));
+                $maskedEmail = $maskedUser . '@' . ($parts[1] ?? 'email.com');
+            }
+
+            Response::success([
+                'conversation_id' => $convId,
+                'is_test' => $isTest,
+                'response' => $aiResponseText,
+                'sources_used' => array_map(fn($s) => ['id' => $s['id'], 'title' => $s['title']], $contextSources),
+                'lead_capture_trigger' => $leadTriggerPayload,
+                'intent_tier' => $intentTier,
+                'turn_count' => $turnCount,
+                'lead_captured' => $leadCaptured,
+                'masked_email' => $maskedEmail
+            ]);
+
+        } catch (Throwable $e) {
+            Response::error("Failed to generate AI response: " . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Resolve structured lead trigger and match with active lead_assets if asset_delivery
+     */
+    private static function resolveLeadTrigger(PDO $db, int $orgId, ?int $deptId, string $triggerType, string $userMessage): ?array
+    {
+        if ($triggerType === 'asset_delivery') {
+            // Find active asset in lead_assets table matching department first, or org-level
+            $stmtAsset = $db->prepare("
+                SELECT id, title, category, description, file_name
+                FROM lead_assets
+                WHERE organization_id = :oid
+                  AND is_active = 1
+                  AND (department_id = :did OR department_id IS NULL)
+                ORDER BY (department_id IS NOT NULL) DESC, id DESC
+                LIMIT 1
+            ");
+            $stmtAsset->execute([':oid' => $orgId, ':did' => $deptId]);
+            $asset = $stmtAsset->fetch();
+
+            $assetTitle = $asset['title'] ?? 'Detailed Course Fee & Admission Guide (PDF)';
+            $assetId = $asset['id'] ?? null;
+
+            return [
+                'type' => 'asset_delivery',
+                'asset_id' => $assetId,
+                'headline' => "Download " . $assetTitle,
+                'description' => "Enter your details to receive the official document and scholarship matrix sent directly to your email.",
+                'fields' => ['name', 'email', 'phone']
+            ];
+        }
+
+        if ($triggerType === 'counselor_callback') {
+            return [
+                'type' => 'counselor_callback',
+                'headline' => "Request a Counselor Callback",
+                'description' => "Leave your contact number so our admissions counselor can connect with you directly at your convenient time.",
+                'fields' => ['name', 'email', 'phone']
+            ];
+        }
+
+        if ($triggerType === 'campus_tour') {
+            return [
+                'type' => 'campus_tour',
+                'headline' => "Schedule a Guided Campus Tour",
+                'description' => "Experience our world-class campus, labs, and student facilities firsthand with a personalized guided visit.",
+                'fields' => ['name', 'email', 'phone']
+            ];
+        }
+
+        return null;
+    }
+}

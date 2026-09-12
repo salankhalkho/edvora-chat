@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Design Showcase — edvora.chat</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/theme-branding.css">
+    <style>
+        :root {
+            /* Light theme palette matching Edvora design standards */
+            --bg-page: #F1F7F4;
+            --bg-card: #ffffff;
+            --text-main: #092F2E;
+            --text-muted: #526360;
+            --border-color: #DDE9E3;
+            --brand-primary: #063D3B;
+            --brand-pistachio: #C8FF63;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 13px;
+            line-height: 1.5;
+            min-height: 100vh;
+            padding: 32px 24px 80px;
+        }
+        .showcase-container {
+            max-width: 1380px;
+            margin: 0 auto;
+        }
+        .header-bar {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px 28px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            box-shadow: 0 4px 20px rgba(6, 61, 59, 0.04);
+        }
+        .header-title-group h1 {
+            font-size: 22px;
+            font-weight: 800;
+            color: #063D3B;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.3px;
+        }
+        .header-title-group p {
+            font-size: 13px;
+            color: #526360;
+            margin-top: 6px;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .back-btn {
+            background: #ffffff;
+            color: #063D3B;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .back-btn:hover {
+            background: #E6F7D2;
+            border-color: #063D3B;
+            color: #063D3B;
+        }
+        .badge-count {
+            background: #E6F7D2;
+            color: #063D3B;
+            border: 1px solid #B9D7C7;
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 26px;
+        }
+
+        .card-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .card-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #526360;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 4px;
+        }
+
+        .card-item {
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s;
+        }
+        .card-item:hover {
+            transform: translateY(-4px);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="showcase-container">
+        <!-- Header -->
+        <header class="header-bar">
+            <div class="header-title-group">
+                <h1><span>🃏</span> Card Design Showcase Lab</h1>
+                <p>13 distinctive card UI architectures — showcasing diverse design paradigms.</p>
+            </div>
+            <div class="header-actions">
+                <span class="badge-count">13 Unique Designs</span>
+                <a href="/superadmin/" class="back-btn">← Back to SuperAdmin</a>
+            </div>
+        </header>
+
+        <!-- Grid of 12 Designs -->
+        <div class="cards-grid">
+
+            <!-- 1. VIVID INDIGO COLOR BLOCK -->
+            <div class="card-wrapper">
+                <div class="card-label"><span>01 · Vivid Indigo Color Block</span><span>🎛️ Controls</span></div>
+                <div class="card-item" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border-radius: 18px; padding: 24px; position: relative; overflow: hidden; box-shadow: 0 10px 28px rgba(99,102,241,0.25);">
+                    <div style="position: absolute; top: -20px; right: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.08); border-radius: 50%;"></div>
+                    <div style="position: absolute; bottom: -30px; right: 20px; width: 60px; height: 60px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                        <div style="background: rgba(255,255,255,0.2); border-radius: 12px; width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; font-size: 24px;">🎛️</div>
+                        <span style="background: rgba(200,255,150,0.25); color: #c8ff63; border: 1px solid rgba(200,255,150,0.4); border-radius: 20px; font-size: 10.5px; font-weight: 700; padding: 4px 10px; letter-spacing: 0.5px;">● ACTIVE</span>
+                    </div>
+                    <div style="color: #fff; font-size: 16px; font-weight: 700; margin-bottom: 8px;">ChatBot Settings</div>
+                    <div style="color: rgba(255,255,255,0.85); font-size: 11.5px; line-height: 1.55; margin-bottom: 18px;">Customize admissions bot persona, greeting message, theme colors, widget launcher style, and generate live website embed codes.</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                        <span style="background: rgba(255,255,255,0.18); color: #fff; border-radius: 6px; padding: 4px 10px; font-size: 10.5px; font-weight: 600;">Widget Styling</span>
+                        <span style="background: rgba(255,255,255,0.18); color: #fff; border-radius: 6px; padding: 4px 10px; font-size: 10.5px; font-weight: 600;">Color Palette</span>
+                        <span style="background: rgba(255,255,255,0.18); color: #fff; border-radius: 6px; padding: 4px 10px; font-size: 10.5px; font-weight: 600;">Embed Snippet</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. SOFT FROSTED GLASS (LIGHT) -->
+            <div class="card-wrapper">
+                <div class="card-label"><span>02 · Soft Frosted Glass</span><span>💬 Chat</span></div>
+                <div class="card-item" style="background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 20px; padding: 24px; box-shadow: 0 10px 30px rgba(99, 102, 241, 0.08); position: relative; overflow: hidden;">
+                    <div style="position: absolute; inset: 0; background: radial-gradient(ellipse at top left, rgba(99,102,241,0.06) 0%, transparent 60%); pointer-events: none;"></div>
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+                        <div style="width: 48px; height: 48px; border-radius: 14px; background: linear-gradient(135deg, #6366f1, #8b5cf6); display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 6px 16px rgba(99,102,241,0.25);">💬</div>
+                        <div>
+                            <div style="color: #092F2E; font-size: 14.5px; font-weight: 700;">ChatBot Settings</div>
+                            <div style="color: #6366f1; font-size: 10.5px; font-weight: 600; margin-top: 2px;">edvora.chat platform</div>
+                        </div>
+                        <span style="margin-left: auto; background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; border-radius: 20px; font-size: 10px; font-weight: 700; padding: 3px 9px;">● ACTIVE</span>
+                    </div>
+                    <div style="height: 1px; background: #e5e7eb; margin-bottom: 14px;"></div>
+                    <div style="color: #4b5563; font-size: 11.5px; line-height: 1.55; margin-bottom: 16px;">Customize admissions bot persona, greeting message, theme colors, widget launcher style, and generate live website embed codes.</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                        <span style="background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; border-radius: 6px; padding: 3px 9px; font-size: 10.5px; font-weight: 600;">Widget Styling</span>
+                        <span style="background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; border-radius: 6px; padding: 3px 9px; font-size: 10.5px; font-weight: 600;">Color Palette</span>
+                        <span style="background: #ecfeff; color: #0e7490; border: 1px solid #a5f3fc; border-radius: 6px; padding: 3px 9px; font-size: 10.5px; font-weight: 600;">Embed Snippet</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. CORAL COLOR SWATCH -->
+            <div class="card-wrapper">
+                <div class="card-label"><span>03 · Color Swatch Editorial</span><span>⚡ Energy</span></div>
+                <div class="card-item" style="background: linear-gradient(135deg, #ff6b6b 0%, #ffa552 100%); border-radius: 18px; padding: 24px; position: relative; overflow: hidden; box-shadow: 0 10px 28px rgba(255,107,107,0.25);">
+                    <div style="position: absolute; top: 14px; right: 14px; font-size: 24px; color: rgba(255,255,255,0.7); font-weight: 300;">+</div>
+                    <div style="font-size: 24px; margin-bottom: 12px;">⚡</div>
+                    <div style="color: #fff; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; line-height: 1.1;">CHATBOT<br>SETTINGS</div>
+                    <div style="width: 36px; height: 2px; background: rgba(255,255,255,0.7); margin: 10px 0;"></div>
+                    <div style="color: rgba(255,255,255,0.92); font-size: 11.5px; line-height: 1.5; margin-bottom: 18px;">Customize admissions bot persona, greeting message, theme colors, widget launcher style, and generate live website embed codes.</div>
+                    <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; gap: 4px; align-items: center;">
+                            <div style="height: 4px; width: 44px; background: rgba(255,255,255,0.9); border-radius: 4px;"></div>
+                            <div style="height: 4px; width: 28px; background: rgba(255,255,255,0.5); border-radius: 4px;"></div>
+                            <div style="height: 4px; width: 16px; background: rgba(255,255,255,0.3); border-radius: 4px;"></div>
+                        </div>
+                        <span style="background: rgba(255,255,255,0.25); color: #fff; border-radius: 20px; font-size: 10px; font-weight: 700; padding: 3px 10px;">● ACTIVE</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. CLEAN MINIMAL LIGHT -->
+            <div class="card-wrapper">
+                <div class="card-label"><span>04 · Clean Minimal Light</span><span>🎨 Palette</span></div>
+                <div class="card-item" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 18px; padding: 24px; box-shadow: 0 6px 24px rgba(6, 61, 59, 0.05); position: relative; overflow: hidden;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                        <div style="width: 48px; height: 48px; border-radius: 14px; background: linear-gradient(135deg, #f0f0ff, #e0e0ff); border: 1px solid #ddd6fe; display: flex; align-items: center; justify-content: center; font-size: 24px;">🎨</div>
+                        <span style="background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; border-radius: 20px; font-size: 10.5px; font-weight: 700; padding: 4px 10px;">● ACTIVE</span>
+                    </div>
+                    <div style="color: #092F2E; font-size: 15px; font-weight: 700; margin-bottom: 8px;">ChatBot Settings</div>
+                    <div style="color: #526360; font-size: 11.5px; line-height: 1.55; margin-bottom: 16px;">Customize admissions bot persona, greeting message, theme colors, widget launcher style, and generate live website embed codes.</div>
+                    <div style="height: 1px; background: #f1f5f9; margin-bottom: 14px;"></div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                        <span style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 6px; padding: 4px 10px; font-size: 10.5px; font-weight: 600;">Widget Styling</span>
+                        <span style="background: #fdf4ff; color: #9333ea; border: 1px solid #e9d5ff; border-radius: 6px; padding: 4px 10px; font-size: 10.5px; font-weight: 600;">Color Palette</span>
+                        <span style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; border-radius: 6px; padding: 4px 10px; font-size: 10.5px; font-weight: 600;">Embed Snippet</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. SPLIT-HEADER METRIC (LIGHT) -->
+            <div class="card-wrapper">
+                <div class="card-label"><span>05 · Split-Banner Header</span><span>🧩 Integration</span></div>
+                <div class="card-item" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 18px; overflow: hidden; box-shadow: 0 6px 24px rgba(6, 61, 59, 0.05); display: flex; flex-direction: column;">
+                    <div style="background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%); padding: 18px 20px; display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 42px; height: 42px; background: rgba(255,255,255,0.2); border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 22px;">🧩</div>
+                        <div style="flex: 1;">
+                            <div style="color: #fff; font-weight: 700; font-size: 13.5px;">ChatBot Settings</div>
+                            <div style="color: rgba(255,255,255,0.85); font-size: 10.5px; margin-top: 1px;">Admissions AI Engine</div>
+                        </div>
+                        <span style="background: rgba(255,255,255,0.25); color: #fff; border-radius: 20px; font-size: 10px; font-weight: 700; padding: 3px 10px;">● ACTIVE</span>
+                    </div>
+                    <div style="padding: 18px 20px; flex: 1; background: #ffffff;">
+                        <div style="color: #526360; font-size: 11.5px; line-height: 1.55; margin-bottom: 14px;">Customize admissions bot persona, greeting message, theme colors, widget launcher style, and generate live website embed codes.</div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 8px; text-align: center;">
+                                <div style="font-size: 16px; margin-bottom: 2px;">🎨</div>
+                                <div style="color: #092F2E; font-size: 10px; font-weight: 600;">Widget</div>
+                            </div>
+                            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 8px; text-align: center;">
+                                <div style="font-size: 16px; margin-bottom: 2px;">🌈</div>
+                                <div style="color: #092F2E; font-size: 10px; font-weight: 600;">Palette</div>
+                            </div>
+                            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 8px; text-align: center;">
+                                <div style="font-size: 16px; margin-bottom: 2px;">💻</div>
+                                <div style="color: #092F2E; font-size: 10px; font-weight: 600;">Embed</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. SIGNATURE FOREST TEAL BRAND -->
+            <div class="card-wrapper">
+                <div class="card-label"><span>06 · Signature Forest Teal</span><span>🌐 Global</span></div>
+                <div class="card-item" style="background: linear-gradient(135deg, #063D3B 0%, #094E4B 100%); border-radius: 18px; padding: 24px; position: relative; overflow: hidden; box-shadow: 0 10px 28px rgba(6,61,59,0.22);">
+                    <div style="position: absolute; bottom: -24px; left: -24px; width: 120px; height: 120px; background: rgba(200,255,99,0.08); border-radius: 50%;"></div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                        <div style="background: rgba(200,255,99,0.2); border: 1px solid rgba(200,255,99,0.35); border-radius: 12px; width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; font-size: 24px;">🌐</div>
+                        <span style="background: rgba(200,255,99,0.2); color: #c8ff63; border: 1px solid rgba(200,255,99,0.4); border-radius: 20px; font-size: 10.5px; font-weight: 700; padding: 3px 10px;">● ACTIVE</span>
+                    </div>
+                    <div style="color: #c8ff63; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px;">ChatBot Settings</div>
+                    <div style="color: rgba(255,255,255,0.92); font-size: 12px; line-height: 1.55; margin-bottom: 18px;">Customize admissions bot persona, greeting message, theme colors, widget launcher style, and generate live website embed codes.</div>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        <span style="background: rgba(255,255,255,0.14); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 4px 10px; font-size: 10.5px; font-weight: 600;">Widget Styling</span>
+                        <span style="background: rgba(255,255,255,0.14); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 4px 10px; font-size: 10.5px; font-weight: 600;">Color Palette</span>
+                        <span style="background: rgba(255,255,255,0.14); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 4px 10px; font-size: 10.5px; font-weight: 600;">Embed Snippet</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. NEO-BRUTALIST -->
+            <div class="card-wrapper">
+                <div class="card-label"><span>07 · Neo-Brutalist Pop</span><span>🔥 Fire</span></div>
+                <div class="card-item" style="background: #fef08a; border: 3px solid #1a1a1a; border-radius: 14px; padding: 22px; box-shadow: 6px 6px 0px #1a1a1a; position: relative;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+                        <div style="background: #1a1a1a; border-radius: 8px; width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; font-size: 24px;">🔥</div>
+                        <span style="background: #1a1a1a; color: #fef08a; border-radius: 4px; font-size: 10.5px; font-weight: 800; padding: 4px 10px; letter-spacing: 0.5px;">● ACTIVE</span>
+                    </div>
+                    <div style="color: #1a1a1a; font-size: 16px; font-weight: 900; letter-spacing: -0.3px; margin-bottom: 8px; text-transform: uppercase;">ChatBot Settings</div>
+                    <div style="color: #1a1a1a; font-size: 11.5px; line-height: 1.55; margin-bottom: 16px;">Customize admissions bot persona, greeting message, theme colors, widget launcher style, and generate live website embed codes.</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                        <span style="background: #fff; color: #1a1a1a; border: 2px solid #1a1a1a; border-radius: 4px; padding: 4px 10px; font-size: 10.5px; font-weight: 800; box-shadow: 2px 2px 0 #1a1a1a;">Widget Styling</span>
+                        <span style="background: #fff; color: #1a1a1a; border: 2px solid #1a1a1a; border-radius: 4px; padding: 4px 10px; font-size: 10.5px; font-weight: 800; box-shadow: 2px 2px 0 #1a1a1a;">Color Palette</span>
+                        <span style="background: #fff; color: #1a1a1a; border: 2px solid #1a1a1a; border-radius: 4px; padding: 4px 10px; font-size: 10.5px; font-weight: 800; box-shadow: 2px 2px 0 #1a1a1a;">Embed Snippet</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. OUTLINED WIREFRAME (LIGHT) -->
+            <div class="card-wrapper">
+                <div class="card-label"><span>08 · Outlined Wireframe</span><span>🔷 Diamond</span></div>
+                <div class="card-item" style="background: #ffffff; border: 2px solid #818cf8; border-radius: 18px; padding: 24px; position: relative; box-shadow: 0 4px 16px rgba(99,102,241,0.06); transition: all 0.2s ease;">
+                    <div style="position: absolute; top: -1px; left: 24px; background: #ffffff; padding: 0 10px;">
+                        <span style="color: #4f46e5; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;">ChatBot Settings</span>
+                    </div>
+                    <div style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+                        <div style="width: 44px; height: 44px; border: 2px solid #c7d2fe; background: #eef2ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px;">🔷</div>
+                        <span style="background: #ecfdf5; color: #059669; border: 1.5px solid #a7f3d0; border-radius: 20px; font-size: 10px; font-weight: 700; padding: 3px 9px;">● ACTIVE</span>
+                    </div>
+                    <div style="color: #526360; font-size: 11.5px; line-height: 1.55; margin-bottom: 16px;">Customize admissions bot persona, greeting message, theme colors, widget launcher style, and generate live website embed codes.</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                        <span style="background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; border-radius: 6px; padding: 4px 10px; font-size: 10.5px; font-weight: 600;">Widget Styling</span>
+                        <span style="background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; border-radius: 6px; padding: 4px 10px; font-size: 10.5px; font-weight: 600;">Color Palette</span>
+                        <span style="background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; border-radius: 6px; padding: 4px 10px; font-size: 10.5px; font-weight: 600;">Embed Snippet</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 9. MINT / GRADIENT BORDER (LIGHT) -->
+            <div class="card-wrapper">
+                <div class="card-label"><span>09 · Prism Gradient Border</span><span>🔮 Magic</span></div>
+                <div class="card-item" style="background: linear-gradient(135deg, #6366f1, #ec4899, #f59e0b); border-radius: 20px; padding: 2px; box-shadow: 0 8px 24px rgba(99,102,241,0.12);">
+                    <div style="background: #ffffff; border-radius: 18px; padding: 22px;">
+                        <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="width: 46px; height: 46px; border-radius: 12px; background: linear-gradient(135deg, #6366f1, #ec4899); display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 12px rgba(99,102,241,0.25);">🔮</div>
+                                <div>
+                                    <div style="color: #092F2E; font-size: 14px; font-weight: 700;">ChatBot Settings</div>
+                                    <div style="color: #8b5cf6; font-size: 10.5px; font-weight: 600; margin-top: 2px;">Admissions AI Module</div>
+                                </div>
+                            </div>
+                            <span style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; border-radius: 20px; font-size: 10px; font-weight: 700; padding: 3px 10px;">● ACTIVE</span>
+                        </div>
+                        <div style="color: #526360; font-size: 11.5px; line-height: 1.55; margin-bottom: 16px;">Customize admissions bot persona, greeting message, theme colors, widget launcher style, and generate live website embed codes.</div>
+                        <div style="height: 1px; background: linear-gradient(90deg, #6366f1, #ec4899, transparent); margin-bottom: 14px; opacity: 0.3;"></div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                            <span style="background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; border-radius: 20px; padding: 4px 12px; font-size: 10.5px; font-weight: 600;">🎨 Widget Styling</span>
+                            <span style="background: #fdf2f8; color: #be185d; border: 1px solid #fbcfe8; border-radius: 20px; padding: 4px 12px; font-size: 10.5px; font-weight: 600;">🌈 Color Palette</span>
+                            <span style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; border-radius: 20px; padding: 4px 12px; font-size: 10.5px; font-weight: 600;">💻 Embed Snippet</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 10. PROGRESS & STATS (LIGHT) -->
+            <div class="card-wrapper">
+                <div class="card-label"><span>10 · Progress & Quotas</span><span>📡 Radar</span></div>
+                <div class="card-item" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 18px; padding: 22px; box-shadow: 0 6px 24px rgba(6, 61, 59, 0.05);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 40px; height: 40px; border-radius: 11px; background: #eef2ff; border: 1px solid #c7d2fe; display: flex; align-items: center; justify-content: center; font-size: 21px;">📡</div>
+                            <div style="color: #092F2E; font-size: 13.5px; font-weight: 700;">ChatBot Settings</div>
+                        </div>
+                        <span style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; border-radius: 20px; font-size: 10px; font-weight: 700; padding: 3px 9px;">● ACTIVE</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px;">
+                        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 10px; text-align: center;">
+                            <div style="color: #4f46e5; font-size: 18px; font-weight: 800; margin-bottom: 2px;">12</div>
+                            <div style="color: #64748b; font-size: 9.5px; font-weight: 600; text-transform: uppercase;">Themes</div>
+                        </div>
+                        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 10px; text-align: center;">
+                            <div style="color: #db2777; font-size: 18px; font-weight: 800; margin-bottom: 2px;">3</div>
+                            <div style="color: #64748b; font-size: 9.5px; font-weight: 600; text-transform: uppercase;">Personas</div>
+                        </div>
+                        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 10px; text-align: center;">
+                            <div style="color: #059669; font-size: 18px; font-weight: 800; margin-bottom: 2px;">∞</div>
+                            <div style="color: #64748b; font-size: 9.5px; font-weight: 600; text-transform: uppercase;">Embeds</div>
+                        </div>
+                    </div>
+                    <div style="color: #526360; font-size: 11px; margin-bottom: 12px; line-height: 1.5;">Customize admissions bot persona, greeting message, theme colors, widget launcher style, and generate live website embed codes.</div>
+                    <div style="background: #E2E8F0; border-radius: 8px; overflow: hidden; height: 6px; margin-bottom: 6px;">
+                        <div style="background: linear-gradient(90deg, #6366f1, #ec4899); height: 100%; width: 78%; border-radius: 8px;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 10.5px; color: #64748b;"><span>Configuration Progress</span><span style="color: #4f46e5; font-weight: 700;">78%</span></div>
+                </div>
+            </div>
+
+            <!-- 11. TIMELINE & ACTIVITY LIST (LIGHT) -->
+            <div class="card-wrapper">
+                <div class="card-label"><span>11 · Activity Timeline</span><span>🗺️ Map</span></div>
+                <div class="card-item" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 18px; padding: 22px; box-shadow: 0 6px 24px rgba(6, 61, 59, 0.05); position: relative; overflow: hidden;">
+                    <div style="position: absolute; inset: 0; background: radial-gradient(ellipse at bottom right, rgba(99,102,241,0.04) 0%, transparent 60%); pointer-events: none;"></div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                        <div>
+                            <div style="color: #6366f1; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px;">Settings Module</div>
+                            <div style="color: #092F2E; font-size: 14.5px; font-weight: 700;">ChatBot Settings</div>
+                        </div>
+                        <div style="width: 42px; height: 42px; border-radius: 11px; background: #eef2ff; border: 1px solid #c7d2fe; display: flex; align-items: center; justify-content: center; font-size: 22px;">🗺️</div>
+                    </div>
+                    <div style="color: #526360; font-size: 11.5px; line-height: 1.55; margin-bottom: 18px;">Customize admissions bot persona, greeting message, theme colors, widget launcher style, and generate live website embed codes.</div>
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="width: 6px; height: 6px; background: #6366f1; border-radius: 50%; flex-shrink: 0;"></div>
+                            <div style="color: #334155; font-size: 11px;">Widget Styling — Launcher &amp; window customization</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="width: 6px; height: 6px; background: #ec4899; border-radius: 50%; flex-shrink: 0;"></div>
+                            <div style="color: #334155; font-size: 11px;">Color Palette — Brand color harmonization</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="width: 6px; height: 6px; background: #10b981; border-radius: 50%; flex-shrink: 0;"></div>
+                            <div style="color: #334155; font-size: 11px;">Embed Snippet — Live embed snippet generator</div>
+                        </div>
+                    </div>
+                    <span style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; border-radius: 20px; font-size: 10px; font-weight: 700; padding: 3px 10px; display: inline-block;">● ACTIVE</span>
+                </div>
+            </div>
+
+            <!-- 12. HERO CTA SHOWCASE (LIGHT) -->
+            <div class="card-wrapper">
+                <div class="card-label"><span>12 · Floating Hero CTA</span><span>✨ Sparkles</span></div>
+                <div class="card-item" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 22px; padding: 26px 22px; text-align: center; box-shadow: 0 8px 28px rgba(6, 61, 59, 0.08); position: relative; overflow: hidden;">
+                    <div style="position: absolute; inset: 0; background: radial-gradient(ellipse at top, rgba(99,102,241,0.06) 0%, transparent 60%); pointer-events: none;"></div>
+                    <div style="width: 66px; height: 66px; border-radius: 20px; background: linear-gradient(135deg, #ede9fe, #ddd6fe); border: 2px solid #c4b5fd; margin: 0 auto 14px; display: flex; align-items: center; justify-content: center; font-size: 32px; box-shadow: 0 8px 18px rgba(139,92,246,0.18);">✨</div>
+                    <div style="display: inline-block; background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; border-radius: 20px; font-size: 10px; font-weight: 700; padding: 3px 10px; margin-bottom: 12px;">● ACTIVE</div>
+                    <div style="color: #092F2E; font-size: 16px; font-weight: 800; margin-bottom: 6px;">ChatBot Settings</div>
+                    <div style="color: #526360; font-size: 11.5px; line-height: 1.55; margin-bottom: 18px;">Customize admissions bot persona, greeting message, theme colors, widget launcher style, and generate live website embed codes.</div>
+                    <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; margin-bottom: 20px;">
+                        <span style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 20px; padding: 4px 12px; font-size: 10.5px; font-weight: 600;">Widget Styling</span>
+                        <span style="background: #fdf4ff; color: #9333ea; border: 1px solid #e9d5ff; border-radius: 20px; padding: 4px 12px; font-size: 10.5px; font-weight: 600;">Color Palette</span>
+                        <span style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; border-radius: 20px; padding: 4px 12px; font-size: 10.5px; font-weight: 600;">Embed Snippet</span>
+                    </div>
+                    <button style="background: linear-gradient(135deg, #063D3B, #094E4B); color: #C8FF63; border: 1px solid rgba(200,255,99,0.3); border-radius: 12px; padding: 10px 28px; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(6,61,59,0.25); width: 100%;">Configure Settings →</button>
+                </div>
+            </div>
+
+            <!-- 13. MARKET INDEX TICKER TILES -->
+            <div class="card-wrapper">
+                <div class="card-label"><span>13 · Market Index Ticker Cards</span><span>📈 Finance</span></div>
+                <div class="card-item" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 18px; padding: 18px; box-shadow: 0 6px 24px rgba(6, 61, 59, 0.05);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 18px;">📊</span>
+                            <span style="font-size: 13.5px; font-weight: 700; color: #092F2E;">Market Indices</span>
+                        </div>
+                        <span style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; border-radius: 20px; font-size: 10px; font-weight: 700; padding: 2px 8px;">● LIVE</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                        <!-- Sensex -->
+                        <div style="background: #ffffff; border: 1px solid #d1d5db; border-radius: 16px; padding: 14px 12px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                            <div style="width: 28px; height: 28px; border-radius: 50%; background: #fdf2f2; color: #b91c1c; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700;">
+                                ↓
+                            </div>
+                            <div style="font-size: 13.5px; font-weight: 600; color: #111827; letter-spacing: -0.2px;">Sensex</div>
+                            <div>
+                                <div style="font-size: 18px; font-weight: 800; color: #dc2626; line-height: 1.1; letter-spacing: -0.3px;">-0.49%</div>
+                                <div style="font-size: 12px; font-weight: 500; color: #4b5563; margin-top: 4px;">75,757.94</div>
+                            </div>
+                        </div>
+                        <!-- NIFTY 50 -->
+                        <div style="background: #ffffff; border: 1px solid #d1d5db; border-radius: 16px; padding: 14px 12px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                            <div style="width: 28px; height: 28px; border-radius: 50%; background: #fdf2f2; color: #b91c1c; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700;">
+                                ↓
+                            </div>
+                            <div style="font-size: 13.5px; font-weight: 600; color: #111827; letter-spacing: -0.2px;">NIFTY 50</div>
+                            <div>
+                                <div style="font-size: 18px; font-weight: 800; color: #dc2626; line-height: 1.1; letter-spacing: -0.3px;">-0.44%</div>
+                                <div style="font-size: 12px; font-weight: 500; color: #4b5563; margin-top: 4px;">23,673.45</div>
+                            </div>
+                        </div>
+                        <!-- Nikkei 225 -->
+                        <div style="background: #ffffff; border: 1px solid #d1d5db; border-radius: 16px; padding: 14px 12px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                            <div style="width: 28px; height: 28px; border-radius: 50%; background: #ecfdf5; color: #047857; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700;">
+                                ↑
+                            </div>
+                            <div style="font-size: 13.5px; font-weight: 600; color: #111827; letter-spacing: -0.2px;">Nikkei 225</div>
+                            <div>
+                                <div style="font-size: 18px; font-weight: 800; color: #047857; line-height: 1.1; letter-spacing: -0.3px;">+0.30%</div>
+                                <div style="font-size: 12px; font-weight: 500; color: #4b5563; margin-top: 4px;">66,597.12</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

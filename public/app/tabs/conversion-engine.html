@@ -1,0 +1,315 @@
+<!-- Page Header -->
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 14px;">
+                    <div>
+                        <h2 style="font-family: var(--brand-font-display); font-size: 18px; font-weight: 700; color: #092F2E; margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <span>🚀</span> Conversion Engine
+                        </h2>
+                        <p style="font-size: 12px; color: #4F7470; margin-top: 4px;">
+                            Turn prospective student interest into applications and confirmed admissions.
+                        </p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="badge" style="background: rgba(99, 102, 241, 0.2); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.4); font-size: 11px; padding: 5px 12px; font-weight: 600;">
+                            2026–27 Admissions Cycle
+                        </span>
+                        <button type="button" class="brand-btn-secondary brand-btn-sm" onclick="loadConversionEngine()">
+                            🔄 Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sub-Navigation Bar -->
+                <div class="ce-subnav-bar">
+                    <button type="button" class="ce-subnav-btn active" data-cesub="overview" onclick="switchCeSubtab('overview')">
+                        <span>⚡</span> Overview &amp; Funnel
+                    </button>
+                    <button type="button" class="ce-subnav-btn" data-cesub="pipeline" onclick="switchCeSubtab('pipeline')">
+                        <span>📋</span> Admissions Pipeline (Kanban)
+                    </button>
+                    <button type="button" class="ce-subnav-btn" data-cesub="followups" onclick="switchCeSubtab('followups')">
+                        <span>⏰</span> Follow-ups Queue <span id="ceFollowupCountBadge" class="badge" style="background:rgba(239, 68, 68, 0.2); color:#f87171; border:1px solid rgba(239, 68, 68, 0.4); padding:1px 6px; font-size:9px; border-radius:10px; margin-left:4px; display:none;">0</span>
+                    </button>
+                    <button type="button" class="ce-subnav-btn" data-cesub="actions" onclick="switchCeSubtab('actions')">
+                        <span>🎯</span> Conversion Actions Hub
+                    </button>
+                    <button type="button" class="ce-subnav-btn" data-cesub="pulse" onclick="switchCeSubtab('pulse')">
+                        <span>💡</span> Today's Pulse
+                    </button>
+                </div>
+
+                <!-- 1. SUBTAB: Overview -->
+                <div id="ceSubtab-overview" class="ce-subtab-panel" style="display: block;">
+                    <!-- Conversion Funnel Pulse Strip -->
+                    <div class="stats-grid" style="margin-bottom: 20px;">
+                        <div class="stat-card" style="border-left: 3px solid var(--brand-indigo-400);">
+                            <div class="stat-label">Inquiries &amp; Leads <span class="stat-badge">+21%</span></div>
+                            <div class="stat-value" id="ceStatLeads">2,481</div>
+                        </div>
+                        <div class="stat-card" style="border-left: 3px solid var(--brand-cyan-400);">
+                            <div class="stat-label">Qualified Leads <span class="stat-badge">+18%</span></div>
+                            <div class="stat-value" id="ceStatQualified">684</div>
+                        </div>
+                        <div class="stat-card" style="border-left: 3px solid var(--brand-amber-400);">
+                            <div class="stat-label">Applications <span class="stat-badge">+14%</span></div>
+                            <div class="stat-value" id="ceStatApplications">217</div>
+                        </div>
+                        <div class="stat-card" style="border-left: 3px solid var(--brand-emerald-400);">
+                            <div class="stat-label">Enrolled Students <span class="stat-badge">+19%</span></div>
+                            <div class="stat-value" id="ceStatEnrolled">64</div>
+                        </div>
+                    </div>
+
+                    <!-- Visual Funnel Card -->
+                    <div class="brand-card" style="margin-bottom: 20px;">
+                        <div class="brand-panel-header">
+                            <div class="brand-panel-title">Admissions Conversion Funnel</div>
+                            <span style="font-size: 11px; color: #648781;">Real-time Progression</span>
+                        </div>
+                        <div style="padding: 20px;">
+                            <div class="ce-funnel-grid">
+                                <div class="ce-funnel-step">
+                                    <div class="ce-funnel-step-label">1. Visitors</div>
+                                    <div class="ce-funnel-step-value" id="ceFunnelVisitors">48,920</div>
+                                    <div class="ce-funnel-step-rate">100% Total</div>
+                                </div>
+                                <div class="ce-funnel-step">
+                                    <div class="ce-funnel-step-label">2. Leads</div>
+                                    <div class="ce-funnel-step-value" id="ceFunnelLeads">2,481</div>
+                                    <div class="ce-funnel-step-rate">5.1% Yield</div>
+                                </div>
+                                <div class="ce-funnel-step">
+                                    <div class="ce-funnel-step-label">3. Qualified</div>
+                                    <div class="ce-funnel-step-value" id="ceFunnelQualified">684</div>
+                                    <div class="ce-funnel-step-rate">27.6% Qual.</div>
+                                </div>
+                                <div class="ce-funnel-step">
+                                    <div class="ce-funnel-step-label">4. Contacted</div>
+                                    <div class="ce-funnel-step-value" id="ceFunnelContacted">512</div>
+                                    <div class="ce-funnel-step-rate">74.8% Outreach</div>
+                                </div>
+                                <div class="ce-funnel-step">
+                                    <div class="ce-funnel-step-label">5. Applications</div>
+                                    <div class="ce-funnel-step-value" id="ceFunnelApps">217</div>
+                                    <div class="ce-funnel-step-rate">31.7% Apps</div>
+                                </div>
+                                <div class="ce-funnel-step" style="border-color: var(--brand-emerald-400); background: rgba(16, 185, 129, 0.06);">
+                                    <div class="ce-funnel-step-label" style="color: var(--brand-emerald-400);">6. Enrolled 🎓</div>
+                                    <div class="ce-funnel-step-value" style="color: var(--brand-emerald-400);" id="ceFunnelEnrolled">64</div>
+                                    <div class="ce-funnel-step-rate" style="color: var(--brand-emerald-400);">29.5% Final</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Two-Column Strip: Needs Attention & Conversion Activity -->
+                    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px;">
+                        <!-- Needs Attention -->
+                        <div class="brand-card">
+                            <div class="brand-panel-header">
+                                <div class="brand-panel-title" style="display: flex; align-items: center; gap: 6px;">
+                                    <span>🔥</span> Needs Attention (High-Yield Actions)
+                                </div>
+                                <button type="button" class="brand-btn-secondary brand-btn-sm" onclick="switchCeSubtab('followups')">View All →</button>
+                            </div>
+                            <div style="padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 6px; cursor: pointer;" onclick="switchCeSubtab('pipeline')">
+                                    <div style="display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; color: #063D3B;">
+                                        <span>🔥</span> <span id="ceAlertHotLeads">17 hot leads haven't been contacted in 24h</span>
+                                    </div>
+                                    <span style="font-size: 11px; color: #f87171; font-weight: 700;">Open →</span>
+                                </div>
+
+                                <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 6px; cursor: pointer;" onclick="switchCeSubtab('followups')">
+                                    <div style="display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; color: #063D3B;">
+                                        <span>📞</span> <span id="ceAlertCallbacks">12 callbacks are due today</span>
+                                    </div>
+                                    <span style="font-size: 11px; color: #fbbf24; font-weight: 700;">Open →</span>
+                                </div>
+
+                                <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: 6px; cursor: pointer;" onclick="switchCeSubtab('actions')">
+                                    <div style="display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; color: #063D3B;">
+                                        <span>🏫</span> <span id="ceAlertTours">8 campus visitors haven't started applications</span>
+                                    </div>
+                                    <span style="font-size: 11px; color: var(--brand-indigo-400); font-weight: 700;">Open →</span>
+                                </div>
+
+                                <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 6px; cursor: pointer;" onclick="switchCeSubtab('actions')">
+                                    <div style="display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; color: #063D3B;">
+                                        <span>🎓</span> <span id="ceAlertScholarship">24 scholarship-qualified students need follow-up</span>
+                                    </div>
+                                    <span style="font-size: 11px; color: var(--brand-emerald-400); font-weight: 700;">Open →</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Conversion Activity -->
+                        <div class="brand-card">
+                            <div class="brand-panel-header">
+                                <div class="brand-panel-title">Conversion Actions Breakdown</div>
+                            </div>
+                            <div style="padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div style="background: var(--brand-surface-100); border: 1px solid #DDE9E3; border-radius: 6px; padding: 14px;">
+                                    <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: #648781;">
+                                        <span>📞</span> Callbacks
+                                    </div>
+                                    <div style="font-family: var(--brand-font-display); font-size: 20px; font-weight: 700; color: #063D3B; margin-top: 4px;" id="ceActCallbacks">386</div>
+                                    <div style="font-size: 10px; color: var(--brand-emerald-400); margin-top: 2px;">72% completed</div>
+                                </div>
+
+                                <div style="background: var(--brand-surface-100); border: 1px solid #DDE9E3; border-radius: 6px; padding: 14px;">
+                                    <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: #648781;">
+                                        <span>🏫</span> Campus Tours
+                                    </div>
+                                    <div style="font-family: var(--brand-font-display); font-size: 20px; font-weight: 700; color: #063D3B; margin-top: 4px;" id="ceActTours">142</div>
+                                    <div style="font-size: 10px; color: #a78bfa; margin-top: 2px;">81% attended</div>
+                                </div>
+
+                                <div style="background: var(--brand-surface-100); border: 1px solid #DDE9E3; border-radius: 6px; padding: 14px;">
+                                    <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: #648781;">
+                                        <span>🎓</span> Scholarships
+                                    </div>
+                                    <div style="font-family: var(--brand-font-display); font-size: 20px; font-weight: 700; color: #063D3B; margin-top: 4px;" id="ceActScholarships">428</div>
+                                    <div style="font-size: 10px; color: var(--brand-cyan-400); margin-top: 2px;">64% eligible</div>
+                                </div>
+
+                                <div style="background: var(--brand-surface-100); border: 1px solid #DDE9E3; border-radius: 6px; padding: 14px;">
+                                    <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: #648781;">
+                                        <span>📄</span> Lead Magnets
+                                    </div>
+                                    <div style="font-family: var(--brand-font-display); font-size: 20px; font-weight: 700; color: #063D3B; margin-top: 4px;" id="ceActMagnets">1,284</div>
+                                    <div style="font-size: 10px; color: var(--brand-amber-400); margin-top: 2px;">delivered</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. SUBTAB: Pipeline (Kanban Board) -->
+                <div id="ceSubtab-pipeline" class="ce-subtab-panel" style="display: none;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <input type="text" id="cePipelineSearch" class="brand-input" placeholder="🔍 Search students, program, phone..." style="width: 260px; height: 34px; font-size: 12px;" oninput="filterPipelineBoard()" />
+                            <select id="cePipelineProgramFilter" class="brand-input" style="height: 34px; font-size: 12px; width: 200px; background-color: #FFFFFF; color: #063D3B;" onchange="filterPipelineBoard()">
+                                <option value="">All Programs</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <button type="button" class="brand-btn-primary brand-btn-sm" onclick="switchNavTab('leads')">
+                                + View All Leads Directory
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Kanban Columns Grid -->
+                    <div class="ce-kanban-board" id="ceKanbanBoard">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+
+                <!-- 3. SUBTAB: Follow-ups Queue -->
+                <div id="ceSubtab-followups" class="ce-subtab-panel" style="display: none;">
+                    <div class="brand-card">
+                        <div class="brand-panel-header">
+                            <div class="brand-panel-title">🔥 Actionable Follow-up Queue</div>
+                            <span style="font-size: 11px; color: #648781;">High-Yield Counselor Outreach</span>
+                        </div>
+                        <div style="padding: 20px;">
+                            <div style="margin-bottom: 16px; font-size: 13px; font-weight: 700; color: #063D3B; display: flex; align-items: center; gap: 8px;">
+                                <span>🔥</span> TODAY'S PRIORITY OUTREACH
+                            </div>
+                            <div id="ceFollowupsTodayList" style="display: flex; flex-direction: column; gap: 12px;">
+                                <!-- Populated dynamically -->
+                            </div>
+
+                            <div style="margin-top: 24px; margin-bottom: 16px; font-size: 13px; font-weight: 700; color: #4F7470; display: flex; align-items: center; gap: 8px;">
+                                <span>⏳</span> UPCOMING SCHEDULED ACTIONS
+                            </div>
+                            <div id="ceFollowupsUpcomingList" style="display: flex; flex-direction: column; gap: 12px;">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. SUBTAB: Conversion Actions Hub -->
+                <div id="ceSubtab-actions" class="ce-subtab-panel" style="display: none;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
+                        <div class="brand-card" style="padding: 20px; border-left: 3px solid #f87171;">
+                            <div style="font-size: 24px; margin-bottom: 8px;">📞</div>
+                            <div style="font-family: var(--brand-font-display); font-size: 15px; font-weight: 700; color: #063D3B;">Counselor Callbacks</div>
+                            <p style="font-size: 12px; color: #4F7470; margin: 6px 0 14px 0; line-height: 1.5;">
+                                Inbound phone callback requests with SLA response timers and counselor assignments.
+                            </p>
+                            <button type="button" class="brand-btn-secondary brand-btn-sm" style="width: 100%;" onclick="switchNavTab('callbacks')">
+                                Open Callbacks Queue →
+                            </button>
+                        </div>
+
+                        <div class="brand-card" style="padding: 20px; border-left: 3px solid #a78bfa;">
+                            <div style="font-size: 24px; margin-bottom: 8px;">🏫</div>
+                            <div style="font-family: var(--brand-font-display); font-size: 15px; font-weight: 700; color: #063D3B;">Campus Tours</div>
+                            <p style="font-size: 12px; color: #4F7470; margin: 6px 0 14px 0; line-height: 1.5;">
+                                Scheduled in-person visits with slot capacity management and post-tour application tracking.
+                            </p>
+                            <button type="button" class="brand-btn-secondary brand-btn-sm" style="width: 100%;" onclick="switchNavTab('campus-tours')">
+                                Manage Campus Tours →
+                            </button>
+                        </div>
+
+                        <div class="brand-card" style="padding: 20px; border-left: 3px solid #38bdf8;">
+                            <div style="font-size: 24px; margin-bottom: 8px;">🎓</div>
+                            <div style="font-family: var(--brand-font-display); font-size: 15px; font-weight: 700; color: #063D3B;">Scholarships &amp; Aid</div>
+                            <p style="font-size: 12px; color: #4F7470; margin: 6px 0 14px 0; line-height: 1.5;">
+                                Merit waiver slabs, entrance exam cutoffs, and scholarship candidate pipeline.
+                            </p>
+                            <button type="button" class="brand-btn-secondary brand-btn-sm" style="width: 100%;" onclick="switchNavTab('scholarships')">
+                                Manage Scholarships →
+                            </button>
+                        </div>
+
+                        <div class="brand-card" style="padding: 20px; border-left: 3px solid #fbbf24;">
+                            <div style="font-size: 24px; margin-bottom: 8px;">📄</div>
+                            <div style="font-family: var(--brand-font-display); font-size: 15px; font-weight: 700; color: #063D3B;">Lead-Magnet Assets</div>
+                            <p style="font-size: 12px; color: #4F7470; margin: 6px 0 14px 0; line-height: 1.5;">
+                                Official admissions prospectuses, fee sheets, and placement reports with download attribution.
+                            </p>
+                            <button type="button" class="brand-btn-secondary brand-btn-sm" style="width: 100%;" onclick="switchNavTab('assets')">
+                                View Assets &amp; Documents →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. SUBTAB: Today's Pulse -->
+                <div id="ceSubtab-pulse" class="ce-subtab-panel" style="display: none;">
+                    <div class="brand-card" style="max-width: 640px; margin: 0 auto; text-align: center; border-color: rgba(99, 102, 241, 0.4); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);">
+                        <div class="brand-panel-header" style="justify-content: center;">
+                            <div class="brand-panel-title" style="letter-spacing: 1px;">TODAY'S CONVERSION PULSE</div>
+                        </div>
+                        <div style="padding: 36px 32px; display: flex; flex-direction: column; align-items: center; gap: 16px;">
+                            <div>
+                                <div style="font-family: var(--brand-font-display); font-size: 38px; font-weight: 800; color: #063D3B;" id="cePulseLeads">47</div>
+                                <div style="font-size: 12px; font-weight: 600; color: #4F7470; text-transform: uppercase;">new student leads</div>
+                            </div>
+                            <div style="font-size: 18px; color: var(--brand-indigo-400);">↓</div>
+                            <div>
+                                <div style="font-family: var(--brand-font-display); font-size: 38px; font-weight: 800; color: var(--brand-cyan-400);" id="cePulseQualified">18</div>
+                                <div style="font-size: 12px; font-weight: 600; color: #4F7470; text-transform: uppercase;">qualified leads</div>
+                            </div>
+                            <div style="font-size: 18px; color: var(--brand-indigo-400);">↓</div>
+                            <div>
+                                <div style="font-family: var(--brand-font-display); font-size: 38px; font-weight: 800; color: #f87171;" id="cePulseOpps">7</div>
+                                <div style="font-size: 12px; font-weight: 600; color: #4F7470; text-transform: uppercase;">high-intent opportunities</div>
+                            </div>
+                            <div style="width: 100%; height: 1px; background: var(--brand-border-subtle); margin: 8px 0;"></div>
+                            <div style="background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 8px; padding: 16px 20px; width: 100%;">
+                                <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--brand-indigo-400); margin-bottom: 6px;">🤖 EDVORA RECOMMENDS</div>
+                                <div style="font-size: 15px; font-weight: 700; color: #063D3B;" id="cePulseRecAction">Contact 7 students today</div>
+                                <div style="font-size: 12px; color: var(--brand-emerald-400); margin-top: 4px;" id="cePulseEstYield">Estimated yield: 3–5 applications</div>
+                            </div>
+                            <button type="button" class="brand-btn-primary" style="height: 42px; font-size: 13px; font-weight: 700; padding: 0 28px;" onclick="switchCeSubtab('pipeline')">
+                                View Opportunities in Pipeline →
+                            </button>
+                        </div>
+                    </div>
+                </div>

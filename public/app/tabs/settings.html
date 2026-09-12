@@ -1,0 +1,134 @@
+<!-- Dedicated Institution Settings Command Frame (1 Unified Big Card matching Overview & Leads) -->
+<div id="view-settings" class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
+    
+    <!-- Top Control Bar (Inside the Big Card) -->
+    <div class="ops-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 24px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important;">
+        <div class="ops-dash-title-group" style="display: flex !important; align-items: center !important; gap: 12px !important;">
+            <button type="button" onclick="switchNavTab('org-settings')" class="brand-btn-secondary" style="height: 32px; padding: 0 11px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; border-radius: 6px; background: #F4FAF7; border: 1.5px solid #D1E5DE; color: var(--e-teal, #063D3B);" title="Return to Control Panel">
+                &larr; Control Panel
+            </button>
+            <span class="ops-live-dot"></span>
+            <div>
+                <div class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important; letter-spacing: -0.01em !important; line-height: 1.25 !important;">
+                    Institution Profile
+                </div>
+                <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">
+                    Manage institution profile, official web presence &amp; core academic metadata
+                </div>
+            </div>
+        </div>
+
+        <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
+            <div class="ckh-ctrl-pill" style="font-size: 11px !important; font-weight: 700 !important; color: var(--e-teal, #063D3B) !important; background: #F4FAF7 !important; border: 1px solid #D1E5DE !important; border-radius: 8px !important; padding: 5px 11px !important; display: inline-flex !important; align-items: center !important; gap: 6px !important;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <span>Academic Cycle: Fall 2026 Active</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inside the Big Card: Content Area with left-aligned form bounded to max 900px -->
+    <div style="padding: 28px 32px 48px 32px; box-sizing: border-box; width: 100%;">
+        <div style="max-width: 900px; width: 100%; margin: 0; box-sizing: border-box;">
+            <form id="institutionSettingsForm" onsubmit="handleInstitutionSettingsSubmit(event)">
+                
+                <!-- SECTION 1: Institution Identity & Digital Presence -->
+                <div style="margin-bottom: 28px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 16px;">
+                        <div>
+                            <label for="settings_name" style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                <span>🏛️</span> College / University Name <span style="color: #EF4444;">*</span>
+                            </label>
+                            <input type="text" id="settings_name" name="name" class="brand-input" placeholder="e.g. State University / College of Arts & Sciences" required style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        </div>
+                        <div>
+                            <label for="settings_short_name" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Short Name / Acronym
+                            </label>
+                            <input type="text" id="settings_short_name" name="short_name" class="brand-input" placeholder="e.g. SU / University" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
+                        <div>
+                            <label for="settings_website_url" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Official Website Address (URL)
+                            </label>
+                            <input type="url" id="settings_website_url" name="website_url" class="brand-input" placeholder="https://www.institution.edu" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                            <span style="font-size: 10.5px; color: #648781; margin-top: 3px; display: block;">Feeds live into the chatbot widget preview bar.</span>
+                        </div>
+                        <div>
+                            <label for="settings_founded_year" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Founded Year
+                            </label>
+                            <input type="text" id="settings_founded_year" name="founded_year" class="brand-input" placeholder="e.g. 1970" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 2: Academic Classification & Cycle -->
+                <div style="margin-bottom: 28px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 16px;">
+                        <div>
+                            <label for="settings_institution_type" style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                <span>🎓</span> Institution Type
+                            </label>
+                            <select id="settings_institution_type" name="institution_type" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+                                <option value="">Select Type...</option>
+                                <option value="University">University</option>
+                                <option value="Autonomous Institute">Autonomous Institute</option>
+                                <option value="Affiliated College">Affiliated College</option>
+                                <option value="Business School">Business School</option>
+                                <option value="Technical Institute">Technical Institute</option>
+                                <option value="Medical College">Medical College</option>
+                                <option value="Polytechnic & Vocational">Polytechnic &amp; Vocational</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="settings_institution_category" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Institution Category
+                            </label>
+                            <select id="settings_institution_category" name="institution_category" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+                                <option value="">Select Category...</option>
+                                <option value="Engineering & Technology">Engineering &amp; Technology</option>
+                                <option value="Management & Business">Management &amp; Business</option>
+                                <option value="Medicine & Allied Health">Medicine &amp; Allied Health</option>
+                                <option value="Law & Legal Studies">Law &amp; Legal Studies</option>
+                                <option value="Arts, Sciences & Humanities">Arts, Sciences &amp; Humanities</option>
+                                <option value="Multi-Disciplinary / Comprehensive">Multi-Disciplinary / Comprehensive</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
+                        <div>
+                            <label for="settings_academic_year" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Current Admissions Cycle
+                            </label>
+                            <input type="text" id="settings_academic_year" name="academic_year" class="brand-input" placeholder="e.g. 2026-2027" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 3: Institutional Overview & Description -->
+                <div style="margin-bottom: 32px;">
+                    <label for="settings_institution_description" style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                        <span>📝</span> About the Institution / Vision Summary <span style="font-weight: 500; text-transform: none; color: #648781; font-size: 10.5px;">(Optional)</span>
+                    </label>
+                    <textarea id="settings_institution_description" name="institution_description" class="brand-input" rows="4" placeholder="Optional: Describe the institution's legacy, accreditation, campus facilities, and admission focus..." style="width: 100%; box-sizing: border-box; font-size: 12.5px; line-height: 1.5; padding: 10px 12px; border: 1.5px solid #DCE9E5; border-radius: 6px;"></textarea>
+                    <span style="font-size: 10.5px; color: #648781; margin-top: 4px; display: block;">Optional high-level context utilized across Admissions AI responses and informational prospectus.</span>
+                </div>
+
+                <!-- Action Bar -->
+                <div style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 10px 0;">
+                    <button type="submit" id="btnSaveSettings" class="brand-btn-primary" style="height: 38px; padding: 0 24px; font-size: 12.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                        <span>💾</span> Save Institution Settings
+                    </button>
+                    <button type="button" onclick="loadSettingsData()" class="brand-btn-secondary" style="height: 38px; padding: 0 16px; font-size: 12px;">
+                        Reset Changes
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>

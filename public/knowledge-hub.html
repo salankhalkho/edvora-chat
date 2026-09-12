@@ -1,0 +1,2320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Central Knowledge Hub — Apex Institute of Higher Education | Edvora</title>
+  <link rel="icon" type="image/svg+xml" href="/edvora_logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/theme-branding.css">
+
+  <style>
+    :root {
+      --e-teal: #063D3B;
+      --e-pistachio: #C8FF63;
+      --e-soft-pistachio: #E6F7D2;
+      --e-sage: #B9D7C7;
+      --e-mist: #F1F7F4;
+      --e-border: #DDE9E3;
+      --e-card-border: #DCE9E5;
+      --e-dark-text: #092F2E;
+      --e-sidebar-w: 230px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      height: auto !important;
+      overflow-x: auto !important;
+      overflow-y: auto !important;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #F4F8F6;
+      color: var(--e-dark-text);
+      min-height: 100vh;
+      height: auto !important;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+      width: 100%;
+      min-width: max-content;
+      overflow-x: visible !important;
+      overflow-y: visible !important;
+    }
+
+    /* Light Theme Browser Bottom Horizontal Scrollbar */
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+      height: 9px;
+      width: 9px;
+    }
+    html::-webkit-scrollbar-track,
+    body::-webkit-scrollbar-track {
+      background: #E6F0EC;
+    }
+    html::-webkit-scrollbar-thumb,
+    body::-webkit-scrollbar-thumb {
+      background: #94A3B8;
+      border-radius: 4px;
+    }
+    html::-webkit-scrollbar-thumb:hover,
+    body::-webkit-scrollbar-thumb:hover {
+      background: #64748B;
+    }
+
+    /* ================= 1. TOP NAVBAR ================= */
+    .brand-top-navbar {
+      height: 56px;
+      background: #FFFFFF;
+      border-bottom: 1.5px solid var(--e-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      min-width: 100%;
+      width: max-content;
+    }
+
+    .brand-top-left-panel {
+      width: var(--e-sidebar-w);
+      height: 100%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      border-right: 1.5px solid var(--e-border);
+      box-sizing: border-box;
+    }
+
+    .brand-logo-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .brand-logo-icon {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+      filter: drop-shadow(0 2px 6px rgba(6, 61, 59, 0.18));
+    }
+
+    .brand-logo-text {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--e-teal);
+      line-height: 1;
+    }
+
+    .brand-logo-text span {
+      color: #0D6E6A;
+    }
+
+    .brand-top-center-panel {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      padding-left: 24px;
+    }
+
+    .brand-top-institution {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-right: 24px;
+    }
+
+    .brand-plan-pill {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--e-teal);
+      background: var(--e-soft-pistachio);
+      border: 1.5px solid var(--e-sage);
+      padding: 6px 14px;
+      border-radius: 100px;
+      letter-spacing: -0.01em;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-plan-pill::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #047857;
+    }
+
+    .brand-logout-btn {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #4F7470;
+      background: #FFFFFF;
+      border: 1.5px solid var(--e-border);
+      padding: 6px 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .brand-logout-btn:hover {
+      background: #F8FBFA;
+      color: #DC2626;
+      border-color: #FCA5A5;
+    }
+
+    /* ================= 2. DASHBOARD SHELL ================= */
+    .dashboard-app-body {
+      display: flex;
+      flex: 1;
+      min-height: calc(100vh - 56px);
+      min-width: max-content;
+      width: 100%;
+    }
+
+    /* SIDEBAR */
+    .dashboard-sidebar {
+      width: var(--e-sidebar-w);
+      background: #FFFFFF;
+      border-right: 1.5px solid var(--e-border);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 16px 12px 14px 12px;
+    }
+
+    .sidebar-nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .sidebar-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      color: #4F7470;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+
+    .sidebar-nav-item:hover {
+      background: #F1F7F4;
+      color: var(--e-teal);
+    }
+
+    .sidebar-nav-item.active {
+      background: var(--e-soft-pistachio);
+      color: var(--e-teal);
+      font-weight: 700;
+      border: 1px solid var(--e-sage);
+    }
+
+    .sidebar-nav-icon {
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .sidebar-nav-icon svg {
+      width: 16px;
+      height: 16px;
+      stroke-width: 2.2;
+    }
+
+    .sidebar-user-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: #F8FBFA;
+      border: 1px solid var(--e-card-border);
+      border-radius: 12px;
+    }
+
+    .sidebar-user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--e-teal);
+      color: var(--e-pistachio);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-user-meta {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .sidebar-user-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--e-teal);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sidebar-user-sub {
+      font-size: 10.5px;
+      color: #648781;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sidebar-role-badge {
+      font-size: 9px;
+      font-weight: 800;
+      background: #ECFDF5;
+      color: #047857;
+      padding: 1px 5px;
+      border-radius: 4px;
+      border: 1px solid #A7F3D0;
+      letter-spacing: 0.04em;
+    }
+
+    /* MAIN CONTENT VIEW */
+    .dashboard-main-content {
+      flex: 1;
+      padding: 20px 24px 40px 24px;
+      min-width: max-content;
+      width: 100%;
+    }
+
+    /* UNIFIED OPERATIONS FRAME */
+    .ops-dashboard-frame {
+      background: #FFFFFF;
+      border: 1.5px solid var(--e-card-border);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 16px 50px -10px rgba(6, 61, 59, 0.08), 0 4px 16px rgba(6, 61, 59, 0.03);
+      width: 100%;
+      min-width: 1305px;
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    /* CONSOLE TOPBAR */
+    .ops-dash-topbar {
+      background: #FFFFFF;
+      border-bottom: 1.5px solid #E6F0EC;
+      border-top-left-radius: 17px;
+      border-top-right-radius: 17px;
+      padding: 18px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .ops-dash-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .ops-dash-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .ops-live-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #059669;
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+      display: inline-block;
+      flex-shrink: 0;
+      animation: pulseGreen 2.2s infinite;
+    }
+
+    @keyframes pulseGreen {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+      70% { box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    .ops-dash-main-title {
+      font-size: 15.5px;
+      font-weight: 800;
+      color: var(--e-teal);
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+
+    .ops-dash-sub-title {
+      font-size: 11.5px;
+      color: #648781;
+      margin-top: 2px;
+    }
+
+    /* SCOPE PILLS FILTER BAR (DIRECTLY ABOVE TABLE) */
+
+    .ckh-ctrl-pill {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #063D3B;
+      background: #F4FAF7;
+      border: 1px solid #D1E5DE;
+      border-radius: 8px;
+      padding: 6px 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .ckh-btn-ingest {
+      background: #063D3B;
+      color: #C8FF63;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 7px 16px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(200, 255, 99, 0.3);
+      cursor: pointer;
+    }
+
+    .ckh-btn-ingest:hover {
+      background: #0A524F;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(6, 61, 59, 0.2);
+    }
+
+    /* 5 LIFECYCLE STATUS KPI TILES */
+    .ckh-kpi-ribbon {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1px;
+      background: #E6F0EC;
+      border-bottom: 1.5px solid #E6F0EC;
+    }
+
+    .ckh-kpi-tile {
+      background: #ffffff;
+      padding: 16px 18px;
+      transition: background 0.2s ease;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .ckh-kpi-tile:hover {
+      background: #FAFDFB;
+    }
+
+    .ckh-kpi-tile.active-kpi {
+      background: #F4FAF7;
+    }
+
+    .ckh-kpi-tile.active-kpi::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: #063D3B;
+    }
+
+    .ckh-kpi-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .ckh-kpi-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+    }
+
+    .ckh-kpi-badge {
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 5px;
+    }
+
+    .ckh-kpi-val {
+      font-size: 24px;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      color: #063D3B;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .ckh-kpi-lbl {
+      font-size: 12px;
+      font-weight: 700;
+      color: #063D3B;
+      margin-bottom: 2px;
+    }
+
+    .ckh-kpi-sub {
+      font-size: 10.5px;
+      color: #648781;
+    }
+
+    /* FILTER TOOLBAR */
+    .ckh-toolbar {
+      padding: 14px 20px;
+      background: #FAFCFB;
+      border-bottom: 1.5px solid #E6F0EC;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ckh-tabs-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+      overflow-x: visible;
+      padding-bottom: 2px;
+    }
+
+    .ckh-tab-btn {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #4F7470;
+      background: transparent;
+      border: 1px solid transparent;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .ckh-tab-btn:hover {
+      background: #EBF4F0;
+      color: #063D3B;
+    }
+
+    .ckh-tab-btn.active {
+      background: #063D3B;
+      color: #ffffff;
+      font-weight: 700;
+      border-color: #063D3B;
+    }
+
+    .ckh-tab-count {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 100px;
+      background: rgba(6, 61, 59, 0.08);
+      color: inherit;
+    }
+
+    .ckh-tab-btn.active .ckh-tab-count {
+      background: rgba(200, 255, 99, 0.25);
+      color: #C8FF63;
+    }
+
+    .ckh-search-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #ffffff;
+      border: 1px solid #D1E5DE;
+      border-radius: 8px;
+      padding: 5px 12px;
+      min-width: 240px;
+    }
+
+    .ckh-search-input {
+      border: none;
+      outline: none;
+      font-size: 12px;
+      color: #063D3B;
+      width: 100%;
+      font-family: inherit;
+      background: transparent;
+    }
+
+    .ckh-search-input::placeholder {
+      color: #94A3B8;
+    }
+
+    /* DOCUMENT TABLE STYLING */
+    .ckh-table-wrap {
+      overflow-x: visible;
+      background: #ffffff;
+    }
+
+    .ckh-doc-table {
+      width: 100%;
+      min-width: 1305px;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 12px;
+      table-layout: fixed;
+    }
+
+    .ckh-doc-table th {
+      background: #F8FBFA;
+      padding: 11px 14px;
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #648781;
+      border-bottom: 1.5px solid #E6F0EC;
+      white-space: nowrap;
+    }
+
+    .ckh-doc-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #EEF5F2;
+      vertical-align: middle;
+      color: #1E293B;
+    }
+
+    .ckh-doc-table tr:hover td {
+      background: #FAFDFB;
+    }
+
+    /* PRECISE BALANCED COLUMN SIZING (1305PX TOTAL, 8 COLUMNS INCL. DEPARTMENT) */
+    .ckh-doc-table th:nth-child(1),
+    .ckh-doc-table td:nth-child(1) {
+      width: 320px;
+      max-width: 500px;
+    }
+
+    .ckh-doc-table th:nth-child(2),
+    .ckh-doc-table td:nth-child(2) {
+      width: 140px;
+      white-space: nowrap;
+    }
+
+    .ckh-doc-table th:nth-child(3),
+    .ckh-doc-table td:nth-child(3) {
+      width: 135px;
+      white-space: nowrap;
+    }
+
+    .ckh-doc-table th:nth-child(4),
+    .ckh-doc-table td:nth-child(4) {
+      width: 120px;
+      white-space: nowrap;
+    }
+
+    .ckh-doc-table th:nth-child(5),
+    .ckh-doc-table td:nth-child(5) {
+      width: 175px;
+      white-space: nowrap;
+    }
+
+    .ckh-doc-table th:nth-child(6),
+    .ckh-doc-table td:nth-child(6) {
+      width: 180px;
+      white-space: nowrap;
+    }
+
+    .ckh-doc-table th:nth-child(7),
+    .ckh-doc-table td:nth-child(7) {
+      width: 130px;
+      white-space: nowrap;
+    }
+
+    .ckh-doc-table th:nth-child(8),
+    .ckh-doc-table td:nth-child(8) {
+      width: 105px;
+      white-space: nowrap;
+      text-align: right;
+    }
+
+    .ckh-dept-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #063D3B;
+      background: #F0FDF4;
+      border: 1px solid #BBF7D0;
+      border-radius: 6px;
+      padding: 3px 8px;
+      white-space: nowrap;
+    }
+
+    .ckh-doc-title-cell {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      max-width: 500px;
+    }
+
+    .ckh-file-badge {
+      width: 30px;
+      height: 34px;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 8.5px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── Document Type Badges Palette ── */
+    .ckh-file-pdf { background: #FEF2F2; color: #DC2626; border: 1px solid #FECDD3; }
+    .ckh-file-web, .ckh-file-url { background: #FEF3C7; color: #D97706; border: 1px solid #FDE68A; }
+    .ckh-file-doc, .ckh-file-docx { background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE; }
+    .ckh-file-xls, .ckh-file-xlsx, .ckh-file-csv { background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; }
+    .ckh-file-ppt, .ckh-file-pptx { background: #FFF7ED; color: #EA580C; border: 1px solid #FED7AA; }
+    .ckh-file-txt, .ckh-file-text { background: #F8FAFC; color: #475569; border: 1px solid #CBD5E1; }
+    .ckh-file-md, .ckh-file-faq { background: #F5F3FF; color: #7C3AED; border: 1px solid #DDD6FE; }
+    .ckh-file-api, .ckh-file-json { background: #F0FDFA; color: #0D9488; border: 1px solid #99F6E4; }
+    .ckh-file-arc { background: #F1F5F9; color: #64748B; border: 1px solid #CBD5E1; }
+
+    .ckh-doc-title-text {
+      font-weight: 700;
+      color: #063D3B;
+      font-size: 12.5px;
+      line-height: 1.35;
+      margin-bottom: 2px;
+    }
+
+    .ckh-doc-meta-text {
+      font-size: 10.5px;
+      color: #648781;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ckh-category-tag {
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: #F1F7F4;
+      color: #063D3B;
+      border: 1px solid #D8E7E1;
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+    .ckh-ingest-tag {
+      font-size: 10.5px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: #475569;
+    }
+
+    .ckh-status-pill {
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+
+    .ckh-status-live {
+      background: #ECFDF5;
+      color: #047857;
+      border: 1px solid #A7F3D0;
+    }
+
+    .ckh-status-warn {
+      background: #FEF3C7;
+      color: #B45309;
+      border: 1px solid #FDE68A;
+    }
+
+    .ckh-status-expired {
+      background: #FEF2F2;
+      color: #DC2626;
+      border: 1px solid #FECDD3;
+    }
+
+    .ckh-status-review {
+      background: #F5F3FF;
+      color: #7C3AED;
+      border: 1px solid #DDD6FE;
+    }
+
+    .ckh-status-archived {
+      background: #F1F5F9;
+      color: #64748B;
+      border: 1px solid #CBD5E1;
+    }
+
+    .ckh-action-btn {
+      background: transparent;
+      border: 1px solid #D1E5DE;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #063D3B;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .ckh-action-btn:hover {
+      background: #E6F7D2;
+      color: #063D3B;
+      border-color: #B9D7C7;
+    }
+
+    /* LIVE CONTEXT RESOLUTION SIMULATION BANNER */
+    .k-sim-banner {
+      margin: 20px 24px;
+      padding: 14px 18px;
+      background: #F8FBFA;
+      border: 1.5px solid var(--e-card-border);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .k-sim-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .k-sim-icon-box {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #063D3B;
+      color: #C8FF63;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .k-sim-meta-title {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #648781;
+    }
+
+    .k-sim-query {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--e-teal);
+      margin-top: 2px;
+    }
+
+    .k-sim-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #ECFDF5;
+      border: 1px solid #A7F3D0;
+      color: #047857;
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+
+    /* ENTERPRISE GUARDRAILS (3 COLUMNS) */
+    .k-guardrails-section {
+      padding: 24px;
+      background: #FFFFFF;
+      border-top: 1.5px solid #E6F0EC;
+    }
+
+    .k-guardrails-header {
+      font-size: 11.5px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--e-teal);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 16px;
+    }
+
+    .k-guardrails-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .k-guardrail-card {
+      background: #FFFFFF;
+      border: 1.5px solid var(--e-card-border);
+      border-radius: 14px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+      box-shadow: 0 4px 14px rgba(6, 61, 59, 0.02);
+    }
+
+    .k-guardrail-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .k-guardrail-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .k-guardrail-badge {
+      font-size: 9.5px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      padding: 2px 7px;
+      border-radius: 5px;
+      text-transform: uppercase;
+    }
+
+    .k-guardrail-title {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: var(--e-teal);
+      margin-bottom: 6px;
+    }
+
+    .k-guardrail-desc {
+      font-size: 11.5px;
+      color: #4F7470;
+      line-height: 1.5;
+    }
+
+    .k-guardrail-desc code {
+      padding: 1px 4px;
+      background: #F1F7F4;
+      border-radius: 4px;
+      color: var(--e-teal);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+    }
+
+    .k-guardrail-footer {
+      padding-top: 12px;
+      border-top: 1px solid #EEF5F2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+    }
+
+    /* RESPONSIVE */
+    @media(max-width: 1100px) {
+      .ckh-kpi-ribbon { grid-template-columns: repeat(2, 1fr); }
+      .k-guardrails-grid { grid-template-columns: 1fr; }
+    }
+
+    @media(max-width: 768px) {
+      .dashboard-sidebar { display: none; }
+      .brand-top-left-panel { width: auto; border-right: none; padding: 0 12px; }
+      .brand-top-center-panel { display: none; }
+      .brand-top-actions { padding-right: 12px; }
+      .dashboard-main-content { padding: 14px; }
+      .ckh-kpi-ribbon { grid-template-columns: 1fr; }
+      .k-sim-banner { flex-direction: column; align-items: flex-start; }
+    }
+
+    /* MODAL: ADD KNOWLEDGE SOURCE DIALOG */
+    .ckh-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 3000;
+      background: rgba(6, 61, 59, 0.65);
+      backdrop-filter: blur(8px);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .ckh-modal-overlay.open {
+      display: flex;
+    }
+    .ckh-modal-card {
+      background: #ffffff;
+      border: 1.5px solid #DCE9E5;
+      border-radius: 20px;
+      max-width: 640px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 32px 80px rgba(6, 61, 59, 0.25);
+      animation: ckhModalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes ckhModalPop {
+      0% { transform: scale(0.95) translateY(10px); opacity: 0; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .ckh-modal-header {
+      padding: 20px 24px;
+      border-bottom: 1.5px solid #E6F0EC;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .ckh-modal-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #063D3B;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .ckh-modal-close {
+      background: #F1F7F4;
+      border: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #063D3B;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .ckh-modal-close:hover {
+      background: #E2EFE9;
+    }
+    .ckh-modal-body {
+      padding: 24px;
+    }
+    .ckh-method-selector {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+      background: #F4FAF7;
+      padding: 4px;
+      border-radius: 12px;
+    }
+    .ckh-method-btn {
+      padding: 10px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 9px;
+      border: none;
+      background: transparent;
+      color: #4F7470;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .ckh-method-btn.active {
+      background: #ffffff;
+      color: #063D3B;
+      box-shadow: 0 2px 8px rgba(6, 61, 59, 0.08);
+      border: 1px solid #D1E5DE;
+    }
+    .ckh-dropzone {
+      border: 2px dashed #B9D7C7;
+      border-radius: 14px;
+      background: #F8FBFA;
+      padding: 28px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-bottom: 20px;
+    }
+    .ckh-dropzone:hover {
+      background: #EAF5EF;
+      border-color: #047857;
+    }
+    .ckh-form-group {
+      margin-bottom: 14px;
+    }
+    .ckh-form-label {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #063D3B;
+      margin-bottom: 5px;
+    }
+    .ckh-form-input, .ckh-form-select, .ckh-form-textarea {
+      width: 100%;
+      padding: 9px 12px;
+      font-size: 12.5px;
+      border: 1.5px solid #D1E5DE;
+      border-radius: 8px;
+      outline: none;
+      font-family: inherit;
+      color: #092F2E;
+      background: #ffffff;
+      transition: border-color 0.2s;
+    }
+    .ckh-form-input:focus, .ckh-form-select:focus, .ckh-form-textarea:focus {
+      border-color: #063D3B;
+    }
+    .ckh-form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .ckh-evergreen-box {
+      background: #F4FAF7;
+      border: 1px solid #D1E5DE;
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .ckh-modal-footer {
+      padding: 16px 24px;
+      border-top: 1.5px solid #E6F0EC;
+      background: #FAFDFB;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .ckh-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      background: #063D3B;
+      color: #ffffff;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      box-shadow: 0 10px 30px rgba(6, 61, 59, 0.35);
+      display: none;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(200, 255, 99, 0.3);
+      animation: ckhToastIn 0.3s ease;
+    }
+    .ckh-toast.show {
+      display: flex;
+    }
+    @keyframes ckhToastIn {
+      from { transform: translateY(16px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .btn-secondary {
+      background: #FFFFFF;
+      color: #4F7470;
+      border: 1.5px solid var(--e-border);
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 8px 16px;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover {
+      background: #F8FBFA;
+      color: var(--e-teal);
+    }
+    .btn-primary {
+      background: var(--e-teal);
+      color: var(--e-pistachio);
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 8px 18px;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-primary:hover {
+      background: #0A524F;
+      box-shadow: 0 4px 14px rgba(6, 61, 59, 0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. TOP HEADER (LOGO + INSTITUTION + STARTER PLAN + LOGOUT) -->
+  <header class="brand-top-navbar">
+    <div style="display: flex; align-items: center; height: 100%; flex: 1;">
+      <!-- Left Logo Panel (230px width matching left navigation boundary) -->
+      <div class="brand-top-left-panel">
+        <a href="/" class="brand-logo-wrap" aria-label="Edvora home">
+          <div class="brand-logo-icon">
+            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%; display:block;">
+              <rect width="40" height="40" rx="11" fill="#063D3B"/>
+              <path d="M20 6C20 13.732 13.732 20 6 20C13.732 20 20 26.268 20 34C20 26.268 26.268 20 34 20C26.268 20 20 13.732 20 6Z" fill="#C8FF63"/>
+            </svg>
+          </div>
+          <span class="brand-logo-text">Edvora<span>Chat</span></span>
+        </a>
+      </div>
+
+      <!-- Center Institution Panel (starts at 230px boundary line) -->
+      <div class="brand-top-center-panel">
+        <div class="brand-top-institution">
+          <span style="font-size: 13.5px; font-weight: 700; color: var(--e-teal); letter-spacing: -0.01em;">Apex Institute of Higher Education</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Actions -->
+    <div class="brand-top-actions">
+      <div class="brand-plan-pill">Starter Plan</div>
+      <a href="/login" class="brand-logout-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span>Logout</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- 2. DASHBOARD BODY (SIDEBAR + MAIN CONTENT) -->
+  <div class="dashboard-app-body">
+    
+    <!-- LEFT SIDEBAR -->
+    <aside class="dashboard-sidebar">
+      <div>
+        <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #71817D; margin-bottom: 10px; padding-left: 6px;">
+          Navigation
+        </div>
+        <nav>
+          <ul class="sidebar-nav-list">
+            <li>
+              <a href="/dashboard" class="sidebar-nav-item">
+                <span class="sidebar-nav-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                </span>
+                <span>Overview</span>
+              </a>
+            </li>
+            <li>
+              <a href="/knowledge-hub" class="sidebar-nav-item active">
+                <span class="sidebar-nav-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                </span>
+                <span>Central Knowledge Hub</span>
+              </a>
+            </li>
+            <li>
+              <a href="/dashboard#departments" class="sidebar-nav-item">
+                <span class="sidebar-nav-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="22.01"/><line x1="15" y1="22" x2="15" y2="22.01"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/><line x1="9" y1="10" x2="9" y2="10.01"/><line x1="15" y1="10" x2="15" y2="10.01"/><line x1="9" y1="14" x2="9" y2="14.01"/><line x1="15" y1="14" x2="15" y2="14.01"/><line x1="9" y1="18" x2="9" y2="18.01"/><line x1="15" y1="18" x2="15" y2="18.01"/></svg>
+                </span>
+                <span>Departments</span>
+              </a>
+            </li>
+            <li>
+              <a href="/dashboard#teams" class="sidebar-nav-item">
+                <span class="sidebar-nav-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </span>
+                <span>Teams</span>
+              </a>
+            </li>
+            <li>
+              <a href="/dashboard#leads" class="sidebar-nav-item">
+                <span class="sidebar-nav-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                </span>
+                <span>Student Leads</span>
+              </a>
+            </li>
+            <li>
+              <a href="/dashboard#chatbot" class="sidebar-nav-item">
+                <span class="sidebar-nav-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+                </span>
+                <span>ChatBot Settings</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Bottom Profile -->
+      <div class="sidebar-user-card">
+        <div class="sidebar-user-avatar">SK</div>
+        <div class="sidebar-user-meta">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 4px;">
+            <span class="sidebar-user-name">salan Khalkho</span>
+            <span class="sidebar-role-badge">Admin</span>
+          </div>
+          <div class="sidebar-user-sub">Institution Name</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT: INSTITUTIONAL KNOWLEDGE COMMAND CENTER -->
+    <main class="dashboard-main-content">
+      
+      <div class="ops-dashboard-frame">
+        
+        <!-- Top Control Bar (Title) -->
+        <div class="ops-dash-topbar">
+          <div class="ops-dash-title-row">
+            <div class="ops-dash-title-group">
+              <span class="ops-live-dot"></span>
+              <div>
+                <div class="ops-dash-main-title">Knowledge Hub</div>
+                <div class="ops-dash-sub-title">Multi-tier department scoping &amp; temporal guardrails</div>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div class="ckh-ctrl-pill">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <span>Academic Cycle: 2026&ndash;2027 Active</span>
+              </div>
+              <button onclick="openCkhModal('upload')" class="ckh-btn-ingest" title="Ingest new institutional document">
+                <span style="font-size: 14px; line-height: 1; font-weight: 800;">+</span>
+                <span>+ Ingest Knowledge Source</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5 LIFECYCLE STATUS KPI TILES (REPLICATED FROM LANDING-COPY) -->
+        <div class="ckh-kpi-ribbon">
+          
+          <!-- 1. Active & Live -->
+          <div class="ckh-kpi-tile active-kpi" onclick="filterCkhTable('active', this)">
+            <div class="ckh-kpi-header">
+              <div class="ckh-kpi-icon" style="background:#ECFDF5; color:#047857;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <span class="ckh-kpi-badge" style="background:#ECFDF5; color:#047857;">100% Grounded</span>
+            </div>
+            <div class="ckh-kpi-val"><span class="cnum-ckh" data-n="42">42</span></div>
+            <div class="ckh-kpi-lbl">Active &amp; Live</div>
+            <div class="ckh-kpi-sub">Serving student answers now</div>
+          </div>
+
+          <!-- 2. Expiring Soon -->
+          <div class="ckh-kpi-tile" onclick="filterCkhTable('expiring_soon', this)">
+            <div class="ckh-kpi-header">
+              <div class="ckh-kpi-icon" style="background:#FEF3C7; color:#D97706;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              </div>
+              <span class="ckh-kpi-badge" style="background:#FEF3C7; color:#B45309;">&le; 30 Days Left</span>
+            </div>
+            <div class="ckh-kpi-val"><span class="cnum-ckh" data-n="5">5</span></div>
+            <div class="ckh-kpi-lbl">Expiring Soon</div>
+            <div class="ckh-kpi-sub">Alerts sent to Dean's office</div>
+          </div>
+
+          <!-- 3. Expired (Hidden) -->
+          <div class="ckh-kpi-tile" onclick="filterCkhTable('expired', this)">
+            <div class="ckh-kpi-header">
+              <div class="ckh-kpi-icon" style="background:#FEF2F2; color:#DC2626;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              </div>
+              <span class="ckh-kpi-badge" style="background:#FEF2F2; color:#DC2626;">AI Quarantined</span>
+            </div>
+            <div class="ckh-kpi-val"><span class="cnum-ckh" data-n="3">3</span></div>
+            <div class="ckh-kpi-lbl">Expired (Hidden)</div>
+            <div class="ckh-kpi-sub">Auto-silenced &bull; 0 false quotes</div>
+          </div>
+
+          <!-- 4. Review Due -->
+          <div class="ckh-kpi-tile" onclick="filterCkhTable('review_due', this)">
+            <div class="ckh-kpi-header">
+              <div class="ckh-kpi-icon" style="background:#F5F3FF; color:#7C3AED;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              </div>
+              <span class="ckh-kpi-badge" style="background:#F5F3FF; color:#7C3AED;">6-Mo Cycle</span>
+            </div>
+            <div class="ckh-kpi-val"><span class="cnum-ckh" data-n="4">4</span></div>
+            <div class="ckh-kpi-lbl">Review Due</div>
+            <div class="ckh-kpi-sub">Audit pending approval</div>
+          </div>
+
+          <!-- 5. Archived History -->
+          <div class="ckh-kpi-tile" onclick="filterCkhTable('archived', this)">
+            <div class="ckh-kpi-header">
+              <div class="ckh-kpi-icon" style="background:#F1F5F9; color:#64748B;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+              </div>
+              <span class="ckh-kpi-badge" style="background:#F1F5F9; color:#64748B;">Audit Log</span>
+            </div>
+            <div class="ckh-kpi-val"><span class="cnum-ckh" data-n="18">18</span></div>
+            <div class="ckh-kpi-lbl">Archived History</div>
+            <div class="ckh-kpi-sub">Past cycles &amp; superseded docs</div>
+          </div>
+
+        </div>
+
+        <!-- FILTER & SEARCH TOOLBAR -->
+        <div class="ckh-toolbar">
+          <div class="ckh-tabs-group" id="ckhTabsContainer">
+            <button class="ckh-tab-btn active" onclick="filterCkhTable('all', this)">
+              <span>All Sources</span>
+              <span class="ckh-tab-count">72</span>
+            </button>
+            <button class="ckh-tab-btn" onclick="filterCkhTable('needs_attention', this)" style="color:#B45309;">
+              <span style="width:6px; height:6px; border-radius:50%; background:#D97706; display:inline-block;"></span>
+              <span>Needs Attention</span>
+              <span class="ckh-tab-count" style="background:#FEF3C7; color:#B45309;">9</span>
+            </button>
+            <button class="ckh-tab-btn" onclick="filterCkhTable('active', this)">
+              <span style="width:6px; height:6px; border-radius:50%; background:#047857; display:inline-block;"></span>
+              <span>Active &amp; Live</span>
+              <span class="ckh-tab-count">42</span>
+            </button>
+            <button class="ckh-tab-btn" onclick="filterCkhTable('expiring_soon', this)">
+              <span style="width:6px; height:6px; border-radius:50%; background:#F59E0B; display:inline-block;"></span>
+              <span>Expiring Soon</span>
+              <span class="ckh-tab-count">5</span>
+            </button>
+            <button class="ckh-tab-btn" onclick="filterCkhTable('expired', this)">
+              <span style="width:6px; height:6px; border-radius:50%; background:#EF4444; display:inline-block;"></span>
+              <span>Expired (Hidden)</span>
+              <span class="ckh-tab-count">3</span>
+            </button>
+            <button class="ckh-tab-btn" onclick="filterCkhTable('review_due', this)">
+              <span style="width:6px; height:6px; border-radius:50%; background:#8B5CF6; display:inline-block;"></span>
+              <span>Review Due</span>
+              <span class="ckh-tab-count">4</span>
+            </button>
+            <button class="ckh-tab-btn" onclick="filterCkhTable('archived', this)">
+              <span style="width:6px; height:6px; border-radius:50%; background:#94A3B8; display:inline-block;"></span>
+              <span>Archived History</span>
+              <span class="ckh-tab-count">18</span>
+            </button>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <!-- Department Filter Dropdown -->
+            <select id="ckhDeptFilter" onchange="applyCkhFilters()" style="font-size: 11.5px; font-weight: 600; color: #063D3B; background: #ffffff; border: 1.5px solid #D1E5DE; border-radius: 8px; padding: 6px 12px; outline: none; cursor: pointer;">
+              <option value="all">All Departments</option>
+              <option value="undergrad_admissions">Undergraduate Admissions</option>
+              <option value="financial_aid">Financial Aid &amp; Bursar</option>
+              <option value="student_affairs">Student Affairs &amp; Housing</option>
+              <option value="placements">Career Services &amp; Placements</option>
+              <option value="governance">Dean's Office &amp; Compliance</option>
+            </select>
+
+            <!-- Category Filter Dropdown -->
+            <select id="ckhCategoryFilter" onchange="applyCkhFilters()" style="font-size: 11.5px; font-weight: 600; color: #063D3B; background: #ffffff; border: 1.5px solid #D1E5DE; border-radius: 8px; padding: 6px 12px; outline: none; cursor: pointer;">
+              <option value="all">All Categories</option>
+              <option value="admissions">Admissions &amp; Prospectus</option>
+              <option value="tuition">Tuition &amp; Fee Structure</option>
+              <option value="scholarships">Scholarships &amp; Aid</option>
+              <option value="housing">Housing &amp; Campus Life</option>
+              <option value="placements">Placements &amp; Careers</option>
+              <option value="governance">Institutional Governance</option>
+            </select>
+
+            <!-- Search Input -->
+            <div class="ckh-search-box">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#648781" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input type="text" id="ckhSearchInput" onkeyup="applyCkhFilters()" placeholder="Filter title, keyword, code..." class="ckh-search-input">
+              <span style="font-size: 9.5px; font-family: 'JetBrains Mono', monospace; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: #F1F7F4; color: #648781; border: 1px solid #DCE9E5;">⌘K</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- MOCK DOCUMENT MANAGEMENT TABLE -->
+        <div class="ckh-table-wrap">
+          <table class="ckh-doc-table">
+            <thead>
+              <tr>
+                <th>Document Title &amp; Source</th>
+                <th>Department</th>
+                <th>Category</th>
+                <th>Ingestion Method</th>
+                <th>Effective &amp; Expiry Validity</th>
+                <th>Review Cadence &amp; Evergreen</th>
+                <th>AI Freshness Shield</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="ckhDocTableBody">
+              
+              <!-- ROW 1: Active Master Prospectus -->
+              <tr data-status="active" data-category="admissions" data-dept="undergrad_admissions" data-title="2026-27 master admissions prospectus eligibility matrix">
+                <td>
+                  <div class="ckh-doc-title-cell">
+                    <div class="ckh-file-badge ckh-file-pdf">
+                      <span>PDF</span>
+                    </div>
+                    <div>
+                      <div class="ckh-doc-title-text">2026–27 Master Admissions Prospectus &amp; Eligibility Matrix</div>
+                      <div class="ckh-doc-meta-text">
+                        <span>14.2 MB &bull; v2.6 Verified</span>
+                        <span>&bull; Added Aug 1, 2026</span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="ckh-dept-badge">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2.3"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="22.01"/><line x1="15" y1="22" x2="15" y2="22.01"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/></svg>
+                    <span>Undergraduate</span>
+                  </span>
+                </td>
+                <td><span class="ckh-category-tag">Admissions &amp; Prospectus</span></td>
+                <td><span class="ckh-ingest-tag"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg> PDF Upload</span></td>
+                <td>
+                  <div style="font-weight: 700; color: #063D3B; font-size: 11.5px;">Aug 1, 2026 &rarr; Jun 30, 2027</div>
+                  <div style="font-size: 10px; color: #047857; font-weight: 600;">302 days active validity</div>
+                </td>
+                <td>
+                  <div style="font-size: 11px; font-weight: 600; color: #063D3B;">Annual (12 Mo)</div>
+                  <div style="font-size: 10px; color: #648781;">Standard Academic Cycle</div>
+                </td>
+                <td>
+                  <span class="ckh-status-pill ckh-status-live">
+                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #047857;"></span>
+                    Active &amp; Live
+                  </span>
+                </td>
+                <td style="text-align: right;">
+                  <button onclick="showCkhToast('Inspecting 18 verified AI knowledge chunks...')" class="ckh-action-btn">
+                    <span>Inspect Chunks</span>
+                  </button>
+                </td>
+              </tr>
+
+              <!-- ROW 2: Expiring Soon Fee Structure -->
+              <tr data-status="expiring_soon" data-category="tuition" data-dept="financial_aid" data-title="undergraduate tuition hostel laboratory fee schedule 2026">
+                <td>
+                  <div class="ckh-doc-title-cell">
+                    <div class="ckh-file-badge ckh-file-pdf">
+                      <span>PDF</span>
+                    </div>
+                    <div>
+                      <div class="ckh-doc-title-text">Undergraduate Tuition, Hostel &amp; Laboratory Fee Schedule 2026</div>
+                      <div class="ckh-doc-meta-text">
+                        <span>3.6 MB &bull; Bursar Office</span>
+                        <span>&bull; Added Jan 15, 2026</span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="ckh-dept-badge" style="background:#FEF3C7; border-color:#FDE68A; color:#B45309;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2.3"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="22.01"/><line x1="15" y1="22" x2="15" y2="22.01"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/></svg>
+                    <span>Bursar &amp; Finance</span>
+                  </span>
+                </td>
+                <td><span class="ckh-category-tag">Tuition &amp; Fee Structure</span></td>
+                <td><span class="ckh-ingest-tag"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg> PDF Upload</span></td>
+                <td>
+                  <div style="font-weight: 700; color: #B45309; font-size: 11.5px;">Jan 15, 2026 &rarr; Oct 15, 2026</div>
+                  <div style="font-size: 10px; color: #DC2626; font-weight: 800; display: flex; align-items: center; gap: 4px;">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    Expiring in 14 days
+                  </div>
+                </td>
+                <td>
+                  <div style="font-size: 11px; font-weight: 600; color: #063D3B;">Every 6 Months</div>
+                  <div style="font-size: 10px; color: #B45309; font-weight: 700;">Dean notified for update</div>
+                </td>
+                <td>
+                  <span class="ckh-status-pill ckh-status-warn">
+                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #F59E0B;"></span>
+                    Expiring Soon
+                  </span>
+                </td>
+                <td style="text-align: right;">
+                  <button onclick="openCkhModal('upload')" class="ckh-action-btn" style="background:#FEF3C7; border-color:#FDE68A; color:#B45309;">
+                    <span>Renew Doc</span>
+                  </button>
+                </td>
+              </tr>
+
+              <!-- ROW 3: Expired Scholarship Guidelines (Hidden) -->
+              <tr data-status="expired" data-category="scholarships" data-dept="financial_aid" data-title="merit-based scholarship criteria fee waiver tiers 2025-26">
+                <td>
+                  <div class="ckh-doc-title-cell">
+                    <div class="ckh-file-badge ckh-file-url">
+                      <span>URL</span>
+                    </div>
+                    <div>
+                      <div class="ckh-doc-title-text">Merit-Based Scholarship Criteria &amp; Fee Waiver Tiers 2025–26</div>
+                      <div class="ckh-doc-meta-text">
+                        <span style="color: #0284C7;">apex.edu/scholarships/merit-2025</span>
+                        <span>&bull; Sync: Daily</span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="ckh-dept-badge" style="background:#EFF6FF; border-color:#BFDBFE; color:#1D4ED8;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="2.3"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="22.01"/><line x1="15" y1="22" x2="15" y2="22.01"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/></svg>
+                    <span>Financial Aid</span>
+                  </span>
+                </td>
+                <td><span class="ckh-category-tag">Scholarships &amp; Aid</span></td>
+                <td><span class="ckh-ingest-tag"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg> Web URL Ingest</span></td>
+                <td>
+                  <div style="font-weight: 700; color: #DC2626; font-size: 11.5px;">Nov 1, 2025 &rarr; Aug 31, 2026</div>
+                  <div style="font-size: 10px; color: #DC2626; font-weight: 700;">Expired yesterday &bull; Quarantined</div>
+                </td>
+                <td>
+                  <div style="font-size: 11px; font-weight: 600; color: #063D3B;">Annual Review</div>
+                  <div style="font-size: 10px; color: #648781;">2026 Cycle Pending</div>
+                </td>
+                <td>
+                  <span class="ckh-status-pill ckh-status-expired">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    Expired (Hidden)
+                  </span>
+                </td>
+                <td style="text-align: right;">
+                  <button onclick="showCkhToast('Document is quarantined: AI automatically answers with fallback!')" class="ckh-action-btn">
+                    <span>View Shield</span>
+                  </button>
+                </td>
+              </tr>
+
+              <!-- ROW 4: Review Due Housing Memo -->
+              <tr data-status="review_due" data-category="housing" data-dept="student_affairs" data-title="campus housing hostel allocations mess rules 2026">
+                <td>
+                  <div class="ckh-doc-title-cell">
+                    <div class="ckh-file-badge ckh-file-txt">
+                      <span>TXT</span>
+                    </div>
+                    <div>
+                      <div class="ckh-doc-title-text">Campus Housing, Hostel Allocations &amp; Mess Rules 2026</div>
+                      <div class="ckh-doc-meta-text">
+                        <span>Direct Rich Text &bull; Warden Desk</span>
+                        <span>&bull; Added Mar 1, 2026</span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="ckh-dept-badge" style="background:#F5F3FF; border-color:#DDD6FE; color:#6D28D9;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#6D28D9" stroke-width="2.3"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="22.01"/><line x1="15" y1="22" x2="15" y2="22.01"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/></svg>
+                    <span>Student Affairs</span>
+                  </span>
+                </td>
+                <td><span class="ckh-category-tag">Housing &amp; Campus Life</span></td>
+                <td><span class="ckh-ingest-tag"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path></svg> Text Paste</span></td>
+                <td>
+                  <div style="font-weight: 700; color: #063D3B; font-size: 11.5px;">Mar 1, 2026 &rarr; Dec 31, 2026</div>
+                  <div style="font-size: 10px; color: #7C3AED; font-weight: 600;">Scheduled audit interval hit</div>
+                </td>
+                <td>
+                  <div style="font-size: 11px; font-weight: 700; color: #7C3AED;">Every 6 Months</div>
+                  <div style="font-size: 10px; color: #7C3AED;">Audit sign-off required</div>
+                </td>
+                <td>
+                  <span class="ckh-status-pill ckh-status-review">
+                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #7C3AED;"></span>
+                    Review Due
+                  </span>
+                </td>
+                <td style="text-align: right;">
+                  <button onclick="showCkhToast('Document flagged for Provost sign-off.')" class="ckh-action-btn">
+                    <span>Audit Policy</span>
+                  </button>
+                </td>
+              </tr>
+
+              <!-- ROW 5: Evergreen Anti-Ragging Policy -->
+              <tr data-status="active" data-category="governance" data-dept="governance" data-title="institutional code of conduct anti-ragging guidelines statutory">
+                <td>
+                  <div class="ckh-doc-title-cell">
+                    <div class="ckh-file-badge ckh-file-pdf">
+                      <span>PDF</span>
+                    </div>
+                    <div>
+                      <div class="ckh-doc-title-text">Institutional Anti-Ragging Code of Conduct &amp; Safety Protocols</div>
+                      <div class="ckh-doc-meta-text">
+                        <span>1.8 MB &bull; Statutory Compliance</span>
+                        <span>&bull; Added Jul 10, 2024</span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="ckh-dept-badge" style="background:#F1F5F9; border-color:#CBD5E1; color:#475569;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2.3"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="22.01"/><line x1="15" y1="22" x2="15" y2="22.01"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/></svg>
+                    <span>Compliance</span>
+                  </span>
+                </td>
+                <td><span class="ckh-category-tag">Institutional Governance</span></td>
+                <td><span class="ckh-ingest-tag"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg> PDF Upload</span></td>
+                <td>
+                  <div style="font-weight: 700; color: #047857; font-size: 11.5px;">Effective: Jul 10, 2024</div>
+                  <div style="font-size: 10px; color: #047857; font-weight: 600;">Permanent Institutional Policy</div>
+                </td>
+                <td>
+                  <div style="display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 800; padding: 2px 6px; border-radius: 4px; background: #E6F7D2; color: #063D3B; border: 1px solid #B9D7C7;">
+                    <span>&infin; Evergreen Policy</span>
+                  </div>
+                  <div style="font-size: 9.5px; color: #648781; margin-top: 2px;">Biennial Audit Review</div>
+                </td>
+                <td>
+                  <span class="ckh-status-pill ckh-status-live">
+                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #047857;"></span>
+                    Active &amp; Live
+                  </span>
+                </td>
+                <td style="text-align: right;">
+                  <button onclick="showCkhToast('Evergreen source permanently active.')" class="ckh-action-btn">
+                    <span>View Details</span>
+                  </button>
+                </td>
+              </tr>
+
+              <!-- ROW 6: Active Placement Report -->
+              <tr data-status="active" data-category="placements" data-dept="placements" data-title="annual placement velocity top recruiter salary disclosures 2025-26">
+                <td>
+                  <div class="ckh-doc-title-cell">
+                    <div class="ckh-file-badge ckh-file-pdf">
+                      <span>PDF</span>
+                    </div>
+                    <div>
+                      <div class="ckh-doc-title-text">Annual Placement Velocity &amp; Top Recruiter Salary Disclosures</div>
+                      <div class="ckh-doc-meta-text">
+                        <span>5.2 MB &bull; Career Cell</span>
+                        <span>&bull; Added Jan 20, 2026</span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="ckh-dept-badge" style="background:#ECFDF5; border-color:#A7F3D0; color:#047857;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2.3"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="22.01"/><line x1="15" y1="22" x2="15" y2="22.01"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/></svg>
+                    <span>Career Cell</span>
+                  </span>
+                </td>
+                <td><span class="ckh-category-tag">Placements &amp; Careers</span></td>
+                <td><span class="ckh-ingest-tag"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg> PDF Upload</span></td>
+                <td>
+                  <div style="font-weight: 700; color: #063D3B; font-size: 11.5px;">Jan 20, 2026 &rarr; Nov 30, 2026</div>
+                  <div style="font-size: 10px; color: #047857; font-weight: 600;">90 days remaining</div>
+                </td>
+                <td>
+                  <div style="font-size: 11px; font-weight: 600; color: #063D3B;">Every 6 Months</div>
+                  <div style="font-size: 10px; color: #648781;">Review in 28 days</div>
+                </td>
+                <td>
+                  <span class="ckh-status-pill ckh-status-live">
+                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #047857;"></span>
+                    Active &amp; Live
+                  </span>
+                </td>
+                <td style="text-align: right;">
+                  <button onclick="showCkhToast('Career disclosures: 100% verified by placement desk.')" class="ckh-action-btn">
+                    <span>Inspect Chunks</span>
+                  </button>
+                </td>
+              </tr>
+
+              <!-- ROW 7: Active International Guidance Web URL -->
+              <tr data-status="active" data-category="admissions" data-dept="undergrad_admissions" data-title="international student visa guidance english proficiency cutoffs toefl ielts">
+                <td>
+                  <div class="ckh-doc-title-cell">
+                    <div class="ckh-file-badge ckh-file-url">
+                      <span>URL</span>
+                    </div>
+                    <div>
+                      <div class="ckh-doc-title-text">International Student Visa Guidance &amp; IELTS/TOEFL Cutoffs</div>
+                      <div class="ckh-doc-meta-text">
+                        <span style="color: #0284C7;">apex.edu/international/admissions</span>
+                        <span>&bull; Sync: Weekly</span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="ckh-dept-badge">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2.3"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="22.01"/><line x1="15" y1="22" x2="15" y2="22.01"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/></svg>
+                    <span>Undergraduate</span>
+                  </span>
+                </td>
+                <td><span class="ckh-category-tag">Admissions &amp; Prospectus</span></td>
+                <td><span class="ckh-ingest-tag"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg> Web URL Ingest</span></td>
+                <td>
+                  <div style="font-weight: 700; color: #063D3B; font-size: 11.5px;">Aug 1, 2026 &rarr; Jul 31, 2027</div>
+                  <div style="font-size: 10px; color: #047857; font-weight: 600;">333 days remaining</div>
+                </td>
+                <td>
+                  <div style="display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 800; padding: 2px 5px; border-radius: 4px; background: #E6F7D2; color: #063D3B; border: 1px solid #B9D7C7;">
+                    <span>&infin; Evergreen Process</span>
+                  </div>
+                  <div style="font-size: 9.5px; color: #648781;">Weekly Webhook Sync</div>
+                </td>
+                <td>
+                  <span class="ckh-status-pill ckh-status-live">
+                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #047857;"></span>
+                    Active &amp; Live
+                  </span>
+                </td>
+                <td style="text-align: right;">
+                  <button onclick="showCkhToast('Live webhook ping: Verified 2 hours ago.')" class="ckh-action-btn">
+                    <span>Re-Sync</span>
+                  </button>
+                </td>
+              </tr>
+
+              <!-- ROW 8: Archived History (2024-25 Catalog) -->
+              <tr data-status="archived" data-category="admissions" data-dept="undergrad_admissions" data-title="2024-25 master undergraduate prospectus superseded v2.6">
+                <td>
+                  <div class="ckh-doc-title-cell">
+                    <div class="ckh-file-badge ckh-file-pdf" style="background:#F1F5F9; color:#64748B; border-color:#CBD5E1;">
+                      <span>ARC</span>
+                    </div>
+                    <div>
+                      <div class="ckh-doc-title-text" style="color:#64748B; text-decoration: line-through;">2024–25 Master Undergraduate Prospectus (Superseded)</div>
+                      <div class="ckh-doc-meta-text">
+                        <span>18.1 MB &bull; Superseded by v2.6</span>
+                        <span>&bull; Archived Aug 1, 2025</span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="ckh-dept-badge" style="background:#F1F5F9; border-color:#CBD5E1; color:#64748B;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2.3"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="22.01"/><line x1="15" y1="22" x2="15" y2="22.01"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/></svg>
+                    <span>Undergraduate</span>
+                  </span>
+                </td>
+                <td><span class="ckh-category-tag" style="opacity: 0.65;">Admissions &amp; Prospectus</span></td>
+                <td><span class="ckh-ingest-tag" style="opacity: 0.65;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg> PDF Upload</span></td>
+                <td>
+                  <div style="font-weight: 700; color: #64748B; font-size: 11.5px;">Aug 1, 2024 &rarr; Jul 31, 2025</div>
+                  <div style="font-size: 10px; color: #64748B;">Historical cycle closed</div>
+                </td>
+                <td>
+                  <div style="font-size: 11px; color: #648781;">Archived Record</div>
+                  <div style="font-size: 10px; color: #648781;">5-Year Audit Storage</div>
+                </td>
+                <td>
+                  <span class="ckh-status-pill ckh-status-archived">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect></svg>
+                    Archived History
+                  </span>
+                </td>
+                <td style="text-align: right;">
+                  <button onclick="showCkhToast('Audit trail locked: Preserved for compliance.')" class="ckh-action-btn" style="color:#64748B;">
+                    <span>Audit Trail</span>
+                  </button>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Table Footer Status Ribbon -->
+        <div style="padding: 14px 20px; background: #F8FBFA; border-top: 1px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 11.5px; color: #648781;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span style="font-weight: 700; color: #063D3B;">Guaranteed Freshness Engine:</span>
+            <span>Expired documents are instantaneously quarantined from conversational context without retraining models.</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <span style="font-weight: 700; color: #063D3B;">Showing 8 of 72 Institutional Documents</span>
+            <button onclick="openCkhModal('upload')" style="color: #047857; font-weight: 700; background: none; border: none; cursor: pointer; text-decoration: underline;">+ Ingest New Document</button>
+          </div>
+        </div>
+
+        <!-- Live Context Resolution Simulation Banner -->
+        <div class="k-sim-banner">
+          <div class="k-sim-left">
+            <div class="k-sim-icon-box">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <div>
+              <div class="k-sim-meta-title">Live Context Resolution Simulation</div>
+              <div class="k-sim-query">Student asks: &ldquo;What is the MBA tuition fee and scholarship eligibility for 2026?&rdquo;</div>
+            </div>
+          </div>
+
+          <div class="k-sim-badge">
+            <span>⚡ Matched: MBA Prospectus 2026&ndash;27 &bull; Score: 98.4% (0.038s)</span>
+          </div>
+        </div>
+
+        <!-- ENTERPRISE KNOWLEDGE GUARDRAILS FOR UNIVERSITIES & COLLEGES -->
+        <div class="k-guardrails-section">
+          <div class="k-guardrails-header">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>Enterprise Knowledge Guardrails for Universities &amp; Colleges</span>
+          </div>
+
+          <div class="k-guardrails-grid">
+            
+            <!-- Guardrail 1: Zero Cross-Talk -->
+            <div class="k-guardrail-card">
+              <div>
+                <div class="k-guardrail-top">
+                  <div class="k-guardrail-icon" style="background:#ECFDF5; color:#047857;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                  </div>
+                  <span class="k-guardrail-badge" style="background:#ECFDF5; color:#047857; border:1px solid #A7F3D0;">Department Scoping</span>
+                </div>
+                <div style="margin-top: 10px;">
+                  <div class="k-guardrail-title">Zero Cross-Talk Between Silos</div>
+                  <div class="k-guardrail-desc">
+                    14 pre-built department templates (MBA, Engineering, Hostel, Scholarships, Placements) ensure student questions only retrieve information scoped to that specific department.
+                  </div>
+                </div>
+              </div>
+              <div class="k-guardrail-footer">
+                <span style="font-weight: 700; color: var(--e-teal);">Scoped Accuracy</span>
+                <span style="font-weight: 800; color: #047857;">100% Isolated</span>
+              </div>
+            </div>
+
+            <!-- Guardrail 2: Auto-Quarantine on Expiry -->
+            <div class="k-guardrail-card">
+              <div>
+                <div class="k-guardrail-top">
+                  <div class="k-guardrail-icon" style="background:#FEF3C7; color:#D97706;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  </div>
+                  <span class="k-guardrail-badge" style="background:#FEF3C7; color:#D97706; border:1px solid #FDE68A;">Temporal Guardrails</span>
+                </div>
+                <div style="margin-top: 10px;">
+                  <div class="k-guardrail-title">Auto-Quarantine on Expiry</div>
+                  <div class="k-guardrail-desc">
+                    Real-time SQL guardrails (<code>effective_from</code> / <code>expires_on</code>) prevent outdated 2025 brochures or expired fee structures from ever being quoted to applicants.
+                  </div>
+                </div>
+              </div>
+              <div class="k-guardrail-footer">
+                <span style="font-weight: 700; color: var(--e-teal);">Expired Fee Quotes</span>
+                <span style="font-weight: 800; color: #047857;">0% Risk</span>
+              </div>
+            </div>
+
+            <!-- Guardrail 3: 1-Click Academic Rollover -->
+            <div class="k-guardrail-card">
+              <div>
+                <div class="k-guardrail-top">
+                  <div class="k-guardrail-icon" style="background:#E0F2FE; color:#0284C7;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                  </div>
+                  <span class="k-guardrail-badge" style="background:#E0F2FE; color:#0284C7; border:1px solid #BAE6FD;">Audit Lineage</span>
+                </div>
+                <div style="margin-top: 10px;">
+                  <div class="k-guardrail-title">1-Click Academic Rollover</div>
+                  <div class="k-guardrail-desc">
+                    When new admission cycles begin, replace documents in 1 click (2025&ndash;26 &rarr; 2026&ndash;27). Predecessors are safely archived with immutable version history for university audits.
+                  </div>
+                </div>
+              </div>
+              <div class="k-guardrail-footer">
+                <span style="font-weight: 700; color: var(--e-teal);">Cycle Transition</span>
+                <span style="font-weight: 800; color: #0284C7;">Zero Downtime</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- INTERACTIVE MODAL: ADD KNOWLEDGE SOURCE DIALOG (DITTO TO LANDING-COPY) -->
+  <div id="ckhModal" class="ckh-modal-overlay" onclick="handleCkhModalBackdrop(event)">
+    <div class="ckh-modal-card">
+      
+      <!-- Modal Header -->
+      <div class="ckh-modal-header">
+        <div>
+          <div class="ckh-modal-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+            <span>Ingest Institutional Knowledge Source</span>
+          </div>
+          <div style="font-size: 11px; color: #648781; margin-top: 2px;">Configure institutional governance and freshness validity before AI ingestion</div>
+        </div>
+        <button onclick="closeCkhModal()" class="ckh-modal-close" aria-label="Close modal">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="ckh-modal-body">
+        
+        <!-- Ingestion Modality Switcher -->
+        <label class="ckh-form-label">Select Ingestion Method</label>
+        <div class="ckh-method-selector">
+          <button id="btnMethodUpload" onclick="switchCkhMethod('upload')" class="ckh-method-btn active">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            <span>Upload File</span>
+          </button>
+          <button id="btnMethodUrl" onclick="switchCkhMethod('url')" class="ckh-method-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+            <span>Ingest Web URL</span>
+          </button>
+          <button id="btnMethodText" onclick="switchCkhMethod('text')" class="ckh-method-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path></svg>
+            <span>Paste Text</span>
+          </button>
+        </div>
+
+        <!-- PANEL 1: UPLOAD FILE -->
+        <div id="panelUpload" class="ckh-method-panel">
+          <div class="ckh-dropzone" onclick="showCkhToast('File selected: 2026-27_Prospectus_v2.pdf')">
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: #E6F7D2; color: #063D3B; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px auto;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            </div>
+            <div style="font-weight: 700; color: #063D3B; font-size: 13px;">Drop your university PDF, DOCX, or XLSX here</div>
+            <div style="font-size: 11px; color: #648781; margin-top: 4px;">Automatic OCR, table preservation &bull; Up to 50MB per document</div>
+            <span style="display: inline-block; margin-top: 10px; font-size: 10.5px; font-weight: 700; color: #047857; background: #ECFDF5; padding: 4px 10px; border-radius: 6px; border: 1px solid #A7F3D0;">Browse Files &rarr;</span>
+          </div>
+        </div>
+
+        <!-- PANEL 2: INGEST WEB URL -->
+        <div id="panelUrl" class="ckh-method-panel" style="display:none;">
+          <div class="ckh-form-group">
+            <label class="ckh-form-label">University Web URL to Crawl</label>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <input type="url" id="modalInputUrl" value="https://apex.edu/admissions/eligibility-2026" class="ckh-form-input" placeholder="https://yourcollege.edu/admissions/fees">
+              <select class="ckh-form-select" style="width: 140px;">
+                <option>Daily Sync</option>
+                <option>Weekly Sync</option>
+                <option>Webhook Trigger</option>
+              </select>
+            </div>
+            <div style="font-size: 10.5px; color: #648781; margin-top: 4px;">Extracts clean text, ignores navigation menus, auto-detects updates.</div>
+          </div>
+        </div>
+
+        <!-- PANEL 3: PASTE TEXT -->
+        <div id="panelText" class="ckh-method-panel" style="display:none;">
+          <div class="ckh-form-group">
+            <label class="ckh-form-label">Paste Policy Text / Spot Announcement</label>
+            <textarea rows="4" class="ckh-form-textarea" placeholder="Paste spot admission deadlines, urgent fee notices, or revised cutoffs here..."></textarea>
+            <div style="font-size: 10.5px; color: #648781; margin-top: 4px;">Processed and grounded into chatbot context in &lt; 2 seconds.</div>
+          </div>
+        </div>
+
+        <!-- MANDATORY DOCUMENT METADATA (GOVERNANCE SHIELD) -->
+        <div style="padding-top: 12px; border-top: 1px solid #E6F0EC;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #063D3B;">Mandatory Document Metadata</span>
+            <span style="font-size: 10px; color: #047857; font-weight: 700; background: #ECFDF5; padding: 2px 7px; border-radius: 4px; border: 1px solid #A7F3D0;">Required for AI Indexing</span>
+          </div>
+
+          <!-- Title -->
+          <div class="ckh-form-group">
+            <label class="ckh-form-label">Document Title <span style="color: #DC2626;">*</span></label>
+            <input type="text" id="modalInputTitle" value="2026–27 Master Admissions Prospectus & Eligibility Matrix" class="ckh-form-input" placeholder="e.g. Master Admissions Prospectus 2026-27">
+          </div>
+
+          <!-- Department & Category Row -->
+          <div class="ckh-form-row">
+            <div class="ckh-form-group">
+              <label class="ckh-form-label">Campus Department <span style="color: #DC2626;">*</span></label>
+              <select id="modalInputDepartment" class="ckh-form-select">
+                <option value="undergrad_admissions" selected>Undergraduate Admissions</option>
+                <option value="financial_aid">Financial Aid &amp; Bursar</option>
+                <option value="student_affairs">Student Affairs &amp; Housing</option>
+                <option value="placements">Career Services &amp; Placements</option>
+                <option value="governance">Dean's Office &amp; Compliance</option>
+              </select>
+            </div>
+            <div class="ckh-form-group">
+              <label class="ckh-form-label">Institutional Category <span style="color: #DC2626;">*</span></label>
+              <select id="modalInputCategory" class="ckh-form-select">
+                <option value="admissions" selected>Admissions &amp; Prospectus</option>
+                <option value="tuition">Tuition &amp; Fee Structure</option>
+                <option value="scholarships">Scholarships &amp; Financial Aid</option>
+                <option value="housing">Housing &amp; Campus Life</option>
+                <option value="placements">Placements &amp; Careers</option>
+                <option value="governance">Institutional Governance &amp; Code of Conduct</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Effective Date & Valid Until -->
+          <div class="ckh-form-row">
+            <div class="ckh-form-group">
+              <label class="ckh-form-label">Effective Date <span style="color: #DC2626;">*</span></label>
+              <input type="date" id="modalInputEffective" value="2026-08-01" class="ckh-form-input">
+            </div>
+            <div class="ckh-form-group">
+              <label class="ckh-form-label">Valid Until / Expires On <span style="color: #DC2626;">*</span></label>
+              <input type="date" id="modalInputExpiry" value="2027-06-30" class="ckh-form-input">
+            </div>
+          </div>
+
+          <!-- Review Cycle -->
+          <div class="ckh-form-group">
+            <label class="ckh-form-label">Review Cycle (Audit Cadence) <span style="color: #DC2626;">*</span></label>
+            <select id="modalInputCycle" class="ckh-form-select">
+              <option value="3">Every 3 Months (Quarterly Review)</option>
+              <option value="6" selected>Every 6 Months (Semi-Annual Review &mdash; Recommended)</option>
+              <option value="12">Annual (12 Months / Academic Year)</option>
+              <option value="24">Every 24 Months (Biennial)</option>
+            </select>
+          </div>
+
+          <!-- Evergreen Content Toggle -->
+          <div class="ckh-evergreen-box">
+            <input type="checkbox" id="modalCheckEvergreen" onchange="toggleCkhEvergreen(this)" style="margin-top: 2px; width: 16px; height: 16px;">
+            <div>
+              <label for="modalCheckEvergreen" style="font-size: 12px; font-weight: 700; color: #063D3B; cursor: pointer;">
+                Mark as Evergreen Content
+              </label>
+              <div style="font-size: 10.5px; color: #648781; line-height: 1.3; margin-top: 2px;">
+                Select for permanent university policies, anti-ragging codes, or campus maps. AI chatbot will maintain continuous answering validity without auto-expiring.
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="ckh-modal-footer">
+        <button onclick="closeCkhModal()" class="btn-secondary">Cancel</button>
+        <button onclick="submitCkhIngest()" class="btn-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Ingest &amp; Guard with AI</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FLOATING TOAST NOTIFICATION -->
+  <div id="ckhToast" class="ckh-toast">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C8FF63" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    <span id="ckhToastMsg">Document successfully indexed and verified.</span>
+  </div>
+
+  <script>
+    /* CENTRAL KNOWLEDGE HUB DASHBOARD INTERACTIVITY */
+    function filterCkhTable(status, btn) {
+      // Update active tab button
+      var container = document.getElementById('ckhTabsContainer');
+      if (container) {
+        container.querySelectorAll('.ckh-tab-btn').forEach(function(b) {
+          b.classList.remove('active');
+        });
+      }
+      if (btn && btn.classList.contains('ckh-tab-btn')) {
+        btn.classList.add('active');
+      }
+
+      // Update active KPI ribbon tile if matching
+      document.querySelectorAll('.ckh-kpi-tile').forEach(function(t) {
+        t.classList.remove('active-kpi');
+      });
+      if (btn && btn.classList.contains('ckh-kpi-tile')) {
+        btn.classList.add('active-kpi');
+        // Also sync the tab above
+        if (container) {
+          var matchTab = container.querySelector('.ckh-tab-btn[onclick*="' + status + '"]');
+          if (matchTab) matchTab.classList.add('active');
+        }
+      }
+
+      applyCkhFilters(status);
+    }
+
+    function applyCkhFilters(forcedStatus) {
+      var activeTab = document.querySelector('.ckh-tab-btn.active');
+      var status = forcedStatus;
+      if (!status && activeTab) {
+        var match = activeTab.getAttribute('onclick').match(/'([^']+)'/);
+        if (match) status = match[1];
+      }
+      if (!status) status = 'all';
+
+      var deptFilter = document.getElementById('ckhDeptFilter') ? document.getElementById('ckhDeptFilter').value : 'all';
+      var catFilter = document.getElementById('ckhCategoryFilter') ? document.getElementById('ckhCategoryFilter').value : 'all';
+      var search = document.getElementById('ckhSearchInput') ? document.getElementById('ckhSearchInput').value.toLowerCase().trim() : '';
+
+      var rows = document.querySelectorAll('#ckhDocTableBody tr');
+      rows.forEach(function(row) {
+        var rowStatus = row.getAttribute('data-status');
+        var rowDept = row.getAttribute('data-dept');
+        var rowCat = row.getAttribute('data-category');
+        var rowTitle = (row.getAttribute('data-title') || '').toLowerCase();
+
+        var matchStatus = false;
+        if (status === 'all') {
+          matchStatus = true;
+        } else if (status === 'needs_attention') {
+          matchStatus = (rowStatus === 'expiring_soon' || rowStatus === 'review_due');
+        } else {
+          matchStatus = (rowStatus === status);
+        }
+
+        var matchDept = (deptFilter === 'all' || rowDept === deptFilter);
+        var matchCat = (catFilter === 'all' || rowCat === catFilter);
+        var matchSearch = (!search || rowTitle.indexOf(search) !== -1);
+
+        if (matchStatus && matchDept && matchCat && matchSearch) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+
+    // Number Count-Up Animation
+    (function initCkhCountUp() {
+      function countUp(el, target, ms) {
+        var s = Date.now();
+        (function tick() {
+          var p = Math.min((Date.now() - s) / ms, 1);
+          var e = 1 - Math.pow(1 - p, 3);
+          var v = Math.round(e * target);
+          el.textContent = v.toLocaleString();
+          if (p < 1) requestAnimationFrame(tick);
+        })();
+      }
+
+      window.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.cnum-ckh').forEach(function(el) {
+          var target = parseInt(el.getAttribute('data-n'), 10);
+          if (!isNaN(target)) {
+            countUp(el, target, 1200);
+          }
+        });
+      });
+    })();
+
+    // Ingest Modal Interactivity (Replicated from landing-copy.html)
+    function openCkhModal(mode) {
+      var modal = document.getElementById('ckhModal');
+      if (modal) {
+        modal.classList.add('open');
+        if (mode) switchCkhMethod(mode);
+      }
+    }
+
+    function closeCkhModal() {
+      var modal = document.getElementById('ckhModal');
+      if (modal) modal.classList.remove('open');
+    }
+
+    function handleCkhModalBackdrop(e) {
+      if (e.target.id === 'ckhModal') closeCkhModal();
+    }
+
+    function switchCkhMethod(mode) {
+      ['Upload', 'Url', 'Text'].forEach(function(m) {
+        var p = document.getElementById('panel' + m);
+        var b = document.getElementById('btnMethod' + m);
+        if (p) p.style.display = 'none';
+        if (b) b.classList.remove('active');
+      });
+      var activePanel = document.getElementById('panel' + mode.charAt(0).toUpperCase() + mode.slice(1));
+      var activeBtn = document.getElementById('btnMethod' + mode.charAt(0).toUpperCase() + mode.slice(1));
+      if (activePanel) activePanel.style.display = 'block';
+      if (activeBtn) activeBtn.classList.add('active');
+    }
+
+    function toggleCkhEvergreen(cb) {
+      var exp = document.getElementById('modalInputExpiry');
+      if (exp) exp.disabled = cb.checked;
+    }
+
+    function submitCkhIngest() {
+      var title = document.getElementById('modalInputTitle')?.value || 'New Knowledge Document';
+      closeCkhModal();
+      showCkhToast('✓ "' + title + '" successfully ingested and guarded with AI Freshness Shield!');
+    }
+
+    function showCkhToast(msg) {
+      var t = document.getElementById('ckhToast');
+      var m = document.getElementById('ckhToastMsg');
+      if (!t || !m) return;
+      m.textContent = msg;
+      t.classList.add('show');
+      setTimeout(function() {
+        t.classList.remove('show');
+      }, 4200);
+    }
+  </script>
+
+</body>
+</html>

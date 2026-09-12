@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edvora.chat — Admissions AI Real-Time Demonstration</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f8fafc;
+            background-image: 
+                radial-gradient(at 10% 20%, rgba(99, 102, 241, 0.05) 0px, transparent 40%),
+                radial-gradient(at 90% 80%, rgba(139, 92, 246, 0.04) 0px, transparent 40%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+            overflow-x: hidden;
+            color: #0f172a;
+        }
+
+        /* Showcase Stage Container */
+        .showcase-stage {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 28px;
+            max-width: 1180px;
+            width: 100%;
+            position: relative;
+        }
+
+        /* Left & Right Sidebar Decks */
+        .cards-deck-left,
+        .cards-deck-right {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 260px;
+            flex-shrink: 0;
+        }
+
+        /* Floating Intelligence Cards */
+        .intel-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 12px 14px;
+            box-shadow: 0 10px 28px -4px rgba(15, 23, 42, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.02);
+            opacity: 0;
+            transform: scale(0.88) translateY(12px);
+            pointer-events: none;
+            position: relative;
+        }
+
+        /* The Visual Climax Card Animation */
+        .intel-card.climax-pop {
+            animation: cardClimaxSequence 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            pointer-events: auto;
+        }
+
+        @keyframes cardClimaxSequence {
+            0% {
+                opacity: 0;
+                transform: scale(0.88) translateY(12px);
+            }
+            45% {
+                opacity: 1;
+                transform: scale(1.0);
+            }
+            70% {
+                transform: scale(1.04);
+                box-shadow: 0 0 24px rgba(99, 102, 241, 0.22), 0 14px 34px -4px rgba(15, 23, 42, 0.12);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1.0) translateY(0);
+                box-shadow: 0 10px 28px -4px rgba(15, 23, 42, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.02);
+            }
+        }
+
+        /* Animated Drawing SVG Checkmark */
+        .animated-check-icon {
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .check-circle-path {
+            stroke-dasharray: 65;
+            stroke-dashoffset: 65;
+        }
+
+        .check-tick-path {
+            stroke-dasharray: 20;
+            stroke-dashoffset: 20;
+        }
+
+        .intel-card.climax-pop .check-circle-path {
+            animation: drawCircle 0.35s ease-out 0.2s forwards;
+        }
+
+        .intel-card.climax-pop .check-tick-path {
+            animation: drawCheck 0.3s ease-out 0.45s forwards;
+        }
+
+        @keyframes drawCircle {
+            to { stroke-dashoffset: 0; }
+        }
+
+        @keyframes drawCheck {
+            to { stroke-dashoffset: 0; }
+        }
+
+        /* TOP-LEFT: Live Lead Activity Leaderboard Card */
+        .lead-activity-card {
+            border-top: 3px solid #6366f1;
+            background: #ffffff;
+            padding: 12px 14px;
+        }
+
+        .activity-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .activity-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .live-pulse-dot {
+            width: 6px;
+            height: 6px;
+            background: #6366f1;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulseActivity 1.4s infinite;
+        }
+
+        @keyframes pulseActivity {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(1.4); }
+        }
+
+        .activity-title {
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            color: #0f172a;
+            text-transform: uppercase;
+        }
+
+        .activity-intent-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            background: #fff1f2;
+            color: #e11d48;
+            border: 1px solid #ffe4e6;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 1.5px 6px;
+            border-radius: 12px;
+        }
+
+        .activity-milestone-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: #94a3b8;
+            padding: 2.5px 5px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .activity-item .item-status-icon {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: #cbd5e1;
+            width: 14px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .activity-item.completed {
+            color: #1e293b;
+            font-weight: 600;
+            background: #f8fafc;
+        }
+
+        .activity-item.completed .item-status-icon {
+            color: #10b981;
+            font-weight: 900;
+            transform: scale(1.1);
+        }
+
+        /* Card 1: Student Profile */
+        .profile-card-header {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 8px;
+            padding-bottom: 7px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .profile-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #e0e7ff;
+            color: #4f46e5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 11.5px;
+            border: 1.5px solid #c7d2fe;
+            flex-shrink: 0;
+        }
+
+        .profile-meta {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .profile-name {
+            font-size: 12px;
+            font-weight: 700;
+            color: #0f172a;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .profile-sub {
+            font-size: 9.5px;
+            color: #64748b;
+        }
+
+        .badge-high-intent {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+            font-size: 8.5px;
+            font-weight: 800;
+            padding: 2px 5px;
+            border-radius: 16px;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+        .badge-high-intent .dot {
+            width: 4px;
+            height: 4px;
+            background: #ef4444;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulseDot 1.4s infinite;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(1.4); }
+        }
+
+        .field-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4.5px;
+            font-size: 10.5px;
+        }
+
+        .field-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .field-label {
+            color: #64748b;
+        }
+
+        .field-val {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .status-pill-active {
+            color: #059669;
+            background: #ecfdf5;
+            padding: 1px 5px;
+            border-radius: 6px;
+            font-size: 9px;
+            font-weight: 600;
+        }
+
+        /* Lead Capture Badges (Left Deck) */
+        .capture-header {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 4px;
+        }
+
+        .capture-header.email-theme {
+            color: #4f46e5;
+        }
+
+        .capture-header.phone-theme {
+            color: #0284c7;
+        }
+
+        .capture-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .capture-footer-tag {
+            font-size: 9px;
+            color: #64748b;
+            margin-top: 3px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Tangible Document Card (Right Deck) */
+        .doc-card-box {
+            border-left: 3px solid #ef4444;
+            background: #ffffff;
+        }
+
+        .doc-card-inner {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+        }
+
+        .doc-icon-badge {
+            width: 30px;
+            height: 36px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            position: relative;
+            padding-top: 2px;
+        }
+
+        .pdf-tag {
+            font-size: 7px;
+            font-weight: 800;
+            color: #dc2626;
+            letter-spacing: 0.02em;
+            margin-top: 1px;
+        }
+
+        .doc-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .doc-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.35;
+        }
+
+        .doc-meta {
+            font-size: 9.5px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        .doc-delivery-status {
+            margin-top: 7px;
+            padding-top: 6px;
+            border-top: 1px solid #f1f5f9;
+            font-size: 10px;
+            color: #059669;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Callback & Tour Cards (Right Deck) */
+        .callback-card-box {
+            border-left: 3px solid #6366f1;
+        }
+
+        .tour-card-box {
+            border-left: 3px solid #10b981;
+        }
+
+        .action-title {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 4px;
+        }
+
+        .action-title.callback-title {
+            color: #4338ca;
+        }
+
+        .action-title.tour-title {
+            color: #047857;
+        }
+
+        .status-transition-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 7px;
+            padding: 4.5px 7px;
+            margin: 3px 0;
+            font-size: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.35s ease;
+        }
+
+        .status-transition-box.assigned {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+            color: #1d4ed8;
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.15);
+            animation: pulseStatus 0.5s ease-out;
+        }
+
+        @keyframes pulseStatus {
+            0% { transform: scale(0.96); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1.0); }
+        }
+
+        /* Center Column & Chat Widget */
+        .edvora-center-column {
+            width: 380px;
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .edvora-top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+        }
+
+        .edvora-replay-external-btn {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            color: #475569;
+            padding: 6px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+            user-select: none;
+            font-family: inherit;
+        }
+
+        .edvora-replay-external-btn:hover {
+            background: #f8fafc;
+            color: #6366f1;
+            border-color: #c7d2fe;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.14);
+            transform: translateY(-1px);
+        }
+
+        .edvora-replay-external-btn:active {
+            transform: translateY(0);
+        }
+
+        .edvora-replay-external-btn svg {
+            color: #6366f1;
+            transition: transform 0.3s ease;
+        }
+
+        .edvora-replay-external-btn:hover svg {
+            transform: rotate(-60deg);
+        }
+
+        .edvora-widget-preview {
+            width: 100%;
+            height: 580px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Header */
+        .edvora-header {
+            background: #6366f1;
+            color: #ffffff;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+            user-select: none;
+            z-index: 10;
+        }
+
+        .edvora-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .edvora-avatar-wrap {
+            position: relative;
+            width: 34px;
+            height: 34px;
+            flex-shrink: 0;
+        }
+
+        .edvora-avatar-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #e0e7ff;
+            border: 1.5px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .edvora-online-dot {
+            position: absolute;
+            bottom: 0px;
+            right: 0px;
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border: 1.5px solid #6366f1;
+            border-radius: 50%;
+        }
+
+        .edvora-title-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .edvora-bot-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.25;
+        }
+
+        .edvora-bot-status {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.85);
+            margin-top: 1px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .edvora-close-btn {
+            background: rgba(255, 255, 255, 0.12);
+            border: none;
+            color: #ffffff;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            cursor: default;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            opacity: 0.9;
+        }
+
+        /* Messages Stream */
+        .edvora-messages-body {
+            flex: 1;
+            background: #f9fafb;
+            padding: 12px 10px 12px 6px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            scroll-behavior: smooth;
+        }
+
+        .edvora-messages-body::-webkit-scrollbar {
+            display: none;
+        }
+
+        .edvora-msg-row-assistant {
+            display: flex;
+            align-items: flex-end;
+            gap: 5px;
+            max-width: 88%;
+            animation: slideInLeft 0.25s ease-out;
+        }
+
+        .edvora-msg-row-user {
+            display: flex;
+            justify-content: flex-end;
+            margin-left: auto;
+            max-width: 82%;
+            animation: slideInRight 0.25s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-8px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(8px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .edvora-msg-bubble-avatar {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            margin-bottom: 2px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .edvora-bubble-assistant {
+            background: #f1f5f9;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px 12px 12px 2px;
+            padding: 10px 12px;
+            font-size: 13px;
+            line-height: 1.5;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+            word-wrap: break-word;
+        }
+
+        .edvora-bubble-assistant p {
+            margin-bottom: 8px;
+        }
+
+        .edvora-bubble-assistant p:last-child {
+            margin-bottom: 0;
+        }
+
+        .edvora-bubble-assistant .greeting-header {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .edvora-bubble-user {
+            background: #6366f1;
+            color: #ffffff;
+            border-radius: 12px 12px 2px 12px;
+            padding: 9px 13px;
+            font-size: 13px;
+            line-height: 1.45;
+            box-shadow: 0 2px 5px rgba(99, 102, 241, 0.2);
+            word-wrap: break-word;
+        }
+
+        /* Typing Indicator Bubble */
+        .edvora-typing-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #e0e7ff;
+            border: 1px solid #c7d2fe;
+            border-radius: 12px 12px 12px 2px;
+            padding: 8px 12px;
+            min-height: 32px;
+        }
+
+        .typing-dot {
+            width: 5px;
+            height: 5px;
+            background: #6366f1;
+            border-radius: 50%;
+            animation: typingBounce 1.3s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-4px); opacity: 1; }
+        }
+
+        .edvora-msg-time {
+            font-size: 10px;
+            color: #94a3b8;
+            margin-left: 28px;
+            margin-top: -6px;
+        }
+
+        /* Input Area */
+        .edvora-input-box {
+            padding: 8px 10px;
+            background: #ffffff;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            position: relative;
+        }
+
+        .edvora-input-wrapper {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .edvora-input-field {
+            width: 100%;
+            padding: 8px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            font-size: 13px;
+            color: #1e293b;
+            outline: none;
+            background: #ffffff;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .edvora-input-field.active-typing {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+        }
+
+        .edvora-send-button {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #6366f1;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
+            transition: transform 0.15s ease, background 0.15s;
+        }
+
+        .edvora-send-button.btn-press {
+            transform: scale(0.9);
+            background: #4f46e5;
+        }
+
+        /* Branding Footer */
+        .edvora-branding {
+            text-align: center;
+            padding: 4px 0 6px 0;
+            background: #ffffff;
+            font-size: 10px;
+            color: #94a3b8;
+            letter-spacing: 0.01em;
+            user-select: none;
+        }
+
+        .edvora-branding span {
+            color: #6366f1;
+            font-weight: 600;
+        }
+
+        /* Responsive */
+        @media (max-width: 960px) {
+            .showcase-stage {
+                flex-direction: column;
+            }
+            .cards-deck-left, .cards-deck-right {
+                width: 380px;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="showcase-stage">
+        <!-- LEFT COLUMN: Live Lead Activity Leaderboard & Lead Capture Badges -->
+        <div class="cards-deck-left">
+            <!-- Lead Activity Leaderboard Card -->
+            <div class="intel-card lead-activity-card" id="cardLeadActivity">
+                <div class="activity-card-header">
+                    <div class="activity-title-wrap">
+                        <span class="live-pulse-dot"></span>
+                        <span class="activity-title">LEAD ACTIVITY</span>
+                    </div>
+                    <div class="activity-intent-badge">
+                        <span>🔥</span>
+                        <span>High Intent</span>
+                    </div>
+                </div>
+                <div class="activity-milestone-list">
+                    <div class="activity-item" id="actItemProspectus">
+                        <span class="item-status-icon">○</span>
+                        <span class="item-text">Prospectus requested</span>
+                    </div>
+                    <div class="activity-item" id="actItemGuide">
+                        <span class="item-status-icon">○</span>
+                        <span class="item-text">Scholarship guide delivered</span>
+                    </div>
+                    <div class="activity-item" id="actItemEmail">
+                        <span class="item-status-icon">○</span>
+                        <span class="item-text">Email captured</span>
+                    </div>
+                    <div class="activity-item" id="actItemPhone">
+                        <span class="item-status-icon">○</span>
+                        <span class="item-text">Phone captured</span>
+                    </div>
+                    <div class="activity-item" id="actItemCallback">
+                        <span class="item-status-icon">○</span>
+                        <span class="item-text">Counselor callback</span>
+                    </div>
+                    <div class="activity-item" id="actItemTour">
+                        <span class="item-status-icon">○</span>
+                        <span class="item-text">Campus tour booked</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email Captured Card -->
+            <div class="intel-card" id="cardEmailCaptured">
+                <div class="capture-header email-theme">
+                    <span>✉️</span>
+                    <span>EMAIL CAPTURED</span>
+                </div>
+                <div class="capture-value">
+                    <span>alex@email.com</span>
+                    <svg class="animated-check-icon" viewBox="0 0 24 24" width="16" height="16">
+                        <circle class="check-circle-path" cx="12" cy="12" r="10" fill="none" stroke="#10b981" stroke-width="2"/>
+                        <path class="check-tick-path" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M7 12l3.5 3.5 7-7"/>
+                    </svg>
+                </div>
+                <div class="capture-footer-tag">
+                    <span>⚡ Prospectus & Scholarship Guide Dispatched</span>
+                </div>
+            </div>
+
+            <!-- Phone Captured Card -->
+            <div class="intel-card" id="cardPhoneCaptured">
+                <div class="capture-header phone-theme">
+                    <span>📱</span>
+                    <span>PHONE CAPTURED</span>
+                </div>
+                <div class="capture-value">
+                    <span>+1 555 •••• 8901</span>
+                    <svg class="animated-check-icon" viewBox="0 0 24 24" width="16" height="16">
+                        <circle class="check-circle-path" cx="12" cy="12" r="10" fill="none" stroke="#10b981" stroke-width="2"/>
+                        <path class="check-tick-path" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M7 12l3.5 3.5 7-7"/>
+                    </svg>
+                </div>
+                <div class="capture-footer-tag">
+                    <span>⚡ CRM Lead Sync & SMS Confirmation Dispatched</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- CENTER COLUMN: Chat Widget Preview -->
+        <div class="edvora-center-column">
+            <!-- External Replay Button -->
+            <div class="edvora-top-bar">
+                <button class="edvora-replay-external-btn" id="replayBtn" title="Replay Live Simulation">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="1 4 1 10 7 10"></polyline>
+                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                    </svg>
+                    <span>Replay</span>
+                </button>
+            </div>
+
+            <div class="edvora-widget-preview">
+                <!-- Header -->
+                <div class="edvora-header">
+                    <div class="edvora-header-left">
+                        <div class="edvora-avatar-wrap">
+                            <img src="./avatar1.png" alt="Pacific Crest University Assistant" class="edvora-avatar-img">
+                            <div class="edvora-online-dot"></div>
+                        </div>
+                        <div class="edvora-title-group">
+                            <div class="edvora-bot-name">Pacific Crest University</div>
+                            <div class="edvora-bot-status">Online Now</div>
+                        </div>
+                    </div>
+                    <button class="edvora-close-btn" aria-label="Close">&times;</button>
+                </div>
+
+                <!-- Messages Stream -->
+                <div class="edvora-messages-body" id="messagesContainer">
+                    <div class="edvora-msg-row-assistant">
+                        <img src="./avatar1.png" alt="Assistant" class="edvora-msg-bubble-avatar">
+                        <div class="edvora-bubble-assistant">
+                            <p class="greeting-header">Welcome 👋</p>
+                            <p>Hi! I’m Taylor, your University Admissions Assistant.</p>
+                            <p>I can help you find the right program, understand admission requirements, check fees and scholarships, explore campus life, and answer your questions.</p>
+                            <p>What would you like to explore?</p>
+                        </div>
+                    </div>
+                    <div class="edvora-msg-time">Just now</div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="edvora-input-box">
+                    <div class="edvora-input-wrapper">
+                        <input type="text" id="simulatedInput" class="edvora-input-field" placeholder="Ask me anything..." readonly />
+                    </div>
+                    <button class="edvora-send-button" id="sendBtn" aria-label="Send">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Branding Footer -->
+                <div class="edvora-branding">
+                    Powered by <span>edvora.chat</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Admissions Intelligence, Document & Booking Cards -->
+        <div class="cards-deck-right">
+            <!-- Card 1: Student Profile Card (Appears before Turn 1) -->
+            <div class="intel-card" id="cardStudentProfile">
+                <div class="profile-card-header">
+                    <div class="profile-avatar">AR</div>
+                    <div class="profile-meta">
+                        <div class="profile-name">Alex Rivera</div>
+                        <div class="profile-sub">📍 Seattle, WA • Live Visitor</div>
+                    </div>
+                    <div class="badge-high-intent">
+                        <span class="dot"></span>
+                        <span>HIGH INTENT</span>
+                    </div>
+                </div>
+                <div class="field-list">
+                    <div class="field-row">
+                        <span class="field-label">Program:</span>
+                        <span class="field-val">MBA Admissions</span>
+                    </div>
+                    <div class="field-row">
+                        <span class="field-label">Assigned AI:</span>
+                        <span class="field-val">Taylor (PCU Admissions AI)</span>
+                    </div>
+                    <div class="field-row">
+                        <span class="field-label">Session Status:</span>
+                        <span class="status-pill-active">Active Prospect</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: Tangible Document Card (Dispatched Viewbook & Scholarship Guide) -->
+            <div class="intel-card doc-card-box" id="cardDocSent">
+                <div class="doc-card-inner">
+                    <div class="doc-icon-badge">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                        </svg>
+                        <span class="pdf-tag">PDF</span>
+                    </div>
+                    <div class="doc-info">
+                        <div class="doc-title">2026-2027 MBA Viewbook & Scholarship Guide</div>
+                        <div class="doc-meta">42 pages • PDF</div>
+                    </div>
+                </div>
+                <div class="doc-delivery-status">
+                    <svg class="animated-check-icon" viewBox="0 0 24 24" width="14" height="14">
+                        <circle class="check-circle-path" cx="12" cy="12" r="10" fill="none" stroke="#10b981" stroke-width="2"/>
+                        <path class="check-tick-path" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M7 12l3.5 3.5 7-7"/>
+                    </svg>
+                    <span>Sent to <b>alex@email.com</b></span>
+                </div>
+            </div>
+
+            <!-- Card 3: Counselor Callback Card -->
+            <div class="intel-card callback-card-box" id="cardCounselorCallback">
+                <div class="action-title callback-title">
+                    <span>📞</span>
+                    <span>COUNSELOR CALLBACK</span>
+                </div>
+                <div class="status-transition-box" id="callbackStatusBox">
+                    <span id="callbackStatusText">Requested ✓</span>
+                    <span style="font-size:10px; color:#64748b;" id="callbackStatusSub">Pending</span>
+                </div>
+                <div class="field-list" style="margin-top: 5px;">
+                    <div class="field-row">
+                        <span class="field-label">Topic:</span>
+                        <span class="field-val">MBA Admissions</span>
+                    </div>
+                    <div class="field-row">
+                        <span class="field-label">Phone:</span>
+                        <span class="field-val" id="callbackPhoneVal">+1 555 •••• 8901</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 5: Campus Tour Card (Exact Screenshot format) -->
+            <div class="intel-card tour-card-box" id="cardCampusTour">
+                <div class="action-title tour-title">
+                    <span>🎓</span>
+                    <span>CAMPUS TOUR</span>
+                </div>
+                <div class="status-transition-box assigned" style="background:#ecfdf5; border-color:#a7f3d0; color:#065f46;">
+                    <span>BOOKED ✓</span>
+                    <span style="font-size:10px; color:#059669;">Confirmed</span>
+                </div>
+                <div class="field-list" style="margin-top: 5px;">
+                    <div class="field-row">
+                        <span class="field-label">Schedule:</span>
+                        <span class="field-val" style="color:#047857;">Saturday • 11:00 AM</span>
+                    </div>
+                    <div class="field-row">
+                        <span class="field-label">Session:</span>
+                        <span class="field-val">MBA Campus Tour</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const container = document.getElementById('messagesContainer');
+            const inputField = document.getElementById('simulatedInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const replayBtn = document.getElementById('replayBtn');
+
+            // Left Deck Cards & Milestones
+            const cardLeadActivity = document.getElementById('cardLeadActivity');
+            const actItemProspectus = document.getElementById('actItemProspectus');
+            const actItemGuide = document.getElementById('actItemGuide');
+            const actItemEmail = document.getElementById('actItemEmail');
+            const actItemPhone = document.getElementById('actItemPhone');
+            const actItemCallback = document.getElementById('actItemCallback');
+            const actItemTour = document.getElementById('actItemTour');
+            const cardEmailCaptured = document.getElementById('cardEmailCaptured');
+            const cardPhoneCaptured = document.getElementById('cardPhoneCaptured');
+
+            // Right Deck Cards
+            const cardStudentProfile = document.getElementById('cardStudentProfile');
+            const cardDocSent = document.getElementById('cardDocSent');
+            const cardCounselorCallback = document.getElementById('cardCounselorCallback');
+            const callbackStatusBox = document.getElementById('callbackStatusBox');
+            const callbackStatusText = document.getElementById('callbackStatusText');
+            const callbackStatusSub = document.getElementById('callbackStatusSub');
+            const cardCampusTour = document.getElementById('cardCampusTour');
+
+            let currentSimulationId = 0;
+
+            function scrollToBottom() {
+                container.scrollTo({
+                    top: container.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }
+
+            function sleep(ms, simId) {
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        resolve(simId === currentSimulationId);
+                    }, ms);
+                });
+            }
+
+            // Trigger Climax Card Entrance
+            function triggerCardEntrance(cardEl) {
+                cardEl.classList.remove('climax-pop');
+                void cardEl.offsetWidth; // Force reflow for clean restart
+                cardEl.classList.add('climax-pop');
+            }
+
+            // Complete an activity item on the leaderboard
+            function completeActivityItem(itemEl) {
+                if (!itemEl) return;
+                itemEl.classList.add('completed');
+                const icon = itemEl.querySelector('.item-status-icon');
+                if (icon) icon.innerText = '✓';
+            }
+
+            // Simulates human-like keystroke typing with relaxed comfortable pace
+            async function typeText(text, simId) {
+                if (simId !== currentSimulationId) return false;
+                inputField.classList.add('active-typing');
+                inputField.value = '';
+                for (let i = 0; i < text.length; i++) {
+                    if (simId !== currentSimulationId) return false;
+                    inputField.value += text[i];
+                    // Natural human typing rhythm (65ms - 105ms)
+                    const delay = 65 + Math.random() * 40;
+                    const ok = await sleep(delay, simId);
+                    if (!ok) return false;
+                }
+                // Pause before hitting send
+                const ok2 = await sleep(600, simId);
+                if (!ok2) return false;
+                
+                sendBtn.classList.add('btn-press');
+                await sleep(200, simId);
+                sendBtn.classList.remove('btn-press');
+                inputField.classList.remove('active-typing');
+                inputField.value = '';
+                return true;
+            }
+
+            // Append Student message
+            function appendStudentMessage(text) {
+                const row = document.createElement('div');
+                row.className = 'edvora-msg-row-user';
+                row.innerHTML = '<div class="edvora-bubble-user">' + text + '</div>';
+                container.appendChild(row);
+                scrollToBottom();
+            }
+
+            // Show Typing Indicator
+            function showAssistantTyping() {
+                const row = document.createElement('div');
+                row.className = 'edvora-msg-row-assistant';
+                row.id = 'activeTypingIndicator';
+                row.innerHTML = `
+                    <img src="./avatar1.png" alt="Assistant" class="edvora-msg-bubble-avatar">
+                    <div class="edvora-typing-indicator">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                `;
+                container.appendChild(row);
+                scrollToBottom();
+                return row;
+            }
+
+            // Append Edvora Response
+            function appendEdvoraResponse(text) {
+                const indicator = document.getElementById('activeTypingIndicator');
+                if (indicator) {
+                    indicator.remove();
+                }
+
+                const row = document.createElement('div');
+                row.className = 'edvora-msg-row-assistant';
+                row.innerHTML = `
+                    <img src="./avatar1.png" alt="Assistant" class="edvora-msg-bubble-avatar">
+                    <div class="edvora-bubble-assistant">
+                        <p>${text}</p>
+                    </div>
+                `;
+                container.appendChild(row);
+                scrollToBottom();
+            }
+
+            // Hide all side cards
+            function hideAllCards() {
+                cardLeadActivity.classList.remove('climax-pop');
+                cardStudentProfile.classList.remove('climax-pop');
+                cardEmailCaptured.classList.remove('climax-pop');
+                cardDocSent.classList.remove('climax-pop');
+                cardCounselorCallback.classList.remove('climax-pop');
+                cardPhoneCaptured.classList.remove('climax-pop');
+                cardCampusTour.classList.remove('climax-pop');
+
+                // Reset all activity items to pending
+                [actItemProspectus, actItemGuide, actItemEmail, actItemPhone, actItemCallback, actItemTour].forEach(item => {
+                    if (item) {
+                        item.classList.remove('completed');
+                        const icon = item.querySelector('.item-status-icon');
+                        if (icon) icon.innerText = '○';
+                    }
+                });
+
+                // Reset callback card text
+                callbackStatusBox.classList.remove('assigned');
+                callbackStatusText.innerText = 'Requested ✓';
+                callbackStatusSub.innerText = 'Pending';
+            }
+
+            // Orchestrate the Complete Timeline with precise user-requested trigger points
+            async function runChatSimulation(simId) {
+                if (simId !== currentSimulationId) return;
+
+                // 1. Initial State: Leaderboard & Student Profile cards appear softly
+                let ok = await sleep(800, simId);
+                if (!ok) return;
+                triggerCardEntrance(cardLeadActivity);
+                triggerCardEntrance(cardStudentProfile);
+
+                // Comfortable pause for viewer to observe the initial dashboard layout
+                ok = await sleep(2200, simId);
+                if (!ok) return;
+
+                // --- Turn 1: Student asks about MBA Cost ---
+                ok = await typeText('How much does the MBA cost?', simId);
+                if (!ok) return;
+                appendStudentMessage('How much does the MBA cost?');
+                
+                // Pause before bot starts thinking
+                ok = await sleep(1000, simId);
+                if (!ok) return;
+
+                // --- Turn 1: Edvora Responds ---
+                showAssistantTyping();
+                ok = await sleep(2400, simId);
+                if (!ok) return;
+                appendEdvoraResponse('MBA tuition starts at $XX,XXX/year. There are also merit scholarships available. Want me to see which options might apply to you?');
+                
+                // Reading pause for viewer to absorb tuition & scholarship answer
+                ok = await sleep(2800, simId);
+                if (!ok) return;
+
+                // --- Turn 2: Student replies "Yes." ---
+                ok = await typeText('Yes.', simId);
+                if (!ok) return;
+                appendStudentMessage('Yes.');
+
+                ok = await sleep(900, simId);
+                if (!ok) return;
+
+                // --- Turn 2: Edvora asks for email ---
+                showAssistantTyping();
+                ok = await sleep(2200, simId);
+                if (!ok) return;
+                appendEdvoraResponse('Absolutely. I can send you the MBA viewbook and scholarship guide. What’s the best email to send them to?');
+                
+                // Reading pause before student types email
+                ok = await sleep(2500, simId);
+                if (!ok) return;
+
+                // --- Turn 3: Student replies with email ---
+                ok = await typeText('alex@email.com', simId);
+                if (!ok) return;
+                appendStudentMessage('alex@email.com');
+
+                // Providing email confirms: Email captured & Viewbook requested!
+                completeActivityItem(actItemEmail);
+                completeActivityItem(actItemProspectus);
+
+                // Email Captured Card pops up on the left
+                triggerCardEntrance(cardEmailCaptured);
+                
+                // Pause while system processes the email
+                ok = await sleep(1400, simId);
+                if (!ok) return;
+
+                // --- Turn 3: Edvora Confirms Email & Proposes Counselor Callback ---
+                showAssistantTyping();
+                ok = await sleep(2600, simId);
+                if (!ok) return;
+                appendEdvoraResponse('Sent! It should be in your inbox in a couple of minutes. 📩</p><p>Our admissions advisor, Sarah, is also doing quick 10-minute 1-on-1 calls tomorrow to help calculate exact scholarship percentages. Would you like a quick callback?');
+
+                // Ticks milestone: Scholarship guide delivered
+                completeActivityItem(actItemGuide);
+
+                // Tangible Document Card appears on Right (Counselor Callback card is NOT shown yet)
+                triggerCardEntrance(cardDocSent);
+
+                // Generous pause to admire PDF brochure and callback offer
+                ok = await sleep(3400, simId);
+                if (!ok) return;
+
+                // --- Turn 4: Student agrees to callback and shares phone ---
+                ok = await typeText('Sure, tomorrow afternoon works best. My number is +1 (555) 342-8901.', simId);
+                if (!ok) return;
+                appendStudentMessage('Sure, tomorrow afternoon works best. My number is +1 (555) 342-8901.');
+
+                // RULE 1: SHOW "COUNSELOR CALLBACK" CARD ON RIGHT ONLY AFTER USER HAS TYPED PHONE NUMBER!
+                completeActivityItem(actItemPhone);
+                triggerCardEntrance(cardPhoneCaptured);
+                triggerCardEntrance(cardCounselorCallback);
+
+                // Animate Counselor Callback status: Requested -> Counselor assigned
+                ok = await sleep(1000, simId);
+                if (!ok) return;
+                callbackStatusBox.classList.add('assigned');
+                callbackStatusText.innerText = 'Counselor Assigned ✓';
+                callbackStatusSub.innerText = 'Sarah Jenkins';
+                completeActivityItem(actItemCallback);
+
+                ok = await sleep(1200, simId);
+                if (!ok) return;
+
+                // --- Turn 4: Edvora confirms callback & naturally introduces Campus Tour ---
+                showAssistantTyping();
+                ok = await sleep(2700, simId);
+                if (!ok) return;
+                appendEdvoraResponse('Noted! Sarah will call you tomorrow afternoon. 📞</p><p>By the way, we’re hosting an MBA Open Campus Tour this Saturday at 11:00 AM with current students and faculty. Would you like to check out the campus in person?');
+                
+                // Reading pause before student agrees to tour
+                ok = await sleep(3000, simId);
+                if (!ok) return;
+
+                // --- Turn 5: Student agrees to Campus Tour ---
+                ok = await typeText('Saturday at 11 AM sounds great. Count me in!', simId);
+                if (!ok) return;
+                appendStudentMessage('Saturday at 11 AM sounds great. Count me in!');
+                
+                ok = await sleep(1000, simId);
+                if (!ok) return;
+
+                // --- Turn 5: Edvora confirms Campus Tour with full details ---
+                showAssistantTyping();
+                ok = await sleep(2700, simId);
+                if (!ok) return;
+                appendEdvoraResponse('You\'re all booked! 🎉</p><p><b>Saturday, 11:00 AM — MBA Campus Tour</b><br>I’ve emailed the calendar invite, meeting point, and parking pass to <b>alex@email.com</b>.</p><p>Looking forward to welcoming you on campus, Alex!');
+
+                // RULE 2: SHOW "CAMPUS TOUR" CARD ONLY AFTER EDVORA HAS COMPLETED TYPING "You're all booked! 🎉"
+                completeActivityItem(actItemTour);
+                triggerCardEntrance(cardCampusTour);
+            }
+
+            function resetAndReplay() {
+                currentSimulationId++;
+                hideAllCards();
+                container.innerHTML = `
+                    <div class="edvora-msg-row-assistant">
+                        <img src="./avatar1.png" alt="Assistant" class="edvora-msg-bubble-avatar">
+                        <div class="edvora-bubble-assistant">
+                            <p class="greeting-header">Welcome 👋</p>
+                            <p>Hi! I’m Taylor, your University Admissions Assistant.</p>
+                            <p>I can help you find the right program, understand admission requirements, check fees and scholarships, explore campus life, and answer your questions.</p>
+                            <p>What would you like to explore?</p>
+                        </div>
+                    </div>
+                    <div class="edvora-msg-time">Just now</div>
+                `;
+                inputField.value = '';
+                inputField.classList.remove('active-typing');
+                sendBtn.classList.remove('btn-press');
+                scrollToBottom();
+                runChatSimulation(currentSimulationId);
+            }
+
+            replayBtn.addEventListener('click', resetAndReplay);
+
+            // Initial run on page load
+            window.addEventListener('DOMContentLoaded', () => {
+                runChatSimulation(currentSimulationId);
+            });
+        })();
+    </script>
+
+</body>
+</html>

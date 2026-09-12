@@ -1,0 +1,3153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apex Institute of Higher Education &mdash; Admissions Console | Edvora.chat</title>
+  
+  <!-- Google Fonts: Plus Jakarta Sans, Inter, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --e-teal: #063D3B;
+      --e-pistachio: #C8FF63;
+      --e-soft-pistachio: #E6F7D2;
+      --e-sage: #B9D7C7;
+      --e-mist: #F1F7F4;
+      --e-border: #DDE9E3;
+      --e-text: #092F2E;
+      --e-muted: #71817D;
+      --e-card-border: #DCE9E5;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
+      background: var(--e-mist);
+      color: var(--e-text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ================= 1. TOP NAVBAR ================= */
+    .brand-top-navbar {
+      height: 56px;
+      background: #FFFFFF;
+      border-bottom: 1.5px solid var(--e-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand-top-left-panel {
+      width: 230px;
+      height: 100%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      border-right: 1.5px solid var(--e-border);
+      box-sizing: border-box;
+    }
+
+    .brand-logo-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .brand-logo-icon {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+      filter: drop-shadow(0 2px 6px rgba(6, 61, 59, 0.18));
+    }
+
+    .brand-logo-text {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--e-teal);
+      line-height: 1;
+    }
+
+    .brand-logo-text span {
+      color: #0D6E6A;
+    }
+
+    .brand-top-center-panel {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      padding-left: 24px;
+    }
+
+    .brand-top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-right: 24px;
+    }
+
+    .brand-plan-pill {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--e-teal);
+      background: var(--e-soft-pistachio);
+      border: 1.5px solid var(--e-sage);
+      padding: 6px 14px;
+      border-radius: 100px;
+      letter-spacing: -0.01em;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-plan-pill::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #047857;
+      display: inline-block;
+    }
+
+    .brand-logout-btn {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--e-teal);
+      background: #FFFFFF;
+      border: 1.5px solid var(--e-border);
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .brand-logout-btn:hover {
+      background: #FFF1F2;
+      border-color: #FECDD3;
+      color: #E11D48;
+    }
+
+    /* ================= 2. DASHBOARD APP LAYOUT ================= */
+    .dashboard-app-body {
+      display: flex;
+      min-height: calc(100vh - 56px);
+    }
+
+    /* ================= 3. LEFT SIDEBAR ================= */
+    .dashboard-sidebar {
+      width: 230px;
+      background: #FFFFFF;
+      border-right: 1.5px solid var(--e-border);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 16px 12px 14px 12px;
+    }
+
+    .sidebar-nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      list-style: none;
+    }
+
+    .sidebar-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #4F7470;
+      text-decoration: none;
+      transition: all 0.18s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .sidebar-nav-item:hover {
+      background: #F4FAF7;
+      color: var(--e-teal);
+    }
+
+    .sidebar-nav-item.active {
+      background: var(--e-soft-pistachio);
+      color: var(--e-teal);
+      font-weight: 700;
+      border: 1px solid var(--e-sage);
+    }
+
+    .sidebar-nav-icon {
+      width: 17px;
+      height: 17px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      stroke-width: 2.2;
+    }
+
+    .sidebar-nav-item.active .sidebar-nav-icon {
+      color: #047857;
+    }
+
+    /* User Profile Box */
+    .sidebar-user-card {
+      background: #F4FAF7;
+      border: 1px solid #E2EFEA;
+      border-radius: 10px;
+      padding: 10px 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar-user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--e-teal);
+      color: var(--e-pistachio);
+      font-size: 11px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      letter-spacing: -0.02em;
+    }
+
+    .sidebar-user-meta {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .sidebar-user-name {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--e-teal);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.2;
+    }
+
+    .sidebar-user-sub {
+      font-size: 10.5px;
+      color: #648781;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 1px;
+    }
+
+    .sidebar-role-badge {
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 5px;
+      background: #ECFDF5;
+      color: #047857;
+      border: 1px solid #A7F3D0;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    /* ================= 4. MAIN CONTENT AREA ================= */
+    .dashboard-main-content {
+      flex: 1;
+      padding: 20px 24px 40px 24px;
+      overflow-y: auto;
+    }
+
+    /* ================= 5. COLLEGE ADMISSIONS COMMAND CENTER MOCK FRAME ================= */
+    /* Exact 1:1 styles from landing-copy.html */
+    .ops-dashboard-frame {
+      background: #FFFFFF;
+      border: 1.5px solid var(--e-card-border);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 16px 50px -10px rgba(6, 61, 59, 0.08), 0 4px 16px rgba(6, 61, 59, 0.03);
+      max-width: 1240px;
+      margin: 0 auto;
+    }
+
+    .ops-dash-topbar {
+      background: #FFFFFF;
+      border-bottom: 1.5px solid #E6F0EC;
+      padding: 16px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .ops-dash-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .ops-live-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #059669;
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+      display: inline-block;
+      animation: pulseOpsGreen 2s infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes pulseOpsGreen {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25); }
+      50% { box-shadow: 0 0 0 7px rgba(16, 185, 129, 0.08); }
+    }
+
+    .ops-dash-main-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--e-teal);
+      letter-spacing: -0.01em;
+      line-height: 1.25;
+    }
+
+    .ops-dash-sub-title {
+      font-size: 11.5px;
+      color: #648781;
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    .ops-dash-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .ops-ctrl-pill {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--e-teal);
+      background: #F4FAF7;
+      border: 1px solid #D1E5DE;
+      border-radius: 8px;
+      padding: 5px 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: default;
+    }
+
+    .ops-ctrl-sync {
+      font-size: 11px;
+      font-weight: 700;
+      color: #047857;
+      background: #ECFDF5;
+      border: 1px solid #A7F3D0;
+      border-radius: 8px;
+      padding: 5px 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .ops-ctrl-btn {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--e-teal);
+      background: #FFFFFF;
+      border: 1px solid #B9D7C7;
+      border-radius: 8px;
+      padding: 5px 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .ops-ctrl-btn:hover {
+      background: var(--e-soft-pistachio);
+      border-color: #063D3B;
+    }
+
+    /* TOTAL CONVERSATIONS TOP BANNER CARD */
+    .ops-conv-banner {
+      background: linear-gradient(135deg, #063D3B 0%, #0A524F 100%);
+      color: #ffffff;
+      padding: 20px 24px;
+      border-bottom: 1.5px solid rgba(200, 255, 99, 0.2);
+      display: grid;
+      grid-template-columns: 1.15fr 2.85fr;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .ops-conv-meta-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 800;
+      color: var(--e-pistachio);
+      margin-bottom: 4px;
+    }
+
+    .ops-conv-meta-desc {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.45;
+    }
+
+    .ops-conv-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .ops-conv-metric-box {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 12px;
+      padding: 12px 14px;
+      transition: all 0.2s ease;
+    }
+
+    .ops-conv-metric-box:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(200, 255, 99, 0.35);
+    }
+
+    .ops-conv-timeframe {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .ops-conv-val {
+      font-size: 24px;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      color: #ffffff;
+      line-height: 1.1;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .ops-conv-delta {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgba(200, 255, 99, 0.2);
+      color: var(--e-pistachio);
+      border: 1px solid rgba(200, 255, 99, 0.3);
+    }
+
+    /* 5 CONVERSION TILES (LAST 30 DAYS) */
+    .ops-conv-tiles-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1px;
+      background: #E6F0EC;
+      border-bottom: 1.5px solid #E6F0EC;
+    }
+
+    .ops-tile {
+      background: #ffffff;
+      padding: 18px 18px;
+      transition: all 0.2s ease;
+      position: relative;
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    .ops-tile:hover {
+      background: #FAFDFB;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(6, 61, 59, 0.06);
+    }
+
+    .ops-tile-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .ops-tile-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+    }
+
+    .ops-tile-badge {
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 5px;
+    }
+
+    .ops-tile-val {
+      font-size: 26px;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--e-teal);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .ops-tile-lbl {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--e-teal);
+      margin-bottom: 2px;
+    }
+
+    .ops-tile-sub {
+      font-size: 10.5px;
+      color: #648781;
+    }
+
+    /* 3 OPERATIONAL COLUMNS (DOCUMENTS, TEAMS, EMBED CODE) */
+    .ops-details-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 1fr 1.05fr;
+      gap: 18px;
+      padding: 24px;
+      background: #F8FBFA;
+    }
+
+    .ops-card {
+      background: #ffffff;
+      border: 1.5px solid var(--e-card-border);
+      border-radius: 16px;
+      padding: 18px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 4px 16px rgba(6, 61, 59, 0.03);
+    }
+
+    .ops-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .ops-card-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--e-teal);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .ops-card-title svg {
+      flex-shrink: 0;
+    }
+
+    .ops-quota-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2.5px 8px;
+      border-radius: 6px;
+      background: #ECFDF5;
+      color: #047857;
+      border: 1px solid #A7F3D0;
+      white-space: nowrap;
+      flex-shrink: 0;
+      line-height: 1.3;
+    }
+
+    .ops-progress-wrap {
+      margin-bottom: 14px;
+    }
+
+    .ops-progress-track {
+      height: 8px;
+      background: #EAF2EE;
+      border-radius: 100px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+    }
+
+    .ops-progress-fill-active {
+      height: 100%;
+      background: #047857;
+    }
+
+    .ops-progress-fill-warn {
+      height: 100%;
+      background: #D97706;
+    }
+
+    .ops-progress-fill-danger {
+      height: 100%;
+      background: #DC2626;
+    }
+
+    /* Document status pill row */
+    .ops-doc-status-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .ops-doc-status-box {
+      padding: 8px 10px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .ops-doc-status-count {
+      font-size: 17px;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      line-height: 1.1;
+    }
+
+    .ops-doc-status-lbl {
+      font-size: 9.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-top: 3px;
+    }
+
+    /* Team seats visual */
+    .ops-team-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin-bottom: 14px;
+    }
+
+    .ops-team-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 9px;
+      background: #F4FAF7;
+      border: 1px solid #E2EFEA;
+      border-radius: 8px;
+      font-size: 11px;
+    }
+
+    .ops-team-avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--e-teal);
+      color: var(--e-pistachio);
+      font-size: 9.5px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* Embed script card */
+    .ops-embed-box {
+      background: #063D3B;
+      color: #C8FF63;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      word-break: break-all;
+      border: 1px solid rgba(200, 255, 99, 0.25);
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    .ops-copy-btn {
+      background: #C8FF63;
+      color: #063D3B;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .ops-copy-btn:hover {
+      background: #d4ff70;
+      box-shadow: 0 4px 14px rgba(200, 255, 99, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .ops-copy-btn.copied {
+      background: #047857;
+      color: #ffffff;
+    }
+
+    .ops-test-live-btn {
+      background: #FFFFFF;
+      color: #063D3B;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1.5px solid #D1E5DC;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .ops-test-live-btn:hover {
+      background: #F4FAF7;
+      border-color: #047857;
+      color: #047857;
+      box-shadow: 0 4px 12px rgba(6, 61, 59, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .ops-test-live-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #047857;
+      text-decoration: none;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: #ECFDF5;
+      border: 1px solid #A7F3D0;
+      transition: all 0.18s ease;
+    }
+
+    .ops-test-live-link:hover {
+      background: #D1FAE5;
+      color: #065F46;
+    }
+
+    /* ========================================================================= */
+    /* DEPARTMENT MULTI-UNIT GOVERNANCE & DEEP-DIVE STYLES                      */
+    /* ========================================================================= */
+    .dept-dashboard-frame,
+    .dept-detail-frame {
+      background: #ffffff;
+      border: 1.5px solid #DCE9E5;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 12px 36px -8px rgba(6, 61, 59, 0.08);
+      min-width: 1305px;
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    .dept-dash-topbar {
+      background: #FFFFFF;
+      border-bottom: 1.5px solid #E6F0EC;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .dept-dash-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .dept-win-dots {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-right: 4px;
+    }
+
+    .dept-win-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .dept-live-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #059669;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+      display: inline-block;
+      animation: pulseDeptGreen 2s infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes pulseDeptGreen {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25); }
+      50% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.08); }
+    }
+
+    .dept-dash-main-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #063D3B;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .dept-dash-sub-title {
+      font-size: 11.5px;
+      color: #648781;
+      font-weight: 500;
+    }
+
+    .dept-dash-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .dept-btn-primary {
+      background: #063D3B;
+      color: #C8FF63;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(6, 61, 59, 0.15);
+      text-decoration: none;
+    }
+
+    .dept-btn-primary:hover {
+      background: #0A524F;
+      transform: translateY(-1px);
+    }
+
+    .dept-btn-secondary {
+      background: #F4FAF7;
+      color: #063D3B;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 14px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid #D1E5DE;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .dept-btn-secondary:hover {
+      background: #E8F4F0;
+      border-color: #B9D7C7;
+    }
+
+    /* MANAGEMENT TOOLBAR */
+    .dept-control-strip {
+      background: #F9FCFB;
+      border-bottom: 1.5px solid #E6F0EC;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .dept-filter-tabs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .dept-filter-pill {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #527570;
+      background: #FFFFFF;
+      border: 1px solid #DDE9E3;
+      padding: 6px 13px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .dept-filter-pill:hover {
+      border-color: #047857;
+      color: #063D3B;
+    }
+
+    .dept-filter-pill.active {
+      background: #E6F7D2;
+      border-color: #B9D7C7;
+      color: #063D3B;
+      font-weight: 800;
+      box-shadow: 0 2px 6px rgba(6, 61, 59, 0.06);
+    }
+
+    .dept-kpi-ribbon {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .dept-kpi-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 8px;
+      background: #FFFFFF;
+      border: 1px solid #E2EFEA;
+      color: #063D3B;
+    }
+
+    .dept-kpi-chip strong {
+      font-weight: 800;
+    }
+
+    /* CARDS GRID */
+    .dept-body-pad {
+      padding: 24px;
+      background: #FFFFFF;
+    }
+
+    .dept-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 20px;
+    }
+
+    .dept-card-item {
+      background: #FFFFFF;
+      border: 1.5px solid #8ca89f;
+      border-radius: 18px;
+      padding: 20px;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .dept-card-item:hover {
+      transform: translateY(-3px);
+      border-color: #047857;
+      box-shadow: 0 16px 40px -10px rgba(6, 61, 59, 0.12);
+    }
+
+    .dept-card-item.selected {
+      border-color: #047857;
+      background: linear-gradient(180deg, #FFFFFF 0%, #F6FAF8 100%);
+      box-shadow: 0 16px 44px -8px rgba(4, 120, 87, 0.18), 0 0 0 1.5px #047857;
+    }
+
+    .dept-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .dept-icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      background: #F4FAF7;
+      border: 1px solid #DDE9E3;
+      flex-shrink: 0;
+    }
+
+    .dept-card-item.selected .dept-icon-box {
+      background: #E6F7D2;
+      border-color: #B9D7C7;
+    }
+
+    .dept-card-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #063D3B;
+      line-height: 1.25;
+      margin-bottom: 3px;
+    }
+
+    .dept-template-tag {
+      font-size: 9.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #047857;
+    }
+
+    .dept-status-pill {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .dept-status-active {
+      background: #ECFDF5;
+      color: #047857;
+      border: 1px solid #A7F3D0;
+    }
+
+    .dept-status-main {
+      background: #F0F9FF;
+      color: #0284C7;
+      border: 1px solid #BAE6FD;
+    }
+
+    .dept-card-desc {
+      font-size: 12px;
+      color: #557772;
+      line-height: 1.5;
+      margin-bottom: 16px;
+      min-height: 36px;
+    }
+
+    .dept-channels-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .dept-channel-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2.5px 7px;
+      border-radius: 6px;
+      background: #F4FAF7;
+      border: 1px solid #E2EFEA;
+      color: #063D3B;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .dept-card-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      background: #F8FAF9;
+      border: 1px solid #E6F0EC;
+      border-radius: 12px;
+      padding: 10px 8px;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+
+    .dept-stat-unit {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .dept-stat-val {
+      font-size: 13px;
+      font-weight: 800;
+      color: #063D3B;
+      font-family: "JetBrains Mono", monospace;
+    }
+
+    .dept-stat-lbl {
+      font-size: 9.5px;
+      font-weight: 600;
+      color: #71817D;
+      margin-top: 1px;
+    }
+
+    .dept-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 12px;
+      border-top: 1px solid #EDF4F1;
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+
+    .dept-card-action-text {
+      color: #047857;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .dept-card-item.selected .dept-card-action-text {
+      color: #063D3B;
+      font-weight: 800;
+    }
+
+    .dept-card-create {
+      background: #FCFDFD;
+      border: 2px dashed #B9D7C7;
+      border-radius: 18px;
+      padding: 28px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-height: 220px;
+    }
+
+    .dept-card-create:hover {
+      background: #F4FAF7;
+      border-color: #047857;
+      transform: translateY(-2px);
+    }
+
+    .dept-create-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #E6F7D2;
+      color: #063D3B;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-bottom: 12px;
+      border: 1px solid #B9D7C7;
+    }
+
+    .dept-card-create-title {
+      font-size: 14.5px;
+      font-weight: 800;
+      color: #063D3B;
+      margin-bottom: 4px;
+    }
+
+    .dept-card-create-desc {
+      font-size: 12.5px;
+      color: #557772;
+      max-width: 210px;
+      line-height: 1.45;
+      margin-bottom: 12px;
+    }
+
+    /* DEEP-DIVE CONSOLE STYLES */
+    .dept-detail-topbar {
+      background: #FFFFFF;
+      border-bottom: 1.5px solid #E6F0EC;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .dept-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #71817D;
+      margin-bottom: 2px;
+    }
+
+    .dept-breadcrumb span {
+      color: #063D3B;
+    }
+
+    .dept-subtabs-nav {
+      background: #F9FCFB;
+      border-bottom: 1.5px solid #E6F0EC;
+      padding: 8px 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .dept-subtab-btn {
+      font-size: 12px;
+      font-weight: 600;
+      color: #557772;
+      background: transparent;
+      border: 1px solid transparent;
+      padding: 7px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dept-subtab-btn:hover {
+      color: #063D3B;
+      background: #FFFFFF;
+      border-color: #DDE9E3;
+    }
+
+    .dept-subtab-btn.active {
+      background: #FFFFFF;
+      color: #063D3B;
+      border-color: #D1E5DE;
+      font-weight: 800;
+      box-shadow: 0 2px 6px rgba(6, 61, 59, 0.04);
+    }
+
+    .dept-subtab-badge {
+      font-size: 10px;
+      font-weight: 800;
+      background: #E6F7D2;
+      color: #063D3B;
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+
+    .dept-pipeline-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      padding: 20px 24px 8px 24px;
+    }
+
+    .dept-pipe-card {
+      background: #FFFFFF;
+      border: 1.5px solid #8ca89f;
+      border-radius: 14px;
+      padding: 16px;
+      position: relative;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .dept-pipe-card:hover {
+      border-color: #047857;
+      box-shadow: 0 8px 24px rgba(6, 61, 59, 0.06);
+    }
+
+    .dept-pipe-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .dept-pipe-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dept-pipe-badge {
+      font-size: 9.5px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+
+    .dept-pipe-val {
+      font-size: 24px;
+      font-weight: 900;
+      color: #063D3B;
+      letter-spacing: -0.02em;
+      font-family: "JetBrains Mono", monospace;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .dept-pipe-lbl {
+      font-size: 12px;
+      font-weight: 700;
+      color: #063D3B;
+      margin-bottom: 2px;
+    }
+
+    .dept-pipe-sub {
+      font-size: 10.5px;
+      color: #648781;
+      line-height: 1.35;
+    }
+
+    .dept-deepdive-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 20px;
+      padding: 16px 24px 24px 24px;
+    }
+
+    .dept-panel-box {
+      background: #FFFFFF;
+      border: 1.5px solid #8ca89f;
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .dept-panel-heading {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #063D3B;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #EDF4F1;
+    }
+
+    .dept-hours-preview {
+      background: #F8FAF9;
+      border: 1px solid #E2EFEA;
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .dept-hours-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .dept-hours-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      background: #ECFDF5;
+      color: #047857;
+      padding: 2px 7px;
+      border-radius: 8px;
+      border: 1px solid #A7F3D0;
+    }
+
+    .dept-hours-time {
+      font-size: 12px;
+      font-weight: 700;
+      color: #063D3B;
+    }
+
+    .dept-away-quote {
+      background: #FFFFFF;
+      border-left: 3px solid #047857;
+      border-radius: 0 8px 8px 0;
+      padding: 10px 12px;
+      font-size: 11.5px;
+      color: #4A6E69;
+      line-height: 1.45;
+      font-style: italic;
+      margin-top: 8px;
+    }
+
+    .dept-esc-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .dept-esc-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #F9FCFB;
+      border: 1px solid #E6F0EC;
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-size: 11.5px;
+    }
+
+    .dept-esc-title {
+      font-weight: 700;
+      color: #063D3B;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dept-esc-tag {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: #FFFFFF;
+      border: 1px solid #DDE9E3;
+      color: #063D3B;
+    }
+
+    .dept-staff-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .dept-staff-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: #F8FAF9;
+      border: 1px solid #E6F0EC;
+    }
+
+    .dept-staff-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dept-staff-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #E6F7D2;
+      color: #063D3B;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+      border: 1px solid #B9D7C7;
+    }
+
+    .dept-staff-name {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #063D3B;
+    }
+
+    .dept-staff-role {
+      font-size: 10px;
+      color: #71817D;
+    }
+
+    .dept-duty-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10B981;
+      display: inline-block;
+      margin-right: 3px;
+    }
+
+    .dept-ks-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .dept-ks-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 10px;
+      border-radius: 8px;
+      background: #F9FCFB;
+      border: 1px solid #E6F0EC;
+      font-size: 11px;
+    }
+
+    .dept-ks-file {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      color: #063D3B;
+    }
+
+    .dept-chips-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .dept-chip-pill {
+      font-size: 11px;
+      font-weight: 600;
+      color: #063D3B;
+      background: #E6F7D2;
+      border: 1px solid #B9D7C7;
+      padding: 5px 11px;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .dept-chip-pill:hover {
+      background: #C8FF63;
+      transform: translateY(-1px);
+    }
+
+    /* Responsive */
+    @media(max-width: 1100px) {
+      .ops-conv-banner { grid-template-columns: 1fr; }
+      .ops-conv-tiles-grid { grid-template-columns: repeat(3, 1fr); }
+      .ops-details-grid { grid-template-columns: 1fr; }
+      .dept-pipeline-grid { grid-template-columns: repeat(2, 1fr); }
+      .dept-deepdive-grid { grid-template-columns: 1fr; }
+    }
+
+    @media(max-width: 768px) {
+      .dashboard-sidebar { display: none; }
+      .brand-top-left-panel { width: auto; border-right: none; padding: 0 12px; }
+      .brand-top-center-panel { display: none; }
+      .brand-top-actions { padding-right: 12px; }
+      .dashboard-main-content { padding: 14px; }
+      .ops-dash-topbar { flex-direction: column; align-items: flex-start; }
+      .ops-conv-metrics-grid { grid-template-columns: 1fr; }
+      .ops-conv-tiles-grid { grid-template-columns: 1fr 1fr; }
+      .dept-pipeline-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. TOP HEADER (LOGO [aligned with 230px sidebar boundary] + INSTITUTION + STARTER PLAN + LOGOUT) -->
+  <header class="brand-top-navbar">
+    <div style="display: flex; align-items: center; height: 100%; flex: 1;">
+      <!-- Left Logo Panel (exactly 230px matching left navigation panel width & right boundary) -->
+      <div class="brand-top-left-panel">
+        <a href="/" class="brand-logo-wrap" aria-label="Edvora home">
+          <div class="brand-logo-icon">
+            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%; display:block;">
+              <rect width="40" height="40" rx="11" fill="#063D3B"/>
+              <path d="M20 6C20 13.732 13.732 20 6 20C13.732 20 20 26.268 20 34C20 26.268 26.268 20 34 20C26.268 20 20 13.732 20 6Z" fill="#C8FF63"/>
+            </svg>
+          </div>
+          <span class="brand-logo-text">Edvora<span>Chat</span></span>
+        </a>
+      </div>
+
+      <!-- Center Institution Panel (starts precisely at the right boundary of the left navigation panel) -->
+      <div class="brand-top-center-panel">
+        <div class="brand-top-institution">
+          <span style="font-size: 13.5px; font-weight: 700; color: var(--e-teal); letter-spacing: -0.01em;">Apex Institute of Higher Education</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="brand-top-actions">
+      <div class="brand-plan-pill">Starter Plan</div>
+      <a href="/login" class="brand-logout-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span>Logout</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- 2. DASHBOARD BODY (SIDEBAR + MAIN CONTENT) -->
+  <div class="dashboard-app-body">
+    
+    <!-- LEFT SIDEBAR -->
+    <aside class="dashboard-sidebar">
+      <div>
+        <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #71817D; margin-bottom: 10px; padding-left: 6px;">
+          Navigation
+        </div>
+        <nav>
+          <ul class="sidebar-nav-list">
+            <li>
+              <a class="sidebar-nav-item active" id="nav-item-overview" onclick="switchDashboardView('overview')">
+                <span class="sidebar-nav-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                </span>
+                <span>Overview</span>
+              </a>
+            </li>
+            <li>
+              <a href="/knowledge-hub" class="sidebar-nav-item">
+                <span class="sidebar-nav-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                </span>
+                <span>Central Knowledge Hub</span>
+              </a>
+            </li>
+            <li>
+              <a class="sidebar-nav-item" id="nav-item-departments" onclick="switchDashboardView('departments')">
+                <span class="sidebar-nav-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="22.01"/><line x1="15" y1="22" x2="15" y2="22.01"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/><line x1="9" y1="10" x2="9" y2="10.01"/><line x1="15" y1="10" x2="15" y2="10.01"/><line x1="9" y1="14" x2="9" y2="14.01"/><line x1="15" y1="14" x2="15" y2="14.01"/><line x1="9" y1="18" x2="9" y2="18.01"/><line x1="15" y1="18" x2="15" y2="18.01"/></svg>
+                </span>
+                <span>Departments</span>
+              </a>
+            </li>
+            <li>
+              <a class="sidebar-nav-item" onclick="setActiveNav(this)">
+                <span class="sidebar-nav-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </span>
+                <span>Teams</span>
+              </a>
+            </li>
+            <li>
+              <a class="sidebar-nav-item" onclick="setActiveNav(this)">
+                <span class="sidebar-nav-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                </span>
+                <span>Student Leads</span>
+              </a>
+            </li>
+            <li>
+              <a class="sidebar-nav-item" onclick="setActiveNav(this)">
+                <span class="sidebar-nav-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+                </span>
+                <span>ChatBot Settings</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Bottom Profile -->
+      <div class="sidebar-user-card">
+        <div class="sidebar-user-avatar">SK</div>
+        <div class="sidebar-user-meta">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 4px;">
+            <span class="sidebar-user-name">salan Khalkho</span>
+            <span class="sidebar-role-badge">Admin</span>
+          </div>
+          <div class="sidebar-user-sub">Institution Name</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT: DITTO ADMISSIONS COMMAND CENTER MOCK -->
+    <main class="dashboard-main-content">
+      
+      <!-- UNIFIED OPERATIONS DASHBOARD FRAME (EXACT MATCH TO LANDING-COPY) -->
+      <div id="view-overview" class="ops-dashboard-frame">
+        
+        <!-- Top Control Bar -->
+        <div class="ops-dash-topbar">
+          <div class="ops-dash-title-group">
+            <span class="ops-live-dot"></span>
+            <div>
+              <div class="ops-dash-main-title" id="pageTabContextTitle">Overview &mdash; Admissions Console</div>
+              <div class="ops-dash-sub-title" id="pageTabContextSub">Fall 2026 Admissions Cycle &bull; Central Knowledge &amp; Conversion Command</div>
+            </div>
+          </div>
+          <div class="ops-dash-controls">
+            <div class="ops-ctrl-pill">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              <span>Window: Last 30 Days</span>
+            </div>
+            <div class="ops-ctrl-pill">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              <span>4 Campus Units</span>
+            </div>
+            <div class="ops-ctrl-sync">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Live CRM Synced</span>
+            </div>
+            <a href="#" onclick="alert('Multilingual Admissions Engine Active (12 Languages Supported)'); return false;" class="ops-ctrl-btn">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <span>Multilingual support</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- 1. TOTAL CONVERSATIONS TOP BANNER (24h, 7D, 30D) -->
+        <div class="ops-conv-banner">
+          <div>
+            <div class="ops-conv-meta-title">Omnichannel Conversations</div>
+            <div class="ops-conv-meta-desc">
+              Automated student admissions inquiries resolved across web, mobile, and portal touchpoints with zero human latency.
+            </div>
+          </div>
+          <div class="ops-conv-metrics-grid">
+            <!-- 1. DEPARTMENT (Pill/Chips representation) -->
+            <a href="javascript:void(0)" onclick="switchNavTab('departments')" class="ops-conv-metric-box ops-metric-card-interactive" title="View Campus Departments">
+              <div class="ops-card-top-row">
+                <div class="ops-card-label-wrap">
+                  <div class="ops-card-icon-pill">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                  </div>
+                  <span class="ops-card-title-text">Department</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                  <span class="ops-conv-delta" id="statDeptActiveBadge" style="background: rgba(200, 255, 99, 0.2); color: var(--e-pistachio);">8 Active</span>
+                  <span class="ops-card-hover-arrow">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </span>
+                </div>
+              </div>
+              <div class="ops-card-main-val-row">
+                <div>
+                  <span class="ops-card-primary-val" id="statDeptCount">8</span>
+                  <span class="ops-card-unit-lbl">Divisions</span>
+                </div>
+                <span style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600;" id="statDeptOnline">100% Routed</span>
+              </div>
+              <!-- Visual Dept Chips -->
+              <div class="ops-dept-chips" id="statDeptChips">
+                <span class="ops-dept-chip">Biology</span>
+                <span class="ops-dept-chip">Engineering</span>
+                <span class="ops-dept-chip-more">+6 more</span>
+              </div>
+            </a>
+
+            <!-- 2. COURSES (Multi-Segment Progress Representation) -->
+            <a href="javascript:void(0)" onclick="switchNavTab('departments')" class="ops-conv-metric-box ops-metric-card-interactive" title="View Department Academic Programs & Courses">
+              <div class="ops-card-top-row">
+                <div class="ops-card-label-wrap">
+                  <div class="ops-card-icon-pill">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                  </div>
+                  <span class="ops-card-title-text">Courses</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                  <span class="ops-conv-delta" id="statCoursesOpenBadge" style="background: rgba(56, 189, 248, 0.2); color: #7DD3FC; border-color: rgba(56, 189, 248, 0.35);">Admissions Open</span>
+                  <span class="ops-card-hover-arrow">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </span>
+                </div>
+              </div>
+              <div class="ops-card-main-val-row">
+                <div>
+                  <span class="ops-card-primary-val" id="statCoursesCount">43</span>
+                  <span class="ops-card-unit-lbl">Programs</span>
+                </div>
+                <span style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600;" id="statCoursesOpenPct">100% Enrolling</span>
+              </div>
+              <!-- Multi-Segment Distribution Bar -->
+              <div class="ops-course-bar-wrap">
+                <div class="ops-course-bar">
+                  <div class="ops-course-seg-ug" id="courseSegUg" style="width: 35%;" title="15 Undergraduate Programs"></div>
+                  <div class="ops-course-seg-pg" id="courseSegPg" style="width: 46%;" title="20 Postgraduate Programs"></div>
+                  <div class="ops-course-seg-doc" id="courseSegDoc" style="width: 12%;" title="5 Doctoral Programs"></div>
+                  <div class="ops-course-seg-other" id="courseSegOther" style="width: 7%;" title="3 Certificate / Other"></div>
+                </div>
+                <div class="ops-course-legend">
+                  <span class="ops-course-legend-item"><span class="ops-course-dot" style="background: #C8FF63;"></span> <span id="lblUgCount">15 UG</span></span>
+                  <span class="ops-course-legend-item"><span class="ops-course-dot" style="background: #38BDF8;"></span> <span id="lblPgCount">20 PG</span></span>
+                  <span class="ops-course-legend-item"><span class="ops-course-dot" style="background: #FBBF24;"></span> <span id="lblDocCount">5 PhD</span></span>
+                  <span class="ops-course-legend-item"><span class="ops-course-dot" style="background: #A78BFA;"></span> <span id="lblOtherCount">3 Cert</span></span>
+                </div>
+              </div>
+            </a>
+
+            <!-- 3. CAMPUS (Geographic & Area representation) -->
+            <a href="javascript:void(0)" onclick="switchNavTab('campus-tours')" class="ops-conv-metric-box ops-metric-card-interactive" title="View Campus Locations & Tours">
+              <div class="ops-card-top-row">
+                <div class="ops-card-label-wrap">
+                  <div class="ops-card-icon-pill">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  </div>
+                  <span class="ops-card-title-text">Campus</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                  <span class="ops-conv-delta" id="statCampusStatusBadge" style="background: rgba(200, 255, 99, 0.2); color: var(--e-pistachio);">Active</span>
+                  <span class="ops-card-hover-arrow">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </span>
+                </div>
+              </div>
+              <div class="ops-card-main-val-row">
+                <div>
+                  <span class="ops-card-primary-val" id="statCampusCount">1</span>
+                  <span class="ops-card-unit-lbl" id="statCampusUnitLbl">Campus Site</span>
+                </div>
+                <span class="ops-campus-badge-area" id="statCampusAreaBadge">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="18"></line><line x1="15" y1="6" x2="15" y2="21"></line></svg>
+                  <span id="statCampusArea">868 Acres</span>
+                </span>
+              </div>
+              <!-- Location Metadata Row -->
+              <div class="ops-campus-meta-row">
+                <div class="ops-campus-loc" id="statCampusPrimaryName" title="Main Campus">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--e-pistachio)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+                  <span id="statCampusCityState">Normal, Alabama</span>
+                </div>
+                <span style="font-size: 9.5px; color: var(--e-pistachio); font-weight: 700; white-space: nowrap;">Tour Booking &rarr;</span>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- 2. CONVERSION ENGINE TILES (LAST 30 DAYS - CLICKABLE EMPTY HYPERLINKS) -->
+        <div class="ops-conv-tiles-grid">
+          <!-- 1. students Leads -->
+          <a href="#" class="ops-tile" title="students Leads" onclick="return false;">
+            <div class="ops-tile-header">
+              <div class="ops-tile-icon" style="background:#E6F7D2; color:#063D3B;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+              </div>
+              <span class="ops-tile-badge" style="background:#ECFDF5; color:#047857;">+28.5% MoM</span>
+            </div>
+            <div class="ops-tile-val"><span class="cnum-ops" data-n="1284">1,284</span></div>
+            <div class="ops-tile-lbl">Leads Captured</div>
+            <div class="ops-tile-sub">Last 30 Days &bull; Verified Contact</div>
+          </a>
+
+          <!-- 2. Counselor Callbacks -->
+          <a href="#" class="ops-tile" title="Counselor Callbacks" onclick="return false;">
+            <div class="ops-tile-header">
+              <div class="ops-tile-icon" style="background:#FFF1F2; color:#E11D48;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              </div>
+              <span class="ops-tile-badge" style="background:#FFF1F2; color:#E11D48;">100% Routed</span>
+            </div>
+            <div class="ops-tile-val"><span class="cnum-ops" data-n="412">412</span></div>
+            <div class="ops-tile-lbl">Callbacks Booked</div>
+            <div class="ops-tile-sub">Last 30 Days &bull; Counselor Calls</div>
+          </a>
+
+          <!-- 3. Campus Tours -->
+          <a href="#" class="ops-tile" title="Campus Tours" onclick="return false;">
+            <div class="ops-tile-header">
+              <div class="ops-tile-icon" style="background:#E0F2FE; color:#0284C7;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              </div>
+              <span class="ops-tile-badge" style="background:#E0F2FE; color:#0284C7;">88% Show-Up</span>
+            </div>
+            <div class="ops-tile-val"><span class="cnum-ops" data-n="186">186</span></div>
+            <div class="ops-tile-lbl">Campus Tours</div>
+            <div class="ops-tile-sub">Last 30 Days &bull; Visits Scheduled</div>
+          </a>
+
+          <!-- 4. Scholarship & Aid -->
+          <a href="#" class="ops-tile" title="Scholarship & Aid" onclick="return false;">
+            <div class="ops-tile-header">
+              <div class="ops-tile-icon" style="background:#FEF3C7; color:#D97706;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+              </div>
+              <span class="ops-tile-badge" style="background:#FEF3C7; color:#D97706;">High Merit</span>
+            </div>
+            <div class="ops-tile-val"><span class="cnum-ops" data-n="628">628</span></div>
+            <div class="ops-tile-lbl">Scholarship Interest</div>
+            <div class="ops-tile-sub">Last 30 Days &bull; Aid Inquiries</div>
+          </a>
+
+          <!-- 5. Lead-Magnet Assets -->
+          <a href="#" class="ops-tile" title="Lead-Magnet Assets" onclick="return false;">
+            <div class="ops-tile-header">
+              <div class="ops-tile-icon" style="background:#F3E8FF; color:#7C3AED;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+              </div>
+              <span class="ops-tile-badge" style="background:#F3E8FF; color:#7C3AED;">Instant PDF</span>
+            </div>
+            <div class="ops-tile-val"><span class="cnum-ops" data-n="954">954</span></div>
+            <div class="ops-tile-lbl">Leads-Magnet Sent</div>
+            <div class="ops-tile-sub">Last 30 Days &bull; Dispatched Guides</div>
+          </a>
+        </div>
+
+        <!-- 3. OPERATIONAL QUOTAS & EMBED CARD (3 COLUMNS) -->
+        <div class="ops-details-grid">
+          
+          <!-- CARD 1: DOCUMENTS (ACTIVE, EXPIRING SOON, EXPIRED) -->
+          <div class="ops-card">
+            <div>
+              <div class="ops-card-header">
+                <div>
+                  <div class="ops-card-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    <span>Documents &amp; Knowledge Base</span>
+                  </div>
+                  <div style="font-size: 11px; color: #648781; margin-top: 3px;">Quota: 50 limit &bull; 48 used &bull; 2 remaining</div>
+                </div>
+                <span class="ops-quota-badge">96% Allocated</span>
+              </div>
+
+              <!-- Progress bar -->
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-track">
+                  <div class="ops-progress-fill-active" style="width: 80%;" title="40 Active Documents"></div>
+                  <div class="ops-progress-fill-warn" style="width: 12%;" title="6 Expiring Soon"></div>
+                  <div class="ops-progress-fill-danger" style="width: 4%;" title="2 Expired"></div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10.5px; color: #648781; margin-top: 6px; font-weight: 600;">
+                  <span>48 Documents in Store</span>
+                  <span style="color: #047857; font-weight: 700;">2 Slots Remaining</span>
+                </div>
+              </div>
+
+              <!-- Active / Expiring Soon / Expired status cards -->
+              <div class="ops-doc-status-grid">
+                <div class="ops-doc-status-box" style="background:#ECFDF5; border:1px solid #A7F3D0;">
+                  <div class="ops-doc-status-count" style="color:#047857;"><span class="cnum-ops" data-n="40">40</span></div>
+                  <div class="ops-doc-status-lbl" style="color:#047857;">Active</div>
+                </div>
+                <div class="ops-doc-status-box" style="background:#FEF3C7; border:1px solid #FDE68A;">
+                  <div class="ops-doc-status-count" style="color:#D97706;"><span class="cnum-ops" data-n="6">6</span></div>
+                  <div class="ops-doc-status-lbl" style="color:#D97706;">Expiring Soon</div>
+                </div>
+                <div class="ops-doc-status-box" style="background:#FEF2F2; border:1px solid #FECDD3;">
+                  <div class="ops-doc-status-count" style="color:#DC2626;"><span class="cnum-ops" data-n="2">2</span></div>
+                  <div class="ops-doc-status-lbl" style="color:#DC2626;">Expired</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="padding-top: 12px; border-top: 1px solid #E6F0EC; display: flex; align-items: center; justify-content: flex-end; font-size: 11px;">
+              <a href="#knowledge" class="ops-footer-pill" title="Open Central Knowledge Hub" style="display: inline-flex; align-items: center; gap: 4px; padding: 2.5px 8px; border-radius: 6px; background: #ECFDF5; border: 1px solid #A7F3D0; color: #047857; font-size: 10.5px; font-weight: 700; text-decoration: none; transition: all 0.15s ease;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                <span>Central Knowledge Hub</span>
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              </a>
+            </div>
+          </div>
+
+          <!-- CARD 2: TEAMS (NO., QUOTA, REMAINING) -->
+          <div class="ops-card">
+            <div>
+              <div class="ops-card-header">
+                <div>
+                  <div class="ops-card-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#063D3B" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <span>Teams &amp; Counselor Seats</span>
+                  </div>
+                  <div style="font-size: 11px; color: #648781; margin-top: 3px;">Quota: 10 seats &bull; 8 active &bull; 2 remaining</div>
+                </div>
+                <span class="ops-quota-badge" style="background:#E6F7D2; color:#063D3B; border-color:#B9D7C7;">8 / 10 Active</span>
+              </div>
+
+              <!-- Progress bar -->
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-track">
+                  <div style="width: 80%; background:#063D3B; height:100%;"></div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10.5px; color: #648781; margin-top: 6px; font-weight: 600;">
+                  <span>8 Staff Assigned</span>
+                  <span style="color: #063D3B; font-weight: 700;">2 Seats Available</span>
+                </div>
+              </div>
+
+              <!-- Active Team Members Mini-List -->
+              <div class="ops-team-list">
+                <div class="ops-team-row">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <div class="ops-team-avatar">SJ</div>
+                    <div>
+                      <div style="font-weight: 700; color: #063D3B;">Sarah Jenkins</div>
+                      <div style="font-size: 9.5px; color: #648781;">Admissions Director &bull; MBA Desk</div>
+                    </div>
+                  </div>
+                  <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 9.5px; font-weight: 700; color: #047857; background: #ECFDF5; padding: 2px 7px; border-radius: 4px;"><span style="width: 5px; height: 5px; border-radius: 50%; background: #047857;"></span>Active</span>
+                </div>
+                <div class="ops-team-row">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <div class="ops-team-avatar" style="background:#0284C7; color:#fff;">MC</div>
+                    <div>
+                      <div style="font-weight: 700; color: #063D3B;">Marcus Chen</div>
+                      <div style="font-size: 9.5px; color: #648781;">Financial Aid &bull; Merit Evaluation</div>
+                    </div>
+                  </div>
+                  <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 9.5px; font-weight: 700; color: #047857; background: #ECFDF5; padding: 2px 7px; border-radius: 4px;"><span style="width: 5px; height: 5px; border-radius: 50%; background: #047857;"></span>Active</span>
+                </div>
+                <div class="ops-team-row">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <div class="ops-team-avatar" style="background:#D97706; color:#fff;">ER</div>
+                    <div>
+                      <div style="font-weight: 700; color: #063D3B;">Elena Rostova</div>
+                      <div style="font-size: 9.5px; color: #648781;">Campus Experience &bull; Tour Desk</div>
+                    </div>
+                  </div>
+                  <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 9.5px; font-weight: 700; color: #D97706; background: #FEF3C7; padding: 2px 7px; border-radius: 4px;"><span style="width: 5px; height: 5px; border-radius: 50%; background: #D97706;"></span>In Callback</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="padding-top: 12px; border-top: 1px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #648781; gap: 8px; flex-wrap: wrap;">
+              <span style="display: flex; align-items: center; gap: 5px; font-size: 10.5px; color: #648781;">
+                <span style="width: 5px; height: 5px; border-radius: 50%; background: #047857; flex-shrink: 0;"></span>
+                Auto Round-Robin
+              </span>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <a href="#teams" class="ops-footer-pill" title="View Teams & Staff Members" style="display: inline-flex; align-items: center; gap: 4px; padding: 2.5px 8px; border-radius: 6px; background: #ECFDF5; border: 1px solid #A7F3D0; color: #047857; font-size: 10.5px; font-weight: 700; text-decoration: none; transition: all 0.15s ease;">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  <span>8 Staff</span>
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </a>
+                <a href="#departments" class="ops-footer-pill" title="Manage Campus Departments" style="display: inline-flex; align-items: center; gap: 4px; padding: 2.5px 8px; border-radius: 6px; background: #F4FAF7; border: 1px solid #D1E5DE; color: #063D3B; font-size: 10.5px; font-weight: 700; text-decoration: none; transition: all 0.15s ease;">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                  <span>9 Campus Departments</span>
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- CARD 3: CHATBOT EMBED CODE -->
+          <div class="ops-card" style="background: linear-gradient(180deg, #FFFFFF 0%, #FAFDFB 100%);">
+            <div>
+              <div class="ops-card-header">
+                <div>
+                  <div class="ops-card-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#063D3B" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                    <span>Chatbot Embed Code</span>
+                  </div>
+                  <div style="font-size: 11px; color: #648781; margin-top: 3px;">1-click snippet &bull; Zero bundle bloat</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="ops-quota-badge" style="background:#E6F7D2; color:#063D3B; border-color:#B9D7C7;">CDN v2.4 Live</span>
+                </div>
+              </div>
+
+              <p style="font-size: 12px; color: #4F7470; margin-bottom: 10px; line-height: 1.5;">
+                Deploy across any website, WordPress, Webflow, Drupal, or student portal. Insert right before the closing <code style="padding: 2px 5px; border-radius: 4px; background: #F1F7F4; color: #063D3B; font-family: monospace; font-size: 11px;">&lt;/body&gt;</code> tag.
+              </p>
+
+              <div class="ops-embed-box" id="opsEmbedCodeText">
+&lt;script src="https://edvora.chat/widget.js" data-bot-token="c074a1862919e240ee863231a67701dc" async&gt;&lt;/script&gt;
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 10px;">
+                <button id="btnCopyOpsEmbed" onclick="copyOpsEmbedCode()" class="ops-copy-btn" style="margin-top: 0;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  <span id="txtCopyOpsEmbed" style="font-weight: 600;">Copy Embed Code</span>
+                </button>
+                <a href="/test_chat.html?token=c074a1862919e240ee863231a67701dc" target="_blank" class="ops-test-live-btn" title="Open live interactive test environment">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                  <span>Test Live</span>
+                </a>
+              </div>
+            </div>
+
+            <div style="padding-top: 12px; border-top: 1px solid #E6F0EC; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 10.5px; color: #648781; margin-top: 12px;">
+              <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 5px; height: 5px; border-radius: 50%; background: #047857;"></span>&lt; 14KB async load</span>
+              <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 5px; height: 5px; border-radius: 50%; background: #047857;"></span>FERPA &amp; GDPR compliant</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+      <!-- ===================================================================== -->
+      <!-- VIEW 2: DEPARTMENT OVERVIEW & MANAGEMENT CONSOLE (DASHBOARD 1)         -->
+      <!-- ===================================================================== -->
+      <div id="view-departments-grid" class="dept-dashboard-frame" style="display:none;">
+        
+        <!-- Top Control Bar -->
+        <div class="dept-dash-topbar">
+          <div class="dept-dash-title-group">
+            <span class="dept-live-dot"></span>
+            <div>
+              <div class="dept-dash-main-title">
+                <span>All Available Departments</span>
+              </div>
+              <div class="dept-dash-sub-title">Pre-built templates, knowledge base scoping, assigned staff, operating hours, and multi-channel routing.</div>
+            </div>
+          </div>
+          
+          <div class="dept-dash-actions">
+            <button class="dept-btn-secondary" title="Bulk import pre-built college department templates">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <span>⚡ 1-Click Import Presets</span>
+            </button>
+            <button class="dept-btn-primary" title="Create a new custom academic or operational department">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span>+ Create Department</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- DISTINCT LIGHT MANAGEMENT TOOLBAR -->
+        <div class="dept-control-strip">
+          <div class="dept-kpi-ribbon">
+            <div class="dept-kpi-chip" title="Total active departments configured">
+              <span style="color:#047857;">🏛️</span>
+              <span><strong id="statActiveDeptsCount">9</strong> Active Departments</span>
+            </div>
+            <div class="dept-kpi-chip" title="Total assigned on-duty counselors">
+              <span style="color:#0284C7;">👥</span>
+              <span><strong id="statAssignedStaffCount">24</strong> Assigned Staff</span>
+            </div>
+            <div class="dept-kpi-chip" title="Documents quarantined to specific departments">
+              <span style="color:#7C3AED;">📚</span>
+              <span><strong id="statScopedDocsCount">48</strong> Scoped Docs</span>
+            </div>
+            <div class="dept-kpi-chip" title="Lead escalation and counselor alert rules active">
+              <span style="color:#D97706;">⚡</span>
+              <span><strong id="statAutoEscalationCount">100%</strong> Auto-Escalation</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- DEPARTMENT CARDS GRID -->
+        <div class="dept-body-pad">
+          <div class="dept-cards-grid" id="landingDeptCardsGrid">
+            
+            <!-- Cards will be dynamically loaded from database via /v1/public/dashboard/departments/c074a1862919e240ee863231a67701dc -->
+            <div style="grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; padding: 48px; color: #557772; font-size: 13.5px; gap: 8px;">
+              <span style="display:inline-block; width:16px; height:16px; border:2px solid #047857; border-top-color:transparent; border-radius:50%; animation: spin 0.8s linear infinite;"></span>
+              <span>Loading institutional department consoles from database...</span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- VIEW 3: DEPARTMENT-SPECIFIC DEEP DIVE DASHBOARD (DASHBOARD 2)          -->
+      <!-- ===================================================================== -->
+      <div id="view-departments-detail" class="dept-detail-frame" style="display:none;">
+        
+        <!-- Topbar with Back button & Breadcrumb & Settings Action -->
+        <div class="dept-detail-topbar">
+          <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+            <button onclick="switchDashboardView('departments')" class="dept-btn-secondary" style="padding: 6px 12px; font-size: 11.5px;" title="Return to All Departments Grid">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              <span>Back to All Units</span>
+            </button>
+            <div class="dept-dash-title-group">
+              <span class="dept-live-dot"></span>
+              <div>
+                <div class="dept-breadcrumb">
+                  <span onclick="switchDashboardView('departments')" style="cursor: pointer; text-decoration: underline;">Departments</span> &rsaquo; <span id="detailBreadcrumbName">🎓 MBA Admissions</span>
+                </div>
+                <div class="dept-dash-main-title">
+                  <span id="detailMainTitle">MBA Admissions</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="dept-dash-actions">
+            <button class="dept-btn-secondary" onclick="editCurrentDepartment()" title="Edit department configuration and routing rules">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+              <span>Settings (Edit Department)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- DEPARTMENT SUB-TOOLBAR / TIME WINDOW FILTER (Matching Overview) -->
+        <div class="dept-control-strip" style="background: #F9FCFB; border-bottom: 1.5px solid #E6F0EC; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.5px;">Activity &amp; Metrics Window</span>
+            <span id="deptDetailActiveWindowBadge" style="font-size: 10.5px; font-weight: 700; color: #047857; background: #ECFDF5; border: 1px solid #A7F3D0; padding: 2px 8px; border-radius: 6px;">Last 30 Days</span>
+          </div>
+
+          <!-- Interactive Time Window Selector -->
+          <div class="ops-ctrl-pill" style="display:inline-flex; align-items:center; gap:3px; padding:3px 6px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <span style="font-size:11px; font-weight:600; color:#648781; margin-right:2px;">Window:</span>
+            <button type="button" class="btn-time-win" id="deptTimeBtn24h" onclick="setDeptDetailTimeWindow('24h')" style="background:transparent; color:#648781; border:none; font-size:11px; font-weight:600; cursor:pointer; padding:2px 7px; border-radius:4px; transition:all 0.15s ease;">24H</button>
+            <button type="button" class="btn-time-win" id="deptTimeBtn7d" onclick="setDeptDetailTimeWindow('7d')" style="background:transparent; color:#648781; border:none; font-size:11px; font-weight:600; cursor:pointer; padding:2px 7px; border-radius:4px; transition:all 0.15s ease;">7D</button>
+            <button type="button" class="btn-time-win active" id="deptTimeBtn30d" onclick="setDeptDetailTimeWindow('30d')" style="background:#063D3B; color:#C8FF63; border:none; font-size:11px; font-weight:700; cursor:pointer; padding:2px 7px; border-radius:4px; transition:all 0.15s ease;">30D</button>
+            <button type="button" class="btn-time-win" id="deptTimeBtn3m" onclick="setDeptDetailTimeWindow('3m')" style="background:transparent; color:#648781; border:none; font-size:11px; font-weight:600; cursor:pointer; padding:2px 7px; border-radius:4px; transition:all 0.15s ease;">3M</button>
+            <button type="button" class="btn-time-win" id="deptTimeBtn6m" onclick="setDeptDetailTimeWindow('6m')" style="background:transparent; color:#648781; border:none; font-size:11px; font-weight:600; cursor:pointer; padding:2px 7px; border-radius:4px; transition:all 0.15s ease;">6M</button>
+            <button type="button" class="btn-time-win" id="deptTimeBtnAll" onclick="setDeptDetailTimeWindow('all')" style="background:transparent; color:#648781; border:none; font-size:11px; font-weight:600; cursor:pointer; padding:2px 7px; border-radius:4px; transition:all 0.15s ease;">All</button>
+            <button type="button" class="btn-time-win" id="deptTimeBtnCustom" onclick="toggleDeptDetailCustomDatePicker()" style="background:transparent; color:#648781; border:none; font-size:11px; font-weight:600; cursor:pointer; padding:2px 7px; border-radius:4px; transition:all 0.15s ease;">📅 Custom</button>
+          </div>
+        </div>
+
+        <!-- Expandable Department Custom Calendar Date Picker Bar -->
+        <div id="deptDetailCustomDatePickerBar" style="display: none; background: #F4FAF7; border-bottom: 1.5px solid #D1E5DE; padding: 10px 20px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <div style="font-weight: 700; color: #063D3B; display: flex; align-items: center; gap: 6px;">
+                    <span>📅</span>
+                    <span>Custom Date Range (IST):</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <label for="deptDetailCustomStartDate" style="font-size: 11px; font-weight: 600; color: #648781;">From:</label>
+                    <input type="date" id="deptDetailCustomStartDate" class="brand-input" style="height: 30px; font-size: 11.5px; font-weight: 600; padding: 0 8px; border: 1.5px solid #DDE9E3; border-radius: 6px; background: #FFFFFF; color: #063D3B;">
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <label for="deptDetailCustomEndDate" style="font-size: 11px; font-weight: 600; color: #648781;">To:</label>
+                    <input type="date" id="deptDetailCustomEndDate" class="brand-input" style="height: 30px; font-size: 11.5px; font-weight: 600; padding: 0 8px; border: 1.5px solid #DDE9E3; border-radius: 6px; background: #FFFFFF; color: #063D3B;">
+                </div>
+                <button type="button" onclick="applyDeptDetailCustomDateRange()" class="dept-btn-primary" style="height: 30px; padding: 0 14px; font-size: 11.5px; font-weight: 700; border-radius: 6px;">
+                    Apply Range
+                </button>
+                <button type="button" onclick="setDeptDetailTimeWindow('30d')" class="dept-btn-secondary" style="height: 30px; padding: 0 10px; font-size: 11.5px; font-weight: 700; border-radius: 6px; color: #648781;">
+                    Reset (30D)
+                </button>
+            </div>
+            <div id="deptDetailActiveRangeIndicator" style="font-size: 11px; font-weight: 700; color: #047857; background: #E6F4EA; padding: 3px 9px; border-radius: 5px; border: 1px solid #A7F3D0;">
+                Active Window: Last 30 Days
+            </div>
+        </div>
+
+        <!-- 4 PIPELINE CARDS -->
+        <div class="dept-pipeline-grid">
+          
+          <!-- 1. Callbacks -->
+          <div class="dept-pipe-card" style="border-top: 3px solid #E11D48;">
+            <div class="dept-pipe-header">
+              <div class="dept-pipe-icon" style="background:#FFF1F2; color:#E11D48;">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              </div>
+              <span class="dept-pipe-badge" style="background:#FFF1F2; color:#E11D48;" id="pipeCallbacksBadge">5 Pending</span>
+            </div>
+            <div>
+              <div class="dept-pipe-val" id="pipeCallbacksVal"><span class="cnum-dept" data-n="5">5</span></div>
+              <div class="dept-pipe-lbl">Callbacks Booked</div>
+              <div class="dept-pipe-sub" id="pipeCallbacksSub">48 handled this admissions cycle &bull; Avg wait 8m</div>
+            </div>
+          </div>
+
+          <!-- 2. Campus Tours -->
+          <div class="dept-pipe-card" style="border-top: 3px solid #0284C7;">
+            <div class="dept-pipe-header">
+              <div class="dept-pipe-icon" style="background:#E0F2FE; color:#0284C7;">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              </div>
+              <span class="dept-pipe-badge" style="background:#E0F2FE; color:#0284C7;" id="pipeToursBadge">88% Show-Up</span>
+            </div>
+            <div>
+              <div class="dept-pipe-val" id="pipeToursVal"><span class="cnum-dept" data-n="18">18</span></div>
+              <div class="dept-pipe-lbl">Campus Tours Scheduled</div>
+              <div class="dept-pipe-sub" id="pipeToursSub">Next group walk: Today, 3:00 PM &bull; Gate 2</div>
+            </div>
+          </div>
+
+          <!-- 3. Scholarships Interest -->
+          <div class="dept-pipe-card" style="border-top: 3px solid #D97706;">
+            <div class="dept-pipe-header">
+              <div class="dept-pipe-icon" style="background:#FEF3C7; color:#D97706;">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+              </div>
+              <span class="dept-pipe-badge" style="background:#FEF3C7; color:#D97706;" id="pipeScholarshipsBadge">High Merit Tier</span>
+            </div>
+            <div>
+              <div class="dept-pipe-val" id="pipeScholarshipsVal"><span class="cnum-dept" data-n="34">34</span></div>
+              <div class="dept-pipe-lbl">Scholarships Interest</div>
+              <div class="dept-pipe-sub" id="pipeScholarshipsSub">$420,000 potential aid calculated &bull; CAT &gt;90%iles</div>
+            </div>
+          </div>
+
+          <!-- 4. Lead-magnet Sent -->
+          <div class="dept-pipe-card" style="border-top: 3px solid #7C3AED;">
+            <div class="dept-pipe-header">
+              <div class="dept-pipe-icon" style="background:#F3E8FF; color:#7C3AED;">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+              </div>
+              <span class="dept-pipe-badge" style="background:#F3E8FF; color:#7C3AED;" id="pipeLeadsMagnetBadge">74% Downloaded</span>
+            </div>
+            <div>
+              <div class="dept-pipe-val" id="pipeLeadsMagnetVal"><span class="cnum-dept" data-n="186">186</span></div>
+              <div class="dept-pipe-lbl">Lead-Magnet Dispatched</div>
+              <div class="dept-pipe-sub" id="pipeLeadsMagnetSub">MBA Curriculum &amp; Placement PDF delivered instantly</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 2-COLUMN OPERATIONAL PANELS -->
+        <div class="dept-deepdive-grid">
+          
+          <!-- LEFT COLUMN: HOURS & AWAY + ESCALATIONS -->
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+            
+            <!-- Hours Away Panel -->
+            <div class="dept-panel-box" id="panelHours">
+              <div class="dept-panel-heading" style="justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2.3"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  <span>Operating Hours &amp; Auto-Away Automation</span>
+                </div>
+              </div>
+              <div class="dept-hours-preview">
+                <div class="dept-hours-header">
+                  <span class="dept-hours-time" id="detailHoursSchedule">Mon &ndash; Sat &bull; 09:00 AM &ndash; 06:00 PM IST</span>
+                  <span class="dept-hours-badge">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#10B981]"></span> Currently Open
+                  </span>
+                </div>
+                <div style="font-size: 11px; color: #648781;">
+                  Timezone: Asia/Kolkata &bull; Off-duty bot takes inquiries into high-priority callback queue.
+                </div>
+                <div class="dept-away-quote" id="detailAwayMessage">
+                  &ldquo;Our MBA Admissions Desk is currently closed for the evening. Your inquiry has been prioritized. Counselor Sarah Chen will contact you tomorrow morning at 09:15 AM.&rdquo;
+                </div>
+              </div>
+            </div>
+
+            <!-- Escalations & Leads Panel -->
+            <div class="dept-panel-box" id="panelEscalations">
+              <div class="dept-panel-heading" style="justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.3"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  <span>Escalations &amp; Lead Assignment Policy</span>
+                </div>
+              </div>
+              <div class="dept-esc-list">
+                <div class="dept-esc-item">
+                  <span class="dept-esc-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Auto-Escalation Threshold</span>
+                  </span>
+                  <span class="dept-esc-tag">2 Unresolved Student Turns</span>
+                </div>
+                <div class="dept-esc-item">
+                  <span class="dept-esc-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Duty Lead Multi-Channel Alerts</span>
+                  </span>
+                  <span class="dept-esc-tag">📧 Email &bull; 💬 WhatsApp Active</span>
+                </div>
+                <div class="dept-esc-item">
+                  <span class="dept-esc-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Lead Routing Method</span>
+                  </span>
+                  <span class="dept-esc-tag" style="color:#047857; font-weight:800;">Round-Robin (Equal Ratio)</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT COLUMN: TEAM + KNOWLEDGE + FAQS -->
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+            
+            <!-- Team Panel -->
+            <div class="dept-panel-box" id="panelTeam">
+              <div class="dept-panel-heading" style="justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0284C7" stroke-width="2.3"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                  <span>Assigned Staff Roster (<span id="panelTeamNumber">3</span> Counselors)</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 10.5px; font-weight: 700; color: #047857; background: #ECFDF5; padding: 2px 8px; border-radius: 20px; border: 1px solid #A7F3D0;">
+                    All On Duty
+                  </span>
+                </div>
+              </div>
+              <div class="dept-staff-list" id="detailStaffList">
+                <!-- Injected dynamically -->
+              </div>
+            </div>
+
+            <!-- Knowledge Panel -->
+            <div class="dept-panel-box" id="panelKnowledge">
+              <div class="dept-panel-heading" style="justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2.3"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                  <span>Department Scoped Knowledge (<span id="panelKsNumber">24</span> Sources)</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 10px; color: #7C3AED; font-weight: 700;">100% Grounded</span>
+                </div>
+              </div>
+              <div class="dept-ks-list" id="detailKsList">
+                <!-- Injected dynamically -->
+              </div>
+              <div style="font-size: 10.5px; color: #648781; text-align: center; padding-top: 4px;" id="detailKsMoreText">
+                + 21 other documents scoped exclusively to this department's AI context
+              </div>
+            </div>
+
+            <!-- FAQs & Quick Chips Panel -->
+            <div class="dept-panel-box" id="panelFaqs">
+              <div class="dept-panel-heading" style="justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#063D3B" stroke-width="2.3"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                  <span>Starter FAQs &amp; Quick Chips (Shown to Prospective Students)</span>
+                </div>
+                <button class="dept-btn-secondary" style="padding: 3px 10px; font-size: 11px; height: 26px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;" title="Manage Starter FAQs &amp; Quick Chips">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                  <span>Edit Quick Chips</span>
+                </button>
+              </div>
+              <p style="font-size: 11px; color: #527570; line-height: 1.45; margin: 0;">
+                When a prospective student selects this department in the widget, these chips display instantly for zero-friction engagement:
+              </p>
+              <div class="dept-chips-cloud" id="detailChipsCloud">
+                <!-- Injected dynamically -->
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- Interactive Scripts (Navigation, Copy Embed Code & Count Up) -->
+  <script>
+    const tabContexts = {
+      'Overview': {
+        title: 'Overview &mdash; Admissions Console',
+        sub: 'Fall 2026 Admissions Cycle &bull; Central Knowledge &amp; Conversion Command'
+      },
+      'Central Knowledge Hub': {
+        title: 'Central Knowledge Hub &mdash; Institutional Documents',
+        sub: 'Knowledge Base &bull; Auto-Sync &bull; Temporal Validity Guardrails'
+      },
+      'Departments': {
+        title: 'Departments &mdash; Multi-Unit Governance &amp; Command',
+        sub: '8 Active Campus Departments &bull; Scoped AI Personas &bull; Automated Counselor Dispatch'
+      },
+      'Teams': {
+        title: 'Teams &mdash; Admissions Staff &amp; Counselor Seats',
+        sub: 'Staff Availability &bull; Real-Time Capacity &bull; 8 of 10 Seats Active'
+      },
+      'Student Leads': {
+        title: 'Student Leads &mdash; Verified Admissions Prospects',
+        sub: 'Omnichannel Conversion Pipeline &bull; High-Intent Funnel'
+      },
+      'ChatBot Settings': {
+        title: 'ChatBot Settings &mdash; AI Widget Customization &amp; Grounding',
+        sub: 'Admissions Persona &bull; Color Palette &bull; Conversation Starters &bull; Embed Snippet'
+      }
+    };
+
+    function setActiveNav(el) {
+      document.querySelectorAll('.sidebar-nav-item').forEach(item => item.classList.remove('active'));
+      el.classList.add('active');
+      const label = el.querySelector('span:last-child');
+      if (label) {
+        const text = label.textContent.trim();
+        const ctx = tabContexts[text];
+        if (ctx) {
+          const titleEl = document.getElementById('pageTabContextTitle');
+          const subEl = document.getElementById('pageTabContextSub');
+          if (titleEl) titleEl.innerHTML = ctx.title;
+          if (subEl) subEl.innerHTML = ctx.sub;
+        }
+      }
+    }
+
+    // Real Dynamic Department Data Container for Org 33
+    var landingDeptData = {};
+    var realDepartmentsList = [];
+
+    async function loadRealDashboardDepartments(targetWindow, startDate, endDate) {
+      const container = document.getElementById('landingDeptCardsGrid');
+      if (!container) return;
+
+      const activeWin = targetWindow || window.currentDeptTimeWindow || '30d';
+      window.currentDeptTimeWindow = activeWin;
+
+      try {
+        let url = '/v1/public/dashboard/departments/c074a1862919e240ee863231a67701dc';
+        const params = new URLSearchParams();
+        params.append('window', activeWin);
+        if (activeWin === 'custom') {
+          const s = startDate || (document.getElementById('deptDetailCustomStartDate') ? document.getElementById('deptDetailCustomStartDate').value : '');
+          const e = endDate || (document.getElementById('deptDetailCustomEndDate') ? document.getElementById('deptDetailCustomEndDate').value : '');
+          if (s && e) {
+            params.append('start_date', s);
+            params.append('end_date', e);
+          }
+        }
+        url += (url.includes('?') ? '&' : '?') + params.toString();
+        const res = await fetch(url);
+        const json = await res.json();
+        if (json.status === 'success' && json.data && json.data.departments && json.data.departments.length > 0) {
+          realDepartmentsList = json.data.departments;
+
+          // Update KPI strip
+          var activeDeptsCount = realDepartmentsList.filter(function(d) { return d.is_active == 1; }).length;
+          var totalStaff = realDepartmentsList.reduce(function(sum, d) { return sum + ((d.staff || []).length); }, 0);
+          var totalDocs = realDepartmentsList.reduce(function(sum, d) { return sum + ((d.knowledge_sources || []).length); }, 0);
+
+          var statActEl = document.getElementById('statActiveDeptsCount');
+          if (statActEl) statActEl.textContent = activeDeptsCount;
+          var statStaffEl = document.getElementById('statAssignedStaffCount');
+          if (statStaffEl) statStaffEl.textContent = totalStaff;
+          var statDocsEl = document.getElementById('statScopedDocsCount');
+          if (statDocsEl) statDocsEl.textContent = totalDocs;
+
+          // Build dictionary map for deep dive
+          landingDeptData = {};
+          var cardsHtml = realDepartmentsList.map(function(d, index) {
+            var isSelected = (index === 0);
+            var isPreset = (d.is_preset == 1);
+            var isActive = (d.is_active == 1);
+            var hasWidget = (d.enable_dedicated_widget != 0 && d.enable_dedicated_widget !== false);
+            var key = d.slug || ('dept_' + d.id);
+
+            var staffCount = (d.staff || []).length;
+            var ksCount = (d.knowledge_sources || []).length;
+            var faqsCount = (d.faqs || []).length;
+            var leadsCount = (d.leads_count !== undefined && d.leads_count !== null) ? Number(d.leads_count) : 0;
+            var callbacksCount = (d.callbacks_count !== undefined && d.callbacks_count !== null) ? Number(d.callbacks_count) : 0;
+            var toursCount = (d.campus_tours_count !== undefined && d.campus_tours_count !== null) ? Number(d.campus_tours_count) : 0;
+            var scholarshipsCount = (d.scholarships_count !== undefined && d.scholarships_count !== null) ? Number(d.scholarships_count) : 0;
+            var leadMagnetCount = (d.lead_assets_downloads !== undefined && d.lead_assets_downloads !== null) ? Number(d.lead_assets_downloads) : leadsCount;
+
+            // Populate deep dive data object
+            landingDeptData[key] = {
+              id: d.id,
+              name: d.name,
+              icon: d.icon || '🏫',
+              slug: d.slug,
+              widgetBadge: isActive ? (hasWidget ? 'Dedicated Widget: #' + d.slug : 'Main Chatbot Integrated') : '○ Inactive • Setup Required',
+              callbacks: { 
+                count: callbacksCount, 
+                pendingText: callbacksCount > 0 ? (callbacksCount + " Pending") : "0 Pending", 
+                sub: callbacksCount > 0 ? (callbacksCount + " handled this admissions cycle • Priority counselor queue") : "No pending counselor callbacks" 
+              },
+              tours: { 
+                count: toursCount, 
+                badge: toursCount > 0 ? "Scheduled" : "0 Bookings", 
+                sub: toursCount > 0 ? (toursCount + " scheduled walking tours & open-house slots") : "No campus visits currently booked" 
+              },
+              scholarships: { 
+                count: scholarshipsCount, 
+                badge: scholarshipsCount > 0 ? "Merit Evaluated" : "0 Evaluated", 
+                sub: scholarshipsCount > 0 ? (scholarshipsCount + " evaluated aid applications & tuition waivers") : "No aid evaluations requested yet" 
+              },
+              leadMagnet: { 
+                count: leadMagnetCount, 
+                badge: leadMagnetCount > 0 ? "Dispatched" : "0 Sent", 
+                sub: leadMagnetCount > 0 ? (d.name + " official curriculum & prospectus PDF") : "No brochures dispatched yet" 
+              },
+              hoursSchedule: (d.working_hours && d.working_hours.mon) ? "Mon – Sat • 09:00 AM – 06:00 PM IST" : "Mon – Sat • 09:00 AM – 06:00 PM IST",
+              awayMessage: d.auto_away_message || ("“Our " + d.name + " desk is currently closed. Your inquiry has been prioritized for callback tomorrow morning at 09:15 AM.”"),
+              teamCount: staffCount,
+              staff: (d.staff && d.staff.length > 0) ? d.staff.map(function(s, sIdx) {
+                var colors = ['#E6F7D2', '#E0F2FE', '#FEF3C7', '#F3E8FF'];
+                var inits = (s.name || 'Staff').split(' ').map(function(n) { return n[0]; }).join('').substring(0, 2).toUpperCase();
+                return {
+                  name: s.name,
+                  role: s.role === 'lead' ? 'Lead Counselor' : (s.role === 'admin' ? 'Department Admin' : 'Admissions Advisor'),
+                  email: s.email || '',
+                  note: s.is_on_duty ? 'On Duty Desk' : 'Standby',
+                  initials: inits,
+                  color: colors[sIdx % colors.length]
+                };
+              }) : [],
+              ksCount: ksCount,
+              ksList: (d.knowledge_sources && d.knowledge_sources.length > 0) ? d.knowledge_sources.slice(0, 3).map(function(k) {
+                return { name: (k.title.endsWith('.pdf') ? k.title : (k.title + '.pdf')), tag: k.status === 'active' ? 'Active • Grounded' : 'Expiring Soon' };
+              }) : [],
+              ksMoreText: ksCount > 3 ? ("+ " + (ksCount - 3) + " other documents scoped exclusively to " + d.name) : (ksCount > 0 ? "Quarantined institutional documents" : "No documents scoped to this department yet"),
+              chips: (d.faqs && d.faqs.length > 0) ? d.faqs.map(function(f) { return f.question; }) : []
+            };
+
+            var statusBadgeHtml = isActive
+              ? (hasWidget
+                  ? '<span class="dept-status-pill dept-status-active"><span class="w-1.5 h-1.5 rounded-full bg-[#10B981]"></span> Active &bull; Widget</span>'
+                  : '<span class="dept-status-pill dept-status-main"><span class="w-1.5 h-1.5 rounded-full bg-[#0284C7]"></span> Active &bull; Main Bot</span>')
+              : '<span class="dept-status-pill" style="background:#FFFBEB; color:#B45309; border:1px solid #FDE68A;"><span class="w-1.5 h-1.5 rounded-full bg-[#F59E0B]"></span> Inactive</span>';
+
+            var category = 'admissions';
+            var lowerName = d.name.toLowerCase();
+            if (lowerName.indexOf('fee') !== -1 || lowerName.indexOf('aid') !== -1 || lowerName.indexOf('finance') !== -1 || lowerName.indexOf('bursar') !== -1 || lowerName.indexOf('scholarship') !== -1) category = 'finance';
+            else if (lowerName.indexOf('tour') !== -1 || lowerName.indexOf('housing') !== -1 || lowerName.indexOf('affair') !== -1 || lowerName.indexOf('life') !== -1 || lowerName.indexOf('dean') !== -1 || lowerName.indexOf('compliance') !== -1) category = 'life';
+
+            return '<div class="dept-card-item ' + (isSelected ? 'selected' : '') + '" id="card-dept-' + key + '" onclick="openDeptDeepDive(\'' + key + '\')" data-category="' + category + '">' +
+              '<div>' +
+                '<div class="dept-card-header">' +
+                  '<div class="flex items-center gap-3">' +
+                    '<div class="dept-icon-box">' + (d.icon || '🏫') + '</div>' +
+                    '<div>' +
+                      '<h3 class="dept-card-title">' + d.name + '</h3>' +
+                      '<span class="dept-template-tag">' + (isPreset ? 'Pre-Built Template' : 'Custom Department') + '</span>' +
+                    '</div>' +
+                  '</div>' +
+                  statusBadgeHtml +
+                '</div>' +
+                '<p class="dept-card-desc">' +
+                  (d.description || 'Dedicated department desk for admissions routing, knowledge scoping, and counselor callback management.') +
+                '</p>' +
+                '<div class="dept-channels-row">' +
+                  (d.email ? '<span class="dept-channel-badge">📧 ' + d.email + '</span>' : '') +
+                  (d.phone ? '<span class="dept-channel-badge">📞 ' + d.phone + '</span>' : '') +
+                  (d.whatsapp ? '<span class="dept-channel-badge">💬 WA Connected</span>' : '') +
+                '</div>' +
+              '</div>' +
+
+              '<div>' +
+                '<div class="dept-card-stats">' +
+                  '<div class="dept-stat-unit">' +
+                    '<span class="dept-stat-val">' + staffCount + '</span>' +
+                    '<span class="dept-stat-lbl">👥 Staff</span>' +
+                  </div>' +
+                  '<div class="dept-stat-unit">' +
+                    '<span class="dept-stat-val">' + ksCount + '</span>' +
+                    '<span class="dept-stat-lbl">📚 Docs</span>' +
+                  </div>' +
+                  '<div class="dept-stat-unit">' +
+                    '<span class="dept-stat-val">' + faqsCount + '</span>' +
+                    '<span class="dept-stat-lbl">❓ FAQs</span>' +
+                  </div>' +
+                  '<div class="dept-stat-unit">' +
+                    '<span class="dept-stat-val">' + leadsCount + '</span>' +
+                    '<span class="dept-stat-lbl">📈 Leads</span>' +
+                  </div>' +
+                '</div>' +
+                '<div class="dept-card-footer">' +
+                  '<span class="dept-card-action-text">' +
+                    '<span>Click to open department console &rarr;</span>' +
+                  '</span>' +
+                '</div>' +
+              '</div>' +
+            '</div>';
+          }).join('');
+
+          // Append "+ Custom Department" action card
+          cardsHtml += '<div class="dept-card-create" onclick="openCreateDeptModal()">' +
+            '<div class="dept-create-icon">' +
+              '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>' +
+            '</div>' +
+            '<h4 class="dept-card-create-title" style="font-size: 14.5px; font-weight: 800; color: #063D3B; margin-bottom: 4px;">+ Custom Department</h4>' +
+            '<p class="dept-card-create-desc" style="font-size: 12.5px; color: #557772; max-width: 210px; line-height: 1.45; margin-bottom: 12px;">' +
+              'Need a bespoke unit for Law, Medicine, or Housing? Create any custom scope with 1 click.' +
+            '</p>' +
+            '<span class="dept-btn-secondary" style="font-size: 11.5px; padding: 5px 12px;">Launch Setup &rarr;</span>' +
+          '</div>';
+
+          container.innerHTML = cardsHtml;
+
+          // Select department in deep dive
+          if (realDepartmentsList.length > 0) {
+            var activeKey = window.currentLandingDeptKey || realDepartmentsList[0].slug || ('dept_' + realDepartmentsList[0].id);
+            selectLandingDept(activeKey);
+          }
+        } else {
+          var statActEl = document.getElementById('statActiveDeptsCount');
+          if (statActEl) statActEl.textContent = '0';
+          var statStaffEl = document.getElementById('statAssignedStaffCount');
+          if (statStaffEl) statStaffEl.textContent = '0';
+          var statDocsEl = document.getElementById('statScopedDocsCount');
+          if (statDocsEl) statDocsEl.textContent = '0';
+          var statEscEl = document.getElementById('statAutoEscalationCount');
+          if (statEscEl) statEscEl.textContent = '0%';
+
+          container.innerHTML = '<div class="dept-card-create" onclick="openCreateDeptModal()" style="grid-column: 1 / -1; min-height: 220px; cursor: pointer;">' +
+            '<div class="dept-create-icon">' +
+              '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>' +
+            '</div>' +
+            '<h4 class="dept-card-create-title" style="font-size: 15px; font-weight: 800; color: #063D3B; margin-bottom: 6px;">No Departments Configured Yet</h4>' +
+            '<p class="dept-card-create-desc" style="font-size: 12.5px; color: #557772; max-width: 480px; line-height: 1.5; margin-bottom: 16px;">' +
+              'Organize your university admissions, student finance, campus tours, and support desks into specialized AI-powered departments.' +
+            '</p>' +
+            '<span class="dept-btn-secondary" style="font-size: 12px; padding: 8px 18px; font-weight: 700;">+ Create Your First Department</span>' +
+          '</div>';
+        }
+      } catch (err) {
+        console.error('Error loading dynamic departments:', err);
+      }
+    }
+
+    // View Switching Engine
+    function switchDashboardView(viewName, deptId) {
+      var vOverview = document.getElementById('view-overview');
+      var vDeptGrid = document.getElementById('view-departments-grid');
+      var vDeptDetail = document.getElementById('view-departments-detail');
+
+      if (vOverview) vOverview.style.display = 'none';
+      if (vDeptGrid) vDeptGrid.style.display = 'none';
+      if (vDeptDetail) vDeptDetail.style.display = 'none';
+
+      document.querySelectorAll('.sidebar-nav-item').forEach(function(item) {
+        item.classList.remove('active');
+      });
+
+      if (viewName === 'departments') {
+        if (vDeptGrid) vDeptGrid.style.display = 'block';
+        var navDept = document.getElementById('nav-item-departments');
+        if (navDept) navDept.classList.add('active');
+        const ctx = tabContexts['Departments'];
+        if (ctx) {
+          const titleEl = document.getElementById('pageTabContextTitle');
+          const subEl = document.getElementById('pageTabContextSub');
+          if (titleEl) titleEl.innerHTML = ctx.title;
+          if (subEl) subEl.innerHTML = ctx.sub;
+        }
+        window.location.hash = 'departments';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        loadRealDashboardDepartments();
+      } else if (viewName === 'dept-detail') {
+        if (vDeptDetail) vDeptDetail.style.display = 'block';
+        var navDept = document.getElementById('nav-item-departments');
+        if (navDept) navDept.classList.add('active');
+        if (deptId) {
+          selectLandingDept(deptId);
+          window.location.hash = 'dept-' + deptId;
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        if (vOverview) vOverview.style.display = 'block';
+        var navOver = document.getElementById('nav-item-overview');
+        if (navOver) navOver.classList.add('active');
+        const ctx = tabContexts['Overview'];
+        if (ctx) {
+          const titleEl = document.getElementById('pageTabContextTitle');
+          const subEl = document.getElementById('pageTabContextSub');
+          if (titleEl) titleEl.innerHTML = ctx.title;
+          if (subEl) subEl.innerHTML = ctx.sub;
+        }
+        window.location.hash = 'overview';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function editCurrentDepartment() {
+      let deptId = window.currentLandingDeptId;
+      if (!deptId && window.landingDeptData && window.currentLandingDeptKey && window.landingDeptData[window.currentLandingDeptKey]) {
+        deptId = window.landingDeptData[window.currentLandingDeptKey].id;
+      }
+      if (deptId && typeof openEditDeptModal === 'function') {
+        openEditDeptModal(deptId);
+      } else {
+        window.location.href = '/app#departments';
+      }
+    }
+    window.editCurrentDepartment = editCurrentDepartment;
+
+    function openDeptDeepDive(deptKey) {
+      switchDashboardView('dept-detail', deptKey);
+      if (typeof window.applyDeptDetailTimeWindowUI === 'function') {
+        window.applyDeptDetailTimeWindowUI(window.currentDeptTimeWindow || '30d');
+      }
+    }
+
+    window.currentDeptTimeWindow = window.currentGlobalTimeWindow || '30d';
+
+    window.setDeptDetailTimeWindow = function(win) {
+      window.currentDeptTimeWindow = win;
+      const dateBar = document.getElementById('deptDetailCustomDatePickerBar');
+      if (dateBar && win !== 'custom') {
+        dateBar.style.display = 'none';
+      }
+      window.applyDeptDetailTimeWindowUI(win);
+      loadRealDashboardDepartments(win);
+    };
+
+    window.applyDeptDetailTimeWindowUI = function(win, customLabel) {
+      const labels = {
+        '24h': 'Last 24 Hours',
+        '7d': 'Last 7 Days',
+        '30d': 'Last 30 Days',
+        '3m': 'Last 3 Months',
+        '6m': 'Last 6 Months',
+        'all': 'All Time',
+        'custom': customLabel || 'Custom Range'
+      };
+      const label = customLabel || labels[win] || labels['30d'];
+
+      ['24h', '7d', '30d', '3m', '6m', 'all', 'custom'].forEach(function(w) {
+        const btn = document.getElementById('deptTimeBtn' + w);
+        if (btn) {
+          if (w === win) {
+            btn.classList.add('active');
+            btn.style.background = '#063D3B';
+            btn.style.color = '#C8FF63';
+            btn.style.fontWeight = '700';
+          } else {
+            btn.classList.remove('active');
+            btn.style.background = 'transparent';
+            btn.style.color = '#648781';
+            btn.style.fontWeight = '600';
+          }
+        }
+      });
+
+      const badge = document.getElementById('deptDetailActiveWindowBadge');
+      if (badge) badge.textContent = label;
+
+      const ind = document.getElementById('deptDetailActiveRangeIndicator');
+      if (ind) ind.textContent = 'Active Window: ' + label;
+    };
+
+    window.toggleDeptDetailCustomDatePicker = function() {
+      const dateBar = document.getElementById('deptDetailCustomDatePickerBar');
+      if (!dateBar) return;
+      const isHidden = dateBar.style.display === 'none' || !dateBar.style.display;
+      dateBar.style.display = isHidden ? 'flex' : 'none';
+      if (isHidden) {
+        const now = new Date();
+        const past = new Date(Date.now() - 30 * 86400000);
+        const sEl = document.getElementById('deptDetailCustomStartDate');
+        const eEl = document.getElementById('deptDetailCustomEndDate');
+        if (sEl && !sEl.value) sEl.value = past.toISOString().slice(0, 10);
+        if (eEl && !eEl.value) eEl.value = now.toISOString().slice(0, 10);
+      }
+    };
+
+    window.applyDeptDetailCustomDateRange = function() {
+      const sEl = document.getElementById('deptDetailCustomStartDate');
+      const eEl = document.getElementById('deptDetailCustomEndDate');
+      if (!sEl || !eEl || !sEl.value || !eEl.value) {
+        if (typeof showToast === 'function') showToast('Please select both start and end dates.', 'warning');
+        else alert('Please select both start and end dates.');
+        return;
+      }
+      const label = sEl.value + ' – ' + eEl.value;
+      window.applyDeptDetailTimeWindowUI('custom', label);
+      loadRealDashboardDepartments('custom', sEl.value, eEl.value);
+    };
+
+    // Function to populate department console
+    function selectLandingDept(key) {
+      window.currentLandingDeptKey = key;
+      var data = landingDeptData[key] || (realDepartmentsList.length > 0 ? landingDeptData[realDepartmentsList[0].slug || ('dept_' + realDepartmentsList[0].id)] : null);
+      if (!data) return;
+      if (data.id) {
+        window.currentLandingDeptId = data.id;
+      }
+
+      // Update selected class on cards
+      document.querySelectorAll('.dept-card-item').forEach(function(card) {
+        card.classList.remove('selected');
+      });
+
+      var activeCard = document.getElementById('card-dept-' + key);
+      if (activeCard) {
+        activeCard.classList.add('selected');
+      }
+
+      // Update Dashboard 2 Header
+      var bName = document.getElementById('detailBreadcrumbName');
+      if (bName) bName.textContent = data.icon + " " + data.name;
+      var mTitle = document.getElementById('detailMainTitle');
+      if (mTitle) mTitle.textContent = data.name;
+
+      // Update 4 Pipeline Cards
+      var pCbVal = document.getElementById('pipeCallbacksVal');
+      if (pCbVal) pCbVal.innerHTML = '<span class="cnum-dept" data-n="' + data.callbacks.count + '">' + data.callbacks.count + '</span>';
+      var pCbBadge = document.getElementById('pipeCallbacksBadge');
+      if (pCbBadge) pCbBadge.textContent = data.callbacks.pendingText;
+      var pCbSub = document.getElementById('pipeCallbacksSub');
+      if (pCbSub) pCbSub.textContent = data.callbacks.sub;
+
+      var pTrVal = document.getElementById('pipeToursVal');
+      if (pTrVal) pTrVal.innerHTML = '<span class="cnum-dept" data-n="' + data.tours.count + '">' + data.tours.count + '</span>';
+      var pTrBadge = document.getElementById('pipeToursBadge');
+      if (pTrBadge) pTrBadge.textContent = data.tours.badge;
+      var pTrSub = document.getElementById('pipeToursSub');
+      if (pTrSub) pTrSub.textContent = data.tours.sub;
+
+      var pScVal = document.getElementById('pipeScholarshipsVal');
+      if (pScVal) pScVal.innerHTML = '<span class="cnum-dept" data-n="' + data.scholarships.count + '">' + data.scholarships.count + '</span>';
+      var pScBadge = document.getElementById('pipeScholarshipsBadge');
+      if (pScBadge) pScBadge.textContent = data.scholarships.badge;
+      var pScSub = document.getElementById('pipeScholarshipsSub');
+      if (pScSub) pScSub.textContent = data.scholarships.sub;
+
+      var pLmVal = document.getElementById('pipeLeadsMagnetVal');
+      if (pLmVal) pLmVal.innerHTML = '<span class="cnum-dept" data-n="' + data.leadMagnet.count + '">' + data.leadMagnet.count + '</span>';
+      var pLmBadge = document.getElementById('pipeLeadsMagnetBadge');
+      if (pLmBadge) pLmBadge.textContent = data.leadMagnet.badge;
+      var pLmSub = document.getElementById('pipeLeadsMagnetSub');
+      if (pLmSub) pLmSub.textContent = data.leadMagnet.sub;
+
+      // Update Hours & Away
+      var hSched = document.getElementById('detailHoursSchedule');
+      if (hSched) hSched.textContent = data.hoursSchedule;
+      var aMsg = document.getElementById('detailAwayMessage');
+      if (aMsg) aMsg.textContent = data.awayMessage;
+
+      // Update Subtabs Badges
+      var stTeam = document.getElementById('subtabTeamCount');
+      if (stTeam) stTeam.textContent = data.teamCount;
+      var stKs = document.getElementById('subtabKsCount');
+      if (stKs) stKs.textContent = data.ksCount;
+      var pTeamNum = document.getElementById('panelTeamNumber');
+      if (pTeamNum) pTeamNum.textContent = data.teamCount;
+      var pKsNum = document.getElementById('panelKsNumber');
+      if (pKsNum) pKsNum.textContent = data.ksCount;
+
+      // Update Staff list
+      var sList = document.getElementById('detailStaffList');
+      if (sList) {
+        if (data.staff && data.staff.length > 0) {
+          sList.innerHTML = data.staff.map(function(s) {
+            return '<div class="dept-staff-row">' +
+              '<div class="dept-staff-info">' +
+                '<div class="dept-staff-avatar" style="background:' + s.color + ';">' + s.initials + '</div>' +
+                '<div>' +
+                  '<div class="dept-staff-name">' + s.name + ' &bull; <span style="font-size:10px; color:#047857; font-weight:700;">' + s.role + '</span></div>' +
+                  '<div class="dept-staff-role">' + (s.email ? (s.email + ' &bull; ') : '') + s.note + '</div>' +
+                '</div>' +
+              '</div>' +
+              '<span style="font-size:10px; font-weight:700; color:#10B981;"><span class="dept-duty-dot"></span> On Duty</span>' +
+            '</div>';
+          }).join('');
+        } else {
+          sList.innerHTML = '<div style="padding:16px; text-align:center; color:#648781; font-size:12px; background:#F8FCFA; border-radius:6px; border:1px dashed #DCE9E5;">No staff members assigned to this department yet. Assign staff via Settings.</div>';
+        }
+      }
+
+      // Update KS list
+      var ksCont = document.getElementById('detailKsList');
+      if (ksCont) {
+        if (data.ksList && data.ksList.length > 0) {
+          ksCont.innerHTML = data.ksList.map(function(k) {
+            return '<div class="dept-ks-item">' +
+              '<span class="dept-ks-file">' +
+                '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#E11D48" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>' +
+                '<span>' + k.name + '</span>' +
+              '</span>' +
+              '<span style="font-size:9.5px; font-weight:700; color:#047857; background:#ECFDF5; padding:2px 6px; border-radius:4px;">' + k.tag + '</span>' +
+            '</div>';
+          }).join('');
+        } else {
+          ksCont.innerHTML = '<div style="padding:16px; text-align:center; color:#648781; font-size:12px; background:#F8FCFA; border-radius:6px; border:1px dashed #DCE9E5;">No documents scoped to this department yet. Scope documents from Knowledge Hub.</div>';
+        }
+      }
+      var ksMore = document.getElementById('detailKsMoreText');
+      if (ksMore) ksMore.textContent = data.ksMoreText;
+
+      // Update Chips
+      var chipsCont = document.getElementById('detailChipsCloud');
+      if (chipsCont) {
+        if (data.chips && data.chips.length > 0) {
+          chipsCont.innerHTML = data.chips.map(function(c) {
+            return '<span class="dept-chip-pill">' + c + '</span>';
+          }).join('');
+        } else {
+          chipsCont.innerHTML = '<span style="font-size:11.5px; color:#648781; font-style:italic;">No starter FAQs or quick chips configured.</span>';
+        }
+      }
+
+      // Animate numbers
+      animateDeptCounters();
+    }
+
+    // Filter Department Cards in Dashboard 1
+    function filterDeptCards(cat, btn) {
+      document.querySelectorAll('.dept-filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+
+      var cards = document.querySelectorAll('#landingDeptCardsGrid .dept-card-item');
+      cards.forEach(function(card) {
+        var cCat = card.getAttribute('data-category');
+        if (cat === 'all' || cCat === cat) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    // Switch subtab view in Dashboard 2
+    function switchDeptSubtabView(viewKey, btn) {
+      document.querySelectorAll('.dept-subtab-btn').forEach(function(b) { b.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+
+      var panels = ['panelHours', 'panelEscalations', 'panelTeam', 'panelKnowledge', 'panelFaqs'];
+      if (viewKey === 'overview') {
+        panels.forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el) el.style.display = 'flex';
+        });
+      } else if (viewKey === 'team') {
+        panels.forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el) el.style.display = (id === 'panelTeam') ? 'flex' : 'none';
+        });
+      } else if (viewKey === 'knowledge') {
+        panels.forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el) el.style.display = (id === 'panelKnowledge') ? 'flex' : 'none';
+        });
+      } else if (viewKey === 'hours') {
+        panels.forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el) el.style.display = (id === 'panelHours') ? 'flex' : 'none';
+        });
+      } else if (viewKey === 'escalations') {
+        panels.forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el) el.style.display = (id === 'panelEscalations') ? 'flex' : 'none';
+        });
+      } else if (viewKey === 'faqs') {
+        panels.forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el) el.style.display = (id === 'panelFaqs') ? 'flex' : 'none';
+        });
+      }
+    }
+
+    // Counter animation for deep-dive
+    function animateDeptCounters() {
+      function countUp(el, target, ms) {
+        var s = Date.now();
+        (function tick() {
+          var p = Math.min((Date.now() - s) / ms, 1);
+          var e = 1 - Math.pow(1 - p, 3);
+          var v = Math.round(e * target);
+          el.textContent = v;
+          if (p < 1) requestAnimationFrame(tick);
+        })();
+      }
+      document.querySelectorAll('#view-departments-detail .cnum-dept[data-n]').forEach(function(el) {
+        countUp(el, +el.getAttribute('data-n'), 800);
+      });
+    }
+
+    function copyOpsEmbedCode() {
+      var code = '<script src="https://edvora.chat/widget.js" data-bot-token="c074a1862919e240ee863231a67701dc" async><' + '/script>';
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(code).then(afterCopyOpsEmbed);
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = code;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand('copy');
+          afterCopyOpsEmbed();
+        } catch(e) {}
+        document.body.removeChild(ta);
+      }
+    }
+
+    function afterCopyOpsEmbed() {
+      var btn = document.getElementById('btnCopyOpsEmbed');
+      var txt = document.getElementById('txtCopyOpsEmbed');
+      if (!btn || !txt) return;
+      btn.classList.add('copied');
+      txt.textContent = 'Copied to Clipboard! ✓';
+      setTimeout(function() {
+        btn.classList.remove('copied');
+        txt.textContent = 'Copy Embed Code';
+      }, 2400);
+    }
+
+    // Interactive Count-up numbers on page load
+    (function initOpsCountUp() {
+      function countUp(el, target, ms, isFloat) {
+        var s = Date.now();
+        (function tick() {
+          var p = Math.min((Date.now() - s) / ms, 1);
+          var e = 1 - Math.pow(1 - p, 3);
+          var v = e * target;
+          el.textContent = isFloat ? v.toFixed(1) + '%' : Math.round(v).toLocaleString();
+          if (p < 1) requestAnimationFrame(tick);
+        })();
+      }
+
+      window.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.cnum-ops').forEach(function(el) {
+          var target = parseInt(el.getAttribute('data-n'), 10);
+          if (!isNaN(target)) {
+            countUp(el, target, 1200, false);
+          }
+        });
+        document.querySelectorAll('.cnum-ops-pct').forEach(function(el) {
+          var target = parseFloat(el.getAttribute('data-n'));
+          if (!isNaN(target)) {
+            countUp(el, target, 1200, true);
+          }
+        });
+
+        // URL hash routing
+        var hash = window.location.hash;
+        loadRealDashboardDepartments();
+
+        if (hash.startsWith('#dept-')) {
+          var dId = hash.replace('#dept-', '');
+          switchDashboardView('dept-detail', dId);
+        } else if (hash === '#departments' || window.location.search.indexOf('tab=departments') !== -1) {
+          switchDashboardView('departments');
+        } else {
+          switchDashboardView('overview');
+        }
+      });
+
+      window.addEventListener('hashchange', function() {
+        var hash = window.location.hash;
+        if (hash.startsWith('#dept-')) {
+          var dId = hash.replace('#dept-', '');
+          switchDashboardView('dept-detail', dId);
+        } else if (hash === '#departments') {
+          switchDashboardView('departments');
+        } else if (hash === '#overview' || hash === '') {
+          switchDashboardView('overview');
+        }
+      });
+    })();
+  </script>
+
+</body>
+</html>

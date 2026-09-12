@@ -1,0 +1,206 @@
+<!-- Page Header with Back Button & Action Controls -->
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                            <button type="button" class="brand-btn-secondary brand-btn-sm" onclick="switchNavTab('analytics')" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer;">
+                                <span>←</span> Back to Admissions Analytics
+                            </button>
+                            <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: var(--brand-rose-400); font-size: 11px; font-weight: 700; border: 1px solid rgba(239, 68, 68, 0.3);">
+                                ⚠️ 1,740 Unanswered Gaps Detected
+                            </span>
+                        </div>
+                        <h2 style="font-family: var(--brand-font-display); font-size: 20px; font-weight: 700; color: #092F2E; margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <span>⚠️</span> Inquiry Leakage & Knowledge Gaps Breakup
+                        </h2>
+                        <p style="font-size: 12px; color: #4F7470; margin-top: 4px;">
+                            Granular breakdown of unanswered student queries, search drop-offs, emerging curriculum demand, geographic shifts, and automated knowledge recommendations.
+                        </p>
+                    </div>
+
+                    <!-- Filter Controls & Actions -->
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <select id="kgTimeRange" class="brand-input" style="height: 38px; font-size: 12px; padding: 0 12px; min-width: 140px;" onchange="loadKnowledgeGapsBreakup()">
+                            <option value="7d">Last 7 Days</option>
+                            <option value="30d" selected>Last 30 Days</option>
+                            <option value="90d">Last 90 Days</option>
+                            <option value="cycle">Admission Cycle</option>
+                        </select>
+
+                        <select id="kgCategoryFilter" class="brand-input" style="height: 38px; font-size: 12px; padding: 0 12px; min-width: 160px;" onchange="loadKnowledgeGapsBreakup()">
+                            <option value="all" selected>All Categories</option>
+                            <option value="Fees & Scholarships">Fees & Scholarships</option>
+                            <option value="Hostels & Campus">Hostels & Campus</option>
+                            <option value="Academic Programs">Academic Programs</option>
+                            <option value="Admissions">Admissions</option>
+                            <option value="Placements & Careers">Placements & Careers</option>
+                        </select>
+
+                        <button type="button" class="brand-btn-secondary" onclick="exportKnowledgeGapsCsv()" style="height: 38px; font-size: 12px; padding: 0 14px; display: inline-flex; align-items: center; gap: 6px;">
+                            📥 Export Gap Audit (CSV)
+                        </button>
+                        <button type="button" class="brand-btn-primary" onclick="loadKnowledgeGapsBreakup()" style="height: 38px; font-size: 12px; padding: 0 14px; display: inline-flex; align-items: center; gap: 6px;">
+                            ⚡ Refresh Intelligence
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 1. Executive Health & Failure Rate KPI Counters -->
+                <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 22px;">
+                    <div class="stat-card" style="border-top: 3px solid var(--brand-indigo-500); padding: 16px;">
+                        <div class="stat-label">Total Inquiries Analyzed</div>
+                        <div class="stat-value" id="kgTotalAnalyzed" style="color: var(--brand-indigo-400); font-size: 22px;">12,438</div>
+                        <div style="font-size: 11px; color: #648781; margin-top: 4px;">Active student dialogues</div>
+                    </div>
+                    <div class="stat-card" style="border-top: 3px solid var(--brand-emerald-500); padding: 16px;">
+                        <div class="stat-label">Answered Confidently</div>
+                        <div class="stat-value" id="kgAnsweredConfidently" style="color: var(--brand-emerald-400); font-size: 22px;">90.8%</div>
+                        <div style="font-size: 11px; color: var(--brand-emerald-400); margin-top: 4px;">
+                            <span id="kgAnsweredCount">43,820</span> queries resolved
+                        </div>
+                    </div>
+                    <div class="stat-card" style="border-top: 3px solid var(--brand-amber-500); padding: 16px;">
+                        <div class="stat-label">Human Handoffs Required</div>
+                        <div class="stat-value" id="kgHumanHandoffs" style="color: var(--brand-amber-400); font-size: 22px;">4.4%</div>
+                        <div style="font-size: 11px; color: var(--brand-amber-400); margin-top: 4px;">
+                            <span id="kgHandoffCount">2,110</span> counselor transfers
+                        </div>
+                    </div>
+                    <div class="stat-card" style="border-top: 3px solid var(--brand-rose-500); padding: 16px;">
+                        <div class="stat-label">Unanswered Knowledge Gaps</div>
+                        <div class="stat-value" id="kgUnansweredGaps" style="color: var(--brand-rose-400); font-size: 22px;">3.6%</div>
+                        <div style="font-size: 11px; color: var(--brand-rose-400); margin-top: 4px;">
+                            <span id="kgGapsCount">1,740</span> content failures
+                        </div>
+                    </div>
+                    <div class="stat-card" style="border-top: 3px solid #f43f5e; padding: 16px;">
+                        <div class="stat-label">Tuition Pipeline at Risk</div>
+                        <div class="stat-value" id="kgRevenueRisk" style="color: #f43f5e; font-size: 22px;">₹ 68.4 L</div>
+                        <div style="font-size: 11px; color: var(--brand-rose-400); margin-top: 4px;">Due to drop-off abandonment</div>
+                    </div>
+                </div>
+
+                <!-- 2. Emerging Questions This Week & Velocity Spikes -->
+                <div class="brand-card" style="padding: 20px; margin-bottom: 22px; border-left: 4px solid #f59e0b;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <h3 style="font-family: var(--brand-font-display); font-size: 15px; font-weight: 700; color: #092F2E; margin: 0; display: flex; align-items: center; gap: 8px;">
+                                <span>🔥</span> Emerging Questions This Week (High Velocity Spikes)
+                            </h3>
+                            <p style="font-size: 11px; color: #4F7470; margin-top: 3px;">
+                                Fast-growing student queries with week-over-week search surges requiring immediate knowledge base verification.
+                            </p>
+                        </div>
+                        <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); padding: 4px 10px; border-radius: 6px; font-size: 11px; color: var(--brand-amber-400);">
+                            🚀 <strong>Trend Alert:</strong> MBA query volume grew <strong>100 → 180 → 290 → 430</strong> over 4 weeks (FinTech accelerating)
+                        </div>
+                    </div>
+
+                    <!-- Emerging Questions Grid -->
+                    <div id="kgEmergingQuestionsGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+
+                <!-- 3. Comprehensive Knowledge Gaps Audit & Action Table -->
+                <div class="brand-card" style="padding: 20px; margin-bottom: 22px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <h3 style="font-family: var(--brand-font-display); font-size: 15px; font-weight: 700; color: #092F2E; margin: 0; display: flex; align-items: center; gap: 8px;">
+                                <span>❌</span> Unanswered Inquiries & Knowledge Failure Audit
+                            </h3>
+                            <p style="font-size: 11px; color: #4F7470; margin-top: 3px;">
+                                Specific topics asked repeatedly by students where no approved AI context exists, causing visitor abandonment.
+                            </p>
+                        </div>
+
+                        <!-- Table Search -->
+                        <div style="min-width: 260px;">
+                            <input type="text" id="kgTableSearchInput" class="brand-input" placeholder="🔍 Filter gaps by topic or keyword..." style="height: 34px; font-size: 11.5px; padding: 0 12px; width: 100%;" oninput="filterKnowledgeGapsTable()">
+                        </div>
+                    </div>
+
+                    <div class="brand-table-container">
+                        <table class="table" style="font-size: 12px;" id="kgAuditTable">
+                            <thead>
+                                <tr>
+                                    <th style="min-width: 200px;">Topic & Sample Student Query</th>
+                                    <th>Category / Dept</th>
+                                    <th style="text-align: right;">Frequency</th>
+                                    <th style="text-align: right;">Abandonment</th>
+                                    <th>Failure Mode</th>
+                                    <th style="min-width: 240px;">AI Recommended Action</th>
+                                    <th style="text-align: center; min-width: 140px;">Quick Resolution</th>
+                                </tr>
+                            </thead>
+                            <tbody id="kgAuditTableBody">
+                                <!-- Dynamically populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 4. Academic Program Demand & Student Objections Matrix (90 Days) -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 22px;">
+                    
+                    <!-- Left: Program Demand Growth Bars -->
+                    <div class="brand-card" style="padding: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <h3 style="font-family: var(--brand-font-display); font-size: 14px; font-weight: 700; color: #092F2E; margin: 0;">
+                                🎓 Academic Program Demand Trend (Last 90 Days)
+                            </h3>
+                            <span style="font-size: 11px; color: #648781;">Inquiry Trajectory</span>
+                        </div>
+
+                        <div id="kgProgramDemandBars" style="display: flex; flex-direction: column; gap: 14px;">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+
+                    <!-- Right: Program Objections, Top Questions & Competitor Mentions -->
+                    <div class="brand-card" style="padding: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <h3 style="font-family: var(--brand-font-display); font-size: 14px; font-weight: 700; color: #092F2E; margin: 0;">
+                                🎯 Student Objections & Market Intelligence
+                            </h3>
+                            <span style="font-size: 11px; color: #648781;">Conversion Insights</span>
+                        </div>
+
+                        <div id="kgProgramObjectionsList" style="display: flex; flex-direction: column; gap: 12px; max-height: 440px; overflow-y: auto; padding-right: 4px;">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 5. Geographic Catchment & International Trends + Content Advisory -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    
+                    <!-- Geographic Catchment Breakdown -->
+                    <div class="brand-card" style="padding: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                            <h3 style="font-family: var(--brand-font-display); font-size: 14px; font-weight: 700; color: #092F2E; margin: 0;">
+                                📍 Geographic Interest & Cross-Border Shifts
+                            </h3>
+                            <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: var(--brand-cyan-400); font-size: 10px;">Regional Catchment</span>
+                        </div>
+
+                        <div id="kgGeographicList" style="display: flex; flex-direction: column; gap: 8px; font-size: 12px;">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+
+                    <!-- Strategic Content Recommendations -->
+                    <div class="brand-card" style="padding: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                            <h3 style="font-family: var(--brand-font-display); font-size: 14px; font-weight: 700; color: #092F2E; margin: 0;">
+                                💡 AI Strategic Recommendations & Action Plan
+                            </h3>
+                            <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: var(--brand-indigo-300); font-size: 10px;">Automated Insights</span>
+                        </div>
+
+                        <div id="kgStrategicRecommendations" style="display: flex; flex-direction: column; gap: 10px;">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+
+                </div>

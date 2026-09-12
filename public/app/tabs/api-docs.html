@@ -1,0 +1,232 @@
+<!-- Navigation Header Back to Integrations -->
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
+                    <div style="display: flex; align-items: center; gap: 14px;">
+                        <button type="button" class="brand-btn-secondary" onclick="closeApiDocsView()" style="height: 38px; padding: 0 16px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                            ← Back to All Integrations
+                        </button>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <button type="button" class="brand-btn-secondary" onclick="copyApiEndpoint()" style="height: 38px; font-size: 12px; padding: 0 16px; display: inline-flex; align-items: center; gap: 6px;">
+                            📋 Copy API Endpoint
+                        </button>
+                        <button type="button" class="brand-btn-primary" onclick="openRequestIntegrationModal()" style="height: 38px; font-size: 12px; padding: 0 16px; display: inline-flex; align-items: center; gap: 6px; background: var(--brand-grad-brand); border: none;">
+                            ✨ Request Custom Webhook
+                        </button>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+
+                    <!-- Title Banner -->
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                            <span class="badge" style="background: rgba(251, 191, 36, 0.15); color: var(--brand-amber-400); border: 1px solid rgba(251, 191, 36, 0.3); font-size: 11px; font-weight: 700;">⚡ High-Throughput REST API</span>
+                            <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: var(--brand-indigo-300); border: 1px solid rgba(99, 102, 241, 0.3); font-size: 11px;">cURL • JavaScript • Python • PHP • Webhooks</span>
+                        </div>
+                        <h1 style="font-family: var(--brand-font-display); font-size: 26px; font-weight: 800; color: #ffffff; margin-bottom: 8px; letter-spacing: -0.02em;">
+                            Headless REST API & Webhooks Documentation
+                        </h1>
+                        <p style="font-size: 14px; color: #4F7470; line-height: 1.6; max-width: 840px; margin: 0;">
+                            Direct HTTP POST inference gateway for colleges building bespoke mobile apps, custom student portal widgets, voice bots, and automated CRM webhook listeners.
+                        </p>
+                    </div>
+
+                    <!-- Token Customizer Bar -->
+                    <div class="brand-card" style="padding: 16px 20px; background: rgba(10, 15, 29, 0.85); border: 1px solid rgba(251, 191, 36, 0.3); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 20px;">🔑</span>
+                            <div>
+                                <strong style="font-size: 13px; color: #ffffff; display: block;">Active Chatbot API Token</strong>
+                                <span style="font-size: 11.5px; color: #648781;">All cURL commands and code samples are dynamically populated with your token.</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px; flex: 1; max-width: 480px; justify-content: flex-end;">
+                            <input type="text" id="apiBotTokenInput" class="brand-input" placeholder="Enter Bot Token..." style="height: 36px; font-size: 12px; font-family: 'Fira Code', monospace; flex: 1; background: #05070e;">
+                            <button type="button" class="brand-btn-secondary" onclick="applyCustomApiToken()" style="height: 36px; font-size: 11.5px; padding: 0 14px; white-space: nowrap;">
+                                Apply Token
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Section 1: POST /api/chat/message (Inference Gateway) -->
+                    <div class="method-card">
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                    <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: var(--brand-emerald-400); font-weight: 800; font-family: monospace; font-size: 12px;">POST</span>
+                                    <h2 style="font-family: var(--brand-font-mono); font-size: 16px; font-weight: 700; color: #ffffff; margin: 0;">
+                                        https://edvora.chat/api/chat/message
+                                    </h2>
+                                </div>
+                                <p style="font-size: 12.5px; color: #4F7470; margin: 0;">
+                                    Send student inquiries and receive intelligent AI answers, classified admission intents, and dynamic follow-up chips.
+                                </p>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <button type="button" class="brand-btn-primary" onclick="copyCurrentApiSnippet()" style="height: 32px; font-size: 11.5px; padding: 0 14px; display: inline-flex; align-items: center; gap: 6px;">
+                                    <span id="apiCopyIcon">📋</span> <span id="apiCopyText">Copy Code</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Language Tabs -->
+                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; border-bottom: 1.5px solid #E6F0EC; padding-bottom: 14px;">
+                            <button type="button" class="pill-tab-btn active" onclick="switchApiCodeTab('curl')" id="apiTabCurl">
+                                <span>⚡</span> cURL / HTTP
+                            </button>
+                            <button type="button" class="pill-tab-btn" onclick="switchApiCodeTab('javascript')" id="apiTabJs">
+                                <span>🟨</span> JavaScript (Fetch)
+                            </button>
+                            <button type="button" class="pill-tab-btn" onclick="switchApiCodeTab('python')" id="apiTabPython">
+                                <span>🐍</span> Python (Requests)
+                            </button>
+                            <button type="button" class="pill-tab-btn" onclick="switchApiCodeTab('php')" id="apiTabPhp">
+                                <span>🐘</span> PHP (cURL)
+                            </button>
+                        </div>
+
+                        <!-- Code Panels -->
+                        <div>
+                            <!-- cURL -->
+                            <div id="apiPanelCurl" class="api-code-panel">
+                                <pre id="apiCodeCurl" class="code-snippet-box" style="color: #fbbf24;"></pre>
+                            </div>
+
+                            <!-- JavaScript -->
+                            <div id="apiPanelJs" class="api-code-panel" style="display: none;">
+                                <pre id="apiCodeJs" class="code-snippet-box" style="color: #38bdf8;"></pre>
+                            </div>
+
+                            <!-- Python -->
+                            <div id="apiPanelPython" class="api-code-panel" style="display: none;">
+                                <pre id="apiCodePython" class="code-snippet-box" style="color: #34d399;"></pre>
+                            </div>
+
+                            <!-- PHP -->
+                            <div id="apiPanelPhp" class="api-code-panel" style="display: none;">
+                                <pre id="apiCodePhp" class="code-snippet-box" style="color: #a5b4fc;"></pre>
+                            </div>
+                        </div>
+
+                        <!-- Schema Spec Grid -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-top: 10px;">
+                            <div style="background: #05070e; border: 1px solid #DDE9E3; border-radius: 10px; padding: 18px;">
+                                <strong style="font-size: 13px; color: var(--brand-indigo-300); display: block; margin-bottom: 10px;">
+                                    Request Headers & Body (JSON)
+                                </strong>
+                                <div style="font-size: 12px; line-height: 1.6; color: #4F7470;">
+                                    <p style="margin-bottom: 6px;"><code style="color: #38bdf8; font-family: monospace;">Content-Type</code>: <span style="color: #648781;">application/json</span></p>
+                                    <p style="margin-bottom: 6px;"><code style="color: #38bdf8; font-family: monospace;">bot_token</code> <span style="color: #ef4444; font-weight: 700;">(required)</span>: Institutional Chatbot Token.</p>
+                                    <p style="margin-bottom: 6px;"><code style="color: #38bdf8; font-family: monospace;">message</code> <span style="color: #ef4444; font-weight: 700;">(required)</span>: Student inquiry text string.</p>
+                                    <p style="margin-bottom: 6px;"><code style="color: #38bdf8; font-family: monospace;">visitor_id</code> <span style="color: #648781;">(optional)</span>: Device UUID or student ID for conversational memory.</p>
+                                    <p style="margin-bottom: 0;"><code style="color: #38bdf8; font-family: monospace;">department_id</code> <span style="color: #648781;">(optional)</span>: Scope response to specific department.</p>
+                                </div>
+                            </div>
+
+                            <div style="background: #05070e; border: 1px solid #DDE9E3; border-radius: 10px; padding: 18px;">
+                                <strong style="font-size: 13px; color: var(--brand-emerald-400); display: block; margin-bottom: 10px;">
+                                    Response Payload Structure
+                                </strong>
+                                <div style="font-size: 12px; line-height: 1.6; color: #4F7470;">
+                                    <p style="margin-bottom: 6px;"><code style="color: #34d399; font-family: monospace;">status</code>: "success" or "error"</p>
+                                    <p style="margin-bottom: 6px;"><code style="color: #34d399; font-family: monospace;">data.reply</code>: Fully synthesized institutional AI answer.</p>
+                                    <p style="margin-bottom: 6px;"><code style="color: #34d399; font-family: monospace;">data.intent</code>: Classified student intent (e.g. <code style="color:#648781;">admission_deadline</code>, <code style="color:#648781;">tuition_fee</code>).</p>
+                                    <p style="margin-bottom: 6px;"><code style="color: #34d399; font-family: monospace;">data.quick_chips</code>: Array of contextual follow-up chip strings.</p>
+                                    <p style="margin-bottom: 0;"><code style="color: #34d399; font-family: monospace;">data.confidence</code>: Confidence score (0.0 to 1.0).</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Outbound Webhooks for CRM & Campus Automation -->
+                    <div class="brand-card" style="padding: 24px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                            <span style="font-size: 20px;">🔄</span>
+                            <h2 style="font-family: var(--brand-font-display); font-size: 18px; font-weight: 700; color: #ffffff; margin: 0;">
+                                Outbound Lead & Event Webhooks
+                            </h2>
+                        </div>
+                        <p style="font-size: 12.5px; color: #4F7470; margin: 0 0 16px 0; line-height: 1.55;">
+                            Edvora automatically dispatches signed HTTPS POST payloads to your endpoint whenever a prospective student provides contact information, books a campus tour, or requests a counselor callback.
+                        </p>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
+                            <div style="background: #05070e; border: 1px solid #DDE9E3; border-radius: 10px; padding: 18px;">
+                                <strong style="font-size: 13px; color: var(--brand-cyan-400); display: block; margin-bottom: 8px;">
+                                    Webhook Events Triggered
+                                </strong>
+                                <ul style="font-size: 12px; color: #4F7470; line-height: 1.7; padding-left: 18px; margin: 0;">
+                                    <li><code style="color: #38bdf8; font-family: monospace;">lead.captured</code> — Student contact info submitted</li>
+                                    <li><code style="color: #38bdf8; font-family: monospace;">callback.requested</code> — Urgent counselor phone callback requested</li>
+                                    <li><code style="color: #38bdf8; font-family: monospace;">tour.scheduled</code> — Campus visit appointment booked</li>
+                                    <li><code style="color: #38bdf8; font-family: monospace;">scholarship.evaluated</code> — Eligibility evaluation submitted</li>
+                                </ul>
+                            </div>
+
+                            <div style="background: #05070e; border: 1px solid #DDE9E3; border-radius: 10px; padding: 18px;">
+                                <strong style="font-size: 13px; color: var(--brand-pink-400); display: block; margin-bottom: 8px;">
+                                    Webhook Payload Sample (JSON)
+                                </strong>
+                                <pre style="font-family: 'Fira Code', monospace; font-size: 11px; color: #f472b6; line-height: 1.5; margin: 0; overflow-x: auto;">{
+  "event": "lead.captured",
+  "timestamp": "2026-08-21T10:30:00Z",
+  "data": {
+    "student_name": "Jordan Smith",
+    "email": "jordan.smith@example.com",
+    "phone": "+1 (555) 234-5678",
+    "department": "Admissions & Enrollment",
+    "program_interest": "Computer Science (BSc)",
+    "lead_score": 85,
+    "lead_type": "high_intent"
+  }
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: HTTP Status Codes & Error Handling -->
+                    <div class="brand-card" style="padding: 20px 24px;">
+                        <strong style="font-size: 14px; font-weight: 700; color: #ffffff; display: block; margin-bottom: 12px;">
+                            HTTP Response Codes & Error Handling
+                        </strong>
+                        <div class="brand-table-container">
+                            <table class="table" style="font-size: 12px;">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 120px;">Status Code</th>
+                                        <th style="width: 200px;">Meaning</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code style="color: #34d399; font-weight: 700;">200 OK</code></td>
+                                        <td>Request Successful</td>
+                                        <td>Inference completed and structured reply returned.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code style="color: #fbbf24; font-weight: 700;">400 Bad Request</code></td>
+                                        <td>Invalid Payload</td>
+                                        <td>Missing <code style="font-family: monospace;">bot_token</code> or empty <code style="font-family: monospace;">message</code> field.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code style="color: #f87171; font-weight: 700;">401 Unauthorized</code></td>
+                                        <td>Invalid Token</td>
+                                        <td>The provided chatbot token does not exist or is disabled.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code style="color: #f87171; font-weight: 700;">429 Rate Limited</code></td>
+                                        <td>Quota Exceeded</td>
+                                        <td>Exceeded plan messages quota. Upgrade plan in Billing.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code style="color: #f87171; font-weight: 700;">500 Internal Error</code></td>
+                                        <td>Server Error</td>
+                                        <td>LLM upstream gateway error; automatic fallback will be attempted.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>

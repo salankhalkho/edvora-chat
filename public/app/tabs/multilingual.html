@@ -1,0 +1,108 @@
+<!-- Multilingual Support Console -->
+<div class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
+    
+    <!-- Top Control Bar (Matches Overview, Knowledge & Departments) -->
+    <div class="ops-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 24px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important;">
+        <div class="ops-dash-title-group" style="display: flex !important; align-items: center !important; gap: 12px !important;">
+            <span class="ops-live-dot"></span>
+            <div>
+                <div class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important; letter-spacing: -0.01em !important; line-height: 1.25 !important; display: flex; align-items: center; gap: 8px;">
+                    <span>🌐</span>
+                    <span>Multilingual Support &amp; Admissions Engine</span>
+                </div>
+                <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">
+                    Zero-setup native multilingual intelligence &bull; Cross-lingual institutional knowledge retrieval
+                </div>
+            </div>
+        </div>
+
+        <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
+            <!-- Active Languages Pill -->
+            <div class="ckh-ctrl-pill" style="font-size: 11px !important; font-weight: 700 !important; color: var(--e-teal, #063D3B) !important; background: #F4FAF7 !important; border: 1px solid #D1E5DE !important; border-radius: 8px !important; padding: 5px 12px !important; display: inline-flex !important; align-items: center !important; gap: 6px !important;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                <span id="multilingualActiveCountBadge">25 of 25 Languages Active</span>
+            </div>
+            <!-- Quick Save Preferences Button in Topbar -->
+            <button type="button" class="dept-btn-primary" onclick="saveMultilingualSettings()" style="height: 34px !important; padding: 0 16px !important; font-size: 12px !important; font-weight: 700 !important; border-radius: 8px !important; display: inline-flex !important; align-items: center !important; gap: 6px !important;">
+                <span>💾</span>
+                <span>Save Language Preferences</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Body Pad -->
+    <div style="padding: 22px 24px; display: flex; flex-direction: column; gap: 20px; background: #FAFDFB;">
+        
+        <!-- Native LLM Intelligence Banner Card -->
+        <div style="padding: 16px 20px; border: 1.5px solid #D1E5DE; background: #F4FAF7; border-radius: 12px; display: flex; align-items: flex-start; gap: 14px; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.02);">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: #E6F4F0; border: 1px solid #C8E3DA; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;">
+                💡
+            </div>
+            <div style="flex: 1; min-width: 0;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 3px;">
+                    <strong style="font-size: 13.5px; font-weight: 700; color: #063D3B;">
+                        Zero-Setup Native Multilingual Intelligence
+                    </strong>
+                    <span style="background: #E8F5E9; color: #059669; border: 1px solid #A7F3D0; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 5px;">
+                        Native AI Enabled
+                    </span>
+                </div>
+                <p style="font-size: 12px; color: #4F7470; margin: 0 0 4px 0; line-height: 1.5;">
+                    By default, edvora.chat is engineered to automatically detect incoming visitor inquiries in any regional language or script, query your institution's English Knowledge Base seamlessly, and generate fluent, accurate responses in the student's or parent's native tongue.
+                </p>
+                <div style="font-size: 11px; color: #648781; font-weight: 500;">
+                    English is the mandatory base language. Select or deselect regional languages below to enable or restrict automated conversational translation for your admissions desk.
+                </div>
+            </div>
+        </div>
+
+        <!-- Configured Languages Workspace Card -->
+        <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 14px; padding: 22px; box-shadow: 0 2px 10px rgba(6, 61, 59, 0.03);">
+            
+            <!-- Controls Toolbar inside Card -->
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; padding-bottom: 16px; border-bottom: 1.5px solid #F0F6F3;">
+                <div>
+                    <div style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: #063D3B; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
+                        <span>Configured Languages</span>
+                        <span id="multilingualTotalBadge" style="font-size: 11px; font-weight: 700; background: #F1F7F4; color: #063D3B; padding: 2px 8px; border-radius: 999px; border: 1px solid #DCE9E5;">25</span>
+                    </div>
+                    <div style="font-size: 11.5px; color: #648781; margin-top: 3px;">
+                        Click any language card or checkbox to toggle instant AI conversation availability
+                    </div>
+                </div>
+
+                <!-- Quick Action Toggles -->
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button type="button" class="dept-btn-secondary" onclick="setAllLanguagesSelection(true)" style="height: 32px; font-size: 11px; font-weight: 700; padding: 0 12px;">
+                        <span>✓</span> Select All (25 Languages)
+                    </button>
+                    <button type="button" class="dept-btn-secondary" onclick="setAllLanguagesSelection(false)" style="height: 32px; font-size: 11px; font-weight: 700; padding: 0 12px; color: #E11D48; border-color: #FECDD3; background: #FFF1F2;">
+                        <span>✕</span> Clear All (Except English)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dynamic Languages Grid Container -->
+            <div id="languagesGridContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 14px;">
+                <!-- Populated dynamically via renderMultilingualGrid() -->
+            </div>
+
+            <!-- Card Bottom Action Bar -->
+            <div style="margin-top: 24px; padding-top: 18px; border-top: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="color: #059669; font-size: 14px;">🛡️</span>
+                    <span id="multilingualSaveNotice" style="font-size: 12px; color: #648781;">
+                        Language availability changes update instantly for your college's live web widget and admissions channels.
+                    </span>
+                </div>
+                <button type="button" class="dept-btn-primary" onclick="saveMultilingualSettings()" style="height: 38px; padding: 0 24px; font-size: 12.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;">
+                    <span>💾</span>
+                    <span>Save Language Preferences</span>
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

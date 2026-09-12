@@ -1,0 +1,2562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Try Edvora on Your Website — Interactive AI Admissions Demo</title>
+  <meta name="description" content="See how your website could turn visitors into qualified admissions leads. Build a live, personalized AI admissions demo in seconds." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --e-teal: #063D3B;
+      --e-teal-hover: #084F4C;
+      --e-teal-dark: #042E2C;
+      --e-pistachio: #C8FF63;
+      --e-pistachio-hover: #D4FF70;
+      --e-soft-pistachio: #E6F7D2;
+      --e-mist: #F1F7F4;
+      --e-card-bg: #FFFFFF;
+      --e-border: #DDE9E3;
+      --e-border-focus: #063D3B;
+      --e-text: #092F2E;
+      --e-muted: #5A7570;
+      --e-muted-light: #7E9490;
+      --e-radius-sm: 8px;
+      --e-radius-md: 14px;
+      --e-radius-lg: 22px;
+      --e-radius-full: 9999px;
+      --e-shadow-subtle: 0 4px 20px rgba(6, 61, 59, 0.05);
+      --e-shadow-elevated: 0 16px 48px rgba(6, 61, 59, 0.08), 0 2px 8px rgba(6, 61, 59, 0.04);
+      --e-shadow-glow: 0 12px 36px rgba(200, 255, 99, 0.45);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; min-height: 100vh;
+      background-color: var(--e-mist);
+      color: var(--e-text);
+      font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background:
+        radial-gradient(circle at 12% 14%, rgba(200, 255, 99, 0.12), transparent 32%),
+        radial-gradient(circle at 88% 86%, rgba(185, 215, 199, 0.22), transparent 36%);
+      pointer-events: none; z-index: 0;
+    }
+
+    .app-viewport {
+      position: relative; z-index: 1; min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 24px 16px;
+    }
+
+    /* ======= TOP BAR ======= */
+    .top-bar {
+      position: fixed; top: 0; left: 0; right: 0; height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; z-index: 50;
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      background: rgba(241, 247, 244, 0.85);
+      border-bottom: 1px solid rgba(221, 233, 227, 0.7);
+    }
+
+    .brand-logo-link {
+      display: inline-flex; align-items: center; gap: 9px;
+      text-decoration: none; color: var(--e-teal);
+      font-weight: 800; font-size: 16px; letter-spacing: -0.02em;
+    }
+
+    .brand-logo-icon {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: var(--e-teal); display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 12px rgba(6, 61, 59, 0.2);
+    }
+
+    .step-dots { display: flex; align-items: center; gap: 8px; }
+    .step-dot {
+      width: 7px; height: 7px; border-radius: var(--e-radius-full);
+      background: #A7D5BE; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .step-dot.active { background: #063D3B; width: 22px; }
+    .step-dot.completed { background: #8FC9A8; }
+
+    .back-home-link {
+      font-size: 12.5px; font-weight: 600; color: var(--e-muted);
+      text-decoration: none; transition: color 0.15s ease;
+    }
+    .back-home-link:hover { color: var(--e-teal); }
+
+    /* ======= MAIN CANVAS ======= */
+    .tool-canvas {
+      width: 100%; max-width: 620px;
+      margin: 40px auto 20px auto;
+      transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .tool-canvas.wide { max-width: 880px; }
+
+    .stage-section {
+      display: none; opacity: 0; transform: translateY(14px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+    .stage-section.active { display: block; opacity: 1; transform: translateY(0); }
+
+    /* ======= SHARED CARD ======= */
+    .stage-card {
+      background: var(--e-card-bg); border: 1.5px solid var(--e-border);
+      border-radius: var(--e-radius-lg); padding: 44px 38px;
+      box-shadow: var(--e-shadow-elevated); text-align: center; position: relative;
+    }
+    @media (max-width: 600px) {
+      .stage-card { padding: 32px 20px; border-radius: 18px; }
+    }
+
+    .tool-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--e-teal);
+      background: rgba(6, 61, 59, 0.06); padding: 4px 12px;
+      border-radius: var(--e-radius-full); margin-bottom: 16px;
+    }
+    .tool-title {
+      font-size: clamp(24px, 3.2vw, 32px); font-weight: 800;
+      color: var(--e-teal); letter-spacing: -0.025em;
+      line-height: 1.2; margin-bottom: 12px;
+    }
+    .tool-subtitle {
+      font-size: 15px; color: var(--e-muted); line-height: 1.55;
+      max-width: 480px; margin: 0 auto 32px auto; font-weight: 400;
+    }
+
+    /* ======= URL INPUT ======= */
+    .url-input-container { position: relative; margin-bottom: 18px; text-align: left; }
+    .url-input-wrap {
+      display: flex; align-items: center; background: #FFFFFF;
+      border: 1.5px solid var(--e-border); border-radius: var(--e-radius-md);
+      padding: 5px 8px 5px 16px; transition: all 0.2s ease;
+      box-shadow: 0 2px 10px rgba(6, 61, 59, 0.03);
+    }
+    .url-input-wrap:focus-within { border-color: var(--e-teal); box-shadow: 0 0 0 4px rgba(6, 61, 59, 0.08); }
+    .url-prefix-icon { color: var(--e-muted-light); margin-right: 10px; display: flex; align-items: center; flex-shrink: 0; }
+    .url-field {
+      flex: 1; border: none; outline: none; font-size: 15.5px; font-family: inherit;
+      color: var(--e-text); font-weight: 500; background: transparent; padding: 10px 0; min-width: 0;
+    }
+    .url-field::placeholder { color: #9CB0AB; font-weight: 400; }
+    .url-badge-indicator {
+      display: none; align-items: center; gap: 5px;
+      font-size: 11.5px; font-weight: 700; color: #047857; background: #E8F7F0;
+      padding: 4px 10px; border-radius: var(--e-radius-full); white-space: nowrap; margin-left: 8px;
+    }
+
+    /* ======= BUTTONS ======= */
+    .btn-submit-main {
+      width: 100%; background: var(--e-pistachio); color: var(--e-teal);
+      border: 1.5px solid #b3ec48; border-radius: var(--e-radius-md);
+      padding: 15px 24px; font-size: 16px; font-weight: 800; letter-spacing: -0.01em;
+      cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+      gap: 10px; box-shadow: var(--e-shadow-glow);
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1); font-family: inherit;
+    }
+    .btn-submit-main:hover:not(:disabled) {
+      background: var(--e-pistachio-hover); transform: translateY(-2px);
+      box-shadow: 0 16px 42px rgba(200, 255, 99, 0.65);
+    }
+    .btn-submit-main:active:not(:disabled) { transform: translateY(0); }
+    .btn-submit-main:disabled { opacity: 0.55; cursor: not-allowed; box-shadow: none; border-color: #DDE9E3; }
+
+    .tool-microcopy { font-size: 12px; color: var(--e-muted-light); margin-top: 18px; font-weight: 500; }
+
+    /* ======= STAGE 2A: DISCOVERY ======= */
+    .discovery-box {
+      text-align: left; background: #F8FBF9; border: 1px solid var(--e-border);
+      border-radius: var(--e-radius-md); padding: 24px 22px; margin: 28px 0;
+    }
+    .discovery-stream-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+    .discovery-item {
+      display: flex; align-items: flex-start; gap: 12px; font-size: 14px;
+      color: var(--e-muted); line-height: 1.45;
+      opacity: 0.3; transform: translateY(4px);
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .discovery-item.active { opacity: 1; color: var(--e-teal); font-weight: 600; transform: translateY(0); }
+    .discovery-item.done { opacity: 0.92; color: #063D3B; transform: translateY(0); }
+    .discovery-icon {
+      width: 20px; height: 20px; border-radius: var(--e-radius-full);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 1px;
+      background: #E2ECE7; color: #7E9490;
+    }
+    .discovery-item.done .discovery-icon { background: #047857; color: #FFFFFF; }
+    .discovery-item.active .discovery-icon {
+      background: var(--e-pistachio); color: var(--e-teal);
+      box-shadow: 0 0 0 3px rgba(200, 255, 99, 0.35); animation: pulse-ring 1.8s infinite;
+    }
+    @keyframes pulse-ring {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(200, 255, 99, 0.4); }
+      50% { box-shadow: 0 0 0 7px rgba(200, 255, 99, 0.15); }
+    }
+    .discovery-tags-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .program-tag-pill {
+      display: inline-block; font-size: 11px; font-weight: 600;
+      color: var(--e-teal); background: #E6F7D2; border: 1px solid #C4E8A2;
+      padding: 2px 8px; border-radius: var(--e-radius-full);
+    }
+    .slow-site-note { display: none; font-size: 12px; color: var(--e-muted); margin-top: 16px; font-style: italic; }
+
+    /* ======= STAGE 2B: ERROR ======= */
+    .error-icon-box {
+      width: 52px; height: 52px; border-radius: var(--e-radius-full);
+      background: #FEE2E2; color: #DC2626;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 24px; margin-bottom: 20px;
+    }
+
+    /* ======= STAGE 3: EMAIL CAPTURE ======= */
+    .summary-badges-strip {
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; flex-wrap: wrap; margin: 22px 0 28px 0;
+    }
+    .summary-badge-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #F1F7F4; border: 1px solid #DDE9E3;
+      padding: 6px 14px; border-radius: var(--e-radius-full);
+      font-size: 12.5px; font-weight: 600; color: var(--e-teal);
+    }
+    .summary-badge-pill.lit { background: #E8F5EE; border-color: #A3D4BE; color: #047857; }
+    .email-prompt-heading { font-size: 14.5px; font-weight: 700; color: var(--e-teal); margin-bottom: 12px; text-align: left; }
+
+    /* ======= STAGE 4: DUAL-PANE DEMO ======= */
+    .demo-outer-layout {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 28px;
+      width: 100%;
+    }
+    @media (max-width: 860px) {
+      .demo-outer-layout {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+      }
+    }
+
+    /* Left Column */
+    .demo-left-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    /* Top Info Card */
+    .edvora-preview-header-card {
+      background: #FFFFFF;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 12px 18px 14px 18px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+      width: 100%;
+      margin-bottom: 14px;
+    }
+    .header-card-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .header-card-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #063D3B;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .header-card-subtitle {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 3px;
+      font-weight: 400;
+    }
+    .header-card-intent-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid #f1f5f9;
+    }
+    .intent-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      white-space: nowrap;
+    }
+    .intent-track {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: #e2e8f0;
+      border-radius: var(--e-radius-full);
+      height: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+    .intent-fill {
+      height: 100%;
+      border-radius: var(--e-radius-full);
+      background: linear-gradient(90deg, #84cc16, #a3e635);
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      width: 15%;
+    }
+    .intent-level-label {
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+      color: #64748b;
+    }
+    .intent-level-label.exploring { color: #64748b; }
+    .intent-level-label.interested { color: #059669; font-weight: 700; }
+    .intent-level-label.high { color: #063D3B; font-weight: 800; }
+
+    .preview-mode-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: #64748b;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 3px 9px;
+      border-radius: var(--e-radius-full);
+    }
+    .preview-mode-badge .dot {
+      width: 5px;
+      height: 5px;
+      background: #94a3b8;
+      border-radius: 50%;
+    }
+
+    /* Chat Widget Preview Container (380px) */
+    .edvora-widget-preview {
+      width: 380px;
+      max-width: 100%;
+      height: 580px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Widget Header */
+    .edvora-header {
+      background: #063D3B;
+      padding: 13px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .edvora-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .edvora-avatar-wrap {
+      position: relative;
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+    }
+    .edvora-avatar-img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid rgba(255, 255, 255, 0.6);
+    }
+    .edvora-online-dot {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 9px;
+      height: 9px;
+      background: #10b981;
+      border: 1.5px solid #063D3B;
+      border-radius: 50%;
+    }
+    .edvora-title-group {
+      display: flex;
+      flex-direction: column;
+    }
+    .edvora-bot-name {
+      color: #ffffff;
+      font-size: 13.5px;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+    }
+    .edvora-bot-status {
+      color: rgba(200, 255, 99, 0.95);
+      font-size: 11px;
+      font-weight: 500;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .edvora-bot-status::before {
+      content: '';
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      background: #C8FF63;
+      border-radius: 50%;
+    }
+    .edvora-close-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: #ffffff;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      line-height: 1;
+    }
+    .edvora-close-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Widget Messages Stream */
+    .edvora-messages-body {
+      flex: 1;
+      background: #f8fafc;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .edvora-msg-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      max-width: 92%;
+    }
+    .edvora-msg-row.user {
+      align-self: flex-end;
+      justify-content: flex-end;
+    }
+    .edvora-msg-bubble-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .edvora-bubble {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      border-top-left-radius: 4px;
+      padding: 12px 14px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .edvora-bubble p {
+      color: #1e293b;
+      font-size: 12.5px;
+      line-height: 1.48;
+    }
+    .edvora-bubble .greeting-header {
+      font-weight: 700;
+      color: #063D3B;
+      font-size: 13.5px;
+    }
+    .edvora-bubble.user {
+      background: #E6F7D2;
+      border-color: #C4E8A2;
+      border-top-left-radius: 14px;
+      border-bottom-right-radius: 4px;
+    }
+    .edvora-bubble.user p {
+      color: #063D3B;
+      font-weight: 500;
+    }
+    .edvora-msg-time {
+      font-size: 10px;
+      color: #94a3b8;
+      margin-left: 32px;
+      margin-top: -6px;
+    }
+    .edvora-msg-time.user {
+      margin-left: 0;
+      margin-right: 4px;
+      align-self: flex-end;
+    }
+
+    /* Source Citation Card */
+    .source-citation-card {
+      align-self: flex-start;
+      margin-left: 32px;
+      margin-top: -4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 10.5px;
+      color: #64748b;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    .source-citation-card a {
+      color: #063D3B;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .source-citation-card a:hover {
+      text-decoration: underline;
+    }
+
+    /* Typing indicator inside widget */
+    .typing-indicator-box {
+      display: inline-flex;
+      gap: 4px;
+      align-items: center;
+    }
+    .typing-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: var(--e-radius-full);
+      background: #7E9490;
+      animation: blink-typing 1.4s infinite both;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink-typing {
+      0%, 80%, 100% { opacity: 0.3; transform: scale(0.85); }
+      40% { opacity: 1; transform: scale(1.15); }
+    }
+
+    /* Input Area */
+    .edvora-input-box {
+      background: #ffffff;
+      border-top: 1px solid #e2e8f0;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .edvora-input-wrapper {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .edvora-input-field {
+      width: 100%;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 12.5px;
+      color: #0f172a;
+      outline: none;
+      background: #f8fafc;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    .edvora-input-field:focus {
+      border-color: #063D3B;
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(6, 61, 59, 0.08);
+    }
+    .edvora-send-button {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: #063D3B;
+      color: #C8FF63;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+    }
+    .edvora-send-button:hover {
+      background: #095451;
+      transform: scale(1.03);
+    }
+
+    /* Branding Footer */
+    .edvora-branding {
+      text-align: center;
+      padding: 6px 0 8px 0;
+      background: #ffffff;
+      font-size: 10.5px;
+      color: #94a3b8;
+      border-top: 1px solid #f1f5f9;
+    }
+    .edvora-branding span {
+      font-weight: 700;
+      color: #063D3B;
+    }
+
+    /* Counselor flow inside widget */
+    .counselor-flow-bubble {
+      align-self: flex-start;
+      background: #FFFFFF;
+      border: 1.5px solid #A3D4BE;
+      border-radius: 14px;
+      border-top-left-radius: 4px;
+      padding: 12px 14px;
+      font-size: 12.5px;
+      color: var(--e-teal);
+      max-width: 96%;
+      box-shadow: 0 4px 16px rgba(6, 61, 59, 0.08);
+      line-height: 1.45;
+      animation: fadeIn 0.3s ease;
+      position: relative;
+    }
+    .flow-header-row {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;
+    }
+    .flow-dismiss-btn {
+      background: none; border: none; font-size: 18px; color: #94A3B8;
+      cursor: pointer; padding: 0 4px; border-radius: 4px; line-height: 1;
+      transition: color 0.15s ease;
+    }
+    .flow-dismiss-btn:hover { color: #063D3B; }
+    .flow-cancel-link {
+      background: none; border: none; font-size: 11.5px; color: var(--e-muted);
+      cursor: pointer; text-decoration: underline; font-family: inherit; padding: 4px 6px;
+    }
+    .flow-cancel-link:hover { color: var(--e-teal); }
+    .contact-method-btns { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+    .contact-method-btn {
+      padding: 6px 12px; border-radius: var(--e-radius-full); font-size: 12px;
+      font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s ease;
+      border: 1.5px solid var(--e-border); background: #FFFFFF; color: var(--e-teal);
+    }
+    .contact-method-btn:hover, .contact-method-btn.selected { 
+      background: var(--e-pistachio); border-color: #b3ec48; color: var(--e-teal);
+    }
+    .counselor-inline-input {
+      width: 100%; margin-top: 6px; padding: 8px 12px;
+      border: 1.5px solid var(--e-border); border-radius: var(--e-radius-sm);
+      font-size: 12.5px; font-family: inherit; outline: none; color: var(--e-text);
+      transition: border-color 0.15s ease;
+    }
+    .counselor-inline-input:focus { border-color: var(--e-teal); }
+    .counselor-inline-submit {
+      padding: 8px 16px; background: var(--e-teal); color: #FFF;
+      border: none; border-radius: var(--e-radius-sm); font-size: 12px;
+      font-weight: 700; cursor: pointer; font-family: inherit;
+      display: inline-flex; align-items: center; gap: 6px; transition: background 0.15s ease;
+    }
+    .counselor-inline-submit:hover { background: var(--e-teal-hover); }
+
+    /* Right Column: Admissions Intelligence Card */
+    .admin-intelligence-card {
+      width: 340px;
+      flex-shrink: 0;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 22px 20px;
+      box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+      display: flex;
+      flex-direction: column;
+    }
+    .admin-panel-eyebrow {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A7570;
+      margin-bottom: 3px;
+    }
+    .admin-panel-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #063D3B;
+      margin-bottom: 16px;
+    }
+    .admin-metric-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .admin-metric-card {
+      background: #f8fafc;
+      border: 1px solid #f1f5f9;
+      border-radius: 10px;
+      padding: 12px 10px;
+      text-align: center;
+    }
+    .admin-metric-label {
+      font-size: 9.5px;
+      font-weight: 600;
+      color: #64748b;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .admin-metric-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: #063D3B;
+      line-height: 1.1;
+    }
+    .admin-metric-value.stage {
+      font-size: 14px;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+    .admin-section-box {
+      background: #f8fafc;
+      border: 1px solid #f1f5f9;
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .admin-section-title {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+    .admin-intent-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .admin-intent-dots {
+      display: flex;
+      gap: 4px;
+    }
+    .admin-intent-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #cbd5e1;
+      transition: all 0.3s ease;
+    }
+    .admin-intent-dot.lit {
+      background: #84cc16;
+    }
+    .admin-intent-dot.lit.high {
+      background: #063D3B;
+    }
+    .admin-intent-text {
+      font-size: 12px;
+      font-weight: 700;
+      color: #475569;
+    }
+    .admin-intent-text.interested { color: #059669; }
+    .admin-intent-text.high { color: #063D3B; }
+
+    .admin-field-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 12px;
+    }
+    .admin-field-row:last-child {
+      border-bottom: none;
+    }
+    .admin-field-key {
+      color: #64748b;
+      font-weight: 500;
+    }
+    .admin-field-val {
+      color: #063D3B;
+      font-weight: 700;
+      text-align: right;
+      max-width: 160px;
+    }
+    .admin-field-val.empty {
+      color: #94a3b8;
+      font-weight: 400;
+      font-style: italic;
+    }
+
+    /* Journey trail */
+    .admin-journey-trail {
+      display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px;
+    }
+    .journey-step-pill {
+      font-size: 10px; font-weight: 600; padding: 2px 8px;
+      border-radius: var(--e-radius-full); background: #E8F5EE;
+      color: #047857; border: 1px solid #A3D4BE;
+    }
+
+    /* Admin toggle bar (optional) */
+    .show-admin-toggle-bar {
+      padding: 10px 14px; background: #F4FAF7; border-bottom: 1px solid var(--e-border);
+      display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+    }
+    .toggle-label { font-size: 11.5px; color: var(--e-muted); font-weight: 500; }
+    .toggle-btn {
+      font-size: 11.5px; font-weight: 700; color: var(--e-teal);
+      background: none; border: 1.5px solid var(--e-teal);
+      border-radius: var(--e-radius-full); padding: 4px 13px;
+      cursor: pointer; font-family: inherit; transition: all 0.15s ease;
+    }
+    .toggle-btn:hover { background: var(--e-teal); color: #FFF; }
+
+    /* Admin placeholder */
+    .admin-placeholder {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; text-align: center; flex: 1; padding: 24px;
+      gap: 10px;
+    }
+    .admin-placeholder-icon { font-size: 32px; }
+    .admin-placeholder-text { font-size: 13px; color: var(--e-muted); line-height: 1.5; }
+
+    /* Conversion alert */
+    .conversion-alert {
+      background: linear-gradient(135deg, #E6F7D2, #F0FAE8);
+      border: 1.5px solid #A8D86C; border-radius: 10px;
+      padding: 10px 14px; animation: alertPulseIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    @keyframes alertPulseIn {
+      from { opacity: 0; transform: scale(0.96) translateY(-6px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .conversion-alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .conversion-alert-body { flex: 1; }
+    .conversion-alert-label {
+      font-size: 9.5px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.09em; color: #3E7A1E; margin-bottom: 3px;
+    }
+    .conversion-alert-text {
+      font-size: 12px; font-weight: 600; color: #2D5A14; line-height: 1.4;
+    }
+
+    /* Activity feed */
+    .activity-feed { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+    .activity-feed-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 11px; color: var(--e-muted); line-height: 1.4;
+      animation: feedItemIn 0.3s ease;
+    }
+    @keyframes feedItemIn {
+      from { opacity: 0; transform: translateX(-8px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .activity-feed-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #A3D4BE; flex-shrink: 0; margin-top: 4px;
+    }
+    .activity-feed-dot.high { background: #063D3B; }
+    .activity-feed-dot.conversion { background: var(--e-pistachio); border: 1.5px solid #9bd44e; }
+    .activity-feed-time { font-size: 10px; color: #B0C4BC; font-weight: 500; flex-shrink: 0; }
+
+    /* Program flash */
+    .program-flash {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 700; padding: 2px 7px;
+      border-radius: var(--e-radius-full); background: var(--e-pistachio);
+      color: var(--e-teal); border: 1px solid #b3ec48;
+      animation: flashTag 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes flashTag {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Enhanced Lead Card in admin panel */
+    .lead-captured-card {
+      background: linear-gradient(145deg, #E8F5EE, #F4FAF7);
+      border: 1.5px solid #A3D4BE; border-radius: 12px; padding: 14px;
+      animation: slideInCard 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes slideInCard {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .lead-card-header {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.07em; color: #047857; margin-bottom: 10px;
+      padding-bottom: 8px; border-bottom: 1px solid #C8E8D4;
+    }
+    .lead-card-name { font-size: 16px; font-weight: 800; color: var(--e-teal); margin-bottom: 8px; }
+    .lead-card-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 10.5px; font-weight: 700; padding: 2px 8px;
+      border-radius: var(--e-radius-full); background: var(--e-pistachio);
+      color: var(--e-teal); margin-bottom: 10px; border: 1px solid #b3ec48;
+    }
+    .lead-card-note {
+      font-size: 11px; color: var(--e-muted); line-height: 1.45;
+      background: rgba(255,255,255,0.6); border-radius: 8px;
+      padding: 6px 10px; border: 1px solid #D5E8DC; margin-top: 8px;
+    }
+    .lead-card-action-row {
+      display: flex; gap: 6px; margin-top: 10px;
+    }
+    .lead-card-action-btn {
+      flex: 1; padding: 7px 8px; border-radius: 7px; font-size: 11px;
+      font-weight: 700; cursor: pointer; font-family: inherit; text-align: center;
+      border: 1.5px solid #A3D4BE; background: #FFFFFF; color: var(--e-teal);
+      transition: all 0.15s ease;
+    }
+    .lead-card-action-btn:hover { background: #E8F5EE; }
+    .lead-card-action-btn.primary { background: var(--e-teal); color: #FFFFFF; border-color: var(--e-teal); }
+    .lead-card-action-btn.primary:hover { background: var(--e-teal-hover); }
+
+    /* Stage 5: Closing (the reveal) */
+    .closing-outer {
+      background: var(--e-card-bg); border: 1.5px solid var(--e-border);
+      border-radius: var(--e-radius-lg); padding: 48px 38px;
+      box-shadow: var(--e-shadow-elevated); text-align: center;
+    }
+    .closing-funnel-strip {
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px; flex-wrap: wrap; margin: 24px auto 28px;
+      background: #F4FAF7; border: 1px solid #D8E7E0;
+      padding: 14px 18px; border-radius: var(--e-radius-md);
+      max-width: 600px;
+    }
+    .funnel-step { font-size: 12px; font-weight: 700; color: var(--e-teal); background: #FFFFFF; border: 1px solid #CCE0D6; padding: 4px 10px; border-radius: var(--e-radius-full); box-shadow: 0 1px 3px rgba(6,61,59,0.04); }
+    .funnel-step.active { background: var(--e-pistachio); border-color: #b3ec48; }
+    .funnel-arrow { color: #94A3B8; font-size: 12px; }
+
+    /* ======= ADMIN PANEL: CONVERSION MOMENT ALERT ======= */
+    .conversion-alert {
+      background: linear-gradient(135deg, #E6F7D2, #F0FAE8);
+      border: 1.5px solid #A8D86C; border-radius: 10px;
+      padding: 10px 14px; animation: alertPulseIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    @keyframes alertPulseIn {
+      from { opacity: 0; transform: scale(0.96) translateY(-6px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .conversion-alert-icon {
+      font-size: 16px; flex-shrink: 0; margin-top: 1px;
+    }
+    .conversion-alert-body { flex: 1; }
+    .conversion-alert-label {
+      font-size: 9.5px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.09em; color: #3E7A1E; margin-bottom: 3px;
+    }
+    .conversion-alert-text {
+      font-size: 12px; font-weight: 600; color: #2D5A14; line-height: 1.4;
+    }
+
+    /* ======= ADMIN PANEL: ACTIVITY FEED ======= */
+    .activity-feed { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+    .activity-feed-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 11.5px; color: var(--e-muted); line-height: 1.4;
+      animation: feedItemIn 0.3s ease;
+    }
+    @keyframes feedItemIn {
+      from { opacity: 0; transform: translateX(-8px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .activity-feed-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #A3D4BE; flex-shrink: 0; margin-top: 4px;
+    }
+    .activity-feed-dot.high { background: #063D3B; }
+    .activity-feed-dot.conversion { background: var(--e-pistachio); border: 1.5px solid #9bd44e; }
+    .activity-feed-time { font-size: 10px; color: #B0C4BC; font-weight: 500; flex-shrink: 0; }
+
+    /* ======= ADMIN PANEL: INTENT ESCALATION PULSE ======= */
+    @keyframes intentEscalate {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.25); }
+      70% { transform: scale(0.95); }
+      100% { transform: scale(1); }
+    }
+    .admin-intent-dot.escalating { animation: intentEscalate 0.5s ease; }
+
+    /* Program interest tag — flash-in */
+    .program-flash {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 700; padding: 3px 9px;
+      border-radius: var(--e-radius-full); background: var(--e-pistachio);
+      color: var(--e-teal); border: 1px solid #b3ec48;
+      animation: flashTag 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes flashTag {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* ======= PREMIUM LEAD CARD (inside chat) ======= */
+    .counselor-flow-bubble {
+      align-self: flex-start;
+      background: #FFFFFF;
+      border: 1.5px solid #A3D4BE;
+      border-radius: 18px;
+      border-bottom-left-radius: 5px;
+      padding: 16px 20px;
+      font-size: 14px;
+      color: var(--e-teal);
+      max-width: 94%;
+      box-shadow: 0 6px 24px rgba(6, 61, 59, 0.10), 0 1px 4px rgba(6,61,59,0.05);
+      line-height: 1.55;
+      animation: leadCardIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+    @keyframes leadCardIn {
+      from { opacity: 0; transform: translateY(10px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .lead-card-type-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 9.5px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: #047857;
+      background: #E6F7D2; border: 1px solid #A8D86C;
+      padding: 3px 9px; border-radius: var(--e-radius-full); margin-bottom: 8px;
+    }
+    .lead-card-desc {
+      font-size: 12.5px; color: #4A7260; margin-bottom: 12px;
+      line-height: 1.45; font-weight: 400;
+    }
+
+    /* ======= STAGE 5: CLOSING REDESIGN ======= */
+    .closing-outer {
+      background: var(--e-card-bg); border: 1.5px solid var(--e-border);
+      border-radius: var(--e-radius-lg); padding: 48px 38px;
+      box-shadow: var(--e-shadow-elevated); text-align: center;
+    }
+    .closing-lead-recap {
+      background: linear-gradient(135deg, #F0FAE8, #E8F5EE);
+      border: 1.5px solid #A3D4BE; border-radius: 14px;
+      padding: 18px 22px; margin: 24px auto; max-width: 480px;
+      text-align: left; animation: slideInCard 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .closing-lead-recap-header {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.09em; color: #3E7A1E; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .closing-lead-name {
+      font-size: 18px; font-weight: 800; color: var(--e-teal); margin-bottom: 6px;
+    }
+    .closing-lead-meta {
+      font-size: 12px; color: var(--e-muted); display: flex;
+      flex-wrap: wrap; gap: 12px; margin-top: 8px;
+    }
+    .closing-lead-meta span { display: flex; align-items: center; gap: 4px; }
+    .closing-roi-box {
+      background: #F8FBF9; border: 1px solid var(--e-border);
+      border-radius: 10px; padding: 14px 18px; margin: 20px auto;
+      max-width: 500px; font-size: 14px; color: #3A5F56; line-height: 1.55;
+    }
+    .closing-roi-box strong { color: var(--e-teal); }
+    .closing-cta-group {
+      display: flex; flex-direction: column; gap: 10px;
+      width: 100%; max-width: 340px; margin: 28px auto 0;
+    }
+    .btn-secondary-outline {
+      width: 100%; background: #FFFFFF; color: var(--e-teal);
+      border: 1.5px solid var(--e-teal); border-radius: var(--e-radius-md);
+      padding: 13px 24px; font-size: 15px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1); text-decoration: none;
+    }
+    .btn-secondary-outline:hover { background: #F0FAF5; transform: translateY(-1px); }
+    .btn-share-link {
+      background: none; border: none; font-size: 12.5px; font-weight: 600;
+      color: var(--e-muted); cursor: pointer; font-family: inherit; padding: 8px;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: color 0.15s ease; text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .btn-share-link:hover { color: var(--e-teal); }
+    .share-copied-toast {
+      display: none; font-size: 12px; color: #047857; font-weight: 600;
+      background: #E6F7D2; border: 1px solid #A8D86C; border-radius: 6px;
+      padding: 4px 12px; margin: 4px auto 0; text-align: center;
+    }
+
+  </style>
+
+</head>
+<body>
+
+  <!-- Top Brand Navigation Bar -->
+  <header class="top-bar">
+    <a href="/" class="brand-logo-link" title="Return to edvora.chat">
+      <div class="brand-logo-icon">
+        <svg width="18" height="18" viewBox="0 0 40 40" fill="none">
+          <path d="M20 6C20 13.732 13.732 20 6 20C13.732 20 20 26.268 20 34C20 26.268 26.268 20 34 20C26.268 20 20 13.732 20 6Z" fill="#C8FF63" />
+        </svg>
+      </div>
+      <span>edvora.chat</span>
+    </a>
+
+    <div class="step-dots" id="stepDotsBar">
+      <span class="step-dot active" id="dot-1"></span>
+      <span class="step-dot" id="dot-2"></span>
+      <span class="step-dot" id="dot-3"></span>
+    </div>
+
+    <a href="/" class="back-home-link">— Back to Overview</a>
+  </header>
+
+  <main class="app-viewport">
+    <div class="tool-canvas" id="mainCanvas">
+
+      <!-- ================================================================ -->
+      <!-- STAGE 1: ENTER WEBSITE                                           -->
+      <!-- ================================================================ -->
+      <section class="stage-section active" id="stage-1">
+        <div class="stage-card">
+          <div class="tool-eyebrow">Interactive Demo Builder</div>
+          <h1 class="tool-title">Try Edvora on Your Website</h1>
+          <p class="tool-subtitle">
+            See how your website could turn visitors into qualified admissions leads. No registration required.
+          </p>
+
+          <form id="urlForm" onsubmit="handleUrlSubmit(event)">
+            <div class="url-input-container">
+              <div class="url-input-wrap">
+                <div class="url-prefix-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                  </svg>
+                </div>
+                <input
+                  type="text" id="websiteUrlInput" class="url-field"
+                  placeholder="https://www.youruniversity.edu"
+                  autocomplete="off" spellcheck="false" required autofocus
+                  oninput="handleUrlInput(this.value)"
+                />
+                <span class="url-badge-indicator" id="urlValidBadge">✓ Website recognized</span>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-submit-main" id="btnBuildDemo" disabled>
+              <span>Build My Demo</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+          </form>
+
+          <p class="tool-microcopy">
+            We'll use your website's publicly available information to build a live demo. No password or credentials needed.
+          </p>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- STAGE 2A: REAL WEBSITE DISCOVERY                                 -->
+      <!-- ================================================================ -->
+      <section class="stage-section" id="stage-2a">
+        <div class="stage-card">
+          <div class="tool-eyebrow">Real Website Discovery</div>
+          <h2 class="tool-title" id="stage2Title">Building your Edvora demo</h2>
+          <p class="tool-subtitle" id="stage2Subtitle">Connecting to your website and exploring admissions content...</p>
+
+          <div class="discovery-box">
+            <ul class="discovery-stream-list" id="discoveryStreamList">
+              <li class="discovery-item active" id="disc-1">
+                <span class="discovery-icon">1</span>
+                <div>Connecting to website...</div>
+              </li>
+              <li class="discovery-item" id="disc-2">
+                <span class="discovery-icon">2</span>
+                <div>Mapping admissions &amp; application pages</div>
+              </li>
+              <li class="discovery-item" id="disc-3">
+                <span class="discovery-icon">3</span>
+                <div id="discProgramsText">Identifying academic programs &amp; degrees</div>
+                <div class="discovery-tags-row" id="discoveredTagsRow" style="display:none;"></div>
+              </li>
+              <li class="discovery-item" id="disc-4">
+                <span class="discovery-icon">4</span>
+                <div>Compiling tuition, fees &amp; scholarship information</div>
+              </li>
+              <li class="discovery-item" id="disc-5">
+                <span class="discovery-icon">5</span>
+                <div>Configuring AI Admissions Assistant</div>
+              </li>
+            </ul>
+          </div>
+
+          <p class="slow-site-note" id="slowSiteNote">
+            Institutional websites with high security can take a few extra moments...
+          </p>
+          <p class="tool-microcopy">Your demo is almost ready.</p>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- STAGE 2B: SCRAPE FAILED                                          -->
+      <!-- ================================================================ -->
+      <section class="stage-section" id="stage-2b">
+        <div class="stage-card">
+          <div class="error-icon-box">✕</div>
+          <h2 class="tool-title" id="failTitle">We couldn't connect to that website</h2>
+          <p class="tool-subtitle" id="failSubtitle">
+            The website may be temporarily unavailable or blocking automated access.
+          </p>
+
+          <div style="margin: 24px 0;">
+            <button onclick="goToStage(1)" class="btn-submit-main" style="max-width: 320px; margin: 0 auto;">
+              <span>Try a Different URL</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+          </div>
+
+          <p class="tool-microcopy">
+            Need help? Reach us at <strong>hello@edvora.chat</strong>
+          </p>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- STAGE 3: DEMO READY & WORK EMAIL CAPTURE                        -->
+      <!-- ================================================================ -->
+      <section class="stage-section" id="stage-3">
+        <div class="stage-card">
+          <div class="tool-eyebrow">Demo Ready</div>
+          <h2 class="tool-title">Your Edvora Demo Is Ready</h2>
+          <p class="tool-subtitle" id="stage3Sub">
+            We mapped Programs, Admissions, Fees and Scholarships on your website.
+          </p>
+
+          <div class="summary-badges-strip" id="summaryBadgesStrip">
+            <span class="summary-badge-pill lit">🎓 Programs Mapped</span>
+            <span class="summary-badge-pill lit">📄 Admissions Found</span>
+            <span class="summary-badge-pill lit">💰 Fees &amp; Tuition</span>
+            <span class="summary-badge-pill lit">🏆 Scholarships</span>
+          </div>
+
+          <form id="emailCaptureForm" onsubmit="handleEmailSubmit(event)">
+            <div class="email-prompt-heading">Where should we save your demo access?</div>
+            <div class="url-input-container">
+              <div class="url-input-wrap">
+                <div class="url-prefix-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                  </svg>
+                </div>
+                <input
+                  type="email" id="workEmailInput" class="url-field"
+                  placeholder="name@university.edu" required autocomplete="email"
+                />
+              </div>
+            </div>
+
+            <button type="submit" class="btn-submit-main" id="btnLaunchDemo">
+              <span>Launch My Demo</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+          </form>
+
+          <p class="tool-microcopy">Built from public information on your website. <strong>No sales call required.</strong></p>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- STAGE 4: DUAL-PANE DEMO EXPERIENCE                              -->
+      <!-- ================================================================ -->
+      <section class="stage-section" id="stage-4">
+        <div class="demo-outer-layout">
+
+          <!-- Left Column: Top Info Card + Centered Chat Widget -->
+          <div class="demo-left-column">
+
+            <!-- Top Info Card -->
+            <div class="edvora-preview-header-card">
+              <div class="header-card-top-row">
+                <div class="header-card-title">
+                  <svg width="15" height="15" viewBox="0 0 40 40" fill="none"><path d="M20 6C20 13.732 13.732 20 6 20C13.732 20 20 26.268 20 34C20 26.268 26.268 20 34 20C26.268 20 20 13.732 20 6Z" fill="#063D3B" /></svg>
+                  <span>Edvora Preview — <span id="demoHeaderInstName">Dallas Christian College</span></span>
+                </div>
+                <span class="preview-mode-badge">
+                  <span class="dot"></span> Preview environment
+                </span>
+              </div>
+              <div class="header-card-subtitle">
+                Built from publicly available information on <span id="demoDomainSpan">dallas.edu</span> for demo purpose
+              </div>
+              <div class="header-card-intent-row">
+                <span class="intent-label">Student Intent</span>
+                <div class="intent-track">
+                  <div class="intent-fill" id="intentFill" style="width: 15%;"></div>
+                </div>
+                <span class="intent-level-label exploring" id="intentLevelLabel">Exploring</span>
+              </div>
+            </div>
+
+            <!-- Hidden elements for JS compatibility -->
+            <div style="display:none;" id="scenarioTabsInner"></div>
+            <div style="display:none;" id="scenarioChipsInner"></div>
+
+            <!-- Chat Widget Preview (From Template) -->
+            <div class="edvora-widget-preview">
+              <!-- Header -->
+              <div class="edvora-header">
+                <div class="edvora-header-left">
+                  <div class="edvora-avatar-wrap">
+                    <img src="/template/avatar1.png" alt="Assistant" class="edvora-avatar-img">
+                    <div class="edvora-online-dot"></div>
+                  </div>
+                  <div class="edvora-title-group">
+                    <div class="edvora-bot-name" id="widgetBotName">Pacific Crest University</div>
+                    <div class="edvora-bot-status">Online Now</div>
+                  </div>
+                </div>
+                <button class="edvora-close-btn" aria-label="Close" type="button" onclick="handleWidgetClose()">&times;</button>
+              </div>
+
+              <!-- Messages Body -->
+              <div class="edvora-messages-body" id="demoMessagesBody">
+                <div class="edvora-msg-row ai">
+                  <img src="/template/avatar1.png" alt="Assistant" class="edvora-msg-bubble-avatar">
+                  <div class="edvora-bubble ai" id="initialAiGreeting">
+                    <p class="greeting-header">Welcome 👋</p>
+                    <p>Hi! I’m Taylor, your University Admissions Assistant<span id="greetingInstName" style="display:none;"></span>.</p>
+                    <p>I can help you find the right program, understand admission requirements, check fees and scholarships, explore campus life, and answer your questions.</p>
+                    <p>What would you like to explore?</p>
+                  </div>
+                </div>
+                <div class="edvora-msg-time">Just now</div>
+
+                <!-- Typing indicator row -->
+                <div class="edvora-msg-row ai" id="typingRow" style="display:none;">
+                  <img src="/template/avatar1.png" alt="Assistant" class="edvora-msg-bubble-avatar">
+                  <div class="edvora-bubble ai" style="padding: 10px 14px;">
+                    <div class="typing-indicator-box" id="typingIndicator" style="display:flex;">
+                      <span class="typing-dot"></span>
+                      <span class="typing-dot"></span>
+                      <span class="typing-dot"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Input Box -->
+              <form class="edvora-input-box" onsubmit="handleSendUserMessage(event)">
+                <div class="edvora-input-wrapper">
+                  <input type="text" id="userChatInput" class="edvora-input-field" placeholder="Ask me anything..." autocomplete="off" />
+                </div>
+                <button type="submit" class="edvora-send-button" aria-label="Send" id="btnSendChat">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                  </svg>
+                </button>
+              </form>
+
+              <!-- Footer Branding -->
+              <div class="edvora-branding">
+                Powered by <span>edvora.chat</span>
+              </div>
+            </div><!-- /edvora-widget-preview -->
+
+          </div><!-- /demo-left-column -->
+
+          <!-- Right Column: Admissions Team View -->
+          <div class="admin-intelligence-card" id="adminPanel">
+            <div class="admin-panel-eyebrow">Admissions Team View</div>
+            <div class="admin-panel-title">Live Session Intelligence</div>
+
+            <!-- Toggle bar hidden / kept for safety -->
+            <div class="show-admin-toggle-bar" id="adminToggleBar" style="display:none;">
+              <span class="toggle-label">Seeing the student experience?</span>
+              <button class="toggle-btn" onclick="revealAdminPanel()">Show what your team sees →</button>
+            </div>
+
+            <div class="admin-panel-body" id="adminPanelBody" style="padding:0; overflow:visible;">
+
+              <!-- Placeholder kept in DOM for safety -->
+              <div class="admin-placeholder" id="adminPlaceholder" style="display:none;"></div>
+
+              <div id="adminLiveData" style="display:flex; flex-direction:column; gap:12px;">
+
+                <div class="admin-metric-row">
+                  <div class="admin-metric-card">
+                    <div class="admin-metric-label">Messages</div>
+                    <div class="admin-metric-value" id="adminMsgCount">0</div>
+                  </div>
+                  <div class="admin-metric-card">
+                    <div class="admin-metric-label">Lead Stage</div>
+                    <div class="admin-metric-value stage" id="adminStageLabel">New</div>
+                  </div>
+                </div>
+
+                <div class="admin-section-box">
+                  <div class="admin-section-title">Student Intent</div>
+                  <div class="admin-intent-bar">
+                    <div class="admin-intent-dots">
+                      <div class="admin-intent-dot lit" id="adminDot1"></div>
+                      <div class="admin-intent-dot" id="adminDot2"></div>
+                      <div class="admin-intent-dot" id="adminDot3"></div>
+                    </div>
+                    <span class="admin-intent-text" id="adminIntentText">Exploring</span>
+                  </div>
+                  <div class="admin-journey-trail" id="adminJourneyTrail"></div>
+                </div>
+
+                <div class="admin-section-box">
+                  <div class="admin-section-title">Session Details</div>
+                  <div class="admin-field-row">
+                    <span class="admin-field-key">Institution</span>
+                    <span class="admin-field-val" id="adminInstName">Dallas Christian College</span>
+                  </div>
+                  <div class="admin-field-row">
+                    <span class="admin-field-key">Source URL</span>
+                    <span class="admin-field-val" id="adminDomain">dallas.edu</span>
+                  </div>
+                  <div class="admin-field-row">
+                    <span class="admin-field-key">Work Email</span>
+                    <span class="admin-field-val" id="adminEmail">salan@dallas.edu</span>
+                  </div>
+                  <div class="admin-field-row">
+                    <span class="admin-field-key">Program Interest</span>
+                    <span class="admin-field-val" id="adminProgramInterest">—</span>
+                  </div>
+                  <div class="admin-field-row">
+                    <span class="admin-field-key">Opportunity</span>
+                    <span class="admin-field-val" id="adminPipelineVal" style="color:#047857;">Admissions Funnel</span>
+                  </div>
+                  <div class="admin-field-row">
+                    <span class="admin-field-key">Contact</span>
+                    <span class="admin-field-val empty" id="adminContact">Not yet captured</span>
+                  </div>
+                </div>
+
+                <!-- Lead card (hidden until counselor form submitted) -->
+                <div id="adminLeadCard" style="display:none;"></div>
+
+                <!-- Conversion Moment Alert (hidden until triggered) -->
+                <div id="conversionAlert" style="display:none;"></div>
+
+                <!-- Live Activity Feed -->
+                <div class="admin-section-box" id="activityFeedBox" style="display:none;">
+                  <div class="admin-section-title">Live Activity Feed</div>
+                  <div class="activity-feed" id="activityFeed"></div>
+                </div>
+
+              </div><!-- /adminLiveData -->
+
+            </div><!-- /admin-panel-body -->
+          </div><!-- /admin-intelligence-card -->
+
+        </div><!-- /demo-outer-layout -->
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- STAGE 5: CLOSING REVEAL (Redesigned)                            -->
+      <!-- ================================================================ -->
+      <section class="stage-section" id="stage-5">
+        <div class="closing-outer">
+          <div style="width:52px; height:52px; border-radius:50%; background:#E6F7D2; color:#063D3B; display:flex; align-items:center; justify-content:center; font-size:22px; margin: 0 auto 16px;">✓</div>
+          <div class="tool-eyebrow" style="margin-bottom: 12px;">That's Edvora in Action</div>
+          <h2 class="tool-title" style="font-size: clamp(22px, 3vw, 30px);">You just watched Edvora convert a visitor into a lead.</h2>
+
+          <!-- Lead Recap Card -->
+          <div class="closing-lead-recap" id="closingLeadRecap" style="display:none;">
+            <div class="closing-lead-recap-header">
+              <span>✅</span> Lead Captured — Ready for Your Admissions Team
+            </div>
+            <div class="closing-lead-name" id="closingLeadName">—</div>
+            <div class="closing-lead-meta">
+              <span>📧 <strong id="closingLeadContact">—</strong></span>
+              <span>🎓 <strong id="closingLeadProgram">—</strong></span>
+              <span>📋 <strong id="closingLeadType">—</strong></span>
+            </div>
+            <div style="font-size:11.5px; color:#3E7A1E; margin-top:10px; font-weight:500;">
+              Full conversation transcript attached. Your team can follow up without any manual effort.
+            </div>
+          </div>
+
+          <!-- ROI Statement -->
+          <div class="closing-roi-box">
+            Without Edvora, this visitor would have left your website with no record of their interest.<br>
+            <strong>Now your admissions team has a name, a contact, and a program — automatically, 24/7.</strong>
+          </div>
+
+          <div class="closing-funnel-strip">
+            <span class="funnel-step active">Your Website</span>
+            <span class="funnel-arrow">→</span>
+            <span class="funnel-step active">Student Visit</span>
+            <span class="funnel-arrow">→</span>
+            <span class="funnel-step active">Conversation</span>
+            <span class="funnel-arrow">→</span>
+            <span class="funnel-step active">Intent Detected</span>
+            <span class="funnel-arrow">→</span>
+            <span class="funnel-step active">Lead Captured</span>
+            <span class="funnel-arrow">→</span>
+            <span class="funnel-step active">Team Notified</span>
+          </div>
+
+          <div class="closing-cta-group">
+            <a href="/app/#signup" class="btn-submit-main" style="text-decoration:none;">
+              <span>Set This Up for My Institution →</span>
+            </a>
+            <button class="btn-share-link" onclick="shareDemoLink()">
+              🔗 Share this demo with my team
+            </button>
+            <div class="share-copied-toast" id="shareCopiedToast">✓ Link copied to clipboard!</div>
+          </div>
+        </div>
+      </section>
+
+
+    </div><!-- /tool-canvas -->
+  </main>
+
+  <script>
+    // ============================================================
+    // STATE
+    // ============================================================
+    const state = {
+      sessionToken: null,
+      institutionName: '',
+      domain: '',
+      programs: [],
+      email: '',
+      hasAdmissions: true,
+      hasFees: true,
+      hasScholarships: true,
+      chatHistory: [],
+      messageCount: 0,
+      intentLevel: 'exploring',
+      journeyTopics: [],
+      counselorFlowActive: false,
+      leadType: 'counselor',
+      counselorContactMethod: null,
+      counselorContactValue: null,
+      leadCaptured: false,
+      adminPanelRevealed: false,
+      lastDetectedProgram: null,
+    };
+
+    // ============================================================
+    // SCENARIO TABS CONFIG (With Natural Lead-Generation Hooks)
+    // ============================================================
+    function buildScenarios() {
+      const programs = state.programs;
+      const firstProgram = programs.length > 0 ? programs[0] : 'MBA';
+      const secondProgram = programs.length > 1 ? programs[1] : 'Nursing';
+
+      return [
+        {
+          label: 'Programs',
+          chips: [
+            `What programs do you offer?`,
+            `Can you send me the prospectus for ${firstProgram}?`,
+          ]
+        },
+        {
+          label: 'Admissions',
+          chips: [
+            `What are the ${firstProgram} admissions requirements?`,
+            `Can someone help me decide which program is right for me?`,
+          ]
+        },
+        {
+          label: 'Fees & Aid',
+          chips: [
+            `What does ${firstProgram} cost?`,
+            `Can I get a scholarship or financial aid evaluation?`,
+          ]
+        },
+        {
+          label: 'Campus & Tours',
+          chips: [
+            `Can I schedule an in-person or virtual campus tour?`,
+            `What is campus and student life like?`,
+          ]
+        },
+        {
+          label: 'Talk to Someone',
+          chips: [
+            `I'd like an admissions advisor to contact me`,
+          ]
+        }
+      ];
+    }
+
+    let currentTabIndex = 0;
+
+    function renderScenarioTabs() {
+      const scenarios = buildScenarios();
+      const tabsEl = document.getElementById('scenarioTabsInner');
+      tabsEl.innerHTML = '';
+
+      scenarios.forEach((s, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'scenario-tab' + (i === currentTabIndex ? ' active' : '');
+        btn.textContent = s.label;
+        btn.onclick = () => {
+          currentTabIndex = i;
+          document.querySelectorAll('.scenario-tab').forEach((t, idx) => {
+            t.classList.toggle('active', idx === i);
+          });
+          renderScenarioChips(scenarios[i].chips);
+        };
+        tabsEl.appendChild(btn);
+      });
+
+      renderScenarioChips(scenarios[currentTabIndex].chips);
+    }
+
+    function renderScenarioChips(chips) {
+      const el = document.getElementById('scenarioChipsInner');
+      el.innerHTML = '';
+      chips.forEach(text => {
+        const btn = document.createElement('button');
+        btn.className = 'scenario-chip';
+        btn.textContent = text;
+        btn.type = 'button';
+        btn.onclick = () => {
+          document.getElementById('userChatInput').value = text;
+          handleSendUserMessage();
+        };
+        el.appendChild(btn);
+      });
+    }
+
+    // ============================================================
+    // STAGE NAVIGATION
+    // ============================================================
+    function goToStage(stageNum) {
+      document.querySelectorAll('.stage-section').forEach(s => s.classList.remove('active'));
+      const canvas = document.getElementById('mainCanvas');
+
+      if (stageNum === 4) {
+        canvas.classList.add('wide');
+      } else {
+        canvas.classList.remove('wide');
+      }
+
+      const stageDotMap = { 1: 1, 2: 2, '2a': 2, '2b': 2, 3: 2, 4: 3, 5: 3 };
+      const activeIdx = stageDotMap[stageNum] || 1;
+      for (let i = 1; i <= 3; i++) {
+        const dot = document.getElementById(`dot-${i}`);
+        if (!dot) continue;
+        dot.className = 'step-dot';
+        if (i === activeIdx) dot.classList.add('active');
+        else if (i < activeIdx) dot.classList.add('completed');
+      }
+
+      if (stageNum === '2b') document.getElementById('stage-2b').classList.add('active');
+      else if (stageNum === '2a' || stageNum === 2) document.getElementById('stage-2a').classList.add('active');
+      else if (stageNum === 5) document.getElementById('stage-5').classList.add('active');
+      else document.getElementById(`stage-${stageNum}`).classList.add('active');
+    }
+
+    // ============================================================
+    // STAGE 1: URL HANDLING
+    // ============================================================
+    function handleUrlInput(val) {
+      val = val.trim();
+      const badge = document.getElementById('urlValidBadge');
+      const btn = document.getElementById('btnBuildDemo');
+      const looksValid = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\/.*)?$/i.test(val) || /^https?:\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/i.test(val);
+      badge.style.display = looksValid ? 'inline-flex' : 'none';
+      btn.disabled = !looksValid;
+    }
+
+    async function handleUrlSubmit(e) {
+      e.preventDefault();
+      const rawUrl = document.getElementById('websiteUrlInput').value.trim();
+      if (!rawUrl) return;
+
+      goToStage('2a');
+      document.getElementById('disc-1').className = 'discovery-item active';
+
+      const slowTimer = setTimeout(() => {
+        const note = document.getElementById('slowSiteNote');
+        if (note) note.style.display = 'block';
+      }, 10000);
+
+      try {
+        const res = await fetch('/v1/preview/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: rawUrl })
+        });
+        clearTimeout(slowTimer);
+        const data = await res.json();
+
+        if (data.status !== 'success' || !data.data) {
+          document.getElementById('failTitle').innerText = `We couldn't connect to ${data.data?.domain || 'that website'}`;
+          document.getElementById('failSubtitle').innerText = data.message || 'The server may be unreachable or blocking automated access.';
+          goToStage('2b');
+          return;
+        }
+
+        const d = data.data;
+        state.sessionToken = d.session_token;
+        state.institutionName = d.institution_name;
+        state.domain = d.domain;
+        state.programs = d.programs || [];
+        state.hasAdmissions = d.has_admissions;
+        state.hasFees = d.has_fees;
+        state.hasScholarships = d.has_scholarships;
+
+        await playDiscoverySequence(d);
+
+        populateStage3(d);
+        setTimeout(() => {
+          goToStage(3);
+          document.getElementById('workEmailInput')?.focus();
+        }, 500);
+
+      } catch (err) {
+        clearTimeout(slowTimer);
+        document.getElementById('failTitle').innerText = `Connection error`;
+        document.getElementById('failSubtitle').innerText = err.message || 'Please check your connection and try again.';
+        goToStage('2b');
+      }
+    }
+
+    async function playDiscoverySequence(d) {
+      const wait = ms => new Promise(r => setTimeout(r, ms));
+
+      const d1 = document.getElementById('disc-1');
+      d1.innerHTML = `<span class="discovery-icon">✓</span><div>Website connected — <strong>${d.domain}</strong> (${d.pages_found} pages found)</div>`;
+      d1.className = 'discovery-item done'; await wait(700);
+
+      const d2 = document.getElementById('disc-2');
+      d2.className = 'discovery-item active'; await wait(850);
+      d2.innerHTML = `<span class="discovery-icon">✓</span><div>Admissions requirements &amp; application procedures mapped</div>`;
+      d2.className = 'discovery-item done'; await wait(600);
+
+      const d3 = document.getElementById('disc-3');
+      d3.className = 'discovery-item active';
+      if (d.programs && d.programs.length > 0) {
+        const tagsRow = document.getElementById('discoveredTagsRow');
+        tagsRow.innerHTML = d.programs.slice(0, 6).map(p => `<span class="program-tag-pill">${escapeHtml(p)}</span>`).join('');
+        tagsRow.style.display = 'flex';
+      }
+      await wait(950);
+      document.getElementById('discProgramsText').innerHTML = `<strong>${d.programs?.length || 0} programs &amp; degrees identified</strong>`;
+      d3.className = 'discovery-item done'; await wait(700);
+
+      const d4 = document.getElementById('disc-4');
+      d4.className = 'discovery-item active'; await wait(800);
+      d4.innerHTML = `<span class="discovery-icon">✓</span><div>Tuition schedules &amp; scholarship criteria compiled</div>`;
+      d4.className = 'discovery-item done'; await wait(600);
+
+      const d5 = document.getElementById('disc-5');
+      d5.className = 'discovery-item active'; await wait(900);
+      d5.innerHTML = `<span class="discovery-icon">✓</span><div>AI Admissions Assistant configured for <strong>${escapeHtml(d.institution_name)}</strong></div>`;
+      d5.className = 'discovery-item done'; await wait(500);
+    }
+
+    // ============================================================
+    // STAGE 3: EMAIL
+    // ============================================================
+    function populateStage3(d) {
+      document.getElementById('stage3Sub').innerHTML =
+        `We mapped Programs, Admissions, Fees and Scholarships on <strong>${escapeHtml(d.domain)}</strong>.`;
+    }
+
+    async function handleEmailSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('workEmailInput').value.trim();
+      if (!email || !state.sessionToken) return;
+
+      state.email = email;
+
+      const btn = document.getElementById('btnLaunchDemo');
+      btn.disabled = true;
+      btn.innerHTML = `<span>Preparing Demo...</span>`;
+
+      try {
+        await fetch('/v1/preview/capture-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_token: state.sessionToken, email })
+        });
+      } catch (err) { console.warn('Email log:', err); }
+
+      initStage4();
+    }
+
+    // ============================================================
+    // STAGE 4: CHAT
+    // ============================================================
+    function initStage4() {
+      goToStage(4);
+
+      document.getElementById('demoHeaderInstName').textContent = state.institutionName || 'Dallas Christian College';
+      document.getElementById('demoDomainSpan').textContent = state.domain || 'dallas.edu';
+      if (document.getElementById('greetingInstName')) {
+        document.getElementById('greetingInstName').textContent = state.institutionName || '';
+      }
+      if (document.getElementById('widgetBotName')) {
+        document.getElementById('widgetBotName').textContent = state.institutionName || 'Pacific Crest University';
+      }
+
+      // Populate admin panel static fields
+      document.getElementById('adminInstName').textContent = state.institutionName || 'Dallas Christian College';
+      document.getElementById('adminDomain').textContent = state.domain || 'dallas.edu';
+      document.getElementById('adminEmail').textContent = state.email || 'salan@dallas.edu';
+
+      // Render scenario tabs
+      renderScenarioTabs();
+
+      // Show admin panel automatically on desktop
+      revealAdminPanel();
+
+      document.getElementById('userChatInput').focus();
+    }
+
+    function revealAdminPanel() {
+      state.adminPanelRevealed = true;
+      const toggle = document.getElementById('adminToggleBar');
+      if (toggle) toggle.style.display = 'none';
+
+      // Update placeholder
+      const placeholder = document.getElementById('adminPlaceholder');
+      const liveData = document.getElementById('adminLiveData');
+      if (placeholder) placeholder.style.display = 'none';
+      if (liveData) liveData.style.display = 'flex';
+    }
+
+    async function handleSendUserMessage(e) {
+      if (e) e.preventDefault();
+
+      const input = document.getElementById('userChatInput');
+      const text = input.value.trim();
+      if (!text || !state.sessionToken) return;
+      input.value = '';
+
+      // Dismiss any open counselor bubble so conversation flows naturally
+      dismissCounselorFlow();
+
+      // Remove scenario chips after first message
+      if (state.messageCount === 0) {
+        document.getElementById('scenarioChipsInner').innerHTML = '';
+      }
+
+      appendMessage('user', text);
+      state.chatHistory.push({ role: 'user', content: text });
+      state.messageCount++;
+
+      // Track topic for admin journey
+      trackJourneyTopic(text);
+
+      const typingRow = document.getElementById('typingRow');
+      const typing = document.getElementById('typingIndicator');
+      if (typingRow) typingRow.style.display = 'flex';
+      else if (typing) typing.style.display = 'inline-flex';
+      scrollChatToBottom();
+
+      try {
+        const res = await fetch('/v1/preview/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_token: state.sessionToken,
+            message: text,
+            history: state.chatHistory.slice(-16, -1)
+          })
+        });
+        const data = await res.json();
+        if (typingRow) typingRow.style.display = 'none';
+        if (typing) typing.style.display = 'none';
+
+        if (data.status === 'success' && data.data) {
+          const reply = data.data.reply;
+          const citation = data.data.source_citation;
+          const intentLevel = data.data.intent_level || 'exploring';
+          const suggestCounselor = data.data.suggest_counselor;
+          const leadType = data.data.lead_type || 'counselor';
+
+          appendMessage('ai', reply, citation);
+          state.chatHistory.push({ role: 'assistant', content: reply });
+
+          // Update intent indicators
+          updateIntentUI(intentLevel);
+
+          // Update admin panel
+          updateAdminPanel(data.data);
+
+          // Counselor flow: ONLY trigger if explicitly flagged and not yet captured
+          if (suggestCounselor && !state.leadCaptured) {
+            setTimeout(() => startCounselorFlow(leadType), 600);
+          }
+        } else {
+          appendMessage('ai', `I'm here to help with anything about ${escapeHtml(state.institutionName)}. Feel free to ask about programs, admissions, fees, or scholarships!`);
+        }
+      } catch (err) {
+        if (typingRow) typingRow.style.display = 'none';
+        if (typing) typing.style.display = 'none';
+        appendMessage('ai', `I'm experiencing a brief issue. Please try your question again!`);
+      }
+
+      scrollChatToBottom();
+    }
+
+    function appendMessage(role, content, citation = null) {
+      const body = document.getElementById('demoMessagesBody');
+      const typingRow = document.getElementById('typingRow');
+      const typing = document.getElementById('typingIndicator');
+      const targetBefore = typingRow || typing;
+
+      if (role === 'ai') {
+        const row = document.createElement('div');
+        row.className = 'edvora-msg-row ai';
+        row.innerHTML = `
+          <img src="/template/avatar1.png" alt="Assistant" class="edvora-msg-bubble-avatar">
+          <div class="edvora-bubble ai">
+            <p>${escapeHtml(content).replace(/\n/g, '<br>')}</p>
+          </div>
+        `;
+        if (targetBefore) {
+          body.insertBefore(row, targetBefore);
+        } else {
+          body.appendChild(row);
+        }
+
+        const time = document.createElement('div');
+        time.className = 'edvora-msg-time';
+        time.textContent = 'Just now';
+        if (targetBefore) {
+          body.insertBefore(time, targetBefore);
+        } else {
+          body.appendChild(time);
+        }
+
+        // Add source citation card below AI bubbles
+        if (citation) {
+          const cite = document.createElement('div');
+          cite.className = 'source-citation-card';
+          const domainLabel = citation.replace('https://', '').replace('http://', '');
+          cite.innerHTML = `
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#5A7570; flex-shrink:0;">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+            <span>Source:</span>
+            <a href="${escapeHtml(citation)}" target="_blank" rel="noopener">${escapeHtml(domainLabel)}</a>
+          `;
+          if (targetBefore) {
+            body.insertBefore(cite, targetBefore);
+          } else {
+            body.appendChild(cite);
+          }
+        }
+      } else {
+        const row = document.createElement('div');
+        row.className = 'edvora-msg-row user';
+        row.innerHTML = `
+          <div class="edvora-bubble user">
+            <p>${escapeHtml(content).replace(/\n/g, '<br>')}</p>
+          </div>
+        `;
+        if (targetBefore) {
+          body.insertBefore(row, targetBefore);
+        } else {
+          body.appendChild(row);
+        }
+
+        const time = document.createElement('div');
+        time.className = 'edvora-msg-time user';
+        time.textContent = 'Just now';
+        if (targetBefore) {
+          body.insertBefore(time, targetBefore);
+        } else {
+          body.appendChild(time);
+        }
+      }
+
+      scrollChatToBottom();
+    }
+
+    // ============================================================
+    // INTENT INDICATOR (with escalation animation)
+    // ============================================================
+    function updateIntentUI(level) {
+      const prevLevel = state.intentLevel;
+      state.intentLevel = level;
+      const fill = document.getElementById('intentFill');
+      const label = document.getElementById('intentLevelLabel');
+
+      const config = {
+        exploring: { width: '15%', text: 'Exploring', cls: 'exploring' },
+        interested: { width: '55%', text: 'Interested', cls: 'interested' },
+        high: { width: '92%', text: 'High Intent', cls: 'high' },
+      };
+      const c = config[level] || config.exploring;
+      fill.style.width = c.width;
+      label.textContent = c.text;
+      label.className = `intent-level-label ${c.cls}`;
+
+      // If intent escalated, add feed entry
+      if (prevLevel !== level && level !== 'exploring') {
+        const msg = level === 'interested'
+          ? 'Intent escalated → Interested'
+          : 'Intent escalated → High Intent 🔥';
+        addActivityFeedItem(msg, level === 'high' ? 'high' : '');
+      }
+    }
+
+    // ============================================================
+    // ADMIN PANEL (with live intelligence)
+    // ============================================================
+    function updateAdminPanel(data) {
+      if (!state.adminPanelRevealed) return;
+
+      const placeholder = document.getElementById('adminPlaceholder');
+      const liveData = document.getElementById('adminLiveData');
+      if (placeholder) placeholder.style.display = 'none';
+      if (liveData) liveData.style.display = 'flex';
+
+      document.getElementById('adminMsgCount').textContent = data.message_count || state.messageCount;
+
+      const stageLabels = { exploring: 'Browsing', interested: 'Interested', high: 'High Intent' };
+      document.getElementById('adminStageLabel').textContent = stageLabels[data.intent_level] || 'Engaged';
+
+      // Intent dots — with escalation pulse animation
+      const level = data.intent_level || 'exploring';
+      const prevLevel = state.intentLevel;
+      ['adminDot1', 'adminDot2', 'adminDot3'].forEach((id, i) => {
+        const dot = document.getElementById(id);
+        dot.className = 'admin-intent-dot';
+        if (level === 'exploring' && i === 0) dot.classList.add('lit');
+        if (level === 'interested' && i <= 1) dot.classList.add('lit');
+        if (level === 'high') { dot.classList.add('lit', 'high'); }
+        // Pulse on escalation
+        if (prevLevel !== level && level !== 'exploring') {
+          dot.classList.add('escalating');
+          setTimeout(() => dot.classList.remove('escalating'), 600);
+        }
+      });
+      const intentEl = document.getElementById('adminIntentText');
+      intentEl.textContent = { exploring: 'Exploring', interested: 'Interested', high: 'High Intent' }[level] || 'Engaged';
+      intentEl.className = `admin-intent-text ${level}`;
+
+      // Pipeline update
+      if (data.lead_type) { state.leadType = data.lead_type; }
+      const pipelineEl = document.getElementById('adminPipelineVal');
+      if (pipelineEl) {
+        const pLabels = {
+          counselor: 'Advising Callback',
+          tour: 'Campus Tour Booking',
+          scholarship: 'Scholarship Evaluation',
+          prospectus: 'Prospectus Download'
+        };
+        pipelineEl.textContent = pLabels[state.leadType] || 'Admissions Opportunity';
+      }
+
+      // Journey trail
+      const trail = document.getElementById('adminJourneyTrail');
+      if (trail && state.journeyTopics.length > 0) {
+        trail.innerHTML = state.journeyTopics.map(t => `<span class="journey-step-pill">${escapeHtml(t)}</span>`).join('');
+      }
+
+      // Program interest — use detected_program from API (reliable, covers all programs)
+      if (data.detected_program) {
+        const progEl = document.getElementById('adminProgramInterest');
+        if (progEl && state.lastDetectedProgram !== data.detected_program) {
+          progEl.innerHTML = `<span class="program-flash">🎓 ${escapeHtml(data.detected_program)}</span>`;
+          addActivityFeedItem(`Expressed interest in ${data.detected_program}`, 'high');
+        }
+        state.lastDetectedProgram = data.detected_program;
+      }
+
+      // Add regular activity feed entry
+      const lastUserMsg = state.chatHistory[state.chatHistory.length - 2]?.content || '';
+      addActivityFeedItem(`Asked: "${lastUserMsg.substring(0, 48)}${lastUserMsg.length > 48 ? '...' : ''}"`, '');
+
+      // Conversion moment alert
+      if (data.suggest_counselor && !state.leadCaptured) {
+        showConversionAlert(data.lead_type || 'counselor');
+      }
+    }
+
+
+    function trackJourneyTopic(msg) {
+      const lower = msg.toLowerCase();
+      const topics = [
+        { keywords: ['program', 'course', 'offer', 'study', 'degree'], label: 'Programs' },
+        { keywords: ['admission', 'requirement', 'eligib', 'apply', 'entry'], label: 'Admissions' },
+        { keywords: ['fee', 'cost', 'tuition', 'price'], label: 'Fees' },
+        { keywords: ['scholarship', 'financial', 'aid', 'grant', 'waiver'], label: 'Scholarships' },
+        { keywords: ['tour', 'visit', 'open house', 'campus'], label: 'Campus Tour' },
+        { keywords: ['prospectus', 'brochure', 'syllabus', 'catalog'], label: 'Prospectus' },
+        { keywords: ['counselor', 'contact', 'speak', 'call', 'help me', 'advisor', 'meeting'], label: 'Counselor' },
+      ];
+      for (const t of topics) {
+        if (t.keywords.some(k => lower.includes(k)) && !state.journeyTopics.includes(t.label)) {
+          state.journeyTopics.push(t.label);
+        }
+      }
+    }
+
+    // ============================================================
+    // ACTIVITY FEED
+    // ============================================================
+    function addActivityFeedItem(text, type = '') {
+      const feed = document.getElementById('activityFeed');
+      const feedBox = document.getElementById('activityFeedBox');
+      if (!feed) return;
+      if (feedBox) feedBox.style.display = 'block';
+
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+      const item = document.createElement('div');
+      item.className = 'activity-feed-item';
+      const dotClass = type === 'high' ? 'activity-feed-dot high' : (type === 'conversion' ? 'activity-feed-dot conversion' : 'activity-feed-dot');
+      item.innerHTML = `<div class="${dotClass}"></div><span style="flex:1;">${escapeHtml(text)}</span><span class="activity-feed-time">${timeStr}</span>`;
+      feed.insertBefore(item, feed.firstChild);
+
+      // Keep max 8 items
+      while (feed.children.length > 8) feed.removeChild(feed.lastChild);
+    }
+
+    // ============================================================
+    // CONVERSION MOMENT ALERT
+    // ============================================================
+    function showConversionAlert(leadType) {
+      const alertEl = document.getElementById('conversionAlert');
+      if (!alertEl) return;
+
+      const labels = {
+        prospectus: { icon: '📄', action: 'Prospectus Request', desc: 'Student accepted the prospectus offer. Lead capture card is active.' },
+        tour: { icon: '🏛️', action: 'Campus Tour Interest', desc: 'Student expressed interest in a campus tour. Lead card is active.' },
+        scholarship: { icon: '🏆', action: 'Scholarship Evaluation', desc: 'Student wants a scholarship assessment. Lead card is active.' },
+        counselor: { icon: '📞', action: 'Advisor Connection', desc: 'Student is ready to connect with an admissions advisor.' },
+      };
+      const l = labels[leadType] || labels.counselor;
+
+      alertEl.style.display = 'block';
+      alertEl.innerHTML = `
+        <div class="conversion-alert">
+          <div class="conversion-alert-icon">${l.icon}</div>
+          <div class="conversion-alert-body">
+            <div class="conversion-alert-label">🔔 Conversion Moment Detected</div>
+            <div class="conversion-alert-text">${l.action} — ${l.desc}</div>
+          </div>
+        </div>
+      `;
+
+      addActivityFeedItem(`🔔 Conversion moment: ${l.action}`, 'conversion');
+    }
+
+    // ============================================================
+    // SHARE DEMO LINK
+    // ============================================================
+    function shareDemoLink() {
+      const url = 'https://edvora.chat/try';
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(() => {
+          const toast = document.getElementById('shareCopiedToast');
+          if (toast) { toast.style.display = 'block'; setTimeout(() => toast.style.display = 'none', 2500); }
+        });
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = url; document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+        const toast = document.getElementById('shareCopiedToast');
+        if (toast) { toast.style.display = 'block'; setTimeout(() => toast.style.display = 'none', 2500); }
+      }
+    }
+
+
+    // ============================================================
+    // CONVERSATIONAL LEAD CAPTURE FLOW (Non-blocking & context-matched)
+    // ============================================================
+    function dismissCounselorFlow() {
+      state.counselorFlowActive = false;
+      const flowBubble = document.getElementById('counselorFlowBubble');
+      if (flowBubble) {
+        flowBubble.style.opacity = '0';
+        flowBubble.style.transform = 'translateY(6px)';
+        setTimeout(() => flowBubble.remove(), 250);
+      }
+    }
+
+    function startCounselorFlow(leadType = 'counselor') {
+      if (state.leadCaptured) return;
+      state.counselorFlowActive = true;
+      state.leadType = leadType;
+
+      const body = document.getElementById('demoMessagesBody');
+      const typingRow = document.getElementById('typingRow');
+      const typing = document.getElementById('typingIndicator');
+      const targetBefore = typingRow || typing;
+
+      const existing = document.getElementById('counselorFlowBubble');
+      if (existing) existing.remove();
+
+      const flowBubble = document.createElement('div');
+      flowBubble.className = 'counselor-flow-bubble';
+      flowBubble.id = 'counselorFlowBubble';
+
+      // Card content varies by lead type
+      const cardConfig = {
+        prospectus: {
+          badge: '📄 Program Prospectus',
+          heading: 'Where should we send it?',
+          desc: "I'll send you the complete curriculum guide, course catalog, and admission requirements — all in one document.",
+          question: 'Where should we send the curriculum guide and course catalog?',
+          btn1: `<button class="contact-method-btn" onclick="selectContactMethod('Email', this)">📧 Email</button>`,
+          btn2: `<button class="contact-method-btn" onclick="selectContactMethod('WhatsApp', this)">💬 WhatsApp</button>`,
+          btn3: '',
+        },
+        tour: {
+          badge: '🏛️ Campus Tour',
+          heading: 'Reserve your tour spot',
+          desc: "Our admissions team will confirm your date and send a personalised visitor guide.",
+          question: 'How should we confirm your campus tour booking?',
+          btn1: `<button class="contact-method-btn" onclick="selectContactMethod('Email', this)">📧 Email</button>`,
+          btn2: `<button class="contact-method-btn" onclick="selectContactMethod('Phone', this)">📞 Phone / WhatsApp</button>`,
+          btn3: '',
+        },
+        scholarship: {
+          badge: '🏆 Scholarship Assessment',
+          heading: 'Where should we send your evaluation?',
+          desc: "Our financial aid advisors will review your profile and send a personalised scholarship and fee waiver assessment.",
+          question: 'Where should our financial aid team send your scholarship assessment?',
+          btn1: `<button class="contact-method-btn" onclick="selectContactMethod('Email', this)">📧 Email</button>`,
+          btn2: `<button class="contact-method-btn" onclick="selectContactMethod('Phone', this)">📞 Phone / WhatsApp</button>`,
+          btn3: '',
+        },
+        counselor: {
+          badge: '📞 Admissions Advisor',
+          heading: 'Connect with your advisor',
+          desc: "An admissions advisor will reach out to answer your questions and help you map the right program.",
+          question: "What's the best way for an admissions advisor to reach you?",
+          btn1: `<button class="contact-method-btn" onclick="selectContactMethod('Email', this)">📧 Email</button>`,
+          btn2: `<button class="contact-method-btn" onclick="selectContactMethod('Phone', this)">📞 Phone</button>`,
+          btn3: `<button class="contact-method-btn" onclick="selectContactMethod('WhatsApp', this)">💬 WhatsApp</button>`,
+        },
+      };
+      const c = cardConfig[leadType] || cardConfig.counselor;
+
+      flowBubble.innerHTML = `
+        <div class="flow-header-row">
+          <div class="lead-card-type-badge">${c.badge}</div>
+          <button class="flow-dismiss-btn" onclick="dismissCounselorFlow()" title="Dismiss">&times;</button>
+        </div>
+        <div style="font-size:15px; font-weight:700; color:#063D3B; margin-bottom:5px;">${c.heading}</div>
+        <div class="lead-card-desc">${c.desc}</div>
+        <div style="font-size:13px; color:#5A7570; margin-bottom:10px;">${c.question}</div>
+        <div class="contact-method-btns">
+          ${c.btn1}
+          ${c.btn2}
+          ${c.btn3}
+        </div>
+        <div style="margin-top:8px; text-align:center;">
+          <button type="button" class="flow-cancel-link" onclick="dismissCounselorFlow()">Maybe later</button>
+        </div>
+      `;
+      if (targetBefore) {
+        body.insertBefore(flowBubble, targetBefore);
+      } else {
+        body.appendChild(flowBubble);
+      }
+      scrollChatToBottom();
+
+      // Chat input always stays enabled
+      const chatInput = document.getElementById('userChatInput');
+      chatInput.disabled = false;
+      chatInput.placeholder = 'Ask anything about admissions, programs, or fees...';
+    }
+
+    function selectContactMethod(method, btn) {
+      state.counselorContactMethod = method;
+      document.querySelectorAll('.contact-method-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+
+      let submitButtonLabel = "Request Callback →";
+      if (state.leadType === 'tour') submitButtonLabel = "Book Campus Tour →";
+      else if (state.leadType === 'scholarship') submitButtonLabel = "Request Scholarship Evaluation →";
+      else if (state.leadType === 'prospectus') submitButtonLabel = "Send My Prospectus →";
+
+      const flowBubble = document.getElementById('counselorFlowBubble');
+      if (flowBubble) {
+        const methodIcon = method === 'Email' ? '📧' : method === 'Phone' ? '📞' : '💬';
+        const methodLabel = method === 'Email' ? 'Email Delivery' : method === 'Phone' ? 'Phone Callback' : 'WhatsApp Delivery';
+        flowBubble.innerHTML = `
+          <div class="flow-header-row">
+            <div class="lead-card-type-badge">${methodIcon} ${methodLabel}</div>
+            <button class="flow-dismiss-btn" onclick="dismissCounselorFlow()" title="Dismiss">&times;</button>
+          </div>
+          <div style="font-size:13px; color:#5A7570; margin-bottom:4px;">
+            What's your ${method === 'Email' ? 'email address' : method === 'Phone' ? 'phone number' : 'WhatsApp number'}?
+          </div>
+          <input
+            type="${method === 'Email' ? 'email' : 'tel'}"
+            id="counselorContactInput"
+            class="counselor-inline-input"
+            placeholder="${method === 'Email' ? 'you@example.com' : '+1 555 000 0000'}"
+          />
+          <div style="margin-top:10px;">
+            <div style="font-size:13px; color:#5A7570; margin-bottom:4px;">And your name?</div>
+            <input type="text" id="counselorNameInput" class="counselor-inline-input" placeholder="e.g. Alex Rivera" />
+            <div style="display:flex; align-items:center; gap:12px; margin-top:10px;">
+              <button class="counselor-inline-submit" onclick="submitCounselorForm()">
+                ${submitButtonLabel}
+              </button>
+              <button type="button" class="flow-cancel-link" onclick="dismissCounselorFlow()">
+                Maybe later
+              </button>
+            </div>
+          </div>
+        `;
+        setTimeout(() => { document.getElementById('counselorContactInput')?.focus(); }, 100);
+        scrollChatToBottom();
+      }
+    }
+
+    async function submitCounselorForm() {
+      const contactVal = document.getElementById('counselorContactInput')?.value.trim();
+      const nameVal = document.getElementById('counselorNameInput')?.value.trim();
+
+      if (!contactVal || !nameVal) {
+        if (!contactVal) document.getElementById('counselorContactInput').style.borderColor = '#ef4444';
+        if (!nameVal) document.getElementById('counselorNameInput').style.borderColor = '#ef4444';
+        return;
+      }
+
+      state.counselorContactValue = contactVal;
+
+      try {
+        await fetch('/v1/preview/counselor-request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_token: state.sessionToken,
+            name: nameVal,
+            phone: contactVal,
+            request_type: state.leadType
+          })
+        });
+      } catch (err) { console.warn('Counselor request:', err); }
+
+      state.leadCaptured = true;
+      state.counselorFlowActive = false;
+
+      let successHeading = `Done. The ${escapeHtml(state.institutionName)} admissions team has been notified.`;
+      let successSub = "This conversation has been shared with them, so you won't have to repeat yourself.";
+
+      if (state.leadType === 'tour') {
+        successHeading = `Your campus tour reservation request has been received!`;
+        successSub = `The admissions office at ${escapeHtml(state.institutionName)} will confirm your tour date and send your visitor pass.`;
+      } else if (state.leadType === 'scholarship') {
+        successHeading = `Scholarship evaluation requested!`;
+        successSub = `Our financial aid team will review your profile and send your personalized scholarship assessment.`;
+      } else if (state.leadType === 'prospectus') {
+        successHeading = `Prospectus is on its way!`;
+        successSub = `The full curriculum guide and course catalog have been dispatched to ${escapeHtml(contactVal)}.`;
+      }
+
+      const flowBubble = document.getElementById('counselorFlowBubble');
+      const isWhatsApp = (state.counselorContactMethod === 'WhatsApp') || (!contactVal.includes('@') && contactVal.replace(/\D/g, '').length >= 7);
+      let waButtonHtml = '';
+
+      if (isWhatsApp) {
+        const progName = state.lastDetectedProgram || (state.programs.length > 0 ? state.programs[0] : 'Academic Programs');
+        const instName = state.institutionName || 'the University';
+        const waMsg = encodeURIComponent(`Hi! I requested information for ${progName} at ${instName} via Edvora.`);
+        const waUrl = `https://api.whatsapp.com/send?text=${waMsg}`;
+        waButtonHtml = `
+          <div style="margin-top:12px;">
+            <a href="${waUrl}" target="_blank" style="display:inline-flex; align-items:center; gap:8px; background:#25D366; color:#ffffff; font-weight:700; font-size:13px; padding:9px 18px; border-radius:9px; text-decoration:none; box-shadow:0 2px 8px rgba(37,211,102,0.3); transition:all 0.15s ease;">
+              <span>💬 Chat on WhatsApp</span> <span>&rarr;</span>
+            </a>
+            <span style="display:block; font-size:11px; color:#5A7570; margin-top:4px;">Tap to open instant conversation</span>
+          </div>
+        `;
+      }
+
+      if (flowBubble) {
+        flowBubble.innerHTML = `
+          <strong style="color:#047857;">${successHeading}</strong><br>
+          <span style="font-size:13px; color:#5A7570;">${successSub}</span>
+          ${waButtonHtml}
+        `;
+      }
+
+      document.getElementById('userChatInput').disabled = false;
+      document.getElementById('userChatInput').placeholder = 'Ask anything about admissions, programs, or fees...';
+
+      showAdminLeadCard(nameVal, contactVal);
+      populateStage5LeadRecap(nameVal, contactVal);
+
+      const advanceDelay = isWhatsApp ? 6000 : 4000;
+      setTimeout(() => { goToStage(5); }, advanceDelay);
+      scrollChatToBottom();
+    }
+
+    // Populate Stage 5 lead recap with actual captured data
+    function populateStage5LeadRecap(name, contact) {
+      const recap = document.getElementById('closingLeadRecap');
+      if (recap) {
+        document.getElementById('closingLeadName').textContent = name;
+        document.getElementById('closingLeadContact').textContent = contact;
+        const program = state.lastDetectedProgram || state.programs[0] || 'Program of interest';
+        document.getElementById('closingLeadProgram').textContent = program;
+        const typeLabels = { counselor: 'Advisor Callback', tour: 'Campus Tour', scholarship: 'Scholarship Eval.', prospectus: 'Prospectus' };
+        document.getElementById('closingLeadType').textContent = typeLabels[state.leadType] || 'Admissions';
+        recap.style.display = 'block';
+      }
+    }
+
+    function showAdminLeadCard(name, contact) {
+      const placeholder = document.getElementById('adminPlaceholder');
+      const liveData = document.getElementById('adminLiveData');
+      if (placeholder) placeholder.style.display = 'none';
+      if (liveData) liveData.style.display = 'flex';
+
+      document.getElementById('adminContact').textContent = contact;
+      document.getElementById('adminContact').classList.remove('empty');
+      document.getElementById('adminStageLabel').textContent = 'Lead Captured';
+      document.getElementById('adminMsgCount').textContent = state.messageCount;
+
+      const leadTypeLabels = {
+        counselor: 'Admissions Advisory Callback',
+        tour: 'Campus Tour Booking',
+        scholarship: 'Scholarship & Aid Evaluation',
+        prospectus: 'Prospectus & Catalog Request'
+      };
+      const leadTypeIcons = { counselor: '📞', tour: '🏛️', scholarship: '🏆', prospectus: '📄' };
+      const typeLabel = leadTypeLabels[state.leadType] || 'Admissions Opportunity';
+      const typeIcon = leadTypeIcons[state.leadType] || '✅';
+
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+      const leadCardEl = document.getElementById('adminLeadCard');
+      const programInterest = state.lastDetectedProgram || document.getElementById('adminProgramInterest')?.textContent?.replace('🎓', '')?.trim();
+
+      const isContactWa = (state.counselorContactMethod === 'WhatsApp') || (!contact.includes('@') && contact.replace(/\D/g, '').length >= 7);
+      const digitsOnly = contact.replace(/\D/g, '');
+      const waFollowUpUrl = isContactWa && digitsOnly
+        ? `https://wa.me/${digitsOnly}?text=` + encodeURIComponent(`Hi ${name}, this is the admissions team from ${state.institutionName || 'the University'}. We received your inquiry regarding ${programInterest || 'our programs'}. How can we help?`)
+        : '';
+
+      const followUpBtnHtml = isContactWa && waFollowUpUrl
+        ? `<a href="${waFollowUpUrl}" target="_blank" class="lead-card-action-btn primary" style="background:#25D366; border-color:#25D366; color:#ffffff; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:4px;">💬 Chat on WhatsApp</a>`
+        : `<button class="lead-card-action-btn primary">✉ Follow Up</button>`;
+
+      leadCardEl.innerHTML = `
+        <div class="lead-captured-card">
+          <div class="lead-card-header">
+            <span>${typeIcon}</span> ${typeLabel}
+            <span style="margin-left:auto; font-size:10px; color:#7E9490; font-weight:500; text-transform:none; letter-spacing:0;">${timeStr}</span>
+          </div>
+          <div class="lead-card-name">${escapeHtml(name)}</div>
+          ${programInterest && programInterest !== '—' ? `<div class="lead-card-tag">🎓 ${escapeHtml(programInterest)}</div>` : ''}
+          <div class="admin-field-row" style="font-size:12px; padding:5px 0;">
+            <span class="admin-field-key">Contact</span>
+            <span class="admin-field-val">${escapeHtml(contact)} ${isContactWa ? '<span style="font-size:10px; font-weight:700; color:#25D366; margin-left:4px;">💬 WA</span>' : ''}</span>
+          </div>
+          <div class="admin-field-row" style="font-size:12px; padding:5px 0;">
+            <span class="admin-field-key">Via</span>
+            <span class="admin-field-val">${escapeHtml(state.counselorContactMethod || 'Direct')}</span>
+          </div>
+          <div class="admin-field-row" style="font-size:12px; padding:5px 0;">
+            <span class="admin-field-key">Messages</span>
+            <span class="admin-field-val">${state.messageCount}</span>
+          </div>
+          <div class="admin-field-row" style="font-size:12px; padding:5px 0; border-bottom:none;">
+            <span class="admin-field-key">Intent</span>
+            <span class="admin-field-val" style="color:#047857;">High ●</span>
+          </div>
+          <div class="lead-card-note">
+            Lead captured automatically. Full conversation transcript attached — your team can follow up without the student repeating themselves.
+          </div>
+          <div class="lead-card-action-row">
+            ${followUpBtnHtml}
+            <button class="lead-card-action-btn">+ Add to CRM</button>
+          </div>
+        </div>
+      `;
+      leadCardEl.style.display = 'block';
+
+      // Clear the conversion alert — lead is captured
+      const alertEl = document.getElementById('conversionAlert');
+      if (alertEl) alertEl.style.display = 'none';
+
+      // Add to activity feed
+      addActivityFeedItem(`✅ Lead captured — ${escapeHtml(name)} (${typeLabel})`, 'conversion');
+
+      scrollChatToBottom();
+    }
+
+    function scrollChatToBottom() {
+      const body = document.getElementById('demoMessagesBody');
+      if (body) body.scrollTop = body.scrollHeight;
+    }
+
+    function handleWidgetClose() {
+      const widget = document.querySelector('.edvora-widget-preview');
+      if (widget) {
+        widget.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+        widget.style.transform = 'scale(0.97)';
+        widget.style.opacity = '0.7';
+        setTimeout(() => {
+          widget.style.transform = 'scale(1)';
+          widget.style.opacity = '1';
+        }, 250);
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
+</body>
+</html>

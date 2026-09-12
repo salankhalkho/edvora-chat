@@ -1,0 +1,342 @@
+<div class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
+
+  <!-- Top Control Bar (Title) -->
+  <div class="ops-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 20px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important;">
+    <div class="ops-dash-title-group" style="display: flex !important; align-items: center !important; gap: 10px !important;">
+      <span class="ops-live-dot"></span>
+      <div>
+        <div class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important;">Teams &amp; People Management</div>
+        <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">Onboard team members, configure Admin vs. Team roles, set structure privileges, and manage department assignments</div>
+      </div>
+    </div>
+
+    <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
+      <div class="ckh-ctrl-pill" style="font-size: 11px !important; font-weight: 700 !important; color: var(--e-teal) !important; background: #F4FAF7 !important; border: 1px solid #D1E5DE !important; border-radius: 8px !important; padding: 5px 11px !important; display: inline-flex !important; align-items: center !important; gap: 5px !important;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        <span id="teamsActivePillCount">Staff Roster: Active</span>
+      </div>
+      <button id="teamsAddMemberBtn" onclick="openAddTeamMemberModal()" class="ckh-btn-ingest" title="Add Team Member" style="background: #063D3B !important; color: #C8FF63 !important; border: none !important; border-radius: 8px !important; padding: 6px 14px !important; font-size: 11.5px !important; font-weight: 700 !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; gap: 6px !important;">
+        <span style="font-size: 14px; line-height: 1; font-weight: 800;">+</span>
+        <span>Add Team Member</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 5 LIFECYCLE STATUS KPI TILES -->
+  <div class="ckh-kpi-ribbon">
+    
+    <!-- 1. Total Team Members -->
+    <div class="ckh-kpi-tile active-kpi" id="teamsKpiTileAll" onclick="setTeamsRoleFilter('all', this)">
+      <div class="ckh-kpi-header">
+        <div class="ckh-kpi-icon" style="background:#ECFDF5; color:#047857;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        </div>
+        <span class="ckh-kpi-badge" style="background:#ECFDF5; color:#047857;">Active Directory</span>
+      </div>
+      <div class="ckh-kpi-val"><span class="cnum-ckh" id="statTotalMembers">0</span></div>
+      <div class="ckh-kpi-lbl">Total Team Members</div>
+      <div class="ckh-kpi-sub">Verified institutional logins</div>
+    </div>
+
+    <!-- 2. Full Administrators -->
+    <div class="ckh-kpi-tile" id="teamsKpiTileFullAdmin" onclick="setTeamsRoleFilter('full_admin', this)">
+      <div class="ckh-kpi-header">
+        <div class="ckh-kpi-icon" style="background:#F5F3FF; color:#7C3AED;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        </div>
+        <span class="ckh-kpi-badge" style="background:#F5F3FF; color:#7C3AED;">Full Privileges</span>
+      </div>
+      <div class="ckh-kpi-val"><span class="cnum-ckh" id="statFullAdmins">0</span></div>
+      <div class="ckh-kpi-lbl">Full Administrators</div>
+      <div class="ckh-kpi-sub">Structure &amp; settings control</div>
+    </div>
+
+    <!-- 3. Content Admins -->
+    <div class="ckh-kpi-tile" id="teamsKpiTileContentAdmin" onclick="setTeamsRoleFilter('content_admin', this)">
+      <div class="ckh-kpi-header">
+        <div class="ckh-kpi-icon" style="background:#FEF3C7; color:#D97706;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+        </div>
+        <span class="ckh-kpi-badge" style="background:#FEF3C7; color:#B45309;">Content Access</span>
+      </div>
+      <div class="ckh-kpi-val"><span class="cnum-ckh" id="statContentAdmins">0</span></div>
+      <div class="ckh-kpi-lbl">Content Admins</div>
+      <div class="ckh-kpi-sub">Knowledge &amp; chat management</div>
+    </div>
+
+    <!-- 4. Counselors & Staff -->
+    <div class="ckh-kpi-tile" id="teamsKpiTileTeamMember" onclick="setTeamsRoleFilter('team_member', this)">
+      <div class="ckh-kpi-header">
+        <div class="ckh-kpi-icon" style="background:#E0F2FE; color:#0284C7;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        </div>
+        <span class="ckh-kpi-badge" style="background:#E0F2FE; color:#0284C7;">Counselors</span>
+      </div>
+      <div class="ckh-kpi-val"><span class="cnum-ckh" id="statTeamMembers">0</span></div>
+      <div class="ckh-kpi-lbl">Team Members</div>
+      <div class="ckh-kpi-sub">Admissions routing queues</div>
+    </div>
+
+    <!-- 5. Assigned Departments -->
+    <div class="ckh-kpi-tile" id="teamsKpiTileDepts" onclick="setTeamsRoleFilter('all', this)">
+      <div class="ckh-kpi-header">
+        <div class="ckh-kpi-icon" style="background:#F1F5F9; color:#64748B;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="22.01"/><line x1="15" y1="22" x2="15" y2="22.01"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/></svg>
+        </div>
+        <span class="ckh-kpi-badge" style="background:#F1F5F9; color:#64748B;">Campus Units</span>
+      </div>
+      <div class="ckh-kpi-val"><span class="cnum-ckh" id="statAssignedDepts">0</span></div>
+      <div class="ckh-kpi-lbl">Assigned Units</div>
+      <div class="ckh-kpi-sub">Department routing covered</div>
+    </div>
+
+  </div>
+
+  <!-- Staff Read-Only Notice Banner -->
+  <div id="teamsRestrictedNotice" class="brand-card" style="display: none; padding: 14px 18px; margin: 16px 20px; background: #FEF3C7; border: 1px solid #FDE68A; border-radius: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span style="font-size: 16px;">ℹ️</span>
+      <span style="font-size: 12px; color: #B45309; font-weight: 600;">
+        Content Admin View: You have permission to inspect organization team members. Contact an Administrator to provision new team members or modify structural roles.
+      </span>
+    </div>
+  </div>
+
+  <!-- FILTER & SEARCH TOOLBAR -->
+  <div class="ckh-toolbar" style="margin-top: 20px;">
+    <div class="ckh-tabs-group" id="teamsTabsContainer">
+      <button class="ckh-tab-btn active" id="teamsTabBtnAll" onclick="setTeamsRoleFilter('all', this)">
+        <span>All Members</span>
+        <span class="ckh-tab-count" id="tabCountAll">0</span>
+      </button>
+      <button class="ckh-tab-btn" id="teamsTabBtnFullAdmin" onclick="setTeamsRoleFilter('full_admin', this)" style="color:#7C3AED;">
+        <span style="width:6px; height:6px; border-radius:50%; background:#7C3AED; display:inline-block;"></span>
+        <span>Full Admins</span>
+        <span class="ckh-tab-count" id="tabCountFullAdmin" style="background:#F5F3FF; color:#7C3AED;">0</span>
+      </button>
+      <button class="ckh-tab-btn" id="teamsTabBtnContentAdmin" onclick="setTeamsRoleFilter('content_admin', this)" style="color:#B45309;">
+        <span style="width:6px; height:6px; border-radius:50%; background:#D97706; display:inline-block;"></span>
+        <span>Content Admins</span>
+        <span class="ckh-tab-count" id="tabCountContentAdmin" style="background:#FEF3C7; color:#B45309;">0</span>
+      </button>
+      <button class="ckh-tab-btn" id="teamsTabBtnTeamMember" onclick="setTeamsRoleFilter('team_member', this)" style="color:#0284C7;">
+        <span style="width:6px; height:6px; border-radius:50%; background:#0284C7; display:inline-block;"></span>
+        <span>Team Members</span>
+        <span class="ckh-tab-count" id="tabCountTeamMember" style="background:#E0F2FE; color:#0284C7;">0</span>
+      </button>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+      <!-- Department Filter Dropdown -->
+      <select id="teamsDeptFilter" onchange="filterTeamsRosterTable()" style="font-size: 11.5px; font-weight: 600; color: #063D3B; background: #ffffff; border: 1.5px solid #D1E5DE; border-radius: 8px; padding: 6px 12px; outline: none; cursor: pointer;">
+        <option value="all">All Departments</option>
+      </select>
+
+      <!-- Search Input -->
+      <div class="ckh-search-box">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#648781" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="teamsSearchInput" class="ckh-search-input" placeholder="Search by name, email, department..." oninput="filterTeamsRosterTable()">
+        <span style="font-size: 9.5px; font-family: 'JetBrains Mono', monospace; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: #F1F7F4; color: #648781; border: 1px solid #DCE9E5;">⌘K</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORGANIZATION TEAM ROSTER TABLE (MATCHES KNOWLEDGE HUB TABLE DESIGN) -->
+  <div class="ckh-table-wrap">
+    <table class="ckh-doc-table teams-roster-table">
+      <thead>
+        <tr>
+          <th>Team Member &amp; Account</th>
+          <th>Role &amp; Privilege Level</th>
+          <th>Department Units</th>
+          <th>Account Status</th>
+          <th id="teamsActionColHeader" style="text-align: right;">Action</th>
+        </tr>
+      </thead>
+      <tbody id="teamsRosterTableBody">
+        <tr>
+          <td colspan="5" style="text-align: center; padding: 36px 20px; color: #648781;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; font-size: 12.5px;">
+              <span>Loading team members...</span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL 1: ADD TEAM MEMBER MODAL -->
+<!-- ========================================================================= -->
+<div id="addTeamMemberModal" class="ckh-modal-overlay">
+  <div class="ckh-modal-card" style="max-width: 600px;">
+    <div class="ckh-modal-header">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: #ECFDF5; color: #047857; font-weight: 800; font-size: 16px;">+</span>
+        <div>
+          <div class="ckh-modal-title">Add Team Member</div>
+          <div style="font-size: 11px; color: #648781; margin-top: 2px;">Provision credentials, select role permissions, and assign departments</div>
+        </div>
+      </div>
+      <button type="button" class="ckh-modal-close" onclick="closeAddTeamMemberModal()" title="Close">&times;</button>
+    </div>
+
+    <form onsubmit="event.preventDefault(); submitAddTeamMemberModal();">
+      <div class="ckh-modal-body" style="padding: 20px 24px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div>
+            <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:#063D3B; margin-bottom:6px; letter-spacing: 0.04em;">Full Name *</label>
+            <input type="text" id="addMemberName" class="brand-input" placeholder="e.g. Dr. Sarah Jenkins" required style="height: 38px; border-radius: 8px; border: 1.5px solid #D1E5DE; padding: 0 12px; font-size: 12px; width: 100%; box-sizing: border-box;" />
+          </div>
+          <div>
+            <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:#063D3B; margin-bottom:6px; letter-spacing: 0.04em;">Email Address *</label>
+            <input type="email" id="addMemberEmail" class="brand-input" autocomplete="off" placeholder="sjenkins@university.edu" required style="height: 38px; border-radius: 8px; border: 1.5px solid #D1E5DE; padding: 0 12px; font-size: 12px; width: 100%; box-sizing: border-box;" />
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div>
+            <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:#063D3B; margin-bottom:6px; letter-spacing: 0.04em;">Password *</label>
+            <div style="position: relative;">
+              <input type="password" id="addMemberPassword" class="brand-input" autocomplete="new-password" placeholder="Min 6 characters" required style="height: 38px; border-radius: 8px; border: 1.5px solid #D1E5DE; padding: 0 38px 0 12px; font-size: 12px; width: 100%; box-sizing: border-box;" />
+              <button type="button" onclick="togglePasswordVisibility('addMemberPassword', this)" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #648781; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center;" title="Show/Hide Password">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+            </div>
+          </div>
+          <div>
+            <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:#063D3B; margin-bottom:6px; letter-spacing: 0.04em;">Role Type *</label>
+            <select id="addMemberRole" class="brand-input" style="height: 38px; border-radius: 8px; border: 1.5px solid #D1E5DE; padding: 0 12px; font-size: 12px; width: 100%; box-sizing: border-box; background-color: #FFFFFF; color: #063D3B; font-weight: 600;" onchange="toggleAddAdminPrivPanel()">
+              <option value="team">👥 Team Member (Counselor / Staff)</option>
+              <option value="admin">👑 Administrator</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Admin Capability Options (Visible when Role = Admin) -->
+        <div id="addAdminPrivPanel" style="display: none; background: #F8FBFA; border: 1.5px solid #D1E5DE; border-radius: 10px; padding: 14px 16px;">
+          <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:#063D3B; margin-bottom:8px; letter-spacing: 0.04em;">Administrator Capability Level:</label>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #092F2E; cursor: pointer;">
+              <input type="radio" name="add_admin_privilege" value="1" checked style="accent-color: #063D3B;" />
+              <span><strong>Full Admin:</strong> Full permissions &mdash; can manage knowledge, settings, team members &amp; departments</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #092F2E; cursor: pointer;">
+              <input type="radio" name="add_admin_privilege" value="0" style="accent-color: #063D3B;" />
+              <span><strong>Content Admin:</strong> Restricted &mdash; can manage knowledge and chat only (cannot modify team roster or departments)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Department Assignment Checklist -->
+        <div>
+          <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:#063D3B; margin-bottom:6px; letter-spacing: 0.04em;">Assign to Department Routing Queues (Optional):</label>
+          <div id="addMemberDeptChecklist" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; background: #F4FAF7; border-radius: 10px; border: 1.5px solid #D1E5DE;">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <div class="ckh-modal-footer" style="padding: 16px 24px; border-top: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="brand-btn-secondary" onclick="closeAddTeamMemberModal()" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border-radius: 8px; cursor: pointer;">Cancel</button>
+        <button type="submit" class="ckh-btn-ingest" style="background: #063D3B !important; color: #C8FF63 !important; border: none !important; border-radius: 8px !important; padding: 8px 20px !important; font-size: 12px !important; font-weight: 700 !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; gap: 6px !important;">
+          <span style="font-size: 14px; font-weight: 800;">+</span>
+          <span>Add Member</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL 2: EDIT TEAM MEMBER MODAL -->
+<!-- ========================================================================= -->
+<div id="editTeamMemberModal" class="ckh-modal-overlay">
+  <div class="ckh-modal-card" style="max-width: 600px;">
+    <div class="ckh-modal-header">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: #EFF6FF; color: #1D4ED8; font-weight: 800; font-size: 15px;">✏️</span>
+        <div>
+          <div class="ckh-modal-title">Edit Team Member</div>
+          <div style="font-size: 11px; color: #648781; margin-top: 2px;">Update profile details, role permissions, and assigned department queues</div>
+        </div>
+      </div>
+      <button type="button" class="ckh-modal-close" onclick="closeEditTeamMemberModal()" title="Close">&times;</button>
+    </div>
+
+    <form onsubmit="event.preventDefault(); submitEditTeamMemberModal();">
+      <input type="hidden" id="editMemberId" />
+      <div class="ckh-modal-body" style="padding: 20px 24px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div>
+            <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:#063D3B; margin-bottom:6px; letter-spacing: 0.04em;">Full Name *</label>
+            <input type="text" id="editMemberName" class="brand-input" required style="height: 38px; border-radius: 8px; border: 1.5px solid #D1E5DE; padding: 0 12px; font-size: 12px; width: 100%; box-sizing: border-box;" />
+          </div>
+          <div>
+            <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:#063D3B; margin-bottom:6px; letter-spacing: 0.04em;">Email Address *</label>
+            <input type="email" id="editMemberEmail" class="brand-input" required style="height: 38px; border-radius: 8px; border: 1.5px solid #D1E5DE; padding: 0 12px; font-size: 12px; width: 100%; box-sizing: border-box;" />
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div>
+            <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:#063D3B; margin-bottom:6px; letter-spacing: 0.04em;">Role Type *</label>
+            <select id="editMemberRole" class="brand-input" style="height: 38px; border-radius: 8px; border: 1.5px solid #D1E5DE; padding: 0 12px; font-size: 12px; width: 100%; box-sizing: border-box; background-color: #FFFFFF; color: #063D3B; font-weight: 600;" onchange="toggleEditAdminPrivPanel()">
+              <option value="team">👥 Team Member (Counselor / Staff)</option>
+              <option value="admin">👑 Administrator</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:#063D3B; margin-bottom:6px; letter-spacing: 0.04em;">New Password (Optional)</label>
+            <div style="position: relative;">
+              <input type="password" id="editMemberPassword" class="brand-input" autocomplete="new-password" placeholder="Leave blank to keep current" style="height: 38px; border-radius: 8px; border: 1.5px solid #D1E5DE; padding: 0 38px 0 12px; font-size: 12px; width: 100%; box-sizing: border-box;" />
+              <button type="button" onclick="togglePasswordVisibility('editMemberPassword', this)" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #648781; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center;" title="Show/Hide Password">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin Capability Options (Visible when Role = Admin) -->
+        <div id="editAdminPrivPanel" style="display: none; background: #F8FBFA; border: 1.5px solid #D1E5DE; border-radius: 10px; padding: 14px 16px;">
+          <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:#063D3B; margin-bottom:8px; letter-spacing: 0.04em;">Administrator Capability Level:</label>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #092F2E; cursor: pointer;">
+              <input type="radio" name="edit_admin_privilege" value="1" checked style="accent-color: #063D3B;" />
+              <span><strong>Full Admin:</strong> Full permissions &mdash; can manage knowledge, settings, team members &amp; departments</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #092F2E; cursor: pointer;">
+              <input type="radio" name="edit_admin_privilege" value="0" style="accent-color: #063D3B;" />
+              <span><strong>Content Admin:</strong> Restricted &mdash; can manage knowledge and chat only (cannot modify team roster or departments)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Department Assignment Checklist -->
+        <div>
+          <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:#063D3B; margin-bottom:6px; letter-spacing: 0.04em;">Assigned Department Routing Queues:</label>
+          <div id="editMemberDeptChecklist" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; background: #F4FAF7; border-radius: 10px; border: 1.5px solid #D1E5DE;">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <div class="ckh-modal-footer" style="padding: 16px 24px; border-top: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="brand-btn-secondary" onclick="closeEditTeamMemberModal()" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border-radius: 8px; cursor: pointer;">Cancel</button>
+        <button type="submit" class="ckh-btn-ingest" style="background: #063D3B !important; color: #C8FF63 !important; border: none !important; border-radius: 8px !important; padding: 8px 20px !important; font-size: 12px !important; font-weight: 700 !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; gap: 6px !important;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          <span>Save Changes</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+(function() {
+  if (typeof loadTeamsWorkspace === 'function') {
+    loadTeamsWorkspace();
+  }
+})();
+</script>

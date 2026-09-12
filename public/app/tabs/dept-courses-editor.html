@@ -1,0 +1,67 @@
+<!-- Dedicated Department Courses & Programs Editor Studio Frame -->
+<div id="view-dept-courses-editor" class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
+    
+    <!-- Top Control Bar -->
+    <div class="ops-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 24px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important; flex-wrap: wrap; gap: 12px;">
+        <div class="ops-dash-title-group" style="display: flex !important; align-items: center !important; gap: 14px !important;">
+            <button type="button" class="brand-btn-secondary" style="height: 34px; padding: 0 12px; font-size: 11.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border-radius: 6px; background: #F4FAF7; border: 1.5px solid #D1E5DE; color: var(--e-teal, #063D3B);" onclick="closeDeptCardEditor()">
+                <span>&larr;</span> Back to Department
+            </button>
+            <div style="height: 24px; width: 1.5px; background: #E2E8F0;"></div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span id="coursesModalDeptIcon" style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: #ECFDF5; font-size: 18px; font-weight: 800; color: #047857; border: 1px solid #A7F3D0;">🎓</span>
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span id="coursesModalDeptTitle" class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important; letter-spacing: -0.01em !important; line-height: 1.25 !important; max-width: 480px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            Academic Programs &amp; Offered Courses
+                        </span>
+                    </div>
+                    <div class="ops-dash-sub-title" id="coursesModalDeptSubtitle" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">
+                        Configure degree curricula, courses, and campus locations offered by this department
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
+            <button type="button" class="brand-btn-secondary" style="height: 34px; padding: 0 14px; font-size: 11.5px; font-weight: 600; border-radius: 6px;" onclick="closeDeptCardEditor()">Cancel</button>
+            <button type="button" class="brand-btn-primary" style="height: 34px; padding: 0 18px; font-size: 11.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; border-radius: 6px; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.2);" onclick="saveDeptCoursesOnly()">
+                <span>💾</span> Save Programs &amp; Courses
+            </button>
+        </div>
+    </div>
+
+    <!-- Content Area: Left-aligned form bounded to 900px -->
+    <div style="padding: 28px 32px 48px 32px; box-sizing: border-box; width: 100%;">
+        <div style="max-width: 900px; width: 100%; margin: 0; box-sizing: border-box;">
+            
+            <form id="deptCoursesForm" onsubmit="event.preventDefault(); saveDeptCoursesOnly();">
+                <input type="hidden" id="coursesEditorDeptId" />
+
+                <!-- SECTION: Academic Programs & Offered Courses -->
+                <div id="sectionDeptCoursesOnly" style="margin-bottom: 28px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div style="font-size: 15px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 16px;">🎓</span> Academic Programs &amp; Offered Courses
+                        </div>
+                        <button type="button" class="brand-btn-secondary" style="height: 30px; padding: 0 12px; font-size: 11.5px; font-weight: 700; border-radius: 6px;" onclick="addFocusedCourseRow()">+ Add Course</button>
+                    </div>
+                    <p style="font-size: 11.5px; color: #648781; margin: 0 0 16px 0; line-height: 1.5;">
+                        Add degree programs and courses offered under this department. Used by the AI chatbot to ground student questions and guide prospective students to relevant curricula, admissions eligibility, and campus facilities.
+                    </p>
+
+                    <div id="focusedDeptCoursesContainer" style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+
+                <!-- Bottom Save / Cancel Controls -->
+                <div style="margin-top: 28px; padding-top: 20px; border-top: 1.5px solid #E6F0EC; display: flex; justify-content: flex-end; gap: 12px;">
+                    <button type="button" class="brand-btn-secondary" style="height: 36px; padding: 0 20px; font-size: 12px; font-weight: 600; border-radius: 6px;" onclick="closeDeptCardEditor()">Cancel</button>
+                    <button type="submit" class="brand-btn-primary" style="height: 36px; padding: 0 24px; font-size: 12px; font-weight: 700; border-radius: 6px; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.2);">Save Programs &amp; Courses</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>

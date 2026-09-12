@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edvora.chat — Brand Logo & Light Theme Design Lab</title>
+    
+    <!-- Google Fonts: Outfit (Display & Brand), Plus Jakarta Sans, Inter, Fira Code -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --brand-indigo-500: #6366F1;
+            --brand-indigo-600: #4F46E5;
+            --brand-purple-500: #8B5CF6;
+            --brand-purple-600: #7C3AED;
+            --brand-purple-700: #9333EA;
+            --brand-lavender: #818CF8;
+            --brand-lavender-soft: #A5B4FC;
+            --brand-dark-bg: #060913;
+            --brand-dark-panel: #0d1117;
+            --brand-dark-card: #0f1728;
+            --brand-slate-900: #0F172A;
+            --brand-slate-800: #1E293B;
+            --brand-mist-bg: #F1F7F4;
+            --brand-teal-deep: #063D3B;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #F8FAFC;
+            color: #0F172A;
+            line-height: 1.5;
+            padding-bottom: 80px;
+        }
+
+        .container {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Top Header */
+        .lab-header {
+            background: #ffffff;
+            border-bottom: 1px solid #E2E8F0;
+            padding: 24px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+        }
+        .lab-header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .lab-title-group h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            color: #0F172A;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .lab-badge {
+            background: #EEF2FF;
+            color: #4F46E5;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid #C7D2FE;
+        }
+        .lab-subtitle {
+            font-size: 13px;
+            color: #64748B;
+            margin-top: 3px;
+        }
+
+        /* Bg Switcher Bar */
+        .bg-switcher {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #F1F5F9;
+            padding: 4px;
+            border-radius: 10px;
+            border: 1px solid #E2E8F0;
+        }
+        .bg-btn {
+            border: none;
+            background: transparent;
+            padding: 6px 14px;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748B;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .bg-btn .color-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 1px solid rgba(0,0,0,0.15);
+        }
+        .bg-btn.active {
+            background: #ffffff;
+            color: #0F172A;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* Section Cards */
+        .section-title-wrap {
+            margin: 40px 0 18px 0;
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+        }
+        .section-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            font-weight: 800;
+            color: #0F172A;
+            letter-spacing: -0.3px;
+        }
+        .section-desc {
+            font-size: 13px;
+            color: #64748B;
+        }
+
+        /* Grid of Logo Options */
+        .logo-options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 20px;
+        }
+
+        .option-card {
+            background: #ffffff;
+            border: 1.5px solid #E2E8F0;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            position: relative;
+        }
+        .option-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(99,102,241,0.08);
+            border-color: #CBD5E1;
+        }
+        .option-card.recommended {
+            border-color: #6366F1;
+            box-shadow: 0 0 0 1px #6366F1, 0 8px 24px rgba(99,102,241,0.12);
+        }
+        .rec-pill {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #6366F1;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 3px 9px;
+            border-radius: 20px;
+            z-index: 10;
+        }
+
+        .option-canvas {
+            padding: 40px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease;
+            min-height: 140px;
+            border-bottom: 1px solid #F1F5F9;
+        }
+
+        .option-info {
+            padding: 20px 24px;
+            background: #ffffff;
+        }
+        .option-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .option-name {
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: #0F172A;
+        }
+        .contrast-badge {
+            font-family: 'Fira Code', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 7px;
+            border-radius: 6px;
+            background: #ECFDF5;
+            color: #059669;
+            border: 1px solid #A7F3D0;
+        }
+        .option-explanation {
+            font-size: 12.5px;
+            color: #64748B;
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+        .color-breakdown {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #F1F5F9;
+            font-size: 11px;
+            color: #475569;
+            font-family: 'Fira Code', monospace;
+        }
+        .color-sample {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .swatch {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        /* ── LOGO COMPONENT DEFINITIONS ── */
+        .logo-lockup {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            user-select: none;
+            text-decoration: none;
+        }
+
+        /* SQUIRCLE ICON SVG */
+        .logo-icon-wrap {
+            width: 38px;
+            height: 38px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .logo-icon-wrap svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+            filter: drop-shadow(0 4px 10px rgba(99, 102, 241, 0.28));
+        }
+
+        /* TYPOGRAPHY */
+        .logo-text {
+            font-family: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
+            font-weight: 800;
+            font-size: 26px;
+            letter-spacing: -0.6px;
+            line-height: 1;
+            display: flex;
+            align-items: baseline;
+        }
+
+        /* VARIATION 0: ORIGINAL (DARK DASHBOARD) */
+        .logo-v0-dark .logo-text {
+            color: #FFFFFF;
+        }
+        .logo-v0-dark .logo-text span {
+            color: #818CF8;
+            font-weight: 700;
+        }
+
+        /* VARIATION 1: ADAPTIVE TWO-TONE (DEEP SLATE + ELECTRIC INDIGO) */
+        .logo-v1-adaptive .logo-text {
+            color: #0F172A;
+        }
+        .logo-v1-adaptive .logo-text span {
+            color: #4F46E5;
+            font-weight: 700;
+        }
+
+        /* VARIATION 2: GRADIENT TEXT ACCENT */
+        .logo-v2-gradient .logo-text {
+            color: #0F172A;
+        }
+        .logo-v2-gradient .logo-text span {
+            background: linear-gradient(135deg, #4F46E5 0%, #9333EA 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        /* VARIATION 3: UNIFIED DEEP SLATE / NAVY */
+        .logo-v3-navy .logo-text {
+            color: #0F172A;
+            font-weight: 800;
+        }
+        .logo-v3-navy .logo-text span {
+            color: #0F172A;
+            font-weight: 800;
+        }
+
+        /* VARIATION 4: ENCAPSULATED DARK GLASS PILL */
+        .logo-v4-pill {
+            background: #0B0F19;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 8px 18px;
+            border-radius: 100px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo-v4-pill .logo-text {
+            color: #FFFFFF;
+            font-size: 22px;
+        }
+        .logo-v4-pill .logo-text span {
+            color: #818CF8;
+        }
+        .logo-v4-pill .logo-icon-wrap {
+            width: 32px;
+            height: 32px;
+        }
+
+        /* VARIATION 5: CLEAN EDVORA.CHAT (LOWERCASE + INDIGO DOT) */
+        .logo-v5-domain .logo-text {
+            color: #0F172A;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.4px;
+        }
+        .logo-v5-domain .logo-text span.dot {
+            color: #6366F1;
+            font-weight: 900;
+        }
+        .logo-v5-domain .logo-text span.tld {
+            color: #6366F1;
+            font-weight: 600;
+        }
+
+        /* ── INTERACTIVE CONTEXT LIVE PREVIEWS ── */
+        .mockup-frame {
+            background: #ffffff;
+            border: 1.5px solid #E2E8F0;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.06);
+            margin-top: 24px;
+        }
+        .mockup-header-bar {
+            background: #F8FAFC;
+            border-bottom: 1px solid #E2E8F0;
+            padding: 10px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .mockup-dots {
+            display: flex;
+            gap: 6px;
+        }
+        .mockup-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        .mockup-dot.r { background: #FF5F56; }
+        .mockup-dot.y { background: #FFBD2E; }
+        .mockup-dot.g { background: #27C93F; }
+        .mockup-url {
+            background: #ffffff;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            padding: 3px 14px;
+            font-size: 11px;
+            font-family: 'Fira Code', monospace;
+            color: #64748B;
+            width: 320px;
+            text-align: center;
+        }
+
+        /* Real Navbar Live Simulation */
+        .sim-navbar {
+            background: rgba(241, 247, 244, 0.95);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid #DDE9E3;
+            padding: 14px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .sim-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            list-style: none;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #475569;
+        }
+        .sim-nav-links a {
+            color: #475569;
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+        .sim-nav-links a:hover { color: #0F172A; }
+        .sim-nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .sim-btn-ghost {
+            background: transparent;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            color: #0F172A;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .sim-btn-secondary {
+            background: #ffffff;
+            border: 1.5px solid #CBD5E1;
+            font-size: 13px;
+            font-weight: 600;
+            color: #0F172A;
+            padding: 8px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        .sim-btn-primary {
+            background: #6366F1;
+            border: none;
+            font-size: 13px;
+            font-weight: 700;
+            color: #ffffff;
+            padding: 9px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(99,102,241,0.3);
+        }
+
+        /* Real Hero Section Simulation */
+        .sim-hero {
+            background: radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.08), transparent 40%), radial-gradient(circle at 85% 90%, rgba(139, 92, 246, 0.08), transparent 40%), #F1F7F4;
+            padding: 56px 28px;
+            text-align: center;
+        }
+        .sim-hero-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #ffffff;
+            border: 1px solid #CBD5E1;
+            padding: 5px 14px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #4F46E5;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+        .sim-hero-h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 38px;
+            font-weight: 800;
+            color: #0F172A;
+            line-height: 1.15;
+            letter-spacing: -0.8px;
+            margin-bottom: 14px;
+        }
+        .sim-hero-h1 span {
+            color: #6366F1;
+        }
+        .sim-hero-p {
+            font-size: 15px;
+            color: #475569;
+            max-width: 680px;
+            margin: 0 auto 28px auto;
+            line-height: 1.6;
+        }
+
+        /* Scales Grid */
+        .scales-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .scale-box {
+            background: #ffffff;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .scale-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #94A3B8;
+        }
+
+        /* Direct Switcher for Live Demo */
+        .live-toggle-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .live-toggle-btn {
+            background: #ffffff;
+            border: 1.5px solid #CBD5E1;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .live-toggle-btn.active {
+            background: #4F46E5;
+            color: #ffffff;
+            border-color: #4F46E5;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ── TOP STICKY LAB BAR ── -->
+    <header class="lab-header">
+        <div class="container">
+            <div class="lab-header-content">
+                <div class="lab-title-group">
+                    <h1>
+                        Edvora Brand Identity Lab
+                        <span class="lab-badge">Design Preview</span>
+                    </h1>
+                    <div class="lab-subtitle">
+                        Interactive side-by-side evaluation of the application squircle logo across light &amp; dark surfaces.
+                    </div>
+                </div>
+
+                <!-- Surface Background Switcher -->
+                <div class="bg-switcher">
+                    <button class="bg-btn active" onclick="setCanvasBackground('white')">
+                        <span class="color-dot" style="background:#ffffff"></span> Pure White
+                    </button>
+                    <button class="bg-btn" onclick="setCanvasBackground('mist')">
+                        <span class="color-dot" style="background:#F1F7F4"></span> Edvora Mist
+                    </button>
+                    <button class="bg-btn" onclick="setCanvasBackground('slate')">
+                        <span class="color-dot" style="background:#F8FAFC"></span> Slate Grey
+                    </button>
+                    <button class="bg-btn" onclick="setCanvasBackground('dark')">
+                        <span class="color-dot" style="background:#060913"></span> Deep Dark
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- 1. SIDE-BY-SIDE LOGO VARIATION CARDS -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <div class="section-title-wrap">
+            <div>
+                <h2 class="section-title">1. Logo Options for Light Backgrounds</h2>
+                <div class="section-desc">Comparing the real dashboard logo against 4 tailored light-mode adaptations.</div>
+            </div>
+        </div>
+
+        <div class="logo-options-grid">
+
+            <!-- ── CARD 0: ORIGINAL (DARK REFERENCE) ── -->
+            <div class="option-card">
+                <div class="option-canvas logo-canvas" style="background: #060913;">
+                    <a href="javascript:void(0)" class="logo-lockup logo-v0-dark">
+                        <div class="logo-icon-wrap">
+                            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="40" height="40" rx="11" fill="url(#gradIcon0)"/>
+                                <path d="M20 9C20 15.0751 15.0751 20 9 20C15.0751 20 20 24.9249 20 31C20 24.9249 24.9249 20 31 20C24.9249 20 20 15.0751 20 9Z" fill="#FFFFFF"/>
+                                <defs>
+                                    <linearGradient id="gradIcon0" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                                        <stop stop-color="#5B50FF"/>
+                                        <stop offset="1" stop-color="#8B5CF6"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                        <span class="logo-text">Edvora<span>Chat</span></span>
+                    </a>
+                </div>
+                <div class="option-info">
+                    <div class="option-header-row">
+                        <span class="option-name">Reference: Native Dashboard (Dark)</span>
+                        <span class="contrast-badge" style="background:#0F172A; color:#818CF8; border-color:#334155;">Dark Mode</span>
+                    </div>
+                    <p class="option-explanation">
+                        The baseline dashboard logo. White text (`#FFFFFF`) with soft periwinkle (`#818CF8`). Looks stunning on dark navy.
+                    </p>
+                    <div class="color-breakdown">
+                        <div class="color-sample"><span class="swatch" style="background:#FFFFFF;"></span> #FFFFFF</div>
+                        <div class="color-sample"><span class="swatch" style="background:#818CF8;"></span> #818CF8</div>
+                        <div class="color-sample"><span class="swatch" style="background:linear-gradient(135deg, #5B50FF, #8B5CF6);"></span> Gradient</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── CARD 1: ADAPTIVE TWO-TONE (RECOMMENDED) ── -->
+            <div class="option-card recommended">
+                <span class="rec-pill">Recommended</span>
+                <div class="option-canvas logo-canvas" id="canvas-v1" style="background: #ffffff;">
+                    <a href="javascript:void(0)" class="logo-lockup logo-v1-adaptive">
+                        <div class="logo-icon-wrap">
+                            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="40" height="40" rx="11" fill="url(#gradIcon1)"/>
+                                <path d="M20 9C20 15.0751 15.0751 20 9 20C15.0751 20 20 24.9249 20 31C20 24.9249 24.9249 20 31 20C24.9249 20 20 15.0751 20 9Z" fill="#FFFFFF"/>
+                                <defs>
+                                    <linearGradient id="gradIcon1" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                                        <stop stop-color="#5B50FF"/>
+                                        <stop offset="1" stop-color="#8B5CF6"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                        <span class="logo-text">Edvora<span>Chat</span></span>
+                    </a>
+                </div>
+                <div class="option-info">
+                    <div class="option-header-row">
+                        <span class="option-name">Option 1: Adaptive Two-Tone</span>
+                        <span class="contrast-badge">AAA 13.8:1</span>
+                    </div>
+                    <p class="option-explanation">
+                        <strong>"Edvora"</strong> in Deep Slate (`#0F172A`) + <strong>"Chat"</strong> in Vibrant Electric Indigo (`#4F46E5`). Retains 100% brand DNA with crisp contrast.
+                    </p>
+                    <div class="color-breakdown">
+                        <div class="color-sample"><span class="swatch" style="background:#0F172A;"></span> #0F172A</div>
+                        <div class="color-sample"><span class="swatch" style="background:#4F46E5;"></span> #4F46E5</div>
+                        <div class="color-sample"><span class="swatch" style="background:linear-gradient(135deg, #5B50FF, #8B5CF6);"></span> Icon</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── CARD 2: GRADIENT-FILLED TEXT ── -->
+            <div class="option-card">
+                <div class="option-canvas logo-canvas" id="canvas-v2" style="background: #ffffff;">
+                    <a href="javascript:void(0)" class="logo-lockup logo-v2-gradient">
+                        <div class="logo-icon-wrap">
+                            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="40" height="40" rx="11" fill="url(#gradIcon2)"/>
+                                <path d="M20 9C20 15.0751 15.0751 20 9 20C15.0751 20 20 24.9249 20 31C20 24.9249 24.9249 20 31 20C24.9249 20 20 15.0751 20 9Z" fill="#FFFFFF"/>
+                                <defs>
+                                    <linearGradient id="gradIcon2" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                                        <stop stop-color="#5B50FF"/>
+                                        <stop offset="1" stop-color="#8B5CF6"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                        <span class="logo-text">Edvora<span>Chat</span></span>
+                    </a>
+                </div>
+                <div class="option-info">
+                    <div class="option-header-row">
+                        <span class="option-name">Option 2: Gradient "Chat" Accent</span>
+                        <span class="contrast-badge">AA 6.2:1</span>
+                    </div>
+                    <p class="option-explanation">
+                        <strong>"Edvora"</strong> in Deep Slate (`#0F172A`) + <strong>"Chat"</strong> rendered in a rich Indigo-to-Violet gradient text fill. Modern luxury SaaS feel.
+                    </p>
+                    <div class="color-breakdown">
+                        <div class="color-sample"><span class="swatch" style="background:#0F172A;"></span> #0F172A</div>
+                        <div class="color-sample"><span class="swatch" style="background:linear-gradient(135deg, #4F46E5, #9333EA);"></span> Text Grad</div>
+                        <div class="color-sample"><span class="swatch" style="background:linear-gradient(135deg, #5B50FF, #8B5CF6);"></span> Icon</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── CARD 3: UNIFIED MONOCHROMATIC SLATE ── -->
+            <div class="option-card">
+                <div class="option-canvas logo-canvas" id="canvas-v3" style="background: #ffffff;">
+                    <a href="javascript:void(0)" class="logo-lockup logo-v3-navy">
+                        <div class="logo-icon-wrap">
+                            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="40" height="40" rx="11" fill="url(#gradIcon3)"/>
+                                <path d="M20 9C20 15.0751 15.0751 20 9 20C15.0751 20 20 24.9249 20 31C20 24.9249 24.9249 20 31 20C24.9249 20 20 15.0751 20 9Z" fill="#FFFFFF"/>
+                                <defs>
+                                    <linearGradient id="gradIcon3" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                                        <stop stop-color="#5B50FF"/>
+                                        <stop offset="1" stop-color="#8B5CF6"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                        <span class="logo-text">Edvora<span>Chat</span></span>
+                    </a>
+                </div>
+                <div class="option-info">
+                    <div class="option-header-row">
+                        <span class="option-name">Option 3: Solid Midnight Slate</span>
+                        <span class="contrast-badge">AAA 14.2:1</span>
+                    </div>
+                    <p class="option-explanation">
+                        Entire wordmark in solid Deep Slate (`#0F172A`). Pure institutional clarity where the gradient squircle stands out as the single vivid focus.
+                    </p>
+                    <div class="color-breakdown">
+                        <div class="color-sample"><span class="swatch" style="background:#0F172A;"></span> #0F172A</div>
+                        <div class="color-sample"><span class="swatch" style="background:linear-gradient(135deg, #5B50FF, #8B5CF6);"></span> Icon Grad</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── CARD 4: ENCAPSULATED DARK GLASS PILL ── -->
+            <div class="option-card">
+                <div class="option-canvas logo-canvas" id="canvas-v4" style="background: #ffffff;">
+                    <div class="logo-v4-pill">
+                        <div class="logo-icon-wrap">
+                            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="40" height="40" rx="11" fill="url(#gradIcon4)"/>
+                                <path d="M20 9C20 15.0751 15.0751 20 9 20C15.0751 20 20 24.9249 20 31C20 24.9249 24.9249 20 31 20C24.9249 20 20 15.0751 20 9Z" fill="#FFFFFF"/>
+                                <defs>
+                                    <linearGradient id="gradIcon4" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                                        <stop stop-color="#5B50FF"/>
+                                        <stop offset="1" stop-color="#8B5CF6"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                        <span class="logo-text">Edvora<span>Chat</span></span>
+                    </div>
+                </div>
+                <div class="option-info">
+                    <div class="option-header-row">
+                        <span class="option-name">Option 4: Dark Glass Capsule</span>
+                        <span class="contrast-badge">Dark Pill</span>
+                    </div>
+                    <p class="option-explanation">
+                        Leaves the exact original dark logo untouched inside a sleek dark navy glass capsule (`#0B0F19`). Great for navbars.
+                    </p>
+                    <div class="color-breakdown">
+                        <div class="color-sample"><span class="swatch" style="background:#0B0F19;"></span> #0B0F19 Capsule</div>
+                        <div class="color-sample"><span class="swatch" style="background:#FFFFFF;"></span> #FFFFFF Text</div>
+                        <div class="color-sample"><span class="swatch" style="background:#818CF8;"></span> #818CF8 Chat</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── CARD 5: DOMAIN WORDMARK (EDVORA.CHAT) ── -->
+            <div class="option-card">
+                <div class="option-canvas logo-canvas" id="canvas-v5" style="background: #ffffff;">
+                    <a href="javascript:void(0)" class="logo-lockup logo-v5-domain">
+                        <div class="logo-icon-wrap">
+                            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="40" height="40" rx="11" fill="url(#gradIcon5)"/>
+                                <path d="M20 9C20 15.0751 15.0751 20 9 20C15.0751 20 20 24.9249 20 31C20 24.9249 24.9249 20 31 20C24.9249 20 20 15.0751 20 9Z" fill="#FFFFFF"/>
+                                <defs>
+                                    <linearGradient id="gradIcon5" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                                        <stop stop-color="#5B50FF"/>
+                                        <stop offset="1" stop-color="#8B5CF6"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                        <span class="logo-text">edvora<span class="dot">.</span><span class="tld">chat</span></span>
+                    </a>
+                </div>
+                <div class="option-info">
+                    <div class="option-header-row">
+                        <span class="option-name">Option 5: Lowercase Domain (edvora.chat)</span>
+                        <span class="contrast-badge">AAA 13.8:1</span>
+                    </div>
+                    <p class="option-explanation">
+                        Domain style: <strong>"edvora"</strong> in Deep Slate with electric indigo dot &amp; <strong>"chat"</strong> extension. Modern web-native presentation.
+                    </p>
+                    <div class="color-breakdown">
+                        <div class="color-sample"><span class="swatch" style="background:#0F172A;"></span> #0F172A</div>
+                        <div class="color-sample"><span class="swatch" style="background:#6366F1;"></span> #6366F1</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- 2. LIVE INTERACTIVE LANDING PAGE SIMULATION -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <div class="section-title-wrap" style="margin-top: 56px;">
+            <div>
+                <h2 class="section-title">2. Live Interactive Landing Page Simulation</h2>
+                <div class="section-desc">Test how each option looks directly embedded in the live website navbar and hero section.</div>
+            </div>
+        </div>
+
+        <!-- Switcher for live simulation -->
+        <div class="live-toggle-toolbar">
+            <span style="font-size: 12px; font-weight: 700; color: #64748B; margin-right: 4px;">SWITCH LOGO IN PREVIEW:</span>
+            <button class="live-toggle-btn active" onclick="switchLiveSimulation('v1')">Option 1: Adaptive Two-Tone ⭐</button>
+            <button class="live-toggle-btn" onclick="switchLiveSimulation('v2')">Option 2: Gradient Text</button>
+            <button class="live-toggle-btn" onclick="switchLiveSimulation('v3')">Option 3: Solid Slate</button>
+            <button class="live-toggle-btn" onclick="switchLiveSimulation('v4')">Option 4: Dark Pill</button>
+            <button class="live-toggle-btn" onclick="switchLiveSimulation('v5')">Option 5: Domain (edvora.chat)</button>
+        </div>
+
+        <div class="mockup-frame">
+            <div class="mockup-header-bar">
+                <div class="mockup-dots">
+                    <div class="mockup-dot r"></div>
+                    <div class="mockup-dot y"></div>
+                    <div class="mockup-dot g"></div>
+                </div>
+                <div class="mockup-url">https://edvora.chat</div>
+                <div style="width: 42px;"></div>
+            </div>
+
+            <!-- SIMULATED NAVBAR -->
+            <nav class="sim-navbar">
+                <!-- DYNAMIC LOGO CONTAINER -->
+                <div id="liveNavLogoTarget">
+                    <a href="javascript:void(0)" class="logo-lockup logo-v1-adaptive" style="gap: 9px;">
+                        <div class="logo-icon-wrap" style="width: 30px; height: 30px;">
+                            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="40" height="40" rx="11" fill="url(#gradIconSim)"/>
+                                <path d="M20 9C20 15.0751 15.0751 20 9 20C15.0751 20 20 24.9249 20 31C20 24.9249 24.9249 20 31 20C24.9249 20 20 15.0751 20 9Z" fill="#FFFFFF"/>
+                                <defs>
+                                    <linearGradient id="gradIconSim" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                                        <stop stop-color="#5B50FF"/>
+                                        <stop offset="1" stop-color="#8B5CF6"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                        <span class="logo-text" style="font-size: 19px;">Edvora<span>Chat</span></span>
+                    </a>
+                </div>
+
+                <ul class="sim-nav-links">
+                    <li><a href="javascript:void(0)">Platform</a></li>
+                    <li><a href="javascript:void(0)">How It Works</a></li>
+                    <li><a href="javascript:void(0)">Trust &amp; Security</a></li>
+                    <li><a href="javascript:void(0)">Pricing</a></li>
+                </ul>
+
+                <div class="sim-nav-actions">
+                    <button class="sim-btn-ghost">Sign In</button>
+                    <button class="sim-btn-secondary">Register College</button>
+                    <button class="sim-btn-primary">Book a Demo &rarr;</button>
+                </div>
+            </nav>
+
+            <!-- SIMULATED HERO -->
+            <section class="sim-hero">
+                <div class="sim-hero-pill">
+                    <span>✨</span> Admissions Intelligence Platform
+                </div>
+                <h1 class="sim-hero-h1">
+                    Your Admissions Team’s New<br>
+                    <span>Conversion Engine.</span>
+                </h1>
+                <p class="sim-hero-p">
+                    Edvora turns every student interaction into an admissions opportunity—answering questions, capturing intent, qualifying prospects, and connecting high-value applicants with your admissions team.
+                </p>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 14px;">
+                    <button class="sim-btn-primary" style="padding: 13px 28px; font-size: 15px;">Book an Institutional Demo &rarr;</button>
+                    <button class="sim-btn-secondary" style="padding: 13px 24px; font-size: 15px;">Explore Platform</button>
+                </div>
+            </section>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- 3. SCALES & SIZES MATRIX -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <div class="section-title-wrap" style="margin-top: 56px;">
+            <div>
+                <h2 class="section-title">3. Scaling &amp; Responsive Legibility</h2>
+                <div class="section-desc">Verifying that Option 1 remains ultra-sharp at all practical UI scales.</div>
+            </div>
+        </div>
+
+        <div class="scales-grid">
+            <div class="scale-box">
+                <span class="scale-label">Favicon / Small (18px icon)</span>
+                <div class="logo-lockup logo-v1-adaptive" style="gap: 6px;">
+                    <div class="logo-icon-wrap" style="width: 20px; height: 20px;">
+                        <svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#gradIcon1)"/><path d="M20 9C20 15.0751 15.0751 20 9 20C15.0751 20 20 24.9249 20 31C20 24.9249 24.9249 20 31 20C24.9249 20 20 15.0751 20 9Z" fill="#FFFFFF"/></svg>
+                    </div>
+                    <span class="logo-text" style="font-size: 14px;">Edvora<span>Chat</span></span>
+                </div>
+            </div>
+
+            <div class="scale-box">
+                <span class="scale-label">Navbar Standard (26px icon)</span>
+                <div class="logo-lockup logo-v1-adaptive" style="gap: 8px;">
+                    <div class="logo-icon-wrap" style="width: 28px; height: 28px;">
+                        <svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#gradIcon1)"/><path d="M20 9C20 15.0751 15.0751 20 9 20C15.0751 20 20 24.9249 20 31C20 24.9249 24.9249 20 31 20C24.9249 20 20 15.0751 20 9Z" fill="#FFFFFF"/></svg>
+                    </div>
+                    <span class="logo-text" style="font-size: 18px;">Edvora<span>Chat</span></span>
+                </div>
+            </div>
+
+            <div class="scale-box">
+                <span class="scale-label">Card / Modal Header (36px icon)</span>
+                <div class="logo-lockup logo-v1-adaptive" style="gap: 10px;">
+                    <div class="logo-icon-wrap" style="width: 36px; height: 36px;">
+                        <svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="11" fill="url(#gradIcon1)"/><path d="M20 9C20 15.0751 15.0751 20 9 20C15.0751 20 20 24.9249 20 31C20 24.9249 24.9249 20 31 20C24.9249 20 20 15.0751 20 9Z" fill="#FFFFFF"/></svg>
+                    </div>
+                    <span class="logo-text" style="font-size: 24px;">Edvora<span>Chat</span></span>
+                </div>
+            </div>
+
+            <div class="scale-box">
+                <span class="scale-label">Hero / Display Mark (48px icon)</span>
+                <div class="logo-lockup logo-v1-adaptive" style="gap: 12px;">
+                    <div class="logo-icon-wrap" style="width: 48px; height: 48px;">
+                        <svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="13" fill="url(#gradIcon1)"/><path d="M20 9C20 15.0751 15.0751 20 9 20C15.0751 20 20 24.9249 20 31C20 24.9249 24.9249 20 31 20C24.9249 20 20 15.0751 20 9Z" fill="#FFFFFF"/></svg>
+                    </div>
+                    <span class="logo-text" style="font-size: 32px;">Edvora<span>Chat</span></span>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        function setCanvasBackground(type) {
+            const bgMap = {
+                'white': '#ffffff',
+                'mist': '#F1F7F4',
+                'slate': '#F8FAFC',
+                'dark': '#060913'
+            };
+            const color = bgMap[type] || '#ffffff';
+
+            document.querySelectorAll('.logo-canvas').forEach(canvas => {
+                canvas.style.background = color;
+            });
+
+            document.querySelectorAll('.bg-btn').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+
+        function switchLiveSimulation(version) {
+            document.querySelectorAll('.live-toggle-btn').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            const container = document.getElementById('liveNavLogoTarget');
+            const svgIcon = `
+                <div class="logo-icon-wrap" style="width: 30px; height: 30px;">
+                    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="40" height="40" rx="11" fill="url(#gradIconSim)"/>
+                        <path d="M20 9C20 15.0751 15.0751 20 9 20C15.0751 20 20 24.9249 20 31C20 24.9249 24.9249 20 31 20C24.9249 20 20 15.0751 20 9Z" fill="#FFFFFF"/>
+                        <defs>
+                            <linearGradient id="gradIconSim" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#5B50FF"/>
+                                <stop offset="1" stop-color="#8B5CF6"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+            `;
+
+            if (version === 'v1') {
+                container.innerHTML = `
+                    <a href="javascript:void(0)" class="logo-lockup logo-v1-adaptive" style="gap: 9px;">
+                        ${svgIcon}
+                        <span class="logo-text" style="font-size: 19px;">Edvora<span>Chat</span></span>
+                    </a>
+                `;
+            } else if (version === 'v2') {
+                container.innerHTML = `
+                    <a href="javascript:void(0)" class="logo-lockup logo-v2-gradient" style="gap: 9px;">
+                        ${svgIcon}
+                        <span class="logo-text" style="font-size: 19px;">Edvora<span>Chat</span></span>
+                    </a>
+                `;
+            } else if (version === 'v3') {
+                container.innerHTML = `
+                    <a href="javascript:void(0)" class="logo-lockup logo-v3-navy" style="gap: 9px;">
+                        ${svgIcon}
+                        <span class="logo-text" style="font-size: 19px;">Edvora<span>Chat</span></span>
+                    </a>
+                `;
+            } else if (version === 'v4') {
+                container.innerHTML = `
+                    <div class="logo-v4-pill" style="padding: 5px 14px;">
+                        ${svgIcon}
+                        <span class="logo-text" style="font-size: 17px;">Edvora<span>Chat</span></span>
+                    </div>
+                `;
+            } else if (version === 'v5') {
+                container.innerHTML = `
+                    <a href="javascript:void(0)" class="logo-lockup logo-v5-domain" style="gap: 9px;">
+                        ${svgIcon}
+                        <span class="logo-text" style="font-size: 18px;">edvora<span class="dot">.</span><span class="tld">chat</span></span>
+                    </a>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

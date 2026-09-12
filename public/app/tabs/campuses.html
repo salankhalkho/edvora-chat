@@ -1,0 +1,206 @@
+<!-- Dedicated Campus Locations & Facilities Command Frame (1 Unified Big Card matching Overview, Leads & Settings) -->
+<div id="view-campuses" class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
+    
+    <!-- Top Control Bar (Inside the Big Card) -->
+    <div class="ops-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 24px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important;">
+        <div class="ops-dash-title-group" style="display: flex !important; align-items: center !important; gap: 12px !important;">
+            <button type="button" onclick="switchNavTab('org-settings')" class="brand-btn-secondary" style="height: 32px; padding: 0 11px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; border-radius: 6px; background: #F4FAF7; border: 1.5px solid #D1E5DE; color: var(--e-teal, #063D3B);" title="Return to Control Panel">
+                &larr; Control Panel
+            </button>
+            <span class="ops-live-dot"></span>
+            <div>
+                <div class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important; letter-spacing: -0.01em !important; line-height: 1.25 !important;">
+                    Campus Management
+                </div>
+                <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">
+                    Configure official university campuses, satellite centers, residential land area, and virtual tour portals.
+                </div>
+            </div>
+        </div>
+
+        <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
+            <div class="ckh-ctrl-pill" style="font-size: 11px !important; font-weight: 700 !important; color: var(--e-teal, #063D3B) !important; background: #F4FAF7 !important; border: 1px solid #D1E5DE !important; border-radius: 8px !important; padding: 5px 11px !important; display: inline-flex !important; align-items: center !important; gap: 6px !important;">
+                <span class="status-indicator-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #10B981; display: inline-block;"></span>
+                <span id="campusTotalBadgeCount">Total Campuses: ...</span>
+            </div>
+
+            <!-- Add Campus Button (Navigates to Dedicated #campus-editor page) -->
+            <button id="btnAddCampusTop" type="button" onclick="navigateToCampusEditor('')" class="brand-btn-primary" style="display: none; height: 34px; padding: 0 14px; font-size: 11.5px; font-weight: 700; border-radius: 6px; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.2);">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>Add Campus</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Inside the Big Card: Content Area with KPI Strip and Campuses Table -->
+    <div style="padding: 24px 28px 48px 28px; box-sizing: border-box; width: 100%;">
+        
+        <!-- KPI Metrics Ribbon (Inside Big Card) -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+            
+            <div class="ckh-kpi-tile" style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 14px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470;">Total Locations</div>
+                    <span style="font-size: 18px;">🏛️</span>
+                </div>
+                <div style="font-size: 24px; font-weight: 800; color: #063D3B;" id="kpiTotalCampuses">0</div>
+                <div style="font-size: 11px; color: #648781; margin-top: 2px;">Configured institutional grounds</div>
+            </div>
+
+            <div class="ckh-kpi-tile" style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 14px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470;">Primary Flagship</div>
+                    <span style="font-size: 18px;">⭐</span>
+                </div>
+                <div style="font-size: 15px; font-weight: 800; color: #047857; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="kpiPrimaryCampusName">-</div>
+                <div style="font-size: 11px; color: #648781; margin-top: 2px;">Main institutional headquarters</div>
+            </div>
+
+            <div class="ckh-kpi-tile" style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 14px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470;">Residential Hostels</div>
+                    <span style="font-size: 18px;">🛏️</span>
+                </div>
+                <div style="font-size: 24px; font-weight: 800; color: #7C3AED;" id="kpiHostelCampuses">0</div>
+                <div style="font-size: 11px; color: #648781; margin-top: 2px;">With on-campus hostel living</div>
+            </div>
+
+            <div class="ckh-kpi-tile" style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 14px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470;">Virtual Tours</div>
+                    <span style="font-size: 18px;">🌐</span>
+                </div>
+                <div style="font-size: 24px; font-weight: 800; color: #0284C7;" id="kpiVirtualTours">0</div>
+                <div style="font-size: 11px; color: #648781; margin-top: 2px;">3D digital tours enabled</div>
+            </div>
+
+        </div>
+
+        <!-- Permission Notice Banner for Staff Members -->
+        <div id="campusReadOnlyNotice" style="display: none; margin-bottom: 18px; padding: 10px 16px; background: #F0FDF4; border: 1.5px solid #BBF7D0; border-radius: 8px; font-size: 11.5px; color: #166534; display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 14px;">ℹ️</span>
+            <span>You have <strong>Team Member (Read-Only)</strong> access. Campus addition, editing, and deletion are restricted to users with <strong>Admin (Full Access)</strong> privileges.</span>
+        </div>
+
+        <!-- Campuses Table / Container Inside the Card -->
+        <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.02);">
+            
+            <!-- Table Action Toolbar -->
+            <div style="padding: 14px 20px; background: #FBFDFD; border-bottom: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 13px; font-weight: 800; color: #063D3B;">Institutional Campuses &amp; Branches</span>
+                    <span id="campusTableSubCount" class="org-ref-chip org-ref-chip-green" style="font-size: 10px;">0 Listed</span>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <input type="text" id="campusSearchInput" onkeyup="filterCampusesList()" placeholder="🔍 Filter by name, city, code..." class="brand-input" style="height: 32px; font-size: 11.5px; width: 220px; padding: 0 10px; border-radius: 6px; border: 1.5px solid #DCE9E5;" />
+                    <button type="button" onclick="loadCampuses()" class="brand-btn-secondary" style="height: 32px; padding: 0 10px; font-size: 11px; font-weight: 700; border-radius: 6px;" title="Reload Campuses">
+                        🔄 Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Campuses Table -->
+            <div style="overflow-x: auto; width: 100%;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; min-width: 800px;">
+                    <thead>
+                        <tr style="background: #F4FAF7; border-bottom: 1.5px solid #E6F0EC; color: #4F7470; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">
+                            <th style="padding: 12px 18px;">Campus Name &amp; Code</th>
+                            <th style="padding: 12px 16px;">Type &amp; Status</th>
+                            <th style="padding: 12px 16px;">Offered Programs</th>
+                            <th style="padding: 12px 16px;">Land Area</th>
+                            <th style="padding: 12px 16px;">Hostels</th>
+                            <th style="padding: 12px 16px;">Location</th>
+                            <th style="padding: 12px 16px;">Virtual Tour</th>
+                            <th style="padding: 12px 18px; text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="campusesTableBody">
+                        <tr>
+                            <td colspan="8" style="padding: 36px 18px; text-align: center; color: #648781;">
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                    <span style="font-size: 24px;">⏳</span>
+                                    <span style="font-weight: 600;">Loading institutional campuses...</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL: VIEW CAMPUS DETAILS (All Staff View)-->
+<!-- ========================================== -->
+<div id="modalCampusView" class="brand-modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(6, 61, 59, 0.45); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #FFFFFF; width: 100%; max-width: 600px; max-height: 85vh; border-radius: 16px; border: 1.5px solid #E6F0EC; box-shadow: 0 24px 48px -12px rgba(6, 61, 59, 0.25); display: flex; flex-direction: column; overflow: hidden;">
+        
+        <div style="padding: 16px 24px; background: #F8FCFA; border-bottom: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 22px;">🏛️</span>
+                <div>
+                    <h3 id="viewCampusName" style="margin: 0; font-size: 15px; font-weight: 800; color: #063D3B;">Campus Details</h3>
+                    <div id="viewCampusTypeBadge" style="font-size: 11px; font-weight: 700; color: #047857; margin-top: 1px;">-</div>
+                </div>
+            </div>
+            <button type="button" onclick="closeCampusViewModal()" style="background: none; border: none; font-size: 20px; line-height: 1; color: #94A3B8; cursor: pointer; padding: 4px;">&times;</button>
+        </div>
+
+        <div style="padding: 24px; overflow-y: auto; flex: 1; font-size: 12.5px;">
+            <!-- Derived Departments & Offered Courses Section -->
+            <div style="margin-bottom: 18px; background: #F8FCFA; border: 1.5px solid #E6F0EC; border-radius: 8px; padding: 14px;">
+                <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #063D3B; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
+                    <span>🏛️ Derived Departments (<span id="viewCampusDeptCount">0</span>)</span>
+                    <span id="viewCampusCoursesCount" style="font-size: 10.5px; font-weight: 700; color: #047857; background: #ECFDF5; border: 1px solid #A7F3D0; padding: 2px 7px; border-radius: 5px;">0 Programs Offered</span>
+                </div>
+                <div id="viewCampusDerivedDepts" style="font-size: 12px; color: #334155; margin-bottom: 10px; line-height: 1.4;">-</div>
+
+                <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #063D3B; margin-bottom: 6px;">🎓 Offered Academic Courses</div>
+                <div id="viewCampusCoursesList" style="font-size: 12px; color: #475569; max-height: 140px; overflow-y: auto; line-height: 1.45;">-</div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px;">
+                <div style="background: #FAFCFB; border: 1px solid #E6F0EC; border-radius: 8px; padding: 12px;">
+                    <div style="font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #648781; margin-bottom: 4px;">Land Area</div>
+                    <div id="viewCampusArea" style="font-weight: 700; color: #063D3B;">-</div>
+                </div>
+                <div style="background: #FAFCFB; border: 1px solid #E6F0EC; border-radius: 8px; padding: 12px;">
+                    <div style="font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #648781; margin-bottom: 4px;">Hostel Accommodations</div>
+                    <div id="viewCampusHostel" style="font-weight: 700; color: #063D3B;">-</div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 18px; background: #FAFCFB; border: 1px solid #E6F0EC; border-radius: 8px; padding: 12px;">
+                <div style="font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #648781; margin-bottom: 4px;">Full Address &amp; Location</div>
+                <div id="viewCampusAddress" style="font-weight: 600; color: #063D3B; line-height: 1.5;">-</div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px;">
+                <div style="background: #FAFCFB; border: 1px solid #E6F0EC; border-radius: 8px; padding: 12px;">
+                    <div style="font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #648781; margin-bottom: 4px;">Contact Email</div>
+                    <div id="viewCampusEmail" style="font-weight: 600; color: #063D3B;">-</div>
+                </div>
+                <div style="background: #FAFCFB; border: 1px solid #E6F0EC; border-radius: 8px; padding: 12px;">
+                    <div style="font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #648781; margin-bottom: 4px;">Contact Phone</div>
+                    <div id="viewCampusPhone" style="font-weight: 600; color: #063D3B;">-</div>
+                </div>
+            </div>
+
+            <div id="viewCampusTourSection" style="margin-bottom: 12px;">
+                <div style="font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #648781; margin-bottom: 6px;">Virtual 3D Tour</div>
+                <div id="viewCampusTourLink">-</div>
+            </div>
+        </div>
+
+        <div style="padding: 14px 24px; background: #F8FCFA; border-top: 1.5px solid #E6F0EC; display: flex; justify-content: flex-end;">
+            <button type="button" onclick="closeCampusViewModal()" class="brand-btn-secondary" style="height: 34px; padding: 0 16px; font-size: 11.5px; font-weight: 700; border-radius: 6px;">
+                Close
+            </button>
+        </div>
+
+    </div>
+</div>

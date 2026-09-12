@@ -1,0 +1,91 @@
+<!-- Page Header -->
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
+                    <div>
+                        <h2 style="font-family: var(--brand-font-display); font-size: 18px; font-weight: 700; color: #092F2E; margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <span>📞</span> Counselor Callbacks
+                        </h2>
+                        <p style="font-size: 12px; color: #4F7470; margin-top: 4px;">
+                            Priority phone callback queue for prospective students requesting direct counseling assistance across all departments.
+                        </p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button class="brand-btn-secondary brand-btn-sm" onclick="loadCallbacks()" style="display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px;">
+                            <span>🔄</span> Refresh Queue
+                        </button>
+                        <a id="exportCallbacksBtn" href="/v1/callbacks/export" target="_blank" class="brand-btn-primary brand-btn-sm" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px;">
+                            📥 Export CSV (IST)
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Callback Metrics Summary Cards -->
+                <div class="stats-grid" style="margin-bottom: 24px;">
+                    <div class="stat-card" style="border-left: 3px solid var(--brand-rose-400);">
+                        <div class="stat-label">Pending Callbacks <span class="stat-badge" style="background: rgba(239, 68, 68, 0.15); color: var(--brand-rose-400);">Requires Action</span></div>
+                        <div class="stat-value" id="statPendingCallbacks" style="color: var(--brand-rose-400);">0</div>
+                    </div>
+                    <div class="stat-card" style="border-left: 3px solid var(--brand-amber-400);">
+                        <div class="stat-label">In Progress / Scheduled <span class="stat-badge" style="background: rgba(251, 191, 36, 0.15); color: var(--brand-amber-400);">Active</span></div>
+                        <div class="stat-value" id="statActiveCallbacks" style="color: var(--brand-amber-400);">0</div>
+                    </div>
+                    <div class="stat-card" style="border-left: 3px solid var(--brand-emerald-400);">
+                        <div class="stat-label">Completed Calls <span class="stat-badge" style="background: rgba(52, 211, 153, 0.15); color: var(--brand-emerald-400);">Resolved</span></div>
+                        <div class="stat-value" id="statCompletedCallbacks" style="color: var(--brand-emerald-400);">0</div>
+                    </div>
+                    <div class="stat-card" style="border-left: 3px solid var(--brand-indigo-400);">
+                        <div class="stat-label">Total Requests <span class="stat-badge">All-Time</span></div>
+                        <div class="stat-value" id="statTotalCallbacks">0</div>
+                    </div>
+                </div>
+
+                <!-- Main Callbacks Card & Filters -->
+                <div class="brand-card">
+                    <!-- Clean Single-Row Card Header with Compact Filter Bar -->
+                    <div style="padding: 10px 16px; background: #FFFFFF; border-bottom: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13px; color: #092F2E; font-family: var(--brand-font-display);">
+                            <span>📋</span> Callback Priority Queue
+                        </div>
+
+                        <!-- Single-line Compact Filter Controls -->
+                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            <select id="filterCallbackStatus" onchange="loadCallbacks()" class="brand-input" style="height: 30px; font-size: 11px; padding: 0 8px; width: 175px; background-color: #FFFFFF; color: #063D3B;">
+                                <option value="all">Status: All Callbacks</option>
+                                <option value="pending" selected>🔴 Pending (Action Needed)</option>
+                                <option value="scheduled">🟡 Scheduled</option>
+                                <option value="in_progress">🟠 In Progress</option>
+                                <option value="completed">🟢 Completed</option>
+                                <option value="no_response">⚪ No Response</option>
+                                <option value="cancelled">⚫ Cancelled</option>
+                            </select>
+
+                            <select id="filterCallbackDept" onchange="loadCallbacks()" class="brand-input" style="height: 30px; font-size: 11px; padding: 0 8px; width: 155px; background-color: #FFFFFF; color: #063D3B;">
+                                <option value="">Department: All</option>
+                            </select>
+
+                            <select id="filterCallbackStaff" onchange="loadCallbacks()" class="brand-input" style="height: 30px; font-size: 11px; padding: 0 8px; width: 145px; background-color: #FFFFFF; color: #063D3B;">
+                                <option value="">Counselor: All</option>
+                            </select>
+
+                            <input type="text" id="filterCallbackSearch" onkeyup="debounceCallbackSearch()" placeholder="🔍 Search name, phone..." class="brand-input" style="height: 30px; font-size: 11px; width: 180px; padding: 0 10px;" />
+                        </div>
+                    </div>
+
+                    <div class="brand-table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Student Name</th>
+                                    <th>Phone & 1-Click Connect</th>
+                                    <th>Department</th>
+                                    <th>Preferred Call Slot</th>
+                                    <th>Topic / Query</th>
+                                    <th>Assigned Counselor</th>
+                                    <th>Status</th>
+                                    <th>Requested (IST)</th>
+                                    <th style="text-align: right;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="callbacksTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>

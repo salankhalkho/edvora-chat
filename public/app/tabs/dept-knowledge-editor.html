@@ -1,0 +1,131 @@
+<!-- Dedicated Department Knowledge Scope & Sources Editor Studio Frame -->
+<div id="view-dept-knowledge-editor" class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
+    
+    <!-- Top Control Bar -->
+    <div class="ops-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 24px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important; flex-wrap: wrap; gap: 12px;">
+        <div class="ops-dash-title-group" style="display: flex !important; align-items: center !important; gap: 14px !important;">
+            <button type="button" class="brand-btn-secondary" style="height: 34px; padding: 0 12px; font-size: 11.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border-radius: 6px; background: #F4FAF7; border: 1.5px solid #D1E5DE; color: var(--e-teal, #063D3B);" onclick="closeDeptCardEditor()">
+                <span>&larr;</span> Back to Department
+            </button>
+            <div style="height: 24px; width: 1.5px; background: #E2E8F0;"></div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span id="ksModalDeptIcon" style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: #F5F3FF; font-size: 18px; font-weight: 800; color: #7C3AED; border: 1px solid #DDD6FE;">📚</span>
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span id="ksModalDeptTitle" class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important; letter-spacing: -0.01em !important; line-height: 1.25 !important; max-width: 480px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            Department Knowledge Scope &amp; Reference Documents
+                        </span>
+                    </div>
+                    <div class="ops-dash-sub-title" id="ksModalDeptSubtitle" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">
+                        Manage prospectus documents, PDFs, and website links scoped specifically to this department
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
+            <button type="button" class="brand-btn-primary" style="height: 34px; padding: 0 18px; font-size: 11.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; border-radius: 6px; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.2);" onclick="closeDeptCardEditor()">
+                <span>✓</span> Done &amp; Back to Dashboard
+            </button>
+        </div>
+    </div>
+
+    <!-- Content Area: Left-aligned form bounded to 900px -->
+    <div style="padding: 28px 32px 48px 32px; box-sizing: border-box; width: 100%;">
+        <div style="max-width: 900px; width: 100%; margin: 0; box-sizing: border-box;">
+            
+            <form id="deptKnowledgeForm" onsubmit="event.preventDefault(); closeDeptCardEditor();">
+                <input type="hidden" id="ksEditorDeptId" />
+
+                <!-- SECTION: Department Knowledge Scope -->
+                <div id="sectionDeptKnowledgeOnly" style="margin-bottom: 28px;">
+                    <div style="font-size: 15px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <span style="font-size: 16px;">📚</span> Department Knowledge Scope &amp; Reference Documents
+                    </div>
+                    <p style="font-size: 11.5px; color: #648781; margin: 0 0 16px 0; line-height: 1.5;">
+                        Add prospectus documents, course guidelines, eligibility criteria, or web links scoped specifically to this department. The AI chatbot prioritizes these sources when answering inquiries for this unit.
+                    </p>
+
+                    <!-- Confirmation / Status Alert Message Container -->
+                    <div id="focusedDeptKsAlert" style="display: none; margin-bottom: 16px; padding: 11px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; align-items: center; justify-content: space-between; gap: 12px; box-shadow: 0 1px 4px rgba(6, 61, 59, 0.06); transition: all 0.25s ease;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span id="focusedDeptKsAlertIcon" style="font-size: 16px; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #D1FAE5; color: #065F46;">✓</span>
+                            <span id="focusedDeptKsAlertMsg" style="line-height: 1.4;">Document uploaded and linked successfully.</span>
+                        </div>
+                        <button type="button" onclick="dismissFocusedDeptKsAlert()" style="background: transparent; border: none; font-size: 18px; font-weight: 700; cursor: pointer; color: inherit; opacity: 0.7; padding: 0 4px; line-height: 1;" title="Dismiss alert">&times;</button>
+                    </div>
+
+                    <!-- Attached Knowledge Documents List -->
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #4F7470; letter-spacing: 0.3px;">Attached Knowledge Documents</span>
+                            <span id="focusedDeptKsCountBadge" style="display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 9999px; font-size: 10.5px; font-weight: 700; background: #ECFDF5; border: 1px solid #A7F3D0; color: #047857;">0 Documents</span>
+                        </div>
+                        <div id="focusedDeptKsList" style="display: flex; flex-direction: column; gap: 10px; width: 100%; box-sizing: border-box; padding: 14px; background: #EDF5F1; border-radius: 8px; border: 1.5px solid #CFE2D9;">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Add Knowledge Box -->
+                    <div style="background: #FFFFFF; border: 1.5px solid #D1E5DE; border-radius: 8px; padding: 18px;">
+                        <div style="font-size: 12.5px; font-weight: 800; color: #063D3B; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                            <span>➕</span> Add Department Knowledge Source
+                        </div>
+
+                        <!-- Mode selector -->
+                        <div style="display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;">
+                            <button type="button" class="brand-btn-secondary focused-dept-ks-mode-btn active" data-mode="text" onclick="switchFocusedDeptKsMode('text')" style="height: 30px; font-size: 11px; font-weight: 700; padding: 0 12px; border-radius: 6px;">📝 Text / Prospectus</button>
+                            <button type="button" class="brand-btn-secondary focused-dept-ks-mode-btn" data-mode="file" onclick="switchFocusedDeptKsMode('file')" style="height: 30px; font-size: 11px; font-weight: 700; padding: 0 12px; border-radius: 6px;">📁 Upload File (PDF / DOCX)</button>
+                            <button type="button" class="brand-btn-secondary focused-dept-ks-mode-btn" data-mode="url" onclick="switchFocusedDeptKsMode('url')" style="height: 30px; font-size: 11px; font-weight: 700; padding: 0 12px; border-radius: 6px;">🌐 Add Web URL</button>
+                        </div>
+
+                        <!-- Mode 1: Text -->
+                        <div id="focusedDeptKsModeText" class="focused-dept-ks-mode-panel">
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 4px;">Topic / Document Title</label>
+                                <input type="text" id="focusedDeptKsTitleText" class="brand-input" placeholder="e.g. Eligibility Guidelines & Fee Structure" style="width: 100%; box-sizing: border-box; height: 36px; font-size: 12px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 10px;" />
+                            </div>
+                            <div style="margin-bottom: 12px;">
+                                <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 4px;">Content / Details</label>
+                                <textarea id="focusedDeptKsContentText" class="brand-textarea" rows="3" placeholder="Paste prospectus text, eligibility criteria, admission timeline..." style="width: 100%; box-sizing: border-box; font-size: 12px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 8px 10px;"></textarea>
+                            </div>
+                            <button type="button" class="brand-btn-primary" style="height: 32px; padding: 0 16px; font-size: 11.5px; font-weight: 700; border-radius: 6px;" onclick="addFocusedDeptKnowledgeText()">Add Text Knowledge</button>
+                        </div>
+
+                        <!-- Mode 2: File -->
+                        <div id="focusedDeptKsModeFile" class="focused-dept-ks-mode-panel" style="display: none;">
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 4px;">Document Title (Optional)</label>
+                                <input type="text" id="focusedDeptKsTitleFile" class="brand-input" placeholder="e.g. 2026 Prospectus PDF" style="width: 100%; box-sizing: border-box; height: 36px; font-size: 12px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 10px;" />
+                            </div>
+                            <div style="margin-bottom: 12px;">
+                                <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 4px;">Select File (.pdf, .docx, .txt)</label>
+                                <input type="file" id="focusedDeptKsFileInput" accept=".pdf,.docx,.txt" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; padding: 6px 10px; font-size: 12px; border: 1.5px solid #DCE9E5; border-radius: 6px; background: #FFFFFF;" />
+                            </div>
+                            <button type="button" id="btnFocusedDeptKsUpload" class="brand-btn-primary" style="height: 32px; padding: 0 16px; font-size: 11.5px; font-weight: 700; border-radius: 6px;" onclick="addFocusedDeptKnowledgeFile()">Upload &amp; Add File</button>
+                        </div>
+
+                        <!-- Mode 3: URL -->
+                        <div id="focusedDeptKsModeUrl" class="focused-dept-ks-mode-panel" style="display: none;">
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 4px;">Document Title (Optional)</label>
+                                <input type="text" id="focusedDeptKsTitleUrl" class="brand-input" placeholder="e.g. Admissions Overview Page" style="width: 100%; box-sizing: border-box; height: 36px; font-size: 12px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 10px;" />
+                            </div>
+                            <div style="margin-bottom: 12px;">
+                                <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 4px;">Web Page URL</label>
+                                <input type="url" id="focusedDeptKsUrlInput" class="brand-input" placeholder="https://college.edu/admissions" style="width: 100%; box-sizing: border-box; height: 36px; font-size: 12px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 10px;" />
+                            </div>
+                            <button type="button" class="brand-btn-primary" style="height: 32px; padding: 0 16px; font-size: 11.5px; font-weight: 700; border-radius: 6px;" onclick="addFocusedDeptKnowledgeUrl()">Add Web Page</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Save / Cancel Controls -->
+                <div style="margin-top: 28px; padding-top: 20px; border-top: 1.5px solid #E6F0EC; display: flex; justify-content: flex-end; gap: 12px;">
+                    <button type="button" class="brand-btn-primary" style="height: 36px; padding: 0 24px; font-size: 12px; font-weight: 700; border-radius: 6px; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.2);" onclick="closeDeptCardEditor()">Done &amp; Return to Dashboard</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>

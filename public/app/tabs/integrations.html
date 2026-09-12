@@ -1,0 +1,388 @@
+<!-- Page Header -->
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
+                    <div>
+                        <h2 style="font-family: var(--brand-font-display); font-size: 18px; font-weight: 700; color: #092F2E; margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <span>🔌</span> Higher Education Integrations Hub (USA & Canada)
+                        </h2>
+                        <p style="font-size: 12px; color: #4F7470; margin-top: 4px;">
+                            Seamlessly connect Edvora AI Chatbot with your Admissions CRM, Student Information System (SIS), Application Portals, and SSO.
+                        </p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <button type="button" class="brand-btn-secondary" onclick="openMobileSetupGuideView()" style="height: 38px; font-size: 12px; padding: 0 16px; display: inline-flex; align-items: center; gap: 6px; border-color: rgba(56, 189, 248, 0.4); color: var(--brand-cyan-400);">
+                            📱 Mobile App Setup Guide
+                        </button>
+                        <button type="button" class="brand-btn-primary" onclick="openRequestIntegrationModal()" style="height: 38px; font-size: 12px; padding: 0 16px; display: inline-flex; align-items: center; gap: 6px; background: var(--brand-grad-brand); border: none;">
+                            ✨ Request Custom Integration
+                        </button>
+                        <button type="button" class="brand-btn-secondary" onclick="openApiDocsView()" style="height: 38px; font-size: 12px; padding: 0 16px; display: inline-flex; align-items: center; gap: 6px;">
+                            ⚡ REST API & Webhooks
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Info / Strategic Overview Banner for US & Canada Institutions -->
+                <div class="brand-card" style="margin-bottom: 24px; padding: 18px 22px; border: 1px solid rgba(99, 102, 241, 0.3); background: rgba(99, 102, 241, 0.06);">
+                    <div style="display: flex; align-items: flex-start; gap: 14px;">
+                        <span style="font-size: 26px; line-height: 1; flex-shrink: 0;">🏛️</span>
+                        <div>
+                            <strong style="font-size: 14px; font-weight: 700; color: var(--brand-indigo-300); display: block; margin-bottom: 4px;">
+                                Enterprise Interoperability for US & Canadian Colleges and Universities
+                            </strong>
+                            <p style="font-size: 12px; color: #4F7470; margin: 0 0 8px 0; line-height: 1.55;">
+                                North American higher education institutions rely on specialized enrollment software ecosystems (Slate, Banner, Workday, Common App, OUAC) with strict FERPA / FIPPA compliance. Edvora AI functions as an intelligent front-door that captures, enriches, and bi-directionally syncs prospective student records into your institutional system of record without duplicate manual data entry.
+                            </p>
+                            <div style="display: flex; gap: 16px; font-size: 11px; color: #648781; flex-wrap: wrap;">
+                                <span>🔒 <strong>FERPA / FIPPA Compliant</strong></span>
+                                <span>⚡ <strong>Real-Time Webhook Dispatch</strong></span>
+                                <span>🔄 <strong>Automated Field Mapping</strong></span>
+                                <span>🛡️ <strong>SAML 2.0 / Shibboleth SSO Ready</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Integration Category Tabs / Grid -->
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+
+                    <!-- 1. Mobile Apps & Custom Client SDKs -->
+                    <div>
+                        <div style="margin-bottom: 14px;">
+                            <h3 style="font-family: var(--brand-font-display); font-size: 15px; font-weight: 700; color: #092F2E; margin: 0 0 3px 0; display: flex; align-items: center; gap: 6px;">
+                                <span>📱</span> Mobile Apps & Custom Client SDKs
+                            </h3>
+                            <p style="font-size: 12px; color: #4F7470; margin: 0;">
+                                Ready-to-use 15-minute integration options for official student and applicant mobile apps.
+                            </p>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px;">
+                            
+                            <!-- Mobile WebView In-App -->
+                            <div class="brand-card" style="padding: 16px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid rgba(56, 189, 248, 0.25);">
+                                <div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <strong style="font-size: 13px; color: #092F2E;">Mobile App In-App WebView</strong>
+                                        <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: var(--brand-emerald-400); font-size: 10px;">★ Recommended (15 Mins)</span>
+                                    </div>
+                                    <p style="font-size: 11px; color: #4F7470; line-height: 1.45; margin: 0 0 10px 0;">
+                                        Embed the zero-maintenance Edvora WebView in Flutter, React Native, iOS Swift, or Android Kotlin with instant cloud UI updates.
+                                    </p>
+                                </div>
+                                <button class="brand-btn-primary" style="width: 100%; height: 32px; font-size: 11px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: var(--brand-grad-brand); border: none;" onclick="openMobileSetupGuideView()">
+                                    🚀 Open Mobile Setup Guide
+                                </button>
+                            </div>
+
+                            <!-- Headless REST / Chat API -->
+                            <div class="brand-card" style="padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <strong style="font-size: 13px; color: #092F2E;">Headless REST / Chat API</strong>
+                                        <span class="badge" style="background: rgba(99, 102, 241, 0.12); color: var(--brand-indigo-400); font-size: 10px;">Custom Native UI</span>
+                                    </div>
+                                    <p style="font-size: 11px; color: #4F7470; line-height: 1.45; margin: 0 0 10px 0;">
+                                        Direct API endpoint (<code style="font-family: var(--brand-font-mono); font-size: 10.5px; color: var(--brand-cyan-300);">POST /api/chat/message</code>) to connect custom native chat views and mobile bots.
+                                    </p>
+                                </div>
+                                <button class="brand-btn-secondary" style="width: 100%; height: 32px; font-size: 11px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" onclick="openApiDocsView()">
+                                    ⚡ View API Docs & cURL
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- 2. Admissions & Enrollment CRMs -->
+                    <div>
+                        <div style="margin-bottom: 14px;">
+                            <h3 style="font-family: var(--brand-font-display); font-size: 15px; font-weight: 700; color: #092F2E; margin: 0 0 3px 0; display: flex; align-items: center; gap: 6px;">
+                                <span>🎯</span> Admissions & Enrollment CRMs
+                            </h3>
+                            <p style="font-size: 12px; color: #4F7470; margin: 0;">
+                                Sync student leads, inquiry source attribution, and chat transcripts directly into candidate records.
+                            </p>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px;">
+                            
+                            <!-- Slate by Technolutions -->
+                            <div class="brand-card" style="padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <strong style="font-size: 13px; color: #092F2E;">Slate by Technolutions</strong>
+                                        <span class="badge" style="background: rgba(52, 211, 153, 0.12); color: var(--brand-emerald-400); font-size: 10px;">★ Gold Standard</span>
+                                    </div>
+                                    <p style="font-size: 11px; color: #4F7470; line-height: 1.45; margin: 0 0 10px 0;">
+                                        The #1 admissions CRM across US universities. Automatically pushes chatbot-captured prospects into Slate Ping & Service desk.
+                                    </p>
+                                </div>
+                                <button class="brand-btn-secondary" style="width: 100%; height: 32px; font-size: 11px;" onclick="showToast('Slate API Connection Wizard opened', 'info')">
+                                    Configure Slate Webhook
+                                </button>
+                            </div>
+
+                            <!-- Salesforce Education Cloud -->
+                            <div class="brand-card" style="padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <strong style="font-size: 13px; color: #092F2E;">Salesforce EDA / Education Cloud</strong>
+                                        <span class="badge" style="background: rgba(99, 102, 241, 0.12); color: var(--brand-indigo-400); font-size: 10px;">OAuth Ready</span>
+                                    </div>
+                                    <p style="font-size: 11px; color: #4F7470; line-height: 1.45; margin: 0 0 10px 0;">
+                                        Syncs candidate inquiries directly into Salesforce Contact, Lead, and Affiliation data models with counselor assignment.
+                                    </p>
+                                </div>
+                                <button class="brand-btn-secondary" style="width: 100%; height: 32px; font-size: 11px;" onclick="showToast('Salesforce Connected App wizard opened', 'info')">
+                                    Connect Salesforce
+                                </button>
+                            </div>
+
+                            <!-- Ellucian CRM Recruit -->
+                            <div class="brand-card" style="padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <strong style="font-size: 13px; color: #092F2E;">Ellucian CRM Recruit / Advance</strong>
+                                        <span class="badge" style="background: rgba(251, 191, 36, 0.12); color: var(--brand-amber-400); font-size: 10px;">Higher Ed</span>
+                                    </div>
+                                    <p style="font-size: 11px; color: #4F7470; line-height: 1.45; margin: 0 0 10px 0;">
+                                        Native integration with Ellucian ecosystem to route inquiries by academic major, state residency, and term intake.
+                                    </p>
+                                </div>
+                                <button class="brand-btn-secondary" style="width: 100%; height: 32px; font-size: 11px;" onclick="showToast('Ellucian Recruit API connector ready', 'info')">
+                                    Configure Ellucian
+                                </button>
+                            </div>
+
+                            <!-- HubSpot for Education -->
+                            <div class="brand-card" style="padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <strong style="font-size: 13px; color: #092F2E;">HubSpot for Higher Education</strong>
+                                        <span class="badge" style="background: rgba(52, 211, 153, 0.12); color: var(--brand-emerald-400); font-size: 10px;">1-Click App</span>
+                                    </div>
+                                    <p style="font-size: 11px; color: #4F7470; line-height: 1.45; margin: 0 0 10px 0;">
+                                        Creates contacts, triggers marketing nurture email workflows, and syncs student engagement timeline events.
+                                    </p>
+                                </div>
+                                <button class="brand-btn-secondary" style="width: 100%; height: 32px; font-size: 11px;" onclick="showToast('HubSpot OAuth flow opened', 'info')">
+                                    Connect HubSpot
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- 3. Student Information Systems (SIS) -->
+                    <div>
+                        <div style="margin-bottom: 14px;">
+                            <h3 style="font-family: var(--brand-font-display); font-size: 15px; font-weight: 700; color: #092F2E; margin: 0 0 3px 0; display: flex; align-items: center; gap: 6px;">
+                                <span>🏢</span> Student Information Systems (SIS) & ERP
+                            </h3>
+                            <p style="font-size: 12px; color: #4F7470; margin: 0;">
+                                Central student record, course catalog & financial hold verification.
+                            </p>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px;">
+                            
+                            <!-- Ellucian Banner -->
+                            <div class="brand-card" style="padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <strong style="font-size: 13px; color: #092F2E;">Ellucian Banner / Colleague</strong>
+                                        <span class="badge" style="background: rgba(99, 102, 241, 0.12); color: var(--brand-indigo-400); font-size: 10px;">Enterprise SIS</span>
+                                    </div>
+                                    <p style="font-size: 11px; color: #4F7470; line-height: 1.45; margin: 0 0 10px 0;">
+                                        Powers over 60% of North American universities. Validates student IDs, admission status, and residency tuition rates.
+                                    </p>
+                                </div>
+                                <button class="brand-btn-secondary" style="width: 100%; height: 32px; font-size: 11px;" onclick="showToast('Ellucian Banner Ethos Integration ready', 'info')">
+                                    Connect Ethos API
+                                </button>
+                            </div>
+
+                            <!-- Workday Student -->
+                            <div class="brand-card" style="padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <strong style="font-size: 13px; color: #092F2E;">Workday Student</strong>
+                                        <span class="badge" style="background: rgba(52, 211, 153, 0.12); color: var(--brand-emerald-400); font-size: 10px;">Cloud SIS</span>
+                                    </div>
+                                    <p style="font-size: 11px; color: #4F7470; line-height: 1.45; margin: 0 0 10px 0;">
+                                        Modern cloud-native student system. Synchronizes real-time application status lookups and orientation rosters.
+                                    </p>
+                                </div>
+                                <button class="brand-btn-secondary" style="width: 100%; height: 32px; font-size: 11px;" onclick="showToast('Workday Enterprise API connector ready', 'info')">
+                                    Connect Workday
+                                </button>
+                            </div>
+
+                            <!-- Oracle PeopleSoft Campus Solutions -->
+                            <div class="brand-card" style="padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <strong style="font-size: 13px; color: #092F2E;">Oracle PeopleSoft Campus Solutions</strong>
+                                        <span class="badge" style="background: rgba(251, 191, 36, 0.12); color: var(--brand-amber-400); font-size: 10px;">Major Public</span>
+                                    </div>
+                                    <p style="font-size: 11px; color: #4F7470; line-height: 1.45; margin: 0 0 10px 0;">
+                                        Standard across major state universities in the US and Canada. Connects student academic records and financial holds.
+                                    </p>
+                                </div>
+                                <button class="brand-btn-secondary" style="width: 100%; height: 32px; font-size: 11px;" onclick="showToast('Oracle Integration Broker wizard opened', 'info')">
+                                    Connect PeopleSoft
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- 4. North American Application Portals -->
+                    <div>
+                        <div style="margin-bottom: 14px;">
+                            <h3 style="font-family: var(--brand-font-display); font-size: 15px; font-weight: 700; color: #092F2E; margin: 0 0 3px 0; display: flex; align-items: center; gap: 6px;">
+                                <span>📝</span> Centralized Application Portals (US & Canada)
+                            </h3>
+                            <p style="font-size: 12px; color: #4F7470; margin: 0;">
+                                Direct application deep-linking & prospective applicant tracking.
+                            </p>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px;">
+                            
+                            <!-- The Common Application -->
+                            <div class="brand-card" style="padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <strong style="font-size: 13px; color: #092F2E;">The Common App (US)</strong>
+                                        <span class="badge" style="background: rgba(52, 211, 153, 0.12); color: var(--brand-emerald-400); font-size: 10px;">US Standard</span>
+                                    </div>
+                                    <p style="font-size: 11px; color: #4F7470; line-height: 1.45; margin: 0 0 10px 0;">
+                                        Deep-link applicants directly to your institution's Common App member page with pre-filled promo and tracking codes.
+                                    </p>
+                                </div>
+                                <button class="brand-btn-secondary" style="width: 100%; height: 32px; font-size: 11px;" onclick="showToast('Common App deep link tracking enabled', 'info')">
+                                    Configure Common App Links
+                                </button>
+                            </div>
+
+                            <!-- OUAC (Ontario, Canada) -->
+                            <div class="brand-card" style="padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <strong style="font-size: 13px; color: #092F2E;">OUAC (Ontario Universities)</strong>
+                                        <span class="badge" style="background: rgba(239, 68, 68, 0.12); color: var(--brand-rose-400); font-size: 10px;">🇨🇦 Canada</span>
+                                    </div>
+                                    <p style="font-size: 11px; color: #4F7470; line-height: 1.45; margin: 0 0 10px 0;">
+                                        Essential for all Ontario institutions (UofT, Waterloo, Western, etc.). Routes high school (101) & general (105) applicants.
+                                    </p>
+                                </div>
+                                <button class="brand-btn-secondary" style="width: 100%; height: 32px; font-size: 11px;" onclick="showToast('OUAC Program routing setup', 'info')">
+                                    Configure OUAC Routing
+                                </button>
+                            </div>
+
+                            <!-- EducationPlannerBC & ApplyAlberta -->
+                            <div class="brand-card" style="padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <strong style="font-size: 13px; color: #092F2E;">EducationPlannerBC / ApplyAlberta</strong>
+                                        <span class="badge" style="background: rgba(239, 68, 68, 0.12); color: var(--brand-rose-400); font-size: 10px;">🇨🇦 Provincial</span>
+                                    </div>
+                                    <p style="font-size: 11px; color: #4F7470; line-height: 1.45; margin: 0 0 10px 0;">
+                                        Official application hubs for Western Canadian post-secondary institutions (UBC, SFU, UVic, UAlberta, UCalgary).
+                                    </p>
+                                </div>
+                                <button class="brand-btn-secondary" style="width: 100%; height: 32px; font-size: 11px;" onclick="showToast('Provincial gateway routing enabled', 'info')">
+                                    Configure Provincial Gateways
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- 5. SSO, Identity, Tuition Payments & Messaging -->
+                    <div>
+                        <div style="margin-bottom: 14px;">
+                            <h3 style="font-family: var(--brand-font-display); font-size: 15px; font-weight: 700; color: #092F2E; margin: 0 0 3px 0; display: flex; align-items: center; gap: 6px;">
+                                <span>🔒</span> Campus Identity (SSO), Tuition Payments & 10DLC Messaging
+                            </h3>
+                            <p style="font-size: 12px; color: #4F7470; margin: 0;">
+                                Security, international fee collection & US carrier-compliant A2P SMS.
+                            </p>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px;">
+                            
+                            <!-- InCommon / Shibboleth SAML SSO -->
+                            <div class="brand-card" style="padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <strong style="font-size: 13px; color: #092F2E;">Shibboleth / InCommon SAML 2.0</strong>
+                                        <span class="badge" style="background: rgba(99, 102, 241, 0.12); color: var(--brand-indigo-400); font-size: 10px;">SSO Standard</span>
+                                    </div>
+                                    <p style="font-size: 11px; color: #4F7470; line-height: 1.45; margin: 0 0 10px 0;">
+                                        Seamless Single Sign-On for campus staff and admitted students via your university's InCommon / Azure AD federated portal.
+                                    </p>
+                                </div>
+                                <button class="brand-btn-secondary" style="width: 100%; height: 32px; font-size: 11px;" onclick="showToast('SAML 2.0 Metadata configuration ready', 'info')">
+                                    Configure SAML 2.0 SSO
+                                </button>
+                            </div>
+
+                            <!-- Flywire / Convera International Payments -->
+                            <div class="brand-card" style="padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <strong style="font-size: 13px; color: #092F2E;">Flywire & Convera Payments</strong>
+                                        <span class="badge" style="background: rgba(52, 211, 153, 0.12); color: var(--brand-emerald-400); font-size: 10px;">Global Tuition</span>
+                                    </div>
+                                    <p style="font-size: 11px; color: #4F7470; line-height: 1.45; margin: 0 0 10px 0;">
+                                        Allows international prospective students to pay application fees, seat reservation deposits, and tuition in local currency.
+                                    </p>
+                                </div>
+                                <button class="brand-btn-secondary" style="width: 100%; height: 32px; font-size: 11px;" onclick="showToast('Flywire Payment Gateway connector ready', 'info')">
+                                    Connect Flywire
+                                </button>
+                            </div>
+
+                            <!-- Twilio US 10DLC Verified SMS -->
+                            <div class="brand-card" style="padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <strong style="font-size: 13px; color: #092F2E;">Twilio 10DLC Verified SMS/MMS</strong>
+                                        <span class="badge" style="background: rgba(52, 211, 153, 0.12); color: var(--brand-emerald-400); font-size: 10px;">US / CA Compliant</span>
+                                    </div>
+                                    <p style="font-size: 11px; color: #4F7470; line-height: 1.45; margin: 0 0 10px 0;">
+                                        A2P 10DLC registered brand messaging for US & Canada. Sends instant SMS tour confirmations and counselor callback reminders.
+                                    </p>
+                                </div>
+                                <button class="brand-btn-secondary" style="width: 100%; height: 32px; font-size: 11px;" onclick="showToast('Twilio 10DLC registration status: Ready', 'info')">
+                                    Configure Twilio SMS
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Missing an Integration? Request Custom Connector Card -->
+                    <div class="brand-card" style="margin-top: 6px; padding: 22px 26px; border: 1px dashed rgba(99, 102, 241, 0.4); background: linear-gradient(135deg, rgba(99, 102, 241, 0.06) 0%, rgba(168, 85, 247, 0.06) 100%);">
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+                            <div style="max-width: 680px;">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                    <span style="font-size: 20px;">✨</span>
+                                    <strong style="font-size: 14px; font-weight: 700; color: #092F2E;">
+                                        Can't Find Your Campus Software or Specialized CRM?
+                                    </strong>
+                                </div>
+                                <p style="font-size: 12px; color: #4F7470; margin: 0; line-height: 1.55;">
+                                    If your college uses a proprietary SIS, regional student database (e.g. Populi, CAMS Enterprise, Tribal SITS, Unit4), or custom API, let us know! Our engineering team builds and tests custom webhook & API connectors within <strong>5–7 business days</strong> at no extra cost.
+                                </p>
+                            </div>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <button type="button" class="brand-btn-primary" onclick="openRequestIntegrationModal()" style="height: 38px; font-size: 12px; padding: 0 20px; display: inline-flex; align-items: center; gap: 6px; background: var(--brand-grad-brand); border: none;">
+                                    🚀 Request Integration Connector
+                                </button>
+                                <button type="button" class="brand-btn-secondary" onclick="showToast('Universal Webhook Documentation opened', 'info')" style="height: 38px; font-size: 12px; padding: 0 16px;">
+                                    🔌 Connect via Webhook / Zapier
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>

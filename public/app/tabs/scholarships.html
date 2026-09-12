@@ -1,0 +1,104 @@
+<!-- Page Header -->
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
+                    <div>
+                        <h2 style="font-family: var(--brand-font-display); font-size: 18px; font-weight: 700; color: #092F2E; margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <span>💰</span> Scholarships & Financial Aid Rules
+                        </h2>
+                        <p style="font-size: 12px; color: #4F7470; margin-top: 4px;">
+                            Configure course-specific merit slabs, entrance exam criteria, and booster quotas to power the high-converting scholarship evaluation lead magnet.
+                        </p>
+                    </div>
+                    <button class="brand-btn-primary" onclick="openCourseScholarshipModal()" style="height: 38px; padding: 0 20px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">
+                        <span>➕</span> Add Course Scholarship Rule
+                    </button>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid" style="margin-bottom: 24px;">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Courses <span class="stat-badge">Catalog</span></div>
+                        <div class="stat-value" id="statScholarshipCoursesCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Scholarship Eligible <span class="stat-badge" style="color: var(--brand-emerald-400);">Merit Active</span></div>
+                        <div class="stat-value" id="statScholarshipActiveCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Fixed Fee / Subsidized <span class="stat-badge" style="color: var(--brand-cyan-400);">0% EMI Only</span></div>
+                        <div class="stat-value" id="statScholarshipFixedCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Lead Magnet Engine <span class="stat-badge" id="statScholarshipEngineBadge">Active</span></div>
+                        <div class="stat-value" id="statScholarshipEngineStatus" style="font-size: 18px;">Enabled</div>
+                    </div>
+                </div>
+
+                <!-- Global Policy & Booster Quotas Card -->
+                <div class="brand-card" style="margin-bottom: 24px;">
+                    <div class="brand-panel-header">
+                        <div class="brand-panel-title">⚙️ Global Institutional Policy & Booster Quotas</div>
+                    </div>
+                    <div style="padding: 20px;">
+                        <form id="orgScholarshipConfigForm" onsubmit="saveOrgScholarshipConfig(event)" style="display: flex; flex-direction: column; gap: 16px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: var(--brand-radius-sm);">
+                                <div>
+                                    <strong style="font-size: 13px; color: #092F2E; display: block;">Enable Scholarship Evaluation Lead Magnet</strong>
+                                    <span style="font-size: 11px; color: #648781;">When enabled, visitors can test their eligibility interactively inside the chatbot widget to unlock fee waivers.</span>
+                                </div>
+                                <label style="cursor: pointer; position: relative;">
+                                    <input type="checkbox" id="orgScholarshipEnabled" checked style="width: 20px; height: 20px; accent-color: var(--brand-indigo-500);" />
+                                </label>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+                                <div>
+                                    <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">🏅 Sports Quota Add-on (%)</label>
+                                    <input type="number" id="orgSportsPct" class="brand-input" min="0" max="50" step="1" value="5" />
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">👧 Girl Child Quota Add-on (%)</label>
+                                    <input type="number" id="orgGirlChildPct" class="brand-input" min="0" max="50" step="1" value="5" />
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">🎖️ Defense / Armed Forces (%)</label>
+                                    <input type="number" id="orgDefensePct" class="brand-input" min="0" max="50" step="1" value="5" />
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">⚡ Early Bird Merit Add-on (%)</label>
+                                    <input type="number" id="orgEarlyBirdPct" class="brand-input" min="0" max="50" step="1" value="5" />
+                                </div>
+                            </div>
+
+                            <div style="display: flex; justify-content: flex-end; padding-top: 12px; border-top: 1.5px solid #E6F0EC;">
+                                <button type="submit" class="brand-btn-primary" style="height: 38px; padding: 0 24px; font-size: 13px; font-weight: 600;">
+                                    💾 Save Global Scholarship Settings
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Course Scholarships Matrix Card -->
+                <div class="brand-card">
+                    <div class="brand-panel-header">
+                        <div class="brand-panel-title">📚 Course-Specific Scholarship Criteria Matrix</div>
+                    </div>
+                    <div class="brand-table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Program / Course Name</th>
+                                    <th>Level</th>
+                                    <th>Department</th>
+                                    <th>Scholarship Status</th>
+                                    <th>Evaluation Metric</th>
+                                    <th>Configured Slabs / Fee</th>
+                                    <th style="text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="courseScholarshipsTableBody">
+                                <!-- Populated dynamically via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
