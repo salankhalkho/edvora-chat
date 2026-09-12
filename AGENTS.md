@@ -13,7 +13,9 @@
 * **There is NO local MySQL database.** Local XAMPP MySQL is obsolete and must never be started or connected to.
 * All PHP execution, unit testing, migrations, and database operations run **exclusively on the remote production VPS** (`166.1.2.112`).
 
-### 2. 🚀 MANDATORY PRODUCTION DEPLOYMENT AFTER EVERY CHANGE
+### 2. 🚀 MANDATORY PRODUCTION DEPLOYMENT & GITHUB SYNC
+* **GitHub for Source Control:** Use GitHub (`https://github.com/salankhalkho/edvora-chat.git`) for source control and change history. Always commit and push changes (`git push origin main`).
+* **Direct SSH for Fast VPS Deployment:** Deploy directly to the VPS (`166.1.2.112`) using the 3-step SSH/tar package script for instant live updates.
 * **Never declare a task or fix complete until it is deployed to the live production server and verified.**
 * Make all edits locally in `c:\xampp\htdocs\edvora.chat\`, then **immediately deploy** using the Standard Deployment Flow below.
 
@@ -163,4 +165,5 @@ Before concluding any user request, verify:
 - [ ] Was MariaDB migration executed if schema was altered (`php migrate.php`)?
 - [ ] Did Apache reload cleanly with `sudo systemctl reload apache2`?
 - [ ] Does the UI strictly conform to [`theme-branding.css`](file:///c:/xampp/htdocs/edvora.chat/theme-branding.css)?
+- [ ] Were changes committed and pushed to GitHub (`git push origin main`)?
 
