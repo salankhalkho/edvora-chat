@@ -272,5 +272,134 @@ EOT;
                 }
             }
         }
+
+        // Seed default academic programs into new programs table for organization 47
+        try {
+            $stmtOrgCheck = $this->db->prepare("SELECT id FROM organizations WHERE id = 47");
+            $stmtOrgCheck->execute();
+            if ($stmtOrgCheck->fetch()) {
+                $stmtProgCheck = $this->db->prepare("SELECT COUNT(*) FROM programs WHERE organization_id = 47");
+                $stmtProgCheck->execute();
+                if ((int)$stmtProgCheck->fetchColumn() === 0) {
+                    $samplePrograms = [
+                        [
+                            'course_name' => 'B.S. in Computer Science & Artificial Intelligence',
+                            'course_code' => 'CS-BS-101',
+                            'program_type' => 'undergraduate',
+                            'duration' => '4 Years (8 Semesters)',
+                            'mode' => 'full_time',
+                            'is_admissions_open' => 1,
+                            'tuition_fee' => 48000.00,
+                            'total_fee' => 52000.00,
+                            'currency' => 'USD',
+                            'eligibility' => 'High School Diploma with GPA 3.2+ or equivalent in Mathematics & Physics.',
+                            'application_deadline' => 'Fall 2026: August 15',
+                            'sort_order' => 1
+                        ],
+                        [
+                            'course_name' => 'B.B.A. in International Finance & Analytics',
+                            'course_code' => 'BUS-BBA-202',
+                            'program_type' => 'undergraduate',
+                            'duration' => '3 Years (6 Semesters)',
+                            'mode' => 'full_time',
+                            'is_admissions_open' => 1,
+                            'tuition_fee' => 42000.00,
+                            'total_fee' => 45000.00,
+                            'currency' => 'USD',
+                            'eligibility' => 'High School Senior Certificate with English & Commerce background.',
+                            'application_deadline' => 'Fall 2026: July 30',
+                            'sort_order' => 2
+                        ],
+                        [
+                            'course_name' => 'M.S. in Data Science & Machine Learning',
+                            'course_code' => 'DS-MS-501',
+                            'program_type' => 'postgraduate',
+                            'duration' => '2 Years (4 Semesters)',
+                            'mode' => 'hybrid',
+                            'is_admissions_open' => 1,
+                            'tuition_fee' => 36000.00,
+                            'total_fee' => 39500.00,
+                            'currency' => 'USD',
+                            'eligibility' => 'Bachelor degree in STEM discipline or equivalent relevant experience.',
+                            'application_deadline' => 'Fall 2026: September 01',
+                            'sort_order' => 3
+                        ],
+                        [
+                            'course_name' => 'Global Executive MBA',
+                            'course_code' => 'EMBA-801',
+                            'program_type' => 'executive',
+                            'duration' => '18 Months',
+                            'mode' => 'weekend',
+                            'is_admissions_open' => 1,
+                            'tuition_fee' => 65000.00,
+                            'total_fee' => 70000.00,
+                            'currency' => 'USD',
+                            'eligibility' => 'Minimum 5 years managerial experience + Bachelor degree.',
+                            'application_deadline' => 'Rolling Admissions',
+                            'sort_order' => 4
+                        ],
+                        [
+                            'course_name' => 'Ph.D. in Biomedical Engineering',
+                            'course_code' => 'BME-PHD-901',
+                            'program_type' => 'doctoral',
+                            'duration' => '4-5 Years',
+                            'mode' => 'full_time',
+                            'is_admissions_open' => 1,
+                            'tuition_fee' => 0.00,
+                            'total_fee' => 0.00,
+                            'currency' => 'USD',
+                            'eligibility' => 'Master of Science or Honors Bachelor in Engineering / Biology.',
+                            'application_deadline' => 'December 15',
+                            'sort_order' => 5
+                        ],
+                        [
+                            'course_name' => 'Postgraduate Certificate in Cyber Security',
+                            'course_code' => 'CYBER-CERT-30',
+                            'program_type' => 'certificate',
+                            'duration' => '6 Months',
+                            'mode' => 'online',
+                            'is_admissions_open' => 1,
+                            'tuition_fee' => 8500.00,
+                            'total_fee' => 9000.00,
+                            'currency' => 'USD',
+                            'eligibility' => 'Basic programming & network fundamentals.',
+                            'application_deadline' => 'Monthly Batches',
+                            'sort_order' => 6
+                        ]
+                    ];
+
+                    $stmtInsProg = $this->db->prepare("
+                        INSERT INTO programs (
+                            organization_id, course_name, course_code, program_type, duration, 
+                            mode, is_admissions_open, tuition_fee, total_fee, currency, 
+                            eligibility, application_deadline, sort_order
+                        ) VALUES (
+                            47, :name, :code, :ptype, :duration, 
+                            :mode, :admissions, :tfee, :totfee, :currency, 
+                            :elig, :deadline, :sort
+                        )
+                    ");
+
+                    foreach ($samplePrograms as $p) {
+                        $stmtInsProg->execute([
+                            ':name' => $p['course_name'],
+                            ':code' => $p['course_code'],
+                            ':ptype' => $p['program_type'],
+                            ':duration' => $p['duration'],
+                            ':mode' => $p['mode'],
+                            ':admissions' => $p['is_admissions_open'],
+                            ':tfee' => $p['tuition_fee'],
+                            ':totfee' => $p['total_fee'],
+                            ':currency' => $p['currency'],
+                            ':elig' => $p['eligibility'],
+                            ':deadline' => $p['application_deadline'],
+                            ':sort' => $p['sort_order']
+                        ]);
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            // Ignore seeder error if table/org not present yet
+        }
     }
 }

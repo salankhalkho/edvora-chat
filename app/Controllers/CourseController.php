@@ -11,9 +11,9 @@ use Throwable;
 class CourseController
 {
     /**
-     * List all courses for the tenant (across all departments, including orphan courses).
+     * List all programs for the tenant from the 'programs' table.
      * Returns:
-     * - courses: list of courses with department details and mapped campuses
+     * - courses: list of programs with details and mapped campuses
      * - departments: list of tenant departments for assignment dropdowns
      * - campuses: list of active tenant campuses for mapping
      */
@@ -28,50 +28,41 @@ class CourseController
         try {
             $db = Database::getConnection();
 
-            // Fetch all courses for tenant, joined with departments (LEFT JOIN for orphan courses)
+            // Fetch all programs for tenant from `programs` table
             $stmt = $db->prepare("
                 SELECT 
-                    dc.id,
-                    dc.organization_id,
-                    dc.department_id,
-                    d.name AS department_name,
-                    d.slug AS department_slug,
-                    d.color AS department_color,
-                    dc.course_name,
-                    dc.course_code,
-                    COALESCE(dc.program_type, 'undergraduate') AS program_type,
-                    dc.duration,
-                    COALESCE(dc.mode, 'full_time') AS mode,
-                    COALESCE(dc.is_admissions_open, 1) AS is_admissions_open,
-                    dc.tuition_fee,
-                    dc.registration_fee,
-                    dc.other_fees,
-                    dc.total_fee,
-                    COALESCE(dc.currency, 'INR') AS currency,
-                    dc.eligibility,
-                    dc.application_deadline,
-                    dc.application_fee,
-                    dc.application_url,
-                    dc.sort_order,
-                    dc.created_at,
-                    dc.updated_at
-                FROM department_courses dc
-                LEFT JOIN departments d ON dc.department_id = d.id AND d.organization_id = :org_id_dept
-                WHERE dc.organization_id = :org_id OR (dc.organization_id IS NULL AND d.organization_id = :org_id_fallback)
-                ORDER BY 
-                    CASE WHEN dc.department_id IS NULL THEN 1 ELSE 0 END ASC,
-                    d.name ASC, 
-                    dc.sort_order ASC, 
-                    dc.course_name ASC
+                    p.id,
+                    p.organization_id,
+                    NULL AS department_id,
+                    NULL AS department_name,
+                    NULL AS department_slug,
+                    NULL AS department_color,
+                    p.course_name,
+                    p.course_code,
+                    COALESCE(p.program_type, 'undergraduate') AS program_type,
+                    p.duration,
+                    COALESCE(p.mode, 'full_time') AS mode,
+                    COALESCE(p.is_admissions_open, 1) AS is_admissions_open,
+                    p.tuition_fee,
+                    p.registration_fee,
+                    p.other_fees,
+                    p.total_fee,
+                    COALESCE(p.currency, 'INR') AS currency,
+                    p.eligibility,
+                    p.application_deadline,
+                    p.application_fee,
+                    p.application_url,
+                    p.sort_order,
+                    p.created_at,
+                    p.updated_at
+                FROM programs p
+                WHERE p.organization_id = :org_id
+                ORDER BY p.sort_order ASC, p.course_name ASC
             ");
-            $stmt->execute([
-                ':org_id' => $orgId,
-                ':org_id_dept' => $orgId,
-                ':org_id_fallback' => $orgId
-            ]);
+            $stmt->execute([':org_id' => $orgId]);
             $courses = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-            // Load mapped campuses for each course
+            // Load mapped campuses for each program
             foreach ($courses as &$crs) {
                 $crsId = (int)$crs['id'];
                 $stmtCmp = $db->prepare("
@@ -89,7 +80,7 @@ class CourseController
             }
             unset($crs);
 
-            // Fetch available departments for dropdown selector
+            // Fetch available departments for UI dropdown selector compatibility
             $stmtDepts = $db->prepare("
                 SELECT id, name, slug, color, is_active
                 FROM departments
@@ -121,7 +112,7 @@ class CourseController
     }
 
     /**
-     * Create a new course / program (can be assigned to a department or orphan if department_id is null).
+     * Create a new academic program in the 'programs' table.
      */
     public function store(Request $request): void
     {
@@ -138,7 +129,6 @@ class CourseController
             return;
         }
 
-        $deptId = !empty($body['department_id']) ? (int)$body['department_id'] : null;
         $courseCode = trim($body['course_code'] ?? '') ?: null;
         $programType = $body['program_type'] ?? 'undergraduate';
         $duration = trim($body['duration'] ?? '') ?: null;
@@ -159,33 +149,23 @@ class CourseController
         try {
             $db = Database::getConnection();
 
-            // If department_id is provided, verify it belongs to this tenant
-            if ($deptId !== null) {
-                $stmtCheck = $db->prepare("SELECT id FROM departments WHERE id = ? AND organization_id = ?");
-                $stmtCheck->execute([$deptId, $orgId]);
-                if (!$stmtCheck->fetch()) {
-                    Response::error('Selected department not found or does not belong to your organization', 404);
-                    return;
-                }
-            }
-
             $db->beginTransaction();
 
             $stmt = $db->prepare("
-                INSERT INTO department_courses (
-                    organization_id, department_id, course_name, course_code, 
+                INSERT INTO programs (
+                    organization_id, course_name, course_code, 
                     program_type, duration, mode, is_admissions_open, 
                     tuition_fee, registration_fee, other_fees, total_fee, currency, 
                     eligibility, application_deadline, application_fee, application_url, sort_order
                 ) VALUES (
-                    ?, ?, ?, ?, 
+                    ?, ?, ?, 
                     ?, ?, ?, ?, 
                     ?, ?, ?, ?, ?, 
                     ?, ?, ?, ?, ?
                 )
             ");
             $stmt->execute([
-                $orgId, $deptId, $courseName, $courseCode,
+                $orgId, $courseName, $courseCode,
                 $programType, $duration, $mode, $isAdmissionsOpen,
                 $tuitionFee, $regFee, $otherFees, $totalFee, $currency,
                 $eligibility, $appDeadline, $appFee, $appUrl, $sortOrder
@@ -223,7 +203,7 @@ class CourseController
     }
 
     /**
-     * Update an existing course / program (including moving to another department or orphan status).
+     * Update an existing program in the 'programs' table.
      */
     public function update(Request $request): void
     {
@@ -235,7 +215,7 @@ class CourseController
 
         $id = (int)$request->param('id');
         if (!$id) {
-            Response::error('Invalid course ID', 400);
+            Response::error('Invalid program ID', 400);
             return;
         }
 
@@ -246,7 +226,6 @@ class CourseController
             return;
         }
 
-        $deptId = array_key_exists('department_id', $body) && !empty($body['department_id']) ? (int)$body['department_id'] : null;
         $courseCode = trim($body['course_code'] ?? '') ?: null;
         $programType = $body['program_type'] ?? 'undergraduate';
         $duration = trim($body['duration'] ?? '') ?: null;
@@ -267,35 +246,19 @@ class CourseController
         try {
             $db = Database::getConnection();
 
-            // Verify course belongs to tenant
-            $stmtVerify = $db->prepare("
-                SELECT dc.id 
-                FROM department_courses dc
-                LEFT JOIN departments d ON dc.department_id = d.id
-                WHERE dc.id = ? AND (dc.organization_id = ? OR d.organization_id = ?)
-            ");
-            $stmtVerify->execute([$id, $orgId, $orgId]);
+            // Verify program belongs to tenant
+            $stmtVerify = $db->prepare("SELECT id FROM programs WHERE id = ? AND organization_id = ?");
+            $stmtVerify->execute([$id, $orgId]);
             if (!$stmtVerify->fetch()) {
-                Response::error('Course not found or unauthorized', 404);
+                Response::error('Program not found or unauthorized', 404);
                 return;
-            }
-
-            // If department_id is provided, verify it belongs to this tenant
-            if ($deptId !== null) {
-                $stmtCheck = $db->prepare("SELECT id FROM departments WHERE id = ? AND organization_id = ?");
-                $stmtCheck->execute([$deptId, $orgId]);
-                if (!$stmtCheck->fetch()) {
-                    Response::error('Selected department not found or does not belong to your organization', 404);
-                    return;
-                }
             }
 
             $db->beginTransaction();
 
             $stmt = $db->prepare("
-                UPDATE department_courses
-                SET department_id = ?,
-                    course_name = ?,
+                UPDATE programs
+                SET course_name = ?,
                     course_code = ?,
                     program_type = ?,
                     duration = ?,
@@ -311,16 +274,15 @@ class CourseController
                     application_fee = ?,
                     application_url = ?,
                     sort_order = ?,
-                    organization_id = ?,
                     updated_at = CURRENT_TIMESTAMP
-                WHERE id = ?
+                WHERE id = ? AND organization_id = ?
             ");
             $stmt->execute([
-                $deptId, $courseName, $courseCode,
+                $courseName, $courseCode,
                 $programType, $duration, $mode, $isAdmissionsOpen,
                 $tuitionFee, $regFee, $otherFees, $totalFee, $currency,
                 $eligibility, $appDeadline, $appFee, $appUrl, $sortOrder,
-                $orgId, $id
+                $id, $orgId
             ]);
 
             // Sync campus mappings if provided
@@ -359,7 +321,7 @@ class CourseController
     }
 
     /**
-     * Delete an academic program course.
+     * Delete an academic program from the 'programs' table.
      */
     public function delete(Request $request): void
     {
@@ -371,35 +333,30 @@ class CourseController
 
         $id = (int)$request->param('id');
         if (!$id) {
-            Response::error('Invalid course ID', 400);
+            Response::error('Invalid program ID', 400);
             return;
         }
 
         try {
             $db = Database::getConnection();
 
-            // Verify course belongs to tenant
-            $stmtVerify = $db->prepare("
-                SELECT dc.id 
-                FROM department_courses dc
-                LEFT JOIN departments d ON dc.department_id = d.id
-                WHERE dc.id = ? AND (dc.organization_id = ? OR d.organization_id = ?)
-            ");
-            $stmtVerify->execute([$id, $orgId, $orgId]);
+            // Verify program belongs to tenant
+            $stmtVerify = $db->prepare("SELECT id FROM programs WHERE id = ? AND organization_id = ?");
+            $stmtVerify->execute([$id, $orgId]);
             if (!$stmtVerify->fetch()) {
-                Response::error('Course not found or unauthorized', 404);
+                Response::error('Program not found or unauthorized', 404);
                 return;
             }
 
             $db->beginTransaction();
 
             // Delete campus junction entries
-            $stmtCamp = $db->prepare("DELETE FROM campus_courses WHERE course_id = ?");
-            $stmtCamp->execute([$id]);
+            $stmtCamp = $db->prepare("DELETE FROM campus_courses WHERE course_id = ? AND organization_id = ?");
+            $stmtCamp->execute([$id, $orgId]);
 
-            // Delete course
-            $stmtDel = $db->prepare("DELETE FROM department_courses WHERE id = ?");
-            $stmtDel->execute([$id]);
+            // Delete program from programs table
+            $stmtDel = $db->prepare("DELETE FROM programs WHERE id = ? AND organization_id = ?");
+            $stmtDel->execute([$id, $orgId]);
 
             $db->commit();
 

@@ -941,6 +941,36 @@ class Migrations
         } catch (Throwable $e) {
             // Ignored
         }
+
+        // Create standalone programs table (identical to department_courses except without department_id)
+        try {
+            $this->db->exec("CREATE TABLE IF NOT EXISTS programs (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                organization_id INT NOT NULL,
+                course_name VARCHAR(255) NOT NULL,
+                course_code VARCHAR(50) NULL,
+                program_type ENUM('undergraduate', 'postgraduate', 'doctoral', 'executive', 'certificate', 'other') DEFAULT 'undergraduate',
+                duration VARCHAR(50) NULL,
+                mode ENUM('full_time', 'part_time', 'online', 'hybrid', 'weekend') DEFAULT 'full_time',
+                is_admissions_open TINYINT(1) DEFAULT 1,
+                tuition_fee DECIMAL(12,2) NULL,
+                registration_fee DECIMAL(12,2) NULL,
+                other_fees DECIMAL(12,2) NULL,
+                total_fee DECIMAL(12,2) NULL,
+                currency VARCHAR(10) DEFAULT 'INR',
+                eligibility TEXT NULL,
+                application_deadline VARCHAR(100) NULL,
+                application_fee VARCHAR(50) NULL,
+                application_url VARCHAR(500) NULL,
+                sort_order INT DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_org (organization_id),
+                FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+        } catch (Throwable $e) {
+            // Table may already exist
+        }
     }
 }
 
