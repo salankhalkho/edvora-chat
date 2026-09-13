@@ -17,9 +17,15 @@ class CourseController
      * - departments: list of tenant departments for assignment dropdowns
      * - campuses: list of active tenant campuses for mapping
      */
+    private function getOrgId(Request $request): ?int
+    {
+        $orgId = $GLOBALS['organization_id'] ?? $GLOBALS['auth_user']['organization_id'] ?? $request->get('organization_id');
+        return $orgId ? (int)$orgId : null;
+    }
+
     public function index(Request $request): void
     {
-        $orgId = $request->organizationId;
+        $orgId = $this->getOrgId($request);
         if (!$orgId) {
             Response::error('Organization context required', 400);
             return;
@@ -116,7 +122,7 @@ class CourseController
      */
     public function store(Request $request): void
     {
-        $orgId = $request->organizationId;
+        $orgId = $this->getOrgId($request);
         if (!$orgId) {
             Response::error('Organization context required', 400);
             return;
@@ -207,7 +213,7 @@ class CourseController
      */
     public function update(Request $request): void
     {
-        $orgId = $request->organizationId;
+        $orgId = $this->getOrgId($request);
         if (!$orgId) {
             Response::error('Organization context required', 400);
             return;
@@ -325,7 +331,7 @@ class CourseController
      */
     public function delete(Request $request): void
     {
-        $orgId = $request->organizationId;
+        $orgId = $this->getOrgId($request);
         if (!$orgId) {
             Response::error('Organization context required', 400);
             return;
