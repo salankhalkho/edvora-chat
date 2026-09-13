@@ -6086,6 +6086,91 @@
             }
         }
 
+        // Knowledge Ingestion Expiry Helpers
+        function ingestSetExpiryDelta(inputId, days) {
+            const d = new Date();
+            d.setDate(d.getDate() + days);
+            const iso = d.toISOString().split('T')[0];
+            const el = document.getElementById(inputId);
+            if (el) el.value = iso;
+            showToast(`Validity expiry set to ${iso} (+${days} days)`, 'info');
+        }
+
+        function ingestClearExpiry(inputId) {
+            const el = document.getElementById(inputId);
+            if (el) el.value = '';
+            showToast('Document expiration cleared — set to Evergreen policy.', 'info');
+        }
+
+        // Knowledge Ingestion Department Scope Loader
+        async function loadIngestDepartments() {
+            const containers = document.querySelectorAll('.ingest-dept-pill-container');
+            if (!containers.length) return;
+
+            try {
+                const res = await fetch('/v1/departments', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                const depts = (data.status === 'success' && data.data) ? (Array.isArray(data.data) ? data.data : (data.data.departments || [])) : [];
+
+                containers.forEach(container => {
+                    const containerId = container.id || '';
+                    const radioName = containerId.includes('File') ? 'ingest_file_dept' : (containerId.includes('Url') ? 'ingest_url_dept' : 'ingest_text_dept');
+
+                    if (depts.length === 0) {
+                        container.innerHTML = '<span style="font-size: 12px; color: #94A3B8;">No departments configured in workspace. Global scope will be applied.</span>';
+                        return;
+                    }
+
+                    let html = `
+                        <label style="display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px; background: #E8F5F3; border: 1.5px solid #063D3B; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; color: #063D3B; user-select: none; transition: all 0.15s ease; box-shadow: 0 0 0 1px #063D3B;">
+                            <input type="radio" name="${radioName}" value="" checked onchange="updateIngestDeptRadios('${containerId}')" style="cursor: pointer; accent-color: #063D3B;" />
+                            <span>🌐</span>
+                            <span>Entire Organization (Global Scope)</span>
+                        </label>
+                    `;
+
+                    html += depts.map(d => `
+                        <label style="display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; color: #0F172A; user-select: none; transition: all 0.15s ease;">
+                            <input type="radio" name="${radioName}" value="${d.id}" onchange="updateIngestDeptRadios('${containerId}')" style="cursor: pointer; accent-color: #063D3B;" />
+                            <span>${escapeHtml(d.icon || '🏫')}</span>
+                            <span>${escapeHtml(d.name)}</span>
+                        </label>
+                    `).join('');
+
+                    container.innerHTML = html;
+                });
+            } catch(e) {
+                console.error('[Edvora] Error loading departments for ingestion:', e);
+                containers.forEach(c => {
+                    c.innerHTML = '<span style="font-size: 12px; color: #EF4444;">Failed to load departments.</span>';
+                });
+            }
+        }
+        window.loadIngestDepartments = loadIngestDepartments;
+
+        function updateIngestDeptRadios(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const labels = container.querySelectorAll('label');
+            labels.forEach(label => {
+                const radio = label.querySelector('input[type="radio"]');
+                if (radio && radio.checked) {
+                    label.style.borderColor = '#063D3B';
+                    label.style.background = '#E8F5F3';
+                    label.style.color = '#063D3B';
+                    label.style.boxShadow = '0 0 0 1px #063D3B';
+                } else if (label) {
+                    label.style.borderColor = '#E2E8F0';
+                    label.style.background = '#FFFFFF';
+                    label.style.color = '#0F172A';
+                    label.style.boxShadow = 'none';
+                }
+            });
+        }
+        window.updateIngestDeptRadios = updateIngestDeptRadios;
+
         async function submitIngestFile(e) {
             e.preventDefault();
             const btn = document.getElementById('btnSubmitFile');
@@ -6102,8 +6187,11 @@
                 category = customVal;
             }
             const academic_version = document.getElementById('ingestAcademicVersion').value.trim();
-            const validity_days = parseInt(document.getElementById('ingestValidityPeriod').value) || 365;
-            const department_id = document.getElementById('ingestDeptScope').value;
+            const effective_from = document.getElementById('ingestFileEffectiveFrom').value.trim();
+            const expires_on = document.getElementById('ingestFileExpiresOn').value.trim();
+            const review_freq = parseInt(document.getElementById('ingestFileReviewFreq').value) || 180;
+            const deptRadio = document.querySelector('input[name="ingest_file_dept"]:checked');
+            const department_id = deptRadio ? deptRadio.value.trim() : '';
             const fileInput = document.getElementById('ingestFileInput');
 
             if (!fileInput.files || fileInput.files.length === 0) {
@@ -6116,7 +6204,9 @@
             formData.append('title', title);
             formData.append('category', category);
             formData.append('academic_version', academic_version);
-            formData.append('review_frequency_days', validity_days);
+            formData.append('review_frequency_days', review_freq);
+            if (effective_from) formData.append('effective_from', effective_from);
+            if (expires_on) formData.append('expires_on', expires_on);
             if (department_id) formData.append('department_id', department_id);
 
             const origText = btn.innerHTML;
@@ -6161,16 +6251,33 @@
                 }
                 category = customVal;
             }
+            const academic_version = document.getElementById('ingestUrlAcademicVersion').value.trim();
+            const effective_from = document.getElementById('ingestUrlEffectiveFrom').value.trim();
+            const expires_on = document.getElementById('ingestUrlExpiresOn').value.trim();
+            const review_freq = parseInt(document.getElementById('ingestUrlReviewFreq').value) || 180;
+            const deptRadio = document.querySelector('input[name="ingest_url_dept"]:checked');
+            const department_id = deptRadio ? deptRadio.value.trim() : '';
 
             const origText = btn.innerHTML;
             btn.innerHTML = '<span>Crawling...</span>';
             btn.disabled = true;
 
+            const payload = {
+                url,
+                title,
+                category,
+                academic_version,
+                review_frequency_days: review_freq
+            };
+            if (effective_from) payload.effective_from = effective_from;
+            if (expires_on) payload.expires_on = expires_on;
+            if (department_id) payload.department_id = department_id;
+
             try {
                 const res = await fetch('/v1/knowledge/crawl', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url, title, category })
+                    body: JSON.stringify(payload)
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
@@ -6203,17 +6310,34 @@
                 }
                 category = customVal;
             }
+            const academic_version = document.getElementById('ingestTextAcademicVersion').value.trim();
+            const effective_from = document.getElementById('ingestTextEffectiveFrom').value.trim();
+            const expires_on = document.getElementById('ingestTextExpiresOn').value.trim();
+            const review_freq = parseInt(document.getElementById('ingestTextReviewFreq').value) || 180;
+            const deptRadio = document.querySelector('input[name="ingest_text_dept"]:checked');
+            const department_id = deptRadio ? deptRadio.value.trim() : '';
             const content = document.getElementById('ingestTextContent').value.trim();
 
             const origText = btn.innerHTML;
             btn.innerHTML = '<span>Saving...</span>';
             btn.disabled = true;
 
+            const payload = {
+                title,
+                category,
+                content,
+                academic_version,
+                review_frequency_days: review_freq
+            };
+            if (effective_from) payload.effective_from = effective_from;
+            if (expires_on) payload.expires_on = expires_on;
+            if (department_id) payload.department_id = department_id;
+
             try {
                 const res = await fetch('/v1/knowledge/text', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ title, category, content })
+                    body: JSON.stringify(payload)
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
@@ -6291,6 +6415,8 @@
                     }
                 } else if (tab === 'teams') {
                     if (typeof closeAddStaffModal === 'function') closeAddStaffModal();
+                } else if (tab === 'knowledge-ingestion') {
+                    if (typeof loadIngestDepartments === 'function') loadIngestDepartments();
                 } else if (tab === 'profile') {
                     if (typeof loadProfileData === 'function') loadProfileData();
                 }

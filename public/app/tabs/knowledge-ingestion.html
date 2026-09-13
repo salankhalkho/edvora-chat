@@ -43,50 +43,102 @@
 
         <!-- MODE 1: DOCUMENT FILE UPLOAD -->
         <form id="ingestFormFile" onsubmit="submitIngestFile(event)" style="display: block;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-            <div>
-              <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #648781; margin-bottom: 6px;">Document Title</label>
-              <input type="text" id="ingestDocTitle" placeholder="e.g. MBA Admissions Prospectus 2026&ndash;27" required style="width: 100%; height: 38px; padding: 0 12px; border: 1.5px solid #D1E5DE; border-radius: 8px; font-size: 12.5px; box-sizing: border-box;">
+          
+          <!-- SECTION 1: Document Core Identity & Department Scope -->
+          <div style="background: #E7F4D7; border: 1.5px solid #CFE6BA; border-radius: 8px; padding: 22px 24px; margin-bottom: 24px;">
+            <div style="font-size: 13.5px; font-weight: 800; color: #092F2E; display: flex; align-items: center; gap: 8px; margin-bottom: 18px;">
+              <span>📋</span> Document Core Identity &amp; Department Scope
             </div>
-            <div>
-              <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #648781; margin-bottom: 6px;">Category</label>
-              <select id="ingestDocCategory" onchange="toggleCustomCategoryInput('ingestDocCategory', 'ingestDocCategoryCustomWrap', 'ingestDocCategoryCustom')" style="width: 100%; height: 38px; padding: 0 12px; border: 1.5px solid #D1E5DE; border-radius: 8px; font-size: 12.5px; box-sizing: border-box; background: #FFFFFF;">
-                <option value="General / Institutional">General / Institutional</option>
-                <option value="Admissions & Prospectus">Admissions &amp; Prospectus</option>
-                <option value="Tuition & Fee Structure">Tuition &amp; Fee Structure</option>
-                <option value="Scholarships & Financial Aid">Scholarships &amp; Financial Aid</option>
-                <option value="Eligibility & Criteria">Eligibility &amp; Criteria</option>
-                <option value="Academic Curriculum & Programs">Academic Curriculum &amp; Programs</option>
-                <option value="Hostel & Campus Life">Hostel &amp; Campus Life</option>
-                <option value="Placements & Career Outcomes">Placements &amp; Career Outcomes</option>
-                <option value="Examinations & Policies">Examinations &amp; Policies</option>
-                <option value="__custom__">➕ Other (Specify Custom Category...)</option>
-              </select>
-              <div id="ingestDocCategoryCustomWrap" style="display: none; margin-top: 8px;">
-                <input type="text" id="ingestDocCategoryCustom" placeholder="Enter custom category name (e.g. Sports & Athletics)" style="width: 100%; height: 38px; padding: 0 12px; border: 1.5px solid #063D3B; border-radius: 8px; font-size: 12.5px; box-sizing: border-box; background: #F8FBFA; color: #063D3B; font-weight: 600;">
+
+            <div style="margin-bottom: 16px;">
+              <label for="ingestDocTitle" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                Document Title <span style="color: #EF4444;">*</span>
+              </label>
+              <input type="text" id="ingestDocTitle" placeholder="e.g. 2026–27 Master Admissions Prospectus & Eligibility Matrix" required style="width: 100%; box-sizing: border-box; height: 44px; font-size: 18px; font-weight: 600; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 18px;">
+              <div>
+                <label for="ingestDocCategory" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                  Institutional Category <span style="color: #EF4444;">*</span>
+                </label>
+                <select id="ingestDocCategory" onchange="toggleCustomCategoryInput('ingestDocCategory', 'ingestDocCategoryCustomWrap', 'ingestDocCategoryCustom')" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+                  <option value="General / Institutional">General / Institutional</option>
+                  <option value="Admissions & Prospectus">Admissions &amp; Prospectus</option>
+                  <option value="Tuition & Fee Structure">Tuition &amp; Fee Structure</option>
+                  <option value="Scholarships & Financial Aid">Scholarships &amp; Financial Aid</option>
+                  <option value="Eligibility & Criteria">Eligibility &amp; Criteria</option>
+                  <option value="Academic Curriculum & Programs">Academic Curriculum &amp; Programs</option>
+                  <option value="Hostel & Campus Life">Hostel &amp; Campus Life</option>
+                  <option value="Placements & Career Outcomes">Placements &amp; Career Outcomes</option>
+                  <option value="Examinations & Policies">Examinations &amp; Policies</option>
+                  <option value="__custom__">➕ Other (Specify Custom Category...)</option>
+                </select>
+                <div id="ingestDocCategoryCustomWrap" style="display: none; margin-top: 8px;">
+                  <input type="text" id="ingestDocCategoryCustom" placeholder="Enter custom category name (e.g. Sports & Athletics)" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #063D3B; border-radius: 6px; padding: 0 12px; background: #FFFFFF; color: #063D3B; font-weight: 600;">
+                </div>
               </div>
+              <div>
+                <label for="ingestAcademicVersion" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                  Academic Version / Cycle
+                </label>
+                <input type="text" id="ingestAcademicVersion" value="2026–27" placeholder="e.g. 2026-27 or Evergreen" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+              </div>
+            </div>
+
+            <!-- Department Scope Radios -->
+            <div>
+              <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 8px;">
+                Assigned Department Scope
+              </label>
+              <div id="ingestFileDeptContainer" class="ingest-dept-pill-container" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; background: #FFFFFF; border: 1.5px solid #CFE6BA; border-radius: 6px; min-height: 44px; align-items: center;">
+                <span style="font-size: 12px; color: #94A3B8;">Loading available departments...</span>
+              </div>
+              <span style="font-size: 10.5px; color: #648781; margin-top: 5px; display: block;">
+                Select a department to scope this document to that specific department, or select Entire Organization for institution-wide global availability.
+              </span>
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px;">
-            <div>
-              <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #648781; margin-bottom: 6px;">Academic Version</label>
-              <input type="text" id="ingestAcademicVersion" value="2026&ndash;27" style="width: 100%; height: 38px; padding: 0 12px; border: 1.5px solid #D1E5DE; border-radius: 8px; font-size: 12.5px; box-sizing: border-box;">
+          <!-- SECTION 2: Freshness Shield & Temporal Validity -->
+          <div style="background: #E7F4D7; border: 1.5px solid #CFE6BA; border-radius: 8px; padding: 22px 24px; margin-bottom: 24px;">
+            <div style="font-size: 13.5px; font-weight: 800; color: #092F2E; display: flex; align-items: center; gap: 8px; margin-bottom: 18px;">
+              <span>🛡️</span> Freshness Shield &amp; Temporal Validity
             </div>
-            <div>
-              <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #648781; margin-bottom: 6px;">Validity Period</label>
-              <select id="ingestValidityPeriod" style="width: 100%; height: 38px; padding: 0 12px; border: 1.5px solid #D1E5DE; border-radius: 8px; font-size: 12.5px; box-sizing: border-box; background: #FFFFFF;">
-                <option value="365">365 Days (Full Academic Year)</option>
-                <option value="180">180 Days (Semester Cycle)</option>
-                <option value="90">90 Days (Admissions Window)</option>
-                <option value="30">30 Days (Urgent / Circular)</option>
-              </select>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 16px;">
+              <div>
+                <label for="ingestFileEffectiveFrom" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                  Effective Start Date (Activation)
+                </label>
+                <input type="date" id="ingestFileEffectiveFrom" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+                <span style="font-size: 10.5px; color: #648781; margin-top: 3px; display: block;">Optional. Defaults to today. Embargoed from visitor chatbot until this date.</span>
+              </div>
+              <div>
+                <label for="ingestFileExpiresOn" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                  Expiration Date (Freshness Shield)
+                </label>
+                <input type="date" id="ingestFileExpiresOn" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+                <span style="font-size: 10.5px; color: #648781; margin-top: 3px; display: block;">Once reached, document is instantly excluded from visitor AI.</span>
+              </div>
             </div>
+
+            <!-- Quick Extend Presets -->
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; padding: 8px 12px; background: #FFFFFF; border: 1.5px solid #CFE6BA; border-radius: 6px;">
+              <span style="font-size: 11px; font-weight: 700; color: #64748B;">Quick Validity Presets:</span>
+              <button type="button" onclick="ingestSetExpiryDelta('ingestFileExpiresOn', 30)" class="ckh-filter-pill" style="font-size: 11px; padding: 3px 10px; cursor: pointer;">+30 Days</button>
+              <button type="button" onclick="ingestSetExpiryDelta('ingestFileExpiresOn', 90)" class="ckh-filter-pill" style="font-size: 11px; padding: 3px 10px; cursor: pointer;">+90 Days</button>
+              <button type="button" onclick="ingestSetExpiryDelta('ingestFileExpiresOn', 180)" class="ckh-filter-pill" style="font-size: 11px; padding: 3px 10px; cursor: pointer;">+180 Days (Semester)</button>
+              <button type="button" onclick="ingestSetExpiryDelta('ingestFileExpiresOn', 365)" class="ckh-filter-pill" style="font-size: 11px; padding: 3px 10px; cursor: pointer;">+1 Year (Full Cycle)</button>
+              <button type="button" onclick="ingestClearExpiry('ingestFileExpiresOn')" class="ckh-filter-pill" style="font-size: 11px; padding: 3px 10px; color: #047857; background: #ECFDF5; border-color: #A7F3D0; cursor: pointer;">Make Evergreen (No Expiry)</button>
+            </div>
+
             <div>
-              <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #648781; margin-bottom: 6px;">Department Scope</label>
-              <select id="ingestDeptScope" style="width: 100%; height: 38px; padding: 0 12px; border: 1.5px solid #D1E5DE; border-radius: 8px; font-size: 12.5px; box-sizing: border-box; background: #FFFFFF;">
-                <option value="">Institution-Wide (All Units)</option>
-              </select>
+              <label for="ingestFileReviewFreq" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                Review Cadence (Days)
+              </label>
+              <input type="number" id="ingestFileReviewFreq" value="180" min="15" max="730" class="brand-input" style="width: 100%; max-width: 280px; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+              <span style="font-size: 10.5px; color: #648781; margin-top: 3px; display: block;">Triggers "Needs Review" alert after this number of days without audit.</span>
             </div>
           </div>
 
@@ -108,34 +160,112 @@
 
         <!-- MODE 2: WEB URL CRAWLER -->
         <form id="ingestFormUrl" onsubmit="submitIngestUrl(event)" style="display: none;">
-          <div style="margin-bottom: 16px;">
-            <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #648781; margin-bottom: 6px;">Target Public Web URL</label>
-            <input type="url" id="ingestTargetUrl" placeholder="https://college.edu/admissions/eligibility" required style="width: 100%; height: 38px; padding: 0 12px; border: 1.5px solid #D1E5DE; border-radius: 8px; font-size: 12.5px; box-sizing: border-box;">
+          
+          <div style="margin-bottom: 20px;">
+            <label for="ingestTargetUrl" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+              Target Public Web URL <span style="color: #EF4444;">*</span>
+            </label>
+            <input type="url" id="ingestTargetUrl" placeholder="https://college.edu/admissions/eligibility" required style="width: 100%; height: 42px; padding: 0 12px; border: 1.5px solid #D1E5DE; border-radius: 8px; font-size: 13.5px; box-sizing: border-box; background: #FFFFFF;">
           </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-            <div>
-              <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #648781; margin-bottom: 6px;">Resource Title</label>
-              <input type="text" id="ingestUrlTitle" placeholder="e.g. Undergraduate Admissions Portal" required style="width: 100%; height: 38px; padding: 0 12px; border: 1.5px solid #D1E5DE; border-radius: 8px; font-size: 12.5px; box-sizing: border-box;">
+
+          <!-- SECTION 1: Document Core Identity & Department Scope -->
+          <div style="background: #E7F4D7; border: 1.5px solid #CFE6BA; border-radius: 8px; padding: 22px 24px; margin-bottom: 24px;">
+            <div style="font-size: 13.5px; font-weight: 800; color: #092F2E; display: flex; align-items: center; gap: 8px; margin-bottom: 18px;">
+              <span>📋</span> Document Core Identity &amp; Department Scope
             </div>
-            <div>
-              <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #648781; margin-bottom: 6px;">Category</label>
-              <select id="ingestUrlCategory" onchange="toggleCustomCategoryInput('ingestUrlCategory', 'ingestUrlCategoryCustomWrap', 'ingestUrlCategoryCustom')" style="width: 100%; height: 38px; padding: 0 12px; border: 1.5px solid #D1E5DE; border-radius: 8px; font-size: 12.5px; box-sizing: border-box; background: #FFFFFF;">
-                <option value="General / Institutional">General / Institutional</option>
-                <option value="Admissions & Prospectus">Admissions &amp; Prospectus</option>
-                <option value="Tuition & Fee Structure">Tuition &amp; Fee Structure</option>
-                <option value="Scholarships & Financial Aid">Scholarships &amp; Financial Aid</option>
-                <option value="Eligibility & Criteria">Eligibility &amp; Criteria</option>
-                <option value="Academic Curriculum & Programs">Academic Curriculum &amp; Programs</option>
-                <option value="Hostel & Campus Life">Hostel &amp; Campus Life</option>
-                <option value="Placements & Career Outcomes">Placements &amp; Career Outcomes</option>
-                <option value="Examinations & Policies">Examinations &amp; Policies</option>
-                <option value="__custom__">➕ Other (Specify Custom Category...)</option>
-              </select>
-              <div id="ingestUrlCategoryCustomWrap" style="display: none; margin-top: 8px;">
-                <input type="text" id="ingestUrlCategoryCustom" placeholder="Enter custom category name (e.g. Sports & Athletics)" style="width: 100%; height: 38px; padding: 0 12px; border: 1.5px solid #063D3B; border-radius: 8px; font-size: 12.5px; box-sizing: border-box; background: #F8FBFA; color: #063D3B; font-weight: 600;">
+
+            <div style="margin-bottom: 16px;">
+              <label for="ingestUrlTitle" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                Resource Title <span style="color: #EF4444;">*</span>
+              </label>
+              <input type="text" id="ingestUrlTitle" placeholder="e.g. Undergraduate Admissions & Eligibility Portal" required style="width: 100%; box-sizing: border-box; height: 40px; font-size: 16px; font-weight: 600; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 18px;">
+              <div>
+                <label for="ingestUrlCategory" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                  Institutional Category <span style="color: #EF4444;">*</span>
+                </label>
+                <select id="ingestUrlCategory" onchange="toggleCustomCategoryInput('ingestUrlCategory', 'ingestUrlCategoryCustomWrap', 'ingestUrlCategoryCustom')" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+                  <option value="General / Institutional">General / Institutional</option>
+                  <option value="Admissions & Prospectus">Admissions &amp; Prospectus</option>
+                  <option value="Tuition & Fee Structure">Tuition &amp; Fee Structure</option>
+                  <option value="Scholarships & Financial Aid">Scholarships &amp; Financial Aid</option>
+                  <option value="Eligibility & Criteria">Eligibility &amp; Criteria</option>
+                  <option value="Academic Curriculum & Programs">Academic Curriculum &amp; Programs</option>
+                  <option value="Hostel & Campus Life">Hostel &amp; Campus Life</option>
+                  <option value="Placements & Career Outcomes">Placements &amp; Career Outcomes</option>
+                  <option value="Examinations & Policies">Examinations &amp; Policies</option>
+                  <option value="__custom__">➕ Other (Specify Custom Category...)</option>
+                </select>
+                <div id="ingestUrlCategoryCustomWrap" style="display: none; margin-top: 8px;">
+                  <input type="text" id="ingestUrlCategoryCustom" placeholder="Enter custom category name (e.g. Sports & Athletics)" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #063D3B; border-radius: 6px; padding: 0 12px; background: #FFFFFF; color: #063D3B; font-weight: 600;">
+                </div>
+              </div>
+              <div>
+                <label for="ingestUrlAcademicVersion" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                  Academic Version / Cycle
+                </label>
+                <input type="text" id="ingestUrlAcademicVersion" value="2026–27" placeholder="e.g. 2026-27 or Evergreen" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
               </div>
             </div>
+
+            <!-- Department Scope Radios -->
+            <div>
+              <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 8px;">
+                Assigned Department Scope
+              </label>
+              <div id="ingestUrlDeptContainer" class="ingest-dept-pill-container" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; background: #FFFFFF; border: 1.5px solid #CFE6BA; border-radius: 6px; min-height: 44px; align-items: center;">
+                <span style="font-size: 12px; color: #94A3B8;">Loading available departments...</span>
+              </div>
+              <span style="font-size: 10.5px; color: #648781; margin-top: 5px; display: block;">
+                Select a department to scope this document to that specific department, or select Entire Organization for institution-wide global availability.
+              </span>
+            </div>
           </div>
+
+          <!-- SECTION 2: Freshness Shield & Temporal Validity -->
+          <div style="background: #E7F4D7; border: 1.5px solid #CFE6BA; border-radius: 8px; padding: 22px 24px; margin-bottom: 24px;">
+            <div style="font-size: 13.5px; font-weight: 800; color: #092F2E; display: flex; align-items: center; gap: 8px; margin-bottom: 18px;">
+              <span>🛡️</span> Freshness Shield &amp; Temporal Validity
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 16px;">
+              <div>
+                <label for="ingestUrlEffectiveFrom" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                  Effective Start Date (Activation)
+                </label>
+                <input type="date" id="ingestUrlEffectiveFrom" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+                <span style="font-size: 10.5px; color: #648781; margin-top: 3px; display: block;">Optional. Defaults to today. Embargoed from visitor chatbot until this date.</span>
+              </div>
+              <div>
+                <label for="ingestUrlExpiresOn" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                  Expiration Date (Freshness Shield)
+                </label>
+                <input type="date" id="ingestUrlExpiresOn" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+                <span style="font-size: 10.5px; color: #648781; margin-top: 3px; display: block;">Once reached, document is instantly excluded from visitor AI.</span>
+              </div>
+            </div>
+
+            <!-- Quick Extend Presets -->
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; padding: 8px 12px; background: #FFFFFF; border: 1.5px solid #CFE6BA; border-radius: 6px;">
+              <span style="font-size: 11px; font-weight: 700; color: #64748B;">Quick Validity Presets:</span>
+              <button type="button" onclick="ingestSetExpiryDelta('ingestUrlExpiresOn', 30)" class="ckh-filter-pill" style="font-size: 11px; padding: 3px 10px; cursor: pointer;">+30 Days</button>
+              <button type="button" onclick="ingestSetExpiryDelta('ingestUrlExpiresOn', 90)" class="ckh-filter-pill" style="font-size: 11px; padding: 3px 10px; cursor: pointer;">+90 Days</button>
+              <button type="button" onclick="ingestSetExpiryDelta('ingestUrlExpiresOn', 180)" class="ckh-filter-pill" style="font-size: 11px; padding: 3px 10px; cursor: pointer;">+180 Days (Semester)</button>
+              <button type="button" onclick="ingestSetExpiryDelta('ingestUrlExpiresOn', 365)" class="ckh-filter-pill" style="font-size: 11px; padding: 3px 10px; cursor: pointer;">+1 Year (Full Cycle)</button>
+              <button type="button" onclick="ingestClearExpiry('ingestUrlExpiresOn')" class="ckh-filter-pill" style="font-size: 11px; padding: 3px 10px; color: #047857; background: #ECFDF5; border-color: #A7F3D0; cursor: pointer;">Make Evergreen (No Expiry)</button>
+            </div>
+
+            <div>
+              <label for="ingestUrlReviewFreq" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                Review Cadence (Days)
+              </label>
+              <input type="number" id="ingestUrlReviewFreq" value="180" min="15" max="730" class="brand-input" style="width: 100%; max-width: 280px; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+              <span style="font-size: 10.5px; color: #648781; margin-top: 3px; display: block;">Triggers "Needs Review" alert after this number of days without audit.</span>
+            </div>
+          </div>
+
           <div style="display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 24px;">
             <button type="button" onclick="switchNavTab('knowledge')" class="brand-btn-secondary" style="height: 38px; padding: 0 18px; font-size: 12px; font-weight: 600; border-radius: 8px; border: 1.5px solid #D1E5DE; background: #FFFFFF; color: #648781; cursor: pointer;">Cancel</button>
             <button type="submit" id="btnSubmitUrl" class="brand-btn-primary" style="height: 38px; padding: 0 22px; font-size: 12px; font-weight: 700; border-radius: 8px; background: #063D3B; color: #C8FF63; border: none; cursor: pointer;">Crawl &amp; Index URL</button>
@@ -144,34 +274,112 @@
 
         <!-- MODE 3: DIRECT TEXT / CIRCULAR -->
         <form id="ingestFormText" onsubmit="submitIngestText(event)" style="display: none;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-            <div>
-              <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #648781; margin-bottom: 6px;">Notice / Circular Title</label>
-              <input type="text" id="ingestTextTitle" placeholder="e.g. Special Round Counseling Dates Circular" required style="width: 100%; height: 38px; padding: 0 12px; border: 1.5px solid #D1E5DE; border-radius: 8px; font-size: 12.5px; box-sizing: border-box;">
+          
+          <!-- SECTION 1: Document Core Identity & Department Scope -->
+          <div style="background: #E7F4D7; border: 1.5px solid #CFE6BA; border-radius: 8px; padding: 22px 24px; margin-bottom: 24px;">
+            <div style="font-size: 13.5px; font-weight: 800; color: #092F2E; display: flex; align-items: center; gap: 8px; margin-bottom: 18px;">
+              <span>📋</span> Document Core Identity &amp; Department Scope
             </div>
-            <div>
-              <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #648781; margin-bottom: 6px;">Category</label>
-              <select id="ingestTextCategory" onchange="toggleCustomCategoryInput('ingestTextCategory', 'ingestTextCategoryCustomWrap', 'ingestTextCategoryCustom')" style="width: 100%; height: 38px; padding: 0 12px; border: 1.5px solid #D1E5DE; border-radius: 8px; font-size: 12.5px; box-sizing: border-box; background: #FFFFFF;">
-                <option value="General / Institutional">General / Institutional</option>
-                <option value="Admissions & Prospectus">Admissions &amp; Prospectus</option>
-                <option value="Tuition & Fee Structure">Tuition &amp; Fee Structure</option>
-                <option value="Scholarships & Financial Aid">Scholarships &amp; Financial Aid</option>
-                <option value="Eligibility & Criteria">Eligibility &amp; Criteria</option>
-                <option value="Academic Curriculum & Programs">Academic Curriculum &amp; Programs</option>
-                <option value="Hostel & Campus Life">Hostel &amp; Campus Life</option>
-                <option value="Placements & Career Outcomes">Placements &amp; Career Outcomes</option>
-                <option value="Examinations & Policies">Examinations &amp; Policies</option>
-                <option value="__custom__">➕ Other (Specify Custom Category...)</option>
-              </select>
-              <div id="ingestTextCategoryCustomWrap" style="display: none; margin-top: 8px;">
-                <input type="text" id="ingestTextCategoryCustom" placeholder="Enter custom category name (e.g. Sports & Athletics)" style="width: 100%; height: 38px; padding: 0 12px; border: 1.5px solid #063D3B; border-radius: 8px; font-size: 12.5px; box-sizing: border-box; background: #F8FBFA; color: #063D3B; font-weight: 600;">
+
+            <div style="margin-bottom: 16px;">
+              <label for="ingestTextTitle" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                Notice / Circular Title <span style="color: #EF4444;">*</span>
+              </label>
+              <input type="text" id="ingestTextTitle" placeholder="e.g. Special Round Counseling Dates & Seat Allotment Circular" required style="width: 100%; box-sizing: border-box; height: 40px; font-size: 16px; font-weight: 600; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 18px;">
+              <div>
+                <label for="ingestTextCategory" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                  Institutional Category <span style="color: #EF4444;">*</span>
+                </label>
+                <select id="ingestTextCategory" onchange="toggleCustomCategoryInput('ingestTextCategory', 'ingestTextCategoryCustomWrap', 'ingestTextCategoryCustom')" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+                  <option value="General / Institutional">General / Institutional</option>
+                  <option value="Admissions & Prospectus">Admissions &amp; Prospectus</option>
+                  <option value="Tuition & Fee Structure">Tuition &amp; Fee Structure</option>
+                  <option value="Scholarships & Financial Aid">Scholarships &amp; Financial Aid</option>
+                  <option value="Eligibility & Criteria">Eligibility &amp; Criteria</option>
+                  <option value="Academic Curriculum & Programs">Academic Curriculum &amp; Programs</option>
+                  <option value="Hostel & Campus Life">Hostel &amp; Campus Life</option>
+                  <option value="Placements & Career Outcomes">Placements &amp; Career Outcomes</option>
+                  <option value="Examinations & Policies">Examinations &amp; Policies</option>
+                  <option value="__custom__">➕ Other (Specify Custom Category...)</option>
+                </select>
+                <div id="ingestTextCategoryCustomWrap" style="display: none; margin-top: 8px;">
+                  <input type="text" id="ingestTextCategoryCustom" placeholder="Enter custom category name (e.g. Sports & Athletics)" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #063D3B; border-radius: 6px; padding: 0 12px; background: #FFFFFF; color: #063D3B; font-weight: 600;">
+                </div>
+              </div>
+              <div>
+                <label for="ingestTextAcademicVersion" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                  Academic Version / Cycle
+                </label>
+                <input type="text" id="ingestTextAcademicVersion" value="2026–27" placeholder="e.g. 2026-27 or Evergreen" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
               </div>
             </div>
+
+            <!-- Department Scope Radios -->
+            <div>
+              <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 8px;">
+                Assigned Department Scope
+              </label>
+              <div id="ingestTextDeptContainer" class="ingest-dept-pill-container" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; background: #FFFFFF; border: 1.5px solid #CFE6BA; border-radius: 6px; min-height: 44px; align-items: center;">
+                <span style="font-size: 12px; color: #94A3B8;">Loading available departments...</span>
+              </div>
+              <span style="font-size: 10.5px; color: #648781; margin-top: 5px; display: block;">
+                Select a department to scope this document to that specific department, or select Entire Organization for institution-wide global availability.
+              </span>
+            </div>
           </div>
+
+          <!-- SECTION 2: Freshness Shield & Temporal Validity -->
+          <div style="background: #E7F4D7; border: 1.5px solid #CFE6BA; border-radius: 8px; padding: 22px 24px; margin-bottom: 24px;">
+            <div style="font-size: 13.5px; font-weight: 800; color: #092F2E; display: flex; align-items: center; gap: 8px; margin-bottom: 18px;">
+              <span>🛡️</span> Freshness Shield &amp; Temporal Validity
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 16px;">
+              <div>
+                <label for="ingestTextEffectiveFrom" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                  Effective Start Date (Activation)
+                </label>
+                <input type="date" id="ingestTextEffectiveFrom" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+                <span style="font-size: 10.5px; color: #648781; margin-top: 3px; display: block;">Optional. Defaults to today. Embargoed from visitor chatbot until this date.</span>
+              </div>
+              <div>
+                <label for="ingestTextExpiresOn" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                  Expiration Date (Freshness Shield)
+                </label>
+                <input type="date" id="ingestTextExpiresOn" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+                <span style="font-size: 10.5px; color: #648781; margin-top: 3px; display: block;">Once reached, document is instantly excluded from visitor AI.</span>
+              </div>
+            </div>
+
+            <!-- Quick Extend Presets -->
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; padding: 8px 12px; background: #FFFFFF; border: 1.5px solid #CFE6BA; border-radius: 6px;">
+              <span style="font-size: 11px; font-weight: 700; color: #64748B;">Quick Validity Presets:</span>
+              <button type="button" onclick="ingestSetExpiryDelta('ingestTextExpiresOn', 30)" class="ckh-filter-pill" style="font-size: 11px; padding: 3px 10px; cursor: pointer;">+30 Days</button>
+              <button type="button" onclick="ingestSetExpiryDelta('ingestTextExpiresOn', 90)" class="ckh-filter-pill" style="font-size: 11px; padding: 3px 10px; cursor: pointer;">+90 Days</button>
+              <button type="button" onclick="ingestSetExpiryDelta('ingestTextExpiresOn', 180)" class="ckh-filter-pill" style="font-size: 11px; padding: 3px 10px; cursor: pointer;">+180 Days (Semester)</button>
+              <button type="button" onclick="ingestSetExpiryDelta('ingestTextExpiresOn', 365)" class="ckh-filter-pill" style="font-size: 11px; padding: 3px 10px; cursor: pointer;">+1 Year (Full Cycle)</button>
+              <button type="button" onclick="ingestClearExpiry('ingestTextExpiresOn')" class="ckh-filter-pill" style="font-size: 11px; padding: 3px 10px; color: #047857; background: #ECFDF5; border-color: #A7F3D0; cursor: pointer;">Make Evergreen (No Expiry)</button>
+            </div>
+
+            <div>
+              <label for="ingestTextReviewFreq" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                Review Cadence (Days)
+              </label>
+              <input type="number" id="ingestTextReviewFreq" value="180" min="15" max="730" class="brand-input" style="width: 100%; max-width: 280px; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+              <span style="font-size: 10.5px; color: #648781; margin-top: 3px; display: block;">Triggers "Needs Review" alert after this number of days without audit.</span>
+            </div>
+          </div>
+
           <div style="margin-bottom: 20px;">
-            <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #648781; margin-bottom: 6px;">Circular Body / Knowledge Content</label>
-            <textarea id="ingestTextContent" rows="8" placeholder="Paste fulltext knowledge notice, deadlines, fee waiver criteria, or policy circular here..." required style="width: 100%; padding: 12px; border: 1.5px solid #D1E5DE; border-radius: 8px; font-size: 12.5px; font-family: inherit; box-sizing: border-box; resize: vertical;"></textarea>
+            <label for="ingestTextContent" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+              Circular Body / Knowledge Content <span style="color: #EF4444;">*</span>
+            </label>
+            <textarea id="ingestTextContent" rows="8" placeholder="Paste fulltext knowledge notice, deadlines, fee waiver criteria, or policy circular here..." required style="width: 100%; padding: 12px; border: 1.5px solid #D1E5DE; border-radius: 8px; font-size: 12.5px; font-family: inherit; box-sizing: border-box; resize: vertical; background: #FFFFFF;"></textarea>
           </div>
+
           <div style="display: flex; justify-content: flex-end; align-items: center; gap: 12px;">
             <button type="button" onclick="switchNavTab('knowledge')" class="brand-btn-secondary" style="height: 38px; padding: 0 18px; font-size: 12px; font-weight: 600; border-radius: 8px; border: 1.5px solid #D1E5DE; background: #FFFFFF; color: #648781; cursor: pointer;">Cancel</button>
             <button type="submit" id="btnSubmitText" class="brand-btn-primary" style="height: 38px; padding: 0 22px; font-size: 12px; font-weight: 700; border-radius: 8px; background: #063D3B; color: #C8FF63; border: none; cursor: pointer;">Save &amp; Index Text</button>
@@ -183,3 +391,9 @@
   </div>
 
 </div>
+
+<script>
+  if (typeof loadIngestDepartments === 'function') {
+    loadIngestDepartments();
+  }
+</script>
