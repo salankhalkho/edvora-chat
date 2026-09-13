@@ -4089,6 +4089,14 @@
               </a>
             </li>
             <li>
+              <a class="sidebar-nav-item nav-item" data-tab="academic-programs">
+                <span class="sidebar-nav-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                </span>
+                <span>Academic Programs</span>
+              </a>
+            </li>
+            <li>
               <a class="sidebar-nav-item nav-item" data-tab="departments">
                 <span class="sidebar-nav-icon">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="22.01"/><line x1="15" y1="22" x2="15" y2="22.01"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/><line x1="9" y1="10" x2="9" y2="10.01"/><line x1="15" y1="10" x2="15" y2="10.01"/><line x1="9" y1="14" x2="9" y2="14.01"/><line x1="15" y1="14" x2="15" y2="14.01"/><line x1="9" y1="18" x2="9" y2="18.01"/><line x1="15" y1="18" x2="15" y2="18.01"/></svg>
@@ -4569,6 +4577,9 @@
             <!-- Tab 2: Central Knowledge Hub -->
             <div class="tab-content" id="tab-knowledge" data-loaded="false"></div>
             <div class="tab-content" id="tab-knowledge-ingestion" data-loaded="false"></div>
+
+            <!-- Tab: Academic Programs & Degrees -->
+            <div class="tab-content" id="tab-academic-programs" data-loaded="false"></div>
 
             <!-- Tab: Lead-Magnet Assets & Document Repository -->
             <div class="tab-content" id="tab-assets" data-loaded="false"></div>
@@ -5842,7 +5853,7 @@
             };
         }
 
-        const VALID_APP_TABS = ['overview', 'knowledge', 'knowledge-ingestion', 'departments', 'leads', 'callbacks', 'campus-tours', 'scholarships', 'teams', 'assets', 'multilingual', 'conversion-engine', 'placeholder', 'analytics', 'knowledge-gaps', 'integrations', 'chatbot', 'test-chat', 'organization', 'org-settings', 'campuses', 'campus-editor', 'settings', 'knowledge-view', 'knowledge-editor', 'profile'];
+        const VALID_APP_TABS = ['overview', 'knowledge', 'knowledge-ingestion', 'academic-programs', 'departments', 'leads', 'callbacks', 'campus-tours', 'scholarships', 'teams', 'assets', 'multilingual', 'conversion-engine', 'placeholder', 'analytics', 'knowledge-gaps', 'integrations', 'chatbot', 'test-chat', 'organization', 'org-settings', 'campuses', 'campus-editor', 'settings', 'knowledge-view', 'knowledge-editor', 'profile'];
 
         // Navigation Tabs Handling with Async Modular Loading
         const _tabLoadPromises = {};
@@ -6429,6 +6440,8 @@
             let cleanTitle = navItem ? navItem.innerText.trim().replace(/^[^\w\s]+\s*/, '') : '';
             if (tab === 'knowledge') {
                 cleanTitle = 'Central Knowledge Hub (Institution-Wide)';
+            } else if (tab === 'academic-programs') {
+                cleanTitle = 'Academic Programs & Degrees';
             } else if (tab === 'teams') {
                 cleanTitle = 'Teams & Staff Management';
             } else if (tab === 'assets') {
@@ -6486,6 +6499,8 @@
                 if (tab === 'departments') {
                     if (typeof closeDeptDeepDive === 'function') closeDeptDeepDive();
                     if (typeof loadDepartments === 'function') loadDepartments();
+                } else if (tab === 'academic-programs') {
+                    if (typeof loadAcademicProgramsTab === 'function') loadAcademicProgramsTab();
                 } else if (tab === 'teams') {
                     if (typeof loadTeamsWorkspace === 'function') loadTeamsWorkspace();
                 } else if (tab === 'overview') {

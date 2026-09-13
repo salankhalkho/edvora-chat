@@ -30,6 +30,7 @@ use App\Controllers\CampusTourController;
 use App\Controllers\ChatbotController;
 use App\Controllers\ChatController;
 use App\Controllers\ConversionEngineController;
+use App\Controllers\CourseController;
 use App\Controllers\DatabaseManagerController;
 use App\Controllers\DemoPreviewController;
 use App\Controllers\DepartmentController;
@@ -401,6 +402,12 @@ $router->post('/v1/departments/{id}/staff', [DepartmentController::class, 'syncS
 $router->post('/v1/departments/{id}/knowledge', [DepartmentController::class, 'syncKnowledge'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->post('/v1/departments/{id}/faqs', [DepartmentController::class, 'manageFaqs'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->post('/v1/departments/{id}/courses', [DepartmentController::class, 'manageCourses'], [AuthMiddleware::class, TenantMiddleware::class]);
+
+// Academic Programs & Courses Management Routes (Tenant Context)
+$router->get('/v1/courses', [CourseController::class, 'index'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->post('/v1/courses', [CourseController::class, 'store'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->put('/v1/courses/{id}', [CourseController::class, 'update'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->delete('/v1/courses/{id}', [CourseController::class, 'delete'], [AuthMiddleware::class, TenantMiddleware::class]);
 
 // Scholarship & Fee Rules Routes (Protected + Tenant Context)
 $router->get('/v1/scholarships/config', [ScholarshipController::class, 'getConfig'], [AuthMiddleware::class, TenantMiddleware::class]);

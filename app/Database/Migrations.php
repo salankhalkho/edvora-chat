@@ -880,6 +880,8 @@ class Migrations
         try {
             $this->db->exec("ALTER TABLE department_courses ADD COLUMN IF NOT EXISTS organization_id INT NULL AFTER id;");
             $this->db->exec("UPDATE department_courses dc JOIN departments d ON dc.department_id = d.id SET dc.organization_id = d.organization_id WHERE dc.organization_id IS NULL;");
+            // Allow department_id to be NULL for orphan courses across departments
+            $this->db->exec("ALTER TABLE department_courses MODIFY COLUMN department_id INT NULL;");
         } catch (Throwable $e) {
             // Column may already exist
         }
