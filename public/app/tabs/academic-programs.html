@@ -148,7 +148,6 @@
       <thead>
         <tr>
           <th>Degree Program &amp; Code</th>
-          <th>Parent Department</th>
           <th>Level &amp; Duration</th>
           <th>Mode &amp; Admissions</th>
           <th>Offered Campuses</th>
@@ -157,7 +156,7 @@
       </thead>
       <tbody id="programsTableBody">
         <tr>
-          <td colspan="6" style="text-align: center; padding: 36px 20px; color: #648781;">
+          <td colspan="5" style="text-align: center; padding: 36px 20px; color: #648781;">
             <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; font-size: 12.5px;">
               <span>Loading academic programs...</span>
             </div>
@@ -494,7 +493,7 @@
     if (filtered.length === 0) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="6" style="text-align: center; padding: 48px 20px; color: #648781;">
+          <td colspan="5" style="text-align: center; padding: 48px 20px; color: #648781;">
             <div style="font-size: 28px; margin-bottom: 8px;">🎓</div>
             <div style="font-size: 13.5px; font-weight: 700; color: #063D3B;">No academic programs found</div>
             <div style="font-size: 11px; margin-top: 4px;">Try adjusting your filters or click "+ Add Program / Course" to register a new degree program.</div>
@@ -505,17 +504,6 @@
     }
 
     tbody.innerHTML = filtered.map(c => {
-      const isOrphan = !c.department_id || !c.department_name;
-      const deptBadge = isOrphan
-        ? `<span style="display:inline-flex; align-items:center; gap:5px; background:#FEF2F2; color:#DC2626; border:1px solid #FECACA; padding:3px 8px; border-radius:6px; font-size:10.5px; font-weight:700;">
-             <span style="width:6px; height:6px; border-radius:50%; background:#DC2626;"></span>
-             <span>Unassigned / Orphan</span>
-           </span>`
-        : `<span style="display:inline-flex; align-items:center; gap:5px; background:#F4FAF7; color:#063D3B; border:1px solid #D1E5DE; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:600;">
-             <span style="width:7px; height:7px; border-radius:50%; background:${c.department_color || '#047857'};"></span>
-             <span>${escapeHtml(c.department_name)}</span>
-           </span>`;
-
       // Level badge
       const pType = (c.program_type || 'undergraduate').toLowerCase();
       let typeStyle = 'background:#EFF6FF; color:#1D4ED8; border:1px solid #BFDBFE;';
@@ -578,9 +566,6 @@
                 ${feeHtml}
               </div>
             </div>
-          </td>
-          <td style="vertical-align: middle;">
-            ${deptBadge}
           </td>
           <td style="vertical-align: middle;">
             <span style="display:inline-block; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:700; ${typeStyle}">
