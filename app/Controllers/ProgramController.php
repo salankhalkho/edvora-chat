@@ -4,7 +4,7 @@ namespace App\Controllers;
 
 use App\Core\Request;
 use App\Core\Response;
-use App\Core\Database;
+use App\Config\Database;
 use PDO;
 use Throwable;
 
