@@ -38,6 +38,7 @@ use App\Controllers\KnowledgeController;
 use App\Controllers\LeadController;
 use App\Controllers\OnboardingController;
 use App\Controllers\OrganizationController;
+use App\Controllers\ProgramController;
 use App\Controllers\ScholarshipController;
 use App\Controllers\SmartOnboardingController;
 use App\Controllers\SuperAdminController;
@@ -403,7 +404,13 @@ $router->post('/v1/departments/{id}/knowledge', [DepartmentController::class, 's
 $router->post('/v1/departments/{id}/faqs', [DepartmentController::class, 'manageFaqs'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->post('/v1/departments/{id}/courses', [DepartmentController::class, 'manageCourses'], [AuthMiddleware::class, TenantMiddleware::class]);
 
-// Academic Programs & Courses Management Routes (Tenant Context)
+// Academic Programs Management Routes (Clean /v1/programs Endpoints)
+$router->get('/v1/programs', [ProgramController::class, 'index'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->post('/v1/programs', [ProgramController::class, 'store'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->put('/v1/programs/{id}', [ProgramController::class, 'update'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->delete('/v1/programs/{id}', [ProgramController::class, 'delete'], [AuthMiddleware::class, TenantMiddleware::class]);
+
+// Academic Programs & Courses Management Routes (Legacy Alias)
 $router->get('/v1/courses', [CourseController::class, 'index'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->post('/v1/courses', [CourseController::class, 'store'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->put('/v1/courses/{id}', [CourseController::class, 'update'], [AuthMiddleware::class, TenantMiddleware::class]);

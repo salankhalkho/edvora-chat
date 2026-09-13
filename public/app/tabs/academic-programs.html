@@ -303,10 +303,10 @@
     if (!token) return;
 
     try {
-      const res = await fetch('/v1/courses', {
+      const res = await fetch('/v1/programs', {
         headers: { 'Authorization': 'Bearer ' + token }
       });
-      if (!res.ok) throw new Error('Failed to load courses (status ' + res.status + ')');
+      if (!res.ok) throw new Error('Failed to load academic programs (status ' + res.status + ')');
       const data = await res.json();
       if (data.status !== 'success') throw new Error(data.message || 'API error');
 
@@ -733,7 +733,7 @@
     saveBtn.innerHTML = '<span>Saving...</span>';
 
     try {
-      const urlEndpoint = id ? `/v1/courses/${id}` : '/v1/courses';
+      const urlEndpoint = id ? `/v1/programs/${id}` : '/v1/programs';
       const method = id ? 'PUT' : 'POST';
 
       const res = await fetch(urlEndpoint, {
@@ -773,7 +773,7 @@
     if (!token) return;
 
     try {
-      const res = await fetch(`/v1/courses/${courseId}`, {
+      const res = await fetch(`/v1/programs/${courseId}`, {
         method: 'DELETE',
         headers: { 'Authorization': 'Bearer ' + token }
       });
