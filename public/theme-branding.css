@@ -2186,10 +2186,10 @@ select.brand-input option {
       line-height: 1.35;
     }
 
-    /* Row 2: Department Intelligence & Readiness Deck (3 Balanced Cards) */
+    /* Row 2: Department Intelligence & Readiness Deck (4 Balanced Cards) */
     .dept-telemetry-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 18px;
     }
 

@@ -260,7 +260,7 @@
             </div>
           </div>
 
-          <!-- TRACK 2: DEPARTMENT INTELLIGENCE & READINESS (3 Balanced Fixed-Height Cards) -->
+          <!-- TRACK 2: DEPARTMENT INTELLIGENCE & READINESS (4 Balanced Fixed-Height Cards) -->
           <div>
             <div class="dept-section-track">
               <span class="dept-track-title">Department Intelligence &amp; Readiness</span>
@@ -366,6 +366,37 @@
                 <div id="telemetryKsBadges" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(15, 23, 42, 0.05);">
                   <span id="telemetryKsBadge1" style="font-size: 10px; font-weight: 700; color: #B45309; background: #FEF3C7; border: 1px solid #FDE68A; padding: 2px 7px; border-radius: 6px;">⚠️ Setup Recommended</span>
                   <span id="telemetryKsBadge2" style="font-size: 10px; font-weight: 600; color: #475569; background: #F1F5F9; padding: 2px 7px; border-radius: 6px;">+ Link in Knowledge Hub</span>
+                </div>
+              </div>
+
+              <!-- Card 4: Lead Magnets (Resource Unlinked) -->
+              <div class="dept-telemetry-card" id="cardLeadMagnets" style="cursor: default;" title="Lead Magnets (Unlinked — Resource Coming Soon)">
+                <div>
+                  <div class="dept-telemetry-header">
+                    <div class="dept-telemetry-title-group">
+                      <div class="dept-telemetry-icon-box" style="background:#FFF7ED; color:#EA580C;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                      </div>
+                      <span class="dept-telemetry-card-title">Lead Magnets</span>
+                    </div>
+                    <span class="dept-card-link-affordance" style="color:#94A3B8; cursor: default;">
+                      <span>Unlinked</span>
+                    </span>
+                  </div>
+                  <div class="dept-telemetry-kpi" id="telemetryLeadMagnetsCount">0</div>
+                  <div class="dept-telemetry-lbl">Department Prospectus &amp; Guides</div>
+                  
+                  <div style="display: flex; align-items: center; gap: 8px; margin: 10px 0 6px 0;">
+                    <span id="telemetryLmStatusDot" class="status-pulse-dot" style="background:#EF4444;"></span>
+                    <span id="telemetryLmStatusText" style="font-size: 11.5px; font-weight: 700; color: #DC2626;">No Active Lead Magnet</span>
+                  </div>
+                  <div id="telemetryLmConText" style="font-size: 11px; color: #648781; line-height: 1.35;">Chatbot will not be able to collect email/phone in exchange of lead magnet.</div>
+                </div>
+
+                <!-- Footer Badges -->
+                <div id="telemetryLmBadges" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(15, 23, 42, 0.05);">
+                  <span id="telemetryLmBadge1" style="font-size: 10px; font-weight: 700; color: #C2410C; background: #FFF7ED; border: 1px solid #FFEDD5; padding: 2px 7px; border-radius: 6px;">⚠️ Lead Capture Impact</span>
+                  <span id="telemetryLmBadge2" style="font-size: 10px; font-weight: 600; color: #475569; background: #F1F5F9; padding: 2px 7px; border-radius: 6px;">Resource Coming Soon</span>
                 </div>
               </div>
 
@@ -933,6 +964,11 @@
           telKsBadge2.textContent = '+ Link in Knowledge Hub';
         }
       }
+
+      // Lead Magnets Telemetry (Dummy Numbers for now)
+      var telLmCount = document.getElementById('telemetryLeadMagnetsCount');
+      var lmCount = data.leadMagnetsCount !== undefined ? data.leadMagnetsCount : 0;
+      if (telLmCount) telLmCount.textContent = lmCount;
 
       // Operational Cards
       var cardHs = document.getElementById('cardHoursSchedule');
