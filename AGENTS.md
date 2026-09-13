@@ -14,10 +14,14 @@
 * All PHP execution, unit testing, migrations, and database operations run **exclusively on the remote production VPS** (`166.1.2.112`).
 
 ### 2. 🚀 MANDATORY PRODUCTION DEPLOYMENT & GITHUB SYNC
-* **GitHub for Source Control:** Use GitHub (`https://github.com/salankhalkho/edvora-chat.git`) for source control and change history. Always commit and push changes (`git push origin main`).
-* **Direct SSH for Fast VPS Deployment:** Deploy directly to the VPS (`166.1.2.112`) using the 3-step SSH/tar package script for instant live updates.
+* **Automated Unified Deployment Script:** Always deploy using the master script:
+  ```powershell
+  powershell -ExecutionPolicy Bypass -File .\deploy.ps1 -Message "your commit message"
+  ```
+  This script atomically packages the project, deploys with `sudo tar` to the VPS (`166.1.2.112`), runs migrations, sets file ownership (`critical:www-data`), reloads Apache, verifies live HTTP response, and pushes to GitHub (`origin/main`).
+* **Never separate VPS deployment and GitHub sync:** They must always occur together.
 * **Never declare a task or fix complete until it is deployed to the live production server and verified.**
-* Make all edits locally in `c:\xampp\htdocs\edvora.chat\`, then **immediately deploy** using the Standard Deployment Flow below.
+* Make all edits locally in `c:\xampp\htdocs\edvora.chat\`, then **immediately deploy** using `deploy.ps1`.
 
 ### 3. ✅ BLANKET PERMISSION GRANTED (DO NOT ASK FOR APPROVAL)
 * The user has granted **blanket pre-approval** for all local shell commands (PowerShell, `tar.exe`, `scp`, `ssh`, `curl`, file read/write).
@@ -38,22 +42,30 @@ The production VPS hosts multiple other live domains (`agenticactivity.com`, `ki
 
 ## 🚀 STANDARD PRODUCTION DEPLOYMENT WORKFLOW
 
-Whenever code, styling, or database scripts are modified locally, execute these 3 steps in PowerShell:
+Whenever code, styling, or database scripts are modified locally, execute the unified deployment script in PowerShell:
 
-### Step 1: Package Local Codebase
 ```powershell
-tar.exe -czvf deploy_package.tar.gz app public BRANDING_GUIDELINES.md theme-branding.css AGENTS.md architecture.md architecture_department_team_management.md migrate.php
+powershell -ExecutionPolicy Bypass -File .\deploy.ps1 -Message "feat/fix: description of changes"
 ```
 
-### Step 2: Upload to Production VPS
-```powershell
-scp -i "C:/Users/Salan Khalkho/.ssh/id_ed25519" -o StrictHostKeyChecking=no deploy_package.tar.gz critical@166.1.2.112:/tmp/deploy_package.tar.gz
-```
-
-### Step 3: Extract, Migrate, Set Permissions & Reload Apache
-```powershell
-ssh -i "C:/Users/Salan Khalkho/.ssh/id_ed25519" -o StrictHostKeyChecking=no critical@166.1.2.112 "tar -xzvf /tmp/deploy_package.tar.gz -C /var/www/edvora.chat/ && php /var/www/edvora.chat/migrate.php && echo 'dYt2295ZBM_EgUb' | sudo -S chown -R critical:www-data /var/www/edvora.chat && echo 'dYt2295ZBM_EgUb' | sudo -S systemctl reload apache2"
-```
+### Manual Fallback (If Running Step-by-Step):
+If executing manually, you MUST use `sudo` for `tar` extraction so existing files owned by `www-data` are cleanly overwritten:
+1. **Package:**
+   ```powershell
+   tar.exe -czvf deploy_package.tar.gz app public BRANDING_GUIDELINES.md theme-branding.css AGENTS.md architecture.md architecture_department_team_management.md migrate.php deploy.ps1
+   ```
+2. **Upload:**
+   ```powershell
+   scp -i "C:/Users/Salan Khalkho/.ssh/id_ed25519" -o StrictHostKeyChecking=no deploy_package.tar.gz critical@166.1.2.112:/tmp/deploy_package.tar.gz
+   ```
+3. **Root Extract, Migrate, Chown & Reload:**
+   ```powershell
+   ssh -i "C:/Users/Salan Khalkho/.ssh/id_ed25519" -o StrictHostKeyChecking=no critical@166.1.2.112 "echo 'dYt2295ZBM_EgUb' | sudo -S tar -xzvf /tmp/deploy_package.tar.gz -C /var/www/edvora.chat/ && php /var/www/edvora.chat/migrate.php && echo 'dYt2295ZBM_EgUb' | sudo -S chown -R critical:www-data /var/www/edvora.chat && echo 'dYt2295ZBM_EgUb' | sudo -S systemctl reload apache2"
+   ```
+4. **Git Sync (Mandatory):**
+   ```powershell
+   git add -A ; git commit -m "commit message" ; git push origin main
+   ```
 
 ---
 
