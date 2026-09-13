@@ -88,7 +88,7 @@ class ProgramController
 
             // Fetch available departments for UI dropdown selector compatibility
             $stmtDepts = $db->prepare("
-                SELECT id, name, slug, color, is_active
+                SELECT id, name, slug, is_active
                 FROM departments
                 WHERE organization_id = ?
                 ORDER BY name ASC
