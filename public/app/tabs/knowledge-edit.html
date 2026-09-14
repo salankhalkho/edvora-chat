@@ -1,0 +1,255 @@
+<!-- Dedicated Document Management & Editor Workspace (Unified Frame matching Settings & Overview) -->
+<div id="view-knowledge-editor" class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
+    
+    <!-- Top Control Bar (Inside the Unified Card) -->
+    <div class="ops-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 24px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important; flex-wrap: wrap; gap: 12px;">
+        <div class="ops-dash-title-group" style="display: flex !important; align-items: center !important; gap: 14px !important;">
+            <button type="button" class="brand-btn-secondary" style="height: 36px; padding: 0 14px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;" onclick="closeKnowledgeEditor()">
+                <span>←</span> Back to Knowledge Hub
+            </button>
+            <div style="height: 24px; width: 1px; background: #E2E8F0;"></div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span id="docEditorTypeIcon" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #F1F5F9; font-size: 16px; font-weight: 800; color: #475569;">📄</span>
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span id="docEditorHeaderTitle" class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important; letter-spacing: -0.01em !important; line-height: 1.25 !important; max-width: 480px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            Loading Document...
+                        </span>
+                        <span id="docEditorStatusBadge" style="display: inline-flex !important; align-items: center !important; gap: 7px !important; padding: 5px 14px !important; border-radius: 9999px !important; font-size: 11.5px !important; font-weight: 800 !important; background: #ECFDF5; border: 1.5px solid #34D399; color: #047857; box-shadow: 0 1px 3px rgba(0,0,0,0.06); flex-shrink: 0 !important;">
+                            <span style="width: 7px; height: 7px; border-radius: 50%; background: #10B981; display: inline-block;"></span>
+                            <span>Active &amp; Live</span>
+                        </span>
+                    </div>
+                    <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">
+                        Document ID: <strong id="docEditorIdTag" style="color: #063D3B;">—</strong> &bull; Governed by Freshness Shield
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
+            <button type="button" class="brand-btn-secondary" style="height: 36px; padding: 0 16px; font-size: 12px; font-weight: 600;" onclick="closeKnowledgeEditor()">Cancel</button>
+            <button type="button" id="btnSaveDocTop" class="brand-btn-primary" style="height: 36px; padding: 0 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;" onclick="document.getElementById('docEditorFormSubmitBtn').click()">
+                <span>💾</span> Save Changes
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Form Content Area bounded cleanly -->
+    <div style="padding: 28px 32px 48px 32px; box-sizing: border-box; width: 100%;">
+        <div style="max-width: 920px; width: 100%; margin: 0; box-sizing: border-box;">
+            
+            <form id="docEditorForm" onsubmit="handleDocEditorSubmit(event)">
+                <input type="hidden" id="editDocId" value="" />
+
+                <!-- SECTION 1: Document Core Identity & Department Scope -->
+                <div style="background: #E7F4D7; border: 1.5px solid #CFE6BA; border-radius: 8px; padding: 22px 24px; margin-bottom: 24px;">
+                    <div style="font-size: 13.5px; font-weight: 800; color: #092F2E; display: flex; align-items: center; gap: 8px; margin-bottom: 18px;">
+                        <span>📋</span> Document Core Identity &amp; Department Scope
+                    </div>
+
+                    <div style="margin-bottom: 16px;">
+                        <label for="edit_doc_title" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                            Document Title <span style="color: #EF4444;">*</span>
+                        </label>
+                        <input type="text" id="edit_doc_title" name="title" class="brand-input" required placeholder="e.g. 2026–27 Master Admissions Prospectus & Eligibility Matrix" oninput="const h = document.getElementById('docEditorHeaderTitle'); if(h) { h.textContent = this.value || 'Untitled Document'; h.title = this.value || ''; }" style="width: 100%; box-sizing: border-box; height: 44px; font-size: 20px; font-weight: 600; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;" />
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 18px;">
+                        <div>
+                            <label for="edit_doc_category" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Institutional Category <span style="color: #EF4444;">*</span>
+                            </label>
+                            <select id="edit_doc_category" name="category" onchange="toggleCustomCategoryInput('edit_doc_category', 'editDocCategoryCustomWrap', 'edit_doc_category_custom')" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+                                <option value="General / Institutional">General / Institutional</option>
+                                <option value="Admissions & Prospectus">Admissions &amp; Prospectus</option>
+                                <option value="Tuition & Fee Structure">Tuition &amp; Fee Structure</option>
+                                <option value="Scholarships & Financial Aid">Scholarships &amp; Financial Aid</option>
+                                <option value="Eligibility & Criteria">Eligibility &amp; Criteria</option>
+                                <option value="Academic Curriculum & Programs">Academic Curriculum &amp; Programs</option>
+                                <option value="Hostel & Campus Life">Hostel &amp; Campus Life</option>
+                                <option value="Placements & Career Outcomes">Placements &amp; Career Outcomes</option>
+                                <option value="Examinations & Policies">Examinations &amp; Policies</option>
+                                <option value="__custom__">➕ Other (Specify Custom Category...)</option>
+                            </select>
+                            <div id="editDocCategoryCustomWrap" style="display: none; margin-top: 8px;">
+                                <input type="text" id="edit_doc_category_custom" placeholder="Enter custom category name (e.g. Sports & Athletics)" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #063D3B; border-radius: 6px; padding: 0 12px; background: #FFFFFF; color: #063D3B; font-weight: 600;" />
+                            </div>
+                        </div>
+                        <div>
+                            <label for="edit_doc_academic_version" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Academic Version / Cycle
+                            </label>
+                            <input type="text" id="edit_doc_academic_version" name="academic_version" class="brand-input" placeholder="e.g. 2026-27 or Evergreen" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;" />
+                        </div>
+                    </div>
+
+                    <!-- Department Assignment Scope -->
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 8px;">
+                            Assigned Department Scope
+                        </label>
+                        <div id="docEditorDeptContainer" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; background: #FFFFFF; border: 1.5px solid #CFE6BA; border-radius: 6px; min-height: 44px; align-items: center;">
+                            <span style="font-size: 12px; color: #94A3B8;">Loading available departments...</span>
+                        </div>
+                        <span style="font-size: 10.5px; color: #648781; margin-top: 5px; display: block;">
+                            Select a department to scope this document to that specific department, or select Entire Organization for institution-wide global availability.
+                        </span>
+                    </div>
+                </div>
+
+                <!-- SECTION 2: Freshness Shield & Validity Governance -->
+                <div style="background: #E7F4D7; border: 1.5px solid #CFE6BA; border-radius: 8px; padding: 22px 24px; margin-bottom: 24px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; gap: 8px;">
+                        <div style="font-size: 13.5px; font-weight: 800; color: #092F2E; display: flex; align-items: center; gap: 8px;">
+                            <span>🛡️</span> Freshness Shield &amp; Temporal Validity
+                        </div>
+                        <button type="button" onclick="docEditorMarkAuditedToday()" class="brand-btn-secondary" style="height: 28px; padding: 0 12px; font-size: 11px; font-weight: 700; background: #F5F3FF; border-color: #DDD6FE; color: #7C3AED; display: inline-flex; align-items: center; gap: 4px;">
+                            <span>✓</span> Mark Audited &amp; Reviewed Today
+                        </button>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 16px;">
+                        <div>
+                            <label for="edit_doc_effective_from" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Effective Start Date (Activation)
+                            </label>
+                            <input type="date" id="edit_doc_effective_from" name="effective_from" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                            <span style="font-size: 10.5px; color: #648781; margin-top: 3px; display: block;">Optional. Embargoed from visitor chatbot until this date.</span>
+                        </div>
+                        <div>
+                            <label for="edit_doc_expires_on" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Expiration Date (Freshness Shield)
+                            </label>
+                            <input type="date" id="edit_doc_expires_on" name="expires_on" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                            <span style="font-size: 10.5px; color: #648781; margin-top: 3px; display: block;">Once reached, document is instantly excluded from visitor AI.</span>
+                        </div>
+                    </div>
+
+                    <!-- Quick Extend Presets -->
+                    <div style="margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 12px; background: #FFFFFF; border: 1.5px solid #CFE6BA; border-radius: 6px;">
+                            <span style="font-size: 11px; font-weight: 700; color: #64748B;">Quick Validity Presets:</span>
+                            <button type="button" onclick="docEditorSetExpiryDelta(30)" class="ckh-filter-pill" style="font-size: 11px; padding: 3px 10px;">+30 Days</button>
+                            <button type="button" onclick="docEditorSetExpiryDelta(90)" class="ckh-filter-pill" style="font-size: 11px; padding: 3px 10px;">+90 Days</button>
+                            <button type="button" onclick="docEditorSetExpiryDelta(180)" class="ckh-filter-pill" style="font-size: 11px; padding: 3px 10px;">+180 Days (Semester)</button>
+                            <button type="button" onclick="docEditorSetExpiryDelta(365)" class="ckh-filter-pill" style="font-size: 11px; padding: 3px 10px;">+1 Year (Full Cycle)</button>
+                            <button type="button" onclick="docEditorClearExpiry()" class="ckh-filter-pill" style="font-size: 11px; padding: 3px 10px; color: #047857; background: #ECFDF5; border-color: #A7F3D0;">Make Evergreen (No Expiry)</button>
+                        </div>
+                        <span style="font-size: 10.5px; color: #648781; margin-top: 4px; display: block;">Presets are shortcut buttons for the user to help auto-fill the Expiration Date input box above.</span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
+                        <div>
+                            <label for="edit_doc_review_freq" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Review Cadence (Days)
+                            </label>
+                            <input type="number" id="edit_doc_review_freq" name="review_frequency_days" min="15" max="730" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;" />
+                            <span style="font-size: 10.5px; color: #648781; margin-top: 3px; display: block;">Triggers "Needs Review" alert after this number of days without audit.</span>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Last Audited &amp; Confirmed
+                            </label>
+                            <input type="text" id="edit_doc_last_reviewed" readonly class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; background: #FFFFFF; border: 1.5px solid #CFE6BA; border-radius: 6px; padding: 0 12px; color: #64748B;" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 3: Semantic Keywords & Retrieval Tuning -->
+                <div style="background: #E7F4D7; border: 1.5px solid #CFE6BA; border-radius: 8px; padding: 22px 24px; margin-bottom: 24px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; gap: 8px;">
+                        <div style="font-size: 13.5px; font-weight: 800; color: #092F2E; display: flex; align-items: center; gap: 8px;">
+                            <span>🧠</span> AI Semantic Keywords &amp; Retrieval Tuning
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span id="docEditorWordCountBadge" class="badge" style="font-size: 11px; font-weight: 600; padding: 3px 8px; background: #FFFFFF; color: #475569; border: 1px solid #CFE6BA;">
+                                0 words
+                            </span>
+                            <button type="button" id="btnResyncUrl" onclick="docEditorResyncContent()" class="brand-btn-secondary" style="display: none; height: 28px; padding: 0 10px; font-size: 11px; font-weight: 700; background: #FFFFFF;">
+                                🔄 Re-Sync Live URL
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- URL Source Display (if type === 'url') -->
+                    <div id="docEditorUrlRow" style="display: none; margin-bottom: 16px;">
+                        <label for="edit_doc_source_url" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                            Target Web Page Address (URL)
+                        </label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="url" id="edit_doc_source_url" name="source_url" readonly class="brand-input" style="flex: 1; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;" />
+                            <a id="btnDocEditorOpenUrl" href="#" target="_blank" class="brand-btn-secondary" style="height: 38px; padding: 0 14px; font-size: 12px; display: inline-flex; align-items: center; text-decoration: none; background: #FFFFFF;">
+                                ↗ Visit URL
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Semantic Keywords Input -->
+                    <div style="margin-bottom: 8px;">
+                        <label for="edit_doc_semantic_keywords" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                            AI Strategic Semantic Search Keywords (Full-Text Retrieval Phrases)
+                        </label>
+                        <textarea id="edit_doc_semantic_keywords" name="semantic_keywords" class="brand-input" rows="4" placeholder="e.g. eligibility matrix, cutoffs, btech, entrance exam deadline, fee structure" style="width: 100%; box-sizing: border-box; font-family: var(--brand-font-sans, inherit); font-size: 12.5px; line-height: 1.6; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 10px 12px; resize: vertical; background: #FFFFFF;"></textarea>
+                        <span style="font-size: 10.5px; color: #648781; margin-top: 4px; display: block;">Matched by the primary MySQL FULLTEXT tier when visitors ask questions. Comma-separated.</span>
+                    </div>
+
+                    <!-- Compacted Content (preserved for background form submission, hidden from user) -->
+                    <input type="hidden" id="edit_doc_raw_content" name="raw_content" />
+                </div>
+
+                <!-- SECTION 4: Version Lineage & Revision Replacement (Supersede) -->
+                <div style="background: #E7F4D7; border: 1.5px solid #CFE6BA; border-radius: 8px; padding: 22px 24px; margin-bottom: 24px;">
+                    <div style="font-size: 13.5px; font-weight: 800; color: #092F2E; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                        <span>🔄</span> 1-Click Version Replacement &amp; Audit Lineage
+                    </div>
+                    <p style="font-size: 12px; color: #4F7470; margin: 0 0 16px 0; line-height: 1.5;">
+                        When an admissions cycle concludes or a new prospectus is published, you can upload a new revision. The old document is automatically archived and preserved for institutional accreditation audit, and department bindings are inherited seamlessly.
+                    </p>
+                    <button type="button" onclick="docEditorTriggerReplace()" class="brand-btn-secondary" style="height: 36px; padding: 0 16px; font-size: 12px; font-weight: 700; border-color: #063D3B; color: #063D3B; background: #FFFFFF;">
+                        🔄 Replace with New Version (Supersede)
+                    </button>
+                </div>
+
+                <!-- SECTION 5: Lifecycle Status & Danger Zone -->
+                <div style="background: #FFF5F5; border: 1.5px solid #FECDD3; border-radius: 8px; padding: 22px 24px; margin-bottom: 32px;">
+                    <div style="font-size: 13.5px; font-weight: 800; color: #991B1B; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                        <span>⚠️</span> Governance &amp; Lifecycle Controls
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <div style="font-size: 12.5px; font-weight: 700; color: #7F1D1D;">Quarantine / Archive Document</div>
+                            <div style="font-size: 11.5px; color: #991B1B; margin-top: 2px;">Temporarily hide from visitor chatbot without deleting audit history.</div>
+                        </div>
+                        <button type="button" id="btnDocEditorArchive" onclick="docEditorToggleArchive()" class="brand-btn-secondary" style="height: 34px; padding: 0 16px; font-size: 12px; font-weight: 600; border-color: #FCA5A5; color: #991B1B;">
+                            📦 Archive Document
+                        </button>
+                    </div>
+
+                    <div style="height: 1px; background: #FECDD3; margin: 16px 0;"></div>
+
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <div style="font-size: 12.5px; font-weight: 700; color: #7F1D1D;">Permanently Delete Document</div>
+                            <div style="font-size: 11.5px; color: #991B1B; margin-top: 2px;">Irreversibly removes document, extracted chunks, and department links.</div>
+                        </div>
+                        <button type="button" onclick="docEditorDeleteDoc()" class="brand-btn-secondary" style="height: 34px; padding: 0 16px; font-size: 12px; font-weight: 700; background: #DC2626; color: #FFFFFF; border: none;">
+                            🗑️ Delete Permanently
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Bottom Action Submission Bar -->
+                <div style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 10px 0;">
+                    <button type="submit" id="docEditorFormSubmitBtn" class="brand-btn-primary" style="height: 40px; padding: 0 28px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;">
+                        <span>💾</span> Save Changes
+                    </button>
+                    <button type="button" onclick="closeKnowledgeEditor()" class="brand-btn-secondary" style="height: 40px; padding: 0 20px; font-size: 13px;">
+                        Cancel
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>

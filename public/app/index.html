@@ -4366,6 +4366,7 @@
             <div class="tab-content" id="tab-dept-escalations-editor" data-loaded="false"></div>
 
             <!-- Tab: Knowledge Document Editor Studio -->
+            <div class="tab-content" id="tab-knowledge-edit" data-loaded="false"></div>
             <div class="tab-content" id="tab-knowledge-editor" data-loaded="false"></div>
 
             <!-- Tab: Knowledge Document Read-Only Viewer -->
@@ -5441,7 +5442,7 @@
             };
         }
 
-        const VALID_APP_TABS = ['overview', 'knowledge', 'knowledge-ingestion', 'academic-programs', 'add-programs', 'edit-programs', 'departments', 'leads', 'callbacks', 'campus-tours', 'scholarships', 'teams', 'assets', 'multilingual', 'conversion-engine', 'placeholder', 'analytics', 'knowledge-gaps', 'integrations', 'chatbot', 'test-chat', 'organization', 'org-settings', 'campuses', 'campus-editor', 'settings', 'knowledge-view', 'knowledge-editor', 'profile'];
+        const VALID_APP_TABS = ['overview', 'knowledge', 'knowledge-ingestion', 'academic-programs', 'add-programs', 'edit-programs', 'departments', 'leads', 'callbacks', 'campus-tours', 'scholarships', 'teams', 'assets', 'multilingual', 'conversion-engine', 'placeholder', 'analytics', 'knowledge-gaps', 'integrations', 'chatbot', 'test-chat', 'organization', 'org-settings', 'campuses', 'campus-editor', 'settings', 'knowledge-view', 'knowledge-editor', 'knowledge-edit', 'profile'];
 
         // Navigation Tabs Handling with Async Modular Loading
         const _tabLoadPromises = {};
@@ -5483,7 +5484,8 @@
             if (!token) {
                 syncAuthFromUrl();
             } else {
-                const target = location.hash.replace('#', '').trim();
+                const rawHash = location.hash.replace('#', '').trim();
+                const target = rawHash.split('?')[0];
                 if (target && VALID_APP_TABS.includes(target)) {
                     switchNavTab(target, null, false);
                 }
@@ -5609,7 +5611,8 @@
         (function() {
             if (token) {
                 initAppIdentity();
-                const h = location.hash.replace('#', '').trim();
+                const rawH = location.hash.replace('#', '').trim();
+                const h = rawH.split('?')[0];
                 const initialTab = (h && VALID_APP_TABS.includes(h)) ? h : (localStorage.getItem('edvora_active_tab') || 'overview');
                 const safeTab = VALID_APP_TABS.includes(initialTab) ? initialTab : 'overview';
                 
@@ -5974,6 +5977,9 @@
             } else if (tab === 'add-programs' || tab === 'edit-programs') {
                 const progItem = document.querySelector(`.nav-item[data-tab="academic-programs"]`);
                 if (progItem) progItem.classList.add('active');
+            } else if (tab === 'knowledge-edit' || tab === 'knowledge-editor') {
+                const kItem = document.querySelector(`.nav-item[data-tab="knowledge"]`);
+                if (kItem) kItem.classList.add('active');
             }
 
             const targetTab = document.getElementById('tab-' + tab);
@@ -5999,6 +6005,8 @@
                     if (editModal) editModal.style.display = 'none';
                     const editorTab = document.getElementById('tab-knowledge-editor');
                     if (editorTab) editorTab.classList.remove('active');
+                    const editTab = document.getElementById('tab-knowledge-edit');
+                    if (editTab) editTab.classList.remove('active');
                     const viewTab = document.getElementById('tab-knowledge-view');
                     if (viewTab) viewTab.classList.remove('active');
                     if (window._skipKnowledgeFilterResetOnce) {
@@ -6034,6 +6042,8 @@
             let cleanTitle = navItem ? navItem.innerText.trim().replace(/^[^\w\s]+\s*/, '') : '';
             if (tab === 'knowledge') {
                 cleanTitle = 'Central Knowledge Hub (Institution-Wide)';
+            } else if (tab === 'knowledge-edit' || tab === 'knowledge-editor') {
+                cleanTitle = 'Edit Knowledge Document';
             } else if (tab === 'academic-programs') {
                 cleanTitle = 'Academic Programs & Degrees';
             } else if (tab === 'add-programs') {
@@ -6142,6 +6152,8 @@
                     if (typeof loadCampuses === 'function') loadCampuses();
                 } else if (tab === 'campus-editor') {
                     if (typeof initCampusEditorPage === 'function') initCampusEditorPage();
+                } else if (tab === 'knowledge-edit' || tab === 'knowledge-editor') {
+                    if (typeof openKnowledgeEditor === 'function') openKnowledgeEditor();
                 } else if (tab === 'settings') {
                     if (typeof loadSettingsData === 'function') loadSettingsData();
                 } else if (tab === 'profile') {
@@ -10912,7 +10924,8 @@ echo $response['reply'];
                 } catch(e) {}
 
                 // Determine active tab from URL hash or localStorage
-                let urlHash = location.hash.replace('#', '').trim();
+                let rawUrlHash = location.hash.replace('#', '').trim();
+                let urlHash = rawUrlHash.split('?')[0];
                 let initialTab = (urlHash && VALID_APP_TABS.includes(urlHash)) 
                     ? urlHash 
                     : (localStorage.getItem('edvora_active_tab') || 'overview');
@@ -15153,18 +15166,45 @@ echo $response['reply'];
 
         async function openKnowledgeEditor(ksId) {
             try {
-                // Ensure tab template is loaded
-                await loadTabContent('knowledge-editor');
+                if (!ksId && window._activeEditingDocId) {
+                    ksId = window._activeEditingDocId;
+                }
+                if (!ksId) {
+                    const params = new URLSearchParams(window.location.hash.includes('?') ? window.location.hash.split('?')[1] : window.location.search);
+                    ksId = params.get('id');
+                }
+                if (!ksId) {
+                    ksId = sessionStorage.getItem('edvora_edit_doc_id');
+                }
+                if (!ksId) {
+                    showToast('No document specified to edit.', 'warning');
+                    switchNavTab('knowledge');
+                    return;
+                }
+
+                window._activeEditingDocId = ksId;
+                sessionStorage.setItem('edvora_edit_doc_id', ksId);
+
+                // Update hash cleanly to #knowledge-edit?id=...
+                try {
+                    history.replaceState(null, '', '#knowledge-edit?id=' + encodeURIComponent(ksId));
+                } catch(e) {}
+
+                // Ensure tab template is loaded (loads tabs/knowledge-edit.html)
+                await loadTabContent('knowledge-edit');
 
                 // Switch active tab view
                 document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-                const editorTab = document.getElementById('tab-knowledge-editor');
-                if (editorTab) editorTab.classList.add('active');
+                const editTab = document.getElementById('tab-knowledge-edit') || document.getElementById('tab-knowledge-editor');
+                if (editTab) editTab.classList.add('active');
 
                 // Keep knowledge nav item highlighted
                 document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
                 const kNavItem = document.querySelector(`.nav-item[data-tab="knowledge"]`);
                 if (kNavItem) kNavItem.classList.add('active');
+
+                const headerTitleEl = document.getElementById('headerTitle');
+                if (headerTitleEl) headerTitleEl.innerText = 'Edit Knowledge Document';
 
                 // Fetch full document details
                 const res = await fetch(`/v1/knowledge/${ksId}`, {
@@ -15188,6 +15228,8 @@ echo $response['reply'];
         }
 
         function closeKnowledgeEditor() {
+            window._activeEditingDocId = null;
+            sessionStorage.removeItem('edvora_edit_doc_id');
             switchNavTab('knowledge');
         }
 
