@@ -162,6 +162,50 @@ class ProgramController
             $stmtAllLeads->execute(array_merge([':program_id' => $id, ':org_id' => $orgId], $dateParams));
             $totalLeads = (int)$stmtAllLeads->fetchColumn();
 
+            // Intelligence & Readiness Telemetry:
+            // 1. Program Staff
+            $stmtStaff = $db->prepare("
+                SELECT ps.user_id, ps.role, ps.is_on_duty, u.name, u.email
+                FROM program_staff ps
+                JOIN users u ON ps.user_id = u.id
+                WHERE ps.program_id = ? AND ps.organization_id = ?
+                ORDER BY ps.role = 'lead' DESC, u.name ASC
+            ");
+            $stmtStaff->execute([$id, $orgId]);
+            $assignedStaff = $stmtStaff->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $totalStaffCount = count($assignedStaff);
+            $onDutyStaffCount = 0;
+            $dutyLead = null;
+            foreach ($assignedStaff as $stf) {
+                if (!empty($stf['is_on_duty'])) {
+                    $onDutyStaffCount++;
+                }
+                if ($stf['role'] === 'lead' && !$dutyLead) {
+                    $dutyLead = $stf['name'] . ' (Lead)';
+                }
+            }
+            if (!$dutyLead && $totalStaffCount > 0) {
+                $dutyLead = $assignedStaff[0]['name'] . ' (' . ucfirst($assignedStaff[0]['role'] ?? 'Agent') . ')';
+            }
+
+            // 2. Program Knowledge Sources (Scoped Documents)
+            $stmtKs = $db->prepare("
+                SELECT id, title, type, status, lead_magnet
+                FROM knowledge_sources
+                WHERE program_id = ? AND organization_id = ? AND status = 'active'
+                ORDER BY id DESC
+            ");
+            $stmtKs->execute([$id, $orgId]);
+            $knowledgeSources = $stmtKs->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $totalScopedDocs = count($knowledgeSources);
+
+            // 3. Program Lead Magnet (knowledge_sources where lead_magnet = 1)
+            $leadMagnets = array_values(array_filter($knowledgeSources, function($doc) {
+                return !empty($doc['lead_magnet']);
+            }));
+            $leadMagnetsCount = count($leadMagnets);
+            $primaryLeadMagnet = $leadMagnets[0] ?? null;
+
             Response::success([
                 'program' => $program,
                 'time_window' => [
@@ -174,6 +218,23 @@ class ProgramController
                     'scholarships_count' => $scholarshipsCount,
                     'lead_magnet_dispatched' => $leadAssetsDownloads,
                     'total_leads' => $totalLeads
+                ],
+                'intelligence' => [
+                    'staff' => [
+                        'total_count' => $totalStaffCount,
+                        'on_duty_count' => $onDutyStaffCount,
+                        'duty_lead' => $dutyLead,
+                        'list' => $assignedStaff
+                    ],
+                    'documents' => [
+                        'total_count' => $totalScopedDocs,
+                        'list' => $knowledgeSources
+                    ],
+                    'lead_magnets' => [
+                        'total_count' => $leadMagnetsCount,
+                        'primary' => $primaryLeadMagnet,
+                        'list' => $leadMagnets
+                    ]
                 ]
             ]);
         } catch (Throwable $e) {
@@ -538,6 +599,256 @@ class ProgramController
                 $db->rollBack();
             }
             Response::error('Failed to delete academic program: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * GET /v1/programs/{id}/staff
+     * Get staff assigned to this program + all available org staff for selection.
+     */
+    public function getStaff(Request $request, array $params = []): void
+    {
+        $orgId = $this->getOrgId($request);
+        if (!$orgId) {
+            Response::error('Organization context required', 400);
+            return;
+        }
+
+        $id = (int)($params['id'] ?? $request->get('id') ?? 0);
+        if (!$id) {
+            Response::error('Invalid program ID', 400);
+            return;
+        }
+
+        try {
+            $db = Database::getConnection();
+
+            // Check program exists
+            $stmtP = $db->prepare("SELECT id, course_name, course_code FROM programs WHERE id = ? AND organization_id = ?");
+            $stmtP->execute([$id, $orgId]);
+            $program = $stmtP->fetch(PDO::FETCH_ASSOC);
+            if (!$program) {
+                Response::error('Program not found', 404);
+                return;
+            }
+
+            // Program assigned staff
+            $stmtAssigned = $db->prepare("
+                SELECT ps.id, ps.user_id, ps.role, ps.is_on_duty, u.name, u.email
+                FROM program_staff ps
+                JOIN users u ON ps.user_id = u.id
+                WHERE ps.program_id = ? AND ps.organization_id = ?
+                ORDER BY ps.role = 'lead' DESC, u.name ASC
+            ");
+            $stmtAssigned->execute([$id, $orgId]);
+            $assignedStaff = $stmtAssigned->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+            // All organization staff
+            $stmtAll = $db->prepare("
+                SELECT id, name, email, role
+                FROM users
+                WHERE organization_id = ?
+                ORDER BY name ASC
+            ");
+            $stmtAll->execute([$orgId]);
+            $allStaff = $stmtAll->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+            Response::success([
+                'program' => $program,
+                'assigned_staff' => $assignedStaff,
+                'available_staff' => $allStaff
+            ]);
+        } catch (Throwable $e) {
+            Response::error('Failed to fetch program staff: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * POST /v1/programs/{id}/staff
+     * Sync assigned staff for this program.
+     */
+    public function syncStaff(Request $request, array $params = []): void
+    {
+        $orgId = $this->getOrgId($request);
+        if (!$orgId) {
+            Response::error('Organization context required', 400);
+            return;
+        }
+
+        $id = (int)($params['id'] ?? $request->get('id') ?? 0);
+        if (!$id) {
+            Response::error('Invalid program ID', 400);
+            return;
+        }
+
+        $data = $request->json();
+        $staffList = $data['staff'] ?? [];
+
+        try {
+            $db = Database::getConnection();
+
+            // Verify program
+            $stmtP = $db->prepare("SELECT id FROM programs WHERE id = ? AND organization_id = ?");
+            $stmtP->execute([$id, $orgId]);
+            if (!$stmtP->fetch()) {
+                Response::error('Program not found', 404);
+                return;
+            }
+
+            $db->beginTransaction();
+
+            // Delete current assignments
+            $stmtDel = $db->prepare("DELETE FROM program_staff WHERE program_id = ? AND organization_id = ?");
+            $stmtDel->execute([$id, $orgId]);
+
+            // Insert new assignments
+            $stmtIns = $db->prepare("
+                INSERT INTO program_staff (organization_id, program_id, user_id, role, is_on_duty)
+                VALUES (?, ?, ?, ?, ?)
+            ");
+
+            foreach ($staffList as $stf) {
+                $userId = (int)($stf['user_id'] ?? $stf['id'] ?? 0);
+                if ($userId > 0) {
+                    $role = ($stf['role'] ?? 'agent') === 'lead' ? 'lead' : 'agent';
+                    $isOnDuty = isset($stf['is_on_duty']) ? (int)$stf['is_on_duty'] : 1;
+                    $stmtIns->execute([$orgId, $id, $userId, $role, $isOnDuty]);
+                }
+            }
+
+            $db->commit();
+
+            Response::success([
+                'message' => 'Program staff assignments updated successfully'
+            ]);
+        } catch (Throwable $e) {
+            if (isset($db) && $db->inTransaction()) {
+                $db->rollBack();
+            }
+            Response::error('Failed to update program staff: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * GET /v1/programs/{id}/lead-magnet
+     * Get attached lead magnet & available knowledge sources for this program.
+     */
+    public function getLeadMagnet(Request $request, array $params = []): void
+    {
+        $orgId = $this->getOrgId($request);
+        if (!$orgId) {
+            Response::error('Organization context required', 400);
+            return;
+        }
+
+        $id = (int)($params['id'] ?? $request->get('id') ?? 0);
+        if (!$id) {
+            Response::error('Invalid program ID', 400);
+            return;
+        }
+
+        try {
+            $db = Database::getConnection();
+
+            $stmtP = $db->prepare("SELECT id, course_name, course_code FROM programs WHERE id = ? AND organization_id = ?");
+            $stmtP->execute([$id, $orgId]);
+            $program = $stmtP->fetch(PDO::FETCH_ASSOC);
+            if (!$program) {
+                Response::error('Program not found', 404);
+                return;
+            }
+
+            // Documents mapped to this program or general
+            $stmtDocs = $db->prepare("
+                SELECT id, title, type, category, lead_magnet, status, created_at, program_id
+                FROM knowledge_sources
+                WHERE organization_id = ? AND status = 'active'
+                ORDER BY (program_id = ?) DESC, id DESC
+            ");
+            $stmtDocs->execute([$orgId, $id]);
+            $documents = $stmtDocs->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+            $activeLeadMagnets = array_values(array_filter($documents, function($d) use ($id) {
+                return (int)$d['program_id'] === $id && !empty($d['lead_magnet']);
+            }));
+
+            Response::success([
+                'program' => $program,
+                'lead_magnets' => $activeLeadMagnets,
+                'available_documents' => $documents
+            ]);
+        } catch (Throwable $e) {
+            Response::error('Failed to fetch program lead magnet: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * POST /v1/programs/{id}/lead-magnet
+     * Attach or detach lead magnet for this program.
+     */
+    public function setLeadMagnet(Request $request, array $params = []): void
+    {
+        $orgId = $this->getOrgId($request);
+        if (!$orgId) {
+            Response::error('Organization context required', 400);
+            return;
+        }
+
+        $id = (int)($params['id'] ?? $request->get('id') ?? 0);
+        if (!$id) {
+            Response::error('Invalid program ID', 400);
+            return;
+        }
+
+        $data = $request->json();
+        $sourceId = (int)($data['knowledge_source_id'] ?? 0);
+        $action = $data['action'] ?? 'attach'; // 'attach' or 'detach'
+
+        try {
+            $db = Database::getConnection();
+
+            if ($action === 'detach') {
+                if ($sourceId > 0) {
+                    $stmt = $db->prepare("UPDATE knowledge_sources SET lead_magnet = 0 WHERE id = ? AND organization_id = ?");
+                    $stmt->execute([$sourceId, $orgId]);
+                } else {
+                    $stmt = $db->prepare("UPDATE knowledge_sources SET lead_magnet = 0 WHERE program_id = ? AND organization_id = ?");
+                    $stmt->execute([$id, $orgId]);
+                }
+
+                Response::success([
+                    'message' => 'Lead magnet detached successfully'
+                ]);
+                return;
+            }
+
+            // Attach
+            if (!$sourceId) {
+                Response::error('Please select a valid document to attach as lead magnet', 400);
+                return;
+            }
+
+            // Verify document belongs to org
+            $stmtCheck = $db->prepare("SELECT id FROM knowledge_sources WHERE id = ? AND organization_id = ?");
+            $stmtCheck->execute([$sourceId, $orgId]);
+            if (!$stmtCheck->fetch()) {
+                Response::error('Document not found or unauthorized', 404);
+                return;
+            }
+
+            // Update document to be program's lead magnet
+            $stmtUpd = $db->prepare("
+                UPDATE knowledge_sources 
+                SET program_id = ?, lead_magnet = 1 
+                WHERE id = ? AND organization_id = ?
+            ");
+            $stmtUpd->execute([$id, $sourceId, $orgId]);
+
+            Response::success([
+                'message' => 'Lead magnet attached successfully to this program'
+            ]);
+        } catch (Throwable $e) {
+            Response::error('Failed to update lead magnet: ' . $e->getMessage(), 500);
         }
     }
 }

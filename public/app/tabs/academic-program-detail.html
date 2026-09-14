@@ -184,85 +184,108 @@
     <!-- Canvas Body -->
     <div style="padding: 24px 20px 48px 20px; box-sizing: border-box; width: 100%;">
 
-      <!-- TRACK 1: ADMISSIONS PIPELINE FUNNEL (4 Pipeline Cards Scoped to Program) -->
+      <!-- TRACK 1: PROGRAM INTELLIGENCE & READINESS (3 Balanced Telemetry Cards) -->
       <div style="margin-bottom: 30px;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-          <span style="font-size: 13px; font-weight: 800; color: #063D3B; text-transform: uppercase; letter-spacing: 0.5px;">Admissions Pipeline Funnel</span>
-          <span style="font-size: 11px; color: #648781; font-weight: 500;">Live Inquiries &amp; Conversions for this Academic Program &bull; Click to View</span>
+          <span style="font-size: 13px; font-weight: 800; color: #063D3B; text-transform: uppercase; letter-spacing: 0.5px;">Program intelligence &amp; readiness</span>
+          <span style="font-size: 11px; color: #648781; font-weight: 500;">Operational Telemetry &bull; Click to Manage</span>
         </div>
 
-        <!-- 4 PIPELINE CARDS GRID -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px;">
+        <!-- 3 TELEMETRY CARDS GRID -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
           
-          <!-- Card 1: Callbacks Booked (counselor_callbacks) -->
-          <div class="prog-pipe-card" onclick="typeof switchNavTab === 'function' ? switchNavTab('callbacks') : null" title="Click to open Callbacks Management">
-            <div class="prog-pipe-header">
-              <div class="prog-pipe-icon" style="background:#FEE2E2; color:#DC2626;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-              </div>
-              <span class="prog-pipe-badge" style="color:#BE123C; background:#FFF1F2; border: 1px solid rgba(225,29,72,0.18);" id="progPipeCallbacksBadge">0 Booked</span>
-            </div>
+          <!-- Card 1: Assigned Staff -->
+          <div class="dept-telemetry-card" id="cardProgStaff" onclick="openProgramStaffPage()" title="Manage counselors and advisors assigned to this program">
             <div>
-              <div class="prog-pipe-val" id="progPipeCallbacksVal">0</div>
-              <div class="prog-pipe-lbl">
-                <span>Callbacks Booked</span>
-                <span style="font-size: 11px; color: #BE123C; opacity: 0.7;">↗</span>
+              <div class="dept-telemetry-header">
+                <div class="dept-telemetry-title-group">
+                  <div class="dept-telemetry-icon-box" style="background:#F0F9FF; color:#0284C7;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                  </div>
+                  <span class="dept-telemetry-card-title">Assigned Staff</span>
+                </div>
+                <span class="dept-card-link-affordance" style="color:#0284C7;">
+                  <span>Roster</span>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                </span>
               </div>
-              <div class="prog-pipe-sub" id="progPipeCallbacksSub">Counselor callback inquiries for this degree</div>
+              <div class="dept-telemetry-kpi" id="progTelemetryStaffCount">0 / 0</div>
+              <div class="dept-telemetry-lbl">Counselors On Active Shift</div>
+              
+              <div style="display: flex; align-items: center; gap: 8px; margin: 10px 0 6px 0;">
+                <span id="progTelemetryStaffDot" class="status-pulse-dot" style="background:#10B981;"></span>
+                <span id="progTelemetryDutyStatusText" style="font-size: 11.5px; font-weight: 700; color: #0F172A;">Staff Assignment Required</span>
+              </div>
+              <div id="progTelemetryDutyLeadText" style="font-size: 11px; color: #648781; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Duty Lead: Admissions Office Desk</div>
+            </div>
+
+            <!-- Footer Badges -->
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(15, 23, 42, 0.05);">
+              <span style="font-size: 10px; font-weight: 700; color: #0369A1; background: #F0F9FF; border: 1px solid #BAE6FD; padding: 2px 7px; border-radius: 6px;">⚡ Target: &lt;8m</span>
+              <span style="font-size: 10px; font-weight: 600; color: #475569; background: #F1F5F9; padding: 2px 7px; border-radius: 6px;">Round-Robin Desk</span>
             </div>
           </div>
 
-          <!-- Card 2: Campus Tours Scheduled (campus_tour_bookings) -->
-          <div class="prog-pipe-card" onclick="typeof switchNavTab === 'function' ? switchNavTab('campus-tours') : null" title="Click to open Campus Tours Management">
-            <div class="prog-pipe-header">
-              <div class="prog-pipe-icon" style="background:#E0F2FE; color:#0284C7;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              </div>
-              <span class="prog-pipe-badge" style="color:#0369A1; background:#F0F9FF; border: 1px solid rgba(2,132,199,0.18);" id="progPipeToursBadge">0 Scheduled</span>
-            </div>
+          <!-- Card 2: Documents & Sources -->
+          <div class="dept-telemetry-card" id="cardProgKnowledge" onclick="openProgramKnowledgeHub()" title="Open Knowledge Hub filtered to this program">
             <div>
-              <div class="prog-pipe-val" id="progPipeToursVal">0</div>
-              <div class="prog-pipe-lbl">
-                <span>Campus Tours Scheduled</span>
-                <span style="font-size: 11px; color: #0369A1; opacity: 0.7;">↗</span>
+              <div class="dept-telemetry-header">
+                <div class="dept-telemetry-title-group">
+                  <div class="dept-telemetry-icon-box" style="background:#F5F3FF; color:#7C3AED;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                  </div>
+                  <span class="dept-telemetry-card-title">Documents &amp; Sources</span>
+                </div>
+                <span class="dept-card-link-affordance" style="color:#7C3AED;">
+                  <span>Knowledge</span>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                </span>
               </div>
-              <div class="prog-pipe-sub" id="progPipeToursSub">Prospective students booked campus walkthrough</div>
+              <div class="dept-telemetry-kpi" id="progTelemetryKsDocCount">0</div>
+              <div class="dept-telemetry-lbl">Scoped Institutional Sources</div>
+              
+              <div style="display: flex; align-items: center; gap: 8px; margin: 10px 0 6px 0;">
+                <span id="progTelemetryKsStatusDot" class="status-pulse-dot" style="background:#F59E0B;"></span>
+                <span id="progTelemetryKsStatusText" style="font-size: 11.5px; font-weight: 700; color: #0F172A;">No Department Documents Linked</span>
+              </div>
+              <div id="progTelemetryKsSyncText" style="font-size: 11px; color: #648781;">Fallback to General College Knowledge</div>
+            </div>
+
+            <!-- Footer Badges -->
+            <div id="progTelemetryKsBadges" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(15, 23, 42, 0.05);">
+              <span id="progTelemetryKsBadge1" style="font-size: 10px; font-weight: 700; color: #B45309; background: #FEF3C7; border: 1px solid #FDE68A; padding: 2px 7px; border-radius: 6px;">⚠️ Setup Recommended</span>
+              <span id="progTelemetryKsBadge2" style="font-size: 10px; font-weight: 600; color: #475569; background: #F1F5F9; padding: 2px 7px; border-radius: 6px;">+ Link in Knowledge Hub</span>
             </div>
           </div>
 
-          <!-- Card 3: Scholarships Interests (leads where scholarship_tier is not null) -->
-          <div class="prog-pipe-card" onclick="typeof switchNavTab === 'function' ? switchNavTab('scholarships') : null" title="Click to open Scholarships Management">
-            <div class="prog-pipe-header">
-              <div class="prog-pipe-icon" style="background:#FEF3C7; color:#D97706;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
-              </div>
-              <span class="prog-pipe-badge" style="color:#B45309; background:#FFFBEB; border: 1px solid rgba(217,119,6,0.18);" id="progPipeScholarshipsBadge">0 Evaluated</span>
-            </div>
+          <!-- Card 3: Lead Magnets -->
+          <div class="dept-telemetry-card" id="cardProgLeadMagnets" onclick="openProgramLeadMagnetPage()" title="Manage downloadable brochure &amp; prospectus lead magnet">
             <div>
-              <div class="prog-pipe-val" id="progPipeScholarshipsVal">0</div>
-              <div class="prog-pipe-lbl">
-                <span>Scholarships Interests</span>
-                <span style="font-size: 11px; color: #B45309; opacity: 0.7;">↗</span>
+              <div class="dept-telemetry-header">
+                <div class="dept-telemetry-title-group">
+                  <div class="dept-telemetry-icon-box" style="background:#FFF7ED; color:#EA580C;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                  </div>
+                  <span class="dept-telemetry-card-title">Lead Magnets</span>
+                </div>
+                <span id="progTelemetryLmAffordance" class="dept-card-link-affordance" style="color:#94A3B8;">
+                  <span>Unlinked</span>
+                </span>
               </div>
-              <div class="prog-pipe-sub" id="progPipeScholarshipsSub">Evaluations &amp; fee concession inquiries requested</div>
+              <div class="dept-telemetry-kpi" id="progTelemetryLeadMagnetsCount">0</div>
+              <div class="dept-telemetry-lbl">Program Prospectus &amp; Guides</div>
+              
+              <div style="display: flex; align-items: center; gap: 8px; margin: 10px 0 6px 0;">
+                <span id="progTelemetryLmStatusDot" class="status-pulse-dot" style="background:#EF4444;"></span>
+                <span id="progTelemetryLmStatusText" style="font-size: 11.5px; font-weight: 700; color: #DC2626;">No Active Lead Magnet</span>
+              </div>
+              <div id="progTelemetryLmConText" style="font-size: 11px; color: #648781; line-height: 1.35;">Chatbot will not be able to collect email/phone in exchange of lead magnet.</div>
             </div>
-          </div>
 
-          <!-- Card 4: Lead-Magnet Dispatched (lead_assets downloads / fallback leads) -->
-          <div class="prog-pipe-card" onclick="typeof switchNavTab === 'function' ? switchNavTab('leads') : null" title="Click to open Leads &amp; Dispatches">
-            <div class="prog-pipe-header">
-              <div class="prog-pipe-icon" style="background:#F3E8FF; color:#7C3AED;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-              </div>
-              <span class="prog-pipe-badge" style="color:#6D28D9; background:#FAF5FF; border: 1px solid rgba(124,58,237,0.18);" id="progPipeLeadsMagnetBadge">0 Delivered</span>
-            </div>
-            <div>
-              <div class="prog-pipe-val" id="progPipeLeadsMagnetVal">0</div>
-              <div class="prog-pipe-lbl">
-                <span>Lead-Magnet Dispatched</span>
-                <span style="font-size: 11px; color: #6D28D9; opacity: 0.7;">↗</span>
-              </div>
-              <div class="prog-pipe-sub" id="progPipeLeadsMagnetSub">Brochures &amp; syllabus documents delivered to leads</div>
+            <!-- Footer Badges -->
+            <div id="progTelemetryLmBadges" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(15, 23, 42, 0.05);">
+              <span id="progTelemetryLmBadge1" style="font-size: 10px; font-weight: 700; color: #C2410C; background: #FFF7ED; border: 1px solid #FFEDD5; padding: 2px 7px; border-radius: 6px;">⚠️ Lead Capture Impact</span>
+              <span id="progTelemetryLmBadge2" style="font-size: 10px; font-weight: 600; color: #475569; background: #F1F5F9; padding: 2px 7px; border-radius: 6px;">Resource Coming Soon</span>
             </div>
           </div>
 
@@ -538,30 +561,154 @@
       admBadge.style.borderColor = isOpen ? '#A7F3D0' : '#CBD5E1';
     }
 
-    // Top 4 Pipeline Funnel Cards
-    // Card 1: Callbacks Booked
-    const elCbVal = document.getElementById('progPipeCallbacksVal');
-    if (elCbVal) elCbVal.textContent = Number(metrics.callbacks_count || 0).toLocaleString();
-    const elCbBadge = document.getElementById('progPipeCallbacksBadge');
-    if (elCbBadge) elCbBadge.textContent = `${metrics.callbacks_count || 0} Booked`;
+    // Program Intelligence & Readiness Telemetry Cards
+    const intel = payload.intelligence || {};
+    const staffIntel = intel.staff || {};
+    const docsIntel = intel.documents || {};
+    const lmIntel = intel.lead_magnets || {};
 
-    // Card 2: Campus Tours Scheduled
-    const elCtVal = document.getElementById('progPipeToursVal');
-    if (elCtVal) elCtVal.textContent = Number(metrics.campus_tours_count || 0).toLocaleString();
-    const elCtBadge = document.getElementById('progPipeToursBadge');
-    if (elCtBadge) elCtBadge.textContent = `${metrics.campus_tours_count || 0} Bookings`;
+    // Card 1: Assigned Staff
+    const elStaffCount = document.getElementById('progTelemetryStaffCount');
+    const totalStaff = staffIntel.total_count || 0;
+    const onDutyStaff = staffIntel.on_duty_count || 0;
+    if (elStaffCount) {
+      elStaffCount.textContent = `${onDutyStaff} / ${totalStaff}`;
+    }
 
-    // Card 3: Scholarships Interests
-    const elScVal = document.getElementById('progPipeScholarshipsVal');
-    if (elScVal) elScVal.textContent = Number(metrics.scholarships_count || 0).toLocaleString();
-    const elScBadge = document.getElementById('progPipeScholarshipsBadge');
-    if (elScBadge) elScBadge.textContent = `${metrics.scholarships_count || 0} Evaluated`;
+    const elStaffDot = document.getElementById('progTelemetryStaffDot');
+    const elStaffStatus = document.getElementById('progTelemetryDutyStatusText');
+    if (elStaffStatus) {
+      if (totalStaff === 0) {
+        elStaffStatus.textContent = 'Staff Assignment Required';
+        elStaffStatus.style.color = '#0F172A';
+        if (elStaffDot) elStaffDot.style.background = '#10B981';
+      } else if (onDutyStaff > 0) {
+        elStaffStatus.textContent = `${onDutyStaff} On Active Shift (${Math.round((onDutyStaff / totalStaff) * 100)}% Covered)`;
+        elStaffStatus.style.color = '#047857';
+        if (elStaffDot) elStaffDot.style.background = '#10B981';
+      } else {
+        elStaffStatus.textContent = 'No Counselors Currently On Duty';
+        elStaffStatus.style.color = '#B45309';
+        if (elStaffDot) elStaffDot.style.background = '#F59E0B';
+      }
+    }
 
-    // Card 4: Lead-Magnet Dispatched
-    const elLmVal = document.getElementById('progPipeLeadsMagnetVal');
-    if (elLmVal) elLmVal.textContent = Number(metrics.lead_magnet_dispatched || 0).toLocaleString();
-    const elLmBadge = document.getElementById('progPipeLeadsMagnetBadge');
-    if (elLmBadge) elLmBadge.textContent = `${metrics.lead_magnet_dispatched || 0} Sent`;
+    const elStaffLead = document.getElementById('progTelemetryDutyLeadText');
+    if (elStaffLead) {
+      elStaffLead.textContent = staffIntel.duty_lead ? `Duty Lead: ${staffIntel.duty_lead}` : 'Duty Lead: Admissions Office Desk';
+    }
+
+    // Card 2: Documents & Sources
+    const elDocsCount = document.getElementById('progTelemetryKsDocCount');
+    const totalDocs = docsIntel.total_count || 0;
+    if (elDocsCount) {
+      elDocsCount.textContent = totalDocs;
+    }
+
+    const elDocsDot = document.getElementById('progTelemetryKsStatusDot');
+    const elDocsStatus = document.getElementById('progTelemetryKsStatusText');
+    const elDocsSync = document.getElementById('progTelemetryKsSyncText');
+    const elDocsBadge1 = document.getElementById('progTelemetryKsBadge1');
+    const elDocsBadge2 = document.getElementById('progTelemetryKsBadge2');
+
+    if (totalDocs > 0) {
+      if (elDocsDot) elDocsDot.style.background = '#10B981';
+      if (elDocsStatus) {
+        elDocsStatus.textContent = `${totalDocs} Scoped Institutional Source${totalDocs === 1 ? '' : 's'}`;
+        elDocsStatus.style.color = '#0F172A';
+      }
+      if (elDocsSync) {
+        elDocsSync.textContent = 'Active & Grounded • Zero-Hallucination Guard';
+      }
+      if (elDocsBadge1) {
+        elDocsBadge1.style.color = '#6D28D9';
+        elDocsBadge1.style.background = '#F5F3FF';
+        elDocsBadge1.style.borderColor = '#DDD6FE';
+        elDocsBadge1.textContent = '🛡️ Grounding Guard';
+      }
+      if (elDocsBadge2) {
+        elDocsBadge2.textContent = 'Manage in Hub ↗';
+      }
+    } else {
+      if (elDocsDot) elDocsDot.style.background = '#F59E0B';
+      if (elDocsStatus) {
+        elDocsStatus.textContent = 'No Department Documents Linked';
+        elDocsStatus.style.color = '#0F172A';
+      }
+      if (elDocsSync) {
+        elDocsSync.textContent = 'Fallback to General College Knowledge';
+      }
+      if (elDocsBadge1) {
+        elDocsBadge1.style.color = '#B45309';
+        elDocsBadge1.style.background = '#FEF3C7';
+        elDocsBadge1.style.borderColor = '#FDE68A';
+        elDocsBadge1.textContent = '⚠️ Setup Recommended';
+      }
+      if (elDocsBadge2) {
+        elDocsBadge2.textContent = '+ Link in Knowledge Hub';
+      }
+    }
+
+    // Card 3: Lead Magnets
+    const elLmCount = document.getElementById('progTelemetryLeadMagnetsCount');
+    const totalLm = lmIntel.total_count || 0;
+    if (elLmCount) {
+      elLmCount.textContent = totalLm;
+    }
+
+    const elLmAffordance = document.getElementById('progTelemetryLmAffordance');
+    const elLmDot = document.getElementById('progTelemetryLmStatusDot');
+    const elLmStatus = document.getElementById('progTelemetryLmStatusText');
+    const elLmDesc = document.getElementById('progTelemetryLmConText');
+    const elLmBadge1 = document.getElementById('progTelemetryLmBadge1');
+    const elLmBadge2 = document.getElementById('progTelemetryLmBadge2');
+
+    if (totalLm > 0) {
+      if (elLmAffordance) {
+        elLmAffordance.style.color = '#EA580C';
+        elLmAffordance.innerHTML = '<span>Lead Magnet ↗</span>';
+      }
+      if (elLmDot) elLmDot.style.background = '#10B981';
+      if (elLmStatus) {
+        const primTitle = (lmIntel.primary && lmIntel.primary.title) ? lmIntel.primary.title : 'Prospectus Active';
+        elLmStatus.textContent = primTitle;
+        elLmStatus.style.color = '#047857';
+      }
+      if (elLmDesc) {
+        elLmDesc.textContent = 'Active lead magnet configured. Ready to capture student phone & email.';
+      }
+      if (elLmBadge1) {
+        elLmBadge1.style.color = '#047857';
+        elLmBadge1.style.background = '#ECFDF5';
+        elLmBadge1.style.borderColor = '#A7F3D0';
+        elLmBadge1.textContent = '✓ Lead Capture Ready';
+      }
+      if (elLmBadge2) {
+        elLmBadge2.textContent = 'Manage Lead Magnet ↗';
+      }
+    } else {
+      if (elLmAffordance) {
+        elLmAffordance.style.color = '#94A3B8';
+        elLmAffordance.innerHTML = '<span>Unlinked</span>';
+      }
+      if (elLmDot) elLmDot.style.background = '#EF4444';
+      if (elLmStatus) {
+        elLmStatus.textContent = 'No Active Lead Magnet';
+        elLmStatus.style.color = '#DC2626';
+      }
+      if (elLmDesc) {
+        elLmDesc.textContent = 'Chatbot will not be able to collect email/phone in exchange of lead magnet.';
+      }
+      if (elLmBadge1) {
+        elLmBadge1.style.color = '#C2410C';
+        elLmBadge1.style.background = '#FFF7ED';
+        elLmBadge1.style.borderColor = '#FFEDD5';
+        elLmBadge1.textContent = '⚠️ Lead Capture Impact';
+      }
+      if (elLmBadge2) {
+        elLmBadge2.textContent = 'Resource Coming Soon';
+      }
+    }
 
     // Specifications & Details
     const elLevel = document.getElementById('progSpecLevel');
@@ -624,6 +771,46 @@
       }
     }
   }
+
+  // Navigation handlers for the 3 cards
+  window.openProgramStaffPage = function() {
+    const pId = window._programDetailState.programId;
+    if (!pId) return;
+    sessionStorage.setItem('edvora_program_staff_id', pId);
+    if (typeof switchNavTab === 'function') {
+      switchNavTab('program-staff');
+    }
+  };
+
+  window.openProgramKnowledgeHub = function() {
+    const pId = window._programDetailState.programId;
+    if (!pId) return;
+    window._userSelectedKnowledgeProgramFilter = String(pId);
+    window._skipKnowledgeFilterResetOnce = true;
+    if (typeof switchNavTab === 'function') {
+      switchNavTab('knowledge');
+      setTimeout(function() {
+        const progSelect = document.getElementById('ckhProgramFilter');
+        if (progSelect) {
+          progSelect.value = String(pId);
+        }
+        if (typeof applyCkhFilters === 'function') {
+          applyCkhFilters();
+        } else if (typeof filterKnowledgeTable === 'function') {
+          filterKnowledgeTable();
+        }
+      }, 100);
+    }
+  };
+
+  window.openProgramLeadMagnetPage = function() {
+    const pId = window._programDetailState.programId;
+    if (!pId) return;
+    sessionStorage.setItem('edvora_program_lead_magnet_id', pId);
+    if (typeof switchNavTab === 'function') {
+      switchNavTab('program-lead-magnet');
+    }
+  };
 
   window.openCurrentProgramEdit = function() {
     const pId = window._programDetailState.programId;

@@ -1,0 +1,312 @@
+<!-- Dedicated Program Staff Roster Management Frame (#program-staff) -->
+<div id="view-program-staff" class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
+    
+    <!-- Top Control Bar (Inside the Big Card, styled exactly like settings.html) -->
+    <div class="ops-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 24px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important; flex-wrap: wrap; gap: 12px;">
+        <div class="ops-dash-title-group" style="display: flex !important; align-items: center !important; gap: 12px !important;">
+            <button type="button" onclick="returnToProgramDetail()" class="brand-btn-secondary" style="height: 32px; padding: 0 11px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; border-radius: 6px; background: #F4FAF7; border: 1.5px solid #D1E5DE; color: var(--e-teal, #063D3B);" title="Return to Program Detail">
+                &larr; Program Detail
+            </button>
+            <span class="ops-live-dot"></span>
+            <div>
+                <div class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important; letter-spacing: -0.01em !important; line-height: 1.25 !important; display: flex; align-items: center; gap: 8px;">
+                    <span id="progStaffProgramTitle">Assigned Staff</span>
+                    <span id="progStaffCodeBadge" style="display: none; font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 700; background: #F1F5F9; color: #475569; padding: 2px 7px; border-radius: 4px; border: 1px solid #E2E8F0;"></span>
+                </div>
+                <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">
+                    Assign counselors and admissions advisors who handle inquiries and callbacks for this degree
+                </div>
+            </div>
+        </div>
+
+        <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
+            <div id="progStaffActiveCountPill" class="ckh-ctrl-pill" style="font-size: 11px !important; font-weight: 700 !important; color: var(--e-teal, #063D3B) !important; background: #F4FAF7 !important; border: 1px solid #D1E5DE !important; border-radius: 8px !important; padding: 5px 11px !important; display: inline-flex !important; align-items: center !important; gap: 6px !important;">
+                <span>0 Counselors Assigned</span>
+            </div>
+            <button type="button" onclick="saveProgramStaffRoster()" class="brand-btn-primary" style="height: 34px; padding: 0 18px; font-size: 11.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; border-radius: 6px; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.2);">
+                <span>💾</span> Save Staff Roster
+            </button>
+        </div>
+    </div>
+
+    <!-- Inside the Big Card: Content Area with left-aligned form bounded to max 900px -->
+    <div style="padding: 28px 32px 48px 32px; box-sizing: border-box; width: 100%;">
+        <div style="max-width: 900px; width: 100%; margin: 0; box-sizing: border-box;">
+            
+            <form id="programStaffForm" onsubmit="event.preventDefault(); saveProgramStaffRoster();">
+                <input type="hidden" id="progStaffProgramId" />
+
+                <!-- SECTION 1: Staff Roster & Duty Controls -->
+                <div style="margin-bottom: 28px;">
+                    <div style="font-size: 14px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                        <span>👥</span> Program Staff Roster &amp; Shift Assignment
+                    </div>
+                    <p style="font-size: 11.5px; color: #648781; margin: 0 0 16px 0; line-height: 1.5;">
+                        Check the staff members assigned to this academic program. Select who serves as the Lead Counselor and toggle their active shift availability.
+                    </p>
+
+                    <div id="progStaffListContainer" style="display: flex; flex-direction: column; gap: 10px; width: 100%; box-sizing: border-box; padding: 16px; background: #F8FCFA; border-radius: 8px; border: 1.5px solid #DCE9E5;">
+                        <div style="text-align: center; color: #648781; font-size: 12px; padding: 24px;">
+                            Loading organization staff...
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 14px; padding: 12px 16px; border: 1.5px solid #D1E5DE; background: #F4FAF7; border-radius: 8px; display: flex; align-items: center; gap: 12px; font-size: 11.5px; color: #063D3B; line-height: 1.5;">
+                        <span style="font-size: 18px;">💡</span>
+                        <span>Assigned staff receive automatic counselor callback inquiries and student lead routing for <strong id="progStaffNoticeName">this program</strong>.</span>
+                    </div>
+                </div>
+
+                <!-- Action Bar -->
+                <div style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 10px 0; border-top: 1.5px solid #E6F0EC;">
+                    <button type="submit" id="btnSaveProgramStaff" class="brand-btn-primary" style="height: 38px; padding: 0 24px; font-size: 12.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                        <span>💾</span> Save Staff Assignments
+                    </button>
+                    <button type="button" onclick="returnToProgramDetail()" class="brand-btn-secondary" style="height: 38px; padding: 0 16px; font-size: 12px;">
+                        Cancel
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    window._progStaffState = {
+        programId: null,
+        availableStaff: [],
+        assignedStaff: []
+    };
+
+    window.initProgramStaffPage = async function() {
+        let pId = sessionStorage.getItem('edvora_program_staff_id') || sessionStorage.getItem('edvora_detail_program_id') || window._currentDetailProgramId;
+        if (!pId && location.hash.includes('?')) {
+            const qs = location.hash.split('?')[1] || '';
+            const params = new URLSearchParams(qs);
+            pId = params.get('id');
+        }
+
+        if (!pId) {
+            if (typeof switchNavTab === 'function') switchNavTab('academic-programs');
+            return;
+        }
+
+        window._progStaffState.programId = parseInt(pId, 10);
+        const pIdInput = document.getElementById('progStaffProgramId');
+        if (pIdInput) pIdInput.value = pId;
+
+        await loadProgramStaffData(pId);
+    };
+
+    async function loadProgramStaffData(pId) {
+        const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token');
+        if (!token) return;
+
+        try {
+            const res = await fetch(`/v1/programs/${pId}/staff`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await res.json();
+            if (!res.ok || data.status !== 'success') {
+                throw new Error((data && data.message) || 'Failed to load staff');
+            }
+
+            const p = data.data.program || {};
+            const assigned = data.data.assigned_staff || [];
+            const available = data.data.available_staff || [];
+
+            window._progStaffState.assignedStaff = assigned;
+            window._progStaffState.availableStaff = available;
+
+            // Update Titles
+            const titleEl = document.getElementById('progStaffProgramTitle');
+            if (titleEl) titleEl.textContent = `${p.course_name || 'Program'} — Staff Roster`;
+
+            const codeEl = document.getElementById('progStaffCodeBadge');
+            if (codeEl) {
+                if (p.course_code) {
+                    codeEl.textContent = p.course_code;
+                    codeEl.style.display = 'inline-block';
+                } else {
+                    codeEl.style.display = 'none';
+                }
+            }
+
+            const noticeEl = document.getElementById('progStaffNoticeName');
+            if (noticeEl) noticeEl.textContent = p.course_name || 'this program';
+
+            renderStaffList(available, assigned);
+        } catch (err) {
+            console.error('[ProgramStaff] Load error:', err);
+            const cont = document.getElementById('progStaffListContainer');
+            if (cont) {
+                cont.innerHTML = `<div style="color:#DC2626; font-weight:600; padding:16px;">Error loading staff: ${err.message}</div>`;
+            }
+        }
+    }
+
+    function renderStaffList(available, assigned) {
+        const cont = document.getElementById('progStaffListContainer');
+        if (!cont) return;
+
+        if (!available || available.length === 0) {
+            cont.innerHTML = `
+                <div style="text-align: center; color: #648781; font-size: 12px; padding: 24px;">
+                    No team members found in your organization. Invite staff members in the <a href="javascript:void(0)" onclick="switchNavTab('teams')" style="color:#047857; font-weight:700;">Teams</a> tab.
+                </div>
+            `;
+            return;
+        }
+
+        const assignedMap = {};
+        assigned.forEach(stf => {
+            assignedMap[stf.user_id] = stf;
+        });
+
+        const pill = document.getElementById('progStaffActiveCountPill');
+        if (pill) {
+            pill.textContent = `${assigned.length} Counselor${assigned.length === 1 ? '' : 's'} Assigned`;
+        }
+
+        cont.innerHTML = available.map(u => {
+            const isAssigned = !!assignedMap[u.id];
+            const role = isAssigned ? (assignedMap[u.id].role || 'agent') : 'agent';
+            const isOnDuty = isAssigned ? (assignedMap[u.id].is_on_duty != 0) : true;
+
+            return `
+                <div class="staff-row-item" style="display:flex; align-items:center; justify-content:space-between; background:#FFFFFF; border:1.5px solid ${isAssigned ? '#A7F3D0' : '#E2E8F0'}; border-radius:8px; padding:12px 14px; gap:12px; transition:border-color 0.15s ease;">
+                    <div style="display:flex; align-items:center; gap:12px; min-width:0;">
+                        <input type="checkbox" class="prog-staff-check" data-user-id="${u.id}" ${isAssigned ? 'checked' : ''} onchange="updateStaffRowState(this)" style="width:16px; height:16px; cursor:pointer; accent-color:#063D3B;" />
+                        <div>
+                            <div style="font-size:12.5px; font-weight:700; color:#063D3B; display:flex; align-items:center; gap:6px;">
+                                <span>${escapeHtml(u.name)}</span>
+                                <span style="font-size:10px; font-weight:600; color:#648781; background:#F1F5F9; padding:1px 6px; border-radius:4px;">${escapeHtml(u.role || 'Member')}</span>
+                            </div>
+                            <div style="font-size:11px; color:#648781; margin-top:2px;">${escapeHtml(u.email)}</div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; align-items:center; gap:12px; flex-shrink:0;">
+                        <!-- Role Selector (Lead vs Agent) -->
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <label style="font-size:11px; font-weight:600; color:#648781;">Role:</label>
+                            <select class="prog-staff-role brand-input" data-user-id="${u.id}" ${!isAssigned ? 'disabled' : ''} style="height:28px; font-size:11px; font-weight:600; padding:0 8px; border-radius:6px; border:1px solid #DCE9E5; background:#FFFFFF;">
+                                <option value="agent" ${role === 'agent' ? 'selected' : ''}>Agent</option>
+                                <option value="lead" ${role === 'lead' ? 'selected' : ''}>Duty Lead</option>
+                            </select>
+                        </div>
+
+                        <!-- On Duty Toggle -->
+                        <label style="display:flex; align-items:center; gap:5px; font-size:11px; font-weight:600; color:#063D3B; cursor:pointer;">
+                            <input type="checkbox" class="prog-staff-duty" data-user-id="${u.id}" ${isOnDuty ? 'checked' : ''} ${!isAssigned ? 'disabled' : ''} style="width:14px; height:14px; accent-color:#10B981;" />
+                            <span>On Duty</span>
+                        </label>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    window.updateStaffRowState = function(chk) {
+        const row = chk.closest('.staff-row-item');
+        const roleSel = row.querySelector('.prog-staff-role');
+        const dutyChk = row.querySelector('.prog-staff-duty');
+
+        if (chk.checked) {
+            row.style.borderColor = '#A7F3D0';
+            if (roleSel) roleSel.disabled = false;
+            if (dutyChk) dutyChk.disabled = false;
+        } else {
+            row.style.borderColor = '#E2E8F0';
+            if (roleSel) roleSel.disabled = true;
+            if (dutyChk) dutyChk.disabled = true;
+        }
+
+        const checkedCount = document.querySelectorAll('.prog-staff-check:checked').length;
+        const pill = document.getElementById('progStaffActiveCountPill');
+        if (pill) {
+            pill.textContent = `${checkedCount} Counselor${checkedCount === 1 ? '' : 's'} Assigned`;
+        }
+    };
+
+    window.saveProgramStaffRoster = async function() {
+        const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token');
+        const pId = window._progStaffState.programId;
+        if (!token || !pId) return;
+
+        const btn = document.getElementById('btnSaveProgramStaff');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳</span> Saving...';
+        }
+
+        const rows = document.querySelectorAll('.staff-row-item');
+        const staffPayload = [];
+
+        rows.forEach(row => {
+            const chk = row.querySelector('.prog-staff-check');
+            if (chk && chk.checked) {
+                const userId = parseInt(chk.dataset.userId, 10);
+                const roleSel = row.querySelector('.prog-staff-role');
+                const dutyChk = row.querySelector('.prog-staff-duty');
+                staffPayload.push({
+                    user_id: userId,
+                    role: roleSel ? roleSel.value : 'agent',
+                    is_on_duty: dutyChk && dutyChk.checked ? 1 : 0
+                });
+            }
+        });
+
+        try {
+            const res = await fetch(`/v1/programs/${pId}/staff`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({ staff: staffPayload })
+            });
+            const data = await res.json();
+            if (!res.ok || data.status !== 'success') {
+                throw new Error((data && data.message) || 'Failed to update roster');
+            }
+
+            alert('Program staff assignments saved successfully!');
+            returnToProgramDetail();
+        } catch (err) {
+            alert('Error saving staff: ' + err.message);
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<span>💾</span> Save Staff Assignments';
+            }
+        }
+    };
+
+    window.returnToProgramDetail = function() {
+        const pId = window._progStaffState.programId;
+        if (pId) {
+            sessionStorage.setItem('edvora_detail_program_id', pId);
+            window._currentDetailProgramId = pId;
+        }
+        if (typeof switchNavTab === 'function') {
+            switchNavTab('academic-program-detail');
+        }
+    };
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    if (typeof initProgramStaffPage === 'function') {
+        initProgramStaffPage();
+    }
+})();
+</script>

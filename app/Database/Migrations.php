@@ -1087,6 +1087,25 @@ class Migrations
         } catch (Throwable $e) {
             // Column/index may already exist
         }
+
+        // Program Staff table for mapping staff to programs
+        try {
+            $this->db->exec("CREATE TABLE IF NOT EXISTS program_staff (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                organization_id INT NOT NULL,
+                program_id INT NOT NULL,
+                user_id INT NOT NULL,
+                role ENUM('lead', 'agent') DEFAULT 'agent',
+                is_on_duty TINYINT(1) DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE CASCADE,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                UNIQUE KEY prog_user (program_id, user_id),
+                INDEX idx_org_prog (organization_id, program_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+        } catch (Throwable $e) {
+            // Table may already exist
+        }
     }
 }
 

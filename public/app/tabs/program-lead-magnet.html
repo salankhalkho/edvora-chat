@@ -1,0 +1,364 @@
+<!-- Dedicated Program Lead Magnet Management Frame (#program-lead-magnet) -->
+<div id="view-program-lead-magnet" class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
+    
+    <!-- Top Control Bar (Inside the Big Card, styled like settings.html) -->
+    <div class="ops-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 24px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important; flex-wrap: wrap; gap: 12px;">
+        <div class="ops-dash-title-group" style="display: flex !important; align-items: center !important; gap: 12px !important;">
+            <button type="button" onclick="returnToProgramDetailFromLm()" class="brand-btn-secondary" style="height: 32px; padding: 0 11px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; border-radius: 6px; background: #F4FAF7; border: 1.5px solid #D1E5DE; color: var(--e-teal, #063D3B);" title="Return to Program Detail">
+                &larr; Program Detail
+            </button>
+            <span class="ops-live-dot"></span>
+            <div>
+                <div class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important; letter-spacing: -0.01em !important; line-height: 1.25 !important; display: flex; align-items: center; gap: 8px;">
+                    <span id="progLmProgramTitle">Program Lead Magnet</span>
+                    <span id="progLmCodeBadge" style="display: none; font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 700; background: #F1F5F9; color: #475569; padding: 2px 7px; border-radius: 4px; border: 1px solid #E2E8F0;"></span>
+                </div>
+                <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">
+                    Program Prospectus &amp; Guides &bull; Downloadable asset used by chatbot to capture student inquiries
+                </div>
+            </div>
+        </div>
+
+        <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
+            <div id="progLmActiveStatusPill" class="ckh-ctrl-pill" style="font-size: 11px !important; font-weight: 700 !important; color: #DC2626 !important; background: #FEF2F2 !important; border: 1px solid #FECACA !important; border-radius: 8px !important; padding: 5px 11px !important; display: inline-flex !important; align-items: center !important; gap: 6px !important;">
+                <span>○ Unlinked</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inside the Big Card: Content Area bounded to max 900px -->
+    <div style="padding: 28px 32px 48px 32px; box-sizing: border-box; width: 100%;">
+        <div style="max-width: 900px; width: 100%; margin: 0; box-sizing: border-box;">
+
+            <!-- CURRENT ACTIVE LEAD MAGNET PANEL -->
+            <div id="progLmCurrentPanel" style="margin-bottom: 28px; background: #FFFFFF; border: 1.5px solid #DCE9E5; border-radius: 10px; padding: 18px 20px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                    <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #648781;">Active Lead Magnet</div>
+                    <span id="progLmCurrentTag" style="font-size: 10.5px; font-weight: 700; color: #94A3B8; background: #F1F5F9; padding: 2px 8px; border-radius: 999px;">None Attached</span>
+                </div>
+                
+                <div id="progLmCurrentDetails" style="font-size: 13px; color: #648781; line-height: 1.5;">
+                    No prospectus document currently attached as the lead magnet for this program. Select an existing document below or upload a new prospectus to enable instant lead capture.
+                </div>
+            </div>
+
+            <!-- SECTION 1: Attach from Knowledge Sources -->
+            <div style="margin-bottom: 28px;">
+                <div style="font-size: 14px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                    <span>📄</span> Select Document from Knowledge Sources
+                </div>
+                <p style="font-size: 11.5px; color: #648781; margin: 0 0 14px 0; line-height: 1.5;">
+                    Choose an institutional document, course syllabus, or brochure from your Knowledge Hub to serve as the lead magnet for prospective students.
+                </p>
+
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;">
+                    <select id="progLmSelectDoc" class="brand-input" style="flex: 1; min-width: 260px; height: 38px; font-size: 12px; font-weight: 600; padding: 0 12px; border: 1.5px solid #DCE9E5; border-radius: 6px; background: #FFFFFF;">
+                        <option value="">-- Choose a Knowledge Source --</option>
+                    </select>
+                    <button type="button" onclick="attachSelectedLeadMagnet()" class="brand-btn-primary" style="height: 38px; padding: 0 18px; font-size: 12px; font-weight: 700; border-radius: 6px; white-space: nowrap;">
+                        Attach as Lead Magnet
+                    </button>
+                </div>
+            </div>
+
+            <!-- SECTION 2: Direct Upload New Prospectus PDF -->
+            <div style="margin-bottom: 28px; padding: 20px; background: #F8FCFA; border: 1.5px dashed #B9D7C7; border-radius: 10px;">
+                <div style="font-size: 14px; font-weight: 800; color: #092F2E; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                    <span>⬆️</span> Or Upload New Program Prospectus (PDF)
+                </div>
+                <p style="font-size: 11.5px; color: #648781; margin: 0 0 14px 0; line-height: 1.5;">
+                    Upload a syllabus or admissions brochure directly. It will be added to your Knowledge Sources and automatically designated as the lead magnet for this degree.
+                </p>
+
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <input type="file" id="progLmFileInput" accept=".pdf,.docx,.txt" style="font-size: 12px; color: #063D3B;" />
+                    <button type="button" id="btnUploadProgLm" onclick="uploadAndAttachLeadMagnet()" class="brand-btn-secondary" style="height: 34px; padding: 0 16px; font-size: 11.5px; font-weight: 700; border-radius: 6px; color: #047857; border: 1.5px solid #A7F3D0;">
+                        Upload &amp; Set Lead Magnet
+                    </button>
+                </div>
+            </div>
+
+            <!-- Notice Callout -->
+            <div style="padding: 12px 16px; border: 1.5px solid #D1E5DE; background: #F4FAF7; border-radius: 8px; display: flex; align-items: center; gap: 12px; font-size: 11.5px; color: #063D3B; line-height: 1.5; margin-bottom: 24px;">
+                <span style="font-size: 18px;">💡</span>
+                <span>When a visitor asks for the syllabus, fee structure, or brochure of <strong id="progLmNoticeName">this program</strong>, the AI chatbot offers this document in exchange for their phone number and email.</span>
+            </div>
+
+            <!-- Action Bar -->
+            <div style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 10px 0; border-top: 1.5px solid #E6F0EC;">
+                <button type="button" onclick="returnToProgramDetailFromLm()" class="brand-btn-secondary" style="height: 36px; padding: 0 20px; font-size: 12px; font-weight: 700;">
+                    &larr; Back to Program Detail
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    window._progLmState = {
+        programId: null,
+        activeLeadMagnets: [],
+        availableDocs: []
+    };
+
+    window.initProgramLeadMagnetPage = async function() {
+        let pId = sessionStorage.getItem('edvora_program_lead_magnet_id') || sessionStorage.getItem('edvora_detail_program_id') || window._currentDetailProgramId;
+        if (!pId && location.hash.includes('?')) {
+            const qs = location.hash.split('?')[1] || '';
+            const params = new URLSearchParams(qs);
+            pId = params.get('id');
+        }
+
+        if (!pId) {
+            if (typeof switchNavTab === 'function') switchNavTab('academic-programs');
+            return;
+        }
+
+        window._progLmState.programId = parseInt(pId, 10);
+        await loadProgramLeadMagnetData(pId);
+    };
+
+    async function loadProgramLeadMagnetData(pId) {
+        const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token');
+        if (!token) return;
+
+        try {
+            const res = await fetch(`/v1/programs/${pId}/lead-magnet`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await res.json();
+            if (!res.ok || data.status !== 'success') {
+                throw new Error((data && data.message) || 'Failed to load lead magnet');
+            }
+
+            const p = data.data.program || {};
+            const activeLm = data.data.lead_magnets || [];
+            const docs = data.data.available_documents || [];
+
+            window._progLmState.activeLeadMagnets = activeLm;
+            window._progLmState.availableDocs = docs;
+
+            // Update Titles
+            const titleEl = document.getElementById('progLmProgramTitle');
+            if (titleEl) titleEl.textContent = `${p.course_name || 'Program'} — Lead Magnet`;
+
+            const codeEl = document.getElementById('progLmCodeBadge');
+            if (codeEl) {
+                if (p.course_code) {
+                    codeEl.textContent = p.course_code;
+                    codeEl.style.display = 'inline-block';
+                } else {
+                    codeEl.style.display = 'none';
+                }
+            }
+
+            const noticeEl = document.getElementById('progLmNoticeName');
+            if (noticeEl) noticeEl.textContent = p.course_name || 'this program';
+
+            renderLeadMagnetView(activeLm, docs);
+        } catch (err) {
+            console.error('[ProgramLeadMagnet] Load error:', err);
+        }
+    }
+
+    function renderLeadMagnetView(activeLm, docs) {
+        const hasActive = activeLm && activeLm.length > 0;
+        const pill = document.getElementById('progLmActiveStatusPill');
+        const tag = document.getElementById('progLmCurrentTag');
+        const details = document.getElementById('progLmCurrentDetails');
+
+        if (hasActive) {
+            const prim = activeLm[0];
+            if (pill) {
+                pill.style.color = '#047857';
+                pill.style.background = '#ECFDF5';
+                pill.style.borderColor = '#A7F3D0';
+                pill.innerHTML = '<span>● Active Lead Magnet</span>';
+            }
+            if (tag) {
+                tag.style.color = '#047857';
+                tag.style.background = '#ECFDF5';
+                tag.textContent = 'Linked & Grounded';
+            }
+            if (details) {
+                details.innerHTML = `
+                    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                        <div>
+                            <div style="font-size:14px; font-weight:800; color:#063D3B; display:flex; align-items:center; gap:8px;">
+                                <span>📑</span>
+                                <span>${escapeHtml(prim.title)}</span>
+                            </div>
+                            <div style="font-size:11px; color:#648781; margin-top:3px;">Category: ${escapeHtml(prim.category || 'Admissions')} &bull; Status: ${escapeHtml(prim.status || 'Active')}</div>
+                        </div>
+                        <button type="button" onclick="detachCurrentLeadMagnet(${prim.id})" class="brand-btn-secondary" style="height:30px; padding:0 12px; font-size:11px; font-weight:700; color:#DC2626; border-color:#FECACA; border-radius:6px; cursor:pointer;">
+                            Detach Lead Magnet
+                        </button>
+                    </div>
+                `;
+            }
+        } else {
+            if (pill) {
+                pill.style.color = '#DC2626';
+                pill.style.background = '#FEF2F2';
+                pill.style.borderColor = '#FECACA';
+                pill.innerHTML = '<span>○ Unlinked</span>';
+            }
+            if (tag) {
+                tag.style.color = '#94A3B8';
+                tag.style.background = '#F1F5F9';
+                tag.textContent = 'None Attached';
+            }
+            if (details) {
+                details.innerHTML = `No prospectus document currently attached as the lead magnet for this program. Select an existing document below or upload a new prospectus to enable instant lead capture.`;
+            }
+        }
+
+        // Populate Select Dropdown
+        const sel = document.getElementById('progLmSelectDoc');
+        if (sel) {
+            let html = '<option value="">-- Choose a Knowledge Source --</option>';
+            docs.forEach(d => {
+                const isSelected = hasActive && activeLm.some(lm => lm.id === d.id);
+                html += `<option value="${d.id}" ${isSelected ? 'disabled' : ''}>${escapeHtml(d.title)} (${d.type || 'document'})${isSelected ? ' — Currently Attached' : ''}</option>`;
+            });
+            sel.innerHTML = html;
+        }
+    }
+
+    window.attachSelectedLeadMagnet = async function() {
+        const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token');
+        const pId = window._progLmState.programId;
+        const sel = document.getElementById('progLmSelectDoc');
+        if (!token || !pId || !sel || !sel.value) {
+            alert('Please select a document from the list.');
+            return;
+        }
+
+        try {
+            const res = await fetch(`/v1/programs/${pId}/lead-magnet`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({
+                    knowledge_source_id: parseInt(sel.value, 10),
+                    action: 'attach'
+                })
+            });
+            const data = await res.json();
+            if (!res.ok || data.status !== 'success') {
+                throw new Error((data && data.message) || 'Failed to attach lead magnet');
+            }
+
+            alert('Lead magnet attached successfully!');
+            await loadProgramLeadMagnetData(pId);
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    };
+
+    window.detachCurrentLeadMagnet = async function(sourceId) {
+        if (!confirm('Are you sure you want to detach this lead magnet from the program?')) return;
+        const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token');
+        const pId = window._progLmState.programId;
+        if (!token || !pId) return;
+
+        try {
+            const res = await fetch(`/v1/programs/${pId}/lead-magnet`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({
+                    knowledge_source_id: sourceId,
+                    action: 'detach'
+                })
+            });
+            const data = await res.json();
+            if (!res.ok || data.status !== 'success') {
+                throw new Error((data && data.message) || 'Failed to detach');
+            }
+
+            alert('Lead magnet detached.');
+            await loadProgramLeadMagnetData(pId);
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    };
+
+    window.uploadAndAttachLeadMagnet = async function() {
+        const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token');
+        const pId = window._progLmState.programId;
+        const fileInput = document.getElementById('progLmFileInput');
+        if (!token || !pId || !fileInput || !fileInput.files || fileInput.files.length === 0) {
+            alert('Please choose a file to upload.');
+            return;
+        }
+
+        const btn = document.getElementById('btnUploadProgLm');
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Uploading...';
+        }
+
+        const formData = new FormData();
+        formData.append('document', fileInput.files[0]);
+        formData.append('title', fileInput.files[0].name.replace(/\.[^/.]+$/, ""));
+        formData.append('category', 'Admissions');
+        formData.append('program_id', pId);
+        formData.append('lead_magnet', '1');
+
+        try {
+            const res = await fetch('/v1/knowledge/upload', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token },
+                body: formData
+            });
+            const data = await res.json();
+            if (!res.ok || data.status !== 'success') {
+                throw new Error((data && data.message) || 'Failed to upload document');
+            }
+
+            alert('Prospectus uploaded and set as lead magnet!');
+            fileInput.value = '';
+            await loadProgramLeadMagnetData(pId);
+        } catch (err) {
+            alert('Upload error: ' + err.message);
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = 'Upload & Set Lead Magnet';
+            }
+        }
+    };
+
+    window.returnToProgramDetailFromLm = function() {
+        const pId = window._progLmState.programId;
+        if (pId) {
+            sessionStorage.setItem('edvora_detail_program_id', pId);
+            window._currentDetailProgramId = pId;
+        }
+        if (typeof switchNavTab === 'function') {
+            switchNavTab('academic-program-detail');
+        }
+    };
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    if (typeof initProgramLeadMagnetPage === 'function') {
+        initProgramLeadMagnetPage();
+    }
+})();
+</script>

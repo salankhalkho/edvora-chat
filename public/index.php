@@ -415,6 +415,10 @@ $router->get('/v1/programs/{id}', [ProgramController::class, 'show'], [AuthMiddl
 $router->post('/v1/programs', [ProgramController::class, 'store'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->put('/v1/programs/{id}', [ProgramController::class, 'update'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->delete('/v1/programs/{id}', [ProgramController::class, 'delete'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->get('/v1/programs/{id}/staff', [ProgramController::class, 'getStaff'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->post('/v1/programs/{id}/staff', [ProgramController::class, 'syncStaff'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->get('/v1/programs/{id}/lead-magnet', [ProgramController::class, 'getLeadMagnet'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->post('/v1/programs/{id}/lead-magnet', [ProgramController::class, 'setLeadMagnet'], [AuthMiddleware::class, TenantMiddleware::class]);
 
 // Academic Programs & Courses Management Routes (Legacy Alias)
 $router->get('/v1/courses', [CourseController::class, 'index'], [AuthMiddleware::class, TenantMiddleware::class]);
