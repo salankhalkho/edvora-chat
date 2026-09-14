@@ -234,12 +234,14 @@ class KnowledgeController
 
         $db = Database::getConnection();
         $stmt = $db->prepare("
-            SELECT id, organization_id, chatbot_id, type, title, category, academic_version,
-                   effective_from, expires_on, last_reviewed_at, review_frequency_days,
-                   previous_version_id, replaced_by_id,
-                   source_url, raw_content, processed_content, keywords, semantic_keywords, file_path, status, last_fetched_at, created_at, updated_at
-            FROM knowledge_sources
-            WHERE id = :id AND organization_id = :org_id
+            SELECT ks.id, ks.organization_id, ks.chatbot_id, ks.program_id, p.course_name as program_name,
+                   ks.type, ks.title, ks.category, ks.academic_version,
+                   ks.effective_from, ks.expires_on, ks.last_reviewed_at, ks.review_frequency_days,
+                   ks.previous_version_id, ks.replaced_by_id,
+                   ks.source_url, ks.raw_content, ks.processed_content, ks.keywords, ks.semantic_keywords, ks.file_path, ks.status, ks.last_fetched_at, ks.created_at, ks.updated_at
+            FROM knowledge_sources ks
+            LEFT JOIN programs p ON ks.program_id = p.id
+            WHERE ks.id = :id AND ks.organization_id = :org_id
         ");
         $stmt->execute([':id' => $id, ':org_id' => $orgId]);
         $source = $stmt->fetch();
@@ -330,6 +332,19 @@ class KnowledgeController
         $semanticKeywords = trim($body['semantic_keywords'] ?? '');
         $rawContent = isset($body['raw_content']) ? (string)$body['raw_content'] : null;
 
+        // Academic Program Mapping
+        $programId = null;
+        if (isset($body['program_id']) && $body['program_id'] !== '' && $body['program_id'] !== null) {
+            $pId = (int)$body['program_id'];
+            if ($pId > 0) {
+                $chkProg = $db->prepare("SELECT id FROM programs WHERE id = ? AND organization_id = ?");
+                $chkProg->execute([$pId, $orgId]);
+                if ($chkProg->fetch()) {
+                    $programId = $pId;
+                }
+            }
+        }
+
         // Auto-recalculate computed status if active
         if ($status !== 'archived') {
             $today = date('Y-m-d');
@@ -353,6 +368,7 @@ class KnowledgeController
             'status = :status',
             'keywords = :keywords',
             'semantic_keywords = :semantic_keywords',
+            'program_id = :program_id',
             'updated_at = NOW()'
         ];
 
@@ -366,6 +382,7 @@ class KnowledgeController
             ':status' => $status,
             ':keywords' => $keywords,
             ':semantic_keywords' => $semanticKeywords,
+            ':program_id' => $programId,
             ':id' => $id,
             ':org_id' => $orgId
         ];

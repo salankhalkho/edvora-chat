@@ -15591,74 +15591,35 @@ echo $response['reply'];
                 }
             }
 
-            // Load and populate departments
-            await loadDocEditorDepartments(doc.department_ids || []);
+            // Load and populate academic programs
+            await loadDocEditorPrograms(doc.program_id);
         }
 
-        function updateDocEditorDeptRadios() {
-            const container = document.getElementById('docEditorDeptContainer');
-            if (!container) return;
-            const labels = container.querySelectorAll('label');
-            labels.forEach(label => {
-                const radio = label.querySelector('input[type="radio"]');
-                if (radio && radio.checked) {
-                    label.style.borderColor = '#063D3B';
-                    label.style.background = '#E8F5F3';
-                    label.style.color = '#063D3B';
-                    label.style.boxShadow = '0 0 0 1px #063D3B';
-                } else if (label) {
-                    label.style.borderColor = '#E2E8F0';
-                    label.style.background = '#FFFFFF';
-                    label.style.color = '#0F172A';
-                    label.style.boxShadow = 'none';
-                }
-            });
-        }
-
-        async function loadDocEditorDepartments(selectedDeptIds) {
-            const container = document.getElementById('docEditorDeptContainer');
-            if (!container) return;
+        async function loadDocEditorPrograms(selectedProgramId) {
+            const select = document.getElementById('edit_doc_program_id');
+            if (!select) return;
 
             try {
-                const res = await fetch('/v1/departments', {
+                const res = await fetch('/v1/programs', {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 const data = await res.json();
-                const depts = (data.status === 'success' && data.data) ? (Array.isArray(data.data) ? data.data : (data.data.departments || [])) : [];
+                const programs = (data.status === 'success' && data.data) ? (data.data.courses || (Array.isArray(data.data) ? data.data : [])) : [];
 
-                if (depts.length === 0) {
-                    container.innerHTML = '<span style="font-size: 12px; color: #94A3B8;">No departments configured in workspace.</span>';
-                    return;
+                let html = '<option value="">🌐 All Academic Programs / General Institutional Scope</option>';
+                programs.forEach(p => {
+                    const isSelected = selectedProgramId && parseInt(selectedProgramId) === parseInt(p.id);
+                    const code = p.course_code ? ` [${escapeHtml(p.course_code)}]` : '';
+                    html += `<option value="${p.id}" ${isSelected ? 'selected' : ''}>${escapeHtml(p.course_name)}${code}</option>`;
+                });
+
+                select.innerHTML = html;
+                if (selectedProgramId) {
+                    select.value = selectedProgramId;
                 }
-
-                // Check if any specific department is selected
-                const normSelected = Array.isArray(selectedDeptIds) ? selectedDeptIds.map(Number) : [];
-                const matchedDept = depts.find(d => normSelected.includes(parseInt(d.id)));
-                const isGlobalChecked = !matchedDept;
-
-                let html = `
-                    <label style="display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px; background: ${isGlobalChecked ? '#E8F5F3' : '#FFFFFF'}; border: 1.5px solid ${isGlobalChecked ? '#063D3B' : '#E2E8F0'}; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; color: ${isGlobalChecked ? '#063D3B' : '#0F172A'}; user-select: none; transition: all 0.15s ease; ${isGlobalChecked ? 'box-shadow: 0 0 0 1px #063D3B;' : ''}">
-                        <input type="radio" name="doc_department" value="" ${isGlobalChecked ? 'checked' : ''} onchange="updateDocEditorDeptRadios()" style="cursor: pointer; accent-color: #063D3B;" />
-                        <span>🌐</span>
-                        <span>Entire Organization (Global Scope)</span>
-                    </label>
-                `;
-
-                html += depts.map(d => {
-                    const isChecked = matchedDept && parseInt(matchedDept.id) === parseInt(d.id);
-                    return `
-                        <label style="display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px; background: ${isChecked ? '#E8F5F3' : '#FFFFFF'}; border: 1.5px solid ${isChecked ? '#063D3B' : '#E2E8F0'}; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; color: ${isChecked ? '#063D3B' : '#0F172A'}; user-select: none; transition: all 0.15s ease; ${isChecked ? 'box-shadow: 0 0 0 1px #063D3B;' : ''}">
-                            <input type="radio" name="doc_department" value="${d.id}" ${isChecked ? 'checked' : ''} onchange="updateDocEditorDeptRadios()" style="cursor: pointer; accent-color: #063D3B;" />
-                            <span>${escapeHtml(d.icon || '🏫')}</span>
-                            <span>${escapeHtml(d.name)}</span>
-                        </label>
-                    `;
-                }).join('');
-
-                container.innerHTML = html;
             } catch (e) {
-                console.error('Error fetching departments for editor:', e);
-                container.innerHTML = '<span style="font-size: 12px; color: #EF4444;">Failed to load departments.</span>';
+                console.error('Error fetching academic programs for editor:', e);
+                select.innerHTML = '<option value="">🌐 All Academic Programs / General Institutional Scope</option>';
             }
         }
 
@@ -15673,9 +15634,8 @@ echo $response['reply'];
                 return;
             }
 
-            const selectedDeptRadio = document.querySelector('input[name="doc_department"]:checked');
-            const selectedDeptVal = selectedDeptRadio ? selectedDeptRadio.value.trim() : '';
-            const checkedDepts = selectedDeptVal ? [parseInt(selectedDeptVal)] : [];
+            const progSelect = document.getElementById('edit_doc_program_id');
+            const program_id = progSelect && progSelect.value ? parseInt(progSelect.value) : null;
             let category = document.getElementById('edit_doc_category').value;
             if (category === '__custom__') {
                 const customInp = document.getElementById('edit_doc_category_custom');
@@ -15717,7 +15677,7 @@ echo $response['reply'];
                         review_frequency_days,
                         semantic_keywords,
                         raw_content,
-                        departments: checkedDepts
+                        program_id
                     })
                 });
 
