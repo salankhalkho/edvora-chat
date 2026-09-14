@@ -81,7 +81,7 @@ class ProgramController
      * GET /v1/programs/{id}
      * Retrieve single academic program details and scoped 4 pipeline cards telemetry.
      */
-    public function show(Request $request): void
+    public function show(Request $request, array $params = []): void
     {
         $orgId = $this->getOrgId($request);
         if (!$orgId) {
@@ -89,7 +89,7 @@ class ProgramController
             return;
         }
 
-        $id = (int)$request->param('id');
+        $id = (int)($params['id'] ?? $request->get('id') ?? 0);
         if (!$id) {
             Response::error('Invalid program ID', 400);
             return;
@@ -374,7 +374,7 @@ class ProgramController
      * PUT /v1/programs/{id}
      * Update an existing program in the 'programs' table.
      */
-    public function update(Request $request): void
+    public function update(Request $request, array $params = []): void
     {
         $orgId = $this->getOrgId($request);
         if (!$orgId) {
@@ -382,13 +382,13 @@ class ProgramController
             return;
         }
 
-        $id = (int)$request->param('id');
+        $id = (int)($params['id'] ?? $request->get('id') ?? 0);
         if (!$id) {
             Response::error('Invalid program ID', 400);
             return;
         }
 
-        $body = $request->json();
+        $body = $request->all();
         $courseName = trim($body['course_name'] ?? '');
         if (empty($courseName)) {
             Response::error('Program / Course name is required', 422);
@@ -493,7 +493,7 @@ class ProgramController
      * DELETE /v1/programs/{id}
      * Delete an academic program from the 'programs' table.
      */
-    public function delete(Request $request): void
+    public function delete(Request $request, array $params = []): void
     {
         $orgId = $this->getOrgId($request);
         if (!$orgId) {
@@ -501,7 +501,7 @@ class ProgramController
             return;
         }
 
-        $id = (int)$request->param('id');
+        $id = (int)($params['id'] ?? $request->get('id') ?? 0);
         if (!$id) {
             Response::error('Invalid program ID', 400);
             return;

@@ -484,9 +484,14 @@
       const res = await fetch(url, {
         headers: { 'Authorization': 'Bearer ' + token }
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      if (data.status !== 'success') throw new Error(data.message || 'API error');
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        const msg = (data && data.message) ? data.message : `HTTP ${res.status}`;
+        throw new Error(msg);
+      }
+      if (!data || data.status !== 'success') {
+        throw new Error((data && data.message) || 'API error');
+      }
 
       window._programDetailState.programData = data.data;
       renderProgramDetailView(data.data);
@@ -494,7 +499,7 @@
       console.error('[ProgramDetail] Load error:', err);
       const titleEl = document.getElementById('progDetailMainTitle');
       if (titleEl) {
-        titleEl.textContent = 'Failed to load program (' + err.message + ')';
+        titleEl.textContent = 'Failed to load program: ' + err.message;
         titleEl.style.color = '#DC2626';
       }
     }
