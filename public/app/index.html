@@ -14718,22 +14718,22 @@ echo $response['reply'];
                 const fileBadgeStyle = docBadge.badgeStyle;
                 const fileMetaText = docBadge.metaText;
 
-                // Dynamic Department Badge (Zero Hardcoded Mapping)
-                let deptName = 'General';
-                let deptBadgeStyle = 'background:#F1F5F9; border-color:#CBD5E1; color:#475569;';
-                let deptStroke = '#475569';
+                // Dynamic Academic Program Badge
+                let progName = 'General / Institutional';
+                let progBadgeStyle = 'background:#F0FDF4; border: 1px solid #BBF7D0; color:#166534;';
+                let progStroke = '#166534';
 
-                if (item.departments && item.departments.length > 0) {
-                    const d = item.departments[0];
-                    deptName = d.name || 'General';
-                    const badgeCfg = getDeptBadgeStyle(d.id, d.name);
-                    deptBadgeStyle = badgeCfg.style;
-                    deptStroke = badgeCfg.stroke;
+                if (item.program_name || item.course_name) {
+                    progName = item.program_name || item.course_name;
+                    progBadgeStyle = 'background:#E8F5E9; border: 1px solid #C8E6C9; color:#1B5E20;';
+                    progStroke = '#2E7D32';
+                } else if (item.departments && item.departments.length > 0) {
+                    progName = item.departments[0].name || 'General / Institutional';
                 } else if (isArchived) {
-                    deptBadgeStyle = 'background:#F1F5F9; border-color:#CBD5E1; color:#64748B;';
-                    deptStroke = '#64748B';
+                    progBadgeStyle = 'background:#F1F5F9; border: 1px solid #CBD5E1; color:#64748B;';
+                    progStroke = '#64748B';
                 }
-                const deptIconSvg = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${deptStroke}" stroke-width="2.3"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="22.01"/><line x1="15" y1="22" x2="15" y2="22.01"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/></svg>`;
+                const progIconSvg = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${progStroke}" stroke-width="2.3"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>`;
 
                 // Category Tag
                 const catTag = `<span class="ckh-category-tag"${isArchived ? ' style="opacity: 0.65;"' : ''}>${escapeHtml(item.category || 'General')}</span>`;
@@ -14845,9 +14845,9 @@ echo $response['reply'];
                             </div>
                         </td>
                         <td>
-                            <span class="ckh-dept-badge" style="${deptBadgeStyle}">
-                                ${deptIconSvg}
-                                <span>${escapeHtml(deptName)}</span>
+                            <span class="ckh-dept-badge" style="${progBadgeStyle}">
+                                ${progIconSvg}
+                                <span>${escapeHtml(progName)}</span>
                             </span>
                         </td>
                         <td>${catTag}</td>
