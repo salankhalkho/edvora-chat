@@ -15,7 +15,7 @@
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
         <span id="programsActivePillCount">Catalog: 0 Programs</span>
       </div>
-      <button id="programsAddBtn" onclick="openAddProgramModal()" class="ckh-btn-ingest" title="Add Academic Program" style="background: #063D3B !important; color: #C8FF63 !important; border: none !important; border-radius: 8px !important; padding: 6px 14px !important; font-size: 11.5px !important; font-weight: 700 !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; gap: 6px !important;">
+      <button id="programsAddBtn" onclick="switchNavTab('add-programs')" class="ckh-btn-ingest" title="Add Academic Program" style="background: #063D3B !important; color: #C8FF63 !important; border: none !important; border-radius: 8px !important; padding: 6px 14px !important; font-size: 11.5px !important; font-weight: 700 !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; gap: 6px !important;">
         <span style="font-size: 14px; line-height: 1; font-weight: 800;">+</span>
         <span>Add Program / Course</span>
       </button>
@@ -162,126 +162,7 @@
   </div>
 </div>
 
-<!-- ========================================================================= -->
-<!-- MODAL: ADD / EDIT ACADEMIC PROGRAM -->
-<!-- ========================================================================= -->
-<div id="programModal" class="ckh-modal-overlay">
-  <div class="ckh-modal-card" style="max-width: 680px; max-height: 90vh; overflow-y: auto;">
-    <div class="ckh-modal-header">
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <span id="progModalIcon" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: #ECFDF5; color: #047857; font-weight: 800; font-size: 16px;">+</span>
-        <div>
-          <div class="ckh-modal-title" id="progModalTitle">Add Academic Program</div>
-          <div style="font-size: 11px; color: #648781; margin-top: 2px;" id="progModalSub">Configure curriculum, parent department, duration, and campus delivery</div>
-        </div>
-      </div>
-      <button type="button" class="ckh-modal-close" onclick="closeProgramModal()" title="Close">&times;</button>
-    </div>
 
-    <form onsubmit="event.preventDefault(); submitProgramModal();">
-      <input type="hidden" id="progFormId" value="" />
-      <div class="ckh-modal-body" style="padding: 20px 24px; display: flex; flex-direction: column; gap: 16px;">
-        
-        <!-- Row 1: Course Name & Code -->
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 14px;">
-          <div>
-            <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:#063D3B; margin-bottom:6px; letter-spacing: 0.04em;">Program / Degree Name *</label>
-            <input type="text" id="progFormName" class="brand-input" placeholder="e.g. B.S. in Computer Science" required style="height: 38px; border-radius: 8px; border: 1.5px solid #D1E5DE; padding: 0 12px; font-size: 12px; width: 100%; box-sizing: border-box;" />
-          </div>
-          <div>
-            <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:#063D3B; margin-bottom:6px; letter-spacing: 0.04em;">Program Code</label>
-            <input type="text" id="progFormCode" class="brand-input" placeholder="e.g. CS-BS-01" style="height: 38px; border-radius: 8px; border: 1.5px solid #D1E5DE; padding: 0 12px; font-size: 12px; width: 100%; box-sizing: border-box;" />
-          </div>
-        </div>
-
-        <!-- Row 2: Department Selection (Including Orphan Option) & Program Level -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
-          <div>
-            <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:#063D3B; margin-bottom:6px; letter-spacing: 0.04em;">Parent Department</label>
-            <select id="progFormDept" class="brand-input" style="height: 38px; border-radius: 8px; border: 1.5px solid #D1E5DE; padding: 0 12px; font-size: 12px; width: 100%; box-sizing: border-box; background-color: #FFFFFF; color: #063D3B; font-weight: 600;">
-              <option value="">(No Department &mdash; Orphan Course)</option>
-            </select>
-            <div style="font-size: 10.5px; color: #648781; margin-top: 4px;">Leave as No Department for institution-wide or unassigned courses.</div>
-          </div>
-          <div>
-            <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:#063D3B; margin-bottom:6px; letter-spacing: 0.04em;">Program Level *</label>
-            <select id="progFormType" class="brand-input" required style="height: 38px; border-radius: 8px; border: 1.5px solid #D1E5DE; padding: 0 12px; font-size: 12px; width: 100%; box-sizing: border-box; background-color: #FFFFFF; color: #063D3B; font-weight: 600;">
-              <option value="undergraduate">Undergraduate (Bachelor's / Associate)</option>
-              <option value="postgraduate">Postgraduate (Master's / MBA)</option>
-              <option value="doctoral">Doctoral (Ph.D. / Fellowship)</option>
-              <option value="executive">Executive Education</option>
-              <option value="certificate">Certificate / Diploma</option>
-              <option value="other">Other Academic Course</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Row 3: Duration, Delivery Mode, Admissions Status -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px;">
-          <div>
-            <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:#063D3B; margin-bottom:6px; letter-spacing: 0.04em;">Duration</label>
-            <input type="text" id="progFormDuration" class="brand-input" placeholder="e.g. 4 Years (8 Semesters)" style="height: 38px; border-radius: 8px; border: 1.5px solid #D1E5DE; padding: 0 12px; font-size: 12px; width: 100%; box-sizing: border-box;" />
-          </div>
-          <div>
-            <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:#063D3B; margin-bottom:6px; letter-spacing: 0.04em;">Delivery Mode</label>
-            <select id="progFormMode" class="brand-input" style="height: 38px; border-radius: 8px; border: 1.5px solid #D1E5DE; padding: 0 12px; font-size: 12px; width: 100%; box-sizing: border-box; background-color: #FFFFFF; color: #063D3B; font-weight: 600;">
-              <option value="full_time">Full Time (On-Campus)</option>
-              <option value="part_time">Part Time</option>
-              <option value="online">100% Online</option>
-              <option value="hybrid">Hybrid / Blended</option>
-              <option value="weekend">Weekend / Evening</option>
-            </select>
-          </div>
-          <div>
-            <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:#063D3B; margin-bottom:6px; letter-spacing: 0.04em;">Admissions Status</label>
-            <select id="progFormAdmissions" class="brand-input" style="height: 38px; border-radius: 8px; border: 1.5px solid #D1E5DE; padding: 0 12px; font-size: 12px; width: 100%; box-sizing: border-box; background-color: #FFFFFF; color: #063D3B; font-weight: 600;">
-              <option value="1">🟢 Admissions Open</option>
-              <option value="0">⚪ Admissions Closed</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Row 4: Campuses Checklist -->
-        <div>
-          <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:#063D3B; margin-bottom:6px; letter-spacing: 0.04em;">Available Campuses (Optional):</label>
-          <div id="progFormCampusesChecklist" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; background: #F4FAF7; border-radius: 10px; border: 1.5px solid #D1E5DE; min-height: 42px;">
-            <!-- Populated dynamically -->
-          </div>
-        </div>
-
-        <!-- Row 5: Tuition Fee & Application Deadline -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
-          <div>
-            <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:#063D3B; margin-bottom:6px; letter-spacing: 0.04em;">Total Tuition Fee</label>
-            <div style="display: flex; gap: 6px;">
-              <input type="text" id="progFormCurrency" class="brand-input" placeholder="USD" style="width: 70px; height: 38px; border-radius: 8px; border: 1.5px solid #D1E5DE; padding: 0 8px; font-size: 12px; text-transform: uppercase; font-weight: 700; text-align: center;" />
-              <input type="number" step="0.01" id="progFormTotalFee" class="brand-input" placeholder="e.g. 45000" style="flex: 1; height: 38px; border-radius: 8px; border: 1.5px solid #D1E5DE; padding: 0 12px; font-size: 12px;" />
-            </div>
-          </div>
-          <div>
-            <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:#063D3B; margin-bottom:6px; letter-spacing: 0.04em;">Application Deadline</label>
-            <input type="text" id="progFormDeadline" class="brand-input" placeholder="e.g. Fall Intake: August 15" style="height: 38px; border-radius: 8px; border: 1.5px solid #D1E5DE; padding: 0 12px; font-size: 12px; width: 100%; box-sizing: border-box;" />
-          </div>
-        </div>
-
-        <!-- Row 6: Application URL -->
-        <div>
-          <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:#063D3B; margin-bottom:6px; letter-spacing: 0.04em;">Application / Brochure URL (Optional)</label>
-          <input type="url" id="progFormUrl" class="brand-input" placeholder="https://university.edu/programs/cs-bs/apply" style="height: 38px; border-radius: 8px; border: 1.5px solid #D1E5DE; padding: 0 12px; font-size: 12px; width: 100%; box-sizing: border-box;" />
-        </div>
-
-      </div>
-
-      <div class="ckh-modal-footer" style="padding: 16px 24px; border-top: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
-        <button type="button" class="brand-btn-secondary" onclick="closeProgramModal()" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border-radius: 8px; cursor: pointer;">Cancel</button>
-        <button type="submit" id="progModalSaveBtn" class="ckh-btn-ingest" style="background: #063D3B !important; color: #C8FF63 !important; border: none !important; border-radius: 8px !important; padding: 8px 20px !important; font-size: 12px !important; font-weight: 700 !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; gap: 6px !important;">
-          <span style="font-size: 14px; font-weight: 800;">+</span>
-          <span id="progModalSaveBtnText">Save Program</span>
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
 
 <script>
 (function() {
@@ -371,30 +252,6 @@
       if (curVal) campusSelect.value = curVal;
     }
 
-    // Populate Modal Department Select
-    const modalDept = document.getElementById('progFormDept');
-    if (modalDept) {
-      let html = '<option value="">(No Department &mdash; Orphan Course)</option>';
-      d.departments.forEach(dept => {
-        html += `<option value="${dept.id}">${escapeHtml(dept.name)}</option>`;
-      });
-      modalDept.innerHTML = html;
-    }
-
-    // Populate Modal Campuses Checklist
-    const modalCampWrap = document.getElementById('progFormCampusesChecklist');
-    if (modalCampWrap) {
-      if (d.campuses.length === 0) {
-        modalCampWrap.innerHTML = '<span style="font-size:11.5px; color:#648781;">No active campus sites found.</span>';
-      } else {
-        modalCampWrap.innerHTML = d.campuses.map(cmp => `
-          <label style="display:inline-flex; align-items:center; gap:6px; background:#FFFFFF; border:1px solid #D1E5DE; border-radius:6px; padding:4px 10px; font-size:11.5px; font-weight:600; color:#063D3B; cursor:pointer;">
-            <input type="checkbox" name="prog_campus_ids" value="${cmp.id}" style="accent-color:#063D3B;" />
-            <span>${escapeHtml(cmp.name)}${cmp.is_primary ? ' <span style="font-size:10px; color:#047857; font-weight:700;">(Main)</span>' : ''}</span>
-          </label>
-        `).join('');
-      }
-    }
   }
 
   window.setProgramFilterType = function(type, el) {
@@ -562,7 +419,7 @@
           </td>
           <td style="text-align: right; vertical-align: middle;">
             <div style="display: inline-flex; align-items: center; gap: 6px;">
-              <button type="button" class="brand-btn-secondary" onclick="openEditProgramModal(${c.id})" title="Edit Program" style="padding: 4px 9px; font-size: 11.5px; font-weight: 600; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+              <button type="button" class="brand-btn-secondary" onclick="openEditProgram(${c.id})" title="Edit Program" style="padding: 4px 9px; font-size: 11.5px; font-weight: 600; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                 <span>Edit</span>
               </button>
@@ -576,150 +433,12 @@
     }).join('');
   }
 
-  window.openAddProgramModal = function() {
-    document.getElementById('progFormId').value = '';
-    document.getElementById('progModalTitle').textContent = 'Add Academic Program';
-    document.getElementById('progModalSub').textContent = 'Configure curriculum, parent department, duration, and campus delivery';
-    document.getElementById('progModalIcon').textContent = '+';
-    document.getElementById('progModalIcon').style.background = '#ECFDF5';
-    document.getElementById('progModalIcon').style.color = '#047857';
-    document.getElementById('progModalSaveBtnText').textContent = 'Add Program';
-
-    // Reset fields
-    document.getElementById('progFormName').value = '';
-    document.getElementById('progFormCode').value = '';
-    document.getElementById('progFormDept').value = '';
-    document.getElementById('progFormType').value = 'undergraduate';
-    document.getElementById('progFormDuration').value = '';
-    document.getElementById('progFormMode').value = 'full_time';
-    document.getElementById('progFormAdmissions').value = '1';
-    document.getElementById('progFormCurrency').value = 'INR';
-    document.getElementById('progFormTotalFee').value = '';
-    document.getElementById('progFormDeadline').value = '';
-    document.getElementById('progFormUrl').value = '';
-
-    // Uncheck campuses
-    document.querySelectorAll('input[name="prog_campus_ids"]').forEach(cb => cb.checked = false);
-
-    const modal = document.getElementById('programModal');
-    if (modal) modal.style.display = 'flex';
+  window.openEditProgram = function(courseId) {
+    window._currentEditProgramId = courseId;
+    sessionStorage.setItem('edvora_edit_program_id', courseId);
+    switchNavTab('edit-programs');
   };
-
-  window.openEditProgramModal = function(courseId) {
-    const d = window._academicProgramsData;
-    const c = d.courses.find(x => parseInt(x.id, 10) === parseInt(courseId, 10));
-    if (!c) return;
-
-    document.getElementById('progFormId').value = c.id;
-    document.getElementById('progModalTitle').textContent = 'Edit Academic Program';
-    document.getElementById('progModalSub').textContent = 'Update program metadata, department assignment, and campus delivery';
-    document.getElementById('progModalIcon').textContent = '✏️';
-    document.getElementById('progModalIcon').style.background = '#EFF6FF';
-    document.getElementById('progModalIcon').style.color = '#1D4ED8';
-    document.getElementById('progModalSaveBtnText').textContent = 'Save Changes';
-
-    document.getElementById('progFormName').value = c.course_name || '';
-    document.getElementById('progFormCode').value = c.course_code || '';
-    document.getElementById('progFormDept').value = c.department_id ? String(c.department_id) : '';
-    document.getElementById('progFormType').value = c.program_type || 'undergraduate';
-    document.getElementById('progFormDuration').value = c.duration || '';
-    document.getElementById('progFormMode').value = c.mode || 'full_time';
-    document.getElementById('progFormAdmissions').value = String(c.is_admissions_open ?? '1');
-    document.getElementById('progFormCurrency').value = c.currency || 'INR';
-    document.getElementById('progFormTotalFee').value = c.total_fee ? String(c.total_fee) : '';
-    document.getElementById('progFormDeadline').value = c.application_deadline || '';
-    document.getElementById('progFormUrl').value = c.application_url || '';
-
-    // Check mapped campuses
-    const activeCampIds = (c.campus_ids || []).map(Number);
-    document.querySelectorAll('input[name="prog_campus_ids"]').forEach(cb => {
-      cb.checked = activeCampIds.includes(Number(cb.value));
-    });
-
-    const modal = document.getElementById('programModal');
-    if (modal) modal.style.display = 'flex';
-  };
-
-  window.closeProgramModal = function() {
-    const modal = document.getElementById('programModal');
-    if (modal) modal.style.display = 'none';
-  };
-
-  window.submitProgramModal = async function() {
-    const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token');
-    if (!token) return;
-
-    const id = document.getElementById('progFormId').value;
-    const name = document.getElementById('progFormName').value.trim();
-    if (!name) {
-      alert('Please enter a program name.');
-      return;
-    }
-
-    const deptVal = document.getElementById('progFormDept').value;
-    const deptId = deptVal ? parseInt(deptVal, 10) : null;
-    const code = document.getElementById('progFormCode').value.trim();
-    const type = document.getElementById('progFormType').value;
-    const duration = document.getElementById('progFormDuration').value.trim();
-    const mode = document.getElementById('progFormMode').value;
-    const admissions = parseInt(document.getElementById('progFormAdmissions').value, 10);
-    const currency = document.getElementById('progFormCurrency').value.trim() || 'INR';
-    const totalFee = document.getElementById('progFormTotalFee').value.trim();
-    const deadline = document.getElementById('progFormDeadline').value.trim();
-    const url = document.getElementById('progFormUrl').value.trim();
-
-    const campusIds = [];
-    document.querySelectorAll('input[name="prog_campus_ids"]:checked').forEach(cb => {
-      campusIds.push(parseInt(cb.value, 10));
-    });
-
-    const payload = {
-      course_name: name,
-      department_id: deptId,
-      course_code: code,
-      program_type: type,
-      duration: duration,
-      mode: mode,
-      is_admissions_open: admissions,
-      currency: currency,
-      total_fee: totalFee !== '' ? parseFloat(totalFee) : null,
-      application_deadline: deadline,
-      application_url: url,
-      campus_ids: campusIds
-    };
-
-    const saveBtn = document.getElementById('progModalSaveBtn');
-    const origText = saveBtn.innerHTML;
-    saveBtn.disabled = true;
-    saveBtn.innerHTML = '<span>Saving...</span>';
-
-    try {
-      const urlEndpoint = id ? `/v1/programs/${id}` : '/v1/programs';
-      const method = id ? 'PUT' : 'POST';
-
-      const res = await fetch(urlEndpoint, {
-        method: method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify(payload)
-      });
-
-      const data = await res.json();
-      if (!res.ok || data.status !== 'success') {
-        throw new Error(data.message || 'Failed to save academic program');
-      }
-
-      closeProgramModal();
-      await window.loadAcademicProgramsTab();
-    } catch (err) {
-      alert('Error saving academic program: ' + err.message);
-    } finally {
-      saveBtn.disabled = false;
-      saveBtn.innerHTML = origText;
-    }
-  };
+  window.openEditProgramModal = window.openEditProgram;
 
   window.deleteProgramCourse = async function(courseId) {
     const d = window._academicProgramsData;

@@ -1,0 +1,333 @@
+<!-- Dedicated Add Academic Program Studio Frame (Unified Card matching Settings & Campus-Editor) -->
+<div id="view-add-programs" class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
+    
+    <!-- Top Control Bar (Inside the Unified Card) -->
+    <div class="ops-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 24px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important; flex-wrap: wrap; gap: 12px;">
+        <div class="ops-dash-title-group" style="display: flex !important; align-items: center !important; gap: 14px !important;">
+            <button type="button" class="brand-btn-secondary" style="height: 34px; padding: 0 12px; font-size: 11.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border-radius: 6px; background: #F4FAF7; border: 1.5px solid #D1E5DE; color: var(--e-teal, #063D3B);" onclick="switchNavTab('academic-programs')">
+                <span>&larr;</span> Back to Academic Programs
+            </button>
+            <div style="height: 24px; width: 1.5px; background: #E2E8F0;"></div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: #ECFDF5; font-size: 18px; font-weight: 800; color: #047857; border: 1px solid #A7F3D0;">🎓</span>
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important; letter-spacing: -0.01em !important; line-height: 1.25 !important;">
+                            Add Academic Program / Course
+                        </span>
+                        <span style="display: inline-flex !important; align-items: center !important; gap: 6px !important; padding: 3px 10px !important; border-radius: 9999px !important; font-size: 11px !important; font-weight: 700 !important; background: #ECFDF5; border: 1px solid #A7F3D0; color: #047857;">
+                            ● New Degree Record
+                        </span>
+                    </div>
+                    <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">
+                        Configure degree curriculum, parent department, duration, tuition fee, and campus delivery
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
+            <button type="button" class="brand-btn-secondary" style="height: 34px; padding: 0 14px; font-size: 11.5px; font-weight: 600; border-radius: 6px;" onclick="switchNavTab('academic-programs')">Cancel</button>
+            <button type="button" id="btnAddProgramTop" class="brand-btn-primary" style="height: 34px; padding: 0 18px; font-size: 11.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; border-radius: 6px; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.2);" onclick="document.getElementById('addProgramFormSubmitBtn').click()">
+                <span>+</span> Add Program
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Area: Left-aligned form bounded to max 900px -->
+    <div style="padding: 28px 32px 48px 32px; box-sizing: border-box; width: 100%;">
+        <div style="max-width: 900px; width: 100%; margin: 0; box-sizing: border-box;">
+            
+            <form id="addProgramForm" onsubmit="handleAddProgramSubmit(event)">
+
+                <!-- SECTION 1: Program Core Identity & Degree Details -->
+                <div style="margin-bottom: 28px;">
+                    <div style="font-size: 14px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                        <span>📜</span> Program Identity &amp; Curriculum Code
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px;">
+                        <div>
+                            <label for="add_prog_name" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Program / Degree Name <span style="color: #EF4444;">*</span>
+                            </label>
+                            <input type="text" id="add_prog_name" required placeholder="e.g. B.S. in Computer Science & Artificial Intelligence" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        </div>
+                        <div>
+                            <label for="add_prog_code" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Program Code
+                            </label>
+                            <input type="text" id="add_prog_code" placeholder="e.g. CS-BS-101" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div>
+                            <label for="add_prog_dept" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Parent Department
+                            </label>
+                            <select id="add_prog_dept" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF; color: #063D3B; font-weight: 600;">
+                                <option value="">(No Department &mdash; Orphan Course)</option>
+                            </select>
+                            <span style="font-size: 10.5px; color: #648781; margin-top: 4px; display: block;">Leave unassigned for institution-wide or independent courses.</span>
+                        </div>
+                        <div>
+                            <label for="add_prog_type" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Program Level <span style="color: #EF4444;">*</span>
+                            </label>
+                            <select id="add_prog_type" required class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF; color: #063D3B; font-weight: 600;">
+                                <option value="undergraduate">Undergraduate (Bachelor's / Associate)</option>
+                                <option value="postgraduate">Postgraduate (Master's / MBA)</option>
+                                <option value="doctoral">Doctoral (Ph.D. / Fellowship)</option>
+                                <option value="executive">Executive Education</option>
+                                <option value="certificate">Certificate / Diploma</option>
+                                <option value="other">Other Academic Course</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 2: Academic Delivery, Duration & Admissions Status -->
+                <div style="margin-bottom: 28px;">
+                    <div style="font-size: 14px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                        <span>⏱️</span> Delivery Mode &amp; Admissions Timing
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                        <div>
+                            <label for="add_prog_duration" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Duration
+                            </label>
+                            <input type="text" id="add_prog_duration" placeholder="e.g. 4 Years (8 Semesters)" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        </div>
+                        <div>
+                            <label for="add_prog_mode" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Delivery Mode
+                            </label>
+                            <select id="add_prog_mode" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF; color: #063D3B; font-weight: 600;">
+                                <option value="full_time">Full Time (On-Campus)</option>
+                                <option value="part_time">Part Time</option>
+                                <option value="online">100% Online</option>
+                                <option value="hybrid">Hybrid / Blended</option>
+                                <option value="weekend">Weekend / Evening</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="add_prog_admissions" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Admissions Status
+                            </label>
+                            <select id="add_prog_admissions" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF; color: #063D3B; font-weight: 600;">
+                                <option value="1">🟢 Admissions Open</option>
+                                <option value="0">⚪ Admissions Closed</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div>
+                            <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Total Tuition Fee
+                            </label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="add_prog_currency" value="INR" placeholder="INR" class="brand-input" style="width: 80px; height: 38px; font-size: 12px; font-weight: 700; text-transform: uppercase; text-align: center; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 6px;" />
+                                <input type="number" step="0.01" id="add_prog_fee" placeholder="e.g. 52000" class="brand-input" style="flex: 1; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                            </div>
+                        </div>
+                        <div>
+                            <label for="add_prog_deadline" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Application Deadline
+                            </label>
+                            <input type="text" id="add_prog_deadline" placeholder="e.g. Fall Intake: August 15, 2026" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 3: Online Link & Brochure URL -->
+                <div style="margin-bottom: 28px;">
+                    <div style="font-size: 14px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                        <span>🔗</span> Application &amp; Curriculum URL
+                    </div>
+                    <div>
+                        <label for="add_prog_url" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                            Official Program or Application URL (Optional)
+                        </label>
+                        <input type="url" id="add_prog_url" placeholder="https://university.edu/admissions/degrees/cs" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        <span style="font-size: 10.5px; color: #648781; margin-top: 4px; display: block;">When students inquire in the chatbot, direct links to this brochure/application page will be recommended.</span>
+                    </div>
+                </div>
+
+                <!-- SECTION 4: Campus Delivery Locations -->
+                <div style="margin-bottom: 32px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <div style="font-size: 14px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px;">
+                            <span>🏫</span> Campus Delivery Sites
+                        </div>
+                    </div>
+                    <p style="font-size: 11.5px; color: #648781; margin: 0 0 12px 0;">
+                        Select which physical or regional campuses offer this degree program. If unselected, it will be marked as all campuses / unrestricted.
+                    </p>
+
+                    <div id="addProgCampusesChecklist" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 14px; background: #F8FCFA; border: 1.5px solid #E6F0EC; border-radius: 8px; min-height: 48px;">
+                        <span style="font-size: 11.5px; color: #648781;">Loading campus sites...</span>
+                    </div>
+                </div>
+
+                <!-- Bottom Form Submit Bar -->
+                <div style="padding-top: 20px; border-top: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: flex-end; gap: 12px;">
+                    <button type="button" onclick="switchNavTab('academic-programs')" class="brand-btn-secondary" style="height: 38px; padding: 0 18px; font-size: 12px; font-weight: 700; border-radius: 6px;">
+                        Cancel
+                    </button>
+                    <button type="submit" id="addProgramFormSubmitBtn" class="brand-btn-primary" style="height: 38px; padding: 0 24px; font-size: 12px; font-weight: 700; border-radius: 6px; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.25);">
+                        + Add Program
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    window.initAddProgramsPage = async function() {
+        const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token');
+        if (!token) return;
+
+        // Reset inputs
+        const form = document.getElementById('addProgramForm');
+        if (form) form.reset();
+
+        const deptSelect = document.getElementById('add_prog_dept');
+        const campusList = document.getElementById('addProgCampusesChecklist');
+
+        try {
+            const res = await fetch('/v1/programs', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (!res.ok) throw new Error('Failed to load metadata (status ' + res.status + ')');
+            const data = await res.json();
+            if (data.status !== 'success') throw new Error(data.message || 'API error');
+
+            const depts = data.data.departments || [];
+            const campuses = data.data.campuses || [];
+
+            // Populate departments
+            if (deptSelect) {
+                let html = '<option value="">(No Department &mdash; Orphan Course)</option>';
+                depts.forEach(d => {
+                    html += `<option value="${d.id}">${escapeHtml(d.name)}</option>`;
+                });
+                deptSelect.innerHTML = html;
+            }
+
+            // Populate campuses
+            if (campusList) {
+                if (campuses.length === 0) {
+                    campusList.innerHTML = '<span style="font-size: 11.5px; color: #648781;">No active campus sites found.</span>';
+                } else {
+                    campusList.innerHTML = campuses.map(cmp => `
+                        <label style="display:inline-flex; align-items:center; gap:6px; background:#FFFFFF; border:1px solid #D1E5DE; border-radius:6px; padding:6px 12px; font-size:11.5px; font-weight:600; color:#063D3B; cursor:pointer;">
+                            <input type="checkbox" name="add_prog_campus_ids" value="${cmp.id}" style="accent-color:#063D3B;" />
+                            <span>${escapeHtml(cmp.name)}${cmp.is_primary ? ' <span style="font-size:10px; color:#047857; font-weight:700;">(Main)</span>' : ''}</span>
+                        </label>
+                    `).join('');
+                }
+            }
+        } catch (err) {
+            console.error('[AddPrograms] Failed to init metadata:', err);
+            if (campusList) {
+                campusList.innerHTML = `<span style="font-size:11.5px; color:#DC2626;">Error loading campuses: ${escapeHtml(err.message)}</span>`;
+            }
+        }
+    };
+
+    window.handleAddProgramSubmit = async function(e) {
+        if (e) e.preventDefault();
+        const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token');
+        if (!token) return;
+
+        const name = document.getElementById('add_prog_name')?.value.trim();
+        if (!name) {
+            alert('Please enter a program name.');
+            return;
+        }
+
+        const deptVal = document.getElementById('add_prog_dept')?.value;
+        const deptId = deptVal ? parseInt(deptVal, 10) : null;
+        const code = document.getElementById('add_prog_code')?.value.trim();
+        const type = document.getElementById('add_prog_type')?.value || 'undergraduate';
+        const duration = document.getElementById('add_prog_duration')?.value.trim();
+        const mode = document.getElementById('add_prog_mode')?.value || 'full_time';
+        const admissions = parseInt(document.getElementById('add_prog_admissions')?.value || '1', 10);
+        const currency = document.getElementById('add_prog_currency')?.value.trim() || 'INR';
+        const totalFee = document.getElementById('add_prog_fee')?.value.trim();
+        const deadline = document.getElementById('add_prog_deadline')?.value.trim();
+        const url = document.getElementById('add_prog_url')?.value.trim();
+
+        const campusIds = [];
+        document.querySelectorAll('input[name="add_prog_campus_ids"]:checked').forEach(cb => {
+            campusIds.push(parseInt(cb.value, 10));
+        });
+
+        const payload = {
+            course_name: name,
+            department_id: deptId,
+            course_code: code,
+            program_type: type,
+            duration: duration,
+            mode: mode,
+            is_admissions_open: admissions,
+            currency: currency,
+            total_fee: totalFee !== '' ? parseFloat(totalFee) : null,
+            application_deadline: deadline,
+            application_url: url,
+            campus_ids: campusIds
+        };
+
+        const submitBtn = document.getElementById('addProgramFormSubmitBtn');
+        const topBtn = document.getElementById('btnAddProgramTop');
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.innerText = 'Creating Program...'; }
+        if (topBtn) { topBtn.disabled = true; }
+
+        try {
+            const res = await fetch('/v1/programs', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+            if (!res.ok || data.status !== 'success') {
+                throw new Error(data.message || 'Failed to create academic program');
+            }
+
+            if (typeof showToast === 'function') {
+                showToast(`Program "${name}" successfully registered.`, 'success');
+            }
+            await switchNavTab('academic-programs');
+        } catch (err) {
+            alert('Error creating program: ' + err.message);
+        } finally {
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.innerText = '+ Add Program'; }
+            if (topBtn) { topBtn.disabled = false; }
+        }
+    };
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    if (typeof window.initAddProgramsPage === 'function') {
+        window.initAddProgramsPage();
+    }
+})();
+</script>
