@@ -5705,6 +5705,35 @@
             showToast('Document expiration cleared — set to Evergreen policy.', 'info');
         }
 
+        // Knowledge Ingestion Academic Programs Loader
+        async function loadIngestPrograms() {
+            const selects = document.querySelectorAll('.ingest-program-select');
+            if (!selects.length) return;
+
+            try {
+                const res = await fetch('/v1/programs', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                const programs = (data.status === 'success' && data.data) ? (data.data.courses || (Array.isArray(data.data) ? data.data : [])) : [];
+
+                let html = '<option value="">🌐 All Academic Programs / General Institutional Scope</option>';
+                programs.forEach(p => {
+                    const code = p.course_code ? ` [${escapeHtml(p.course_code)}]` : '';
+                    html += `<option value="${p.id}">${escapeHtml(p.course_name)}${code}</option>`;
+                });
+
+                selects.forEach(select => {
+                    const currVal = select.value;
+                    select.innerHTML = html;
+                    if (currVal) select.value = currVal;
+                });
+            } catch(e) {
+                console.error('[Edvora] Error loading programs for ingestion:', e);
+            }
+        }
+        window.loadIngestPrograms = loadIngestPrograms;
+
         // Knowledge Ingestion Department Scope Loader
         async function loadIngestDepartments() {
             const containers = document.querySelectorAll('.ingest-dept-pill-container');
@@ -5795,6 +5824,8 @@
             const review_freq = parseInt(document.getElementById('ingestFileReviewFreq').value) || 180;
             const deptRadio = document.querySelector('input[name="ingest_file_dept"]:checked');
             const department_id = deptRadio ? deptRadio.value.trim() : '';
+            const programSelect = document.getElementById('ingestFileProgramId');
+            const program_id = programSelect ? programSelect.value.trim() : '';
             const fileInput = document.getElementById('ingestFileInput');
 
             if (!fileInput.files || fileInput.files.length === 0) {
@@ -5811,6 +5842,7 @@
             if (effective_from) formData.append('effective_from', effective_from);
             if (expires_on) formData.append('expires_on', expires_on);
             if (department_id) formData.append('department_id', department_id);
+            if (program_id) formData.append('program_id', program_id);
 
             const origText = btn.innerHTML;
             btn.innerHTML = '<span>Indexing...</span>';
@@ -5860,6 +5892,8 @@
             const review_freq = parseInt(document.getElementById('ingestUrlReviewFreq').value) || 180;
             const deptRadio = document.querySelector('input[name="ingest_url_dept"]:checked');
             const department_id = deptRadio ? deptRadio.value.trim() : '';
+            const programSelect = document.getElementById('ingestUrlProgramId');
+            const program_id = programSelect ? programSelect.value.trim() : '';
 
             const origText = btn.innerHTML;
             btn.innerHTML = '<span>Crawling...</span>';
@@ -5875,6 +5909,7 @@
             if (effective_from) payload.effective_from = effective_from;
             if (expires_on) payload.expires_on = expires_on;
             if (department_id) payload.department_id = department_id;
+            if (program_id) payload.program_id = program_id;
 
             try {
                 const res = await fetch('/v1/knowledge/crawl', {
@@ -5919,6 +5954,8 @@
             const review_freq = parseInt(document.getElementById('ingestTextReviewFreq').value) || 180;
             const deptRadio = document.querySelector('input[name="ingest_text_dept"]:checked');
             const department_id = deptRadio ? deptRadio.value.trim() : '';
+            const programSelect = document.getElementById('ingestTextProgramId');
+            const program_id = programSelect ? programSelect.value.trim() : '';
             const content = document.getElementById('ingestTextContent').value.trim();
 
             const origText = btn.innerHTML;
@@ -5935,6 +5972,7 @@
             if (effective_from) payload.effective_from = effective_from;
             if (expires_on) payload.expires_on = expires_on;
             if (department_id) payload.department_id = department_id;
+            if (program_id) payload.program_id = program_id;
 
             try {
                 const res = await fetch('/v1/knowledge/text', {
@@ -6030,6 +6068,7 @@
                 } else if (tab === 'teams') {
                     if (typeof closeAddStaffModal === 'function') closeAddStaffModal();
                 } else if (tab === 'knowledge-ingestion') {
+                    if (typeof loadIngestPrograms === 'function') loadIngestPrograms();
                     if (typeof loadIngestDepartments === 'function') loadIngestDepartments();
                 } else if (tab === 'profile') {
                     if (typeof loadProfileData === 'function') loadProfileData();

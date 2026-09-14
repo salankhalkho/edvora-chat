@@ -443,21 +443,24 @@ class KnowledgeController
         $expiresOn = !empty($data['expires_on']) ? $data['expires_on'] : null;
         $reviewFreq = !empty($data['review_frequency_days']) ? (int)$data['review_frequency_days'] : 180;
 
+        $programId = !empty($data['program_id']) ? (int)$data['program_id'] : null;
+
         $rawContent = DocumentParser::sanitizeText($data['content']);
         $compacted = ContentCompactor::process($rawContent, $title);
 
         $db = Database::getConnection();
         $stmt = $db->prepare("
-            INSERT INTO knowledge_sources (organization_id, chatbot_id, type, title, category, academic_version,
+            INSERT INTO knowledge_sources (organization_id, chatbot_id, program_id, type, title, category, academic_version,
                                            effective_from, expires_on, last_reviewed_at, review_frequency_days,
                                            raw_content, processed_content, keywords, status, created_at, updated_at)
-            VALUES (:org_id, :bot_id, 'text_paste', :title, :category, :academic_version,
+            VALUES (:org_id, :bot_id, :program_id, 'text_paste', :title, :category, :academic_version,
                     :effective_from, :expires_on, NOW(), :review_freq,
                     :raw_content, :processed_content, :keywords, 'active', NOW(), NOW())
         ");
         $stmt->execute([
             ':org_id' => $orgId,
             ':bot_id' => $data['chatbot_id'] ?? null,
+            ':program_id' => $programId,
             ':title' => $title,
             ':category' => $category,
             ':academic_version' => $academicVersion,
@@ -517,6 +520,8 @@ class KnowledgeController
         $expiresOn = !empty($request->get('expires_on')) ? $request->get('expires_on') : null;
         $reviewFreq = !empty($request->get('review_frequency_days')) ? (int)$request->get('review_frequency_days') : 180;
 
+        $programId = !empty($request->get('program_id')) ? (int)$request->get('program_id') : null;
+
         try {
             $scraped = UrlScraper::scrape($url);
             $title = !empty($request->get('title')) ? trim($request->get('title')) : $scraped['title'];
@@ -524,16 +529,17 @@ class KnowledgeController
 
             $db = Database::getConnection();
             $stmt = $db->prepare("
-                INSERT INTO knowledge_sources (organization_id, chatbot_id, type, title, category, academic_version,
+                INSERT INTO knowledge_sources (organization_id, chatbot_id, program_id, type, title, category, academic_version,
                                                effective_from, expires_on, last_reviewed_at, review_frequency_days,
                                                source_url, raw_content, processed_content, keywords, content_hash, status, last_fetched_at, created_at, updated_at)
-                VALUES (:org_id, :bot_id, 'url', :title, :category, :academic_version,
+                VALUES (:org_id, :bot_id, :program_id, 'url', :title, :category, :academic_version,
                         :effective_from, :expires_on, NOW(), :review_freq,
                         :url, :raw_content, :processed_content, :keywords, :hash, 'active', NOW(), NOW(), NOW())
             ");
             $stmt->execute([
                 ':org_id' => $orgId,
                 ':bot_id' => !empty($request->get('chatbot_id')) ? (int)$request->get('chatbot_id') : null,
+                ':program_id' => $programId,
                 ':title' => $title,
                 ':category' => $category,
                 ':academic_version' => $academicVersion,
@@ -617,6 +623,8 @@ class KnowledgeController
         $expiresOn = !empty($request->get('expires_on')) ? $request->get('expires_on') : null;
         $reviewFreq = !empty($request->get('review_frequency_days')) ? (int)$request->get('review_frequency_days') : 180;
 
+        $programId = !empty($request->get('program_id')) ? (int)$request->get('program_id') : (!empty($_POST['program_id']) ? (int)$_POST['program_id'] : null);
+
         try {
             $rawContent = DocumentParser::parse($targetPath, $originalFilename);
             $title = !empty($request->get('title')) ? trim($request->get('title')) : pathinfo($originalFilename, PATHINFO_FILENAME);
@@ -624,16 +632,17 @@ class KnowledgeController
 
             $db = Database::getConnection();
             $stmt = $db->prepare("
-                INSERT INTO knowledge_sources (organization_id, chatbot_id, type, title, category, academic_version,
+                INSERT INTO knowledge_sources (organization_id, chatbot_id, program_id, type, title, category, academic_version,
                                                effective_from, expires_on, last_reviewed_at, review_frequency_days,
                                                raw_content, processed_content, keywords, file_path, status, created_at, updated_at)
-                VALUES (:org_id, :bot_id, 'document', :title, :category, :academic_version,
+                VALUES (:org_id, :bot_id, :program_id, 'document', :title, :category, :academic_version,
                         :effective_from, :expires_on, NOW(), :review_freq,
                         :raw_content, :processed_content, :keywords, :file_path, 'active', NOW(), NOW())
             ");
             $stmt->execute([
                 ':org_id' => $orgId,
                 ':bot_id' => !empty($request->get('chatbot_id')) ? (int)$request->get('chatbot_id') : null,
+                ':program_id' => $programId,
                 ':title' => $title,
                 ':category' => $category,
                 ':academic_version' => $academicVersion,
