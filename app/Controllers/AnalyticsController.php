@@ -76,7 +76,7 @@ class AnalyticsController
         $stmtDeptPreview->execute([':org_id' => $orgId]);
         $departmentPreview = $stmtDeptPreview->fetchAll() ?: [];
 
-        // 5b. Department Courses Breakdown & Counts
+        // 5b. Academic Programs Breakdown & Counts from `programs` table
         $totalCourses = 0;
         $openCourses = 0;
         $courseBreakdown = ['undergraduate' => 0, 'postgraduate' => 0, 'doctoral' => 0, 'other' => 0];
@@ -84,16 +84,15 @@ class AnalyticsController
             $stmtCourses = $db->prepare("
                 SELECT 
                     COUNT(*) as total,
-                    SUM(CASE WHEN dc.is_admissions_open = 1 THEN 1 ELSE 0 END) as open_count,
-                    SUM(CASE WHEN dc.program_type = 'undergraduate' THEN 1 ELSE 0 END) as ug_count,
-                    SUM(CASE WHEN dc.program_type = 'postgraduate' THEN 1 ELSE 0 END) as pg_count,
-                    SUM(CASE WHEN dc.program_type = 'doctoral' THEN 1 ELSE 0 END) as doc_count,
-                    SUM(CASE WHEN dc.program_type NOT IN ('undergraduate', 'postgraduate', 'doctoral') THEN 1 ELSE 0 END) as other_count
-                FROM department_courses dc
-                LEFT JOIN departments d ON dc.department_id = d.id
-                WHERE dc.organization_id = :org_id1 OR d.organization_id = :org_id2
+                    SUM(CASE WHEN is_admissions_open = 1 THEN 1 ELSE 0 END) as open_count,
+                    SUM(CASE WHEN program_type = 'undergraduate' THEN 1 ELSE 0 END) as ug_count,
+                    SUM(CASE WHEN program_type = 'postgraduate' THEN 1 ELSE 0 END) as pg_count,
+                    SUM(CASE WHEN program_type = 'doctoral' THEN 1 ELSE 0 END) as doc_count,
+                    SUM(CASE WHEN program_type NOT IN ('undergraduate', 'postgraduate', 'doctoral') THEN 1 ELSE 0 END) as other_count
+                FROM programs
+                WHERE organization_id = :org_id
             ");
-            $stmtCourses->execute([':org_id1' => $orgId, ':org_id2' => $orgId]);
+            $stmtCourses->execute([':org_id' => $orgId]);
             $cData = $stmtCourses->fetch();
             if ($cData) {
                 $totalCourses = (int)($cData['total'] ?? 0);
@@ -106,7 +105,7 @@ class AnalyticsController
                 ];
             }
         } catch (\Throwable $e) {
-            error_log('Analytics courses query error: ' . $e->getMessage());
+            error_log('Analytics programs query error: ' . $e->getMessage());
         }
 
         // 5c. Campuses Breakdown & Primary Campus Info

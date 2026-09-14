@@ -9087,8 +9087,8 @@ echo $response['reply'];
                         elDeptChips.innerHTML = chipsHtml;
                     }
 
-                    // 2. Courses Card
-                    const courseTotal = coursesData.total !== undefined ? coursesData.total : 43;
+                    // 2. Academic Programs Card
+                    const courseTotal = coursesData.total !== undefined ? coursesData.total : 0;
                     const elCourseCount = document.getElementById('statCoursesCount');
                     if (elCourseCount) elCourseCount.innerText = courseTotal;
 
@@ -9099,7 +9099,7 @@ echo $response['reply'];
                         elCoursesOpenPct.innerText = `${pct}% Enrolling`;
                     }
 
-                    const cBreak = coursesData.breakdown || { undergraduate: 15, postgraduate: 20, doctoral: 5, other: 3 };
+                    const cBreak = coursesData.breakdown || { undergraduate: 0, postgraduate: 0, doctoral: 0, other: 0 };
                     const ug = cBreak.undergraduate || 0;
                     const pg = cBreak.postgraduate || 0;
                     const doc = cBreak.doctoral || 0;
