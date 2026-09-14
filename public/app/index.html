@@ -15556,10 +15556,33 @@ echo $response['reply'];
             if (contentTextarea) contentTextarea.value = raw;
 
             // Word Count
+            const words = raw.trim() ? raw.trim().split(/\s+/).length : 0;
             const wcBadge = document.getElementById('docEditorWordCountBadge');
-            if (wcBadge) {
-                const words = raw.trim() ? raw.trim().split(/\s+/).length : 0;
-                wcBadge.textContent = words.toLocaleString() + ' words';
+            if (wcBadge) wcBadge.textContent = words.toLocaleString() + ' words';
+            const wcBadge2 = document.getElementById('docEditorWordCountBadge2');
+            if (wcBadge2) wcBadge2.textContent = words.toLocaleString() + ' words';
+
+            // Document Content Preview Pre-element
+            const contentDisplay = document.getElementById('docEditorContentDisplay');
+            if (contentDisplay) {
+                contentDisplay.innerText = raw.trim() ? raw : '(No extracted text available for this knowledge item)';
+            }
+
+            // File Row Display & Download Button
+            const fileRowDisplay = document.getElementById('docEditorFileRowDisplay');
+            const fileNameDisplay = document.getElementById('docEditorFileNameDisplay');
+            const topDownloadBtn = document.getElementById('btnDocEditorDownload');
+            if (doc.file_path) {
+                const fname = doc.file_path.split('/').pop();
+                if (fileRowDisplay) fileRowDisplay.style.display = 'flex';
+                if (fileNameDisplay) fileNameDisplay.textContent = fname || (doc.title + ' (Attachment)');
+                if (topDownloadBtn) topDownloadBtn.style.display = 'inline-flex';
+            } else {
+                if (fileRowDisplay) fileRowDisplay.style.display = 'none';
+                if (topDownloadBtn) {
+                    // Even without file_path, document or text paste can be downloaded as .txt
+                    topDownloadBtn.style.display = raw.trim() ? 'inline-flex' : 'none';
+                }
             }
 
             // URL handling
@@ -15567,14 +15590,23 @@ echo $response['reply'];
             const btnResync = document.getElementById('btnResyncUrl');
             const urlInput = document.getElementById('edit_doc_source_url');
             const openUrlBtn = document.getElementById('btnDocEditorOpenUrl');
+            const urlRowDisplay = document.getElementById('docEditorUrlRowDisplay');
+            const openUrlDisplay = document.getElementById('btnDocEditorOpenUrlDisplay');
+
             if (doc.type === 'url') {
                 if (urlRow) urlRow.style.display = 'block';
                 if (btnResync) btnResync.style.display = 'inline-flex';
                 if (urlInput) urlInput.value = doc.source_url || '';
                 if (openUrlBtn) openUrlBtn.href = doc.source_url || '#';
+                if (urlRowDisplay) urlRowDisplay.style.display = 'block';
+                if (openUrlDisplay) {
+                    openUrlDisplay.href = doc.source_url || '#';
+                    openUrlDisplay.textContent = doc.source_url || '—';
+                }
             } else {
                 if (urlRow) urlRow.style.display = 'none';
                 if (btnResync) btnResync.style.display = 'none';
+                if (urlRowDisplay) urlRowDisplay.style.display = 'none';
             }
 
             // Archive button state
@@ -15819,6 +15851,47 @@ echo $response['reply'];
         function docEditorTriggerReplace() {
             if (!currentEditingDoc) return;
             openReplaceKnowledgeModal(currentEditingDoc.id);
+        }
+
+        function docEditorDownloadOriginal() {
+            if (!currentEditingDoc) return;
+            const docId = currentEditingDoc.id;
+            // Secure download using token
+            const url = `/v1/knowledge/${docId}/download?token=${encodeURIComponent(token)}`;
+            const link = document.createElement('a');
+            link.href = url;
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function docEditorToggleContentCard() {
+            const card = document.getElementById('docEditorContentCard');
+            const textEl = document.getElementById('btnDocEditorToggleContentText');
+            if (!card) return;
+            if (card.style.display === 'none') {
+                card.style.display = 'block';
+                if (textEl) textEl.textContent = 'Hide Content';
+                card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function docEditorCopyContent() {
+            const contentDisplay = document.getElementById('docEditorContentDisplay');
+            if (!contentDisplay) return;
+            const text = contentDisplay.innerText || '';
+            if (!text || text.startsWith('(No extracted text')) {
+                showToast('No content available to copy', 'warning');
+                return;
+            }
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('✓ Document content copied to clipboard!', 'success');
+            }).catch(() => {
+                showToast('Failed to copy to clipboard', 'error');
+            });
         }
 
         async function addMainKnowledgeText(e) {

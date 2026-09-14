@@ -1039,4 +1039,65 @@ class KnowledgeController
             'sources' => $selectedContext
         ]);
     }
+
+    /**
+     * GET /v1/knowledge/{id}/download — Securely download the document file or text content
+     */
+    public function download(Request $request, array $params = []): void
+    {
+        $orgId = $GLOBALS['organization_id'] ?? null;
+        $id = (int)($params['id'] ?? 0);
+
+        $db = Database::getConnection();
+        $stmt = $db->prepare("SELECT id, title, type, file_path, raw_content, source_url FROM knowledge_sources WHERE id = :id AND organization_id = :org_id");
+        $stmt->execute([':id' => $id, ':org_id' => $orgId]);
+        $doc = $stmt->fetch();
+
+        if (!$doc) {
+            http_response_code(404);
+            echo "Document not found.";
+            exit;
+        }
+
+        // If physical file exists on disk
+        if (!empty($doc['file_path'])) {
+            $absPath = dirname(__DIR__, 2) . '/' . ltrim($doc['file_path'], '/');
+            if (file_exists($absPath) && is_file($absPath)) {
+                $ext = strtolower(pathinfo($absPath, PATHINFO_EXTENSION));
+                $mimeTypes = [
+                    'pdf' => 'application/pdf',
+                    'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'doc' => 'application/msword',
+                    'txt' => 'text/plain; charset=utf-8'
+                ];
+                $mimeType = $mimeTypes[$ext] ?? 'application/octet-stream';
+                $safeFilename = preg_replace('/[^a-zA-Z0-9_\-\.]/', '_', $doc['title']) . '.' . $ext;
+
+                header('Content-Description: File Transfer');
+                header('Content-Type: ' . $mimeType);
+                header('Content-Disposition: attachment; filename="' . addslashes($safeFilename) . '"');
+                header('Expires: 0');
+                header('Cache-Control: must-revalidate');
+                header('Pragma: public');
+                header('Content-Length: ' . filesize($absPath));
+                readfile($absPath);
+                exit;
+            }
+        }
+
+        // If URL type and has source_url, redirect to source_url if requested or serve text
+        $content = !empty($doc['raw_content']) ? $doc['raw_content'] : "Document title: " . $doc['title'] . "\nSource: " . ($doc['source_url'] ?? 'N/A');
+        $safeFilename = preg_replace('/[^a-zA-Z0-9_\-\.]/', '_', $doc['title']) . '.txt';
+
+        header('Content-Description: File Transfer');
+        header('Content-Type: text/plain; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . addslashes($safeFilename) . '"');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        header('Content-Length: ' . strlen($content));
+        echo $content;
+        exit;
+    }
 }
+

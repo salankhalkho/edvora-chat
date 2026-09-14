@@ -28,6 +28,12 @@
         </div>
 
         <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
+            <button type="button" id="btnDocEditorDownload" onclick="docEditorDownloadOriginal()" class="brand-btn-secondary" style="height: 36px; padding: 0 14px; font-size: 12px; font-weight: 700; color: #063D3B; border-color: #063D3B; background: #FFFFFF; display: inline-flex; align-items: center; gap: 6px;">
+                <span>📥</span> Download File
+            </button>
+            <button type="button" id="btnDocEditorToggleContent" onclick="docEditorToggleContentCard()" class="brand-btn-secondary" style="height: 36px; padding: 0 14px; font-size: 12px; font-weight: 700; color: #063D3B; border-color: #CFE6BA; background: #F0FDF4; display: inline-flex; align-items: center; gap: 6px;">
+                <span>👁️</span> <span id="btnDocEditorToggleContentText">View Content</span>
+            </button>
             <button type="button" class="brand-btn-secondary" style="height: 36px; padding: 0 16px; font-size: 12px; font-weight: 600;" onclick="closeKnowledgeEditor()">Cancel</button>
             <button type="button" id="btnSaveDocTop" class="brand-btn-primary" style="height: 36px; padding: 0 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;" onclick="document.getElementById('docEditorFormSubmitBtn').click()">
                 <span>💾</span> Save Changes
@@ -196,6 +202,57 @@
 
                     <!-- Compacted Content (preserved for background form submission, hidden from user) -->
                     <input type="hidden" id="edit_doc_raw_content" name="raw_content" />
+                </div>
+
+                <!-- SECTION: Extracted Document Content & Inspection Viewer -->
+                <div id="docEditorContentCard" style="background: #FFFFFF; border: 1.5px solid #CFE6BA; border-radius: 8px; padding: 22px 24px; margin-bottom: 24px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+                        <div style="font-size: 13.5px; font-weight: 800; color: #092F2E; display: flex; align-items: center; gap: 8px;">
+                            <span>📄</span> Document Policy Content &amp; Extraction
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span id="docEditorWordCountBadge2" class="badge" style="font-size: 11px; font-weight: 600; padding: 3px 8px; background: #F1F5F9; color: #475569; border: 1px solid #CBD5E1;">
+                                0 words
+                            </span>
+                            <button type="button" onclick="docEditorCopyContent()" class="brand-btn-secondary" style="height: 28px; padding: 0 10px; font-size: 11px; font-weight: 700; background: #FFFFFF;">
+                                📋 Copy Text
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- URL Quick Link (if type === 'url') -->
+                    <div id="docEditorUrlRowDisplay" style="display: none; margin-bottom: 14px; padding: 10px 14px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px;">
+                        <div style="font-size: 11px; font-weight: 700; color: #4F7470; margin-bottom: 4px; text-transform: uppercase;">Source Web Page</div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                            <a id="btnDocEditorOpenUrlDisplay" href="#" target="_blank" style="font-size: 12.5px; color: #0284C7; text-decoration: underline; word-break: break-all;">—</a>
+                            <span style="font-size: 11px; color: #64748B; white-space: nowrap;">Live Link ↗</span>
+                        </div>
+                    </div>
+
+                    <!-- File Download Bar (if document file attached) -->
+                    <div id="docEditorFileRowDisplay" style="display: none; margin-bottom: 14px; padding: 12px 16px; background: #F0FDF4; border: 1.5px solid #86EFAC; border-radius: 6px; align-items: center; justify-content: space-between; gap: 12px;">
+                        <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+                            <span style="font-size: 20px;">📎</span>
+                            <div style="min-width: 0;">
+                                <div id="docEditorFileNameDisplay" style="font-size: 12.5px; font-weight: 700; color: #14532D; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">Original File</div>
+                                <div style="font-size: 11px; color: #166534;">Uploaded original document available for download.</div>
+                            </div>
+                        </div>
+                        <button type="button" onclick="docEditorDownloadOriginal()" class="brand-btn-primary" style="height: 32px; padding: 0 14px; font-size: 11.5px; font-weight: 700; flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px;">
+                            <span>📥</span> Download
+                        </button>
+                    </div>
+
+                    <!-- Content Text Preview -->
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470;">
+                                Extracted Text / Policy Knowledge
+                            </label>
+                            <span style="font-size: 10.5px; color: #648781;">Full textual content used by AI retrieval engine</span>
+                        </div>
+                        <pre id="docEditorContentDisplay" style="width: 100%; box-sizing: border-box; font-family: var(--brand-font-mono, monospace); font-size: 12px; line-height: 1.6; padding: 14px; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 6px; white-space: pre-wrap; word-break: break-word; max-height: 420px; overflow-y: auto; color: #1E293B; margin: 0;"></pre>
+                    </div>
                 </div>
 
                 <!-- SECTION 4: Version Lineage & Revision Replacement (Supersede) -->

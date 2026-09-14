@@ -261,6 +261,7 @@ $router->post('/v1/knowledge/url', [KnowledgeController::class, 'addUrl'], [Auth
 $router->post('/v1/knowledge/search', [KnowledgeController::class, 'search'], [AuthMiddleware::class, TenantMiddleware::class]);
 
 $router->get('/v1/knowledge/{id}', [KnowledgeController::class, 'show'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->get('/v1/knowledge/{id}/download', [KnowledgeController::class, 'download'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->put('/v1/knowledge/{id}', [KnowledgeController::class, 'update'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->post('/v1/knowledge/{id}', [KnowledgeController::class, 'update'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->post('/v1/knowledge/{id}/replace', [KnowledgeController::class, 'replaceVersion'], [AuthMiddleware::class, TenantMiddleware::class]);
