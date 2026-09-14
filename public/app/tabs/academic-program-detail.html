@@ -133,53 +133,7 @@
       </div>
     </div>
 
-    <!-- SUB-TOOLBAR / TIME WINDOW FILTER -->
-    <div class="dept-control-strip" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: #FFFFFF; border-bottom: 1.5px solid #E6F0EC; flex-wrap: wrap; gap: 10px;">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.5px;">Activity &amp; Metrics Window</span>
-        <span id="progDetailActiveWindowBadge" style="font-size: 10.5px; font-weight: 700; color: #047857; background: #ECFDF5; border: 1px solid #A7F3D0; padding: 2px 8px; border-radius: 6px;">Last 30 Days</span>
-      </div>
 
-      <!-- Interactive Time Window Selector -->
-      <div class="ops-ctrl-pill" style="display:inline-flex; align-items:center; gap:3px; padding:3px 6px; background:#F4FAF7; border:1px solid #D1E5DE; border-radius:8px;">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #648781;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-        <span style="font-size:11px; font-weight:600; color:#648781; margin-right:2px;">Window:</span>
-        <button type="button" class="btn-time-win" id="progTimeBtn24h" onclick="setProgDetailTimeWindow('24h')" style="background:transparent; color:#648781; border:none; font-size:11px; font-weight:600; cursor:pointer; padding:2px 7px; border-radius:4px; transition:all 0.15s ease;">24H</button>
-        <button type="button" class="btn-time-win" id="progTimeBtn7d" onclick="setProgDetailTimeWindow('7d')" style="background:transparent; color:#648781; border:none; font-size:11px; font-weight:600; cursor:pointer; padding:2px 7px; border-radius:4px; transition:all 0.15s ease;">7D</button>
-        <button type="button" class="btn-time-win active" id="progTimeBtn30d" onclick="setProgDetailTimeWindow('30d')" style="background:#063D3B; color:#C8FF63; border:none; font-size:11px; font-weight:700; cursor:pointer; padding:2px 7px; border-radius:4px; transition:all 0.15s ease;">30D</button>
-        <button type="button" class="btn-time-win" id="progTimeBtn3m" onclick="setProgDetailTimeWindow('3m')" style="background:transparent; color:#648781; border:none; font-size:11px; font-weight:600; cursor:pointer; padding:2px 7px; border-radius:4px; transition:all 0.15s ease;">3M</button>
-        <button type="button" class="btn-time-win" id="progTimeBtn6m" onclick="setProgDetailTimeWindow('6m')" style="background:transparent; color:#648781; border:none; font-size:11px; font-weight:600; cursor:pointer; padding:2px 7px; border-radius:4px; transition:all 0.15s ease;">6M</button>
-        <button type="button" class="btn-time-win" id="progTimeBtnAll" onclick="setProgDetailTimeWindow('all')" style="background:transparent; color:#648781; border:none; font-size:11px; font-weight:600; cursor:pointer; padding:2px 7px; border-radius:4px; transition:all 0.15s ease;">All</button>
-        <button type="button" class="btn-time-win" id="progTimeBtnCustom" onclick="toggleProgDetailCustomDatePicker()" style="background:transparent; color:#648781; border:none; font-size:11px; font-weight:600; cursor:pointer; padding:2px 7px; border-radius:4px; transition:all 0.15s ease;">📅 Custom</button>
-      </div>
-    </div>
-
-    <!-- Expandable Custom Calendar Date Picker Bar -->
-    <div id="progDetailCustomDatePickerBar" style="display: none; background: #F9FCFB; border-bottom: 1.5px solid #E6F0EC; padding: 10px 20px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 12px;">
-      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-        <div style="font-weight: 700; color: #063D3B; display: flex; align-items: center; gap: 6px;">
-          <span>📅</span>
-          <span>Custom Date Range (IST):</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <label for="progDetailCustomStartDate" style="font-size: 11px; font-weight: 600; color: #648781;">From:</label>
-          <input type="date" id="progDetailCustomStartDate" class="brand-input" style="height: 30px; font-size: 11.5px; font-weight: 600; padding: 0 8px; border: 1.5px solid #DDE9E3; border-radius: 6px; background: #FFFFFF; color: #063D3B;">
-        </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <label for="progDetailCustomEndDate" style="font-size: 11px; font-weight: 600; color: #648781;">To:</label>
-          <input type="date" id="progDetailCustomEndDate" class="brand-input" style="height: 30px; font-size: 11.5px; font-weight: 600; padding: 0 8px; border: 1.5px solid #DDE9E3; border-radius: 6px; background: #FFFFFF; color: #063D3B;">
-        </div>
-        <button type="button" onclick="applyProgDetailCustomDateRange()" class="brand-btn-primary" style="height: 30px; padding: 0 14px; font-size: 11.5px; font-weight: 700; border-radius: 6px; cursor: pointer;">
-          Apply Range
-        </button>
-        <button type="button" onclick="setProgDetailTimeWindow('30d')" class="brand-btn-secondary" style="height: 30px; padding: 0 10px; font-size: 11.5px; font-weight: 700; border-radius: 6px; color: #648781; cursor: pointer;">
-          Reset (30D)
-        </button>
-      </div>
-      <div id="progDetailActiveRangeIndicator" style="font-size: 11px; font-weight: 700; color: #047857; background: #E6F4EA; padding: 3px 9px; border-radius: 5px; border: 1px solid #A7F3D0;">
-        Active Window: Last 30 Days
-      </div>
-    </div>
 
     <!-- Canvas Body -->
     <div style="padding: 24px 20px 48px 20px; box-sizing: border-box; width: 100%;">
