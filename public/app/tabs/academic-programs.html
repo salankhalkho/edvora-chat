@@ -122,11 +122,6 @@
     </div>
 
     <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-      <!-- Department Filter Dropdown -->
-      <select id="progDeptFilter" onchange="filterProgramsTable()" style="font-size: 11.5px; font-weight: 600; color: #063D3B; background: #ffffff; border: 1.5px solid #D1E5DE; border-radius: 8px; padding: 6px 12px; outline: none; cursor: pointer;">
-        <option value="all">All Departments</option>
-        <option value="orphan">Orphan / Unassigned Only</option>
-      </select>
 
       <!-- Campus Filter Dropdown -->
       <select id="progCampusFilter" onchange="filterProgramsTable()" style="font-size: 11.5px; font-weight: 600; color: #063D3B; background: #ffffff; border: 1.5px solid #D1E5DE; border-radius: 8px; padding: 6px 12px; outline: none; cursor: pointer;">
@@ -363,17 +358,6 @@
     const tOrphan = document.getElementById('progTabCountOrphan');
     if (tOrphan) tOrphan.textContent = orphan;
 
-    // Populate Department Filter Select
-    const deptSelect = document.getElementById('progDeptFilter');
-    if (deptSelect) {
-      const curVal = deptSelect.value;
-      let html = '<option value="all">All Departments</option><option value="orphan">Orphan / Unassigned Only</option>';
-      d.departments.forEach(dept => {
-        html += `<option value="${dept.id}">${escapeHtml(dept.name)}</option>`;
-      });
-      deptSelect.innerHTML = html;
-      if (curVal) deptSelect.value = curVal;
-    }
 
     // Populate Campus Filter Select
     const campusSelect = document.getElementById('progCampusFilter');
@@ -448,7 +432,6 @@
     if (!tbody) return;
 
     const typeFilter = d.currentTypeFilter || 'all';
-    const deptFilter = document.getElementById('progDeptFilter')?.value || 'all';
     const campusFilter = document.getElementById('progCampusFilter')?.value || 'all';
     const query = (document.getElementById('programsSearchInput')?.value || '').toLowerCase().trim();
 
@@ -461,13 +444,6 @@
       if (typeFilter === 'postgraduate' && pType !== 'postgraduate') return false;
       if (typeFilter === 'doctoral' && !['doctoral', 'executive', 'certificate', 'other'].includes(pType)) return false;
       if (typeFilter === 'orphan' && !isOrphan) return false;
-
-      // Department filter
-      if (deptFilter === 'orphan') {
-        if (!isOrphan) return false;
-      } else if (deptFilter !== 'all') {
-        if (String(course.department_id) !== String(deptFilter)) return false;
-      }
 
       // Campus filter
       if (campusFilter !== 'all') {
