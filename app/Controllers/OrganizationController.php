@@ -543,4 +543,220 @@ class OrganizationController
             'total_selected' => count($cleaned)
         ], 'Multilingual preferences saved successfully.');
     }
+
+    /**
+     * GET /v1/organization/operating-hours — Retrieve institution-level desk hours & away automation
+     */
+    public function getOperatingHours(Request $request, array $params = []): void
+    {
+        $orgId = $GLOBALS['organization_id'] ?? null;
+        if (!$orgId) {
+            Response::error('Tenant context missing.', 403);
+        }
+
+        $db = Database::getConnection();
+        $stmt = $db->prepare("SELECT * FROM organization_operating_hours WHERE organization_id = :org_id LIMIT 1");
+        $stmt->execute([':org_id' => $orgId]);
+        $record = $stmt->fetch();
+
+        $defaultHours = [
+            'mon' => ['active' => true, 'open' => '09:00', 'close' => '18:00'],
+            'tue' => ['active' => true, 'open' => '09:00', 'close' => '18:00'],
+            'wed' => ['active' => true, 'open' => '09:00', 'close' => '18:00'],
+            'thu' => ['active' => true, 'open' => '09:00', 'close' => '18:00'],
+            'fri' => ['active' => true, 'open' => '09:00', 'close' => '18:00'],
+            'sat' => ['active' => true, 'open' => '09:00', 'close' => '18:00'],
+            'sun' => ['active' => false, 'open' => '09:00', 'close' => '18:00'],
+        ];
+
+        if ($record) {
+            $workingHours = $defaultHours;
+            if (!empty($record['working_hours'])) {
+                $decoded = is_string($record['working_hours']) ? json_decode($record['working_hours'], true) : $record['working_hours'];
+                if (is_array($decoded)) {
+                    $workingHours = array_merge($defaultHours, $decoded);
+                }
+            }
+            Response::success([
+                'id' => (int)$record['id'],
+                'organization_id' => (int)$record['organization_id'],
+                'timezone' => $record['timezone'] ?: 'America/New_York',
+                'working_hours' => $workingHours,
+                'auto_away_message' => $record['auto_away_message'] ?: 'Our Admissions & Support Desk is currently closed. Your inquiry has been received and prioritized. A counselor will respond promptly during our next operating shift.'
+            ]);
+            return;
+        }
+
+        Response::success([
+            'id' => null,
+            'organization_id' => (int)$orgId,
+            'timezone' => 'America/New_York',
+            'working_hours' => $defaultHours,
+            'auto_away_message' => 'Our Admissions & Support Desk is currently closed. Your inquiry has been received and prioritized. A counselor will respond promptly during our next operating shift.'
+        ]);
+    }
+
+    /**
+     * PUT /v1/organization/operating-hours — Upsert institution-level desk hours & away automation
+     */
+    public function updateOperatingHours(Request $request, array $params = []): void
+    {
+        $orgId = $GLOBALS['organization_id'] ?? null;
+        if (!$orgId) {
+            Response::error('Tenant context missing.', 403);
+        }
+
+        $data = $request->all();
+        $timezone = !empty($data['timezone']) ? trim($data['timezone']) : 'America/New_York';
+        $workingHours = $data['working_hours'] ?? null;
+        $autoAwayMessage = isset($data['auto_away_message']) ? trim($data['auto_away_message']) : null;
+
+        $workingHoursJson = is_array($workingHours) ? json_encode($workingHours) : (is_string($workingHours) ? $workingHours : null);
+
+        $db = Database::getConnection();
+        $stmtCheck = $db->prepare("SELECT id FROM organization_operating_hours WHERE organization_id = :org_id LIMIT 1");
+        $stmtCheck->execute([':org_id' => $orgId]);
+        $existing = $stmtCheck->fetch();
+
+        if ($existing) {
+            $stmt = $db->prepare("
+                UPDATE organization_operating_hours
+                SET timezone = :timezone,
+                    working_hours = :working_hours,
+                    auto_away_message = :auto_away_message,
+                    updated_at = NOW()
+                WHERE organization_id = :org_id
+            ");
+            $stmt->execute([
+                ':timezone' => $timezone,
+                ':working_hours' => $workingHoursJson,
+                ':auto_away_message' => $autoAwayMessage,
+                ':org_id' => $orgId
+            ]);
+        } else {
+            $stmt = $db->prepare("
+                INSERT INTO organization_operating_hours
+                (organization_id, timezone, working_hours, auto_away_message, created_at, updated_at)
+                VALUES
+                (:org_id, :timezone, :working_hours, :auto_away_message, NOW(), NOW())
+            ");
+            $stmt->execute([
+                ':org_id' => $orgId,
+                ':timezone' => $timezone,
+                ':working_hours' => $workingHoursJson,
+                ':auto_away_message' => $autoAwayMessage
+            ]);
+        }
+
+        AuditLogger::log('organization_operating_hours_updated', 'organization', $orgId, [
+            'timezone' => $timezone
+        ]);
+
+        $this->getOperatingHours($request, $params);
+    }
+
+    /**
+     * GET /v1/organization/escalation-rules — Retrieve institution-level escalation rules & SLA
+     */
+    public function getEscalationRules(Request $request, array $params = []): void
+    {
+        $orgId = $GLOBALS['organization_id'] ?? null;
+        if (!$orgId) {
+            Response::error('Tenant context missing.', 403);
+        }
+
+        $db = Database::getConnection();
+        $stmt = $db->prepare("SELECT * FROM organization_escalation_rules WHERE organization_id = :org_id LIMIT 1");
+        $stmt->execute([':org_id' => $orgId]);
+        $record = $stmt->fetch();
+
+        if ($record) {
+            Response::success([
+                'id' => (int)$record['id'],
+                'organization_id' => (int)$record['organization_id'],
+                'lead_assignment_logic' => $record['lead_assignment_logic'] ?: 'round_robin',
+                'sla_target_minutes' => (int)($record['sla_target_minutes'] ?: 8),
+                'escalate_email' => (bool)$record['escalate_email'],
+                'escalate_whatsapp' => (bool)$record['escalate_whatsapp'],
+                'priority_channel' => $record['priority_channel'] ?: 'whatsapp_email'
+            ]);
+            return;
+        }
+
+        Response::success([
+            'id' => null,
+            'organization_id' => (int)$orgId,
+            'lead_assignment_logic' => 'round_robin',
+            'sla_target_minutes' => 8,
+            'escalate_email' => true,
+            'escalate_whatsapp' => true,
+            'priority_channel' => 'whatsapp_email'
+        ]);
+    }
+
+    /**
+     * PUT /v1/organization/escalation-rules — Upsert institution-level escalation rules & SLA
+     */
+    public function updateEscalationRules(Request $request, array $params = []): void
+    {
+        $orgId = $GLOBALS['organization_id'] ?? null;
+        if (!$orgId) {
+            Response::error('Tenant context missing.', 403);
+        }
+
+        $data = $request->all();
+        $leadAssignmentLogic = !empty($data['lead_assignment_logic']) ? trim($data['lead_assignment_logic']) : 'round_robin';
+        $slaTargetMinutes = isset($data['sla_target_minutes']) ? max(1, (int)$data['sla_target_minutes']) : 8;
+        $escalateEmail = isset($data['escalate_email']) ? ($data['escalate_email'] ? 1 : 0) : 1;
+        $escalateWhatsapp = isset($data['escalate_whatsapp']) ? ($data['escalate_whatsapp'] ? 1 : 0) : 1;
+        $priorityChannel = !empty($data['priority_channel']) ? trim($data['priority_channel']) : 'whatsapp_email';
+
+        $db = Database::getConnection();
+        $stmtCheck = $db->prepare("SELECT id FROM organization_escalation_rules WHERE organization_id = :org_id LIMIT 1");
+        $stmtCheck->execute([':org_id' => $orgId]);
+        $existing = $stmtCheck->fetch();
+
+        if ($existing) {
+            $stmt = $db->prepare("
+                UPDATE organization_escalation_rules
+                SET lead_assignment_logic = :lead_assignment_logic,
+                    sla_target_minutes = :sla_target_minutes,
+                    escalate_email = :escalate_email,
+                    escalate_whatsapp = :escalate_whatsapp,
+                    priority_channel = :priority_channel,
+                    updated_at = NOW()
+                WHERE organization_id = :org_id
+            ");
+            $stmt->execute([
+                ':lead_assignment_logic' => $leadAssignmentLogic,
+                ':sla_target_minutes' => $slaTargetMinutes,
+                ':escalate_email' => $escalateEmail,
+                ':escalate_whatsapp' => $escalateWhatsapp,
+                ':priority_channel' => $priorityChannel,
+                ':org_id' => $orgId
+            ]);
+        } else {
+            $stmt = $db->prepare("
+                INSERT INTO organization_escalation_rules
+                (organization_id, lead_assignment_logic, sla_target_minutes, escalate_email, escalate_whatsapp, priority_channel, created_at, updated_at)
+                VALUES
+                (:org_id, :lead_assignment_logic, :sla_target_minutes, :escalate_email, :escalate_whatsapp, :priority_channel, NOW(), NOW())
+            ");
+            $stmt->execute([
+                ':org_id' => $orgId,
+                ':lead_assignment_logic' => $leadAssignmentLogic,
+                ':sla_target_minutes' => $slaTargetMinutes,
+                ':escalate_email' => $escalateEmail,
+                ':escalate_whatsapp' => $escalateWhatsapp,
+                ':priority_channel' => $priorityChannel
+            ]);
+        }
+
+        AuditLogger::log('organization_escalation_rules_updated', 'organization', $orgId, [
+            'lead_assignment_logic' => $leadAssignmentLogic,
+            'sla_target_minutes' => $slaTargetMinutes
+        ]);
+
+        $this->getEscalationRules($request, $params);
+    }
 }

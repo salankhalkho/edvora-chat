@@ -971,6 +971,42 @@ class Migrations
         } catch (Throwable $e) {
             // Table may already exist
         }
+
+        // Create organization_operating_hours table (institution-level live desk hours & away automation)
+        try {
+            $this->db->exec("CREATE TABLE IF NOT EXISTS organization_operating_hours (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                organization_id INT NOT NULL UNIQUE,
+                timezone VARCHAR(50) DEFAULT 'America/New_York',
+                working_hours JSON NULL,
+                auto_away_message TEXT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_org (organization_id),
+                FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+        } catch (Throwable $e) {
+            // Table may already exist
+        }
+
+        // Create organization_escalation_rules table (institution-level lead escalation & assignment SLA)
+        try {
+            $this->db->exec("CREATE TABLE IF NOT EXISTS organization_escalation_rules (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                organization_id INT NOT NULL UNIQUE,
+                lead_assignment_logic VARCHAR(50) DEFAULT 'round_robin',
+                sla_target_minutes INT DEFAULT 8,
+                escalate_email TINYINT(1) DEFAULT 1,
+                escalate_whatsapp TINYINT(1) DEFAULT 1,
+                priority_channel VARCHAR(50) DEFAULT 'whatsapp_email',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_org (organization_id),
+                FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+        } catch (Throwable $e) {
+            // Table may already exist
+        }
     }
 }
 

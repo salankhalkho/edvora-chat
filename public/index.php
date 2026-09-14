@@ -233,6 +233,10 @@ $router->get('/v1/organization/profile', [OrganizationController::class, 'show']
 $router->put('/v1/organization/profile', [OrganizationController::class, 'update'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->get('/v1/organization/languages', [OrganizationController::class, 'getLanguages'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->put('/v1/organization/languages', [OrganizationController::class, 'updateLanguages'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->get('/v1/organization/operating-hours', [OrganizationController::class, 'getOperatingHours'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->put('/v1/organization/operating-hours', [OrganizationController::class, 'updateOperatingHours'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->get('/v1/organization/escalation-rules', [OrganizationController::class, 'getEscalationRules'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->put('/v1/organization/escalation-rules', [OrganizationController::class, 'updateEscalationRules'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->get('/v1/organization/staff', [OrganizationController::class, 'indexStaff'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->post('/v1/organization/staff', [OrganizationController::class, 'createStaff'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->put('/v1/organization/staff/{id}', [OrganizationController::class, 'updateStaff'], [AuthMiddleware::class, TenantMiddleware::class]);
