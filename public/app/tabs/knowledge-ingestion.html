@@ -84,17 +84,19 @@
                 </label>
                 <input type="text" id="ingestAcademicVersion" value="2026–27" placeholder="e.g. 2026-27 or Evergreen" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
               </div>
-              <div style="grid-column: 1 / -1;">
-                <label for="ingestFileProgramId" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
-                  Academic Program Mapping (Optional)
-                </label>
-                <select id="ingestFileProgramId" class="ingest-program-select" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
-                  <option value="">🌐 All Academic Programs / General Institutional Scope</option>
-                </select>
-                <span style="font-size: 10.5px; color: #648781; margin-top: 5px; display: block;">
-                  Map this document to a specific degree/course, or leave global for all academic programs across the university.
-                </span>
+            </div>
+
+            <!-- Academic Program Mapping Radios -->
+            <div>
+              <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 8px;">
+                Academic Program Mapping
+              </label>
+              <div id="ingestFileProgramContainer" class="ingest-program-pill-container" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; background: #FFFFFF; border: 1.5px solid #CFE6BA; border-radius: 6px; min-height: 44px; align-items: center;">
+                <span style="font-size: 12px; color: #94A3B8;">Loading available academic programs...</span>
               </div>
+              <span style="font-size: 10.5px; color: #648781; margin-top: 5px; display: block;">
+                Select an academic program to scope this document to that specific degree/course, or select Entire Organization for institution-wide global availability.
+              </span>
             </div>
           </div>
 
@@ -209,17 +211,19 @@
                 </label>
                 <input type="text" id="ingestUrlAcademicVersion" value="2026–27" placeholder="e.g. 2026-27 or Evergreen" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
               </div>
-              <div style="grid-column: 1 / -1;">
-                <label for="ingestUrlProgramId" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
-                  Academic Program Mapping (Optional)
-                </label>
-                <select id="ingestUrlProgramId" class="ingest-program-select" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
-                  <option value="">🌐 All Academic Programs / General Institutional Scope</option>
-                </select>
-                <span style="font-size: 10.5px; color: #648781; margin-top: 5px; display: block;">
-                  Map this web resource to a specific degree/course, or leave global for all academic programs across the university.
-                </span>
+            </div>
+
+            <!-- Academic Program Mapping Radios -->
+            <div>
+              <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 8px;">
+                Academic Program Mapping
+              </label>
+              <div id="ingestUrlProgramContainer" class="ingest-program-pill-container" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; background: #FFFFFF; border: 1.5px solid #CFE6BA; border-radius: 6px; min-height: 44px; align-items: center;">
+                <span style="font-size: 12px; color: #94A3B8;">Loading available academic programs...</span>
               </div>
+              <span style="font-size: 10.5px; color: #648781; margin-top: 5px; display: block;">
+                Select an academic program to scope this web resource to that specific degree/course, or select Entire Organization for institution-wide global availability.
+              </span>
             </div>
           </div>
 
@@ -317,17 +321,19 @@
                 </label>
                 <input type="text" id="ingestTextAcademicVersion" value="2026–27" placeholder="e.g. 2026-27 or Evergreen" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
               </div>
-              <div style="grid-column: 1 / -1;">
-                <label for="ingestTextProgramId" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
-                  Academic Program Mapping (Optional)
-                </label>
-                <select id="ingestTextProgramId" class="ingest-program-select" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
-                  <option value="">🌐 All Academic Programs / General Institutional Scope</option>
-                </select>
-                <span style="font-size: 10.5px; color: #648781; margin-top: 5px; display: block;">
-                  Map this notice/circular to a specific degree/course, or leave global for all academic programs across the university.
-                </span>
+            </div>
+
+            <!-- Academic Program Mapping Radios -->
+            <div>
+              <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 8px;">
+                Academic Program Mapping
+              </label>
+              <div id="ingestTextProgramContainer" class="ingest-program-pill-container" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; background: #FFFFFF; border: 1.5px solid #CFE6BA; border-radius: 6px; min-height: 44px; align-items: center;">
+                <span style="font-size: 12px; color: #94A3B8;">Loading available academic programs...</span>
               </div>
+              <span style="font-size: 10.5px; color: #648781; margin-top: 5px; display: block;">
+                Select an academic program to scope this notice/circular to that specific degree/course, or select Entire Organization for institution-wide global availability.
+              </span>
             </div>
           </div>
 

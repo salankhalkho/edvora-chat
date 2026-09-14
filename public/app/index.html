@@ -5705,10 +5705,10 @@
             showToast('Document expiration cleared — set to Evergreen policy.', 'info');
         }
 
-        // Knowledge Ingestion Academic Programs Loader
+        // Knowledge Ingestion Academic Programs Loader (Radio Button Pills)
         async function loadIngestPrograms() {
-            const selects = document.querySelectorAll('.ingest-program-select');
-            if (!selects.length) return;
+            const containers = document.querySelectorAll('.ingest-program-pill-container');
+            if (!containers.length) return;
 
             try {
                 const res = await fetch('/v1/programs', {
@@ -5717,22 +5717,59 @@
                 const data = await res.json();
                 const programs = (data.status === 'success' && data.data) ? (data.data.courses || (Array.isArray(data.data) ? data.data : [])) : [];
 
-                let html = '<option value="">🌐 All Academic Programs / General Institutional Scope</option>';
-                programs.forEach(p => {
-                    const code = p.course_code ? ` [${escapeHtml(p.course_code)}]` : '';
-                    html += `<option value="${p.id}">${escapeHtml(p.course_name)}${code}</option>`;
-                });
+                containers.forEach(container => {
+                    const containerId = container.id || '';
+                    const radioName = containerId.includes('File') ? 'ingest_file_program' : (containerId.includes('Url') ? 'ingest_url_program' : 'ingest_text_program');
 
-                selects.forEach(select => {
-                    const currVal = select.value;
-                    select.innerHTML = html;
-                    if (currVal) select.value = currVal;
+                    let html = `
+                        <label style="display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px; background: #E8F5F3; border: 1.5px solid #063D3B; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; color: #063D3B; user-select: none; transition: all 0.15s ease; box-shadow: 0 0 0 1px #063D3B;">
+                            <input type="radio" name="${radioName}" value="" checked onchange="updateIngestProgramRadios('${containerId}')" style="cursor: pointer; accent-color: #063D3B;" />
+                            <span>🌐</span>
+                            <span>Entire Organization (All Programs)</span>
+                        </label>
+                    `;
+
+                    if (programs.length > 0) {
+                        html += programs.map(p => `
+                            <label style="display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; color: #0F172A; user-select: none; transition: all 0.15s ease;">
+                                <input type="radio" name="${radioName}" value="${p.id}" onchange="updateIngestProgramRadios('${containerId}')" style="cursor: pointer; accent-color: #063D3B;" />
+                                <span>🎓</span>
+                                <span>${escapeHtml(p.course_name)}${p.course_code ? ' (' + escapeHtml(p.course_code) + ')' : ''}</span>
+                            </label>
+                        `).join('');
+                    }
+
+                    container.innerHTML = html;
                 });
             } catch(e) {
                 console.error('[Edvora] Error loading programs for ingestion:', e);
+                containers.forEach(c => {
+                    c.innerHTML = '<span style="font-size: 12px; color: #EF4444;">Failed to load academic programs.</span>';
+                });
             }
         }
         window.loadIngestPrograms = loadIngestPrograms;
+
+        function updateIngestProgramRadios(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const labels = container.querySelectorAll('label');
+            labels.forEach(label => {
+                const radio = label.querySelector('input[type="radio"]');
+                if (radio && radio.checked) {
+                    label.style.borderColor = '#063D3B';
+                    label.style.background = '#E8F5F3';
+                    label.style.color = '#063D3B';
+                    label.style.boxShadow = '0 0 0 1px #063D3B';
+                } else if (label) {
+                    label.style.borderColor = '#E2E8F0';
+                    label.style.background = '#FFFFFF';
+                    label.style.color = '#0F172A';
+                    label.style.boxShadow = 'none';
+                }
+            });
+        }
+        window.updateIngestProgramRadios = updateIngestProgramRadios;
 
         // Knowledge Ingestion Department Scope Loader
         async function loadIngestDepartments() {
@@ -5824,8 +5861,8 @@
             const review_freq = parseInt(document.getElementById('ingestFileReviewFreq').value) || 180;
             const deptRadio = document.querySelector('input[name="ingest_file_dept"]:checked');
             const department_id = deptRadio ? deptRadio.value.trim() : '';
-            const programSelect = document.getElementById('ingestFileProgramId');
-            const program_id = programSelect ? programSelect.value.trim() : '';
+            const programRadio = document.querySelector('input[name="ingest_file_program"]:checked');
+            const program_id = programRadio ? programRadio.value.trim() : '';
             const fileInput = document.getElementById('ingestFileInput');
 
             if (!fileInput.files || fileInput.files.length === 0) {
@@ -5892,8 +5929,8 @@
             const review_freq = parseInt(document.getElementById('ingestUrlReviewFreq').value) || 180;
             const deptRadio = document.querySelector('input[name="ingest_url_dept"]:checked');
             const department_id = deptRadio ? deptRadio.value.trim() : '';
-            const programSelect = document.getElementById('ingestUrlProgramId');
-            const program_id = programSelect ? programSelect.value.trim() : '';
+            const programRadio = document.querySelector('input[name="ingest_url_program"]:checked');
+            const program_id = programRadio ? programRadio.value.trim() : '';
 
             const origText = btn.innerHTML;
             btn.innerHTML = '<span>Crawling...</span>';
@@ -5954,8 +5991,8 @@
             const review_freq = parseInt(document.getElementById('ingestTextReviewFreq').value) || 180;
             const deptRadio = document.querySelector('input[name="ingest_text_dept"]:checked');
             const department_id = deptRadio ? deptRadio.value.trim() : '';
-            const programSelect = document.getElementById('ingestTextProgramId');
-            const program_id = programSelect ? programSelect.value.trim() : '';
+            const programRadio = document.querySelector('input[name="ingest_text_program"]:checked');
+            const program_id = programRadio ? programRadio.value.trim() : '';
             const content = document.getElementById('ingestTextContent').value.trim();
 
             const origText = btn.innerHTML;
