@@ -1020,6 +1020,58 @@ class Migrations
         } catch (Throwable $e) {
             // Column/index may already exist
         }
+
+        // Task 1: Add program_id to counselor_callbacks
+        try {
+            $checkCbProgram = $this->db->query("SHOW COLUMNS FROM counselor_callbacks LIKE 'program_id'");
+            if (!$checkCbProgram->fetch()) {
+                $this->db->exec("ALTER TABLE counselor_callbacks 
+                    ADD COLUMN program_id INT NULL AFTER department_id,
+                    ADD INDEX idx_cb_program (program_id),
+                    ADD CONSTRAINT fk_cb_program FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE SET NULL;");
+            }
+        } catch (Throwable $e) {
+            // Column/index may already exist
+        }
+
+        // Task 2: Add program_id to campus_tour_bookings
+        try {
+            $checkTourProgram = $this->db->query("SHOW COLUMNS FROM campus_tour_bookings LIKE 'program_id'");
+            if (!$checkTourProgram->fetch()) {
+                $this->db->exec("ALTER TABLE campus_tour_bookings 
+                    ADD COLUMN program_id INT NULL AFTER department_id,
+                    ADD INDEX idx_tour_program (program_id),
+                    ADD CONSTRAINT fk_tour_program FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE SET NULL;");
+            }
+        } catch (Throwable $e) {
+            // Column/index may already exist
+        }
+
+        // Task 3: Add program_id to leads
+        try {
+            $checkLeadProgram = $this->db->query("SHOW COLUMNS FROM leads LIKE 'program_id'");
+            if (!$checkLeadProgram->fetch()) {
+                $this->db->exec("ALTER TABLE leads 
+                    ADD COLUMN program_id INT NULL AFTER department_id,
+                    ADD INDEX idx_leads_program (program_id),
+                    ADD CONSTRAINT fk_leads_program FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE SET NULL;");
+            }
+        } catch (Throwable $e) {
+            // Column/index may already exist
+        }
+
+        // Task 4: Add program_id to lead_assets
+        try {
+            $checkAssetProgram = $this->db->query("SHOW COLUMNS FROM lead_assets LIKE 'program_id'");
+            if (!$checkAssetProgram->fetch()) {
+                $this->db->exec("ALTER TABLE lead_assets 
+                    ADD COLUMN program_id INT NULL AFTER department_id,
+                    ADD INDEX idx_assets_program (program_id),
+                    ADD CONSTRAINT fk_assets_program FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE SET NULL;");
+            }
+        } catch (Throwable $e) {
+            // Column/index may already exist
+        }
     }
 }
 
