@@ -417,9 +417,783 @@
             </div>
           </div>
 
+        <!-- 4. LIVE OPERATIONAL POLICIES (INSTITUTION LEVEL: LIVE DESK HOURS & ESCALATION SLA) -->
+        <div style="padding: 24px 24px 32px 24px; background: #FFFFFF; border-top: 1.5px solid #E6F0EC;">
+          <div class="dept-section-track" style="margin-bottom: 14px;">
+            <span class="dept-track-title">Live Operational Policies &bull; Institution Command</span>
+            <span class="dept-track-meta">Automated Desk Schedules &amp; Escalation SLA &bull; Click to Edit</span>
+          </div>
+
+          <div class="dept-ops-grid">
+            <!-- Card 1: Live Desk Hours & Auto-Away Automation (Institution Level) -->
+            <div class="dept-ops-card" id="cardOrgHours" onclick="openOrgHoursModal()" title="Edit Institution Live Desk Hours &amp; Auto-Away Automation">
+              <div class="dept-telemetry-header" style="margin-bottom: 0;">
+                <div class="dept-telemetry-title-group">
+                  <div class="dept-telemetry-icon-box" style="background:#ECFDF5; color:#047857;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  </div>
+                  <span class="dept-telemetry-card-title">Live Desk Hours &amp; Away Automation</span>
+                </div>
+                <span class="dept-card-link-affordance" style="color:#047857;">
+                  <span>Edit Schedule</span>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                </span>
+              </div>
+
+              <!-- Status & Time -->
+              <div style="display: flex; align-items: center; justify-content: space-between; background: #F8FAF9; border-radius: 8px; padding: 10px 14px;">
+                <span id="orgHoursScheduleText" style="font-size: 12px; font-weight: 700; color: #0F172A;">Mon – Sat &bull; 09:00 AM – 06:00 PM ET</span>
+                <span id="orgHoursStatusBadge" class="dept-hours-badge" style="color:#047857; background:#ECFDF5; border:1px solid #A7F3D0; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 6px; display: inline-flex; align-items: center; gap: 5px;">
+                  <span style="width: 6px; height: 6px; border-radius: 50%; background: #10B981; display: inline-block;"></span>
+                  <span id="orgHoursStatusLabel">Currently Open</span>
+                </span>
+              </div>
+
+              <!-- 7-Day Visual Strip -->
+              <div>
+                <div style="font-size: 10px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;">
+                  Institution Operating Days (<span id="orgTimezoneDisplay">America/New_York</span>)
+                </div>
+                <div class="dept-day-strip" id="orgDayStrip">
+                  <div class="dept-day-pill" data-day="mon">Mon</div>
+                  <div class="dept-day-pill" data-day="tue">Tue</div>
+                  <div class="dept-day-pill" data-day="wed">Wed</div>
+                  <div class="dept-day-pill" data-day="thu">Thu</div>
+                  <div class="dept-day-pill" data-day="fri">Fri</div>
+                  <div class="dept-day-pill" data-day="sat">Sat</div>
+                  <div class="dept-day-pill off" data-day="sun">Sun</div>
+                </div>
+              </div>
+
+              <!-- Away Message Preview -->
+              <div style="background: #F8FAF9; border-left: 3px solid #047857; border-radius: 0 8px 8px 0; padding: 10px 14px;">
+                <div style="font-size: 10px; font-weight: 700; color: #047857; text-transform: uppercase; margin-bottom: 3px;">Automated After-Hours Student Response</div>
+                <div id="orgAwayMessagePreview" style="font-size: 11.5px; color: #334155; line-height: 1.45; font-style: italic;">
+                  &ldquo;Our Admissions &amp; Support Desk is currently closed. Your inquiry has been received and prioritized. A counselor will respond promptly during our next operating shift.&rdquo;
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2: Lead Escalation & Assignment SLA (Institution Level) -->
+            <div class="dept-ops-card" id="cardOrgEscalations" onclick="openOrgEscalationModal()" title="Edit Institution Escalation Policy &amp; Routing Rules">
+              <div class="dept-telemetry-header" style="margin-bottom: 0;">
+                <div class="dept-telemetry-title-group">
+                  <div class="dept-telemetry-icon-box" style="background:#FFFBEB; color:#D97706;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  </div>
+                  <span class="dept-telemetry-card-title">Lead Escalation &amp; Assignment SLA</span>
+                </div>
+                <span class="dept-card-link-affordance" style="color:#D97706;">
+                  <span>Edit Policy</span>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                </span>
+              </div>
+
+              <!-- SLA Banner -->
+              <div style="display: flex; align-items: center; justify-content: space-between; background: #F8FAF9; border-radius: 8px; padding: 10px 14px;">
+                <span style="font-size: 12px; font-weight: 700; color: #0F172A;">First-Touch Counselor Target</span>
+                <span id="orgSlaBadge" style="font-size: 10.5px; font-weight: 700; color: #D97706; background: #FEF3C7; border: 1px solid #FDE68A; padding: 2.5px 8px; border-radius: 6px;">
+                  &lt; 8 Mins SLA
+                </span>
+              </div>
+
+              <!-- 3-Stage Visual Pipeline Stepper -->
+              <div>
+                <div style="font-size: 10px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;">Automated Escalation Pipeline</div>
+                <div class="dept-stepper-container">
+                  <div class="dept-step-tile">
+                    <div class="dept-step-num">Step 1 &bull; Trigger</div>
+                    <div class="dept-step-title">2 Bot Turns</div>
+                    <div class="dept-step-desc">Unresolved query or human handoff</div>
+                  </div>
+                  <div class="dept-step-tile">
+                    <div class="dept-step-num">Step 2 &bull; Dispatch</div>
+                    <div class="dept-step-title" id="orgDispatchTitle">Multi-Channel</div>
+                    <div class="dept-step-desc" id="orgDispatchDesc">WhatsApp &amp; Email staff alerts</div>
+                  </div>
+                  <div class="dept-step-tile">
+                    <div class="dept-step-num">Step 3 &bull; Routing</div>
+                    <div class="dept-step-title" id="orgRoutingTitle">Round-Robin</div>
+                    <div class="dept-step-desc">Balanced equal distribution across roster</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SLA Meta -->
+              <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #648781; padding-top: 4px; border-top: 1px dashed #E2E8F0;">
+                <span id="orgPriorityChannelText">Priority Channel: WhatsApp + Email Active</span>
+                <span style="font-weight: 700; color: #047857;">Institution Wide</span>
+              </div>
+            </div>
+
+          </div>
         </div>
 
       </div>
+
+<!-- ========================================================================= -->
+<!-- MODAL 1: Organization Operating Hours & Auto-Away Editor                  -->
+<!-- ========================================================================= -->
+<div id="modalOrgHours" style="display: none; position: fixed; inset: 0; z-index: 10050; background: rgba(6, 61, 59, 0.55); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+    <div style="background: #FFFFFF; border-radius: 16px; max-width: 820px; width: 100%; max-height: 92vh; display: flex; flex-direction: column; box-shadow: 0 24px 48px -12px rgba(6, 61, 59, 0.35); border: 1.5px solid #DCE9E5; overflow: hidden;">
+        
+        <!-- Modal Header -->
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1.5px solid #E6F0EC; background: #FAFDFB;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; background: #ECFDF5; font-size: 20px; color: #047857; border: 1px solid #A7F3D0;">⏱️</span>
+                <div>
+                    <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #063D3B;">Institution Desk Hours &amp; Away Automation</h3>
+                    <div style="font-size: 11.5px; color: #648781; margin-top: 2px;">Configure weekly live desk schedule, timezone, and student off-duty auto-response</div>
+                </div>
+            </div>
+            <button type="button" onclick="closeOrgHoursModal()" style="background: transparent; border: none; font-size: 20px; cursor: pointer; color: #648781; padding: 4px 8px; border-radius: 6px; line-height: 1;">&times;</button>
+        </div>
+
+        <!-- Modal Body (Scrollable) -->
+        <div style="padding: 24px; overflow-y: auto; flex: 1; box-sizing: border-box;">
+            <form id="orgHoursForm" onsubmit="event.preventDefault(); saveOrgHours();">
+                <!-- Top Row: Quick Presets & Timezone -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px;">
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">Quick Schedule Presets</label>
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                            <button type="button" class="brand-btn-secondary" style="height: 30px; font-size: 11px; font-weight: 600; padding: 0 10px; border-radius: 6px;" onclick="applyOrgHoursPreset('mon_sat')">Mon – Sat (9am-6pm)</button>
+                            <button type="button" class="brand-btn-secondary" style="height: 30px; font-size: 11px; font-weight: 600; padding: 0 10px; border-radius: 6px;" onclick="applyOrgHoursPreset('mon_fri')">Mon – Fri (9am-5pm)</button>
+                            <button type="button" class="brand-btn-secondary" style="height: 30px; font-size: 11px; font-weight: 600; padding: 0 10px; border-radius: 6px;" onclick="applyOrgHoursPreset('24_7')">24 / 7 Always Open</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="orgTimezoneInput" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">Institutional Timezone</label>
+                        <select id="orgTimezoneInput" class="brand-input" style="width: 100%; box-sizing: border-box; height: 34px; font-size: 12px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 10px; background: #FFFFFF;">
+                            <optgroup label="United States &amp; Canada">
+                                <option value="America/New_York" selected>Eastern Time (ET • New York, Toronto, Miami)</option>
+                                <option value="America/Chicago">Central Time (CT • Chicago, Dallas, Winnipeg)</option>
+                                <option value="America/Denver">Mountain Time (MT • Denver, Phoenix, Calgary)</option>
+                                <option value="America/Los_Angeles">Pacific Time (PT • Los Angeles, Vancouver, Seattle)</option>
+                                <option value="America/Anchorage">Alaska Time (AKT • Anchorage)</option>
+                                <option value="Pacific/Honolulu">Hawaii Time (HST • Honolulu)</option>
+                                <option value="America/Halifax">Atlantic Time (AT • Halifax)</option>
+                            </optgroup>
+                            <optgroup label="International">
+                                <option value="Europe/London">London (GMT/BST • UTC+00:00)</option>
+                                <option value="Europe/Paris">Central Europe (CET • Paris, Berlin • UTC+01:00)</option>
+                                <option value="Asia/Dubai">Gulf Standard (GST • Dubai • UTC+04:00)</option>
+                                <option value="Asia/Kolkata">India Standard (IST • New Delhi • UTC+05:30)</option>
+                                <option value="Asia/Singapore">Singapore / Malaysia (SGT • UTC+08:00)</option>
+                                <option value="UTC">UTC (Coordinated Universal Time)</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Day-by-Day Schedule Grid -->
+                <div style="background: #F8FCFA; border: 1.5px solid #DCE9E5; border-radius: 8px; padding: 14px 16px; margin-bottom: 18px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #E6F0EC;">
+                        <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #4F7470;">Weekly Desk Schedule</span>
+                        <span style="font-size: 11px; color: #648781;">Select active days &amp; counselor shift hours</span>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <!-- Monday -->
+                        <div class="org-schedule-row" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 10px; border-radius: 6px; background: #FFFFFF; border: 1px solid #E6F0EC;">
+                            <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: #092F2E; min-width: 110px; cursor: pointer;">
+                                <input type="checkbox" id="orgHourActive_mon" checked onchange="onOrgHourToggle('mon')" style="width: 16px; height: 16px; accent-color: #047857;" />
+                                <span>Monday</span>
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <input type="time" id="orgHourOpen_mon" value="09:00" class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px;" />
+                                <span style="font-size: 11px; color: #648781;">to</span>
+                                <input type="time" id="orgHourClose_mon" value="18:00" class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px;" />
+                            </div>
+                            <span id="orgHourStatus_mon" style="font-size: 10.5px; font-weight: 700; min-width: 75px; text-align: right; color: #047857; background: #ECFDF5; padding: 2px 8px; border-radius: 4px; border: 1px solid #A7F3D0;">Open</span>
+                        </div>
+
+                        <!-- Tuesday -->
+                        <div class="org-schedule-row" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 10px; border-radius: 6px; background: #FFFFFF; border: 1px solid #E6F0EC;">
+                            <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: #092F2E; min-width: 110px; cursor: pointer;">
+                                <input type="checkbox" id="orgHourActive_tue" checked onchange="onOrgHourToggle('tue')" style="width: 16px; height: 16px; accent-color: #047857;" />
+                                <span>Tuesday</span>
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <input type="time" id="orgHourOpen_tue" value="09:00" class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px;" />
+                                <span style="font-size: 11px; color: #648781;">to</span>
+                                <input type="time" id="orgHourClose_tue" value="18:00" class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px;" />
+                            </div>
+                            <span id="orgHourStatus_tue" style="font-size: 10.5px; font-weight: 700; min-width: 75px; text-align: right; color: #047857; background: #ECFDF5; padding: 2px 8px; border-radius: 4px; border: 1px solid #A7F3D0;">Open</span>
+                        </div>
+
+                        <!-- Wednesday -->
+                        <div class="org-schedule-row" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 10px; border-radius: 6px; background: #FFFFFF; border: 1px solid #E6F0EC;">
+                            <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: #092F2E; min-width: 110px; cursor: pointer;">
+                                <input type="checkbox" id="orgHourActive_wed" checked onchange="onOrgHourToggle('wed')" style="width: 16px; height: 16px; accent-color: #047857;" />
+                                <span>Wednesday</span>
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <input type="time" id="orgHourOpen_wed" value="09:00" class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px;" />
+                                <span style="font-size: 11px; color: #648781;">to</span>
+                                <input type="time" id="orgHourClose_wed" value="18:00" class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px;" />
+                            </div>
+                            <span id="orgHourStatus_wed" style="font-size: 10.5px; font-weight: 700; min-width: 75px; text-align: right; color: #047857; background: #ECFDF5; padding: 2px 8px; border-radius: 4px; border: 1px solid #A7F3D0;">Open</span>
+                        </div>
+
+                        <!-- Thursday -->
+                        <div class="org-schedule-row" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 10px; border-radius: 6px; background: #FFFFFF; border: 1px solid #E6F0EC;">
+                            <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: #092F2E; min-width: 110px; cursor: pointer;">
+                                <input type="checkbox" id="orgHourActive_thu" checked onchange="onOrgHourToggle('thu')" style="width: 16px; height: 16px; accent-color: #047857;" />
+                                <span>Thursday</span>
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <input type="time" id="orgHourOpen_thu" value="09:00" class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px;" />
+                                <span style="font-size: 11px; color: #648781;">to</span>
+                                <input type="time" id="orgHourClose_thu" value="18:00" class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px;" />
+                            </div>
+                            <span id="orgHourStatus_thu" style="font-size: 10.5px; font-weight: 700; min-width: 75px; text-align: right; color: #047857; background: #ECFDF5; padding: 2px 8px; border-radius: 4px; border: 1px solid #A7F3D0;">Open</span>
+                        </div>
+
+                        <!-- Friday -->
+                        <div class="org-schedule-row" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 10px; border-radius: 6px; background: #FFFFFF; border: 1px solid #E6F0EC;">
+                            <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: #092F2E; min-width: 110px; cursor: pointer;">
+                                <input type="checkbox" id="orgHourActive_fri" checked onchange="onOrgHourToggle('fri')" style="width: 16px; height: 16px; accent-color: #047857;" />
+                                <span>Friday</span>
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <input type="time" id="orgHourOpen_fri" value="09:00" class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px;" />
+                                <span style="font-size: 11px; color: #648781;">to</span>
+                                <input type="time" id="orgHourClose_fri" value="18:00" class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px;" />
+                            </div>
+                            <span id="orgHourStatus_fri" style="font-size: 10.5px; font-weight: 700; min-width: 75px; text-align: right; color: #047857; background: #ECFDF5; padding: 2px 8px; border-radius: 4px; border: 1px solid #A7F3D0;">Open</span>
+                        </div>
+
+                        <!-- Saturday -->
+                        <div class="org-schedule-row" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 10px; border-radius: 6px; background: #FFFFFF; border: 1px solid #E6F0EC;">
+                            <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: #092F2E; min-width: 110px; cursor: pointer;">
+                                <input type="checkbox" id="orgHourActive_sat" checked onchange="onOrgHourToggle('sat')" style="width: 16px; height: 16px; accent-color: #047857;" />
+                                <span>Saturday</span>
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <input type="time" id="orgHourOpen_sat" value="09:00" class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px;" />
+                                <span style="font-size: 11px; color: #648781;">to</span>
+                                <input type="time" id="orgHourClose_sat" value="18:00" class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px;" />
+                            </div>
+                            <span id="orgHourStatus_sat" style="font-size: 10.5px; font-weight: 700; min-width: 75px; text-align: right; color: #047857; background: #ECFDF5; padding: 2px 8px; border-radius: 4px; border: 1px solid #A7F3D0;">Open</span>
+                        </div>
+
+                        <!-- Sunday -->
+                        <div class="org-schedule-row" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 10px; border-radius: 6px; background: #FFFFFF; border: 1px solid #E6F0EC;">
+                            <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: #092F2E; min-width: 110px; cursor: pointer;">
+                                <input type="checkbox" id="orgHourActive_sun" onchange="onOrgHourToggle('sun')" style="width: 16px; height: 16px; accent-color: #047857;" />
+                                <span>Sunday</span>
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <input type="time" id="orgHourOpen_sun" value="09:00" disabled class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px; opacity: 0.6;" />
+                                <span style="font-size: 11px; color: #648781;">to</span>
+                                <input type="time" id="orgHourClose_sun" value="18:00" disabled class="brand-input" style="height: 30px; font-size: 11.5px; padding: 2px 6px; border: 1.5px solid #DCE9E5; border-radius: 4px; opacity: 0.6;" />
+                            </div>
+                            <span id="orgHourStatus_sun" style="font-size: 10.5px; font-weight: 700; min-width: 75px; text-align: right; color: #648781; background: #F1F5F9; padding: 2px 8px; border-radius: 4px; border: 1px solid #CBD5E1;">Closed</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Auto-Away Message -->
+                <div style="background: #FFFFFF; border: 1.5px solid #D1E5DE; border-radius: 8px; padding: 14px 16px; margin-bottom: 8px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                        <div>
+                            <label for="orgAwayMessageInput" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470;">Off-Hours Auto-Away Response</label>
+                            <span style="font-size: 11px; color: #648781;">Delivered by the admissions AI bot when student chats outside operating desk hours</span>
+                        </div>
+                        <button type="button" class="brand-btn-secondary" style="height: 26px; padding: 0 10px; font-size: 10.5px; font-weight: 700; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;" onclick="applyOrgAwayTemplate()">
+                            <span>⚡ Load Recommended Template</span>
+                        </button>
+                    </div>
+                    <textarea id="orgAwayMessageInput" class="brand-textarea" rows="3" style="width: 100%; box-sizing: border-box; font-size: 12px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 8px 12px; line-height: 1.45;" placeholder="Our Admissions & Support Desk is currently closed. Your inquiry has been received and prioritized. A counselor will respond promptly during our next operating shift."></textarea>
+                </div>
+            </form>
+        </div>
+
+        <!-- Modal Footer -->
+        <div style="padding: 14px 24px; border-top: 1.5px solid #E6F0EC; background: #FAFDFB; display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
+            <button type="button" class="brand-btn-secondary" style="height: 34px; padding: 0 16px; font-size: 11.5px; font-weight: 600; border-radius: 6px;" onclick="closeOrgHoursModal()">Cancel</button>
+            <button type="button" class="brand-btn-primary" id="btnSaveOrgHours" style="height: 34px; padding: 0 20px; font-size: 11.5px; font-weight: 700; border-radius: 6px; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.2);" onclick="saveOrgHours()">
+                <span>💾</span> Save Operating Hours
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL 2: Organization Lead Escalation & Assignment SLA Editor            -->
+<!-- ========================================================================= -->
+<div id="modalOrgEscalation" style="display: none; position: fixed; inset: 0; z-index: 10050; background: rgba(6, 61, 59, 0.55); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+    <div style="background: #FFFFFF; border-radius: 16px; max-width: 720px; width: 100%; max-height: 92vh; display: flex; flex-direction: column; box-shadow: 0 24px 48px -12px rgba(6, 61, 59, 0.35); border: 1.5px solid #DCE9E5; overflow: hidden;">
+        
+        <!-- Modal Header -->
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1.5px solid #E6F0EC; background: #FAFDFB;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; background: #FFFBEB; font-size: 20px; color: #D97706; border: 1px solid #FDE68A;">⚡</span>
+                <div>
+                    <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #063D3B;">Lead Escalation &amp; Assignment SLA Policy</h3>
+                    <div style="font-size: 11.5px; color: #648781; margin-top: 2px;">Configure institution routing algorithm, counselor alert triggers, and response SLA target</div>
+                </div>
+            </div>
+            <button type="button" onclick="closeOrgEscalationModal()" style="background: transparent; border: none; font-size: 20px; cursor: pointer; color: #648781; padding: 4px 8px; border-radius: 6px; line-height: 1;">&times;</button>
+        </div>
+
+        <!-- Modal Body (Scrollable) -->
+        <div style="padding: 24px; overflow-y: auto; flex: 1; box-sizing: border-box;">
+            <form id="orgEscalationForm" onsubmit="event.preventDefault(); saveOrgEscalation();">
+                
+                <!-- Lead Auto-Assignment Logic -->
+                <div style="margin-bottom: 18px;">
+                    <label for="orgLeadAssignmentSelect" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">Lead Auto-Assignment Logic</label>
+                    <select id="orgLeadAssignmentSelect" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+                        <option value="round_robin">Round-Robin (Equally distribute incoming inquiries across all active counselors)</option>
+                        <option value="direct">Direct Assignment (Assign all leads to Primary Admissions Lead / Admin)</option>
+                    </select>
+                </div>
+
+                <!-- First-Touch Target SLA Stepper -->
+                <div style="margin-bottom: 18px;">
+                    <label for="orgSlaTargetMinutesInput" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">First-Touch Counselor Target SLA (Minutes)</label>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <input type="number" id="orgSlaTargetMinutesInput" min="1" max="120" value="8" class="brand-input" style="width: 120px; height: 38px; font-size: 13px; font-weight: 700; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        <span style="font-size: 12px; color: #648781;">minutes target for staff counselor to respond to hot lead</span>
+                    </div>
+                </div>
+
+                <!-- Escalation Triggers -->
+                <div style="background: #F8FCFA; border: 1.5px solid #DCE9E5; border-radius: 8px; padding: 14px 16px; margin-bottom: 18px;">
+                    <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 8px;">Multi-Channel Escalation Alerts</label>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <label style="font-size: 12px; color: #092F2E; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600;">
+                            <input type="checkbox" id="orgEscalateEmailCheck" checked style="width: 16px; height: 16px; accent-color: #047857;" /> Send instant Email notification to assigned staff counselor on lead escalation
+                        </label>
+                        <label style="font-size: 12px; color: #092F2E; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600;">
+                            <input type="checkbox" id="orgEscalateWhatsappCheck" checked style="width: 16px; height: 16px; accent-color: #047857;" /> Send instant WhatsApp alert to institution desk on urgent student inquiry
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Priority Channel Selection -->
+                <div style="margin-bottom: 18px;">
+                    <label for="orgPriorityChannelSelect" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">Priority Alert Channel</label>
+                    <select id="orgPriorityChannelSelect" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+                        <option value="whatsapp_email">WhatsApp + Email (Recommended: Multi-Channel)</option>
+                        <option value="whatsapp">WhatsApp Only</option>
+                        <option value="email">Email Only</option>
+                    </select>
+                </div>
+
+                <!-- Info Notice -->
+                <div style="padding: 12px 14px; border: 1.5px solid #BFDBFE; background: #EFF6FF; border-radius: 6px; display: flex; align-items: flex-start; gap: 10px;">
+                    <span style="font-size: 16px; line-height: 1;">📞</span>
+                    <div style="font-size: 11.5px; color: #1E3A8A; line-height: 1.45;">
+                        <strong>Counselor Callbacks &amp; Campus Tours Integrated:</strong> Incoming lead callbacks and campus visit requests will follow these institution-level SLA targets and notification rules automatically.
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Modal Footer -->
+        <div style="padding: 14px 24px; border-top: 1.5px solid #E6F0EC; background: #FAFDFB; display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
+            <button type="button" class="brand-btn-secondary" style="height: 34px; padding: 0 16px; font-size: 11.5px; font-weight: 600; border-radius: 6px;" onclick="closeOrgEscalationModal()">Cancel</button>
+            <button type="button" class="brand-btn-primary" id="btnSaveOrgEscalation" style="height: 34px; padding: 0 20px; font-size: 11.5px; font-weight: 700; border-radius: 6px; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.2);" onclick="saveOrgEscalation()">
+                <span>💾</span> Save Escalation Policy
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- Client-side Logic for Organization Hours & Escalations (Overview Tab)      -->
+<!-- ========================================================================= -->
+<script>
+(function() {
+    var _orgHoursData = null;
+    var _orgEscalationData = null;
+    var DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+
+    function formatTime12(t24) {
+        if (!t24) return '';
+        var parts = t24.split(':');
+        var h = parseInt(parts[0], 10);
+        var m = parts[1] || '00';
+        var ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12;
+        return (h < 10 ? '0' + h : h) + ':' + m + ' ' + ampm;
+    }
+
+    function formatScheduleString(wh, tz) {
+        if (!wh || typeof wh !== 'object') {
+            return 'Mon – Sat • 09:00 AM – 06:00 PM ET';
+        }
+        var activeDays = DAYS.filter(function(d) {
+            return wh[d] && (wh[d].active === true || wh[d].active === 1 || wh[d].active === '1');
+        });
+        if (activeDays.length === 0) return 'Desk Currently Inactive / Closed';
+
+        var sample = wh[activeDays[0]];
+        var timeStr = sample ? (formatTime12(sample.open) + ' – ' + formatTime12(sample.close)) : '09:00 AM – 06:00 PM';
+        if (sample && sample.open === '00:00' && sample.close === '23:59') {
+            timeStr = '24 Hours';
+        }
+
+        var dayStr = '';
+        if (activeDays.length === 7) dayStr = 'All 7 Days';
+        else if (activeDays.length === 6 && activeDays.indexOf('sun') === -1) dayStr = 'Mon – Sat';
+        else if (activeDays.length === 5 && activeDays.indexOf('sat') === -1 && activeDays.indexOf('sun') === -1) dayStr = 'Mon – Fri';
+        else dayStr = activeDays.map(function(d) { return d.charAt(0).toUpperCase() + d.slice(1); }).join(', ');
+
+        var tzShort = 'ET';
+        tz = tz || 'America/New_York';
+        if (tz.indexOf('New_York') !== -1) tzShort = 'ET';
+        else if (tz.indexOf('Chicago') !== -1) tzShort = 'CT';
+        else if (tz.indexOf('Denver') !== -1) tzShort = 'MT';
+        else if (tz.indexOf('Los_Angeles') !== -1) tzShort = 'PT';
+        else if (tz.indexOf('Kolkata') !== -1) tzShort = 'IST';
+        else if (tz.indexOf('London') !== -1) tzShort = 'GMT';
+        else if (tz.indexOf('Dubai') !== -1) tzShort = 'GST';
+        else tzShort = tz;
+
+        return dayStr + ' • ' + timeStr + ' ' + tzShort;
+    }
+
+    function computeStatus(wh, tz) {
+        if (!wh || typeof wh !== 'object') return { isOpen: true, label: 'Currently Open' };
+        try {
+            tz = tz || 'America/New_York';
+            var now = new Date();
+            var dayFormatter = new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: tz });
+            var timeFormatter = new Intl.DateTimeFormat('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: tz });
+            var dayKey = dayFormatter.format(now).toLowerCase();
+            var currentTimeStr = timeFormatter.format(now);
+
+            var dayCfg = wh[dayKey];
+            if (!dayCfg || !dayCfg.active) return { isOpen: false, label: 'Currently Closed' };
+            if (dayCfg.open === '00:00' && dayCfg.close === '23:59') return { isOpen: true, label: 'Currently Open (24/7)' };
+            if (currentTimeStr >= dayCfg.open && currentTimeStr <= dayCfg.close) {
+                return { isOpen: true, label: 'Currently Open' };
+            } else {
+                return { isOpen: false, label: 'Currently Closed' };
+            }
+        } catch(e) {
+            return { isOpen: true, label: 'Currently Open' };
+        }
+    }
+
+    window.onOrgHourToggle = function(day) {
+        var chk = document.getElementById('orgHourActive_' + day);
+        var openInp = document.getElementById('orgHourOpen_' + day);
+        var closeInp = document.getElementById('orgHourClose_' + day);
+        var badge = document.getElementById('orgHourStatus_' + day);
+        if (!chk) return;
+        var isActive = chk.checked;
+        if (openInp) { openInp.disabled = !isActive; openInp.style.opacity = isActive ? '1' : '0.6'; }
+        if (closeInp) { closeInp.disabled = !isActive; closeInp.style.opacity = isActive ? '1' : '0.6'; }
+        if (badge) {
+            if (isActive) {
+                badge.textContent = 'Open';
+                badge.style.color = '#047857';
+                badge.style.background = '#ECFDF5';
+                badge.style.borderColor = '#A7F3D0';
+            } else {
+                badge.textContent = 'Closed';
+                badge.style.color = '#648781';
+                badge.style.background = '#F1F5F9';
+                badge.style.borderColor = '#CBD5E1';
+            }
+        }
+    };
+
+    window.applyOrgHoursPreset = function(preset) {
+        DAYS.forEach(function(d) {
+            var chk = document.getElementById('orgHourActive_' + d);
+            var openInp = document.getElementById('orgHourOpen_' + d);
+            var closeInp = document.getElementById('orgHourClose_' + d);
+            if (!chk) return;
+
+            if (preset === 'mon_sat') {
+                chk.checked = (d !== 'sun');
+                if (openInp) openInp.value = '09:00';
+                if (closeInp) closeInp.value = '18:00';
+            } else if (preset === 'mon_fri') {
+                chk.checked = (d !== 'sat' && d !== 'sun');
+                if (openInp) openInp.value = '09:00';
+                if (closeInp) closeInp.value = '17:00';
+            } else if (preset === '24_7') {
+                chk.checked = true;
+                if (openInp) openInp.value = '00:00';
+                if (closeInp) closeInp.value = '23:59';
+            }
+            window.onOrgHourToggle(d);
+        });
+    };
+
+    window.applyOrgAwayTemplate = function() {
+        var inp = document.getElementById('orgAwayMessageInput');
+        if (inp) {
+            inp.value = "Our Admissions & Support Desk is currently closed for the evening. Your inquiry has been received and prioritized. A counselor will respond promptly tomorrow morning during our active shift.";
+        }
+    };
+
+    window.openOrgHoursModal = function() {
+        var modal = document.getElementById('modalOrgHours');
+        if (!modal) return;
+        modal.style.display = 'flex';
+
+        var wh = (_orgHoursData && _orgHoursData.working_hours) || {
+            mon: { active: true, open: '09:00', close: '18:00' },
+            tue: { active: true, open: '09:00', close: '18:00' },
+            wed: { active: true, open: '09:00', close: '18:00' },
+            thu: { active: true, open: '09:00', close: '18:00' },
+            fri: { active: true, open: '09:00', close: '18:00' },
+            sat: { active: true, open: '09:00', close: '18:00' },
+            sun: { active: false, open: '09:00', close: '18:00' }
+        };
+
+        DAYS.forEach(function(d) {
+            var cfg = wh[d] || { active: false, open: '09:00', close: '18:00' };
+            var chk = document.getElementById('orgHourActive_' + d);
+            var openInp = document.getElementById('orgHourOpen_' + d);
+            var closeInp = document.getElementById('orgHourClose_' + d);
+            if (chk) chk.checked = !!cfg.active;
+            if (openInp) openInp.value = cfg.open || '09:00';
+            if (closeInp) closeInp.value = cfg.close || '18:00';
+            window.onOrgHourToggle(d);
+        });
+
+        var tzInp = document.getElementById('orgTimezoneInput');
+        if (tzInp && _orgHoursData && _orgHoursData.timezone) tzInp.value = _orgHoursData.timezone;
+
+        var awayInp = document.getElementById('orgAwayMessageInput');
+        if (awayInp && _orgHoursData && _orgHoursData.auto_away_message) awayInp.value = _orgHoursData.auto_away_message;
+    };
+
+    window.closeOrgHoursModal = function() {
+        var modal = document.getElementById('modalOrgHours');
+        if (modal) modal.style.display = 'none';
+    };
+
+    window.saveOrgHours = async function() {
+        var btn = document.getElementById('btnSaveOrgHours');
+        var origText = btn ? btn.innerHTML : '';
+        if (btn) { btn.innerHTML = '<span>Saving...</span>'; btn.disabled = true; }
+
+        var tz = (document.getElementById('orgTimezoneInput') || {}).value || 'America/New_York';
+        var awayMsg = (document.getElementById('orgAwayMessageInput') || {}).value || '';
+
+        var wh = {};
+        DAYS.forEach(function(d) {
+            var chk = document.getElementById('orgHourActive_' + d);
+            var openInp = document.getElementById('orgHourOpen_' + d);
+            var closeInp = document.getElementById('orgHourClose_' + d);
+            wh[d] = {
+                active: chk ? chk.checked : false,
+                open: (openInp && openInp.value) ? openInp.value : '09:00',
+                close: (closeInp && closeInp.value) ? closeInp.value : '18:00'
+            };
+        });
+
+        try {
+            var token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token');
+            var res = await fetch('/v1/organization/operating-hours', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({
+                    timezone: tz,
+                    working_hours: wh,
+                    auto_away_message: awayMsg
+                })
+            });
+            var json = await res.json();
+            if (json.status === 'success') {
+                _orgHoursData = json.data;
+                renderOrgHoursCard();
+                closeOrgHoursModal();
+                if (typeof showToast === 'function') showToast('Operating hours saved successfully', 'success');
+            } else {
+                alert('Failed to save operating hours: ' + (json.message || 'Unknown error'));
+            }
+        } catch(e) {
+            alert('Save error: ' + e.message);
+        } finally {
+            if (btn) { btn.innerHTML = origText; btn.disabled = false; }
+        }
+    };
+
+    window.openOrgEscalationModal = function() {
+        var modal = document.getElementById('modalOrgEscalation');
+        if (!modal) return;
+        modal.style.display = 'flex';
+
+        var logicSelect = document.getElementById('orgLeadAssignmentSelect');
+        if (logicSelect && _orgEscalationData) logicSelect.value = _orgEscalationData.lead_assignment_logic || 'round_robin';
+
+        var slaInput = document.getElementById('orgSlaTargetMinutesInput');
+        if (slaInput && _orgEscalationData) slaInput.value = _orgEscalationData.sla_target_minutes || 8;
+
+        var emailChk = document.getElementById('orgEscalateEmailCheck');
+        if (emailChk && _orgEscalationData) emailChk.checked = (_orgEscalationData.escalate_email !== false && _orgEscalationData.escalate_email !== 0);
+
+        var waChk = document.getElementById('orgEscalateWhatsappCheck');
+        if (waChk && _orgEscalationData) waChk.checked = (_orgEscalationData.escalate_whatsapp !== false && _orgEscalationData.escalate_whatsapp !== 0);
+
+        var chanSelect = document.getElementById('orgPriorityChannelSelect');
+        if (chanSelect && _orgEscalationData) chanSelect.value = _orgEscalationData.priority_channel || 'whatsapp_email';
+    };
+
+    window.closeOrgEscalationModal = function() {
+        var modal = document.getElementById('modalOrgEscalation');
+        if (modal) modal.style.display = 'none';
+    };
+
+    window.saveOrgEscalation = async function() {
+        var btn = document.getElementById('btnSaveOrgEscalation');
+        var origText = btn ? btn.innerHTML : '';
+        if (btn) { btn.innerHTML = '<span>Saving...</span>'; btn.disabled = true; }
+
+        var logic = (document.getElementById('orgLeadAssignmentSelect') || {}).value || 'round_robin';
+        var sla = parseInt((document.getElementById('orgSlaTargetMinutesInput') || {}).value, 10) || 8;
+        var email = (document.getElementById('orgEscalateEmailCheck') || {}).checked ? 1 : 0;
+        var wa = (document.getElementById('orgEscalateWhatsappCheck') || {}).checked ? 1 : 0;
+        var priority = (document.getElementById('orgPriorityChannelSelect') || {}).value || 'whatsapp_email';
+
+        try {
+            var token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token');
+            var res = await fetch('/v1/organization/escalation-rules', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({
+                    lead_assignment_logic: logic,
+                    sla_target_minutes: sla,
+                    escalate_email: email,
+                    escalate_whatsapp: wa,
+                    priority_channel: priority
+                })
+            });
+            var json = await res.json();
+            if (json.status === 'success') {
+                _orgEscalationData = json.data;
+                renderOrgEscalationCard();
+                closeOrgEscalationModal();
+                if (typeof showToast === 'function') showToast('Escalation rules saved successfully', 'success');
+            } else {
+                alert('Failed to save escalation policy: ' + (json.message || 'Unknown error'));
+            }
+        } catch(e) {
+            alert('Save error: ' + e.message);
+        } finally {
+            if (btn) { btn.innerHTML = origText; btn.disabled = false; }
+        }
+    };
+
+    function renderOrgHoursCard() {
+        if (!_orgHoursData) return;
+        var wh = _orgHoursData.working_hours;
+        var tz = _orgHoursData.timezone || 'America/New_York';
+
+        var schedEl = document.getElementById('orgHoursScheduleText');
+        if (schedEl) schedEl.textContent = formatScheduleString(wh, tz);
+
+        var st = computeStatus(wh, tz);
+        var stLabel = document.getElementById('orgHoursStatusLabel');
+        var stBadge = document.getElementById('orgHoursStatusBadge');
+        if (stLabel) stLabel.textContent = st.label;
+        if (stBadge) {
+            if (st.isOpen) {
+                stBadge.style.color = '#047857';
+                stBadge.style.background = '#ECFDF5';
+                stBadge.style.borderColor = '#A7F3D0';
+            } else {
+                stBadge.style.color = '#B91C1C';
+                stBadge.style.background = '#FEF2F2';
+                stBadge.style.borderColor = '#FECACA';
+            }
+        }
+
+        var tzDisp = document.getElementById('orgTimezoneDisplay');
+        if (tzDisp) tzDisp.textContent = tz;
+
+        DAYS.forEach(function(d) {
+            var pill = document.querySelector('#orgDayStrip .dept-day-pill[data-day="' + d + '"]');
+            if (pill) {
+                var isActive = wh && wh[d] && (wh[d].active === true || wh[d].active === 1 || wh[d].active === '1');
+                if (isActive) {
+                    pill.classList.remove('off');
+                } else {
+                    pill.classList.add('off');
+                }
+            }
+        });
+
+        var awayEl = document.getElementById('orgAwayMessagePreview');
+        if (awayEl && _orgHoursData.auto_away_message) {
+            awayEl.textContent = '“' + _orgHoursData.auto_away_message + '”';
+        }
+    }
+
+    function renderOrgEscalationCard() {
+        if (!_orgEscalationData) return;
+        var sla = _orgEscalationData.sla_target_minutes || 8;
+        var logic = _orgEscalationData.lead_assignment_logic || 'round_robin';
+        var priority = _orgEscalationData.priority_channel || 'whatsapp_email';
+
+        var slaBadge = document.getElementById('orgSlaBadge');
+        if (slaBadge) slaBadge.textContent = '< ' + sla + ' Mins SLA';
+
+        var routeTitle = document.getElementById('orgRoutingTitle');
+        if (routeTitle) {
+            routeTitle.textContent = (logic === 'direct') ? 'Direct Admin' : 'Round-Robin';
+        }
+
+        var chanText = document.getElementById('orgPriorityChannelText');
+        if (chanText) {
+            var chanLabel = (priority === 'whatsapp') ? 'WhatsApp Only Active' : ((priority === 'email') ? 'Email Only Active' : 'WhatsApp + Email Active');
+            chanText.textContent = 'Priority Channel: ' + chanLabel;
+        }
+    }
+
+    async function loadOrgOperationsData() {
+        try {
+            var token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token');
+            if (!token) return;
+
+            var [hoursRes, escRes] = await Promise.all([
+                fetch('/v1/organization/operating-hours', { headers: { 'Authorization': 'Bearer ' + token } }),
+                fetch('/v1/organization/escalation-rules', { headers: { 'Authorization': 'Bearer ' + token } })
+            ]);
+
+            if (hoursRes.ok) {
+                var hJson = await hoursRes.json();
+                if (hJson.status === 'success') {
+                    _orgHoursData = hJson.data;
+                    renderOrgHoursCard();
+                }
+            }
+
+            if (escRes.ok) {
+                var eJson = await escRes.json();
+                if (eJson.status === 'success') {
+                    _orgEscalationData = eJson.data;
+                    renderOrgEscalationCard();
+                }
+            }
+        } catch(err) {
+            console.warn('[Edvora] Failed to load org operations data in overview:', err);
+        }
+    }
+
+    // Auto-fetch data when Overview tab is loaded
+    loadOrgOperationsData();
+})();
+</script>
 
 <!-- Hidden compatibility bindings for JS analytics loader -->
 <div style="display:none;">
@@ -436,3 +1210,4 @@
     <span id="quotaChatbotsSlotsRemaining"></span>
     <a id="overviewStandaloneLink" href="/test" target="_blank"></a>
 </div>
+
