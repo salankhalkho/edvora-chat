@@ -15457,17 +15457,14 @@ echo $response['reply'];
             const vVer = document.getElementById('view_doc_academic_version');
             if (vVer) vVer.innerText = doc.academic_version || '2026-27';
 
-            // Departments Scope
-            const deptContainer = document.getElementById('viewDocDeptContainer');
-            if (deptContainer) {
-                const depts = doc.departments || [];
-                if (depts.length === 0 || doc.is_global) {
-                    deptContainer.innerHTML = '<span class="ckh-dept-badge" style="background:#EFF6FF; border-color:#BFDBFE; color:#1D4ED8;"><span>🌐 Global (Institution-Wide)</span></span>';
+            // Academic Program Mapped
+            const progContainer = document.getElementById('viewDocProgramContainer') || document.getElementById('viewDocDeptContainer');
+            if (progContainer) {
+                const progName = doc.program_name || (doc.program && doc.program.name) || (doc.program && doc.program.course_name) || '';
+                if (progName) {
+                    progContainer.innerHTML = `<span class="badge" style="background:#ECFDF5; border:1px solid #A7F3D0; color:#065F46; font-size:12px; font-weight:600; padding:5px 10px; border-radius:6px; display:inline-flex; align-items:center; gap:6px;">🎓 ${escapeHtml(progName)}</span>`;
                 } else {
-                    deptContainer.innerHTML = depts.map(d => {
-                        const bStyle = getDeptBadgeStyle(d.id, d.name);
-                        return `<span class="ckh-dept-badge" style="${bStyle.style}"><span>${escapeHtml(d.icon || '🏛️')} ${escapeHtml(d.name)}</span></span>`;
-                    }).join('');
+                    progContainer.innerHTML = '<span style="font-size: 12px; color: #94A3B8;">— None (Global / Institution-wide)</span>';
                 }
             }
 
