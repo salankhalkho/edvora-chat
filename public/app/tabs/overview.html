@@ -417,13 +417,13 @@
           </div>
 
         <!-- 4. LIVE OPERATIONAL POLICIES (INSTITUTION LEVEL: LIVE DESK HOURS & ESCALATION SLA) -->
-        <div style="padding: 24px 24px 32px 24px; background: #FFFFFF; border-top: 1.5px solid #E6F0EC;">
-          <div class="dept-section-track" style="margin-bottom: 14px;">
-            <span class="dept-track-title">Live Operational Policies &bull; Institution Command</span>
-            <span class="dept-track-meta">Automated Desk Schedules &amp; Escalation SLA &bull; Click to Edit</span>
+        <div style="padding: 20px 24px 36px 24px; box-sizing: border-box; width: 100%;">
+          <div class="dept-section-track" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+            <span class="dept-track-title" style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #64748B;">Live Operational Policies</span>
+            <span class="dept-track-meta" style="font-size: 10.5px; font-weight: 500; color: #94A3B8;">Automated Schedules &amp; Escalations &bull; Click to Edit</span>
           </div>
 
-          <div class="dept-ops-grid">
+          <div class="dept-ops-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; width: 100%; box-sizing: border-box;">
             <!-- Card 1: Live Desk Hours & Auto-Away Automation (Institution Level) -->
             <div class="dept-ops-card" id="cardOrgHours" onclick="openOrgHoursModal()" title="Edit Institution Live Desk Hours &amp; Auto-Away Automation">
               <div class="dept-telemetry-header" style="margin-bottom: 0;">
@@ -450,8 +450,8 @@
 
               <!-- 7-Day Visual Strip -->
               <div>
-                <div style="font-size: 10px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;">
-                  Institution Operating Days (<span id="orgTimezoneDisplay">America/New_York</span>)
+                <div style="font-size: 10.5px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;">
+                  Operating Days (<span id="orgTimezoneDisplay">America/New_York</span>)
                 </div>
                 <div class="dept-day-strip" id="orgDayStrip">
                   <div class="dept-day-pill" data-day="mon">Mon</div>
@@ -466,7 +466,7 @@
 
               <!-- Away Message Preview -->
               <div style="background: #F8FAF9; border-left: 3px solid #047857; border-radius: 0 8px 8px 0; padding: 10px 14px;">
-                <div style="font-size: 10px; font-weight: 700; color: #047857; text-transform: uppercase; margin-bottom: 3px;">Automated After-Hours Student Response</div>
+                <div style="font-size: 10.5px; font-weight: 700; color: #047857; text-transform: uppercase; margin-bottom: 3px;">Automated After-Hours Student Response</div>
                 <div id="orgAwayMessagePreview" style="font-size: 11.5px; color: #334155; line-height: 1.45; font-style: italic;">
                   &ldquo;Our Admissions &amp; Support Desk is currently closed. Your inquiry has been received and prioritized. A counselor will respond promptly during our next operating shift.&rdquo;
                 </div>
@@ -498,22 +498,22 @@
 
               <!-- 3-Stage Visual Pipeline Stepper -->
               <div>
-                <div style="font-size: 10px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;">Automated Escalation Pipeline</div>
+                <div style="font-size: 10.5px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;">Automated Escalation Pipeline</div>
                 <div class="dept-stepper-container">
                   <div class="dept-step-tile">
                     <div class="dept-step-num">Step 1 &bull; Trigger</div>
                     <div class="dept-step-title">2 Bot Turns</div>
-                    <div class="dept-step-desc">Unresolved query or human handoff</div>
+                    <div class="dept-step-desc">Unresolved query or explicit human handoff request</div>
                   </div>
                   <div class="dept-step-tile">
                     <div class="dept-step-num">Step 2 &bull; Dispatch</div>
                     <div class="dept-step-title" id="orgDispatchTitle">Multi-Channel</div>
-                    <div class="dept-step-desc" id="orgDispatchDesc">WhatsApp &amp; Email staff alerts</div>
+                    <div class="dept-step-desc" id="orgDispatchDesc">Instant WhatsApp &amp; Email duty counselor alerts</div>
                   </div>
                   <div class="dept-step-tile">
                     <div class="dept-step-num">Step 3 &bull; Routing</div>
                     <div class="dept-step-title" id="orgRoutingTitle">Round-Robin</div>
-                    <div class="dept-step-desc">Balanced equal distribution across roster</div>
+                    <div class="dept-step-desc">Balanced equal distribution across on-duty roster</div>
                   </div>
                 </div>
               </div>
@@ -521,7 +521,7 @@
               <!-- SLA Meta -->
               <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #648781; padding-top: 4px; border-top: 1px dashed #E2E8F0;">
                 <span id="orgPriorityChannelText">Priority Channel: WhatsApp + Email Active</span>
-                <span style="font-weight: 700; color: #047857;">Institution Wide</span>
+                <span style="font-weight: 700; color: #047857;">96.8% Inquiries Handled Cleanly</span>
               </div>
             </div>
 
