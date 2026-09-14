@@ -411,6 +411,7 @@ $router->post('/v1/departments/{id}/courses', [DepartmentController::class, 'man
 
 // Academic Programs Management Routes (Clean /v1/programs Endpoints)
 $router->get('/v1/programs', [ProgramController::class, 'index'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->get('/v1/programs/{id}', [ProgramController::class, 'show'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->post('/v1/programs', [ProgramController::class, 'store'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->put('/v1/programs/{id}', [ProgramController::class, 'update'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->delete('/v1/programs/{id}', [ProgramController::class, 'delete'], [AuthMiddleware::class, TenantMiddleware::class]);

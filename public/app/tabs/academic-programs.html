@@ -393,7 +393,9 @@
               <span style="display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:6px; background:#F4FAF7; color:#063D3B; font-weight:800; font-size:13px; flex-shrink:0;">🎓</span>
               <div>
                 <div style="font-size: 12.5px; font-weight: 700; color: #063D3B; display: flex; align-items: center; flex-wrap: wrap;">
-                  <span>${escapeHtml(c.course_name)}</span>
+                  <a href="javascript:void(0)" onclick="openProgramDetail(${c.id})" style="color: #063D3B; text-decoration: none; border-bottom: 1.5px solid transparent; transition: all 0.15s ease;" onmouseover="this.style.color='#047857'; this.style.borderBottomColor='#047857'" onmouseout="this.style.color='#063D3B'; this.style.borderBottomColor='transparent'" title="View details and conversion telemetry for ${escapeHtml(c.course_name)}">
+                    ${escapeHtml(c.course_name)}
+                  </a>
                   ${codeHtml}
                 </div>
                 ${feeHtml}
@@ -419,6 +421,10 @@
           </td>
           <td style="text-align: right; vertical-align: middle;">
             <div style="display: inline-flex; align-items: center; gap: 6px;">
+              <button type="button" class="brand-btn-secondary" onclick="openProgramDetail(${c.id})" title="View Program Details & Funnel" style="padding: 4px 9px; font-size: 11.5px; font-weight: 600; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; background: #F4FAF7; color: #063D3B; border: 1px solid #D1E5DE;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <span>View</span>
+              </button>
               <button type="button" class="brand-btn-secondary" onclick="openEditProgram(${c.id})" title="Edit Program" style="padding: 4px 9px; font-size: 11.5px; font-weight: 600; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                 <span>Edit</span>
@@ -432,6 +438,14 @@
       `;
     }).join('');
   }
+
+  window.openProgramDetail = function(courseId) {
+    window._currentDetailProgramId = courseId;
+    sessionStorage.setItem('edvora_detail_program_id', courseId);
+    if (typeof switchNavTab === 'function') {
+      switchNavTab('academic-program-detail');
+    }
+  };
 
   window.openEditProgram = function(courseId) {
     window._currentEditProgramId = courseId;

@@ -20,6 +20,168 @@ class ProgramController
     }
 
     /**
+     * Helper to parse time window parameter and return SQL condition & params.
+     */
+    private function parseWindowDateCondition(Request $request): array
+    {
+        $window = strtolower(trim((string)($request->get('window') ?? $request->get('time_window') ?? '30d')));
+        $startDate = trim((string)($request->get('start_date') ?? ''));
+        $endDate = trim((string)($request->get('end_date') ?? ''));
+
+        $sqlWhereDate = '';
+        $dateParams = [];
+        $windowLabel = 'Last 30 Days';
+
+        if (!empty($startDate) && !empty($endDate)) {
+            $window = 'custom';
+            $sqlWhereDate = ' AND created_at >= :start_date AND created_at <= :end_date';
+            $dateParams[':start_date'] = $startDate . ' 00:00:00';
+            $dateParams[':end_date'] = $endDate . ' 23:59:59';
+            $windowLabel = date('d M Y', strtotime($startDate)) . ' – ' . date('d M Y', strtotime($endDate));
+        } else {
+            switch ($window) {
+                case '24h':
+                    $sqlWhereDate = ' AND created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)';
+                    $windowLabel = 'Last 24 Hours';
+                    break;
+                case '7d':
+                    $sqlWhereDate = ' AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)';
+                    $windowLabel = 'Last 7 Days';
+                    break;
+                case '3m':
+                    $sqlWhereDate = ' AND created_at >= DATE_SUB(NOW(), INTERVAL 90 DAY)';
+                    $windowLabel = 'Last 3 Months';
+                    break;
+                case '6m':
+                    $sqlWhereDate = ' AND created_at >= DATE_SUB(NOW(), INTERVAL 180 DAY)';
+                    $windowLabel = 'Last 6 Months';
+                    break;
+                case 'all':
+                    $sqlWhereDate = '';
+                    $windowLabel = 'All Time';
+                    break;
+                case '30d':
+                default:
+                    $window = '30d';
+                    $sqlWhereDate = ' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)';
+                    $windowLabel = 'Last 30 Days';
+                    break;
+            }
+        }
+
+        return [
+            'window' => $window,
+            'window_label' => $windowLabel,
+            'sql' => $sqlWhereDate,
+            'params' => $dateParams
+        ];
+    }
+
+    /**
+     * GET /v1/programs/{id}
+     * Retrieve single academic program details and scoped 4 pipeline cards telemetry.
+     */
+    public function show(Request $request): void
+    {
+        $orgId = $this->getOrgId($request);
+        if (!$orgId) {
+            Response::error('Organization context required', 400);
+            return;
+        }
+
+        $id = (int)$request->param('id');
+        if (!$id) {
+            Response::error('Invalid program ID', 400);
+            return;
+        }
+
+        try {
+            $db = Database::getConnection();
+
+            $stmt = $db->prepare("
+                SELECT 
+                    p.*
+                FROM programs p
+                WHERE p.id = :id AND p.organization_id = :org_id
+            ");
+            $stmt->execute([':id' => $id, ':org_id' => $orgId]);
+            $program = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$program) {
+                Response::error('Academic program not found or unauthorized', 404);
+                return;
+            }
+
+            // Mapped campuses
+            $stmtCmp = $db->prepare("
+                SELECT c.id, c.name, c.short_name, c.city, c.state, c.is_primary
+                FROM campuses c
+                JOIN campus_courses cc ON c.id = cc.campus_id
+                WHERE cc.course_id = ? AND c.organization_id = ? AND c.status = 'active'
+                ORDER BY c.is_primary DESC, c.name ASC
+            ");
+            $stmtCmp->execute([$id, $orgId]);
+            $campuses = $stmtCmp->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $program['campuses'] = $campuses;
+            $program['campus_ids'] = array_map('intval', array_column($campuses, 'id'));
+
+            // Parse time window filter
+            $timeWindow = $this->parseWindowDateCondition($request);
+            $sqlWhereDate = $timeWindow['sql'];
+            $dateParams = $timeWindow['params'];
+
+            // Card 1: Callbacks Booked (counselor_callbacks where program_id = ?)
+            $stmtCb = $db->prepare("SELECT COUNT(*) FROM counselor_callbacks WHERE program_id = :program_id AND organization_id = :org_id {$sqlWhereDate}");
+            $stmtCb->execute(array_merge([':program_id' => $id, ':org_id' => $orgId], $dateParams));
+            $callbacksCount = (int)$stmtCb->fetchColumn();
+
+            // Card 2: Campus Tours Scheduled (campus_tour_bookings where program_id = ?)
+            $stmtCt = $db->prepare("SELECT COUNT(*) FROM campus_tour_bookings WHERE program_id = :program_id AND organization_id = :org_id {$sqlWhereDate}");
+            $stmtCt->execute(array_merge([':program_id' => $id, ':org_id' => $orgId], $dateParams));
+            $campusToursCount = (int)$stmtCt->fetchColumn();
+
+            // Card 3: Scholarships Interests (leads where program_id = ? AND scholarship_tier IS NOT NULL)
+            $stmtSch = $db->prepare("SELECT COUNT(*) FROM leads WHERE program_id = :program_id AND organization_id = :org_id AND scholarship_tier IS NOT NULL {$sqlWhereDate}");
+            $stmtSch->execute(array_merge([':program_id' => $id, ':org_id' => $orgId], $dateParams));
+            $scholarshipsCount = (int)$stmtSch->fetchColumn();
+
+            // Card 4: Lead-Magnet Dispatched (lead_assets where program_id = ?, fallback: leads count)
+            $stmtAsset = $db->prepare("SELECT COALESCE(SUM(downloads_count), 0) FROM lead_assets WHERE program_id = :program_id AND organization_id = :org_id {$sqlWhereDate}");
+            $stmtAsset->execute(array_merge([':program_id' => $id, ':org_id' => $orgId], $dateParams));
+            $leadAssetsDownloads = (int)$stmtAsset->fetchColumn();
+
+            if ($leadAssetsDownloads === 0) {
+                // Fallback to leads count for this program
+                $stmtLeads = $db->prepare("SELECT COUNT(*) FROM leads WHERE program_id = :program_id AND organization_id = :org_id {$sqlWhereDate}");
+                $stmtLeads->execute(array_merge([':program_id' => $id, ':org_id' => $orgId], $dateParams));
+                $leadAssetsDownloads = (int)$stmtLeads->fetchColumn();
+            }
+
+            // Total overall leads for context
+            $stmtAllLeads = $db->prepare("SELECT COUNT(*) FROM leads WHERE program_id = :program_id AND organization_id = :org_id {$sqlWhereDate}");
+            $stmtAllLeads->execute(array_merge([':program_id' => $id, ':org_id' => $orgId], $dateParams));
+            $totalLeads = (int)$stmtAllLeads->fetchColumn();
+
+            Response::success([
+                'program' => $program,
+                'time_window' => [
+                    'active' => $timeWindow['window'],
+                    'label' => $timeWindow['window_label']
+                ],
+                'funnel_metrics' => [
+                    'callbacks_count' => $callbacksCount,
+                    'campus_tours_count' => $campusToursCount,
+                    'scholarships_count' => $scholarshipsCount,
+                    'lead_magnet_dispatched' => $leadAssetsDownloads,
+                    'total_leads' => $totalLeads
+                ]
+            ]);
+        } catch (Throwable $e) {
+            Response::error('Failed to retrieve program details: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
      * GET /v1/programs
      * List all programs for the authenticated organization from the 'programs' table.
      */

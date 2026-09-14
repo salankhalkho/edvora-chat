@@ -4166,6 +4166,7 @@
 
             <!-- Tab: Academic Programs & Degrees -->
             <div class="tab-content" id="tab-academic-programs" data-loaded="false"></div>
+            <div class="tab-content" id="tab-academic-program-detail" data-loaded="false"></div>
             <div class="tab-content" id="tab-add-programs" data-loaded="false"></div>
             <div class="tab-content" id="tab-edit-programs" data-loaded="false"></div>
 
@@ -5442,7 +5443,7 @@
             };
         }
 
-        const VALID_APP_TABS = ['overview', 'knowledge', 'knowledge-ingestion', 'academic-programs', 'add-programs', 'edit-programs', 'departments', 'leads', 'callbacks', 'campus-tours', 'scholarships', 'teams', 'assets', 'multilingual', 'conversion-engine', 'placeholder', 'analytics', 'knowledge-gaps', 'integrations', 'chatbot', 'test-chat', 'organization', 'org-settings', 'campuses', 'campus-editor', 'settings', 'knowledge-view', 'knowledge-editor', 'knowledge-edit', 'profile'];
+        const VALID_APP_TABS = ['overview', 'knowledge', 'knowledge-ingestion', 'academic-programs', 'academic-program-detail', 'add-programs', 'edit-programs', 'departments', 'leads', 'callbacks', 'campus-tours', 'scholarships', 'teams', 'assets', 'multilingual', 'conversion-engine', 'placeholder', 'analytics', 'knowledge-gaps', 'integrations', 'chatbot', 'test-chat', 'organization', 'org-settings', 'campuses', 'campus-editor', 'settings', 'knowledge-view', 'knowledge-editor', 'knowledge-edit', 'profile'];
 
         // Navigation Tabs Handling with Async Modular Loading
         const _tabLoadPromises = {};
@@ -5974,7 +5975,7 @@
             } else if (tab === 'chatbot' || tab === 'settings') {
                 const orgItem = document.querySelector(`.nav-item[data-tab="org-settings"]`);
                 if (orgItem) orgItem.classList.add('active');
-            } else if (tab === 'add-programs' || tab === 'edit-programs') {
+            } else if (tab === 'add-programs' || tab === 'edit-programs' || tab === 'academic-program-detail') {
                 const progItem = document.querySelector(`.nav-item[data-tab="academic-programs"]`);
                 if (progItem) progItem.classList.add('active');
             } else if (tab === 'knowledge-edit' || tab === 'knowledge-editor') {
@@ -6050,6 +6051,8 @@
                 cleanTitle = 'Add Academic Program';
             } else if (tab === 'edit-programs') {
                 cleanTitle = 'Edit Academic Program';
+            } else if (tab === 'academic-program-detail') {
+                cleanTitle = 'Academic Program Details';
             } else if (tab === 'teams') {
                 cleanTitle = 'Teams & Staff Management';
             } else if (tab === 'assets') {
@@ -6113,6 +6116,8 @@
                     if (typeof initAddProgramsPage === 'function') initAddProgramsPage();
                 } else if (tab === 'edit-programs') {
                     if (typeof initEditProgramsPage === 'function') initEditProgramsPage();
+                } else if (tab === 'academic-program-detail') {
+                    if (typeof initAcademicProgramDetailPage === 'function') initAcademicProgramDetailPage();
                 } else if (tab === 'teams') {
                     if (typeof loadTeamsWorkspace === 'function') loadTeamsWorkspace();
                 } else if (tab === 'overview') {

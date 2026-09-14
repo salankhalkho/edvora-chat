@@ -1,0 +1,648 @@
+<!-- Client-Approved Academic Program Detail Console (#academic-program-detail) -->
+<style>
+.prog-pipe-card {
+  background: #FFFFFF;
+  border: 1.5px solid #E6F0EC;
+  border-radius: 10px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(6, 61, 59, 0.04);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.prog-pipe-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(6, 61, 59, 0.08);
+  border-color: #B4D7CC;
+}
+.prog-pipe-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.prog-pipe-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.prog-pipe-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  letter-spacing: 0.2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.prog-pipe-val {
+  font-size: 26px;
+  font-weight: 800;
+  color: #063D3B;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  font-family: 'Cabinet Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  margin-bottom: 2px;
+}
+.prog-pipe-lbl {
+  font-size: 12px;
+  font-weight: 700;
+  color: #063D3B;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.prog-pipe-sub {
+  font-size: 11px;
+  color: #648781;
+  font-weight: 500;
+  margin-top: 3px;
+  line-height: 1.35;
+}
+.prog-spec-card {
+  background: #FFFFFF;
+  border: 1.5px solid #E6F0EC;
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.prog-spec-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #648781;
+}
+.prog-spec-value {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #063D3B;
+  word-break: break-word;
+}
+</style>
+
+<div class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
+
+  <!-- VIEW: PROGRAM DEEP DIVE DASHBOARD -->
+  <div id="view-program-detail" class="dept-detail-frame" style="display: block; width: 100%;">
+    
+    <!-- Topbar with Back button, Program Title, Breadcrumb & Edit Settings Action -->
+    <div class="dept-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 20px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important; flex-wrap: wrap; gap: 12px;">
+      
+      <!-- Left: Title on TOP, Breadcrumb underneath -->
+      <div class="dept-dash-title-group" style="display: flex !important; align-items: center !important; gap: 12px !important;">
+        <button onclick="switchNavTab('academic-programs')" class="dept-btn-secondary" title="Return to Academic Programs Catalog" style="height: 34px; padding: 0 12px; font-size: 11.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border-radius: 6px; background: #F4FAF7; border: 1.5px solid #D1E5DE; color: var(--e-teal, #063D3B);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          <span>Back to All Programs</span>
+        </button>
+        <div style="height: 24px; width: 1.5px; background: #E2E8F0;"></div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span class="dept-live-dot" style="width: 10px; height: 10px; border-radius: 50%; background: #10B981; display: inline-block;"></span>
+          <div>
+            <div class="dept-dash-main-title" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <span id="progDetailMainTitle" style="font-size: 15.5px; font-weight: 800; color: #063D3B; letter-spacing: -0.01em;">Loading Program...</span>
+              <span id="progDetailCodeBadge" style="display: none; font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 700; background: #F1F5F9; color: #475569; padding: 2px 7px; border-radius: 4px; border: 1px solid #E2E8F0;"></span>
+              <span id="progDetailAdmissionsBadge" style="font-size: 10.5px; font-weight: 700; color: #047857; background: #ECFDF5; padding: 2px 8px; border-radius: 999px; border: 1px solid #A7F3D0;">● Open</span>
+            </div>
+            <div class="dept-breadcrumb" style="font-size: 11px; color: #648781; font-weight: 500; margin-top: 2px;">
+              <span onclick="switchNavTab('academic-programs')" style="cursor: pointer; text-decoration: underline;">Academic Programs</span> &rsaquo; 
+              <span id="progDetailBreadcrumbName" style="color: #063D3B; font-weight: 600;">Program Detail</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Action Buttons -->
+      <div class="dept-dash-actions" style="display: flex; align-items: center; gap: 8px;">
+        <button class="dept-btn-secondary" onclick="openCurrentProgramEdit()" title="Edit program configuration and details" style="height: 34px; padding: 0 14px; font-size: 11.5px; font-weight: 700; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; background: #F4FAF7; border: 1.5px solid #D1E5DE; color: #063D3B;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <span>Settings (Edit Program)</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- SUB-TOOLBAR / TIME WINDOW FILTER -->
+    <div class="dept-control-strip" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: #FFFFFF; border-bottom: 1.5px solid #E6F0EC; flex-wrap: wrap; gap: 10px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.5px;">Activity &amp; Metrics Window</span>
+        <span id="progDetailActiveWindowBadge" style="font-size: 10.5px; font-weight: 700; color: #047857; background: #ECFDF5; border: 1px solid #A7F3D0; padding: 2px 8px; border-radius: 6px;">Last 30 Days</span>
+      </div>
+
+      <!-- Interactive Time Window Selector -->
+      <div class="ops-ctrl-pill" style="display:inline-flex; align-items:center; gap:3px; padding:3px 6px; background:#F4FAF7; border:1px solid #D1E5DE; border-radius:8px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #648781;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        <span style="font-size:11px; font-weight:600; color:#648781; margin-right:2px;">Window:</span>
+        <button type="button" class="btn-time-win" id="progTimeBtn24h" onclick="setProgDetailTimeWindow('24h')" style="background:transparent; color:#648781; border:none; font-size:11px; font-weight:600; cursor:pointer; padding:2px 7px; border-radius:4px; transition:all 0.15s ease;">24H</button>
+        <button type="button" class="btn-time-win" id="progTimeBtn7d" onclick="setProgDetailTimeWindow('7d')" style="background:transparent; color:#648781; border:none; font-size:11px; font-weight:600; cursor:pointer; padding:2px 7px; border-radius:4px; transition:all 0.15s ease;">7D</button>
+        <button type="button" class="btn-time-win active" id="progTimeBtn30d" onclick="setProgDetailTimeWindow('30d')" style="background:#063D3B; color:#C8FF63; border:none; font-size:11px; font-weight:700; cursor:pointer; padding:2px 7px; border-radius:4px; transition:all 0.15s ease;">30D</button>
+        <button type="button" class="btn-time-win" id="progTimeBtn3m" onclick="setProgDetailTimeWindow('3m')" style="background:transparent; color:#648781; border:none; font-size:11px; font-weight:600; cursor:pointer; padding:2px 7px; border-radius:4px; transition:all 0.15s ease;">3M</button>
+        <button type="button" class="btn-time-win" id="progTimeBtn6m" onclick="setProgDetailTimeWindow('6m')" style="background:transparent; color:#648781; border:none; font-size:11px; font-weight:600; cursor:pointer; padding:2px 7px; border-radius:4px; transition:all 0.15s ease;">6M</button>
+        <button type="button" class="btn-time-win" id="progTimeBtnAll" onclick="setProgDetailTimeWindow('all')" style="background:transparent; color:#648781; border:none; font-size:11px; font-weight:600; cursor:pointer; padding:2px 7px; border-radius:4px; transition:all 0.15s ease;">All</button>
+        <button type="button" class="btn-time-win" id="progTimeBtnCustom" onclick="toggleProgDetailCustomDatePicker()" style="background:transparent; color:#648781; border:none; font-size:11px; font-weight:600; cursor:pointer; padding:2px 7px; border-radius:4px; transition:all 0.15s ease;">📅 Custom</button>
+      </div>
+    </div>
+
+    <!-- Expandable Custom Calendar Date Picker Bar -->
+    <div id="progDetailCustomDatePickerBar" style="display: none; background: #F9FCFB; border-bottom: 1.5px solid #E6F0EC; padding: 10px 20px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 12px;">
+      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <div style="font-weight: 700; color: #063D3B; display: flex; align-items: center; gap: 6px;">
+          <span>📅</span>
+          <span>Custom Date Range (IST):</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <label for="progDetailCustomStartDate" style="font-size: 11px; font-weight: 600; color: #648781;">From:</label>
+          <input type="date" id="progDetailCustomStartDate" class="brand-input" style="height: 30px; font-size: 11.5px; font-weight: 600; padding: 0 8px; border: 1.5px solid #DDE9E3; border-radius: 6px; background: #FFFFFF; color: #063D3B;">
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <label for="progDetailCustomEndDate" style="font-size: 11px; font-weight: 600; color: #648781;">To:</label>
+          <input type="date" id="progDetailCustomEndDate" class="brand-input" style="height: 30px; font-size: 11.5px; font-weight: 600; padding: 0 8px; border: 1.5px solid #DDE9E3; border-radius: 6px; background: #FFFFFF; color: #063D3B;">
+        </div>
+        <button type="button" onclick="applyProgDetailCustomDateRange()" class="brand-btn-primary" style="height: 30px; padding: 0 14px; font-size: 11.5px; font-weight: 700; border-radius: 6px; cursor: pointer;">
+          Apply Range
+        </button>
+        <button type="button" onclick="setProgDetailTimeWindow('30d')" class="brand-btn-secondary" style="height: 30px; padding: 0 10px; font-size: 11.5px; font-weight: 700; border-radius: 6px; color: #648781; cursor: pointer;">
+          Reset (30D)
+        </button>
+      </div>
+      <div id="progDetailActiveRangeIndicator" style="font-size: 11px; font-weight: 700; color: #047857; background: #E6F4EA; padding: 3px 9px; border-radius: 5px; border: 1px solid #A7F3D0;">
+        Active Window: Last 30 Days
+      </div>
+    </div>
+
+    <!-- Canvas Body -->
+    <div style="padding: 24px 20px 48px 20px; box-sizing: border-box; width: 100%;">
+
+      <!-- TRACK 1: ADMISSIONS PIPELINE FUNNEL (4 Pipeline Cards Scoped to Program) -->
+      <div style="margin-bottom: 30px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+          <span style="font-size: 13px; font-weight: 800; color: #063D3B; text-transform: uppercase; letter-spacing: 0.5px;">Admissions Pipeline Funnel</span>
+          <span style="font-size: 11px; color: #648781; font-weight: 500;">Live Inquiries &amp; Conversions for this Academic Program &bull; Click to View</span>
+        </div>
+
+        <!-- 4 PIPELINE CARDS GRID -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px;">
+          
+          <!-- Card 1: Callbacks Booked (counselor_callbacks) -->
+          <div class="prog-pipe-card" onclick="typeof switchNavTab === 'function' ? switchNavTab('callbacks') : null" title="Click to open Callbacks Management">
+            <div class="prog-pipe-header">
+              <div class="prog-pipe-icon" style="background:#FEE2E2; color:#DC2626;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              </div>
+              <span class="prog-pipe-badge" style="color:#BE123C; background:#FFF1F2; border: 1px solid rgba(225,29,72,0.18);" id="progPipeCallbacksBadge">0 Booked</span>
+            </div>
+            <div>
+              <div class="prog-pipe-val" id="progPipeCallbacksVal">0</div>
+              <div class="prog-pipe-lbl">
+                <span>Callbacks Booked</span>
+                <span style="font-size: 11px; color: #BE123C; opacity: 0.7;">↗</span>
+              </div>
+              <div class="prog-pipe-sub" id="progPipeCallbacksSub">Counselor callback inquiries for this degree</div>
+            </div>
+          </div>
+
+          <!-- Card 2: Campus Tours Scheduled (campus_tour_bookings) -->
+          <div class="prog-pipe-card" onclick="typeof switchNavTab === 'function' ? switchNavTab('campus-tours') : null" title="Click to open Campus Tours Management">
+            <div class="prog-pipe-header">
+              <div class="prog-pipe-icon" style="background:#E0F2FE; color:#0284C7;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              </div>
+              <span class="prog-pipe-badge" style="color:#0369A1; background:#F0F9FF; border: 1px solid rgba(2,132,199,0.18);" id="progPipeToursBadge">0 Scheduled</span>
+            </div>
+            <div>
+              <div class="prog-pipe-val" id="progPipeToursVal">0</div>
+              <div class="prog-pipe-lbl">
+                <span>Campus Tours Scheduled</span>
+                <span style="font-size: 11px; color: #0369A1; opacity: 0.7;">↗</span>
+              </div>
+              <div class="prog-pipe-sub" id="progPipeToursSub">Prospective students booked campus walkthrough</div>
+            </div>
+          </div>
+
+          <!-- Card 3: Scholarships Interests (leads where scholarship_tier is not null) -->
+          <div class="prog-pipe-card" onclick="typeof switchNavTab === 'function' ? switchNavTab('scholarships') : null" title="Click to open Scholarships Management">
+            <div class="prog-pipe-header">
+              <div class="prog-pipe-icon" style="background:#FEF3C7; color:#D97706;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+              </div>
+              <span class="prog-pipe-badge" style="color:#B45309; background:#FFFBEB; border: 1px solid rgba(217,119,6,0.18);" id="progPipeScholarshipsBadge">0 Evaluated</span>
+            </div>
+            <div>
+              <div class="prog-pipe-val" id="progPipeScholarshipsVal">0</div>
+              <div class="prog-pipe-lbl">
+                <span>Scholarships Interests</span>
+                <span style="font-size: 11px; color: #B45309; opacity: 0.7;">↗</span>
+              </div>
+              <div class="prog-pipe-sub" id="progPipeScholarshipsSub">Evaluations &amp; fee concession inquiries requested</div>
+            </div>
+          </div>
+
+          <!-- Card 4: Lead-Magnet Dispatched (lead_assets downloads / fallback leads) -->
+          <div class="prog-pipe-card" onclick="typeof switchNavTab === 'function' ? switchNavTab('leads') : null" title="Click to open Leads &amp; Dispatches">
+            <div class="prog-pipe-header">
+              <div class="prog-pipe-icon" style="background:#F3E8FF; color:#7C3AED;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+              </div>
+              <span class="prog-pipe-badge" style="color:#6D28D9; background:#FAF5FF; border: 1px solid rgba(124,58,237,0.18);" id="progPipeLeadsMagnetBadge">0 Delivered</span>
+            </div>
+            <div>
+              <div class="prog-pipe-val" id="progPipeLeadsMagnetVal">0</div>
+              <div class="prog-pipe-lbl">
+                <span>Lead-Magnet Dispatched</span>
+                <span style="font-size: 11px; color: #6D28D9; opacity: 0.7;">↗</span>
+              </div>
+              <div class="prog-pipe-sub" id="progPipeLeadsMagnetSub">Brochures &amp; syllabus documents delivered to leads</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TRACK 2: PROGRAM SPECIFICATIONS & CURRICULAR OVERVIEW -->
+      <div>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+          <span style="font-size: 13px; font-weight: 800; color: #063D3B; text-transform: uppercase; letter-spacing: 0.5px;">Program Overview &amp; Specifications</span>
+          <span style="font-size: 11px; color: #648781; font-weight: 500;">Academic parameters, tuition structure, and offering campuses</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-bottom: 20px;">
+          
+          <!-- Spec 1: Degree Level -->
+          <div class="prog-spec-card">
+            <span class="prog-spec-label">Program Level</span>
+            <div class="prog-spec-value" id="progSpecLevel" style="text-transform: capitalize;">—</div>
+          </div>
+
+          <!-- Spec 2: Duration -->
+          <div class="prog-spec-card">
+            <span class="prog-spec-label">Duration</span>
+            <div class="prog-spec-value" id="progSpecDuration">—</div>
+          </div>
+
+          <!-- Spec 3: Mode -->
+          <div class="prog-spec-card">
+            <span class="prog-spec-label">Study Mode</span>
+            <div class="prog-spec-value" id="progSpecMode" style="text-transform: capitalize;">—</div>
+          </div>
+
+          <!-- Spec 4: Total Fees -->
+          <div class="prog-spec-card">
+            <span class="prog-spec-label">Total Fee / Tuition</span>
+            <div class="prog-spec-value" id="progSpecFee" style="color: #047857;">—</div>
+          </div>
+
+          <!-- Spec 5: Application Deadline -->
+          <div class="prog-spec-card">
+            <span class="prog-spec-label">Application Deadline</span>
+            <div class="prog-spec-value" id="progSpecDeadline">—</div>
+          </div>
+
+          <!-- Spec 6: Application Fee -->
+          <div class="prog-spec-card">
+            <span class="prog-spec-label">Application Fee</span>
+            <div class="prog-spec-value" id="progSpecAppFee">—</div>
+          </div>
+        </div>
+
+        <!-- Detailed Cards: Eligibility & Offered Campuses -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px;">
+          
+          <!-- Eligibility & Criteria -->
+          <div class="prog-spec-card" style="padding: 18px 20px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <span class="prog-spec-label">Eligibility Criteria &amp; Prerequisites</span>
+              <span style="font-size: 14px;">📋</span>
+            </div>
+            <div id="progSpecEligibility" style="font-size: 12.5px; color: #334155; line-height: 1.6; white-space: pre-wrap;">
+              No special prerequisites configured for this degree.
+            </div>
+          </div>
+
+          <!-- Campuses & Application URL -->
+          <div class="prog-spec-card" style="padding: 18px 20px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <span class="prog-spec-label">Offered Campuses &amp; Portal</span>
+              <span style="font-size: 14px;">🏛️</span>
+            </div>
+            <div id="progSpecCampusesList" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px;">
+              <span style="font-size: 11.5px; color: #648781;">All Campuses</span>
+            </div>
+
+            <div style="border-top: 1px solid #E6F0EC; padding-top: 10px; margin-top: auto;">
+              <span class="prog-spec-label" style="display: block; margin-bottom: 4px;">Direct Application URL</span>
+              <div id="progSpecAppUrl">
+                <span style="font-size: 11.5px; color: #94A3B8; font-style: italic;">No custom application portal link provided</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function() {
+  window._programDetailState = {
+    programId: null,
+    programData: null,
+    currentWindow: '30d',
+    customStartDate: '',
+    customEndDate: ''
+  };
+
+  window.initAcademicProgramDetailPage = async function() {
+    // Determine program ID from sessionStorage or URL hash
+    let pId = sessionStorage.getItem('edvora_detail_program_id') || window._currentDetailProgramId;
+    if (!pId && location.hash.includes('?')) {
+      const qs = location.hash.split('?')[1] || '';
+      const params = new URLSearchParams(qs);
+      pId = params.get('id');
+    }
+
+    if (!pId) {
+      // Fallback: Return to academic programs if no ID present
+      if (typeof switchNavTab === 'function') {
+        switchNavTab('academic-programs');
+      }
+      return;
+    }
+
+    window._programDetailState.programId = parseInt(pId, 10);
+    await loadProgramDetailTelemetry(window._programDetailState.currentWindow);
+  };
+
+  window.setProgDetailTimeWindow = function(win) {
+    window._programDetailState.currentWindow = win;
+    window._programDetailState.customStartDate = '';
+    window._programDetailState.customEndDate = '';
+    applyProgDetailTimeWindowUI(win);
+    loadProgramDetailTelemetry(win);
+  };
+
+  window.applyProgDetailTimeWindowUI = function(win, customLabel) {
+    const labels = {
+      '24h': 'Last 24 Hours',
+      '7d': 'Last 7 Days',
+      '30d': 'Last 30 Days',
+      '3m': 'Last 3 Months',
+      '6m': 'Last 6 Months',
+      'all': 'All Time',
+      'custom': customLabel || 'Custom Range'
+    };
+    const label = customLabel || labels[win] || labels['30d'];
+
+    ['24h', '7d', '30d', '3m', '6m', 'all', 'custom'].forEach(function(w) {
+      const btn = document.getElementById('progTimeBtn' + w);
+      if (btn) {
+        if (w === win) {
+          btn.classList.add('active');
+          btn.style.background = '#063D3B';
+          btn.style.color = '#C8FF63';
+          btn.style.fontWeight = '700';
+        } else {
+          btn.classList.remove('active');
+          btn.style.background = 'transparent';
+          btn.style.color = '#648781';
+          btn.style.fontWeight = '600';
+        }
+      }
+    });
+
+    const badge = document.getElementById('progDetailActiveWindowBadge');
+    if (badge) badge.textContent = label;
+
+    const ind = document.getElementById('progDetailActiveRangeIndicator');
+    if (ind) ind.textContent = 'Active Window: ' + label;
+  };
+
+  window.toggleProgDetailCustomDatePicker = function() {
+    const bar = document.getElementById('progDetailCustomDatePickerBar');
+    if (!bar) return;
+    const isHidden = bar.style.display === 'none' || !bar.style.display;
+    bar.style.display = isHidden ? 'flex' : 'none';
+    if (isHidden) {
+      const now = new Date();
+      const past = new Date(Date.now() - 30 * 86400000);
+      const sEl = document.getElementById('progDetailCustomStartDate');
+      const eEl = document.getElementById('progDetailCustomEndDate');
+      if (sEl && !sEl.value) sEl.value = past.toISOString().slice(0, 10);
+      if (eEl && !eEl.value) eEl.value = now.toISOString().slice(0, 10);
+    }
+  };
+
+  window.applyProgDetailCustomDateRange = function() {
+    const sEl = document.getElementById('progDetailCustomStartDate');
+    const eEl = document.getElementById('progDetailCustomEndDate');
+    if (!sEl || !eEl || !sEl.value || !eEl.value) {
+      alert('Please select both start and end dates.');
+      return;
+    }
+    const s = sEl.value;
+    const e = eEl.value;
+    if (new Date(s) > new Date(e)) {
+      alert('Start date must be earlier than or equal to End date.');
+      return;
+    }
+
+    window._programDetailState.currentWindow = 'custom';
+    window._programDetailState.customStartDate = s;
+    window._programDetailState.customEndDate = e;
+
+    const customLabel = s + ' – ' + e;
+    applyProgDetailTimeWindowUI('custom', customLabel);
+    loadProgramDetailTelemetry('custom', s, e);
+  };
+
+  window.loadProgramDetailTelemetry = async function(win, sDate, eDate) {
+    const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token');
+    if (!token) return;
+
+    const pId = window._programDetailState.programId;
+    if (!pId) return;
+
+    let url = `/v1/programs/${pId}?window=${encodeURIComponent(win || '30d')}`;
+    if (win === 'custom' && sDate && eDate) {
+      url += `&start_date=${encodeURIComponent(sDate)}&end_date=${encodeURIComponent(eDate)}`;
+    }
+
+    try {
+      const res = await fetch(url, {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.status !== 'success') throw new Error(data.message || 'API error');
+
+      window._programDetailState.programData = data.data;
+      renderProgramDetailView(data.data);
+    } catch (err) {
+      console.error('[ProgramDetail] Load error:', err);
+      const titleEl = document.getElementById('progDetailMainTitle');
+      if (titleEl) {
+        titleEl.textContent = 'Failed to load program (' + err.message + ')';
+        titleEl.style.color = '#DC2626';
+      }
+    }
+  };
+
+  function renderProgramDetailView(payload) {
+    const p = payload.program || {};
+    const metrics = payload.funnel_metrics || {};
+
+    // Header & Titles
+    const titleEl = document.getElementById('progDetailMainTitle');
+    if (titleEl) {
+      titleEl.textContent = p.course_name || 'Academic Program';
+      titleEl.style.color = '#063D3B';
+    }
+
+    const bName = document.getElementById('progDetailBreadcrumbName');
+    if (bName) bName.textContent = p.course_name || 'Program Detail';
+
+    const codeBadge = document.getElementById('progDetailCodeBadge');
+    if (codeBadge) {
+      if (p.course_code) {
+        codeBadge.textContent = p.course_code;
+        codeBadge.style.display = 'inline-block';
+      } else {
+        codeBadge.style.display = 'none';
+      }
+    }
+
+    const admBadge = document.getElementById('progDetailAdmissionsBadge');
+    if (admBadge) {
+      const isOpen = parseInt(p.is_admissions_open, 10) === 1;
+      admBadge.innerHTML = isOpen ? '● Open' : '○ Closed';
+      admBadge.style.color = isOpen ? '#047857' : '#64748B';
+      admBadge.style.background = isOpen ? '#ECFDF5' : '#F1F5F9';
+      admBadge.style.borderColor = isOpen ? '#A7F3D0' : '#CBD5E1';
+    }
+
+    // Top 4 Pipeline Funnel Cards
+    // Card 1: Callbacks Booked
+    const elCbVal = document.getElementById('progPipeCallbacksVal');
+    if (elCbVal) elCbVal.textContent = Number(metrics.callbacks_count || 0).toLocaleString();
+    const elCbBadge = document.getElementById('progPipeCallbacksBadge');
+    if (elCbBadge) elCbBadge.textContent = `${metrics.callbacks_count || 0} Booked`;
+
+    // Card 2: Campus Tours Scheduled
+    const elCtVal = document.getElementById('progPipeToursVal');
+    if (elCtVal) elCtVal.textContent = Number(metrics.campus_tours_count || 0).toLocaleString();
+    const elCtBadge = document.getElementById('progPipeToursBadge');
+    if (elCtBadge) elCtBadge.textContent = `${metrics.campus_tours_count || 0} Bookings`;
+
+    // Card 3: Scholarships Interests
+    const elScVal = document.getElementById('progPipeScholarshipsVal');
+    if (elScVal) elScVal.textContent = Number(metrics.scholarships_count || 0).toLocaleString();
+    const elScBadge = document.getElementById('progPipeScholarshipsBadge');
+    if (elScBadge) elScBadge.textContent = `${metrics.scholarships_count || 0} Evaluated`;
+
+    // Card 4: Lead-Magnet Dispatched
+    const elLmVal = document.getElementById('progPipeLeadsMagnetVal');
+    if (elLmVal) elLmVal.textContent = Number(metrics.lead_magnet_dispatched || 0).toLocaleString();
+    const elLmBadge = document.getElementById('progPipeLeadsMagnetBadge');
+    if (elLmBadge) elLmBadge.textContent = `${metrics.lead_magnet_dispatched || 0} Sent`;
+
+    // Specifications & Details
+    const elLevel = document.getElementById('progSpecLevel');
+    if (elLevel) elLevel.textContent = (p.program_type || 'Undergraduate').replace(/_/g, ' ');
+
+    const elDur = document.getElementById('progSpecDuration');
+    if (elDur) elDur.textContent = p.duration || 'Not specified';
+
+    const elMode = document.getElementById('progSpecMode');
+    if (elMode) elMode.textContent = (p.mode || 'full_time').replace(/_/g, ' ');
+
+    const elFee = document.getElementById('progSpecFee');
+    if (elFee) {
+      if (p.total_fee) {
+        elFee.textContent = `${p.currency || 'INR'} ${Number(p.total_fee).toLocaleString()}`;
+      } else {
+        elFee.textContent = 'Free / Contact Office';
+      }
+    }
+
+    const elDeadline = document.getElementById('progSpecDeadline');
+    if (elDeadline) elDeadline.textContent = p.application_deadline || 'Rolling Admissions';
+
+    const elAppFee = document.getElementById('progSpecAppFee');
+    if (elAppFee) elAppFee.textContent = p.application_fee || 'Waived / Free';
+
+    const elElig = document.getElementById('progSpecEligibility');
+    if (elElig) {
+      elElig.textContent = p.eligibility ? p.eligibility.trim() : 'No specific prerequisites recorded.';
+    }
+
+    // Campuses
+    const elCampuses = document.getElementById('progSpecCampusesList');
+    if (elCampuses) {
+      const cmpList = p.campuses || [];
+      if (cmpList.length === 0) {
+        elCampuses.innerHTML = '<span style="font-size: 11.5px; color: #94A3B8; font-style: italic;">All / Unrestricted Campuses</span>';
+      } else {
+        elCampuses.innerHTML = cmpList.map(c => `
+          <span style="display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:700; background:#F8FAFC; color:#063D3B; border:1px solid #D1E5DE; padding:3px 8px; border-radius:5px;">
+            <span>📍 ${escapeHtml(c.short_name || c.name)}</span>
+            ${c.is_primary ? '<span style="font-size:9px; background:#ECFDF5; color:#047857; padding:1px 4px; border-radius:3px;">Main</span>' : ''}
+          </span>
+        `).join('');
+      }
+    }
+
+    // Application URL
+    const elAppUrl = document.getElementById('progSpecAppUrl');
+    if (elAppUrl) {
+      if (p.application_url) {
+        elAppUrl.innerHTML = `
+          <a href="${escapeHtml(p.application_url)}" target="_blank" rel="noopener noreferrer" style="font-size: 11.5px; color: #047857; font-weight: 700; text-decoration: underline; display: inline-flex; align-items: center; gap: 4px;">
+            <span>${escapeHtml(p.application_url)}</span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+          </a>
+        `;
+      } else {
+        elAppUrl.innerHTML = '<span style="font-size: 11.5px; color: #94A3B8; font-style: italic;">No custom application portal link provided</span>';
+      }
+    }
+  }
+
+  window.openCurrentProgramEdit = function() {
+    const pId = window._programDetailState.programId;
+    if (!pId) return;
+    window._currentEditProgramId = pId;
+    sessionStorage.setItem('edvora_edit_program_id', pId);
+    if (typeof switchNavTab === 'function') {
+      switchNavTab('edit-programs');
+    }
+  };
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  // Self-initialize if active tab is academic-program-detail
+  if (typeof initAcademicProgramDetailPage === 'function') {
+    initAcademicProgramDetailPage();
+  }
+})();
+</script>
