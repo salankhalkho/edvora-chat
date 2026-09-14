@@ -15709,8 +15709,8 @@ echo $response['reply'];
         }
 
         async function loadDocEditorPrograms(selectedProgramId) {
-            const select = document.getElementById('edit_doc_program_id');
-            if (!select) return;
+            const container = document.getElementById('editDocProgramContainer');
+            if (!container) return;
 
             try {
                 const res = await fetch('/v1/programs', {
@@ -15719,20 +15719,32 @@ echo $response['reply'];
                 const data = await res.json();
                 const programs = (data.status === 'success' && data.data) ? (data.data.courses || (Array.isArray(data.data) ? data.data : [])) : [];
 
-                let html = '<option value="">🌐 All Academic Programs / General Institutional Scope</option>';
-                programs.forEach(p => {
-                    const isSelected = selectedProgramId && parseInt(selectedProgramId) === parseInt(p.id);
-                    const code = p.course_code ? ` [${escapeHtml(p.course_code)}]` : '';
-                    html += `<option value="${p.id}" ${isSelected ? 'selected' : ''}>${escapeHtml(p.course_name)}${code}</option>`;
-                });
+                const isGlobal = !selectedProgramId;
+                let html = `
+                    <label style="display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px; background: ${isGlobal ? '#E8F5F3' : '#FFFFFF'}; border: 1.5px solid ${isGlobal ? '#063D3B' : '#E2E8F0'}; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; color: ${isGlobal ? '#063D3B' : '#0F172A'}; user-select: none; transition: all 0.15s ease; ${isGlobal ? 'box-shadow: 0 0 0 1px #063D3B;' : ''}">
+                        <input type="radio" name="edit_doc_program" value="" ${isGlobal ? 'checked' : ''} onchange="updateIngestProgramRadios('editDocProgramContainer')" style="cursor: pointer; accent-color: #063D3B;" />
+                        <span>🌐</span>
+                        <span>Entire Organization (All Programs)</span>
+                    </label>
+                `;
 
-                select.innerHTML = html;
-                if (selectedProgramId) {
-                    select.value = selectedProgramId;
+                if (programs.length > 0) {
+                    html += programs.map(p => {
+                        const isSelected = selectedProgramId && parseInt(selectedProgramId) === parseInt(p.id);
+                        return `
+                            <label style="display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px; background: ${isSelected ? '#E8F5F3' : '#FFFFFF'}; border: 1.5px solid ${isSelected ? '#063D3B' : '#E2E8F0'}; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; color: ${isSelected ? '#063D3B' : '#0F172A'}; user-select: none; transition: all 0.15s ease; ${isSelected ? 'box-shadow: 0 0 0 1px #063D3B;' : ''}">
+                                <input type="radio" name="edit_doc_program" value="${p.id}" ${isSelected ? 'checked' : ''} onchange="updateIngestProgramRadios('editDocProgramContainer')" style="cursor: pointer; accent-color: #063D3B;" />
+                                <span>🎓</span>
+                                <span>${escapeHtml(p.course_name)}${p.course_code ? ' (' + escapeHtml(p.course_code) + ')' : ''}</span>
+                            </label>
+                        `;
+                    }).join('');
                 }
+
+                container.innerHTML = html;
             } catch (e) {
                 console.error('Error fetching academic programs for editor:', e);
-                select.innerHTML = '<option value="">🌐 All Academic Programs / General Institutional Scope</option>';
+                container.innerHTML = '<span style="font-size: 12px; color: #EF4444;">Failed to load academic programs.</span>';
             }
         }
 
@@ -15747,8 +15759,8 @@ echo $response['reply'];
                 return;
             }
 
-            const progSelect = document.getElementById('edit_doc_program_id');
-            const program_id = progSelect && progSelect.value ? parseInt(progSelect.value) : null;
+            const progRadio = document.querySelector('input[name="edit_doc_program"]:checked');
+            const program_id = progRadio && progRadio.value ? parseInt(progRadio.value) : null;
             let category = document.getElementById('edit_doc_category').value;
             if (category === '__custom__') {
                 const customInp = document.getElementById('edit_doc_category_custom');
