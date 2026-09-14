@@ -28,7 +28,7 @@ class KnowledgeController
             SELECT ks.id, ks.organization_id, ks.chatbot_id, ks.program_id, p.course_name as program_name,
                    ks.type, ks.title, ks.category, ks.academic_version,
                    ks.effective_from, ks.expires_on, ks.last_reviewed_at, ks.review_frequency_days,
-                   ks.previous_version_id, ks.replaced_by_id,
+                   ks.previous_version_id, ks.replaced_by_id, ks.lead_magnet,
                    ks.source_url, ks.file_path, ks.status, ks.keywords, ks.last_fetched_at, ks.created_at, ks.updated_at,
                    GROUP_CONCAT(CONCAT(d.id, ':::', d.name, ':::', IFNULL(d.icon, '🏫')) SEPARATOR '|||') as departments_raw
             FROM knowledge_sources ks
@@ -237,7 +237,7 @@ class KnowledgeController
             SELECT ks.id, ks.organization_id, ks.chatbot_id, ks.program_id, p.course_name as program_name,
                    ks.type, ks.title, ks.category, ks.academic_version,
                    ks.effective_from, ks.expires_on, ks.last_reviewed_at, ks.review_frequency_days,
-                   ks.previous_version_id, ks.replaced_by_id,
+                   ks.previous_version_id, ks.replaced_by_id, ks.lead_magnet,
                    ks.source_url, ks.raw_content, ks.processed_content, ks.keywords, ks.semantic_keywords, ks.file_path, ks.status, ks.last_fetched_at, ks.created_at, ks.updated_at
             FROM knowledge_sources ks
             LEFT JOIN programs p ON ks.program_id = p.id

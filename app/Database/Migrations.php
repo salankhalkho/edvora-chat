@@ -76,6 +76,9 @@ class Migrations
                 keywords TEXT NULL,
                 file_path VARCHAR(500) NULL,
                 content_hash VARCHAR(64) NULL,
+                previous_version_id INT NULL,
+                replaced_by_id INT NULL,
+                lead_magnet TINYINT(1) DEFAULT 0 COMMENT 'Flag indicating if document is a downloadable lead magnet asset',
                 status ENUM('processing', 'active', 'failed', 'archived') DEFAULT 'processing',
                 last_fetched_at TIMESTAMP NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -1068,6 +1071,18 @@ class Migrations
                     ADD COLUMN program_id INT NULL AFTER department_id,
                     ADD INDEX idx_assets_program (program_id),
                     ADD CONSTRAINT fk_assets_program FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE SET NULL;");
+            }
+        } catch (Throwable $e) {
+            // Column/index may already exist
+        }
+
+        // Add lead_magnet column to knowledge_sources table
+        try {
+            $checkLmCol = $this->db->query("SHOW COLUMNS FROM knowledge_sources LIKE 'lead_magnet'");
+            if (!$checkLmCol->fetch()) {
+                $this->db->exec("ALTER TABLE knowledge_sources 
+                    ADD COLUMN lead_magnet TINYINT(1) DEFAULT 0 COMMENT 'Flag indicating if document is a downloadable lead magnet asset' AFTER replaced_by_id,
+                    ADD INDEX idx_ks_lead_magnet (organization_id, lead_magnet);");
             }
         } catch (Throwable $e) {
             // Column/index may already exist
