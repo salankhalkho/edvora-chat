@@ -6005,8 +6005,11 @@
                         window._skipKnowledgeFilterResetOnce = false;
                     } else {
                         window._userSelectedKnowledgeDeptFilter = null;
+                        window._userSelectedKnowledgeProgramFilter = null;
                         const deptSelect = document.getElementById('ckhDeptFilter');
                         if (deptSelect) deptSelect.value = 'all';
+                        const progSelect = document.getElementById('ckhProgramFilter');
+                        if (progSelect) progSelect.value = 'all';
                     }
                 } else if (tab === 'leads') {
                     if (typeof closeLeadDrawer === 'function') {
@@ -14381,10 +14384,10 @@ echo $response['reply'];
         function filterKnowledgeTable() {
             const query = (document.getElementById('ksSearchInput')?.value || '').toLowerCase().trim();
             const filterKey = currentKnowledgeHealthFilter || 'all';
-            const deptFilter = document.getElementById('ckhDeptFilter')?.value || 'all';
+            const progFilter = (document.getElementById('ckhProgramFilter')?.value || document.getElementById('ckhDeptFilter')?.value || 'all');
             const catFilter = document.getElementById('ckhCategoryFilter')?.value || 'all';
 
-            // 1. Filter by Department, Category, Search Query (Current Active Scope)
+            // 1. Filter by Academic Program, Category, Search Query (Current Active Scope)
             let scopeDocs = allKnowledgeSources.filter(item => {
                 // Search query match
                 if (query) {
@@ -14392,30 +14395,23 @@ echo $response['reply'];
                     const matchCat = (item.category || '').toLowerCase().includes(query);
                     const matchVer = (item.academic_version || '').toLowerCase().includes(query);
                     const matchKw = (item.keywords || '').toLowerCase().includes(query);
+                    const matchProg = (item.program_name || item.course_name || '').toLowerCase().includes(query);
                     const matchDepts = (item.departments || []).some(d => (d.name || '').toLowerCase().includes(query));
-                    if (!matchTitle && !matchCat && !matchVer && !matchKw && !matchDepts) return false;
+                    if (!matchTitle && !matchCat && !matchVer && !matchKw && !matchProg && !matchDepts) return false;
                 }
 
-                // Department filter match
-                if (deptFilter === 'my-depts') {
-                    const myDeptIds = new Set((currentUser?.departments || []).map(d => String(d.id)));
-                    const myDeptNames = new Set((currentUser?.departments || []).map(d => (d.name || '').toLowerCase().trim()));
-                    const hasDept = (item.departments || []).some(d => myDeptIds.has(String(d.id)) || myDeptNames.has((d.name || '').toLowerCase().trim()));
-                    if (!hasDept) return false;
-                } else if (deptFilter === 'general') {
-                    // Documents with no department assignment or explicitly global
-                    const hasDept = Array.isArray(item.departments) && item.departments.length > 0;
-                    if (hasDept) return false;
-                } else if (deptFilter !== 'all') {
-                    // Specific department chosen: shows ONLY documents assigned to that department
-                    const hasDept = (item.departments || []).some(d => {
-                        const dId = String(d.id || '');
-                        const dSlug = (d.slug || '').toLowerCase().replace(/[^a-z0-9]/g, '_');
-                        const dName = (d.name || '').toLowerCase().trim();
-                        const filterLower = deptFilter.toLowerCase().trim();
-                        return dId === deptFilter || dName === filterLower || dSlug === filterLower || dName.includes(filterLower);
-                    });
-                    if (!hasDept) return false;
+                // Academic Program filter match
+                if (progFilter === 'general') {
+                    // Documents with no program assignment
+                    if (item.program_id) return false;
+                } else if (progFilter !== 'all') {
+                    // Specific program chosen: match by program id or course name
+                    const pId = String(item.program_id || '');
+                    const pName = (item.program_name || item.course_name || '').toLowerCase().trim();
+                    const filterLower = progFilter.toLowerCase().trim();
+                    if (pId !== progFilter && pName !== filterLower && !pName.includes(filterLower)) {
+                        return false;
+                    }
                 }
 
                 // Category filter match
@@ -14455,47 +14451,40 @@ echo $response['reply'];
             renderKnowledgeTablePage();
         }
 
-        function updateKnowledgeDeptDropdown() {
-            const selectEl = document.getElementById('ckhDeptFilter');
+        function updateKnowledgeProgramDropdown() {
+            const selectEl = document.getElementById('ckhProgramFilter') || document.getElementById('ckhDeptFilter');
             if (!selectEl) return;
 
-            const isStaff = !isOrgAdminUser();
-            const myDepts = (currentUser && currentUser.departments) || [];
-
-            const deptMap = new Map();
-            if (Array.isArray(currentDepartments)) {
-                currentDepartments.forEach(d => {
-                    if (d && d.name) deptMap.set(String(d.id || d.name), d.name);
+            const progMap = new Map();
+            if (Array.isArray(window._allProgramsList)) {
+                window._allProgramsList.forEach(p => {
+                    if (p && p.course_name) progMap.set(String(p.id), p.course_name);
                 });
             }
             if (Array.isArray(allKnowledgeSources)) {
                 allKnowledgeSources.forEach(item => {
-                    if (item.departments && Array.isArray(item.departments)) {
-                        item.departments.forEach(d => {
-                            if (d && d.name) deptMap.set(String(d.id || d.name), d.name);
-                        });
+                    if (item.program_id && (item.program_name || item.course_name)) {
+                        progMap.set(String(item.program_id), item.program_name || item.course_name);
                     }
                 });
             }
 
-            let html = '';
-            if (isStaff && myDepts.length > 0) {
-                html += '<option value="my-depts">🎯 My Assigned Departments</option>';
-            }
-            html += '<option value="all">All Departments</option>';
-            html += '<option value="general">General / Institution-Wide</option>';
-            deptMap.forEach((name, id) => {
+            let html = '<option value="all">All Academic Programs</option>';
+            html += '<option value="general">General / Non-Program Specific</option>';
+            progMap.forEach((name, id) => {
                 html += `<option value="${escapeHtml(id)}">${escapeHtml(name)}</option>`;
             });
             selectEl.innerHTML = html;
 
-            if (window._userSelectedKnowledgeDeptFilter) {
-                selectEl.value = window._userSelectedKnowledgeDeptFilter;
-            } else if (isStaff && myDepts.length > 0) {
-                selectEl.value = 'my-depts';
+            if (window._userSelectedKnowledgeProgramFilter) {
+                selectEl.value = window._userSelectedKnowledgeProgramFilter;
             } else {
                 selectEl.value = 'all';
             }
+        }
+
+        function updateKnowledgeDeptDropdown() {
+            updateKnowledgeProgramDropdown();
         }
 
         function updateKnowledgeCategoryDropdown() {
@@ -14904,6 +14893,15 @@ echo $response['reply'];
                     } catch(e) {}
                 }
 
+                // Ensure academic programs are loaded for dropdown
+                try {
+                    const progRes = await fetch('/v1/programs', { headers: { 'Authorization': 'Bearer ' + token } });
+                    const progData = await progRes.json();
+                    if (progData.status === 'success' && progData.data) {
+                        window._allProgramsList = progData.data.courses || (Array.isArray(progData.data) ? progData.data : []);
+                    }
+                } catch(e) {}
+
                 const res = await fetch('/v1/knowledge', {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
@@ -14911,7 +14909,9 @@ echo $response['reply'];
 
                 if (data.status === 'success' && data.data) {
                     allKnowledgeSources = data.data || [];
-                    if (typeof updateKnowledgeDeptDropdown === 'function') {
+                    if (typeof updateKnowledgeProgramDropdown === 'function') {
+                        updateKnowledgeProgramDropdown();
+                    } else if (typeof updateKnowledgeDeptDropdown === 'function') {
                         updateKnowledgeDeptDropdown();
                     }
                     if (typeof updateKnowledgeCategoryDropdown === 'function') {

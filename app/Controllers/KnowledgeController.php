@@ -25,12 +25,14 @@ class KnowledgeController
         $filter = $request->get('health_filter') ?? $request->get('status') ?? 'all';
 
         $stmt = $db->prepare("
-            SELECT ks.id, ks.organization_id, ks.chatbot_id, ks.type, ks.title, ks.category, ks.academic_version,
+            SELECT ks.id, ks.organization_id, ks.chatbot_id, ks.program_id, p.course_name as program_name,
+                   ks.type, ks.title, ks.category, ks.academic_version,
                    ks.effective_from, ks.expires_on, ks.last_reviewed_at, ks.review_frequency_days,
                    ks.previous_version_id, ks.replaced_by_id,
                    ks.source_url, ks.file_path, ks.status, ks.keywords, ks.last_fetched_at, ks.created_at, ks.updated_at,
                    GROUP_CONCAT(CONCAT(d.id, ':::', d.name, ':::', IFNULL(d.icon, '🏫')) SEPARATOR '|||') as departments_raw
             FROM knowledge_sources ks
+            LEFT JOIN programs p ON ks.program_id = p.id
             LEFT JOIN department_knowledge dk ON ks.id = dk.knowledge_source_id
             LEFT JOIN departments d ON dk.department_id = d.id
             WHERE ks.organization_id = :org_id

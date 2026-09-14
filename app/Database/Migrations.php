@@ -1007,6 +1007,19 @@ class Migrations
         } catch (Throwable $e) {
             // Table may already exist
         }
+
+        // Add program_id to knowledge_sources table for Academic Programs filtering & scoping
+        try {
+            $checkProgramCol = $this->db->query("SHOW COLUMNS FROM knowledge_sources LIKE 'program_id'");
+            if (!$checkProgramCol->fetch()) {
+                $this->db->exec("ALTER TABLE knowledge_sources 
+                    ADD COLUMN program_id INT NULL AFTER chatbot_id,
+                    ADD INDEX idx_ks_program (program_id),
+                    ADD CONSTRAINT fk_ks_program FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE SET NULL;");
+            }
+        } catch (Throwable $e) {
+            // Column/index may already exist
+        }
     }
 }
 
