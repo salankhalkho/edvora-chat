@@ -297,7 +297,7 @@
         document.addEventListener('DOMContentLoaded', bindAuthToggleListeners);
         document.addEventListener('edvora:partials-ready', bindAuthToggleListeners);
 
-        const VALID_APP_TABS = ['overview', 'knowledge', 'knowledge-ingestion', 'academic-programs', 'academic-program-detail', 'course-staff-assignment', 'program-staff', 'program-lead-magnet', 'add-programs', 'edit-programs', 'departments', 'leads', 'callbacks', 'campus-tours', 'scholarships', 'teams', 'assets', 'multilingual', 'conversion-engine', 'placeholder', 'analytics', 'knowledge-gaps', 'integrations', 'chatbot', 'test-chat', 'organization', 'org-settings', 'campuses', 'campus-editor', 'settings', 'knowledge-view', 'knowledge-editor', 'knowledge-edit', 'profile'];
+        const VALID_APP_TABS = ['overview', 'knowledge', 'knowledge-ingestion', 'academic-programs', 'academic-program-detail', 'course-staff-assignment', 'program-staff', 'program-lead-magnet', 'add-programs', 'edit-programs', 'departments', 'leads', 'callbacks', 'campus-tours', 'campus-tours-scheduling', 'scholarships', 'teams', 'assets', 'multilingual', 'conversion-engine', 'placeholder', 'analytics', 'knowledge-gaps', 'integrations', 'chatbot', 'test-chat', 'organization', 'org-settings', 'campuses', 'campus-editor', 'settings', 'knowledge-view', 'knowledge-editor', 'knowledge-edit', 'profile'];
 
         // Navigation Tabs Handling with Async Modular Loading
         const _tabLoadPromises = {};
@@ -1003,6 +1003,10 @@
                 cleanTitle = 'Counselor Callbacks Queue';
             } else if (tab === 'org-settings') {
                 cleanTitle = 'Control Panel';
+            } else if (tab === 'campus-tours') {
+                cleanTitle = 'Campus Tours & Visit Management';
+            } else if (tab === 'campus-tours-scheduling') {
+                cleanTitle = 'Campus Visit Scheduling & Rules';
             } else if (tab === 'campuses') {
                 cleanTitle = 'Campus Management';
             } else if (tab === 'campus-editor') {
@@ -1079,6 +1083,9 @@
                     if (typeof loadCallbacks === 'function') loadCallbacks();
                 } else if (tab === 'campus-tours') {
                     if (typeof loadCampusTours === 'function') loadCampusTours();
+                } else if (tab === 'campus-tours-scheduling') {
+                    if (typeof loadTourSlots === 'function') loadTourSlots();
+                    if (typeof loadTourSettings === 'function') loadTourSettings();
                 } else if (tab === 'scholarships') {
                     if (typeof loadScholarships === 'function') loadScholarships();
                 } else if (tab === 'chatbot') {
