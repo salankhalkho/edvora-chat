@@ -764,6 +764,8 @@
     const pId = window._programDetailState.programId;
     if (!pId) return;
     sessionStorage.setItem('edvora_program_lead_magnet_id', pId);
+    sessionStorage.setItem('edvora_detail_program_id', pId);
+    window._currentDetailProgramId = pId;
     if (typeof switchNavTab === 'function') {
       switchNavTab('program-lead-magnet');
     }
