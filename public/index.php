@@ -300,16 +300,18 @@ $router->put('/v1/callbacks/{id}', [CallbackController::class, 'update'], [AuthM
 $router->post('/v1/campus-tours', [CampusTourController::class, 'store']);
 $router->get('/v1/campus-tours', [CampusTourController::class, 'index'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->get('/v1/campus-tours/export', [CampusTourController::class, 'export'], [AuthMiddleware::class, TenantMiddleware::class]);
-$router->get('/v1/campus-tours/{id}', [CampusTourController::class, 'show'], [AuthMiddleware::class, TenantMiddleware::class]);
-$router->put('/v1/campus-tours/{id}', [CampusTourController::class, 'update'], [AuthMiddleware::class, TenantMiddleware::class]);
-$router->post('/v1/campus-tours/{id}/feedback', [CampusTourController::class, 'triggerFeedback'], [AuthMiddleware::class, TenantMiddleware::class]);
 
-// Campus Tour Scheduling & Rules Routes (Protected + Tenant Context & Public Widget)
+// Campus Tour Scheduling & Rules Routes — must be BEFORE the {id} wildcard
 $router->get('/v1/campus-tours/slots', [CampusTourSchedulingController::class, 'indexSlots']);
 $router->post('/v1/campus-tours/slots', [CampusTourSchedulingController::class, 'storeSlot'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->delete('/v1/campus-tours/slots/{id}', [CampusTourSchedulingController::class, 'deleteSlot'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->get('/v1/campus-tours/settings', [CampusTourSchedulingController::class, 'getSettings'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->post('/v1/campus-tours/settings', [CampusTourSchedulingController::class, 'saveSettings'], [AuthMiddleware::class, TenantMiddleware::class]);
+
+// Campus Tour Booking Wildcard Routes (must come AFTER specific paths above)
+$router->get('/v1/campus-tours/{id}', [CampusTourController::class, 'show'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->put('/v1/campus-tours/{id}', [CampusTourController::class, 'update'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->post('/v1/campus-tours/{id}/feedback', [CampusTourController::class, 'triggerFeedback'], [AuthMiddleware::class, TenantMiddleware::class]);
 
 // Conversion Engine Routes (Protected + Tenant Context)
 $router->get('/v1/conversion-engine/overview', [ConversionEngineController::class, 'overview'], [AuthMiddleware::class, TenantMiddleware::class]);
