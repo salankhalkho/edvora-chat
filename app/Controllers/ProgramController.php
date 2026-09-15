@@ -758,12 +758,12 @@ class ProgramController
                 return;
             }
 
-            // Documents mapped to this program or general
+            // Only documents explicitly scoped to this academic program
             $stmtDocs = $db->prepare("
                 SELECT id, title, type, category, lead_magnet, status, created_at, program_id
                 FROM knowledge_sources
-                WHERE organization_id = ? AND status = 'active'
-                ORDER BY (program_id = ?) DESC, id DESC
+                WHERE organization_id = ? AND program_id = ? AND status = 'active'
+                ORDER BY id DESC
             ");
             $stmtDocs->execute([$orgId, $id]);
             $documents = $stmtDocs->fetchAll(PDO::FETCH_ASSOC) ?: [];
