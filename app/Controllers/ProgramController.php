@@ -836,6 +836,16 @@ class ProgramController
                 return;
             }
 
+            $db->beginTransaction();
+
+            // Unset previous lead magnet for this program
+            $stmtReset = $db->prepare("
+                UPDATE knowledge_sources 
+                SET lead_magnet = 0 
+                WHERE program_id = ? AND organization_id = ? AND lead_magnet = 1
+            ");
+            $stmtReset->execute([$id, $orgId]);
+
             // Update document to be program's lead magnet
             $stmtUpd = $db->prepare("
                 UPDATE knowledge_sources 
@@ -844,8 +854,10 @@ class ProgramController
             ");
             $stmtUpd->execute([$id, $sourceId, $orgId]);
 
+            $db->commit();
+
             Response::success([
-                'message' => 'Lead magnet attached successfully to this program'
+                'message' => 'Lead magnet assigned successfully to this program'
             ]);
         } catch (Throwable $e) {
             Response::error('Failed to update lead magnet: ' . $e->getMessage(), 500);

@@ -4168,6 +4168,7 @@
             <div class="tab-content" id="tab-academic-programs" data-loaded="false"></div>
             <div class="tab-content" id="tab-academic-program-detail" data-loaded="false"></div>
             <div class="tab-content" id="tab-course-staff-assignment" data-loaded="false"></div>
+            <div class="tab-content" id="tab-program-lead-magnet" data-loaded="false"></div>
             <div class="tab-content" id="tab-add-programs" data-loaded="false"></div>
             <div class="tab-content" id="tab-edit-programs" data-loaded="false"></div>
 
@@ -6132,6 +6133,8 @@
                 cleanTitle = 'Academic Program Details';
             } else if (tab === 'course-staff-assignment') {
                 cleanTitle = 'Course Staff Assignment';
+            } else if (tab === 'program-lead-magnet') {
+                cleanTitle = 'Program Lead Magnet';
             } else if (tab === 'teams') {
                 cleanTitle = 'Teams & Staff Management';
             } else if (tab === 'assets') {
@@ -6240,6 +6243,8 @@
                     if (typeof initCourseStaffAssignmentPage === 'function') initCourseStaffAssignmentPage();
                 } else if (tab === 'program-staff') {
                     if (typeof initProgramStaffPage === 'function') initProgramStaffPage();
+                } else if (tab === 'program-lead-magnet') {
+                    if (typeof initProgramLeadMagnetPage === 'function') initProgramLeadMagnetPage();
                 } else if (tab === 'academic-program-detail') {
                     if (typeof initAcademicProgramDetailPage === 'function') initAcademicProgramDetailPage();
                 } else if (tab === 'knowledge-edit' || tab === 'knowledge-editor') {
