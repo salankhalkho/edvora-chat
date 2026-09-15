@@ -4323,6 +4323,9 @@
             <!-- Tab: Campus Tour Scheduling (Admin) -->
             <div class="tab-content" id="tab-campus-tours-scheduling" data-loaded="false"></div>
 
+            <!-- Tab: Dedicated Create Tour Slot Page -->
+            <div class="tab-content" id="tab-create-tour-slot" data-loaded="false"></div>
+
             <!-- Tab: Scholarship & Fee Rules Engine -->
             <div class="tab-content" id="tab-scholarships" data-loaded="false"></div>
 
@@ -5448,7 +5451,7 @@
             };
         }
 
-        const VALID_APP_TABS = ['overview', 'knowledge', 'knowledge-ingestion', 'academic-programs', 'academic-program-detail', 'course-staff-assignment', 'program-staff', 'program-lead-magnet', 'add-programs', 'edit-programs', 'departments', 'leads', 'callbacks', 'campus-tours', 'campus-tours-scheduling', 'scholarships', 'teams', 'assets', 'multilingual', 'conversion-engine', 'placeholder', 'analytics', 'knowledge-gaps', 'integrations', 'chatbot', 'test-chat', 'organization', 'org-settings', 'campuses', 'campus-editor', 'settings', 'knowledge-view', 'knowledge-editor', 'knowledge-edit', 'profile'];
+        const VALID_APP_TABS = ['overview', 'knowledge', 'knowledge-ingestion', 'academic-programs', 'academic-program-detail', 'course-staff-assignment', 'program-staff', 'program-lead-magnet', 'add-programs', 'edit-programs', 'departments', 'leads', 'callbacks', 'campus-tours', 'campus-tours-scheduling', 'create-tour-slot', 'scholarships', 'teams', 'assets', 'multilingual', 'conversion-engine', 'placeholder', 'analytics', 'knowledge-gaps', 'integrations', 'chatbot', 'test-chat', 'organization', 'org-settings', 'campuses', 'campus-editor', 'settings', 'knowledge-view', 'knowledge-editor', 'knowledge-edit', 'profile'];
 
         // Navigation Tabs Handling with Async Modular Loading
         const _tabLoadPromises = {};
@@ -6233,6 +6236,8 @@
                 } else if (tab === 'campus-tours-scheduling') {
                     if (typeof loadTourSlots === 'function') loadTourSlots();
                     if (typeof loadTourSettings === 'function') loadTourSettings();
+                } else if (tab === 'create-tour-slot') {
+                    if (typeof initCreateTourSlotPage === 'function') initCreateTourSlotPage();
                 } else if (tab === 'scholarships') {
                     if (typeof loadScholarships === 'function') loadScholarships();
                 } else if (tab === 'chatbot') {

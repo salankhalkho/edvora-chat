@@ -1,0 +1,444 @@
+﻿<!-- Dedicated Create Tour Slot Command Frame (1 Unified Big Card matching Settings, Campuses & Campus-Editor) -->
+<div id="view-create-tour-slot" class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
+    
+    <!-- Top Control Bar (Inside the Big Card) -->
+    <div class="ops-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 24px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important; flex-wrap: wrap; gap: 12px;">
+        <div class="ops-dash-title-group" style="display: flex !important; align-items: center !important; gap: 14px !important;">
+            <button type="button" class="brand-btn-secondary" style="height: 34px; padding: 0 12px; font-size: 11.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border-radius: 6px; background: #F4FAF7; border: 1.5px solid #D1E5DE; color: var(--e-teal, #063D3B);" onclick="switchNavTab('campus-tours-scheduling')">
+                <span>&larr;</span> Back to Scheduling &amp; Rules
+            </button>
+            <div style="height: 24px; width: 1.5px; background: #E2E8F0;"></div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: #ECFDF5; font-size: 18px; font-weight: 800; color: #047857; border: 1px solid #A7F3D0;">🗓️</span>
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important; letter-spacing: -0.01em !important; line-height: 1.25 !important;">
+                            Create Campus Tour Slot
+                        </span>
+                        <span style="display: inline-flex !important; align-items: center !important; gap: 6px !important; padding: 3px 10px !important; border-radius: 9999px !important; font-size: 11px !important; font-weight: 700 !important; background: #F0FDF4; border: 1px solid #BBF7D0; color: #166534;">
+                            ● Active Intake
+                        </span>
+                    </div>
+                    <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">
+                        Configure visit availability, date &amp; time range, campus assignment, and attendee capacity limits.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
+            <button type="button" class="brand-btn-secondary" style="height: 34px; padding: 0 14px; font-size: 11.5px; font-weight: 600; border-radius: 6px;" onclick="switchNavTab('campus-tours-scheduling')">Cancel</button>
+            <button type="button" class="brand-btn-primary" style="height: 34px; padding: 0 18px; font-size: 11.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; border-radius: 6px; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.2);" onclick="document.getElementById('ctsSubmitBtn').click()">
+                <span>💾</span> Publish Tour Slot
+            </button>
+        </div>
+    </div>
+
+    <!-- Inside the Big Card: Content Area matching Settings & Campus-Editor layout -->
+    <div style="padding: 28px 32px 48px 32px; box-sizing: border-box; width: 100%;">
+        
+        <div style="display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 32px; align-items: start; max-width: 1200px; margin: 0; box-sizing: border-box;">
+            
+            <!-- LEFT COLUMN: The Dedicated Form -->
+            <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 800; color: #063D3B; margin-bottom: 20px; border-bottom: 1.5px solid #F1F7F4; padding-bottom: 12px;">
+                    <span>⚙️</span> Slot Configuration Details
+                </div>
+
+                <form id="formDedicatedCreateTourSlot" onsubmit="handleDedicatedCreateTourSlot(event)">
+                    <div style="display: flex; flex-direction: column; gap: 18px;">
+                        
+                        <div>
+                            <label for="ctsCampusId" style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                <span>🏛️</span> Target Campus Location <span style="color: #EF4444;">*</span>
+                            </label>
+                            <select id="ctsCampusId" required onchange="updateCtsLivePreview()" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+                                <option value="">Loading campuses...</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="ctsTitle" style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                <span>🏷️</span> Tour Title / Discovery Program <span style="color: #EF4444;">*</span>
+                            </label>
+                            <input type="text" id="ctsTitle" required placeholder="e.g. Guided Campus &amp; Lab Discovery Tour" value="Guided Campus &amp; Lab Discovery Tour" oninput="updateCtsLivePreview()" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                            <span style="font-size: 10.5px; color: #648781; margin-top: 4px; display: block;">Displays directly to prospective students when booking via the AI chat widget or tour link.</span>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div>
+                                <label for="ctsDate" style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                    <span>📅</span> Tour Date <span style="color: #EF4444;">*</span>
+                                </label>
+                                <input type="date" id="ctsDate" required onchange="updateCtsLivePreview()" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                            </div>
+                            <div>
+                                <label for="ctsCapacity" style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                    <span>👥</span> Max Capacity (Visitors) <span style="color: #EF4444;">*</span>
+                                </label>
+                                <input type="number" id="ctsCapacity" required value="15" min="1" max="500" oninput="updateCtsLivePreview()" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div>
+                                <label for="ctsStartTime" style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                    <span>⏰</span> Start Time <span style="color: #EF4444;">*</span>
+                                </label>
+                                <input type="time" id="ctsStartTime" required value="10:00" onchange="updateCtsLivePreview()" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                            </div>
+                            <div>
+                                <label for="ctsEndTime" style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                    <span>🏁</span> End Time <span style="color: #EF4444;">*</span>
+                                </label>
+                                <input type="time" id="ctsEndTime" required value="11:30" onchange="updateCtsLivePreview()" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="ctsCounselorId" style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                <span>👔</span> Assigned Admissions Guide / Counselor
+                            </label>
+                            <select id="ctsCounselorId" onchange="updateCtsLivePreview()" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+                                <option value="">Auto-route (Round Robin)</option>
+                            </select>
+                            <span style="font-size: 10.5px; color: #648781; margin-top: 4px; display: block;">Select a specific tour leader or leave unassigned for automated counselor round-robin assignment.</span>
+                        </div>
+
+                        <!-- Hidden submit button for top bar triggers -->
+                        <button type="submit" id="ctsSubmitBtn" style="display: none;"></button>
+
+                        <!-- Action Bar -->
+                        <div style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding-top: 14px; border-top: 1.5px solid #F1F7F4;">
+                            <button type="submit" class="brand-btn-primary" style="height: 38px; padding: 0 24px; font-size: 12.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; border-radius: 6px;">
+                                <span>💾</span> Publish Tour Slot
+                            </button>
+                            <button type="button" onclick="switchNavTab('campus-tours-scheduling')" class="brand-btn-secondary" style="height: 38px; padding: 0 16px; font-size: 12px; border-radius: 6px;">
+                                Cancel
+                            </button>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+
+            <!-- RIGHT COLUMN: Cal.com / Modern Booking Experience Preview Card -->
+            <div style="position: sticky; top: 80px;">
+                <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 16px rgba(6, 61, 59, 0.05);">
+                    
+                    <!-- Preview Card Header Ribbon -->
+                    <div style="background: #F8FCFA; border-bottom: 1.5px solid #E6F0EC; padding: 12px 18px; display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 800; color: #063D3B;">
+                            <span style="width: 8px; height: 8px; border-radius: 50%; background: #10B981; display: inline-block;"></span>
+                            <span>PROSPECTIVE STUDENT BOOKING EXPERIENCE</span>
+                        </div>
+                        <span style="font-size: 10.5px; color: #648781; background: #FFFFFF; padding: 2px 8px; border-radius: 6px; border: 1px solid #E2E8F0; font-weight: 600;">Cal.com Style Preview</span>
+                    </div>
+
+                    <!-- Inner Modern Scheduling Widget Preview -->
+                    <div style="padding: 20px; box-sizing: border-box;">
+                        
+                        <!-- Mini Brand / Host Info (Cal style Left Panel) -->
+                        <div style="display: flex; gap: 14px; align-items: flex-start; padding-bottom: 16px; border-bottom: 1px solid #F1F5F3; margin-bottom: 16px;">
+                            <div id="previewAvatar" style="width: 44px; height: 44px; border-radius: 50%; background: #063D3B; color: #C8FF63; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; flex-shrink: 0; box-shadow: 0 2px 6px rgba(6, 61, 59, 0.15);">
+                                CT
+                            </div>
+                            <div style="min-width: 0; flex: 1;">
+                                <div id="previewCounselorName" style="font-size: 11.5px; font-weight: 600; color: #648781;">
+                                    Admissions Office Guide
+                                </div>
+                                <div id="previewTitle" style="font-size: 15px; font-weight: 800; color: #063D3B; line-height: 1.25; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                    Guided Campus &amp; Lab Discovery Tour
+                                </div>
+                                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; font-size: 11px; color: #4F7470; font-weight: 600;">
+                                    <span style="display: inline-flex; align-items: center; gap: 4px;">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                        <span id="previewDuration">90 mins</span>
+                                    </span>
+                                    <span style="display: inline-flex; align-items: center; gap: 4px;">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                                        <span id="previewCampus">Select Campus</span>
+                                    </span>
+                                    <span style="display: inline-flex; align-items: center; gap: 4px; color: #059669;">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                        <span id="previewCapacity">15 Max Seats</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Calendar Grid & Time Slots Layout (Cal.com Look & Feel) -->
+                        <div style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 14px;">
+                            
+                            <!-- Mini Calendar Box -->
+                            <div style="border: 1px solid #E6F0EC; border-radius: 10px; padding: 12px; background: #FAFCFB;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                    <div id="previewMonthYear" style="font-weight: 800; font-size: 12px; color: #063D3B;">September 2026</div>
+                                    <div style="display: flex; gap: 4px;">
+                                        <span style="display: inline-flex; width: 18px; height: 18px; align-items: center; justify-content: center; font-size: 10px; color: #94A3B8; border: 1px solid #E2E8F0; border-radius: 4px; background: #FFFFFF;">&lt;</span>
+                                        <span style="display: inline-flex; width: 18px; height: 18px; align-items: center; justify-content: center; font-size: 10px; color: #94A3B8; border: 1px solid #E2E8F0; border-radius: 4px; background: #FFFFFF;">&gt;</span>
+                                    </div>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 9px; font-weight: 700; color: #94A3B8; margin-bottom: 6px;">
+                                    <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+                                </div>
+                                <div id="previewCalendarDays" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; text-align: center; font-size: 10.5px;">
+                                    <!-- Rendered dynamically -->
+                                </div>
+                            </div>
+
+                            <!-- Right Slot Choice List (Cal.com Look) -->
+                            <div style="display: flex; flex-direction: column; gap: 6px;">
+                                <div style="font-size: 11px; font-weight: 700; color: #063D3B; margin-bottom: 2px;" id="previewSelectedDayTitle">
+                                    Selected Time
+                                </div>
+                                
+                                <div id="previewTimePill" style="border: 1.5px solid #063D3B; background: #ECFDF5; border-radius: 8px; padding: 9px 10px; display: flex; align-items: center; justify-content: space-between; cursor: default;">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span style="width: 6px; height: 6px; border-radius: 50%; background: #059669;"></span>
+                                        <span id="previewSlotTimeText" style="font-size: 12px; font-weight: 700; color: #063D3B;">10:00am</span>
+                                    </div>
+                                    <span style="font-size: 9.5px; background: #063D3B; color: #FFFFFF; padding: 2px 6px; border-radius: 4px; font-weight: 700;">ACTIVE</span>
+                                </div>
+
+                                <div style="border: 1px solid #E2E8F0; background: #F8FAFC; border-radius: 8px; padding: 9px 10px; display: flex; align-items: center; justify-content: space-between; opacity: 0.6;">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span style="width: 6px; height: 6px; border-radius: 50%; background: #94A3B8;"></span>
+                                        <span style="font-size: 12px; font-weight: 600; color: #64748B;">02:00pm</span>
+                                    </div>
+                                    <span style="font-size: 9.5px; color: #94A3B8;">Full</span>
+                                </div>
+
+                                <div style="border: 1px solid #E2E8F0; background: #F8FAFC; border-radius: 8px; padding: 9px 10px; display: flex; align-items: center; justify-content: space-between; opacity: 0.6;">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span style="width: 6px; height: 6px; border-radius: 50%; background: #94A3B8;"></span>
+                                        <span style="font-size: 12px; font-weight: 600; color: #64748B;">04:00pm</span>
+                                    </div>
+                                    <span style="font-size: 9.5px; color: #94A3B8;">Optional</span>
+                                </div>
+
+                                <div style="margin-top: 6px; background: #F4FAF7; border: 1px dashed #B9D7C7; border-radius: 6px; padding: 8px; font-size: 10px; color: #4F7470; text-align: center; line-height: 1.4;">
+                                    ✨ Auto-syncs with WhatsApp &amp; Email reminder workflows.
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+(function() {
+    var campusesCache = [];
+    var staffCache = [];
+
+    window.initCreateTourSlotPage = function() {
+        var d = new Date();
+        d.setDate(d.getDate() + 1);
+        var yyyy = d.getFullYear();
+        var mm = String(d.getMonth() + 1).padStart(2, '0');
+        var dd = String(d.getDate()).padStart(2, '0');
+        var dateInput = document.getElementById('ctsDate');
+        if (dateInput && !dateInput.value) {
+            dateInput.value = yyyy + '-' + mm + '-' + dd;
+        }
+
+        loadCtsCampusesAndStaff();
+    };
+
+    function loadCtsCampusesAndStaff() {
+        fetch('/v1/campuses')
+            .then(function(res) { return res.json(); })
+            .then(function(res) {
+                if (res.status === 'success' && res.data) {
+                    campusesCache = res.data.campuses || res.data || [];
+                    var sel = document.getElementById('ctsCampusId');
+                    if (sel) {
+                        var html = '<option value="">Select Campus Location...</option>';
+                        campusesCache.forEach(function(c) {
+                            html += '<option value="' + c.id + '">' + c.name + (c.is_primary ? ' (Main Flagship)' : '') + '</option>';
+                        });
+                        sel.innerHTML = html;
+                        if (campusesCache.length > 0) {
+                            sel.value = campusesCache[0].id;
+                        }
+                    }
+                    updateCtsLivePreview();
+                }
+            }).catch(function(){});
+
+        fetch('/v1/organization/staff')
+            .then(function(res) { return res.json(); })
+            .then(function(res) {
+                if (res.status === 'success' && res.data) {
+                    staffCache = res.data.staff || res.data || [];
+                    var sel = document.getElementById('ctsCounselorId');
+                    if (sel) {
+                        var html = '<option value="">Auto-route (Round Robin)</option>';
+                        staffCache.forEach(function(u) {
+                            html += '<option value="' + u.id + '">' + u.name + ' (' + (u.role || 'Staff') + ')</option>';
+                        });
+                        sel.innerHTML = html;
+                    }
+                    updateCtsLivePreview();
+                }
+            }).catch(function(){});
+    }
+
+    window.updateCtsLivePreview = function() {
+        var title = document.getElementById('ctsTitle') ? document.getElementById('ctsTitle').value : '';
+        var campusId = document.getElementById('ctsCampusId') ? document.getElementById('ctsCampusId').value : '';
+        var dateVal = document.getElementById('ctsDate') ? document.getElementById('ctsDate').value : '';
+        var startVal = document.getElementById('ctsStartTime') ? document.getElementById('ctsStartTime').value : '';
+        var endVal = document.getElementById('ctsEndTime') ? document.getElementById('ctsEndTime').value : '';
+        var capacityVal = document.getElementById('ctsCapacity') ? document.getElementById('ctsCapacity').value : '15';
+        var counselorId = document.getElementById('ctsCounselorId') ? document.getElementById('ctsCounselorId').value : '';
+
+        if (document.getElementById('previewTitle')) {
+            document.getElementById('previewTitle').innerText = title || 'Guided Campus & Lab Discovery Tour';
+        }
+
+        var campusName = 'Campus Location';
+        if (campusId && campusesCache.length > 0) {
+            var foundC = campusesCache.find(function(c) { return String(c.id) === String(campusId); });
+            if (foundC) campusName = foundC.name;
+        }
+        if (document.getElementById('previewCampus')) {
+            document.getElementById('previewCampus').innerText = campusName;
+        }
+
+        var counselorName = 'Admissions Office Guide';
+        var initials = 'CT';
+        if (counselorId && staffCache.length > 0) {
+            var foundStaff = staffCache.find(function(s) { return String(s.id) === String(counselorId); });
+            if (foundStaff) {
+                counselorName = foundStaff.name;
+                var parts = foundStaff.name.split(' ');
+                initials = (parts[0] ? parts[0][0] : '') + (parts[1] ? parts[1][0] : '');
+            }
+        }
+        if (document.getElementById('previewCounselorName')) {
+            document.getElementById('previewCounselorName').innerText = counselorName;
+        }
+        if (document.getElementById('previewAvatar')) {
+            document.getElementById('previewAvatar').innerText = initials || 'CT';
+        }
+
+        if (document.getElementById('previewCapacity')) {
+            document.getElementById('previewCapacity').innerText = (capacityVal || 15) + ' Max Seats';
+        }
+
+        var durationText = '90 mins';
+        if (startVal && endVal) {
+            var sParts = startVal.split(':');
+            var eParts = endVal.split(':');
+            var sMins = parseInt(sParts[0], 10) * 60 + parseInt(sParts[1], 10);
+            var eMins = parseInt(eParts[0], 10) * 60 + parseInt(eParts[1], 10);
+            var diff = eMins - sMins;
+            if (diff > 0) {
+                durationText = diff + ' mins';
+            }
+        }
+        if (document.getElementById('previewDuration')) {
+            document.getElementById('previewDuration').innerText = durationText;
+        }
+
+        if (document.getElementById('previewSlotTimeText') && startVal) {
+            var hours = parseInt(startVal.split(':')[0], 10);
+            var minutes = startVal.split(':')[1];
+            var ampm = hours >= 12 ? 'pm' : 'am';
+            var h12 = hours % 12 || 12;
+            document.getElementById('previewSlotTimeText').innerText = h12 + ':' + minutes + ampm;
+        }
+
+        renderPreviewCalendar(dateVal);
+    };
+
+    function renderPreviewCalendar(dateStr) {
+        var calDays = document.getElementById('previewCalendarDays');
+        var monthYear = document.getElementById('previewMonthYear');
+        var dayTitle = document.getElementById('previewSelectedDayTitle');
+        if (!calDays) return;
+
+        var targetDate = dateStr ? new Date(dateStr + 'T00:00:00') : new Date();
+        var year = targetDate.getFullYear();
+        var month = targetDate.getMonth();
+        var currentDay = targetDate.getDate();
+
+        var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        var dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        if (monthYear) monthYear.innerText = monthNames[month] + ' ' + year;
+        if (dayTitle) dayTitle.innerText = (dayNames[targetDate.getDay()] || 'Day') + ' ' + currentDay + (getOrdinal(currentDay)) + ' Slots';
+
+        var firstDayIndex = new Date(year, month, 1).getDay();
+        var totalDays = new Date(year, month + 1, 0).getDate();
+
+        var html = '';
+        for (var i = 0; i < firstDayIndex; i++) {
+            html += '<div style="color: transparent; padding: 4px;">0</div>';
+        }
+        for (var d = 1; d <= totalDays; d++) {
+            var isSelected = (d === currentDay);
+            if (isSelected) {
+                html += '<div style="background: #063D3B; color: #FFFFFF; font-weight: 800; border-radius: 6px; padding: 4px; box-shadow: 0 2px 4px rgba(6, 61, 59, 0.2);">' + d + '</div>';
+            } else {
+                html += '<div style="color: #475569; padding: 4px; border-radius: 4px;">' + d + '</div>';
+            }
+        }
+        calDays.innerHTML = html;
+    }
+
+    function getOrdinal(n) {
+        var s = ["th", "st", "nd", "rd"], v = n % 100;
+        return s[(v - 20) % 10] || s[v] || s[0];
+    }
+
+    window.handleDedicatedCreateTourSlot = function(e) {
+        e.preventDefault();
+        var payload = {
+            campus_id: document.getElementById('ctsCampusId').value,
+            title: document.getElementById('ctsTitle').value,
+            tour_date: document.getElementById('ctsDate').value,
+            start_time: document.getElementById('ctsStartTime').value,
+            end_time: document.getElementById('ctsEndTime').value,
+            max_capacity: document.getElementById('ctsCapacity').value,
+            counselor_user_id: document.getElementById('ctsCounselorId').value
+        };
+
+        if (!payload.campus_id) {
+            alert('Please select a campus location.');
+            return;
+        }
+
+        fetch('/v1/campus-tours/slots', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(res) {
+            if (res.status === 'success') {
+                alert('Campus tour slot created successfully!');
+                switchNavTab('campus-tours-scheduling');
+            } else {
+                alert(res.message || 'Failed to create slot');
+            }
+        })
+        .catch(function() {
+            alert('Network error while creating tour slot.');
+        });
+    };
+
+    setTimeout(function() {
+        initCreateTourSlotPage();
+    }, 100);
+})();
+</script>
