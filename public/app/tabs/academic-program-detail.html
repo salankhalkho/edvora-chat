@@ -727,14 +727,17 @@
   }
 
   // Navigation handlers for the 3 cards
-  window.openProgramStaffPage = function() {
+  window.openCourseStaffAssignmentPage = function() {
     const pId = window._programDetailState.programId;
     if (!pId) return;
-    sessionStorage.setItem('edvora_program_staff_id', pId);
+    sessionStorage.setItem('edvora_course_staff_program_id', pId);
+    sessionStorage.setItem('edvora_detail_program_id', pId);
+    window._currentDetailProgramId = pId;
     if (typeof switchNavTab === 'function') {
-      switchNavTab('program-staff');
+      switchNavTab('course-staff-assignment');
     }
   };
+  window.openProgramStaffPage = window.openCourseStaffAssignmentPage;
 
   window.openProgramKnowledgeHub = function() {
     const pId = window._programDetailState.programId;
