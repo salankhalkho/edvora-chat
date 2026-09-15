@@ -124,6 +124,24 @@ class Request
             ?? '127.0.0.1';
     }
 
+    public function json(?string $key = null, mixed $default = null): mixed
+    {
+        if ($this->jsonBody === null) {
+            $input = file_get_contents('php://input');
+            if (!empty($input)) {
+                $decoded = json_decode($input, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    $this->jsonBody = $decoded;
+                }
+            }
+        }
+        $body = $this->jsonBody ?? [];
+        if ($key === null) {
+            return $body;
+        }
+        return $body[$key] ?? $default;
+    }
+
     public function getFile(string $name): ?array
     {
         return $_FILES[$name] ?? null;
