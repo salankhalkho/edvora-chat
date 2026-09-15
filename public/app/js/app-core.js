@@ -268,27 +268,34 @@
         }
 
         // Auth Modal Toggle Listeners
-        const showSignupEl = document.getElementById('showSignup');
-        if (showSignupEl) {
-            showSignupEl.onclick = (e) => {
-                e.preventDefault();
-                if (window.location.hash !== '#signup') {
-                    history.replaceState(null, '', '#signup');
-                }
-                setAuthCard('signup');
-            };
+        function bindAuthToggleListeners() {
+            const showSignupEl = document.getElementById('showSignup');
+            if (showSignupEl && !showSignupEl._bound) {
+                showSignupEl._bound = true;
+                showSignupEl.onclick = (e) => {
+                    e.preventDefault();
+                    if (window.location.hash !== '#signup') {
+                        history.replaceState(null, '', '#signup');
+                    }
+                    setAuthCard('signup');
+                };
+            }
+            
+            const showLoginEl = document.getElementById('showLogin');
+            if (showLoginEl && !showLoginEl._bound) {
+                showLoginEl._bound = true;
+                showLoginEl.onclick = (e) => {
+                    e.preventDefault();
+                    if (window.location.hash !== '#login' && window.location.hash !== '') {
+                        history.replaceState(null, '', '#login');
+                    }
+                    setAuthCard('login');
+                };
+            }
         }
-        
-        const showLoginEl = document.getElementById('showLogin');
-        if (showLoginEl) {
-            showLoginEl.onclick = (e) => {
-                e.preventDefault();
-                if (window.location.hash !== '#login' && window.location.hash !== '') {
-                    history.replaceState(null, '', '#login');
-                }
-                setAuthCard('login');
-            };
-        }
+        bindAuthToggleListeners();
+        document.addEventListener('DOMContentLoaded', bindAuthToggleListeners);
+        document.addEventListener('edvora:partials-ready', bindAuthToggleListeners);
 
         const VALID_APP_TABS = ['overview', 'knowledge', 'knowledge-ingestion', 'academic-programs', 'academic-program-detail', 'course-staff-assignment', 'program-staff', 'program-lead-magnet', 'add-programs', 'edit-programs', 'departments', 'leads', 'callbacks', 'campus-tours', 'scholarships', 'teams', 'assets', 'multilingual', 'conversion-engine', 'placeholder', 'analytics', 'knowledge-gaps', 'integrations', 'chatbot', 'test-chat', 'organization', 'org-settings', 'campuses', 'campus-editor', 'settings', 'knowledge-view', 'knowledge-editor', 'knowledge-edit', 'profile'];
 

@@ -1,4 +1,4 @@
-﻿// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 // MISC.JS - User profile, conversion engine, multilingual settings,
 //            admissions analytics, knowledge gap audit, integrations/mobile/API docs
 // BUG AREAS:
@@ -2124,117 +2124,127 @@ echo $response['reply'];
             };
         }
 
-        // Form Submission: Login
-        document.getElementById('loginForm').onsubmit = async (e) => {
-            e.preventDefault();
-            clearAuthError('loginError');
-            const btn = e.target.querySelector('button[type="submit"]');
-            const originalBtnText = btn ? btn.textContent : 'Sign In to Console';
-            if (btn) {
-                btn.disabled = true;
-                btn.textContent = 'Signing In...';
+        // Form Submission: Login & Signup Handlers
+        function bindAuthFormHandlers() {
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm && !loginForm._bound) {
+                loginForm._bound = true;
+                loginForm.onsubmit = async (e) => {
+                    e.preventDefault();
+                    clearAuthError('loginError');
+                    const btn = e.target.querySelector('button[type="submit"]');
+                    const originalBtnText = btn ? btn.textContent : 'Sign In to Console';
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.textContent = 'Signing In...';
+                    }
+
+                    const email = (document.getElementById('loginEmail')?.value || '').trim();
+                    const password = (document.getElementById('loginPassword')?.value || '').trim();
+
+                    try {
+                        const res = await fetch('/v1/auth/login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email, password })
+                        });
+                        const data = await res.json();
+                        if (data.status === 'success') {
+                            token = data.data.access_token;
+                            localStorage.setItem('edvora_token', token);
+                            if (data.data.refresh_token) {
+                                localStorage.setItem('edvora_refresh_token', data.data.refresh_token);
+                            }
+                            if (data.data.organization) {
+                                updateAppIdentityUI(data.data.organization, data.data.user);
+                            }
+                            document.documentElement.classList.add('has-auth-token');
+                            currentDepartments = [];
+                            availableOrgStaff = [];
+                            availableOrgKs = [];
+                            if (data.data.onboarding_required) {
+                                startOnboardingWizard(1);
+                            } else {
+                                initDashboard();
+                            }
+                        } else {
+                            showAuthError('loginError', data.message || 'Invalid email address or password.');
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        showAuthError('loginError', 'Unable to connect to server. Please try again.');
+                    } finally {
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.textContent = originalBtnText;
+                        }
+                    }
+                };
             }
 
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value.trim();
+            const signupForm = document.getElementById('signupForm');
+            if (signupForm && !signupForm._bound) {
+                signupForm._bound = true;
+                signupForm.onsubmit = async (e) => {
+                    e.preventDefault();
+                    clearAuthError('signupError');
+                    const btn = document.getElementById('signupSubmitBtn') || e.target.querySelector('button[type="submit"]');
+                    const originalBtnHtml = btn ? btn.innerHTML : '<span>⚡</span> <span>Analyze Website &amp; Launch Bot</span>';
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.innerHTML = '<span style="display:inline-flex; align-items:center; gap:8px;"><span class="brand-spinner" style="width:14px; height:14px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:smartPulse 0.8s infinite;"></span> Initializing Spider...</span>';
+                    }
 
-            try {
-                const res = await fetch('/v1/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    token = data.data.access_token;
-                    localStorage.setItem('edvora_token', token);
-                    if (data.data.refresh_token) {
-                        localStorage.setItem('edvora_refresh_token', data.data.refresh_token);
+                    const websiteVal = (document.getElementById('signupWebsite')?.value || '').trim();
+                    const collegeNameVal = (document.getElementById('signupCollegeName')?.value || '').trim();
+
+                    try {
+                        const res = await fetch('/v1/auth/signup', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                name: (document.getElementById('signupName')?.value || '').trim(),
+                                college_name: collegeNameVal,
+                                email: (document.getElementById('signupEmail')?.value || '').trim(),
+                                password: document.getElementById('signupPassword')?.value || '',
+                                website_url: websiteVal
+                            })
+                        });
+                        const data = await res.json();
+                        if (data.status === 'success') {
+                            token = data.data.access_token;
+                            localStorage.setItem('edvora_token', token);
+                            if (data.data.refresh_token) {
+                                localStorage.setItem('edvora_refresh_token', data.data.refresh_token);
+                            }
+                            document.documentElement.classList.add('has-auth-token');
+                            currentDepartments = [];
+                            availableOrgStaff = [];
+                            availableOrgKs = [];
+
+                            const effectiveWebsite = data.data.organization?.website_url || websiteVal;
+                            const botToken = data.data.chatbot?.bot_token || '';
+
+                            launchSmartOnboardingEngine(token, botToken, effectiveWebsite);
+                        } else {
+                            showAuthError('signupError', data.message || 'Signup failed. Please verify your details.');
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        showAuthError('signupError', 'Unable to connect to server. Please try again.');
+                    } finally {
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.innerHTML = originalBtnHtml;
+                        }
                     }
-                    if (data.data.organization) {
-                        updateAppIdentityUI(data.data.organization, data.data.user);
-                    }
-                    document.documentElement.classList.add('has-auth-token');
-                    currentDepartments = [];
-                    availableOrgStaff = [];
-                    availableOrgKs = [];
-                    if (data.data.onboarding_required) {
-                        startOnboardingWizard(1);
-                    } else {
-                        initDashboard();
-                    }
-                } else {
-                    showAuthError('loginError', data.message || 'Invalid email address or password.');
-                }
-            } catch (err) {
-                console.error(err);
-                showAuthError('loginError', 'Unable to connect to server. Please try again.');
-            } finally {
-                if (btn) {
-                    btn.disabled = false;
-                    btn.textContent = originalBtnText;
-                }
+                };
             }
-        };
+        }
 
-        // Form Submission: Signup
-        // Form Submission: Signup
-        document.getElementById('signupForm').onsubmit = async (e) => {
-            e.preventDefault();
-            clearAuthError('signupError');
-            const btn = document.getElementById('signupSubmitBtn') || e.target.querySelector('button[type="submit"]');
-            const originalBtnHtml = btn ? btn.innerHTML : '<span>âš¡</span> <span>Analyze Website &amp; Launch Bot</span>';
-            if (btn) {
-                btn.disabled = true;
-                btn.innerHTML = '<span style="display:inline-flex; align-items:center; gap:8px;"><span class="brand-spinner" style="width:14px; height:14px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:smartPulse 0.8s infinite;"></span> Initializing Spider...</span>';
-            }
-
-            const websiteVal = (document.getElementById('signupWebsite')?.value || '').trim();
-
-            const collegeNameVal = (document.getElementById('signupCollegeName')?.value || '').trim();
-
-            try {
-                const res = await fetch('/v1/auth/signup', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        name: document.getElementById('signupName').value.trim(),
-                        college_name: collegeNameVal,
-                        email: document.getElementById('signupEmail').value.trim(),
-                        password: document.getElementById('signupPassword').value,
-                        website_url: websiteVal
-                    })
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    token = data.data.access_token;
-                    localStorage.setItem('edvora_token', token);
-                    if (data.data.refresh_token) {
-                        localStorage.setItem('edvora_refresh_token', data.data.refresh_token);
-                    }
-                    document.documentElement.classList.add('has-auth-token');
-                    currentDepartments = [];
-                    availableOrgStaff = [];
-                    availableOrgKs = [];
-
-                    const effectiveWebsite = data.data.organization?.website_url || websiteVal;
-                    const botToken = data.data.chatbot?.bot_token || '';
-
-                    // Launch the real-time Discovery Engine!
-                    launchSmartOnboardingEngine(token, botToken, effectiveWebsite);
-                } else {
-                    showAuthError('signupError', data.message || 'Signup failed. Please verify your details.');
-                }
-            } catch (err) {
-                console.error(err);
-                showAuthError('signupError', 'Unable to connect to server. Please try again.');
-            } finally {
-                if (btn) {
-                    btn.disabled = false;
-                    btn.innerHTML = originalBtnHtml;
-                }
-            }
-        };
+        bindAuthFormHandlers();
+        document.addEventListener('DOMContentLoaded', bindAuthFormHandlers);
+        document.addEventListener('edvora:partials-ready', bindAuthFormHandlers);
 
         // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // SMART ONBOARDING ENGINE CONTROLLER (SSE + UI STATE MACHINE)

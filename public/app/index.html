@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -83,12 +83,121 @@
 </head>
 <body>
 
-    <!-- ══════════════════════════════════════════════════════════════════════
-         SECTION 1: AUTH CONTAINER
-         BUG AREA: login/signup forms -> public/app/partials/auth.html
-         Inner HTML injected by partial loader below.
-         ══════════════════════════════════════════════════════════════════════ -->
-    <div id="authContainer"></div>
+    <!-- ══════════════════════════════════════════════════════════════════
+         SECTION 1: AUTH CONTAINER (Synchronously rendered for zero FOUC/delay)
+         BUG AREA: login/signup forms -> #loginForm, #signupForm
+         ══════════════════════════════════════════════════════════════════ -->
+    <div id="authContainer">
+        
+        <!-- Login Card -->
+        <div class="auth-card-wrapper" id="loginCard">
+            <div class="auth-brand-header">
+                <div class="auth-logo-badge">✦</div>
+                <div>
+                    <div class="auth-title">Edvora<span>Chat</span></div>
+                    <div class="auth-sub">College Admissions & Assistant Console</div>
+                </div>
+            </div>
+            
+            <div id="loginError" class="auth-error-banner" style="display: none;" role="alert">
+                <svg class="auth-error-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span id="loginErrorText"></span>
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email Address</label>
+                    <input type="email" id="loginEmail" class="brand-input" required placeholder="admin@college.edu" />
+                </div>
+                <div class="form-group">
+                    <div class="form-label-row">
+                        <label for="loginPassword">Password</label>
+                        <button type="button" class="auth-password-toggle" onclick="togglePasswordVisibility('loginPassword', this)" title="Show/Hide Password">
+                            <span class="toggle-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
+                            <span class="toggle-text">Show</span>
+                        </button>
+                    </div>
+                    <input type="password" id="loginPassword" class="brand-input" required placeholder="••••••••" />
+                </div>
+                <button type="submit" class="brand-btn-primary" style="width: 100%; height: 38px; font-size: 13px; margin-top: 8px;">
+                    Sign In to Console
+                </button>
+            </form>
+            
+            <div class="auth-toggle">
+                Don't have an account? <a href="#" id="showSignup">Register College</a>
+            </div>
+        </div>
+
+        <!-- Signup Card -->
+        <div class="auth-card-wrapper" id="signupCard" style="display: none;">
+            <div class="auth-brand-header">
+                <div class="auth-logo-badge">✦</div>
+                <div>
+                    <div class="auth-title">Register College</div>
+                    <div class="auth-sub">Onboard your AI Assistant in &lt;60s</div>
+                </div>
+            </div>
+
+            <div id="signupError" class="auth-error-banner" style="display: none;" role="alert">
+                <svg class="auth-error-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span id="signupErrorText"></span>
+            </div>
+
+            <form id="signupForm">
+                <div class="form-group">
+                    <label for="signupName">Your Name</label>
+                    <input type="text" id="signupName" class="brand-input" required placeholder="Dr. Sunita Rao" />
+                </div>
+                <div class="form-group">
+                    <label for="signupEmail">Official Email</label>
+                    <input type="email" id="signupEmail" class="brand-input" required placeholder="sunita@delhitech.edu" />
+                </div>
+                <div class="form-group">
+                    <label for="signupCollegeName">College / University Name <span style="color: #ef4444;">*</span></label>
+                    <input type="text" id="signupCollegeName" class="brand-input" required placeholder="e.g. Stanford University or Delhi Institute of Technology" />
+                </div>
+                <div class="form-group">
+                    <div class="form-label-row">
+                        <label for="signupPassword">Password</label>
+                        <button type="button" class="auth-password-toggle" onclick="togglePasswordVisibility('signupPassword', this)" title="Show/Hide Password">
+                            <span class="toggle-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
+                            <span class="toggle-text">Show</span>
+                        </button>
+                    </div>
+                    <input type="password" id="signupPassword" class="brand-input" required placeholder="Minimum 8 characters" />
+                </div>
+                <div class="form-group">
+                    <label for="signupWebsite">Official Website URL <span style="color: #ef4444;">*</span></label>
+                    <div style="position: relative;">
+                        <input type="text" id="signupWebsite" class="brand-input" required placeholder="https://www.stanford.edu" style="padding-left: 36px;" />
+                        <svg style="position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #64748b; pointer-events: none;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                        </svg>
+                    </div>
+                    <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Our AI engine will scan your site for verified degrees, departments &amp; fee structures.</div>
+                </div>
+                <button type="submit" class="brand-btn-primary" id="signupSubmitBtn" style="width: 100%; height: 40px; font-size: 13px; font-weight: 600; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <span>⚡</span> <span>Analyze Website &amp; Launch Bot</span>
+                </button>
+            </form>
+            
+            <div class="auth-toggle">
+                Already registered? <a href="#" id="showLogin">Sign In</a>
+            </div>
+        </div>
+
+    </div>
 
     <!-- ══════════════════════════════════════════════════════════════════════
          SECTION 1.4: SMART ONBOARDING DISCOVERY & SETUP ENGINE
@@ -321,7 +430,6 @@
     <script>
         (function() {
             var partials = [
-                { url: 'partials/auth.html',              targetId: 'authContainer' },
                 { url: 'partials/smart-onboarding.html',  targetId: 'smartOnboardingContainer' },
                 { url: 'partials/onboarding.html',        targetId: 'onboardingContainer' },
                 { url: 'partials/app-modals.html',        targetId: 'appModalsContainer' }
