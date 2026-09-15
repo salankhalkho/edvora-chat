@@ -263,8 +263,18 @@
                         html += '</tr>';
                     });
                     tbody.innerHTML = html;
+                } else {
+                    var tbody = document.getElementById('tourSlotsTableBody');
+                    if (tbody) {
+                        tbody.innerHTML = '<tr><td colspan="7" style="padding:30px; text-align:center; color:#EF4444;">' + (res.message || 'Failed to load tour slots') + '</td></tr>';
+                    }
                 }
-            }).catch(function(){});
+            }).catch(function(err) {
+                var tbody = document.getElementById('tourSlotsTableBody');
+                if (tbody) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="padding:30px; text-align:center; color:#EF4444;">Unable to connect to server.</td></tr>';
+                }
+            });
     };
 
     window.loadCampusesAndStaffOptions = function() {

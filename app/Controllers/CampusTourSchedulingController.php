@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Config\Database;
+use App\Core\Jwt;
 use App\Core\Request;
 use App\Core\Response;
 use App\Helpers\AuditLogger;
@@ -21,6 +22,17 @@ class CampusTourSchedulingController
         $botToken = trim((string)$request->get('bot_token'));
         $campusId = $request->get('campus_id') ? (int)$request->get('campus_id') : null;
         $programId = $request->get('program_id') ? (int)$request->get('program_id') : null;
+
+        // If not set by middleware, extract organization_id from Bearer JWT token (admin dashboard)
+        if (!$orgId) {
+            $token = $request->getBearerToken();
+            if ($token) {
+                $payload = Jwt::decode($token);
+                if ($payload && !empty($payload['organization_id'])) {
+                    $orgId = (int)$payload['organization_id'];
+                }
+            }
+        }
 
         // If called from public chatbot widget, resolve orgId from bot_token
         if (!$orgId && !empty($botToken)) {
@@ -56,9 +68,9 @@ class CampusTourSchedulingController
         }
 
         $query = "
-            SELECT s.*, c.name as campus_name, c.is_primary, u.name as counselor_name
+            SELECT s.*, COALESCE(c.name, 'Main Campus') as campus_name, COALESCE(c.is_primary, 1) as is_primary, u.name as counselor_name
             FROM campus_tour_slots s
-            JOIN campuses c ON s.campus_id = c.id
+            LEFT JOIN campuses c ON s.campus_id = c.id
             LEFT JOIN users u ON s.counselor_user_id = u.id
             WHERE s.organization_id = :org_id AND s.status = 'active'
         ";
