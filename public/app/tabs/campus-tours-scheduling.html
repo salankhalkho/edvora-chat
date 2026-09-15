@@ -1,0 +1,397 @@
+<!-- Dedicated Campus Tours Scheduling Command Frame (1 Unified Big Card matching Campuses, Leads & Settings) -->
+<div id="view-campus-tours-scheduling" class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
+    
+    <!-- Top Control Bar (Inside the Big Card) -->
+    <div class="ops-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 24px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important;">
+        <div class="ops-dash-title-group" style="display: flex !important; align-items: center !important; gap: 12px !important;">
+            <button type="button" onclick="switchNavTab('org-settings')" class="brand-btn-secondary" style="height: 32px; padding: 0 11px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; border-radius: 6px; background: #F4FAF7; border: 1.5px solid #D1E5DE; color: var(--e-teal, #063D3B);" title="Return to Control Panel">
+                &larr; Control Panel
+            </button>
+            <span class="ops-live-dot"></span>
+            <div>
+                <div class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important; letter-spacing: -0.01em !important; line-height: 1.25 !important;">
+                    Campus Visit Scheduling &amp; Rules
+                </div>
+                <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">
+                    Set up in-person campus visit slots, counselor routing rules, guided tour policies, and automated attendee follow-up triggers.
+                </div>
+            </div>
+        </div>
+
+        <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
+            <button type="button" onclick="switchNavTab('campus-tours')" class="brand-btn-secondary" style="height: 34px; padding: 0 12px; font-size: 11.5px; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border: 1.5px solid #D1E5DE; color: #063D3B;">
+                <span>📋 View Booked Visits</span>
+            </button>
+            <button type="button" onclick="openCreateTourSlotModal()" class="brand-btn-primary" style="height: 34px; padding: 0 14px; font-size: 11.5px; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.2);">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>+ Create Tour Slot</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Inside the Big Card: Content Area with KPI Strip, Slots Table & Policy Configuration -->
+    <div style="padding: 24px 28px 48px 28px; box-sizing: border-box; width: 100%;">
+        
+        <!-- KPI Metrics Ribbon (Inside Big Card) -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+            
+            <div class="ckh-kpi-tile" style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 14px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470;">Upcoming Slots</div>
+                    <span style="font-size: 18px;">📅</span>
+                </div>
+                <div style="font-size: 24px; font-weight: 800; color: #063D3B;" id="kpiUpcomingSlots">0</div>
+                <div style="font-size: 11px; color: #648781; margin-top: 2px;">Active visit schedules</div>
+            </div>
+
+            <div class="ckh-kpi-tile" style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 14px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470;">Total Capacity</div>
+                    <span style="font-size: 18px;">👥</span>
+                </div>
+                <div style="font-size: 24px; font-weight: 800; color: #2563EB;" id="kpiTotalCapacity">0</div>
+                <div style="font-size: 11px; color: #648781; margin-top: 2px;">Max seats open for booking</div>
+            </div>
+
+            <div class="ckh-kpi-tile" style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 14px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470;">Assigned Counselors</div>
+                    <span style="font-size: 18px;">👔</span>
+                </div>
+                <div style="font-size: 24px; font-weight: 800; color: #7C3AED;" id="kpiAssignedCounselors">0</div>
+                <div style="font-size: 11px; color: #648781; margin-top: 2px;">Active staff guides</div>
+            </div>
+
+            <div class="ckh-kpi-tile" style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 14px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470;">Follow-up Status</div>
+                    <span style="font-size: 18px;">⚡</span>
+                </div>
+                <div style="font-size: 15px; font-weight: 800; color: #047857; margin-top: 4px;" id="kpiFollowupStatus">Auto-Trigger Active</div>
+                <div style="font-size: 11px; color: #648781; margin-top: 2px;">Pre &amp; Post visit triggers</div>
+            </div>
+
+        </div>
+
+        <!-- Section 1: Active Visit Slots Table -->
+        <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; overflow: hidden; margin-bottom: 28px;">
+            <div style="padding: 14px 20px; background: #F8FCFA; border-bottom: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 13.5px; color: #063D3B;">
+                    <span>📅</span> Active Campus Visit Slots
+                </div>
+                <select id="filterSlotCampus" onchange="loadTourSlots()" class="brand-input" style="height: 30px; font-size: 11px; width: 200px; padding: 0 8px; background: #FFFFFF; border: 1px solid #D1E5DE; border-radius: 6px;">
+                    <option value="">All Campuses</option>
+                </select>
+            </div>
+            
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 12px;">
+                    <thead>
+                        <tr style="background: #FAFCFB; border-bottom: 1px solid #E6F0EC; color: #648781; font-weight: 700; text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.5px;">
+                            <th style="padding: 12px 18px;">Date &amp; Time</th>
+                            <th style="padding: 12px 18px;">Campus</th>
+                            <th style="padding: 12px 18px;">Title / Type</th>
+                            <th style="padding: 12px 18px;">Assigned Counselor</th>
+                            <th style="padding: 12px 18px;">Capacity / Booked</th>
+                            <th style="padding: 12px 18px;">Status</th>
+                            <th style="padding: 12px 18px; text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tourSlotsTableBody">
+                        <tr>
+                            <td colspan="7" style="padding: 30px; text-align: center; color: #648781; font-style: italic;">
+                                Loading tour slots...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Section 2: Policies, Counselor Routing & Follow-up Triggers -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px;">
+            
+            <!-- Counselor Routing Rules -->
+            <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 20px;">
+                <div style="font-weight: 800; font-size: 14px; color: #063D3B; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                    <span>👔</span> Counselor Assignment Routing
+                </div>
+                <div style="font-size: 11.5px; color: #648781; margin-bottom: 16px;">
+                    Configure how incoming student tour registrations are distributed among admissions staff.
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <label style="display: flex; align-items: flex-start; gap: 10px; padding: 10px; border: 1px solid #E6F0EC; border-radius: 8px; cursor: pointer;">
+                        <input type="radio" name="tour_routing_policy" value="direct_assigned" checked style="margin-top: 3px;" />
+                        <div>
+                            <div style="font-weight: 700; font-size: 12px; color: #063D3B;">Direct Counselor Assignment (Recommended)</div>
+                            <div style="font-size: 11px; color: #648781;">Route bookings to the specific counselor assigned to the scheduled slot.</div>
+                        </div>
+                    </label>
+
+                    <label style="display: flex; align-items: flex-start; gap: 10px; padding: 10px; border: 1px solid #E6F0EC; border-radius: 8px; cursor: pointer;">
+                        <input type="radio" name="tour_routing_policy" value="round_robin" style="margin-top: 3px;" />
+                        <div>
+                            <div style="font-weight: 700; font-size: 12px; color: #063D3B;">Round-Robin Auto Distribution</div>
+                            <div style="font-size: 11px; color: #648781;">Equally rotate attendees across active admissions representatives.</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Guided Tour Policies & Auto Follow-up Triggers -->
+            <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 20px;">
+                <div style="font-weight: 800; font-size: 14px; color: #063D3B; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                    <span>⚡</span> Guided Tour Policies &amp; Triggers
+                </div>
+                <div style="font-size: 11.5px; color: #648781; margin-bottom: 16px;">
+                    Automated attendee follow-up triggers and visitor notice policies.
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                    <div>
+                        <label style="font-size: 11px; font-weight: 700; color: #063D3B; display: block; margin-bottom: 4px;">Minimum Advance Notice (Hours)</label>
+                        <input type="number" id="tourAdvanceHours" value="12" min="1" class="brand-input" style="width: 100%; height: 32px; font-size: 12px;" />
+                    </div>
+
+                    <div>
+                        <label style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 12px; color: #063D3B; cursor: pointer;">
+                            <input type="checkbox" id="tourAutoFollowupEnabled" checked />
+                            <span>Enable Automated Pre-Visit &amp; Post-Visit Reminders</span>
+                        </label>
+                    </div>
+
+                    <button type="button" onclick="saveTourSettings()" class="brand-btn-primary" style="height: 34px; margin-top: 8px; font-size: 11.5px; font-weight: 700; border-radius: 6px; cursor: pointer;">
+                        Save Policies &amp; Triggers
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal: Create Tour Slot -->
+<div id="modalCreateTourSlot" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99999; align-items: center; justify-content: center; padding: 16px;">
+    <div style="background: #FFFFFF; border-radius: 14px; max-width: 520px; width: 100%; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+            <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #063D3B;">+ Create Campus Visit Slot</h3>
+            <button type="button" onclick="closeCreateTourSlotModal()" style="background: none; border: none; font-size: 20px; color: #94A3B8; cursor: pointer;">&times;</button>
+        </div>
+
+        <form id="formCreateTourSlot" onsubmit="handleCreateTourSlot(event)">
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div>
+                    <label style="font-size: 11px; font-weight: 700; color: #063D3B; display: block; margin-bottom: 4px;">Target Campus *</label>
+                    <select id="slotCampusId" required class="brand-input" style="width: 100%; height: 34px; font-size: 12px;"></select>
+                </div>
+
+                <div>
+                    <label style="font-size: 11px; font-weight: 700; color: #063D3B; display: block; margin-bottom: 4px;">Tour Title *</label>
+                    <input type="text" id="slotTitle" required placeholder="e.g. Guided Campus & Lab Discovery Tour" class="brand-input" style="width: 100%; height: 34px; font-size: 12px;" />
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <label style="font-size: 11px; font-weight: 700; color: #063D3B; display: block; margin-bottom: 4px;">Date *</label>
+                        <input type="date" id="slotDate" required class="brand-input" style="width: 100%; height: 34px; font-size: 12px;" />
+                    </div>
+                    <div>
+                        <label style="font-size: 11px; font-weight: 700; color: #063D3B; display: block; margin-bottom: 4px;">Max Capacity *</label>
+                        <input type="number" id="slotCapacity" required value="15" min="1" class="brand-input" style="width: 100%; height: 34px; font-size: 12px;" />
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <label style="font-size: 11px; font-weight: 700; color: #063D3B; display: block; margin-bottom: 4px;">Start Time *</label>
+                        <input type="time" id="slotStartTime" required value="10:00" class="brand-input" style="width: 100%; height: 34px; font-size: 12px;" />
+                    </div>
+                    <div>
+                        <label style="font-size: 11px; font-weight: 700; color: #063D3B; display: block; margin-bottom: 4px;">End Time *</label>
+                        <input type="time" id="slotEndTime" required value="11:30" class="brand-input" style="width: 100%; height: 34px; font-size: 12px;" />
+                    </div>
+                </div>
+
+                <div>
+                    <label style="font-size: 11px; font-weight: 700; color: #063D3B; display: block; margin-bottom: 4px;">Assigned Counselor / Guide</label>
+                    <select id="slotCounselorId" class="brand-input" style="width: 100%; height: 34px; font-size: 12px;"></select>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                    <button type="button" onclick="closeCreateTourSlotModal()" class="brand-btn-secondary" style="height: 34px; padding: 0 14px; font-size: 12px;">Cancel</button>
+                    <button type="submit" class="brand-btn-primary" style="height: 34px; padding: 0 16px; font-size: 12px; font-weight: 700;">Create Slot</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+(function() {
+    window.loadTourSlots = function() {
+        var campusId = document.getElementById('filterSlotCampus') ? document.getElementById('filterSlotCampus').value : '';
+        fetch('/v1/campus-tours/slots' + (campusId ? '?campus_id=' + campusId : ''))
+            .then(function(res) { return res.json(); })
+            .then(function(res) {
+                if (res.status === 'success' && res.data) {
+                    var slots = res.data.slots || [];
+                    var stats = res.data.stats || {};
+
+                    if (document.getElementById('kpiUpcomingSlots')) document.getElementById('kpiUpcomingSlots').innerText = stats.upcoming_slots || 0;
+                    if (document.getElementById('kpiTotalCapacity')) document.getElementById('kpiTotalCapacity').innerText = stats.total_capacity || 0;
+                    if (document.getElementById('kpiAssignedCounselors')) document.getElementById('kpiAssignedCounselors').innerText = stats.assigned_counselors || 0;
+
+                    var tbody = document.getElementById('tourSlotsTableBody');
+                    if (!tbody) return;
+
+                    if (slots.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="7" style="padding:30px; text-align:center; color:#648781;">No active tour slots scheduled yet. Click "+ Create Tour Slot" above.</td></tr>';
+                        return;
+                    }
+
+                    var html = '';
+                    slots.forEach(function(s) {
+                        html += '<tr style="border-bottom: 1px solid #E6F0EC;">';
+                        html += '<td style="padding: 12px 18px; font-weight: 700; color: #063D3B;">' + s.tour_date + '<div style="font-size:11px; color:#648781; font-weight:500;">' + s.start_time.substring(0,5) + ' - ' + s.end_time.substring(0,5) + '</div></td>';
+                        html += '<td style="padding: 12px 18px; font-weight: 600;">' + s.campus_name + (s.is_primary ? ' <span style="font-size:10px; background:#ECFDF5; color:#047857; padding:2px 5px; border-radius:4px;">Main</span>' : '') + '</td>';
+                        html += '<td style="padding: 12px 18px;">' + s.title + '</td>';
+                        html += '<td style="padding: 12px 18px;">' + (s.counselor_name || '<span style="color:#94A3B8;">Auto-routed</span>') + '</td>';
+                        html += '<td style="padding: 12px 18px; font-weight: 700;">' + (s.booked_count || 0) + ' / ' + s.max_capacity + '</td>';
+                        html += '<td style="padding: 12px 18px;"><span style="background:#ECFDF5; color:#047857; font-weight:700; padding:3px 8px; border-radius:9999px; font-size:10.5px;">ACTIVE</span></td>';
+                        html += '<td style="padding: 12px 18px; text-align: right;"><button type="button" onclick="cancelTourSlot(' + s.id + ')" class="brand-btn-secondary" style="height:26px; padding:0 8px; font-size:10.5px; color:#EF4444; border-color:#FCA5A5;">Cancel</button></td>';
+                        html += '</tr>';
+                    });
+                    tbody.innerHTML = html;
+                }
+            }).catch(function(){});
+    };
+
+    window.loadCampusesAndStaffOptions = function() {
+        fetch('/v1/campuses')
+            .then(function(res) { return res.json(); })
+            .then(function(res) {
+                if (res.status === 'success' && res.data) {
+                    var campuses = res.data.campuses || res.data || [];
+                    var filterSelect = document.getElementById('filterSlotCampus');
+                    var slotCampusSelect = document.getElementById('slotCampusId');
+
+                    if (filterSelect) {
+                        var fHtml = '<option value="">All Campuses</option>';
+                        campuses.forEach(function(c) { fHtml += '<option value="' + c.id + '">' + c.name + '</option>'; });
+                        filterSelect.innerHTML = fHtml;
+                    }
+                    if (slotCampusSelect) {
+                        var sHtml = '<option value="">Select Campus...</option>';
+                        campuses.forEach(function(c) { sHtml += '<option value="' + c.id + '">' + c.name + (c.is_primary ? ' (Main)' : '') + '</option>'; });
+                        slotCampusSelect.innerHTML = sHtml;
+                    }
+                }
+            }).catch(function(){});
+
+        fetch('/v1/organization/staff')
+            .then(function(res) { return res.json(); })
+            .then(function(res) {
+                if (res.status === 'success' && res.data) {
+                    var staff = res.data.staff || res.data || [];
+                    var counselorSelect = document.getElementById('slotCounselorId');
+                    if (counselorSelect) {
+                        var html = '<option value="">Auto-route (Round Robin)</option>';
+                        staff.forEach(function(u) { html += '<option value="' + u.id + '">' + u.name + ' (' + u.role + ')</option>'; });
+                        counselorSelect.innerHTML = html;
+                    }
+                }
+            }).catch(function(){});
+    };
+
+    window.loadTourSettings = function() {
+        fetch('/v1/campus-tours/settings')
+            .then(function(res) { return res.json(); })
+            .then(function(res) {
+                if (res.status === 'success' && res.data) {
+                    var s = res.data;
+                    var policyRad = document.querySelector('input[name="tour_routing_policy"][value="' + s.routing_policy + '"]');
+                    if (policyRad) policyRad.checked = true;
+                    if (document.getElementById('tourAdvanceHours')) document.getElementById('tourAdvanceHours').value = s.advance_hours || 12;
+                    if (document.getElementById('tourAutoFollowupEnabled')) document.getElementById('tourAutoFollowupEnabled').checked = !!s.auto_followup_enabled;
+                }
+            }).catch(function(){});
+    };
+
+    window.openCreateTourSlotModal = function() {
+        var modal = document.getElementById('modalCreateTourSlot');
+        if (modal) modal.style.display = 'flex';
+    };
+
+    window.closeCreateTourSlotModal = function() {
+        var modal = document.getElementById('modalCreateTourSlot');
+        if (modal) modal.style.display = 'none';
+    };
+
+    window.handleCreateTourSlot = function(e) {
+        e.preventDefault();
+        var payload = {
+            campus_id: document.getElementById('slotCampusId').value,
+            title: document.getElementById('slotTitle').value,
+            tour_date: document.getElementById('slotDate').value,
+            start_time: document.getElementById('slotStartTime').value,
+            end_time: document.getElementById('slotEndTime').value,
+            max_capacity: document.getElementById('slotCapacity').value,
+            counselor_user_id: document.getElementById('slotCounselorId').value
+        };
+
+        fetch('/v1/campus-tours/slots', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(res) {
+            if (res.status === 'success') {
+                closeCreateTourSlotModal();
+                loadTourSlots();
+            } else {
+                alert(res.message || 'Failed to create slot');
+            }
+        })
+        .catch(function() { alert('Error creating slot'); });
+    };
+
+    window.cancelTourSlot = function(id) {
+        if (!confirm('Are you sure you want to cancel this tour slot?')) return;
+        fetch('/v1/campus-tours/slots/' + id, { method: 'DELETE' })
+            .then(function(res) { return res.json(); })
+            .then(function(res) {
+                if (res.status === 'success') loadTourSlots();
+            });
+    };
+
+    window.saveTourSettings = function() {
+        var selectedPolicy = document.querySelector('input[name="tour_routing_policy"]:checked') ? document.querySelector('input[name="tour_routing_policy"]:checked').value : 'direct_assigned';
+        var advanceHours = document.getElementById('tourAdvanceHours') ? document.getElementById('tourAdvanceHours').value : 12;
+        var autoFollowup = document.getElementById('tourAutoFollowupEnabled') ? document.getElementById('tourAutoFollowupEnabled').checked : true;
+
+        fetch('/v1/campus-tours/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                routing_policy: selectedPolicy,
+                advance_hours: advanceHours,
+                auto_followup_enabled: autoFollowup
+            })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(res) {
+            if (res.status === 'success') alert('Policies & triggers saved successfully!');
+        });
+    };
+
+    // Auto load on tab init
+    setTimeout(function() {
+        loadCampusesAndStaffOptions();
+        loadTourSlots();
+        loadTourSettings();
+    }, 100);
+})();
+</script>

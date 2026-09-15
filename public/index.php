@@ -27,6 +27,7 @@ use App\Controllers\BillingController;
 use App\Controllers\CallbackController;
 use App\Controllers\CampusController;
 use App\Controllers\CampusTourController;
+use App\Controllers\CampusTourSchedulingController;
 use App\Controllers\ChatbotController;
 use App\Controllers\ChatController;
 use App\Controllers\ConversionEngineController;
@@ -302,6 +303,13 @@ $router->get('/v1/campus-tours/export', [CampusTourController::class, 'export'],
 $router->get('/v1/campus-tours/{id}', [CampusTourController::class, 'show'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->put('/v1/campus-tours/{id}', [CampusTourController::class, 'update'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->post('/v1/campus-tours/{id}/feedback', [CampusTourController::class, 'triggerFeedback'], [AuthMiddleware::class, TenantMiddleware::class]);
+
+// Campus Tour Scheduling & Rules Routes (Protected + Tenant Context & Public Widget)
+$router->get('/v1/campus-tours/slots', [CampusTourSchedulingController::class, 'indexSlots']);
+$router->post('/v1/campus-tours/slots', [CampusTourSchedulingController::class, 'storeSlot'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->delete('/v1/campus-tours/slots/{id}', [CampusTourSchedulingController::class, 'deleteSlot'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->get('/v1/campus-tours/settings', [CampusTourSchedulingController::class, 'getSettings'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->post('/v1/campus-tours/settings', [CampusTourSchedulingController::class, 'saveSettings'], [AuthMiddleware::class, TenantMiddleware::class]);
 
 // Conversion Engine Routes (Protected + Tenant Context)
 $router->get('/v1/conversion-engine/overview', [ConversionEngineController::class, 'overview'], [AuthMiddleware::class, TenantMiddleware::class]);

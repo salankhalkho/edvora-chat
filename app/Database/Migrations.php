@@ -1106,6 +1106,46 @@ class Migrations
         } catch (Throwable $e) {
             // Table may already exist
         }
+
+        // Campus Tour Slots table
+        try {
+            $this->db->exec("CREATE TABLE IF NOT EXISTS campus_tour_slots (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                organization_id INT NOT NULL,
+                campus_id INT NOT NULL,
+                title VARCHAR(255) NOT NULL DEFAULT 'Guided Campus Visit',
+                tour_date DATE NOT NULL,
+                start_time TIME NOT NULL,
+                end_time TIME NOT NULL,
+                max_capacity INT DEFAULT 15,
+                booked_count INT DEFAULT 0,
+                counselor_user_id INT NULL,
+                status ENUM('active', 'cancelled', 'completed') DEFAULT 'active',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
+                FOREIGN KEY (campus_id) REFERENCES campuses(id) ON DELETE CASCADE,
+                FOREIGN KEY (counselor_user_id) REFERENCES users(id) ON DELETE SET NULL,
+                INDEX idx_org_date (organization_id, tour_date),
+                INDEX idx_org_campus (organization_id, campus_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+        } catch (Throwable $e) {
+            // Table may already exist
+        }
+
+        // Campus Tour Settings table
+        try {
+            $this->db->exec("CREATE TABLE IF NOT EXISTS campus_tour_settings (
+                organization_id INT PRIMARY KEY,
+                routing_policy ENUM('direct_assigned', 'round_robin') DEFAULT 'direct_assigned',
+                advance_hours INT DEFAULT 12,
+                auto_followup_enabled TINYINT(1) DEFAULT 1,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+        } catch (Throwable $e) {
+            // Table may already exist
+        }
     }
 }
 

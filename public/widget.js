@@ -770,6 +770,9 @@
             <div style="color:#64748B; font-size:11px; margin-bottom:10px; line-height:1.4;">
                 Tour our academic blocks, advanced research labs, sports complex, and hostel amenities with an admissions coordinator.
             </div>
+            <div id="edvoraTourSlotContainer" style="margin-bottom:10px; font-size:11px; color:#4C1D95; background:#F5F3FF; border:1px solid #DDD6FE; border-radius:8px; padding:8px;">
+                Loading available tour schedules...
+            </div>
             <form style="display:flex; flex-direction:column; gap:7px;" onsubmit="return false;">
                 <div>
                     <label style="display:block; font-size:10px; font-weight:700; color:#334155; text-transform:uppercase; margin-bottom:2px;">Full Name *</label>
@@ -786,11 +789,11 @@
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
                     <div>
                         <label style="display:block; font-size:10px; font-weight:700; color:#334155; text-transform:uppercase; margin-bottom:2px;">Preferred Date</label>
-                        <input type="date" class="edvora-tour-input" style="width:100%; box-sizing:border-box; padding:6px 8px; font-size:11px; border:1px solid #CBD5E1; border-radius:6px; outline:none; background:#fff;" />
+                        <input type="date" class="edvora-tour-input" id="edvoraTourPrefDate" style="width:100%; box-sizing:border-box; padding:6px 8px; font-size:11px; border:1px solid #CBD5E1; border-radius:6px; outline:none; background:#fff;" />
                     </div>
                     <div>
                         <label style="display:block; font-size:10px; font-weight:700; color:#334155; text-transform:uppercase; margin-bottom:2px;">Time Slot</label>
-                        <select class="edvora-tour-input" style="width:100%; box-sizing:border-box; padding:6px 8px; font-size:11px; border:1px solid #CBD5E1; border-radius:6px; outline:none; background:#fff;">
+                        <select class="edvora-tour-input" id="edvoraTourPrefTime" style="width:100%; box-sizing:border-box; padding:6px 8px; font-size:11px; border:1px solid #CBD5E1; border-radius:6px; outline:none; background:#fff;">
                             <option value="Morning (10 AM - 12 PM)">🌅 Morning (10 AM)</option>
                             <option value="Afternoon (2 PM - 4 PM)">☀️ Afternoon (2 PM)</option>
                             <option value="Saturday Weekend Tour">📅 Weekend Visit</option>
@@ -802,6 +805,38 @@
                 </button>
             </form>
         `;
+
+        // Fetch active slots for this bot
+        fetch(apiBaseUrl + '/v1/campus-tours/slots?bot_token=' + encodeURIComponent(botToken))
+            .then(function(res) { return res.json(); })
+            .then(function(res) {
+                var slotBox = card.querySelector('#edvoraTourSlotContainer');
+                if (slotBox && res.status === 'success' && res.data && res.data.slots && res.data.slots.length > 0) {
+                    var html = '<div style="font-weight:700; margin-bottom:4px;">Select Available Schedule:</div><div style="display:flex; flex-wrap:wrap; gap:4px;">';
+                    res.data.slots.slice(0, 4).forEach(function(s) {
+                        html += '<button type="button" class="edvora-slot-chip" data-date="' + s.tour_date + '" data-time="' + s.start_time + '" style="background:#fff; border:1px solid #C4B5FD; color:#6D28D9; border-radius:4px; padding:3px 6px; font-size:10px; cursor:pointer; font-weight:600;">' + s.tour_date + ' (' + s.start_time.substring(0, 5) + ')</button>';
+                    });
+                    html += '</div>';
+                    slotBox.innerHTML = html;
+
+                    var chips = slotBox.querySelectorAll('.edvora-slot-chip');
+                    chips.forEach(function(btn) {
+                        btn.onclick = function() {
+                            chips.forEach(function(b) { b.style.background = '#fff'; b.style.color = '#6D28D9'; });
+                            btn.style.background = '#7C3AED';
+                            btn.style.color = '#fff';
+                            var dateInput = card.querySelector('#edvoraTourPrefDate');
+                            if (dateInput) dateInput.value = btn.getAttribute('data-date');
+                        };
+                    });
+                } else if (slotBox) {
+                    slotBox.innerHTML = '✨ <strong>Flexible Visiting Hours:</strong> Pick any preferred date below for a guided walk.';
+                }
+            })
+            .catch(function() {
+                var slotBox = card.querySelector('#edvoraTourSlotContainer');
+                if (slotBox) slotBox.innerHTML = '✨ <strong>Flexible Visiting Hours:</strong> Pick any preferred date below.';
+            });
 
         var inputs = card.querySelectorAll('.edvora-tour-input');
         var submitBtn = card.querySelector('.edvora-tour-btn');
