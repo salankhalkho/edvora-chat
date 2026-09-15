@@ -1,0 +1,453 @@
+﻿/* ═══════════════════════════════════════════════════════════════════
+   ONBOARDING.CSS - Progressive onboarding wizard + app-shell base layout
+   SELECTORS: #onboardingContainer, .onb-*, .onb-topbar, .onb-progress-wrap,
+              .onb-step-*, #appContainer (display:none rule), .workspace-main, .tab-content
+   USED BY: index.html #onboardingContainer, #appContainer base
+   BUG AREAS: onboarding step layout -> .onb-step-*; progress bar -> .onb-progress-*
+   ═══════════════════════════════════════════════════════════════════ */
+        /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+           PROGRESSIVE ONBOARDING ENGINE LIGHT DESIGN SYSTEM
+           â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+        #onboardingContainer {
+            position: fixed !important;
+            inset: 0 !important;
+            background: #F1F7F4 !important;
+            background-image: none !important;
+            display: none;
+            flex-direction: column;
+            z-index: 99999;
+            overflow-y: auto;
+            color: #092F2E !important;
+            font-size: 15px;
+        }
+
+        #onboardingContainer label {
+            font-size: 14px;
+            font-weight: 700;
+            color: #063D3B !important;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        #onboardingContainer .brand-input,
+        #onboardingContainer select.brand-input,
+        #onboardingContainer textarea.brand-input {
+            font-size: 14.5px;
+            min-height: 44px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            background: #FFFFFF !important;
+            border: 1.5px solid #D1E5DE !important;
+            color: #063D3B !important;
+        }
+
+        #onboardingContainer .brand-input:focus,
+        #onboardingContainer select.brand-input:focus,
+        #onboardingContainer textarea.brand-input:focus {
+            border-color: #047857 !important;
+            box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.08) !important;
+        }
+
+        #onboardingContainer textarea.brand-input {
+            min-height: 90px;
+            line-height: 1.5;
+        }
+
+        .onb-topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.96) !important;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1.5px solid #DDE9E3 !important;
+            padding: 16px 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            box-shadow: 0 2px 8px rgba(6, 61, 59, 0.04);
+            color: #063D3B !important;
+        }
+
+        .onb-topbar div,
+        .onb-topbar span {
+            color: #063D3B;
+        }
+
+        .onb-progress-wrap {
+            flex: 1;
+            max-width: 540px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .onb-progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: #DDE9E3 !important;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .onb-progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #063D3B, #059669) !important;
+            border-radius: 999px;
+            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 0 10px rgba(6, 61, 59, 0.25);
+        }
+
+        .onb-main-body {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 24px 80px 24px;
+            background: #F1F7F4 !important;
+        }
+
+        .onb-card {
+            width: 100%;
+            max-width: 880px;
+            background: #FFFFFF !important;
+            border: 1.5px solid #DCE9E5 !important;
+            border-radius: 18px;
+            box-shadow: 0 20px 50px -10px rgba(6, 61, 59, 0.08), 0 4px 16px rgba(6, 61, 59, 0.03) !important;
+            overflow: hidden;
+            position: relative;
+            animation: onbFadeSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes onbFadeSlide {
+            from { opacity: 0; transform: translateY(14px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .onb-card-header {
+            padding: 28px 36px 20px 36px;
+            border-bottom: 1.5px solid #E6F0EC !important;
+            background: #FAFDFB !important;
+        }
+
+        .onb-card-body {
+            padding: 32px 36px;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            background: #FFFFFF !important;
+        }
+
+        .onb-card-footer {
+            padding: 20px 36px;
+            border-top: 1.5px solid #E6F0EC !important;
+            background: #F8FBFA !important;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+        }
+
+        .onb-card-footer .brand-btn-primary {
+            background: #063D3B !important;
+            color: #C8FF63 !important;
+            height: 44px;
+            font-size: 14px;
+            font-weight: 700;
+            padding: 0 24px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(6, 61, 59, 0.15);
+        }
+
+        .onb-card-footer .brand-btn-primary:hover {
+            background: #0A524F !important;
+            transform: translateY(-1px);
+        }
+
+        .onb-card-footer .brand-btn-secondary {
+            background: #FFFFFF !important;
+            color: #063D3B !important;
+            border: 1.5px solid #DDE9E3 !important;
+            height: 44px;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 0 20px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .onb-card-footer .brand-btn-secondary:hover {
+            background: #F4FAF7 !important;
+            border-color: #B9D7C7 !important;
+        }
+
+        .onb-radio-card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .onb-radio-card {
+            background: #F8FBFA !important;
+            border: 1.5px solid #DDE9E3 !important;
+            border-radius: 10px;
+            padding: 14px 16px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #4F7470 !important;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+
+        .onb-radio-card:hover {
+            border-color: #047857 !important;
+            color: #063D3B !important;
+            background: #F4FAF7 !important;
+        }
+
+        .onb-radio-card.active {
+            background: #E6F7D2 !important;
+            border-color: #B9D7C7 !important;
+            color: #063D3B !important;
+            font-weight: 700 !important;
+            box-shadow: 0 2px 8px rgba(6, 61, 59, 0.06);
+        }
+
+        .onb-chip-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 600;
+            background: #F8FBFA !important;
+            border: 1.5px solid #DDE9E3 !important;
+            color: #4F7470 !important;
+            cursor: pointer;
+            transition: all 0.15s;
+            user-select: none;
+        }
+
+        .onb-chip-toggle:hover {
+            border-color: #047857 !important;
+            color: #063D3B !important;
+            background: #F4FAF7 !important;
+        }
+
+        .onb-chip-toggle.active {
+            background: #E6F7D2 !important;
+            border-color: #B9D7C7 !important;
+            color: #063D3B !important;
+            font-weight: 700 !important;
+            box-shadow: 0 2px 6px rgba(6, 61, 59, 0.04);
+        }
+
+        .onb-preview-chatbox {
+            background: #FFFFFF !important;
+            border: 1.5px solid #DCE9E5 !important;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            height: 420px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(6, 61, 59, 0.06);
+        }
+
+        .main-ks-mode-btn.active, .dept-ks-mode-btn.active, .brand-btn-secondary.active {
+            background: rgba(99, 102, 241, 0.2) !important;
+            color: #a5b4fc !important;
+            border-color: var(--brand-indigo-500) !important;
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.25) !important;
+        }
+
+        .lang-item-card:hover {
+            border-color: rgba(99, 102, 241, 0.45) !important;
+            transform: translateY(-1px);
+        }
+
+        /* Auth Screen Ambient Glow Backdrop */
+        #authContainer {
+            position: fixed;
+            inset: 0;
+            background: #F1F7F4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 20px;
+        }
+
+        .auth-card-wrapper {
+            width: 100%;
+            max-width: 440px;
+            background: #FFFFFF;
+            border: 1px solid var(--brand-border-strong);
+            border-radius: var(--brand-radius-md);
+            padding: 36px;
+            box-shadow: var(--brand-shadow-modal);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-card-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--brand-grad-brand);
+        }
+
+        .auth-brand-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 28px;
+            text-align: center;
+        }
+
+        .auth-logo-badge {
+            width: 44px;
+            height: 44px;
+            background: var(--brand-grad-brand);
+            border-radius: var(--brand-radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: #fff;
+            box-shadow: var(--brand-glow-indigo);
+        }
+
+        .auth-title {
+            font-family: var(--brand-font-display);
+            font-size: 22px;
+            font-weight: 700;
+            color: #092F2E;
+            letter-spacing: -0.3px;
+        }
+
+        .auth-title span {
+            color: var(--brand-indigo-400);
+        }
+
+        .auth-sub {
+            font-size: 12px;
+            color: #648781;
+            margin-top: 2px;
+        }
+
+        .auth-error-banner {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            background: rgba(244, 63, 94, 0.12);
+            border: 1px solid rgba(244, 63, 94, 0.35);
+            border-radius: var(--brand-radius-sm, 6px);
+            padding: 10px 14px;
+            margin-bottom: 18px;
+            color: #fecdd3;
+            font-size: 12.5px;
+            font-weight: 500;
+            line-height: 1.4;
+            animation: authErrorSlide 0.25s ease-out;
+        }
+
+        .auth-error-icon {
+            flex-shrink: 0;
+            color: var(--brand-rose-400, #fb7185);
+        }
+
+        @keyframes authErrorSlide {
+            0% {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #4F7470;
+            margin-bottom: 6px;
+        }
+
+        .form-label-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .form-label-row label {
+            margin-bottom: 0 !important;
+        }
+
+        .auth-password-toggle {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: #063D3B;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1;
+            transition: color var(--brand-transition-fast, 0.15s ease);
+        }
+
+        .auth-password-toggle:hover {
+            color: #0D6E6A;
+            text-decoration: underline;
+        }
+
+        .auth-password-toggle .toggle-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-password-toggle .toggle-icon svg {
+            display: block;
+        }
+
+        .auth-toggle {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #648781;
+        }
+
+        .auth-toggle a {
+            color: var(--brand-indigo-400);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color var(--brand-transition-fast);
+        }
+
+        .auth-toggle a:hover {
+            color: #092F2E;
+            text-decoration: underline;
+        }
+

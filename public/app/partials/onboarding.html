@@ -1,0 +1,730 @@
+﻿<!-- ═══════════════════════════════════════════════════════════════════
+     ONBOARDING.HTML - Progressive 6-step onboarding wizard
+     PARENT: #onboardingContainer in index.html (empty shell, injected via fetch())
+     BUG AREAS:
+       Step navigation  -> goToOnbStep() in js/onboarding.js
+       Step save        -> saveOnbStep() in js/onboarding.js
+       Chat preview     -> sendOnbChatMessage() in js/onboarding.js
+       Program list     -> renderOnbProgramsList() in js/onboarding.js
+       Embed snippet    -> #onbEmbedScriptCode
+       Sticky top bar   -> .onb-topbar
+     LOADED BY: index.html partial loader (edvora:partials-ready event)
+     ═══════════════════════════════════════════════════════════════════ -->
+    <div id="onboardingContainer">
+        <!-- Sticky Header Bar -->
+        <div class="onb-topbar">
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <div class="brand-logo-icon" style="font-size: 20px;">âœ¦</div>
+                <div>
+                    <div style="font-family: var(--brand-font-display); font-size: 16px; font-weight: 700; color: #063D3B; line-height: 1.2;">Edvora<span style="color: var(--brand-indigo-400);">Chat</span></div>
+                    <div style="font-size: 14px; color: #648781;" id="onbHeaderCollegeName">Institution Setup Wizard</div>
+                </div>
+            </div>
+
+            <div class="onb-progress-wrap">
+                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 14.5px;">
+                    <span style="font-weight: 600; color: #092F2E;" id="onbStepIndicator">Step 1 of 16 â€¢ Welcome</span>
+                    <span style="font-family: var(--brand-font-mono); color: var(--brand-indigo-400); font-weight: 700;" id="onbProgressPct">0% Completed</span>
+                </div>
+                <div class="onb-progress-bar-bg">
+                    <div class="onb-progress-bar-fill" id="onbProgressBar" style="width: 6%;"></div>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <button type="button" class="brand-btn-secondary" onclick="exitOnboardingToDashboard()" style="font-size: 14.5px; height: 38px; padding: 0 18px;">
+                    Save & Exit to Console
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Body Steps Container -->
+        <div class="onb-main-body">
+            
+            <!-- STEP 1: Welcome & Overview -->
+            <div class="onb-card onb-step-card" id="onbStep1" style="display: block;">
+                <div class="onb-card-header" style="text-align: center; padding: 44px 40px 28px 40px;">
+                    <div style="width: 68px; height: 68px; border-radius: 20px; background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 20px auto; box-shadow: 0 0 24px rgba(99, 102, 241, 0.25);">
+                        ðŸŽ“
+                    </div>
+                    <h2 style="font-family: var(--brand-font-display); font-size: 28px; font-weight: 800; color: #063D3B; margin: 0 0 12px 0;">
+                        Welcome to Edvora Chat
+                    </h2>
+                    <p style="font-size: 16px; color: #4F7470; max-width: 640px; margin: 0 auto; line-height: 1.65;">
+                        Let's configure your AI admissions assistant in a few quick steps. We'll capture your programs, admissions criteria, and fee structure so your AI can immediately assist prospective students accurately.
+                    </p>
+                </div>
+                <div class="onb-card-body" style="padding: 14px 40px 32px 40px;">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 12px;">
+                        <div style="background: #F1F7F4; border: 1px solid #DDE9E3; border-radius: 12px; padding: 18px; text-align: center;">
+                            <div style="font-size: 24px; margin-bottom: 8px;">âš¡</div>
+                            <div style="font-size: 15.5px; font-weight: 700; color: #092F2E;">5 Min Setup</div>
+                            <div style="font-size: 14px; color: #648781; margin-top: 4px;">Fast, progressive guided steps</div>
+                        </div>
+                        <div style="background: #F1F7F4; border: 1px solid #DDE9E3; border-radius: 12px; padding: 18px; text-align: center;">
+                            <div style="font-size: 24px; margin-bottom: 8px;">ðŸ§ </div>
+                            <div style="font-size: 15.5px; font-weight: 700; color: #092F2E;">Auto-Knowledge</div>
+                            <div style="font-size: 14px; color: #648781; margin-top: 4px;">AI is primed instantly</div>
+                        </div>
+                        <div style="background: #F1F7F4; border: 1px solid #DDE9E3; border-radius: 12px; padding: 18px; text-align: center;">
+                            <div style="font-size: 24px; margin-bottom: 8px;">ðŸ§ª</div>
+                            <div style="font-size: 15.5px; font-weight: 700; color: #092F2E;">Live Test Chat</div>
+                            <div style="font-size: 14px; color: #648781; margin-top: 4px;">Preview before embed</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="onb-card-footer" style="justify-content: flex-end;">
+                    <button type="button" class="brand-btn-primary" onclick="goToOnbStep(2)" style="height: 48px; padding: 0 32px; font-size: 16px; font-weight: 700;">
+                        Get Started & Configure Assistant â†’
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 2: Institution Profile -->
+            <div class="onb-card onb-step-card" id="onbStep2" style="display: none;">
+                <div class="onb-card-header">
+                    <div style="font-size: 13.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--brand-indigo-400); margin-bottom: 6px;">Step 2 of 16 â€¢ Required</div>
+                    <h2 style="font-family: var(--brand-font-display); font-size: 24px; font-weight: 800; color: #063D3B; margin: 0 0 6px 0;">
+                        ðŸ›ï¸ Institution Profile & Basic Details
+                    </h2>
+                    <p style="font-size: 15px; color: #4F7470; margin: 0; line-height: 1.5;">
+                        Provide official identification and location details for your college or university.
+                    </p>
+                </div>
+                <div class="onb-card-body">
+                    <div class="form-group">
+                        <label>Official Institution Name <span style="color: var(--brand-rose-400);">*</span></label>
+                        <input type="text" id="onbOrgName" class="brand-input" placeholder="e.g. Bangalore School of Business & Management" required />
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group">
+                            <label>Short Name / Acronym</label>
+                            <input type="text" id="onbOrgShortName" class="brand-input" placeholder="e.g. BSBM" />
+                        </div>
+                        <div class="form-group">
+                            <label>Founded Year</label>
+                            <input type="text" id="onbFoundedYear" class="brand-input" placeholder="e.g. 2012" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Institution Type</label>
+                        <div class="onb-radio-card-grid" id="onbInstTypeGroup">
+                            <div class="onb-radio-card active" data-val="Private">Private</div>
+                            <div class="onb-radio-card" data-val="Public / State">Public / State</div>
+                            <div class="onb-radio-card" data-val="Deemed University">Deemed University</div>
+                            <div class="onb-radio-card" data-val="Autonomous">Autonomous</div>
+                            <div class="onb-radio-card" data-val="Other">Other</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Institution Category</label>
+                        <div class="onb-radio-card-grid" id="onbInstCatGroup">
+                            <div class="onb-radio-card" data-val="University">University</div>
+                            <div class="onb-radio-card active" data-val="College">College</div>
+                            <div class="onb-radio-card" data-val="Business School">Business School</div>
+                            <div class="onb-radio-card" data-val="Institute">Institute</div>
+                            <div class="onb-radio-card" data-val="Other">Other</div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px;">
+                        <div class="form-group">
+                            <label>City <span style="color: var(--brand-rose-400);">*</span></label>
+                            <input type="text" id="onbCity" class="brand-input" placeholder="e.g. Bengaluru" required />
+                        </div>
+                        <div class="form-group">
+                            <label>State</label>
+                            <input type="text" id="onbState" class="brand-input" placeholder="e.g. Karnataka" />
+                        </div>
+                        <div class="form-group">
+                            <label>PIN / ZIP Code</label>
+                            <input type="text" id="onbPincode" class="brand-input" placeholder="e.g. 560001" />
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group">
+                            <label>Official Website URL</label>
+                            <input type="url" id="onbWebsiteUrl" class="brand-input" placeholder="https://www.example.edu" />
+                        </div>
+                        <div class="form-group">
+                            <label>Admissions Academic Year</label>
+                            <input type="text" id="onbAcademicYear" class="brand-input" placeholder="2026-27" value="2026-27" />
+                        </div>
+                    </div>
+                </div>
+                <div class="onb-card-footer">
+                    <button type="button" class="brand-btn-secondary" onclick="goToOnbStep(1)">â† Back</button>
+                    <button type="button" class="brand-btn-primary" onclick="saveOnbStep(2)">Save & Continue â†’</button>
+                </div>
+            </div>
+
+            <!-- STEP 3: Identity & Conversational Persona -->
+            <div class="onb-card onb-step-card" id="onbStep3" style="display: none;">
+                <div class="onb-card-header">
+                    <div style="font-size: 13.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--brand-indigo-400); margin-bottom: 6px;">Step 3 of 16 â€¢ Required</div>
+                    <h2 style="font-family: var(--brand-font-display); font-size: 24px; font-weight: 800; color: #063D3B; margin: 0 0 6px 0;">
+                        ðŸ·ï¸ Institution Identity & AI Context
+                    </h2>
+                    <p style="font-size: 15px; color: #4F7470; margin: 0; line-height: 1.5;">
+                        Help the AI understand your institution's positioning and how to refer to you in student conversations.
+                    </p>
+                </div>
+                <div class="onb-card-body">
+                    <div class="form-group">
+                        <label>Preferred Conversational Name <span style="color: var(--brand-rose-400);">*</span></label>
+                        <input type="text" id="onbPreferredName" class="brand-input" placeholder="e.g. Patna Management School" oninput="updateOnbPreviewName(this.value)" />
+                        <div style="font-size: 14.5px; color: #648781; margin-top: 8px;">The AI will say: "Welcome to <strong id="onbPreviewPreferredName" style="color: var(--brand-indigo-400); font-weight: 700;">Patna Management School</strong> Admissions! How can I help you today?"</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Institution Short Description (Global AI Context) <span style="color: var(--brand-rose-400);">*</span></label>
+                        <textarea id="onbInstitutionDesc" class="brand-input" rows="4" style="resize: vertical;" placeholder="e.g. Bangalore School of Business & Management is a premier management institution established in 2012, offering AICTE-approved PGDM, MBA, and Executive programs with 100% placement assistance and global university partnerships."></textarea>
+                    </div>
+                </div>
+                <div class="onb-card-footer">
+                    <button type="button" class="brand-btn-secondary" onclick="goToOnbStep(2)">â† Back</button>
+                    <button type="button" class="brand-btn-primary" onclick="saveOnbStep(3)">Save & Continue â†’</button>
+                </div>
+            </div>
+
+            <!-- STEP 4: Programs Offered -->
+            <div class="onb-card onb-step-card" id="onbStep4" style="display: none;">
+                <div class="onb-card-header">
+                    <div style="font-size: 13.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--brand-indigo-400); margin-bottom: 6px;">Step 4 of 16 â€¢ Core Foundation</div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                        <div>
+                            <h2 style="font-family: var(--brand-font-display); font-size: 24px; font-weight: 800; color: #063D3B; margin: 0 0 6px 0;">
+                                ðŸ“– Academic Programs Offered
+                            </h2>
+                            <p style="font-size: 15px; color: #4F7470; margin: 0; line-height: 1.5;">
+                                Add the degrees and programs available for admission. (Add at least 1 program).
+                            </p>
+                        </div>
+                        <button type="button" class="brand-btn-secondary" onclick="addProgramOnbRow()" style="font-size: 14.5px; height: 38px; padding: 0 16px; white-space: nowrap;">
+                            + Add Program
+                        </button>
+                    </div>
+                </div>
+                <div class="onb-card-body">
+                    <div id="onbProgramsList" style="display: flex; flex-direction: column; gap: 14px;">
+                        <!-- Dynamic program items populated here -->
+                    </div>
+                </div>
+                <div class="onb-card-footer">
+                    <button type="button" class="brand-btn-secondary" onclick="goToOnbStep(3)">â† Back</button>
+                    <button type="button" class="brand-btn-primary" onclick="saveOnbStep(4)">Save & Continue â†’</button>
+                </div>
+            </div>
+
+            <!-- STEP 5: Admissions Basics -->
+            <div class="onb-card onb-step-card" id="onbStep5" style="display: none;">
+                <div class="onb-card-header">
+                    <div style="font-size: 13.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--brand-indigo-400); margin-bottom: 6px;">Step 5 of 16 â€¢ Admissions Rules</div>
+                    <h2 style="font-family: var(--brand-font-display); font-size: 24px; font-weight: 800; color: #063D3B; margin: 0 0 6px 0;">
+                        ðŸ“ Admissions Process & Accepted Exams
+                    </h2>
+                    <p style="font-size: 15px; color: #4F7470; margin: 0; line-height: 1.5;">
+                        Specify entrance exam requirements and selection procedure.
+                    </p>
+                </div>
+                <div class="onb-card-body">
+                    <div class="form-group">
+                        <label>Application Method</label>
+                        <div class="onb-radio-card-grid" id="onbAppMethodGroup">
+                            <div class="onb-radio-card active" data-val="Online application on website">Online Portal</div>
+                            <div class="onb-radio-card" data-val="Offline in campus">Offline / In-person</div>
+                            <div class="onb-radio-card" data-val="Both online and offline">Both Online & Offline</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Do applicants need an entrance exam score?</label>
+                        <div class="onb-radio-card-grid" id="onbExamReqGroup">
+                            <div class="onb-radio-card active" data-val="Yes">Yes, Required</div>
+                            <div class="onb-radio-card" data-val="No">No (Merit / Direct)</div>
+                            <div class="onb-radio-card" data-val="Depends on program">Depends on Program</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Select Accepted Entrance Exams</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px;" id="onbExamsChips">
+                            <span class="onb-chip-toggle active" data-val="CAT">CAT</span>
+                            <span class="onb-chip-toggle active" data-val="XAT">XAT</span>
+                            <span class="onb-chip-toggle active" data-val="GMAT">GMAT</span>
+                            <span class="onb-chip-toggle active" data-val="CMAT">CMAT</span>
+                            <span class="onb-chip-toggle active" data-val="MAT">MAT</span>
+                            <span class="onb-chip-toggle" data-val="JEE Main">JEE Main</span>
+                            <span class="onb-chip-toggle" data-val="CUET">CUET</span>
+                            <span class="onb-chip-toggle" data-val="State CET">State CET</span>
+                            <span class="onb-chip-toggle" data-val="Institutional Entrance Test">College Test</span>
+                        </div>
+                        <div style="margin-top: 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <input type="text" id="onbCustomExamInput" class="brand-input" placeholder="Add custom exam (e.g. NEET, CLAT, NMAT, SNAP, ATMA, GATE, SAT)..." style="max-width: 460px; height: 44px; font-size: 15px;" onkeydown="if(event.key==='Enter'){event.preventDefault(); addCustomOnbExam();}" />
+                            <button type="button" class="brand-btn-secondary" onclick="addCustomOnbExam()" style="height: 44px; font-size: 14.5px; font-weight: 700; padding: 0 18px; white-space: nowrap;">
+                                + Add Exam
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 8px;">
+                        <div style="background: #F1F7F4; border: 1px solid #DDE9E3; border-radius: 12px; padding: 16px;">
+                            <label style="font-size: 15px; font-weight: 600;">Personal Interviews</label>
+                            <select id="onbInterviews" class="brand-input" style="margin-top: 8px;">
+                                <option value="1">Yes, Required</option>
+                                <option value="0">No Interview</option>
+                            </select>
+                        </div>
+                        <div style="background: #F1F7F4; border: 1px solid #DDE9E3; border-radius: 12px; padding: 16px;">
+                            <label style="font-size: 15px; font-weight: 600;">Group Discussions</label>
+                            <select id="onbGd" class="brand-input" style="margin-top: 8px;">
+                                <option value="1">Yes, Conducted</option>
+                                <option value="0" selected>No GD</option>
+                            </select>
+                        </div>
+                        <div style="background: #F1F7F4; border: 1px solid #DDE9E3; border-radius: 12px; padding: 16px;">
+                            <label style="font-size: 15px; font-weight: 600;">Rolling Admissions</label>
+                            <select id="onbRolling" class="brand-input" style="margin-top: 8px;">
+                                <option value="1" selected>Yes, Open Now</option>
+                                <option value="0">Fixed Deadlines</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="onb-card-footer">
+                    <button type="button" class="brand-btn-secondary" onclick="goToOnbStep(4)">â† Back</button>
+                    <button type="button" class="brand-btn-primary" onclick="saveOnbStep(5)">Save & Continue â†’</button>
+                </div>
+            </div>
+
+            <!-- STEP 6: Key Admissions Essentials -->
+            <div class="onb-card onb-step-card" id="onbStep6" style="display: none;">
+                <div class="onb-card-header">
+                    <div style="font-size: 13.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--brand-indigo-400); margin-bottom: 6px;">Step 6 of 16 â€¢ Program Essentials</div>
+                    <h2 style="font-family: var(--brand-font-display); font-size: 24px; font-weight: 800; color: #063D3B; margin: 0 0 6px 0;">
+                        ðŸŽ¯ Eligibility, Deadlines & Application Links
+                    </h2>
+                    <p style="font-size: 15px; color: #4F7470; margin: 0; line-height: 1.5;">
+                        Provide the eligibility criteria and application deadlines for your configured programs.
+                    </p>
+                </div>
+                <div class="onb-card-body">
+                    <div id="onbProgramEssentialsList" style="display: flex; flex-direction: column; gap: 16px;">
+                        <!-- Program eligibility inputs populated here -->
+                    </div>
+                </div>
+                <div class="onb-card-footer">
+                    <button type="button" class="brand-btn-secondary" onclick="goToOnbStep(5)">â† Back</button>
+                    <button type="button" class="brand-btn-primary" onclick="saveOnbStep(6)">Save & Continue â†’</button>
+                </div>
+            </div>
+
+            <!-- STEP 7: Tuition Fees & Hostel -->
+            <div class="onb-card onb-step-card" id="onbStep7" style="display: none;">
+                <div class="onb-card-header">
+                    <div style="font-size: 13.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--brand-indigo-400); margin-bottom: 6px;">Step 7 of 16 â€¢ High Student Intent</div>
+                    <h2 style="font-family: var(--brand-font-display); font-size: 24px; font-weight: 800; color: #063D3B; margin: 0 0 6px 0;">
+                        ðŸ’³ Tuition Fees & Hostel Accommodation
+                    </h2>
+                    <p style="font-size: 15px; color: #4F7470; margin: 0; line-height: 1.5;">
+                        Fee transparency increases student trust and AI conversion rates by over 40%.
+                    </p>
+                </div>
+                <div class="onb-card-body">
+                    <div id="onbProgramFeesList" style="display: flex; flex-direction: column; gap: 16px;">
+                        <!-- Program fee inputs populated here -->
+                    </div>
+
+                    <div style="background: #F1F7F4; border: 1px solid #DDE9E3; border-radius: 14px; padding: 20px; margin-top: 10px;">
+                        <div style="font-size: 16px; font-weight: 700; color: #063D3B; margin-bottom: 14px;">ðŸ  On-Campus Hostel Accommodation</div>
+                        <div style="display: grid; grid-template-columns: 1fr 1.5fr 1fr; gap: 16px;">
+                            <div class="form-group">
+                                <label>Hostel Available?</label>
+                                <select id="onbHostelAvailable" class="brand-input">
+                                    <option value="1">Yes, Available</option>
+                                    <option value="0">Not Available</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Annual Hostel Fee (â‚¹)</label>
+                                <input type="number" id="onbHostelFee" class="brand-input" placeholder="e.g. 180000" />
+                            </div>
+                            <div class="form-group">
+                                <label>Food / Mess Included?</label>
+                                <select id="onbFoodIncluded" class="brand-input">
+                                    <option value="1">Yes, Included</option>
+                                    <option value="0">Separate Charge</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="onb-card-footer">
+                    <button type="button" class="brand-btn-secondary" onclick="goToOnbStep(6)">â† Back</button>
+                    <button type="button" class="brand-btn-primary" onclick="saveOnbStep(7)">Save & Continue â†’</button>
+                </div>
+            </div>
+
+            <!-- STEP 8: Scholarships -->
+            <div class="onb-card onb-step-card" id="onbStep8" style="display: none;">
+                <div class="onb-card-header">
+                    <div style="font-size: 13.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--brand-indigo-400); margin-bottom: 6px;">Step 8 of 16 â€¢ Recommended</div>
+                    <h2 style="font-family: var(--brand-font-display); font-size: 24px; font-weight: 800; color: #063D3B; margin: 0 0 6px 0;">
+                        ðŸ† Scholarships & Financial Aid
+                    </h2>
+                    <p style="font-size: 15px; color: #4F7470; margin: 0; line-height: 1.5;">
+                        Enable your AI assistant to evaluate scholarships and capture high-scoring applicant leads.
+                    </p>
+                </div>
+                <div class="onb-card-body">
+                    <div class="form-group">
+                        <label>Do you offer merit or need-based scholarships?</label>
+                        <select id="onbOfferScholarships" class="brand-input" onchange="toggleOnbScholarshipFields(this.value)">
+                            <option value="1" selected>Yes, Merit & Category Scholarships Available</option>
+                            <option value="0">No Scholarships Offered</option>
+                        </select>
+                    </div>
+
+                    <div id="onbScholarshipFields">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div class="form-group">
+                                <label>Scholarship Name / Scheme</label>
+                                <input type="text" id="onbScholarshipName" class="brand-input" placeholder="e.g. Merit-Cum-Means Excellence Waiver" />
+                            </div>
+                            <div class="form-group">
+                                <label>Maximum Waiver / Benefit</label>
+                                <input type="text" id="onbScholarshipBenefit" class="brand-input" placeholder="e.g. Up to 50% Tuition Fee Waiver" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Eligibility Benchmark</label>
+                            <input type="text" id="onbScholarshipEligibility" class="brand-input" placeholder="e.g. 90%+ in 12th / Graduation or CAT 90+ percentile" />
+                        </div>
+                    </div>
+                </div>
+                <div class="onb-card-footer">
+                    <button type="button" class="brand-btn-secondary" onclick="goToOnbStep(7)">â† Back</button>
+                    <button type="button" class="brand-btn-primary" onclick="saveOnbStep(8)">Save & Continue â†’</button>
+                </div>
+            </div>
+
+            <!-- STEP 9: Campus Life & Facilities -->
+            <div class="onb-card onb-step-card" id="onbStep9" style="display: none;">
+                <div class="onb-card-header">
+                    <div style="font-size: 13.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--brand-indigo-400); margin-bottom: 6px;">Step 9 of 16 â€¢ Student Life</div>
+                    <h2 style="font-family: var(--brand-font-display); font-size: 24px; font-weight: 800; color: #063D3B; margin: 0 0 6px 0;">
+                        ðŸŒ³ Campus Life, Facilities & Infrastructure
+                    </h2>
+                    <p style="font-size: 15px; color: #4F7470; margin: 0; line-height: 1.5;">
+                        Highlight your campus amenities so your AI can answer campus tour and infrastructure questions.
+                    </p>
+                </div>
+                <div class="onb-card-body">
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
+                        <div class="form-group">
+                            <label>Campus Name / Campus Location</label>
+                            <input type="text" id="onbCampusName" class="brand-input" placeholder="e.g. Electronic City Main Campus" />
+                        </div>
+                        <div class="form-group">
+                            <label>Transport / Bus Facility</label>
+                            <select id="onbTransportAvailable" class="brand-input">
+                                <option value="1">Yes, Available</option>
+                                <option value="0">No Bus Service</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Select Major Campus Facilities</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px;" id="onbFacilitiesChips">
+                            <span class="onb-chip-toggle active" data-val="Central Digital Library">ðŸ“š Digital Library</span>
+                            <span class="onb-chip-toggle active" data-val="Gym & Fitness Center">ðŸ‹ï¸ Gym & Fitness</span>
+                            <span class="onb-chip-toggle active" data-val="Multi-Cuisine Cafeteria">â˜• Cafeteria</span>
+                            <span class="onb-chip-toggle active" data-val="Auditorium">ðŸŽ­ Auditorium</span>
+                            <span class="onb-chip-toggle active" data-val="Sports Complex">âš½ Sports Ground</span>
+                            <span class="onb-chip-toggle active" data-val="AI & Innovation Lab">ðŸ’» AI Labs</span>
+                            <span class="onb-chip-toggle active" data-val="High-Speed Wi-Fi Campus">ðŸ“¶ Wi-Fi Campus</span>
+                            <span class="onb-chip-toggle" data-val="Medical Care Center">ðŸ¥ Medical Center</span>
+                            <span class="onb-chip-toggle" data-val="Startup Incubation Center">ðŸš€ Incubation Hub</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="onb-card-footer">
+                    <button type="button" class="brand-btn-secondary" onclick="goToOnbStep(8)">â† Back</button>
+                    <button type="button" class="brand-btn-primary" onclick="saveOnbStep(9)">Save & Continue â†’</button>
+                </div>
+            </div>
+
+            <!-- STEP 10: Placements -->
+            <div class="onb-card onb-step-card" id="onbStep10" style="display: none;">
+                <div class="onb-card-header">
+                    <div style="font-size: 13.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--brand-indigo-400); margin-bottom: 6px;">Step 10 of 16 â€¢ Career Records</div>
+                    <h2 style="font-family: var(--brand-font-display); font-size: 24px; font-weight: 800; color: #063D3B; margin: 0 0 6px 0;">
+                        ðŸ’¼ Placements & Top Recruiters
+                    </h2>
+                    <p style="font-size: 15px; color: #4F7470; margin: 0; line-height: 1.5;">
+                        Placement track records are the #1 deciding factor for prospective students.
+                    </p>
+                </div>
+                <div class="onb-card-body">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group">
+                            <label>Placement Rate (%)</label>
+                            <input type="text" id="onbPlacementRate" class="brand-input" placeholder="e.g. 96%" />
+                        </div>
+                        <div class="form-group">
+                            <label>Average CTC Package</label>
+                            <input type="text" id="onbAvgPackage" class="brand-input" placeholder="e.g. â‚¹9.6 LPA" />
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group">
+                            <label>Highest CTC Package</label>
+                            <input type="text" id="onbHighestPackage" class="brand-input" placeholder="e.g. â‚¹24.0 LPA" />
+                        </div>
+                        <div class="form-group">
+                            <label>Latest Placement Year</label>
+                            <input type="text" id="onbPlacementYear" class="brand-input" placeholder="e.g. 2025-26" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Key Recruiters (Comma separated)</label>
+                        <input type="text" id="onbTopRecruiters" class="brand-input" placeholder="e.g. Google, Deloitte, Microsoft, HDFC Bank, Amazon, KPMG" />
+                    </div>
+                </div>
+                <div class="onb-card-footer">
+                    <button type="button" class="brand-btn-secondary" onclick="goToOnbStep(9)">â† Back</button>
+                    <button type="button" class="brand-btn-primary" onclick="saveOnbStep(10)">Save & Continue â†’</button>
+                </div>
+            </div>
+
+            <!-- STEP 11: Knowledge Base Documents -->
+            <div class="onb-card onb-step-card" id="onbStep11" style="display: none;">
+                <div class="onb-card-header">
+                    <div style="font-size: 13.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--brand-indigo-400); margin-bottom: 6px;">Step 11 of 16 â€¢ Documents & URLs</div>
+                    <h2 style="font-family: var(--brand-font-display); font-size: 24px; font-weight: 800; color: #063D3B; margin: 0 0 6px 0;">
+                        ðŸ“š Upload Admissions Documents & Prospectus
+                    </h2>
+                    <p style="font-size: 15px; color: #4F7470; margin: 0; line-height: 1.5;">
+                        Upload your official PDF brochures, fee sheets, or admission rules for automatic indexing.
+                    </p>
+                </div>
+                <div class="onb-card-body">
+                    <div style="border: 2px dashed rgba(99, 102, 241, 0.4); border-radius: 14px; padding: 32px; text-align: center; background: rgba(99, 102, 241, 0.04); cursor: pointer;" onclick="document.getElementById('onbDocFileInput').click()">
+                        <input type="file" id="onbDocFileInput" style="display: none;" accept=".pdf,.doc,.docx,.txt" onchange="handleOnbFileSelect(this)" />
+                        <div style="font-size: 36px; margin-bottom: 10px;">ðŸ“„</div>
+                        <div style="font-size: 16px; font-weight: 700; color: #063D3B;">Click to Upload Admission Prospectus / Fee PDF</div>
+                        <div style="font-size: 14px; color: #648781; margin-top: 6px;">PDF, DOCX, TXT up to 25MB â€¢ Automatically trains AI & creates downloadable lead magnet</div>
+                    </div>
+                    <div id="onbUploadStatus" style="font-size: 14.5px; color: var(--brand-emerald-400); display: none; text-align: center; font-weight: 600; margin-top: 10px;"></div>
+                </div>
+                <div class="onb-card-footer">
+                    <button type="button" class="brand-btn-secondary" onclick="goToOnbStep(10)">â† Back</button>
+                    <button type="button" class="brand-btn-primary" onclick="goToOnbStep(12)">Continue to Assistant Setup â†’</button>
+                </div>
+            </div>
+
+            <!-- STEP 12: Meet AI Assistant -->
+            <div class="onb-card onb-step-card" id="onbStep12" style="display: none;">
+                <div class="onb-card-header">
+                    <div style="font-size: 13.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--brand-indigo-400); margin-bottom: 6px;">Step 12 of 16 â€¢ Persona & Tone</div>
+                    <h2 style="font-family: var(--brand-font-display); font-size: 24px; font-weight: 800; color: #063D3B; margin: 0 0 6px 0;">
+                        ðŸ¤– Meet Your AI Admissions Assistant
+                    </h2>
+                    <p style="font-size: 15px; color: #4F7470; margin: 0; line-height: 1.5;">
+                        Customize your assistant's public identity, greeting, and conversational persona.
+                    </p>
+                </div>
+                <div class="onb-card-body">
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
+                        <div class="form-group">
+                            <label>Assistant Display Name</label>
+                            <input type="text" id="onbBotName" class="brand-input" placeholder="e.g. BSBM Admissions Assistant" />
+                        </div>
+                        <div class="form-group">
+                            <label>Theme Accent Color</label>
+                            <input type="color" id="onbBotColor" value="#4f46e5" class="brand-input" style="padding: 2px; height: 46px; cursor: pointer;" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Opening Greeting Message</label>
+                        <textarea id="onbWelcomeMsg" class="brand-input" rows="3" placeholder="Hello! Welcome to our admissions desk. I can help with programs, fee structure, scholarship eligibility, and campus tours. What program are you interested in?"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Communication Tone</label>
+                        <div class="onb-radio-card-grid" id="onbBotToneGroup">
+                            <div class="onb-radio-card active" data-val="Friendly & Balanced">Friendly & Helpful</div>
+                            <div class="onb-radio-card" data-val="Formal & Academic">Formal & Academic</div>
+                            <div class="onb-radio-card" data-val="Conversational">Conversational</div>
+                            <div class="onb-radio-card" data-val="Warm & Welcoming">Warm & Welcoming</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="onb-card-footer">
+                    <button type="button" class="brand-btn-secondary" onclick="goToOnbStep(11)">â† Back</button>
+                    <button type="button" class="brand-btn-primary" onclick="saveOnbStep(12)">Save & Continue â†’</button>
+                </div>
+            </div>
+
+            <!-- STEP 13: Human Handoff & Counselor Contact -->
+            <div class="onb-card onb-step-card" id="onbStep13" style="display: none;">
+                <div class="onb-card-header">
+                    <div style="font-size: 13.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--brand-indigo-400); margin-bottom: 6px;">Step 13 of 16 â€¢ Counselor Routing</div>
+                    <h2 style="font-family: var(--brand-font-display); font-size: 24px; font-weight: 800; color: #063D3B; margin: 0 0 6px 0;">
+                        ðŸ“ž Admissions Team & Counselor Handoff
+                    </h2>
+                    <p style="font-size: 15px; color: #4F7470; margin: 0; line-height: 1.5;">
+                        When students request a callback or tour, where should notifications be routed?
+                    </p>
+                </div>
+                <div class="onb-card-body">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group">
+                            <label>Primary Admissions Officer Name</label>
+                            <input type="text" id="onbContactName" class="brand-input" placeholder="e.g. Admissions Office" />
+                        </div>
+                        <div class="form-group">
+                            <label>Official Admissions Email</label>
+                            <input type="email" id="onbContactEmail" class="brand-input" placeholder="admissions@college.edu" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Admissions Helpline / WhatsApp Number</label>
+                        <input type="text" id="onbContactPhone" class="brand-input" placeholder="e.g. +91 98765 43210" />
+                    </div>
+                </div>
+                <div class="onb-card-footer">
+                    <button type="button" class="brand-btn-secondary" onclick="goToOnbStep(12)">â† Back</button>
+                    <button type="button" class="brand-btn-primary" onclick="saveOnbStep(13)">Save & Preview AI â†’</button>
+                </div>
+            </div>
+
+            <!-- STEP 14: Live Interactive Preview Test -->
+            <div class="onb-card onb-step-card" id="onbStep14" style="display: none;">
+                <div class="onb-card-header">
+                    <div style="font-size: 13.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--brand-indigo-400); margin-bottom: 6px;">Step 14 of 16 â€¢ Real-Time Verification</div>
+                    <h2 style="font-family: var(--brand-font-display); font-size: 24px; font-weight: 800; color: #063D3B; margin: 0 0 6px 0;">
+                        ðŸ§ª Test Your AI Assistant Live
+                    </h2>
+                    <p style="font-size: 15px; color: #4F7470; margin: 0; line-height: 1.5;">
+                        Try asking questions using the sample chips below or type your own test question.
+                    </p>
+                </div>
+                <div class="onb-card-body">
+                    <!-- Suggested Sample Prompt Chips -->
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+                        <span class="onb-chip-toggle" onclick="sendOnbTestPrompt('What programs and degrees do you offer?')">ðŸ“– What programs do you offer?</span>
+                        <span class="onb-chip-toggle" onclick="sendOnbTestPrompt('What is the tuition fee structure?')">ðŸ’³ What is the fee structure?</span>
+                        <span class="onb-chip-toggle" onclick="sendOnbTestPrompt('Do you offer scholarships?')">ðŸ† Do you offer scholarships?</span>
+                        <span class="onb-chip-toggle" onclick="sendOnbTestPrompt('What are your placement statistics?')">ðŸ’¼ What are your placements?</span>
+                        <span class="onb-chip-toggle" onclick="sendOnbTestPrompt('How can I apply for admission?')">ðŸ“ How do I apply?</span>
+                    </div>
+
+                    <!-- Embedded Interactive Chat Box -->
+                    <div class="onb-preview-chatbox">
+                        <div style="background: rgba(255, 255, 255, 0.04); border-bottom: 1.5px solid #E6F0EC; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 10px; height: 10px; border-radius: 50%; background: #10b981; box-shadow: 0 0 10px #10b981;"></div>
+                                <span style="font-size: 15px; font-weight: 700; color: #063D3B;" id="onbPreviewBotHeader">AI Admissions Assistant</span>
+                            </div>
+                            <button type="button" class="brand-btn-secondary" onclick="resetOnbChat()" style="font-size: 13.5px; height: 28px; padding: 0 12px;">Clear</button>
+                        </div>
+                        <div id="onbChatMessages" style="flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;">
+                            <!-- Chat Bubbles -->
+                        </div>
+                        <div style="display: flex; gap: 10px; padding: 12px 16px; border-top: 1.5px solid #E6F0EC; background: rgba(0,0,0,0.25);">
+                            <input type="text" id="onbChatInput" class="brand-input" placeholder="Type a question as a prospective student..." style="font-size: 15px; height: 46px;" onkeydown="if(event.key==='Enter') sendOnbChatMessage();" />
+                            <button type="button" class="brand-btn-primary" onclick="sendOnbChatMessage()" style="height: 46px; padding: 0 22px; font-size: 15px; font-weight: 700;">Send</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="onb-card-footer">
+                    <button type="button" class="brand-btn-secondary" onclick="goToOnbStep(13)">â† Back</button>
+                    <button type="button" class="brand-btn-primary" onclick="goToOnbStep(15)">View Readiness Score â†’</button>
+                </div>
+            </div>
+
+            <!-- STEP 15: AI Readiness Score Breakdown -->
+            <div class="onb-card onb-step-card" id="onbStep15" style="display: none;">
+                <div class="onb-card-header">
+                    <div style="font-size: 13.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--brand-indigo-400); margin-bottom: 6px;">Step 15 of 16 â€¢ Audit & Score</div>
+                    <h2 style="font-family: var(--brand-font-display); font-size: 24px; font-weight: 800; color: #063D3B; margin: 0 0 6px 0;">
+                        ðŸ“Š AI Readiness Score Breakdown
+                    </h2>
+                    <p style="font-size: 15px; color: #4F7470; margin: 0; line-height: 1.5;">
+                        Detailed audit of your institution's AI admissions readiness.
+                    </p>
+                </div>
+                <div class="onb-card-body">
+                    <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.18), rgba(56, 189, 248, 0.12)); border: 1px solid rgba(99, 102, 241, 0.35); border-radius: 16px; padding: 32px; text-align: center;">
+                        <div style="font-family: var(--brand-font-display); font-size: 54px; font-weight: 800; color: #063D3B; line-height: 1;" id="onbReadinessScoreNum">94%</div>
+                        <div style="font-size: 18px; font-weight: 700; color: var(--brand-indigo-300); margin-top: 10px;" id="onbReadinessScoreLabel">Exceptional â€” Ready to Launch</div>
+                        <div style="font-size: 15px; color: #648781; margin-top: 6px;">Your AI chatbot is fully equipped with institutional knowledge, fee structure, and admissions rules.</div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;" id="onbReadinessAuditList">
+                        <!-- Category Audit items -->
+                    </div>
+                </div>
+                <div class="onb-card-footer">
+                    <button type="button" class="brand-btn-secondary" onclick="goToOnbStep(14)">â† Back</button>
+                    <button type="button" class="brand-btn-primary" onclick="goToOnbStep(16)">Get Website Embed Snippet â†’</button>
+                </div>
+            </div>
+
+            <!-- STEP 16: Deploy & Website Installation -->
+            <div class="onb-card onb-step-card" id="onbStep16" style="display: none;">
+                <div class="onb-card-header" style="text-align: center; padding: 40px 40px 24px 40px;">
+                    <div style="width: 64px; height: 64px; border-radius: 20px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 16px auto;">
+                        ðŸš€
+                    </div>
+                    <h2 style="font-family: var(--brand-font-display); font-size: 26px; font-weight: 800; color: #063D3B; margin: 0 0 8px 0;">
+                        Put AI on Your Institution's Website
+                    </h2>
+                    <p style="font-size: 15.5px; color: #4F7470; max-width: 580px; margin: 0 auto; line-height: 1.6;">
+                        Copy the single-line script below and paste it before the closing &lt;/body&gt; tag of your website.
+                    </p>
+                </div>
+                <div class="onb-card-body" style="padding: 12px 40px 28px 40px;">
+                    <div style="background: #090d16; border: 1px solid #DDE9E3; border-radius: 12px; padding: 18px; position: relative;">
+                        <pre style="font-family: var(--brand-font-mono); font-size: 14.5px; color: #38bdf8; margin: 0; white-space: pre-wrap; word-break: break-all;" id="onbEmbedScriptCode">&lt;!-- Edvora Admissions Assistant --&gt;
+&lt;script src="https://edvora.chat/widget.js" data-bot-token="BOT_TOKEN" async&gt;&lt;/script&gt;</pre>
+                        <button type="button" class="brand-btn-primary brand-btn-sm" onclick="copyOnbSnippet()" style="position: absolute; right: 12px; top: 12px; font-size: 13.5px; height: 32px; padding: 0 14px;">
+                            ðŸ“‹ Copy Snippet
+                        </button>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px;">
+                        <div style="background: #F1F7F4; border: 1px solid #DDE9E3; border-radius: 12px; padding: 16px;">
+                            <div style="font-size: 15.5px; font-weight: 700; color: #063D3B; margin-bottom: 4px;">WordPress Integration</div>
+                            <div style="font-size: 14px; color: #648781;">Paste into Header/Footer Scripts plugin or theme customizer.</div>
+                        </div>
+                        <div style="background: #F1F7F4; border: 1px solid #DDE9E3; border-radius: 12px; padding: 16px;">
+                            <div style="font-size: 15.5px; font-weight: 700; color: #063D3B; margin-bottom: 4px;">Email to Webmaster</div>
+                            <div style="font-size: 14px; color: var(--brand-indigo-400); cursor: pointer;" onclick="emailWebmasterSnippet()">Send installation guide to tech team â†’</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="onb-card-footer" style="justify-content: space-between;">
+                    <button type="button" class="brand-btn-secondary" onclick="goToOnbStep(15)">â† Back</button>
+                    <button type="button" class="brand-btn-primary" onclick="completeOnboardingWizard()" style="height: 48px; padding: 0 32px; font-size: 16px; font-weight: 700;">
+                        ðŸŽ‰ Complete Setup & Open Console â†’
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+        </div>
+    </div>

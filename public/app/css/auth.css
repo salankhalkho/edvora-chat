@@ -1,0 +1,27 @@
+﻿/* ═══════════════════════════════════════════════════════════════════
+   AUTH.CSS - Auth state visibility switches, login/signup keyframes
+   SELECTORS: html.has-auth-token, html.in-onboarding, html.in-smart-onboarding,
+              html.auth-mode-signup, @keyframes smartPulse, @keyframes smartChipPop
+   USED BY: index.html - controls which container is visible on load
+   BUG AREAS: visibility flash on load? check these rules first.
+   ═══════════════════════════════════════════════════════════════════ */
+        html.has-auth-token #authContainer { display: none !important; }
+        html.has-auth-token:not(.in-onboarding) #appContainer { display: grid !important; }
+        html.in-onboarding #onboardingContainer { display: flex !important; }
+        html.in-onboarding #appContainer { display: none !important; }
+        html.in-onboarding #authContainer { display: none !important; }
+        html.in-smart-onboarding #smartOnboardingContainer { display: flex !important; }
+        html.in-smart-onboarding #appContainer { display: none !important; }
+        html.in-smart-onboarding #authContainer { display: none !important; }
+        html.in-smart-onboarding #onboardingContainer { display: none !important; }
+        html.auth-mode-signup #signupCard { display: block !important; }
+
+        @keyframes smartPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.9); }
+        }
+        @keyframes smartChipPop {
+            0% { opacity: 0; transform: scale(0.8) translateY(6px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+

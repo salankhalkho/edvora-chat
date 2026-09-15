@@ -1,0 +1,247 @@
+﻿<!-- ═══════════════════════════════════════════════════════════════════
+     SMART-ONBOARDING.HTML - AI-powered auto-discovery setup engine
+     PARENT: #smartOnboardingContainer in index.html (empty shell, injected via fetch())
+     BUG AREAS:
+       Terminal feed    -> #smartTerminalFeed (SSE event output)
+       Progress bar     -> updateSmartProgress() in js/onboarding.js
+       Completion screen -> showSmartCompletionScreen() in js/onboarding.js
+       Top bar          -> sticky header at top
+     LOADED BY: index.html partial loader (edvora:partials-ready event)
+     ═══════════════════════════════════════════════════════════════════ -->
+        <!-- Top Bar -->
+        <header style="height: 52px; background: rgba(14, 19, 32, 0.95); backdrop-filter: blur(16px); border-bottom: 1px solid #1f2937; padding: 0 28px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <div style="font-size: 15px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; font-family: var(--brand-font-display);">
+                    <span style="color: #6366f1;">âœ¦</span> Edvora<span style="color: #818cf8;">Chat</span>
+                </div>
+                <div style="height: 18px; width: 1px; background: #1f2937;"></div>
+                <div id="smartHeaderWebsite" style="font-size: 12px; color: #94a3b8; font-family: var(--brand-font-mono); background: rgba(255,255,255,0.04); border: 1px solid #1f2937; padding: 3px 10px; border-radius: 6px;">
+                    Connecting...
+                </div>
+                <div id="smartPagesCounter" style="font-size: 11px; color: #34d399; font-family: var(--brand-font-mono); background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.25); padding: 3px 10px; border-radius: 6px; display: none;">
+                    0 Pages Inspected
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span id="smartHeaderBadge" style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; background: rgba(99, 102, 241, 0.15); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.3);">
+                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #6366f1; box-shadow: 0 0 8px #6366f1; animation: smartPulse 1.5s infinite;"></span>
+                    <span id="smartHeaderBadgeText">Crawling Website</span>
+                </span>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main style="flex: 1; max-width: 960px; width: 100%; margin: 0 auto; padding: 36px 24px 60px 24px;">
+            
+            <!-- STAGE 1: Discovery & Analysis Progress View -->
+            <div id="smartDiscoveryView">
+                <div style="text-align: center; margin-bottom: 32px;">
+                    <div style="display: inline-flex; align-items: center; gap: 8px; padding: 4px 14px; border-radius: 999px; background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.25); color: #a5b4fc; font-size: 11.5px; font-weight: 600; margin-bottom: 14px;">
+                        <span>âš¡</span> Automated Production Provisioning
+                    </div>
+                    <h1 style="font-family: var(--brand-font-display); font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 8px; letter-spacing: -0.02em;">
+                        Scanning &amp; Indexing Institutional Knowledge
+                    </h1>
+                    <p style="font-size: 13.5px; color: #94a3b8; max-width: 620px; margin: 0 auto; line-height: 1.55;">
+                        Edvora's spider is navigating your public pages to discover academic departments, degrees, tuition fees, and admissions criteria in real time.
+                    </p>
+                </div>
+
+                <!-- Live Progress Card -->
+                <div style="background: #0f1623; border: 1px solid #1f2937; border-radius: 12px; padding: 20px 24px; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 6px; background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); font-size: 11.5px; color: #a5b4fc; font-family: var(--brand-font-mono);">
+                                <span>ðŸŒ</span> <span id="smartActiveTargetUrl">Connecting...</span>
+                            </span>
+                            <div id="smartTelemetryLogoWrap" style="display: none; align-items: center; padding: 2px 8px; background: rgba(255,255,255,0.05); border-radius: 4px;">
+                                <img id="smartTelemetryLogoImg" src="" alt="Logo" style="max-height: 18px; max-width: 90px; object-fit: contain; filter: brightness(0.95);" />
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span id="smartStatusText" style="font-size: 13px; font-weight: 600; color: #e2e8f0;">Initializing connection...</span>
+                            <span id="smartProgressPct" style="font-family: var(--brand-font-mono); font-size: 13.5px; font-weight: 700; color: #818cf8;">5%</span>
+                        </div>
+                    </div>
+                    <!-- Bar -->
+                    <div style="width: 100%; height: 8px; background: #111827; border-radius: 999px; overflow: hidden; border: 1px solid rgba(255,255,255,0.04);">
+                        <div id="smartProgressBarFill" style="width: 5%; height: 100%; background: linear-gradient(90deg, #6366f1, #818cf8, #34d399); border-radius: 999px; transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);"></div>
+                    </div>
+                </div>
+
+                <!-- 4 Live Telemetry Cards -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px;">
+                    <div style="background: #0f1623; border: 1px solid #1f2937; border-radius: 10px; padding: 14px 16px;">
+                        <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">ðŸ“„ Pages Inspected</div>
+                        <div style="display: flex; align-items: baseline; gap: 6px;">
+                            <span id="smartTelemetryPages" style="font-family: var(--brand-font-mono); font-size: 20px; font-weight: 700; color: #38bdf8;">0</span>
+                            <span style="font-size: 11px; color: #64748b;">scanned</span>
+                        </div>
+                    </div>
+                    <div style="background: #0f1623; border: 1px solid #1f2937; border-radius: 10px; padding: 14px 16px;">
+                        <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">ðŸ›ï¸ Colleges &amp; Depts</div>
+                        <div style="display: flex; align-items: baseline; gap: 6px;">
+                            <span id="smartTelemetryDepts" style="font-family: var(--brand-font-mono); font-size: 20px; font-weight: 700; color: #818cf8;">0</span>
+                            <span style="font-size: 11px; color: #64748b;">detected</span>
+                        </div>
+                    </div>
+                    <div style="background: #0f1623; border: 1px solid #1f2937; border-radius: 10px; padding: 14px 16px;">
+                        <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">ðŸŽ“ Degree Programs</div>
+                        <div style="display: flex; align-items: baseline; gap: 6px;">
+                            <span id="smartTelemetryPrograms" style="font-family: var(--brand-font-mono); font-size: 20px; font-weight: 700; color: #34d399;">0</span>
+                            <span style="font-size: 11px; color: #64748b;">indexed</span>
+                        </div>
+                    </div>
+                    <div style="background: #0f1623; border: 1px solid #1f2937; border-radius: 10px; padding: 14px 16px;">
+                        <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">ðŸ“š Knowledge Base</div>
+                        <div style="display: flex; align-items: baseline; gap: 6px;">
+                            <span id="smartTelemetryKnowledge" style="font-family: var(--brand-font-mono); font-size: 20px; font-weight: 700; color: #f59e0b;">0</span>
+                            <span style="font-size: 11px; color: #64748b;">clusters</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Discovered Items Reel -->
+                <div id="smartLiveDiscoveryReel" style="background: #0b0f19; border: 1px solid #1f2937; border-radius: 10px; padding: 12px 16px; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+                            <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; animation: smartPulse 1.2s infinite;"></span>
+                            Live Discovered Entities
+                        </span>
+                        <span id="smartLiveChipsCount" style="font-family: var(--brand-font-mono); font-size: 11px; color: #64748b;">0 items</span>
+                    </div>
+                    <div id="smartLiveChipsContainer" style="display: flex; flex-wrap: wrap; gap: 7px; max-height: 85px; overflow-y: hidden;">
+                        <div id="smartLiveChipsPlaceholder" style="font-size: 12px; color: #475569; font-style: italic; padding: 4px 0;">
+                            Awaiting catalog extraction from pages...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Real-Time Activity Log Terminal -->
+                <div style="background: #0b0f19; border: 1px solid #1f2937; border-radius: 10px; overflow: hidden;">
+                    <div style="background: #111827; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1f2937;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444; display: inline-block;"></span>
+                            <span style="width: 10px; height: 10px; border-radius: 50%; background: #f59e0b; display: inline-block;"></span>
+                            <span style="width: 10px; height: 10px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+                            <span style="font-family: var(--brand-font-mono); font-size: 11px; color: #64748b; margin-left: 8px;">crawler-telemetry.log</span>
+                        </div>
+                        <span style="font-family: var(--brand-font-mono); font-size: 10px; color: #64748b;">LIVE STREAM</span>
+                    </div>
+                    <div id="smartTerminalLog" style="height: 180px; overflow-y: auto; padding: 14px 16px; font-family: var(--brand-font-mono); font-size: 11.5px; line-height: 1.6; color: #94a3b8; display: flex; flex-direction: column; gap: 4px;">
+                        <div><span style="color: #6366f1;">[START]</span> Establishing authenticated stream to backend...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 2: Completion & Test Screen -->
+            <div id="smartCompleteView" style="display: none;">
+                <div style="text-align: center; margin-bottom: 28px;">
+                    <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(52, 211, 153, 0.12); border: 1px solid rgba(52, 211, 153, 0.3); display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 16px auto; box-shadow: 0 0 24px rgba(52, 211, 153, 0.25);">
+                        <span id="smartCompleteIcon">ðŸŽ‰</span>
+                    </div>
+                    <h1 id="smartCompleteTitle" style="font-family: var(--brand-font-display); font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 8px;">
+                        Your AI Student Assistant is Ready!
+                    </h1>
+                    <p id="smartCompleteSubtitle" style="font-size: 14px; color: #94a3b8; max-width: 580px; margin: 0 auto; line-height: 1.5;">
+                        Your institution's public information has been ingested into your production database. You can test your bot now or proceed to the Console.
+                    </p>
+                </div>
+
+                <!-- Verified Summary Card -->
+                <div style="background: #0f1623; border: 1px solid #1f2937; border-radius: 12px; padding: 24px; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px; padding-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <div id="smartFinalLogoContainer" style="width: 52px; height: 52px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid #1f2937; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+                            <span id="smartFinalLogoFallback" style="font-size: 24px;">ðŸ›ï¸</span>
+                            <img id="smartFinalLogoImg" src="" alt="Institution Logo" style="width: 100%; height: 100%; object-fit: contain; display: none;" />
+                        </div>
+                        <div>
+                            <div id="smartFinalInstName" style="font-family: var(--brand-font-display); font-size: 18px; font-weight: 700; color: #fff;">Institution Name</div>
+                            <div id="smartFinalWebsite" style="font-size: 12px; color: #64748b; font-family: var(--brand-font-mono);">website.edu</div>
+                        </div>
+                        <div style="margin-left: auto;">
+                            <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; background: rgba(52, 211, 153, 0.12); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); font-size: 11.5px; font-weight: 600;">
+                                <span>âœ“</span> Status: Active
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 3 Summary Metrics -->
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 16px; text-align: center;">
+                            <div style="font-size: 11.5px; color: #64748b; margin-bottom: 4px;">Colleges &amp; Departments</div>
+                            <div id="smartSummaryDepts" style="font-family: var(--brand-font-mono); font-size: 24px; font-weight: 700; color: #818cf8;">0</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 16px; text-align: center;">
+                            <div style="font-size: 11.5px; color: #64748b; margin-bottom: 4px;">Academic Programs &amp; Courses</div>
+                            <div id="smartSummaryPrograms" style="font-family: var(--brand-font-mono); font-size: 24px; font-weight: 700; color: #34d399;">0</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 16px; text-align: center;">
+                            <div style="font-size: 11.5px; color: #64748b; margin-bottom: 4px;">Knowledge Clusters</div>
+                            <div id="smartSummaryKnowledge" style="font-family: var(--brand-font-mono); font-size: 24px; font-weight: 700; color: #f59e0b;">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Friendly & Assuring Information Notice -->
+                <div style="background: rgba(99, 102, 241, 0.07); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: 12px; padding: 18px 22px; margin-bottom: 24px; display: flex; align-items: flex-start; gap: 14px; text-align: left;">
+                    <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; margin-top: 2px;">
+                        ðŸ’¡
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap;">
+                            <h4 style="font-size: 13.5px; font-weight: 700; color: #f1f5f9; margin: 0;">Automated Baseline Discovery Complete</h4>
+                            <span style="font-size: 11px; padding: 2px 8px; border-radius: 999px; background: rgba(52, 211, 153, 0.12); color: #34d399; font-weight: 600; border: 1px solid rgba(52, 211, 153, 0.25);">Fully Customizable</span>
+                        </div>
+                        <p style="font-size: 12.5px; color: #cbd5e1; line-height: 1.55; margin: 0 0 10px 0;">
+                            This is what our automated spider could initially detect from your public website pages. Because university websites are vast and complexâ€”with information often distributed across department portals, student intranet links, or PDF brochuresâ€”you have full control to add or edit any data from your dashboard.
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 18px; flex-wrap: wrap; font-size: 12px; color: #94a3b8;">
+                            <span style="display: inline-flex; align-items: center; gap: 5px;">
+                                <span style="color: #34d399; font-weight: 700;">âœ“</span> Add or edit academic departments &amp; courses
+                            </span>
+                            <span style="display: inline-flex; align-items: center; gap: 5px;">
+                                <span style="color: #34d399; font-weight: 700;">âœ“</span> Upload official PDFs &amp; admission brochures
+                            </span>
+                            <span style="display: inline-flex; align-items: center; gap: 5px;">
+                                <span style="color: #34d399; font-weight: 700;">âœ“</span> Refine criteria &amp; fee answers anytime
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action CTAs -->
+                <div style="display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;">
+                    <button type="button" id="smartTestBotBtn" class="brand-btn-primary" style="height: 46px; padding: 0 28px; font-size: 14px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 0 20px rgba(99, 102, 241, 0.35);">
+                        <span>ðŸ’¬</span> <span>Test Chatbot Now</span>
+                    </button>
+                    <button type="button" id="smartEnterDashboardBtn" class="brand-btn-secondary" style="height: 46px; padding: 0 24px; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">
+                        <span>ðŸ“Š</span> <span>Enter Console â†’</span>
+                    </button>
+                </div>
+
+                <!-- Log Toggle Button & Container -->
+                <div style="margin-top: 24px; text-align: center;">
+                    <button type="button" id="smartToggleLogsBtn" onclick="toggleSmartCompletionLogs()" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 6px 14px; color: #94a3b8; font-size: 11.5px; cursor: pointer; font-family: var(--brand-font-mono); transition: all 0.2s;">
+                        ðŸ“‹ View Full Discovery Terminal Log
+                    </button>
+                </div>
+                <div id="smartCompletedLogsSection" style="display: none; margin-top: 16px; background: #0b0f19; border: 1px solid #1f2937; border-radius: 10px; overflow: hidden; text-align: left;">
+                    <div style="background: #111827; padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1f2937;">
+                        <span style="font-family: var(--brand-font-mono); font-size: 11px; color: #64748b;">completed-telemetry-archive.log</span>
+                        <span style="font-family: var(--brand-font-mono); font-size: 10px; color: #10b981;">âœ“ VERIFIED ARCHIVE</span>
+                    </div>
+                    <div id="smartCompletedLogsBody" style="height: 160px; overflow-y: auto; padding: 12px 14px; font-family: var(--brand-font-mono); font-size: 11px; line-height: 1.6; color: #94a3b8; display: flex; flex-direction: column; gap: 4px;">
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <style>
+        @keyframes smartPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+    </style>

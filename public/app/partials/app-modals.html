@@ -1,0 +1,989 @@
+﻿<!-- ═══════════════════════════════════════════════════════════════════
+     APP-MODALS.HTML - All modal overlays, slide-over drawer, and status footer
+     PARENT: #appModalsContainer in index.html (injected via fetch())
+     BUG AREAS:
+       Knowledge Gap modal  -> #knowledgeGapsModal (showKnowledgeGapsModal() in js/misc.js)
+       Lead intel drawer    -> #leadIntelDrawer (.ce-drawer-overlay - openLeadIntelligence())
+       Preset catalog modal -> #presetsModal (openPresetsModal() in js/departments.js)
+       Lead details modal   -> #leadDetailsModal (openLeadModal() in js/leads.js)
+       Callback modal       -> #callbackDetailsModal (openCallbackModal() in js/leads.js)
+       Course scholarship   -> #courseScholarshipModal (openCourseScholarshipModal())
+       Asset upload modal   -> #assetUploadModal (openAssetUploadModal() in js/misc.js)
+       Request integration  -> #requestIntegrationModal (openRequestIntegrationModal())
+       Doc replace modal    -> #replaceKnowledgeModal (openReplaceKnowledgeModal())
+       Quick add KS modal   -> #quickAddKsModal
+       Status footer        -> .brand-footer (always visible at bottom)
+     LOADED BY: index.html partial loader (edvora:partials-ready event)
+     ═══════════════════════════════════════════════════════════════════ -->
+            <!-- â”€â”€ KNOWLEDGE GAP AUDIT & MISSING INFORMATION MODAL â”€â”€ -->
+            <div id="knowledgeGapsModal" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); z-index: 999999; align-items: center; justify-content: center; padding: 20px;">
+                <div style="background: #0e1320; border: 1px solid #1f2937; border-radius: 14px; max-width: 600px; width: 100%; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6); overflow: hidden;">
+                    <!-- Header -->
+                    <div style="padding: 18px 24px; border-bottom: 1px solid #1f2937; display: flex; align-items: center; justify-content: space-between; background: #111827;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 20px;">âš ï¸</span>
+                            <div>
+                                <div style="font-family: var(--brand-font-display); font-size: 16px; font-weight: 800; color: #fff;">Institutional Knowledge Gaps</div>
+                                <div style="font-size: 11.5px; color: #94a3b8;">Missing items needed for accurate admissions answering</div>
+                            </div>
+                        </div>
+                        <button type="button" onclick="hideKnowledgeGapsModal()" style="background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; padding: 4px; line-height: 1;">âœ•</button>
+                    </div>
+
+                    <!-- Checklist -->
+                    <div style="padding: 24px; display: flex; flex-direction: column; gap: 12px;" id="knowledgeGapsChecklist">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <!-- Footer -->
+                    <div style="padding: 14px 24px; border-top: 1px solid #1f2937; background: #0b0f19; display: flex; align-items: center; justify-content: space-between;">
+                        <span style="font-size: 11.5px; color: #64748b;">Cardinal Rule: The AI never invents missing facts.</span>
+                        <button type="button" onclick="hideKnowledgeGapsModal()" class="brand-btn-secondary" style="height: 32px; padding: 0 16px; font-size: 12px; font-weight: 600;">Close Audit</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- â”€â”€ LEAD INTELLIGENCE SLIDE-OVER DRAWER â”€â”€ -->
+            <div class="ce-drawer-overlay" id="ceLeadDrawerOverlay" onclick="closeLeadDrawer(event)">
+                <div class="ce-drawer" id="ceLeadDrawer" onclick="event.stopPropagation()">
+                    <div class="ce-drawer-header">
+                        <div>
+                            <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--brand-indigo-400);">Lead Intelligence</div>
+                            <div style="font-family: var(--brand-font-display); font-size: 18px; font-weight: 800; color: #ffffff; margin-top: 2px;" id="drawerStudentName">Candidate Profile</div>
+                        </div>
+                        <button type="button" onclick="closeLeadDrawer()" style="background:none; border:none; color:#648781; font-size:18px; cursor:pointer; padding:4px;">âœ•</button>
+                    </div>
+
+                    <div class="ce-drawer-body">
+                        <!-- Score Gauge Strip -->
+                        <div style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 10px; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                            <div>
+                                <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #648781;">Conversion Score</div>
+                                <div style="font-family: var(--brand-font-display); font-size: 28px; font-weight: 900; color: #f87171; display: flex; align-items: center; gap: 6px;" id="drawerScoreVal">
+                                    ðŸ”¥ 94 <span style="font-size: 14px; color: #648781; font-weight: 500;">/ 100</span>
+                                </div>
+                                <div style="font-size: 12px; color: #4F7470; margin-top: 2px;" id="drawerScoreDesc">High probability of application</div>
+                            </div>
+                            <div id="drawerStageBadge" class="badge" style="background: rgba(99, 102, 241, 0.25); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.4); font-size: 12px; font-weight: 700; padding: 6px 12px;">
+                                Stage: New
+                            </div>
+                        </div>
+
+                        <!-- Edvora Recommends Action Box -->
+                        <div style="background: #F8FBFA; border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 10px; padding: 16px 18px;">
+                            <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #fbbf24; margin-bottom: 4px;">ðŸ¤– EDVORA RECOMMENDS</div>
+                            <div style="font-size: 14px; font-weight: 700; color: #ffffff;" id="drawerNbaTitle">Call Candidate Today</div>
+                            <div style="font-size: 12px; color: #4F7470; margin: 4px 0 14px 0;" id="drawerNbaReason">High-intent candidate with recent engagement.</div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="drawerNbaActions">
+                                <!-- Dynamic CTAs -->
+                            </div>
+                        </div>
+
+                        <!-- Student Profile Details -->
+                        <div class="brand-card">
+                            <div class="brand-panel-header">
+                                <div class="brand-panel-title">Student Profile &amp; Merit</div>
+                            </div>
+                            <div style="padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;" id="drawerProfileGrid">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Intent Signals -->
+                        <div class="brand-card">
+                            <div class="brand-panel-header">
+                                <div class="brand-panel-title">Intent Signals Detected</div>
+                            </div>
+                            <div style="padding: 16px; display: flex; flex-direction: column; gap: 8px;" id="drawerSignalsList">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Conversion Journey Timeline -->
+                        <div class="brand-card">
+                            <div class="brand-panel-header">
+                                <div class="brand-panel-title">Conversion Journey Milestone Trail</div>
+                            </div>
+                            <div style="padding: 16px;" id="drawerJourneyTimeline">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ce-drawer-footer">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <label style="font-size: 11px; font-weight: 600; color: #4F7470;">Move Stage:</label>
+                            <select id="drawerStageSelect" class="brand-input" style="height: 32px; font-size: 11px; width: 140px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;" onchange="drawerUpdateStage()">
+                                <option value="new">ðŸ†• New</option>
+                                <option value="qualified">ðŸŽ¯ Qualified</option>
+                                <option value="contacted">ðŸ“ž Contacted</option>
+                                <option value="application">ðŸ“ Application</option>
+                                <option value="campus_visit">ðŸ« Campus Visit</option>
+                                <option value="decision">âš–ï¸ Decision</option>
+                                <option value="enrolled">ðŸŽ“ Enrolled</option>
+                                <option value="lost">ðŸ“ Lost</option>
+                            </select>
+                        </div>
+                        <button type="button" class="brand-btn-secondary brand-btn-sm" onclick="closeLeadDrawer()">Close</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Admissions & ROI Analytics (College Business Intelligence) -->
+            <!-- Tab: Admissions & ROI Analytics -->
+            <div class="tab-content" id="tab-analytics" data-loaded="false"></div>
+
+            <!-- Tab: Inquiry Leakage & Knowledge Gap Breakup -->
+            <div class="tab-content" id="tab-knowledge-gaps" data-loaded="false"></div>
+
+            <!-- Tab: Higher Ed Integrations Hub -->
+            <div class="tab-content" id="tab-integrations" data-loaded="false"></div>
+
+            <!-- Tab: Mobile Integration Guide -->
+            <div class="tab-content" id="tab-mobile-guide" data-loaded="false"></div>
+
+            <!-- Tab: API Documentation -->
+            <div class="tab-content" id="tab-api-docs" data-loaded="false"></div>
+
+            <!-- Tab: Student Leads Roster -->
+            <div class="tab-content" id="tab-leads" data-loaded="false"></div>
+
+            <!-- Tab: Counselor Callbacks Queue -->
+            <div class="tab-content" id="tab-callbacks" data-loaded="false"></div>
+
+            <!-- Tab: Campus Tour Bookings -->
+            <div class="tab-content" id="tab-campus-tours" data-loaded="false"></div>
+
+            <!-- Tab: Scholarship & Fee Rules Engine -->
+            <div class="tab-content" id="tab-scholarships" data-loaded="false"></div>
+
+            <!-- Tab: Chatbot Studio -->
+            <div class="tab-content" id="tab-chatbot" data-loaded="false"></div>
+
+            <!-- Tab: Test Chat Canvas -->
+            <div class="tab-content" id="tab-test-chat" data-loaded="false"></div>
+
+            <!-- Tab: College Profile & Identity -->
+            <div class="tab-content" id="tab-organization" data-loaded="false"></div>
+
+            <!-- Tab: Org. Settings (Blank Page) -->
+            <div class="tab-content" id="tab-org-settings" data-loaded="false"></div>
+
+            <!-- Tab: Campus Locations & Facilities -->
+            <div class="tab-content" id="tab-campuses" data-loaded="false"></div>
+
+            <!-- Tab: Dedicated Campus Editor Page -->
+            <div class="tab-content" id="tab-campus-editor" data-loaded="false"></div>
+
+            <!-- Tab: Institution Settings -->
+            <div class="tab-content" id="tab-settings" data-loaded="false"></div>
+
+            <!-- Tab: Teams Workspace & Staff Roster -->
+            <div class="tab-content" id="tab-teams" data-loaded="false"></div>
+
+            <!-- Tab: Departments Management -->
+            <div class="tab-content" id="tab-departments" data-loaded="false"></div>
+
+            <!-- Tab: Department Editor Studio -->
+            <div class="tab-content" id="tab-department-editor" data-loaded="false"></div>
+
+            <!-- Tab: Department Courses Focused Editor -->
+            <div class="tab-content" id="tab-dept-courses-editor" data-loaded="false"></div>
+
+            <!-- Tab: Department Staff Focused Editor -->
+            <div class="tab-content" id="tab-dept-staff-editor" data-loaded="false"></div>
+
+            <!-- Tab: Department Knowledge Focused Editor -->
+            <div class="tab-content" id="tab-dept-knowledge-editor" data-loaded="false"></div>
+
+            <!-- Tab: Department Hours Focused Editor -->
+            <div class="tab-content" id="tab-dept-hours-editor" data-loaded="false"></div>
+
+            <!-- Tab: Department Escalations Focused Editor -->
+            <div class="tab-content" id="tab-dept-escalations-editor" data-loaded="false"></div>
+
+            <!-- Tab: Knowledge Document Editor Studio -->
+            <div class="tab-content" id="tab-knowledge-edit" data-loaded="false"></div>
+            <div class="tab-content" id="tab-knowledge-editor" data-loaded="false"></div>
+
+            <!-- Tab: Knowledge Document Read-Only Viewer -->
+            <div class="tab-content" id="tab-knowledge-view" data-loaded="false"></div>
+
+            <!-- Tab: User Profile & Security Management Dedicated Workspace -->
+            <div class="tab-content" id="tab-profile" data-loaded="false"></div>
+
+        </main>
+
+        <!-- â”€â”€ PRESET CATALOG MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+        <div id="presetsModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+            <div style="background: #FFFFFF; border: 1px solid var(--brand-border-strong); border-radius: var(--brand-radius-md); max-width: 900px; width: 100%; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--brand-shadow-modal);">
+                <div style="padding: 20px; border-bottom: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                    <div>
+                        <h3 style="font-family: var(--brand-font-display); font-size: 18px; font-weight: 700; color: #092F2E; margin: 0;">
+                            14 Pre-Built College Department Templates
+                        </h3>
+                        <p style="font-size: 13px; color: #648781; margin-top: 4px; line-height: 1.4;">
+                            Select a department template to import and configure for your college workspace.
+                        </p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+                        <button class="brand-btn-primary" style="font-size: 14px; height: 38px; padding: 0 20px; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center;" onclick="importSelectedPresets()">
+                            Import Selected Preset
+                        </button>
+                        <button class="brand-btn-secondary" style="font-size: 14px; min-width: 96px; height: 38px; padding: 0 18px; white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" onclick="closePresetsModal()">âœ• Close</button>
+                    </div>
+                </div>
+
+                <div id="presetsGrid" style="padding: 20px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px;">
+                    <!-- Populated via JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- â”€â”€ LEAD DETAILS & REASSIGNMENT MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+        <div id="leadDetailModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+            <div style="background: #FFFFFF; border: 1px solid var(--brand-border-strong); border-radius: var(--brand-radius-md); max-width: 680px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--brand-shadow-modal);">
+                <div style="padding: 18px 24px; border-bottom: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 24px;">ðŸŽ“</span>
+                        <div>
+                            <h3 id="leadModalName" style="font-family: var(--brand-font-display); font-size: 17px; font-weight: 700; color: #092F2E; margin: 0;">
+                                Lead Details
+                            </h3>
+                            <div style="margin-top: 4px; display: flex; align-items: center; gap: 8px;">
+                                <span id="leadModalStatusBadge" class="badge" style="font-size: 10px;">NEW</span>
+                                <span id="leadModalCapturedAt" style="font-size: 11px; color: #648781; font-family: var(--brand-font-mono);">â€”</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="brand-btn-secondary brand-btn-sm" onclick="closeLeadModal()" style="font-size: 13px;">âœ• Close</button>
+                </div>
+
+                <div style="padding: 20px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px;">
+                    <!-- Student Contact Info Card -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; background: #F1F7F4; padding: 14px; border-radius: var(--brand-radius-sm); border: 1px solid #DDE9E3;">
+                        <div>
+                            <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #648781;">Email Address</div>
+                            <div id="leadModalEmail" style="font-size: 13px; font-weight: 600; color: #092F2E; margin-top: 2px;">â€”</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #648781;">Phone Number</div>
+                            <div id="leadModalPhone" style="font-size: 13px; font-weight: 600; color: #092F2E; margin-top: 2px;">â€”</div>
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #648781;">Program / Inquiry Topic</div>
+                            <div id="leadModalProgram" style="font-size: 13px; font-weight: 600; color: var(--brand-indigo-400); margin-top: 2px;">â€”</div>
+                        </div>
+                    </div>
+
+                    <!-- Enriched Scholarship Evaluation Profile Card -->
+                    <div id="leadModalScholarshipBox" style="display: none; background: rgba(52, 211, 153, 0.08); border: 1.5px solid rgba(52, 211, 153, 0.3); border-radius: var(--brand-radius-sm); padding: 12px 14px;">
+                        <div style="font-size: 11px; font-weight: 700; color: var(--brand-emerald-400); text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+                            <span>ðŸŽ“</span> Scholarship Evaluation Profile
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; font-size: 12px;">
+                            <div><span style="color: #648781;">Academic Score:</span> <strong id="leadModalAcademicScore" style="color: #092F2E;">â€”</strong></div>
+                            <div><span style="color: #648781;">Qualified Tier:</span> <strong id="leadModalSchTier" style="color: var(--brand-emerald-400);">â€”</strong></div>
+                            <div><span style="color: #648781;">Est. Tuition Waiver:</span> <strong id="leadModalWaiverAmount" style="color: var(--brand-cyan-400);">â€”</strong></div>
+                        </div>
+                    </div>
+
+                    <!-- Department & Assigned Staff Assignment Row -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                        <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                                Assigned Department
+                            </label>
+                            <select id="leadModalDeptSelect" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
+                                <option value="">ðŸ›ï¸ General (No Department)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                                Assigned Counselor / Staff
+                            </label>
+                            <select id="leadModalStaffSelect" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
+                                <option value="">ðŸ‘¤ Unassigned</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Status & Counselor Notes -->
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                            Lead Status
+                        </label>
+                        <select id="leadModalStatusSelect" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
+                            <option value="new">ðŸ”µ New (Needs Contact)</option>
+                            <option value="contacted">ðŸŸ¡ Contacted / In Follow-up</option>
+                            <option value="converted">ðŸŸ¢ Converted / Admitted</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                            Counselor Notes & Follow-up History
+                        </label>
+                        <textarea id="leadModalNotes" class="brand-textarea" rows="3" placeholder="Add follow-up notes, call summary, or admission remarks..."></textarea>
+                    </div>
+
+                    <!-- Chat Transcript (if captured from bot session) -->
+                    <div id="leadModalTranscriptSection" style="display: block;">
+                        <label style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                            <span>ðŸ’¬ Chatbot Conversation Transcript <span id="leadModalTranscriptBadge" style="display: none; font-size: 10px; font-weight: 700; background: rgba(99, 102, 241, 0.2); color: var(--brand-indigo-400); border: 1px solid rgba(99, 102, 241, 0.3); padding: 1px 7px; border-radius: 10px; margin-left: 6px; text-transform: none;"></span></span>
+                        </label>
+                        <div id="leadModalTranscriptBox" style="background: #F1F7F4; border: 1px solid #DDE9E3; border-radius: var(--brand-radius-sm); padding: 14px; max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 12px;">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="padding: 16px 24px; border-top: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+                    <button type="button" class="brand-btn-secondary" onclick="deleteActiveLeadRecord()" style="height: 38px; padding: 0 16px; color: #f87171; border-color: rgba(248, 113, 113, 0.3);" title="Right to Erasure (FERPA / GDPR / PIPEDA compliance)">
+                        ðŸ—‘ï¸ Delete Lead (Erasure Request)
+                    </button>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="button" class="brand-btn-secondary" onclick="closeLeadModal()" style="height: 38px; padding: 0 18px;">Cancel</button>
+                        <button type="button" class="brand-btn-primary" onclick="saveLeadModalChanges()" style="height: 38px; padding: 0 22px;">Save Lead Details</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- â”€â”€ COUNSELOR CALLBACK DETAILS & RESOLUTION MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+        <div id="callbackDetailModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+            <div style="background: #FFFFFF; border: 1px solid var(--brand-border-strong); border-radius: var(--brand-radius-md); max-width: 700px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--brand-shadow-modal);">
+                <div style="padding: 18px 24px; border-bottom: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 24px;">ðŸ“ž</span>
+                        <div>
+                            <h3 id="callbackModalName" style="font-family: var(--brand-font-display); font-size: 17px; font-weight: 700; color: #092F2E; margin: 0;">
+                                Counselor Callback
+                            </h3>
+                            <div style="margin-top: 4px; display: flex; align-items: center; gap: 8px;">
+                                <span id="callbackModalStatusBadge" class="badge" style="font-size: 10px;">PENDING</span>
+                                <span id="callbackModalRequestedAt" style="font-size: 11px; color: #648781; font-family: var(--brand-font-mono);">â€”</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="brand-btn-secondary brand-btn-sm" onclick="closeCallbackModal()" style="font-size: 13px;">âœ• Close</button>
+                </div>
+
+                <div style="padding: 20px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px;">
+                    <!-- Student Contact Card with 1-Click Connect -->
+                    <div style="background: #F1F7F4; padding: 16px; border-radius: var(--brand-radius-sm); border: 1px solid #DDE9E3; display: flex; flex-direction: column; gap: 12px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                            <div>
+                                <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #648781;">Student Phone Number</div>
+                                <div id="callbackModalPhone" style="font-size: 14px; font-weight: 700; color: #092F2E; margin-top: 2px; font-family: var(--brand-font-mono);">â€”</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #648781;">Email Address</div>
+                                <div id="callbackModalEmail" style="font-size: 13px; font-weight: 600; color: #4F7470; margin-top: 2px;">â€”</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #648781;">Preferred Call Time Slot</div>
+                                <div id="callbackModalSlot" style="font-size: 13px; font-weight: 700; color: var(--brand-amber-400); margin-top: 2px;">â€”</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #648781;">Topic / Discussion Need</div>
+                                <div id="callbackModalTopic" style="font-size: 13px; font-weight: 600; color: var(--brand-indigo-400); margin-top: 2px;">â€”</div>
+                            </div>
+                        </div>
+
+                        <!-- 1-Click Quick Connect Bar -->
+                        <div style="display: flex; gap: 10px; padding-top: 10px; border-top: 1.5px solid #E6F0EC;">
+                            <a id="callbackModalCallLink" href="#" class="brand-btn-primary brand-btn-sm" style="flex: 1; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: #2563EB; font-weight: 600; height: 36px;">
+                                <span>ðŸ“ž</span> Direct Dial (tel:)
+                            </a>
+                            <a id="callbackModalWaLink" href="#" target="_blank" class="brand-btn-secondary brand-btn-sm" style="flex: 1; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-color: rgba(52, 211, 153, 0.4); color: var(--brand-emerald-400); font-weight: 600; height: 36px;">
+                                <span>ðŸ’¬</span> Open WhatsApp Chat
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Department & Assigned Counselor Selectors -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                        <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                                Department Desk
+                            </label>
+                            <select id="callbackModalDeptSelect" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
+                                <option value="">ðŸ›ï¸ General Admissions Desk</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                                Assigned Counselor / Staff
+                            </label>
+                            <select id="callbackModalStaffSelect" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
+                                <option value="">ðŸ‘¤ Unassigned</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Status & Call Attempts Row -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                        <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                                Callback Status
+                            </label>
+                            <select id="callbackModalStatusSelect" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
+                                <option value="pending">ðŸ”´ Pending (Action Required)</option>
+                                <option value="scheduled">ðŸŸ¡ Scheduled / Call Set</option>
+                                <option value="in_progress">ðŸŸ  In Progress / Speaking</option>
+                                <option value="completed">ðŸŸ¢ Completed / Resolved</option>
+                                <option value="no_response">âšª No Response / Missed</option>
+                                <option value="cancelled">âš« Cancelled by Student</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                                Call Attempts Count
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <button type="button" class="brand-btn-secondary" onclick="modifyCallbackAttempts(-1)" style="height: 38px; width: 38px; padding: 0; font-size: 16px; font-weight: 700;">-</button>
+                                <input type="number" id="callbackModalAttempts" class="brand-input" min="0" value="0" style="height: 38px; text-align: center; font-weight: 700; font-family: var(--brand-font-mono);" />
+                                <button type="button" class="brand-btn-secondary" onclick="modifyCallbackAttempts(1)" style="height: 38px; width: 38px; padding: 0; font-size: 16px; font-weight: 700;">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Counselor Notes & Summary -->
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                            Counselor Resolution Notes & Remarks
+                        </label>
+                        <textarea id="callbackModalNotes" class="brand-textarea" rows="3" placeholder="Enter call discussion points, student eligibility status, next step, fee concession discussed..."></textarea>
+                    </div>
+
+                    <!-- Chat Transcript -->
+                    <div id="callbackModalTranscriptSection" style="display: none;">
+                        <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                            ðŸ’¬ Originating Chat Conversation Transcript
+                        </label>
+                        <div id="callbackModalTranscriptBox" style="background: #F1F7F4; border: 1px solid #DDE9E3; border-radius: var(--brand-radius-sm); padding: 12px; max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 12px;">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="padding: 16px 24px; border-top: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
+                    <button type="button" class="brand-btn-secondary" onclick="closeCallbackModal()" style="height: 38px; padding: 0 18px;">Cancel</button>
+                    <button type="button" class="brand-btn-primary" onclick="saveCallbackModalChanges()" style="height: 38px; padding: 0 22px;">Save Callback Details</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- â”€â”€ COURSE SCHOLARSHIP CONFIGURATION MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+        <div id="courseScholarshipModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+            <div style="background: #FFFFFF; border: 1px solid var(--brand-border-strong); border-radius: var(--brand-radius-md); max-width: 740px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--brand-shadow-modal);">
+                <div style="padding: 18px 24px; border-bottom: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 24px;">ðŸ’°</span>
+                        <div>
+                            <h3 id="courseSchModalTitle" style="font-family: var(--brand-font-display); font-size: 17px; font-weight: 700; color: #092F2E; margin: 0;">
+                                Add Course Scholarship Rule
+                            </h3>
+                            <p style="font-size: 12px; color: #648781; margin-top: 2px;">
+                                Define whether this course offers merit waivers and configure academic slabs.
+                            </p>
+                        </div>
+                    </div>
+                    <button class="brand-btn-secondary brand-btn-sm" onclick="closeCourseScholarshipModal()" style="font-size: 13px;">âœ• Close</button>
+                </div>
+
+                <form id="courseScholarshipForm" onsubmit="saveCourseScholarship(event)" style="display: flex; flex-direction: column; flex: 1; overflow-y: auto; padding: 20px 24px; gap: 16px;">
+                    <input type="hidden" id="editCourseSchId" value="" />
+
+                    <!-- Row 1: Course Name & Code -->
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
+                        <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">Course / Program Name *</label>
+                            <input type="text" id="courseSchName" class="brand-input" placeholder="e.g. B.Tech in Computer Science & Engineering" required />
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">Course Code</label>
+                            <input type="text" id="courseSchCode" class="brand-input" placeholder="e.g. BT-CSE" />
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Department & Degree Level -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">Department Scope</label>
+                            <select id="courseSchDeptSelect" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
+                                <option value="">ðŸ›ï¸ All / General Institutional</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">Degree Level</label>
+                            <select id="courseSchDegreeLevel" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
+                                <option value="undergraduate">Undergraduate (UG)</option>
+                                <option value="postgraduate">Postgraduate (PG)</option>
+                                <option value="diploma">Diploma</option>
+                                <option value="doctorate">Doctorate (Ph.D)</option>
+                                <option value="certificate">Certificate Program</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Toggle: Offers Scholarship -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: rgba(99, 102, 241, 0.06); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: var(--brand-radius-sm);">
+                        <div>
+                            <strong style="font-size: 12px; color: #092F2E; display: block;">Offers Direct Merit Scholarships</strong>
+                            <span style="font-size: 11px; color: #648781;">Uncheck if this program has a fixed subsidized fee or 0% EMI loan structure without direct merit waivers.</span>
+                        </div>
+                        <input type="checkbox" id="courseSchHasScholarship" checked onchange="toggleCourseSchFormFields()" style="width: 18px; height: 18px; accent-color: var(--brand-indigo-500); cursor: pointer;" />
+                    </div>
+
+                    <!-- No Scholarship Reason (Shown when toggle is OFF) -->
+                    <div id="courseSchNoReasonGroup" style="display: none;">
+                        <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                            No Scholarship Explanation (Presented to Student)
+                        </label>
+                        <input type="text" id="courseSchNoReason" class="brand-input" placeholder="e.g. Standard subsidized tuition fee structure with 0% interest EMI options." />
+                    </div>
+
+                    <!-- Scholarship Criteria (Shown when toggle is ON) -->
+                    <div id="courseSchCriteriaGroup" style="display: flex; flex-direction: column; gap: 14px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                            <div>
+                                <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">Evaluation Metric</label>
+                                <select id="courseSchMetric" class="brand-input" onchange="toggleCourseSchMetricFields()" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
+                                    <option value="percentage_12th">Class 12th Marks (%)</option>
+                                    <option value="graduation_cgpa">Graduation CGPA</option>
+                                    <option value="entrance_exam">Entrance Exam (JEE/CAT/etc)</option>
+                                    <option value="merit_rank">Merit / State Rank</option>
+                                </select>
+                            </div>
+                            <div id="courseSchExamGroup" style="display: none;">
+                                <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">Exam Name</label>
+                                <input type="text" id="courseSchExamName" class="brand-input" placeholder="e.g. JEE Main, CAT, CUET" />
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">Annual Tuition Fee (â‚¹ / $)</label>
+                                <input type="number" id="courseSchAnnualFee" class="brand-input" placeholder="e.g. 180000" min="0" />
+                            </div>
+                        </div>
+
+                        <!-- Slabs Builder -->
+                        <div style="background: #F1F7F4; padding: 14px; border-radius: var(--brand-radius-sm); border: 1px solid #DDE9E3;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                                <div>
+                                    <strong style="font-size: 12px; color: #092F2E;">Merit Scholarship Slabs</strong>
+                                    <div style="font-size: 10px; color: #648781;">Set score boundaries and corresponding tuition waiver percentages</div>
+                                </div>
+                                <button type="button" class="brand-btn-secondary brand-btn-sm" onclick="addCourseSchSlabRow()" style="font-size: 11px;">
+                                    âž• Add Slab
+                                </button>
+                            </div>
+
+                            <div id="courseSchSlabsContainer" style="display: flex; flex-direction: column; gap: 8px;">
+                                <!-- Slabs injected dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="padding-top: 14px; border-top: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
+                        <button type="button" class="brand-btn-secondary" onclick="closeCourseScholarshipModal()" style="height: 38px; padding: 0 18px;">Cancel</button>
+                        <button type="submit" class="brand-btn-primary" style="height: 38px; padding: 0 24px;">Save Course Rule</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- â”€â”€ LEAD-MAGNET ASSET UPLOAD & EDIT MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+        <div id="assetUploadModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+            <div style="background: #FFFFFF; border: 1px solid var(--brand-border-strong); border-radius: var(--brand-radius-md); max-width: 680px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--brand-shadow-modal);">
+                
+                <!-- Modal Header -->
+                <div style="padding: 18px 24px; border-bottom: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 24px;">ðŸ“</span>
+                        <div>
+                            <h3 id="assetModalTitle" style="font-family: var(--brand-font-display); font-size: 17px; font-weight: 700; color: #092F2E; margin: 0;">
+                                Upload Lead-Magnet Document
+                            </h3>
+                            <p style="font-size: 12px; color: #648781; margin-top: 2px;">
+                                Deploy documents that the AI chatbot will deliver to prospective students in exchange for verified contact details.
+                            </p>
+                        </div>
+                    </div>
+                    <button class="brand-btn-secondary brand-btn-sm" onclick="closeAssetModal()" style="font-size: 13px;">âœ• Close</button>
+                </div>
+
+                <!-- Modal Body Form -->
+                <form id="assetUploadForm" onsubmit="handleAssetFormSubmit(event)" style="display: flex; flex-direction: column; flex: 1; overflow-y: auto; padding: 20px 24px; gap: 16px;">
+                    <input type="hidden" id="editAssetId" value="" />
+
+                    <!-- Row 1: Document Title -->
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                            Document / Asset Title *
+                        </label>
+                        <input type="text" id="assetFormTitle" class="brand-input" placeholder="e.g. 2026-27 Comprehensive Fee Structure &amp; Installment Payment Guide" required />
+                    </div>
+
+                    <!-- Row 2: Category & Department Mapping -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                        <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                                Document Category *
+                            </label>
+                            <select id="assetFormCategory" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;" required>
+                                <option value="brochure">ðŸ“„ Official Brochure / Prospectus</option>
+                                <option value="fee_structure">ðŸ’° Fee Structure &amp; Installments</option>
+                                <option value="scholarship_guide">ðŸ† Scholarship Matrix</option>
+                                <option value="placement_report">ðŸ“ˆ Placement &amp; Salary Report</option>
+                                <option value="curriculum">ðŸ“š Curriculum &amp; Syllabus</option>
+                                <option value="hostel_guide">ðŸ¡ Hostel &amp; Campus Life</option>
+                                <option value="exam_cutoff">ðŸŽ¯ Cutoff &amp; Exam Prep Kit</option>
+                                <option value="international_guide">ðŸŒ International / NRI Guide</option>
+                                <option value="other">ðŸ“‘ Other Resource</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                                Department Scope *
+                            </label>
+                            <div id="assetFormDeptWrapper">
+                                <select id="assetFormDept" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
+                                    <option value="org">ðŸŒ Org-wide (All Departments / General)</option>
+                                </select>
+                            </div>
+                            <div id="assetFormDeptLockedBadge" style="display: none; margin-top: 4px; font-size: 11px; color: var(--brand-cyan-400);">
+                                ðŸ”’ Locked to your assigned department
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row 3: File Input (Hidden when editing metadata only) -->
+                    <div id="assetFormFileGroup">
+                        <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                            Select Document File (.PDF, .DOCX, .PPTX, .ZIP, .TXT) *
+                        </label>
+                        <div style="border: 1.5px dashed var(--brand-border-mid); border-radius: var(--brand-radius-sm); padding: 16px; text-align: center; background: rgba(0, 0, 0, 0.2); transition: border-color 0.2s;">
+                            <input type="file" id="assetFormFile" accept=".pdf,.docx,.doc,.pptx,.xlsx,.zip,.txt" style="display: block; width: 100%; font-size: 12px; color: #4F7470;" />
+                            <div style="font-size: 11px; color: #648781; margin-top: 6px;">
+                                Maximum file size: 25MB â€¢ Formats: PDF, Word, Presentation, Spreadsheet, Zip archive
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row 4: AI Conversational Trigger Keywords -->
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                            Conversational AI Intent Triggers <span style="font-weight: 400; text-transform: none; color: #648781;">(comma-separated)</span>
+                        </label>
+                        <input type="text" id="assetFormTrigger" class="brand-input" placeholder="e.g. fee structure, hostel fee, payment installments, education loan, mba syllabus" />
+                        <div style="font-size: 11px; color: #648781; margin-top: 4px;">
+                            When student inquiries match these topics or keywords, the AI chatbot offers this asset to capture student contact details.
+                        </div>
+                    </div>
+
+                    <!-- Row 5: Description -->
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                            Description / Summary <span style="font-weight: 400; text-transform: none; color: #648781;">(Optional internal notes or visitor pitch)</span>
+                        </label>
+                        <textarea id="assetFormDesc" class="brand-textarea" rows="2" placeholder="Brief summary of what this document provides to prospective applicants..."></textarea>
+                    </div>
+
+                    <!-- Row 6: Active Status Checkbox -->
+                    <div>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #092F2E; cursor: pointer;">
+                            <input type="checkbox" id="assetFormIsActive" checked style="accent-color: var(--brand-indigo-500); width: 16px; height: 16px;" />
+                            <span>Active in AI Chatbot (AI assistant will actively offer and deliver this document)</span>
+                        </label>
+                    </div>
+
+                    <!-- Footer Action Buttons -->
+                    <div style="padding-top: 14px; border-top: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
+                        <button type="button" class="brand-btn-secondary" onclick="closeAssetModal()" style="height: 38px; padding: 0 18px;">Cancel</button>
+                        <button type="submit" id="assetFormSubmitBtn" class="brand-btn-primary" style="height: 38px; padding: 0 24px; font-weight: 700;">
+                            Deploy Asset
+                        </button>
+                    </div>
+        <!-- â”€â”€ REQUEST CUSTOM INTEGRATION MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+        <div id="requestIntegrationModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+            <div style="background: #FFFFFF; border: 1px solid var(--brand-border-strong); border-radius: var(--brand-radius-md); max-width: 620px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--brand-shadow-modal);">
+                
+                <!-- Modal Header -->
+                <div style="padding: 18px 24px; border-bottom: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 24px;">ðŸ”Œ</span>
+                        <div>
+                            <h3 style="font-family: var(--brand-font-display); font-size: 17px; font-weight: 700; color: #092F2E; margin: 0;">
+                                Request Custom Integration Connector
+                            </h3>
+                            <p style="font-size: 11px; color: #4F7470; margin: 2px 0 0 0;">
+                                Let our engineering team build a native sync bridge for your campus software
+                            </p>
+                        </div>
+                    </div>
+                    <button class="brand-btn-secondary brand-btn-sm" onclick="closeRequestIntegrationModal()" style="font-size: 13px;">âœ• Close</button>
+                </div>
+
+                <!-- Form Body -->
+                <form id="requestIntegrationForm" onsubmit="handleIntegrationRequestSubmit(event)" style="padding: 20px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px;">
+                    
+                    <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: var(--brand-radius-sm); padding: 12px 14px; font-size: 12px; color: var(--brand-indigo-300); line-height: 1.45;">
+                        ðŸš€ <strong>Fast-Track SLA:</strong> Custom SIS, CRM, and Payment connectors are developed, tested in staging, and deployed within <strong>5â€“7 business days</strong>.
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                        <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                                Software / Platform Name *
+                            </label>
+                            <input type="text" id="reqIntSoftware" class="brand-input" required placeholder="e.g. Populi, CAMS, Tribal SITS" />
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                                System Category *
+                            </label>
+                            <select id="reqIntCategory" class="brand-input" required style="background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
+                                <option value="crm">Admissions / Recruitment CRM</option>
+                                <option value="sis">Student Information System (SIS / ERP)</option>
+                                <option value="portal">Application Portal / Gateway</option>
+                                <option value="lms">Learning Management System (LMS)</option>
+                                <option value="payment">Tuition & Fee Payment Processor</option>
+                                <option value="database">Internal Custom Database / API</option>
+                                <option value="other">Other Campus Tool</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                        <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                                IT / Technical Contact Email *
+                            </label>
+                            <input type="email" id="reqIntEmail" class="brand-input" required placeholder="it-admin@university.edu" />
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                                Target Go-Live Timeline
+                            </label>
+                            <select id="reqIntTimeline" class="brand-input" style="background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
+                                <option value="urgent">Immediate (Within 7 Days)</option>
+                                <option value="current_intake" selected>Current Admissions Cycle</option>
+                                <option value="next_semester">Next Semester / Term</option>
+                                <option value="exploring">Exploring Options</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                            Specific Requirements / API Documentation Link <span style="font-weight: 400; text-transform: none; color: #648781;">(optional)</span>
+                        </label>
+                        <textarea id="reqIntNotes" class="brand-input" rows="3" placeholder="Specify if on-premise or cloud, preferred authentication method (OAuth2, API Key, Webhook), or link to API docs..."></textarea>
+                    </div>
+
+                    <div style="padding-top: 14px; border-top: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
+                        <button type="button" class="brand-btn-secondary" onclick="closeRequestIntegrationModal()" style="height: 38px; padding: 0 18px;">Cancel</button>
+                        <button type="submit" id="reqIntSubmitBtn" class="brand-btn-primary" style="height: 38px; padding: 0 24px; font-weight: 700; background: var(--brand-grad-brand); border: none;">
+                            Submit Integration Request ðŸš€
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+        <!-- â”€â”€ 1-CLICK REPLACE DOCUMENT VERSION MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+        <div id="replaceKnowledgeModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+            <div style="background: #FFFFFF; border: 1px solid var(--brand-border-strong); border-radius: var(--brand-radius-md); max-width: 650px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--brand-shadow-modal);">
+                
+                <!-- Modal Header -->
+                <div style="padding: 18px 24px; border-bottom: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 24px;">ðŸ”„</span>
+                        <div>
+                            <h3 style="font-family: var(--brand-font-display); font-size: 17px; font-weight: 700; color: #092F2E; margin: 0;">
+                                Replace Document Version &amp; Update Cycle
+                            </h3>
+                            <p style="font-size: 11px; color: #4F7470; margin: 2px 0 0 0;">
+                                Automatically archive the outdated version, deploy the fresh replacement, and preserve version lineage.
+                            </p>
+                        </div>
+                    </div>
+                    <button class="brand-btn-secondary brand-btn-sm" onclick="closeReplaceKnowledgeModal()" style="font-size: 13px;">âœ• Close</button>
+                </div>
+
+                <!-- Modal Form Body -->
+                <form id="replaceKnowledgeForm" onsubmit="submitReplaceKnowledge(event)" style="padding: 20px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px;">
+                    <input type="hidden" id="replaceSourceId" value="" />
+
+                    <!-- Summary of Expired/Current Version -->
+                    <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: var(--brand-radius-sm); padding: 12px 14px;">
+                        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--brand-indigo-300); margin-bottom: 4px;">
+                            Current Document to be Archived
+                        </div>
+                        <div style="font-size: 14px; font-weight: 700; color: #092F2E;" id="replaceOldTitle">
+                            Loading document...
+                        </div>
+                        <div style="font-size: 11px; color: #648781; margin-top: 4px; display: flex; gap: 12px; flex-wrap: wrap;">
+                            <span>Category: <strong id="replaceOldCategory" style="color: #4F7470;">Admissions</strong></span>
+                            <span>Cycle: <strong id="replaceOldVersion" style="color: #4F7470;">2025-26</strong></span>
+                            <span>Expired On: <strong id="replaceOldExpiry" style="color: var(--brand-rose-400);">2026-07-31</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- Ingestion Type Selector -->
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                            Replacement Content Ingestion Method *
+                        </label>
+                        <div style="display: flex; gap: 8px;">
+                            <button type="button" class="brand-btn-secondary replace-mode-btn active" data-mode="file" onclick="switchReplaceMode('file')" style="flex: 1;">ðŸ“ Upload New File</button>
+                            <button type="button" class="brand-btn-secondary replace-mode-btn" data-mode="text" onclick="switchReplaceMode('text')" style="flex: 1;">ðŸ“ Paste New Content</button>
+                            <button type="button" class="brand-btn-secondary replace-mode-btn" data-mode="url" onclick="switchReplaceMode('url')" style="flex: 1;">ðŸŒ New Web URL</button>
+                        </div>
+                    </div>
+
+                    <!-- Mode 1: File Input -->
+                    <div id="replaceModeFile" class="replace-mode-panel">
+                        <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                            Select Replacement File (.PDF, .DOCX, .TXT) *
+                        </label>
+                        <input type="file" id="replaceFileInput" accept=".pdf,.docx,.txt" class="brand-input" style="height: 42px; padding: 8px;" />
+                    </div>
+
+                    <!-- Mode 2: Text Input -->
+                    <div id="replaceModeText" class="replace-mode-panel" style="display: none;">
+                        <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                            Replacement Text / Notice Content *
+                        </label>
+                        <textarea id="replaceContentInput" class="brand-textarea" rows="4" placeholder="Paste the updated prospectus, fee policy, or admissions guidelines text..."></textarea>
+                    </div>
+
+                    <!-- Mode 3: URL Input -->
+                    <div id="replaceModeUrl" class="replace-mode-panel" style="display: none;">
+                        <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                            Updated Webpage URL *
+                        </label>
+                        <input type="url" id="replaceUrlInput" class="brand-input" placeholder="https://college.edu/admissions/2026-27" />
+                    </div>
+
+                    <!-- Replacement Title & Academic Version -->
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 14px;">
+                        <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                                New Document Title *
+                            </label>
+                            <input type="text" id="replaceTitleInput" class="brand-input" placeholder="e.g. 2026-27 Official Admissions Prospectus" required />
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                                New Academic Version *
+                            </label>
+                            <input type="text" id="replaceVersionInput" class="brand-input" placeholder="e.g. 2026-27" value="2026-27" required />
+                        </div>
+                    </div>
+
+                    <!-- Validity & Expiration for New Version -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                        <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                                Effective From
+                            </label>
+                            <input type="date" id="replaceEffectiveFrom" class="brand-input" />
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                                Valid Until / Expires On *
+                            </label>
+                            <input type="date" id="replaceExpiresOn" class="brand-input" />
+                        </div>
+                    </div>
+
+                    <!-- Expiry 1-Click Presets -->
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <span style="font-size: 11px; color: #648781;">âš¡ Quick Presets:</span>
+                        <button type="button" class="brand-btn-secondary brand-btn-sm" style="font-size: 11px; padding: 2px 8px; height: 26px;" onclick="applyKsExpiryPreset('replaceExpiresOn', 'academic_year')">ðŸŽ“ End of Academic Cycle (Jul 31)</button>
+                        <button type="button" class="brand-btn-secondary brand-btn-sm" style="font-size: 11px; padding: 2px 8px; height: 26px;" onclick="applyKsExpiryPreset('replaceExpiresOn', '1_year')">ðŸ“… +1 Year</button>
+                        <button type="button" class="brand-btn-secondary brand-btn-sm" style="font-size: 11px; padding: 2px 8px; height: 26px;" onclick="applyKsExpiryPreset('replaceExpiresOn', '6_months')">âš¡ +6 Months</button>
+                        <button type="button" class="brand-btn-secondary brand-btn-sm" style="font-size: 11px; padding: 2px 8px; height: 26px; color: var(--brand-emerald-400);" onclick="applyKsExpiryPreset('replaceExpiresOn', 'evergreen')">â™¾ï¸ Evergreen</button>
+                    </div>
+
+                    <!-- Footer Action Buttons -->
+                    <div style="padding-top: 14px; border-top: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 6px;">
+                        <button type="button" class="brand-btn-secondary" onclick="closeReplaceKnowledgeModal()" style="height: 38px; padding: 0 18px;">Cancel</button>
+                        <button type="submit" id="replaceSubmitBtn" class="brand-btn-primary" style="height: 38px; padding: 0 24px; font-weight: 700; background: var(--brand-grad-brand); border: none;">
+                            ðŸš€ Deploy New Version &amp; Archive Old
+                        </button>
+                    </div>
+                </form>
+
+        <!-- â”€â”€ QUICK ADD KNOWLEDGE SOURCE / GAP RESOLUTION MODAL â”€â”€â”€â”€â”€â”€â”€â”€ -->
+        <div id="resolveGapModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+            <div style="background: #FFFFFF; border: 1px solid var(--brand-border-strong); border-radius: var(--brand-radius-md); max-width: 640px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--brand-shadow-modal);">
+                
+                <!-- Modal Header -->
+                <div style="padding: 18px 24px; border-bottom: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 24px;">âž•</span>
+                        <div>
+                            <h3 style="font-family: var(--brand-font-display); font-size: 17px; font-weight: 700; color: #092F2E; margin: 0;">
+                                Resolve Knowledge Gap &amp; Train Chatbot
+                            </h3>
+                            <div style="font-size: 11px; color: #4F7470; margin-top: 2px;">
+                                Add authoritative policy/content to immediately resolve unanswered queries.
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="brand-btn-secondary brand-btn-sm" onclick="closeResolveGapModal()" style="font-size: 13px;">âœ• Close</button>
+                </div>
+
+                <!-- Form Body -->
+                <form id="resolveGapForm" onsubmit="submitResolveGap(event)" style="padding: 20px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px;">
+                    
+                    <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: var(--brand-radius-sm); padding: 12px 14px; font-size: 12px; color: var(--brand-indigo-300); line-height: 1.45;">
+                        ðŸ’¡ <strong>Instant Activation:</strong> Once published, Edvora AI immediately uses this content to answer related student questions across all active chatbots.
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-size: 12px; font-weight: 600; color: #4F7470;">Knowledge Source Title</label>
+                        <input type="text" id="rgTitle" class="brand-input" required placeholder="e.g., UGC Compliant Fee Refund Policy 2025-26" style="height: 38px; font-size: 12px; padding: 0 12px;">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <label style="font-size: 12px; font-weight: 600; color: #4F7470;">Category / Department</label>
+                            <select id="rgCategory" class="brand-input" style="height: 38px; font-size: 12px; padding: 0 12px;">
+                                <option value="Admissions">Admissions</option>
+                                <option value="Fees & Scholarships">Fees & Scholarships</option>
+                                <option value="Hostels & Campus">Hostels & Campus</option>
+                                <option value="Academic Programs">Academic Programs</option>
+                                <option value="Placements & Careers">Placements & Careers</option>
+                                <option value="General & Policy">General & Policy</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <label style="font-size: 12px; font-weight: 600; color: #4F7470;">Urgency / Action Priority</label>
+                            <input type="text" id="rgPriority" class="brand-input" readonly value="High Priority Gap" style="height: 38px; font-size: 12px; padding: 0 12px; opacity: 0.8;">
+                        </div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <label style="font-size: 12px; font-weight: 600; color: #4F7470;">Approved Policy / Knowledge Content</label>
+                            <span style="font-size: 11px; color: var(--brand-emerald-400);">AI pre-drafted template</span>
+                        </div>
+                        <textarea id="rgContent" class="brand-input" required rows="7" placeholder="Paste or verify the exact institution policy rules, fee numbers, or admission criteria..." style="font-size: 12px; padding: 10px 12px; line-height: 1.5; font-family: var(--brand-font-sans);"></textarea>
+                    </div>
+
+                    <!-- Footer Action Buttons -->
+                    <div style="padding-top: 14px; border-top: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
+                        <button type="button" class="brand-btn-secondary" onclick="closeResolveGapModal()" style="height: 38px; padding: 0 18px;">Cancel</button>
+                        <button type="submit" id="rgSubmitBtn" class="brand-btn-primary" style="height: 38px; padding: 0 24px; font-weight: 700; background: var(--brand-grad-brand); border: none;">
+                            ðŸš€ Add to Knowledge Base &amp; Resolve Gap
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
