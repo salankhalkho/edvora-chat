@@ -72,7 +72,7 @@ class LlmService
         $model = $providerConfig['model_name'];
         $apiKey = !empty($providerConfig['api_key_encrypted']) ? self::decryptKey($providerConfig['api_key_encrypted']) : Env::get(strtoupper($providerType) . '_API_KEY');
         $temperature = (float)($providerConfig['temperature'] ?? 0.30);
-        $maxTokens = (int)($providerConfig['max_tokens'] ?? 1000);
+        $maxTokens = min(400, (int)($providerConfig['max_tokens'] ?? 400));
         $timeout = (int)($providerConfig['timeout_seconds'] ?? 20);
 
         if (empty($apiKey)) {
@@ -217,12 +217,12 @@ class LlmService
     {
         $openAiKey = Env::get('OPENAI_API_KEY');
         if (!empty($openAiKey)) {
-            return self::callOpenAiCompatible('https://api.openai.com/v1', $openAiKey, 'gpt-4o-mini', $systemPrompt, $userMessage, $history, 0.3, 1000, 20);
+            return self::callOpenAiCompatible('https://api.openai.com/v1', $openAiKey, 'gpt-4o-mini', $systemPrompt, $userMessage, $history, 0.3, 400, 20);
         }
 
         $geminiKey = Env::get('GEMINI_API_KEY');
         if (!empty($geminiKey)) {
-            return self::callGemini($geminiKey, 'gemini-1.5-flash', $systemPrompt, $userMessage, $history, 0.3, 1000, 20);
+            return self::callGemini($geminiKey, 'gemini-1.5-flash', $systemPrompt, $userMessage, $history, 0.3, 400, 20);
         }
 
         // Default neutral greeting if no external API keys configured yet

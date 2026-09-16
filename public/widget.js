@@ -463,15 +463,9 @@
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 
-    // 8. Send Message Handler
-    function sendMessage() {
-        var text = inputField.value.trim();
-        if (!text) return;
-
-        appendMessage('user', text);
-        inputField.value = '';
-
-        // Show typing indicator
+    // 8. Typing Indicator Helpers
+    function showTypingIndicator() {
+        if (document.getElementById('edvoraTyping')) return;
         var cust = (config && config.customization) ? config.customization : {};
         var showBubbleAv = (cust.avatar_location === 'bubbles' || cust.avatar_location === 'both' || !cust.avatar_location);
         var avatarSrc = config._resolvedAvatarSrc || (apiBaseUrl + '/avatars/avatar1.png');
@@ -502,6 +496,22 @@
         typingRow.appendChild(typingDiv);
         messagesContainer.appendChild(typingRow);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+        var typing = document.getElementById('edvoraTyping');
+        if (typing) typing.remove();
+    }
+
+    // 9. Send Message Handler
+    function sendMessage() {
+        var text = inputField.value.trim();
+        if (!text) return;
+
+        appendMessage('user', text);
+        inputField.value = '';
+
+        showTypingIndicator();
 
         fetch(apiBaseUrl + '/v1/chat/completions', {
             method: 'POST',
@@ -517,24 +527,34 @@
         })
         .then(function (res) { return res.json(); })
         .then(function (res) {
-            var typing = document.getElementById('edvoraTyping');
-            if (typing) typing.remove();
+            removeTypingIndicator();
 
             if (res.status === 'success' && res.data) {
                 if (res.data.conversation_id) {
                     currentConversationId = res.data.conversation_id;
                 }
                 appendMessage('assistant', res.data.response);
+
                 if (res.data.lead_capture_trigger) {
                     renderLeadBanner(res.data.lead_capture_trigger);
+                }
+
+                // If follow-up provoking question is provided, display it as a separate bubble with natural typing delay
+                if (res.data.follow_up_message) {
+                    setTimeout(function () {
+                        showTypingIndicator();
+                        setTimeout(function () {
+                            removeTypingIndicator();
+                            appendMessage('assistant', res.data.follow_up_message);
+                        }, 900);
+                    }, 800);
                 }
             } else {
                 appendMessage('assistant', 'Sorry, I am having trouble connecting right now. Please try again.');
             }
         })
         .catch(function () {
-            var typing = document.getElementById('edvoraTyping');
-            if (typing) typing.remove();
+            removeTypingIndicator();
             appendMessage('assistant', 'Network error. Please check your internet connection.');
         });
     }

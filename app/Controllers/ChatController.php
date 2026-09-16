@@ -264,10 +264,10 @@ class ChatController
             $leadTriggerPayload = null;
             $aiResponseText = $rawAiResponse;
 
-            if (preg_match('/\[LEAD_TRIGGER:([a-z_]+)\]\s*$/i', $rawAiResponse, $matches)) {
+            if (preg_match('/\[LEAD_TRIGGER:([a-z_]+)\]\s*$/i', $aiResponseText, $matches)) {
                 $rawTriggerType = strtolower(trim($matches[1]));
                 // Strip tag from user-facing text
-                $aiResponseText = trim(preg_replace('/\[LEAD_TRIGGER:[a-z_]+\]\s*$/i', '', $rawAiResponse));
+                $aiResponseText = trim(preg_replace('/\[LEAD_TRIGGER:[a-z_]+\]\s*$/i', '', $aiResponseText));
 
                 // Only generate a trigger form if lead is NOT yet captured AND turn count >= minTurns
                 if (!$leadCaptured && $turnCount >= $minTurns && (bool)$bot['lead_capture_enabled']) {
@@ -275,9 +275,33 @@ class ChatController
                 }
             }
 
+            // 10. Parse and strip structured [FOLLOW_UP] tag
+            $followUpMessage = null;
+            if (preg_match('/\[FOLLOW_UP\]\s*(.*?)(?=\[LEAD_TRIGGER:|$)/is', $aiResponseText, $fuMatches)) {
+                $rawFollowUp = trim($fuMatches[1]);
+                // Strip [FOLLOW_UP] tag and question from main response text
+                $aiResponseText = trim(preg_replace('/\[FOLLOW_UP\]\s*(.*?)(?=\[LEAD_TRIGGER:|$)/is', '', $aiResponseText));
+
+                // 4-Layer Gate for Follow-Up message:
+                // Gate 1: LLM provided non-empty follow-up
+                // Gate 2: Turn count >= 2 (never on first turn)
+                // Gate 3: Intent is Knowledge Query (not conversational greeting / clarification)
+                // Gate 4: Lead not yet captured and lead capture enabled
+                // Gate 5: No active lead_trigger form on this exact turn
+                if (!empty($rawFollowUp) 
+                    && $turnCount >= 2 
+                    && $intentTier === IntentClassifier::TIER_KNOWLEDGE_QUERY 
+                    && !$leadCaptured 
+                    && empty($leadTriggerPayload) 
+                    && (bool)$bot['lead_capture_enabled']
+                ) {
+                    $followUpMessage = $rawFollowUp;
+                }
+            }
+
             $sourceIdsUsed = array_map(fn($s) => $s['id'], $contextSources);
 
-            // 10. Save AI Response Message to DB
+            // 11. Save AI Response Message to DB
             $stmtAiMsg = $db->prepare("
                 INSERT INTO messages (conversation_id, organization_id, role, content, knowledge_sources_used, tokens_used, created_at)
                 VALUES (:conv_id, :org_id, 'assistant', :content, :sources, :tokens, NOW())
@@ -290,7 +314,20 @@ class ChatController
                 ':tokens' => $tokensUsed
             ]);
 
-            // 11. Update Monthly Usage Logs (Skip test conversations)
+            // If follow-up message bubble is active, also store it so future turns have full conversational context
+            if (!empty($followUpMessage)) {
+                $stmtFuMsg = $db->prepare("
+                    INSERT INTO messages (conversation_id, organization_id, role, content, knowledge_sources_used, tokens_used, created_at)
+                    VALUES (:conv_id, :org_id, 'assistant', :content, '[]', 0, NOW())
+                ");
+                $stmtFuMsg->execute([
+                    ':conv_id' => $convId,
+                    ':org_id' => $orgId,
+                    ':content' => $followUpMessage
+                ]);
+            }
+
+            // 12. Update Monthly Usage Logs (Skip test conversations)
             if ($isTest === 0) {
                 $period = date('Y-m');
                 $db->exec("
@@ -314,6 +351,7 @@ class ChatController
                 'conversation_id' => $convId,
                 'is_test' => $isTest,
                 'response' => $aiResponseText,
+                'follow_up_message' => $followUpMessage,
                 'sources_used' => array_map(fn($s) => ['id' => $s['id'], 'title' => $s['title']], $contextSources),
                 'lead_capture_trigger' => $leadTriggerPayload,
                 'intent_tier' => $intentTier,
