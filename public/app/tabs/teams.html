@@ -22,62 +22,6 @@
     </div>
   </div>
 
-  <!-- 4 LIFECYCLE STATUS KPI TILES -->
-  <div class="ckh-kpi-ribbon">
-    
-    <!-- 1. Total Team Roster -->
-    <div class="ckh-kpi-tile active-kpi" id="teamsKpiTileAll" onclick="setTeamsRoleFilter('all', this)">
-      <div class="ckh-kpi-header">
-        <div class="ckh-kpi-icon" style="background:#ECFDF5; color:#047857;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-        </div>
-        <span class="ckh-kpi-badge" style="background:#ECFDF5; color:#047857;">All Accounts</span>
-      </div>
-      <div class="ckh-kpi-val"><span class="cnum-ckh" id="statTotalMembers">0</span></div>
-      <div class="ckh-kpi-lbl">Total Roster</div>
-      <div class="ckh-kpi-sub">Active institutional users</div>
-    </div>
-
-    <!-- 2. Full Administrators -->
-    <div class="ckh-kpi-tile" id="teamsKpiTileFullAdmin" onclick="setTeamsRoleFilter('full_admin', this)">
-      <div class="ckh-kpi-header">
-        <div class="ckh-kpi-icon" style="background:#EFF6FF; color:#1D4ED8;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-        </div>
-        <span class="ckh-kpi-badge" style="background:#EFF6FF; color:#1D4ED8;">Unrestricted</span>
-      </div>
-      <div class="ckh-kpi-val"><span class="cnum-ckh" id="statFullAdmins">0</span></div>
-      <div class="ckh-kpi-lbl">Full Admins</div>
-      <div class="ckh-kpi-sub">Root administrative owners</div>
-    </div>
-
-    <!-- 3. Content Admins -->
-    <div class="ckh-kpi-tile" id="teamsKpiTileContentAdmin" onclick="setTeamsRoleFilter('content_admin', this)">
-      <div class="ckh-kpi-header">
-        <div class="ckh-kpi-icon" style="background:#FEF3C7; color:#D97706;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-        </div>
-        <span class="ckh-kpi-badge" style="background:#FEF3C7; color:#B45309;">Restricted</span>
-      </div>
-      <div class="ckh-kpi-val"><span class="cnum-ckh" id="statContentAdmins">0</span></div>
-      <div class="ckh-kpi-lbl">Content Admins</div>
-      <div class="ckh-kpi-sub">Knowledge &amp; chat operators</div>
-    </div>
-
-    <!-- 4. Team Members -->
-    <div class="ckh-kpi-tile" id="teamsKpiTileTeamMember" onclick="setTeamsRoleFilter('team_member', this)">
-      <div class="ckh-kpi-header">
-        <div class="ckh-kpi-icon" style="background:#E0F2FE; color:#0284C7;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
-        </div>
-        <span class="ckh-kpi-badge" style="background:#E0F2FE; color:#0284C7;">Admissions Staff</span>
-      </div>
-      <div class="ckh-kpi-val"><span class="cnum-ckh" id="statTeamMembers">0</span></div>
-      <div class="ckh-kpi-lbl">Team Members</div>
-      <div class="ckh-kpi-sub">Admissions counselors</div>
-    </div>
-
-  </div>
 
   <!-- Staff Read-Only Notice Banner -->
   <div id="teamsRestrictedNotice" class="brand-card" style="display: none; padding: 14px 18px; margin: 16px 20px; background: #FEF3C7; border: 1px solid #FDE68A; border-radius: 12px;">
