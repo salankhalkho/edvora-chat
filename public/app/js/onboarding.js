@@ -1,4 +1,4 @@
-﻿// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 // ONBOARDING.JS - Smart AI onboarding engine (SSE) + progressive wizard
 // BUG AREAS:
 //   Smart onboarding SSE  -> launchSmartOnboardingEngine() (EventSource/SSE handler)
@@ -3387,11 +3387,16 @@
 
             const bubble = document.createElement('div');
             bubble.className = 'onb-chat-bubble';
-            bubble.style.cssText = sender === 'user'
-                ? 'background: var(--brand-indigo-600); color: #ffffff; padding: 12px 18px; border-radius: 16px 16px 4px 16px; max-width: 82%; font-size: 15px; line-height: 1.55;'
-                : 'background: #FFFFFF; border: 1px solid #DDE9E3; color: #092F2E; padding: 12px 18px; border-radius: 16px 16px 16px 4px; max-width: 85%; font-size: 15px; line-height: 1.55;';
-
-            bubble.innerText = text;
+            if (isTyping) {
+                bubble.className += ' edvora-typing-bubble';
+                bubble.style.cssText = 'background: #E2F8E7; border: 1px solid #B8ECC5; padding: 10px 14px; border-radius: 16px 16px 16px 4px; display: inline-flex; align-items: center; justify-content: center; gap: 4px;';
+                bubble.innerHTML = '<span class="edvora-typing-dot"></span><span class="edvora-typing-dot"></span><span class="edvora-typing-dot"></span>';
+            } else {
+                bubble.style.cssText = sender === 'user'
+                    ? 'background: var(--brand-indigo-600); color: #ffffff; padding: 12px 18px; border-radius: 16px 16px 4px 16px; max-width: 82%; font-size: 15px; line-height: 1.55;'
+                    : 'background: #FFFFFF; border: 1px solid #DDE9E3; color: #092F2E; padding: 12px 18px; border-radius: 16px 16px 16px 4px; max-width: 85%; font-size: 15px; line-height: 1.55;';
+                bubble.innerText = text;
+            }
             wrap.appendChild(bubble);
             list.appendChild(wrap);
             list.scrollTop = list.scrollHeight;

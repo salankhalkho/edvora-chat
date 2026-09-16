@@ -80,6 +80,12 @@
         .edvora-send-btn svg { width: 15px; height: 15px; fill: currentColor; margin-left: 2px; display: block; }
         .edvora-lead-banner { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; padding: 12px; border-radius: 8px; font-size: 13px; margin-top: 8px; }
         .edvora-lead-btn { background: #2563EB; color: white; border: none; padding: 6px 12px; border-radius: 4px; margin-top: 8px; cursor: pointer; font-weight: 500; }
+        .edvora-typing-bubble { display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 10px 14px; background: #E2F8E7; border: 1px solid #B8ECC5; border-radius: 16px 16px 16px 4px; min-width: 48px; height: 28px; box-sizing: border-box; }
+        .edvora-typing-dot { width: 7px; height: 7px; border-radius: 50%; background-color: #092F2E; opacity: 0.4; animation: edvoraDotPulse 1.4s infinite ease-in-out both; }
+        .edvora-typing-dot:nth-child(1) { animation-delay: 0s; }
+        .edvora-typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .edvora-typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes edvoraDotPulse { 0%, 80%, 100% { transform: scale(0.7); opacity: 0.3; } 40% { transform: scale(1.15); opacity: 1; } }
     `;
     document.head.appendChild(style);
 
@@ -408,10 +414,9 @@
         }
 
         var typingDiv = document.createElement('div');
-        typingDiv.className = 'edvora-msg assistant';
-        typingDiv.innerText = 'Thinking...';
+        typingDiv.className = 'edvora-msg assistant edvora-typing-bubble';
+        typingDiv.innerHTML = '<span class="edvora-typing-dot"></span><span class="edvora-typing-dot"></span><span class="edvora-typing-dot"></span>';
         if (cust.bot_bubble_bg) typingDiv.style.background = cust.bot_bubble_bg;
-        if (cust.bot_bubble_text) typingDiv.style.color = cust.bot_bubble_text;
         if (cust.bot_bubble_radius !== undefined) {
             var br = cust.bot_bubble_radius;
             typingDiv.style.borderRadius = br + 'px ' + br + 'px ' + br + 'px 3px';
