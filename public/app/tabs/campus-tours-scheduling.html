@@ -263,11 +263,11 @@
                         html += '<tr style="border-bottom: 1px solid #E6F0EC;">';
                         html += '<td style="padding: 12px 18px; font-weight: 700; color: #063D3B;">' + s.tour_date + '<div style="font-size:11px; color:#648781; font-weight:500;">' + s.start_time.substring(0,5) + ' - ' + s.end_time.substring(0,5) + '</div></td>';
                         html += '<td style="padding: 12px 18px; font-weight: 600;">' + s.campus_name + (s.is_primary ? ' <span style="font-size:10px; background:#ECFDF5; color:#047857; padding:2px 5px; border-radius:4px;">Main</span>' : '') + '</td>';
-                        html += '<td style="padding: 12px 18px;"><div style="font-weight:700; color:#063D3B;">' + s.title + '</div>' + progBadgeHtml + '</td>';
+                        html += '<td style="padding: 12px 18px;"><a href="javascript:void(0)" onclick="openEditTourSlot(' + s.id + ')" style="text-decoration:none; font-weight:700; color:#063D3B; cursor:pointer;" title="Click to Edit Slot">' + s.title + '</a>' + progBadgeHtml + '</td>';
                         html += '<td style="padding: 12px 18px;">' + (s.counselor_name || '<span style="color:#94A3B8;">Auto-routed</span>') + '</td>';
                         html += '<td style="padding: 12px 18px; font-weight: 700;">' + (s.booked_count || 0) + ' / ' + s.max_capacity + '</td>';
                         html += '<td style="padding: 12px 18px;"><span style="background:#ECFDF5; color:#047857; font-weight:700; padding:3px 8px; border-radius:9999px; font-size:10.5px;">ACTIVE</span></td>';
-                        html += '<td style="padding: 12px 18px; text-align: right;"><button type="button" onclick="cancelTourSlot(' + s.id + ')" class="brand-btn-secondary" style="height:26px; padding:0 8px; font-size:10.5px; color:#EF4444; border-color:#FCA5A5;">Cancel</button></td>';
+                        html += '<td style="padding: 12px 18px; text-align: right;"><div style="display:inline-flex; align-items:center; gap:6px; justify-content:flex-end;"><button type="button" onclick="openEditTourSlot(' + s.id + ')" class="brand-btn-secondary" style="height:26px; padding:0 10px; font-size:10.5px; font-weight:700; color:#063D3B; border-color:#D1E5DE; background:#F4FAF7;">Edit</button><button type="button" onclick="cancelTourSlot(' + s.id + ')" class="brand-btn-secondary" style="height:26px; padding:0 8px; font-size:10.5px; color:#EF4444; border-color:#FCA5A5;">Cancel</button></div></td>';
                         html += '</tr>';
                     });
                     tbody.innerHTML = html;
@@ -373,6 +373,14 @@
             }
         })
         .catch(function() { alert('Error creating slot'); });
+    };
+
+    window.openEditTourSlot = function(slotId) {
+        window._currentEditTourSlotId = slotId;
+        try {
+            sessionStorage.setItem('edvora_edit_tour_slot_id', slotId);
+        } catch(e) {}
+        switchNavTab('edit-tour-slot');
     };
 
     window.cancelTourSlot = function(id) {

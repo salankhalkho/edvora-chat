@@ -1,0 +1,834 @@
+<!-- Dedicated Edit Tour Slot Command Frame (1 Unified Big Card matching Settings, Campuses & Campus-Editor) -->
+<div id="view-edit-tour-slot" class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
+    
+    <!-- Top Control Bar (Inside the Big Card) -->
+    <div class="ops-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 24px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important; flex-wrap: wrap; gap: 12px;">
+        <div class="ops-dash-title-group" style="display: flex !important; align-items: center !important; gap: 14px !important;">
+            <button type="button" class="brand-btn-secondary" style="height: 34px; padding: 0 12px; font-size: 11.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border-radius: 6px; background: #F4FAF7; border: 1.5px solid #D1E5DE; color: var(--e-teal, #063D3B);" onclick="switchNavTab('campus-tours-scheduling')">
+                <span>&larr;</span> Back to Scheduling &amp; Rules
+            </button>
+            <div style="height: 24px; width: 1.5px; background: #E2E8F0;"></div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: #ECFDF5; font-size: 18px; font-weight: 800; color: #047857; border: 1px solid #A7F3D0;">🗓️</span>
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important; letter-spacing: -0.01em !important; line-height: 1.25 !important;">
+                            Edit Campus Tour Slot
+                        </span>
+                        <span id="etsSlotIdTag" style="display: inline-flex !important; align-items: center !important; gap: 6px !important; padding: 3px 10px !important; border-radius: 9999px !important; font-size: 11px !important; font-weight: 700 !important; background: #F0FDF4; border: 1px solid #BBF7D0; color: #166534;">
+                            ● Loading Slot...
+                        </span>
+                    </div>
+                    <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">
+                        Update visit availability, date &amp; time range, campus assignment, and attendee capacity limits.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
+            <button type="button" class="brand-btn-secondary" style="height: 34px; padding: 0 14px; font-size: 11.5px; font-weight: 600; border-radius: 6px;" onclick="switchNavTab('campus-tours-scheduling')">Cancel</button>
+            <button type="button" id="etsTopSaveBtn" class="brand-btn-primary" style="height: 34px; padding: 0 18px; font-size: 11.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; border-radius: 6px; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.2);" onclick="document.getElementById('etsSubmitBtn').click()">
+                <span>💾</span> Save Changes
+            </button>
+        </div>
+    </div>
+
+    <!-- Inside the Big Card: Content Area matching Settings & Campus-Editor layout -->
+    <div style="padding: 28px 32px 48px 32px; box-sizing: border-box; width: 100%;">
+        
+        <div style="display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 32px; align-items: start; max-width: 1200px; margin: 0; box-sizing: border-box;">
+            
+            <!-- LEFT COLUMN: The Dedicated Form -->
+            <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1.5px solid #F1F7F4; padding-bottom: 12px;">
+                    <div style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 800; color: #063D3B;">
+                        <span>⚙️</span> Slot Configuration Details
+                    </div>
+                    <span id="etsStatusBadge" style="font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: #ECFDF5; color: #047857;">ACTIVE</span>
+                </div>
+
+                <div id="etsBookedNotice" style="display: none; margin-bottom: 16px; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 10px 14px; font-size: 11.5px; color: #1E40AF; line-height: 1.4;">
+                    <strong>ℹ️ Active Visitor Bookings:</strong> This slot has <strong id="etsBookedCountText">0</strong> registered attendee(s). Setting the maximum capacity lower than registered attendees will not unenroll already confirmed visitors.
+                </div>
+
+                <form id="formDedicatedEditTourSlot" onsubmit="handleDedicatedEditTourSlot(event)">
+                    <input type="hidden" id="etsSlotId" value="" />
+
+                    <div style="display: flex; flex-direction: column; gap: 18px;">
+                        
+                        <div>
+                            <label for="etsCampusId" style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                <span>🏛️</span> Target Campus Location <span style="color: #EF4444;">*</span>
+                            </label>
+                            <select id="etsCampusId" required onchange="updateEtsLivePreview()" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+                                <option value="">Loading campuses...</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="etsTitle" style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                <span>🏷️</span> Tour Title / Discovery Program <span style="color: #EF4444;">*</span>
+                            </label>
+                            <input type="text" id="etsTitle" required placeholder="e.g. Guided Campus &amp; Lab Discovery Tour" value="" oninput="updateEtsLivePreview()" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                            <span style="font-size: 10.5px; color: #648781; margin-top: 4px; display: block;">Displays directly to prospective students when booking via the AI chat widget or tour link.</span>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div>
+                                <label for="etsDate" style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                    <span>📅</span> Tour Date <span style="color: #EF4444;">*</span>
+                                </label>
+                                <input type="date" id="etsDate" required onchange="updateEtsLivePreview()" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                            </div>
+                            <div>
+                                <label for="etsCapacity" style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                    <span>👥</span> Max Capacity (Visitors) <span style="color: #EF4444;">*</span>
+                                </label>
+                                <input type="number" id="etsCapacity" required value="15" min="1" max="500" oninput="updateEtsLivePreview()" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div>
+                                <label for="etsStartTime" style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                    <span>⏰</span> Start Time <span style="color: #EF4444;">*</span>
+                                </label>
+                                <input type="time" id="etsStartTime" required value="10:00" onchange="updateEtsLivePreview()" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                            </div>
+                            <div>
+                                <label for="etsEndTime" style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                    <span>🏁</span> End Time <span style="color: #EF4444;">*</span>
+                                </label>
+                                <input type="time" id="etsEndTime" required value="11:30" onchange="updateEtsLivePreview()" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                            </div>
+                        </div>
+
+                        <!-- Academic Program Mapping Checkbox Pills -->
+                        <div>
+                            <label style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 8px;">
+                                <span style="display: flex; align-items: center; gap: 6px;">
+                                    <span>🎓</span> Mapped Academic Programs / Interest Areas
+                                </span>
+                                <span id="etsProgramSelectionSummary" style="font-size: 10px; color: #047857; text-transform: none; font-weight: 700; background: #ECFDF5; border: 1px solid #A7F3D0; padding: 2px 8px; border-radius: 9999px;">
+                                    Entire Organization (General Tour)
+                                </span>
+                            </label>
+                            
+                            <div id="etsProgramContainer" class="ingest-program-pill-container" style="display: flex flex-wrap: wrap; gap: 8px; padding: 12px; background: #FFFFFF; border: 1.5px solid #CFE6BA; border-radius: 6px; min-height: 48px; align-items: center;">
+                                <label id="etsPillGlobal" style="display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px; background: #E8F5F3; border: 1.5px solid #063D3B; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; color: #063D3B; user-select: none; transition: all 0.15s ease; box-shadow: 0 0 0 1px #063D3B;">
+                                    <input type="checkbox" id="etsProgGlobal" value="global" checked onchange="handleEtsGlobalToggle()" style="cursor: pointer; accent-color: #063D3B;" />
+                                    <span>🌐</span>
+                                    <span>Entire Organization (General Campus Tour)</span>
+                                </label>
+                                <span id="etsLoadingPrograms" style="font-size: 12px; color: #94A3B8;">Loading academic programs...</span>
+                            </div>
+                            <span style="font-size: 10.5px; color: #648781; margin-top: 5px; display: block;">
+                                Check specific academic programs to designate this visit for specialized applicants. Leave "Entire Organization" selected for a general visit.
+                            </span>
+                        </div>
+
+                        <div>
+                            <label for="etsCounselorId" style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                <span>👔</span> Assigned Admissions Guide / Counselor
+                            </label>
+                            <select id="etsCounselorId" onchange="updateEtsLivePreview()" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+                                <option value="">Auto-route (Round Robin)</option>
+                            </select>
+                            <span style="font-size: 10.5px; color: #648781; margin-top: 4px; display: block;">Select a specific tour leader or leave unassigned for automated counselor round-robin assignment.</span>
+                        </div>
+
+                        <!-- Hidden submit button for top bar triggers -->
+                        <button type="submit" id="etsSubmitBtn" style="display: none;"></button>
+
+                        <!-- Action Bar -->
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 14px; border-top: 1.5px solid #F1F7F4; flex-wrap: wrap;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <button type="submit" id="etsBottomSaveBtn" class="brand-btn-primary" style="height: 38px; padding: 0 24px; font-size: 12.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; border-radius: 6px;">
+                                    <span>💾</span> Save Changes
+                                </button>
+                                <button type="button" onclick="switchNavTab('campus-tours-scheduling')" class="brand-btn-secondary" style="height: 38px; padding: 0 16px; font-size: 12px; border-radius: 6px;">
+                                    Cancel
+                                </button>
+                            </div>
+                            <button type="button" onclick="handleDeleteCurrentSlot()" class="brand-btn-secondary" style="height: 38px; padding: 0 14px; font-size: 11.5px; font-weight: 600; color: #EF4444; border-color: #FCA5A5; border-radius: 6px;">
+                                <span>🗑️</span> Cancel / Delete Slot
+                            </button>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+
+            <!-- RIGHT COLUMN: Cal.com / Modern Booking Experience Preview Card -->
+            <div style="position: sticky; top: 80px;">
+                <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 16px rgba(6, 61, 59, 0.05);">
+                    
+                    <!-- Preview Card Header Ribbon -->
+                    <div style="background: #F8FCFA; border-bottom: 1.5px solid #E6F0EC; padding: 12px 18px; display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 800; color: #063D3B;">
+                            <span style="width: 8px; height: 8px; border-radius: 50%; background: #10B981; display: inline-block;"></span>
+                            <span>PROSPECTIVE STUDENT BOOKING EXPERIENCE</span>
+                        </div>
+                        <span style="font-size: 10.5px; color: #648781; background: #FFFFFF; padding: 2px 8px; border-radius: 6px; border: 1px solid #E2E8F0; font-weight: 600;">Cal.com Style Preview</span>
+                    </div>
+
+                    <!-- Inner Modern Scheduling Widget Preview -->
+                    <div style="padding: 20px; box-sizing: border-box;">
+                        
+                        <!-- Mini Brand / Host Info (Cal style Left Panel) -->
+                        <div style="display: flex; gap: 14px; align-items: flex-start; padding-bottom: 16px; border-bottom: 1px solid #F1F5F3; margin-bottom: 16px;">
+                            <div id="etsPreviewAvatar" style="width: 44px; height: 44px; border-radius: 50%; background: #063D3B; color: #C8FF63; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; flex-shrink: 0; box-shadow: 0 2px 6px rgba(6, 61, 59, 0.15);">
+                                CT
+                            </div>
+                            <div style="min-width: 0; flex: 1;">
+                                <div id="etsPreviewCounselorName" style="font-size: 11.5px; font-weight: 600; color: #648781;">
+                                    Admissions Office Guide
+                                </div>
+                                <div id="etsPreviewTitle" style="font-size: 15px; font-weight: 800; color: #063D3B; line-height: 1.25; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                    Guided Campus &amp; Lab Discovery Tour
+                                </div>
+                                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; font-size: 11px; color: #4F7470; font-weight: 600;">
+                                    <span style="display: inline-flex; align-items: center; gap: 4px;">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                        <span id="etsPreviewDuration">90 mins</span>
+                                    </span>
+                                    <span style="display: inline-flex; align-items: center; gap: 4px;">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                                        <span id="etsPreviewCampus">Select Campus</span>
+                                    </span>
+                                    <span style="display: inline-flex; align-items: center; gap: 4px; color: #059669;">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                        <span id="etsPreviewCapacity">15 Max Seats</span>
+                                    </span>
+                                    <span id="etsPreviewProgramTag" style="display: inline-flex; align-items: center; gap: 4px; color: #047857; background: #ECFDF5; padding: 1px 6px; border-radius: 4px; border: 1px solid #A7F3D0; font-size: 10.5px;">
+                                        🌐 General Tour
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Calendar Grid & Time Slots Layout (Cal.com Look & Feel) -->
+                        <div style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 14px;">
+                            
+                            <!-- Mini Calendar Box -->
+                            <div style="border: 1px solid #E6F0EC; border-radius: 10px; padding: 12px; background: #FAFCFB;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                    <div id="etsPreviewMonthYear" style="font-weight: 800; font-size: 12px; color: #063D3B;">September 2026</div>
+                                    <div style="display: flex; gap: 4px;">
+                                        <span style="display: inline-flex; width: 18px; height: 18px; align-items: center; justify-content: center; font-size: 10px; color: #94A3B8; border: 1px solid #E2E8F0; border-radius: 4px; background: #FFFFFF;">&lt;</span>
+                                        <span style="display: inline-flex; width: 18px; height: 18px; align-items: center; justify-content: center; font-size: 10px; color: #94A3B8; border: 1px solid #E2E8F0; border-radius: 4px; background: #FFFFFF;">&gt;</span>
+                                    </div>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 9px; font-weight: 700; color: #94A3B8; margin-bottom: 6px;">
+                                    <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+                                </div>
+                                <div id="etsPreviewCalendarDays" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; text-align: center; font-size: 10.5px;">
+                                    <!-- Rendered dynamically -->
+                                </div>
+                            </div>
+
+                            <!-- Right Slot Choice List (Cal.com Look) -->
+                            <div style="display: flex; flex-direction: column; gap: 6px;">
+                                <div style="font-size: 11px; font-weight: 700; color: #063D3B; margin-bottom: 2px;" id="etsPreviewSelectedDayTitle">
+                                    Selected Time
+                                </div>
+                                
+                                <div id="etsPreviewTimePill" style="border: 1.5px solid #063D3B; background: #ECFDF5; border-radius: 8px; padding: 9px 10px; display: flex; align-items: center; justify-content: space-between; cursor: default;">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span style="width: 6px; height: 6px; border-radius: 50%; background: #059669;"></span>
+                                        <span id="etsPreviewSlotTimeText" style="font-size: 12px; font-weight: 700; color: #063D3B;">10:00am</span>
+                                    </div>
+                                    <span style="font-size: 9.5px; background: #063D3B; color: #FFFFFF; padding: 2px 6px; border-radius: 4px; font-weight: 700;">ACTIVE</span>
+                                </div>
+
+                                <div style="border: 1px solid #E2E8F0; background: #F8FAFC; border-radius: 8px; padding: 9px 10px; display: flex; align-items: center; justify-content: space-between; opacity: 0.6;">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span style="width: 6px; height: 6px; border-radius: 50%; background: #94A3B8;"></span>
+                                        <span style="font-size: 12px; font-weight: 600; color: #64748B;">02:00pm</span>
+                                    </div>
+                                    <span style="font-size: 9.5px; color: #94A3B8;">Full</span>
+                                </div>
+
+                                <div style="border: 1px solid #E2E8F0; background: #F8FAFC; border-radius: 8px; padding: 9px 10px; display: flex; align-items: center; justify-content: space-between; opacity: 0.6;">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span style="width: 6px; height: 6px; border-radius: 50%; background: #94A3B8;"></span>
+                                        <span style="font-size: 12px; font-weight: 600; color: #64748B;">04:00pm</span>
+                                    </div>
+                                    <span style="font-size: 9.5px; color: #94A3B8;">Optional</span>
+                                </div>
+
+                                <div style="margin-top: 6px; background: #F4FAF7; border: 1px dashed #B9D7C7; border-radius: 6px; padding: 8px; font-size: 10px; color: #4F7470; text-align: center; line-height: 1.4;">
+                                    ✨ Live edits update both chatbot &amp; calendar invite bookings.
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+(function() {
+    var campusesCache = [];
+    var staffCache = [];
+    var programsCache = [];
+    var currentSlotData = null;
+
+    window.initEditTourSlotPage = function(passedId) {
+        var targetId = passedId || window._currentEditTourSlotId;
+        if (!targetId) {
+            try {
+                targetId = sessionStorage.getItem('edvora_edit_tour_slot_id');
+            } catch(e) {}
+        }
+
+        if (!targetId) {
+            console.warn('[EditTourSlot] No tour slot ID specified, returning to scheduling list');
+            switchNavTab('campus-tours-scheduling');
+            return;
+        }
+
+        window._currentEditTourSlotId = targetId;
+        try {
+            sessionStorage.setItem('edvora_edit_tour_slot_id', targetId);
+        } catch(e) {}
+
+        var idTag = document.getElementById('etsSlotIdTag');
+        if (idTag) idTag.innerText = '● Loading Slot #' + targetId + '...';
+
+        loadEtsCampusesAndStaff(function() {
+            loadEtsPrograms(function() {
+                loadSlotData(targetId);
+            });
+        });
+    };
+
+    function loadEtsCampusesAndStaff(callback) {
+        var pCampuses = fetch('/v1/campuses').then(function(res) { return res.json(); }).catch(function(){ return { data: [] }; });
+        var pStaff = fetch('/v1/organization/staff').then(function(res) { return res.json(); }).catch(function(){ return { data: [] }; });
+
+        Promise.all([pCampuses, pStaff]).then(function(results) {
+            var cRes = results[0];
+            var sRes = results[1];
+
+            if (cRes && cRes.status === 'success' && cRes.data) {
+                campusesCache = cRes.data.campuses || cRes.data || [];
+                var sel = document.getElementById('etsCampusId');
+                if (sel) {
+                    var html = '<option value="">Select Campus Location...</option>';
+                    campusesCache.forEach(function(c) {
+                        html += '<option value="' + c.id + '">' + c.name + (c.is_primary ? ' (Main Flagship)' : '') + '</option>';
+                    });
+                    sel.innerHTML = html;
+                }
+            }
+
+            if (sRes && sRes.status === 'success' && sRes.data) {
+                staffCache = sRes.data.staff || sRes.data || [];
+                var selStaff = document.getElementById('etsCounselorId');
+                if (selStaff) {
+                    var sHtml = '<option value="">Auto-route (Round Robin)</option>';
+                    staffCache.forEach(function(u) {
+                        sHtml += '<option value="' + u.id + '">' + u.name + ' (' + (u.role || 'Staff') + ')</option>';
+                    });
+                    selStaff.innerHTML = sHtml;
+                }
+            }
+
+            if (typeof callback === 'function') callback();
+        });
+    }
+
+    function loadEtsPrograms(callback) {
+        fetch('/v1/programs')
+            .then(function(res) { return res.json(); })
+            .then(function(res) {
+                var container = document.getElementById('etsProgramContainer');
+                var loading = document.getElementById('etsLoadingPrograms');
+                if (loading) loading.style.display = 'none';
+                if (!container) return;
+
+                if (res.status === 'success' && res.data) {
+                    programsCache = res.data.courses || (Array.isArray(res.data) ? res.data : []);
+                    // Clear existing dynamic pills except the global one
+                    var existingPills = container.querySelectorAll('.ets-prog-pill');
+                    existingPills.forEach(function(p) { p.remove(); });
+
+                    if (programsCache.length === 0) {
+                        container.innerHTML += '<span style="font-size: 11px; color: #648781;">No programs found. Defaulting to general campus visits.</span>';
+                    } else {
+                        programsCache.forEach(function(p) {
+                            var label = document.createElement('label');
+                            label.className = 'ets-prog-pill';
+                            label.id = 'etsPillProg_' + p.id;
+                            label.style.cssText = 'display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; color: #0F172A; user-select: none; transition: all 0.15s ease;';
+                            
+                            var codeLabel = p.course_code ? ' (' + p.course_code + ')' : '';
+                            label.innerHTML = '<input type="checkbox" name="ets_programs" value="' + p.id + '" onchange="handleEtsProgramToggle(' + p.id + ')" style="cursor: pointer; accent-color: #063D3B;" />' +
+                                              '<span>🎓</span>' +
+                                              '<span>' + (p.course_name || 'Program') + codeLabel + '</span>';
+                            container.appendChild(label);
+                        });
+                    }
+                }
+                if (typeof callback === 'function') callback();
+            })
+            .catch(function() {
+                var loading = document.getElementById('etsLoadingPrograms');
+                if (loading) loading.innerText = 'Failed to load programs.';
+                if (typeof callback === 'function') callback();
+            });
+    }
+
+    function loadSlotData(slotId) {
+        fetch('/v1/campus-tours/slots/' + slotId)
+            .then(function(res) { return res.json(); })
+            .then(function(res) {
+                if (res.status !== 'success' || !res.data) {
+                    alert(res.message || 'Tour slot not found.');
+                    switchNavTab('campus-tours-scheduling');
+                    return;
+                }
+
+                var s = res.data;
+                currentSlotData = s;
+
+                // Set ID and header tags
+                document.getElementById('etsSlotId').value = s.id;
+                var idTag = document.getElementById('etsSlotIdTag');
+                if (idTag) idTag.innerText = '● Slot #' + s.id + ' (' + (s.status || 'active').toUpperCase() + ')';
+
+                var statusBadge = document.getElementById('etsStatusBadge');
+                if (statusBadge) {
+                    statusBadge.innerText = (s.status || 'ACTIVE').toUpperCase();
+                    if (s.status === 'cancelled') {
+                        statusBadge.style.background = '#FEE2E2';
+                        statusBadge.style.color = '#B91C1C';
+                    } else {
+                        statusBadge.style.background = '#ECFDF5';
+                        statusBadge.style.color = '#047857';
+                    }
+                }
+
+                // Show booked attendees alert if any
+                var bookedCount = parseInt(s.live_booked_count || s.booked_count || 0, 10);
+                var noticeEl = document.getElementById('etsBookedNotice');
+                var countSpan = document.getElementById('etsBookedCountText');
+                if (noticeEl && countSpan) {
+                    if (bookedCount > 0) {
+                        countSpan.innerText = bookedCount;
+                        noticeEl.style.display = 'block';
+                    } else {
+                        noticeEl.style.display = 'none';
+                    }
+                }
+
+                // Populate Form Fields
+                if (document.getElementById('etsCampusId')) document.getElementById('etsCampusId').value = s.campus_id || '';
+                if (document.getElementById('etsTitle')) document.getElementById('etsTitle').value = s.title || '';
+                if (document.getElementById('etsDate')) document.getElementById('etsDate').value = s.tour_date || '';
+                if (document.getElementById('etsStartTime')) document.getElementById('etsStartTime').value = (s.start_time || '10:00:00').substring(0, 5);
+                if (document.getElementById('etsEndTime')) document.getElementById('etsEndTime').value = (s.end_time || '11:30:00').substring(0, 5);
+                if (document.getElementById('etsCapacity')) document.getElementById('etsCapacity').value = s.max_capacity || 15;
+                if (document.getElementById('etsCounselorId')) document.getElementById('etsCounselorId').value = s.counselor_user_id || '';
+
+                // Populate Mapped Academic Programs
+                var mappedProgIds = [];
+                if (s.programs && Array.isArray(s.programs)) {
+                    mappedProgIds = s.programs.map(function(p) { return parseInt(p.program_id || p.id, 10); });
+                }
+
+                var isGeneral = parseInt(s.is_general, 10) === 1 || mappedProgIds.length === 0;
+                var globalCb = document.getElementById('etsProgGlobal');
+                var globalPill = document.getElementById('etsPillGlobal');
+
+                if (isGeneral) {
+                    if (globalCb) globalCb.checked = true;
+                    if (globalPill) {
+                        globalPill.style.background = '#E8F5F3';
+                        globalPill.style.borderColor = '#063D3B';
+                        globalPill.style.color = '#063D3B';
+                        globalPill.style.boxShadow = '0 0 0 1px #063D3B';
+                    }
+                    var progCbs = document.querySelectorAll('input[name="ets_programs"]');
+                    progCbs.forEach(function(cb) {
+                        cb.checked = false;
+                        var pill = document.getElementById('etsPillProg_' + cb.value);
+                        if (pill) {
+                            pill.style.background = '#FFFFFF';
+                            pill.style.borderColor = '#E2E8F0';
+                            pill.style.color = '#0F172A';
+                            pill.style.boxShadow = 'none';
+                        }
+                    });
+                } else {
+                    if (globalCb) globalCb.checked = false;
+                    if (globalPill) {
+                        globalPill.style.background = '#FFFFFF';
+                        globalPill.style.borderColor = '#E2E8F0';
+                        globalPill.style.color = '#0F172A';
+                        globalPill.style.boxShadow = 'none';
+                    }
+                    var allProgCbs = document.querySelectorAll('input[name="ets_programs"]');
+                    allProgCbs.forEach(function(cb) {
+                        var isChecked = mappedProgIds.includes(parseInt(cb.value, 10));
+                        cb.checked = isChecked;
+                        var pill = document.getElementById('etsPillProg_' + cb.value);
+                        if (pill) {
+                            if (isChecked) {
+                                pill.style.background = '#E8F5F3';
+                                pill.style.borderColor = '#063D3B';
+                                pill.style.color = '#063D3B';
+                                pill.style.boxShadow = '0 0 0 1px #063D3B';
+                            } else {
+                                pill.style.background = '#FFFFFF';
+                                pill.style.borderColor = '#E2E8F0';
+                                pill.style.color = '#0F172A';
+                                pill.style.boxShadow = 'none';
+                            }
+                        }
+                    });
+                }
+
+                updateEtsProgramSummary();
+                updateEtsLivePreview();
+            })
+            .catch(function(err) {
+                console.error('[EditTourSlot] Load error:', err);
+                alert('Network error while retrieving tour slot details.');
+                switchNavTab('campus-tours-scheduling');
+            });
+    }
+
+    window.handleEtsGlobalToggle = function() {
+        var globalCb = document.getElementById('etsProgGlobal');
+        var globalPill = document.getElementById('etsPillGlobal');
+        var progCbs = document.querySelectorAll('input[name="ets_programs"]');
+
+        if (globalCb && globalCb.checked) {
+            progCbs.forEach(function(cb) {
+                cb.checked = false;
+                var pill = document.getElementById('etsPillProg_' + cb.value);
+                if (pill) {
+                    pill.style.background = '#FFFFFF';
+                    pill.style.borderColor = '#E2E8F0';
+                    pill.style.color = '#0F172A';
+                    pill.style.boxShadow = 'none';
+                }
+            });
+            if (globalPill) {
+                globalPill.style.background = '#E8F5F3';
+                globalPill.style.borderColor = '#063D3B';
+                globalPill.style.color = '#063D3B';
+                globalPill.style.boxShadow = '0 0 0 1px #063D3B';
+            }
+        } else if (globalPill) {
+            globalPill.style.background = '#FFFFFF';
+            globalPill.style.borderColor = '#E2E8F0';
+            globalPill.style.color = '#0F172A';
+            globalPill.style.boxShadow = 'none';
+        }
+
+        updateEtsProgramSummary();
+        updateEtsLivePreview();
+    };
+
+    window.handleEtsProgramToggle = function(progId) {
+        var globalCb = document.getElementById('etsProgGlobal');
+        var globalPill = document.getElementById('etsPillGlobal');
+        var progPill = document.getElementById('etsPillProg_' + progId);
+        var clickedCb = progPill ? progPill.querySelector('input[name="ets_programs"]') : null;
+
+        if (clickedCb && clickedCb.checked) {
+            if (globalCb) globalCb.checked = false;
+            if (globalPill) {
+                globalPill.style.background = '#FFFFFF';
+                globalPill.style.borderColor = '#E2E8F0';
+                globalPill.style.color = '#0F172A';
+                globalPill.style.boxShadow = 'none';
+            }
+            if (progPill) {
+                progPill.style.background = '#E8F5F3';
+                progPill.style.borderColor = '#063D3B';
+                progPill.style.color = '#063D3B';
+                progPill.style.boxShadow = '0 0 0 1px #063D3B';
+            }
+        } else if (progPill) {
+            progPill.style.background = '#FFFFFF';
+            progPill.style.borderColor = '#E2E8F0';
+            progPill.style.color = '#0F172A';
+            progPill.style.boxShadow = 'none';
+        }
+
+        var checkedProgCbs = document.querySelectorAll('input[name="ets_programs"]:checked');
+        if (checkedProgCbs.length === 0 && globalCb) {
+            globalCb.checked = true;
+            if (globalPill) {
+                globalPill.style.background = '#E8F5F3';
+                globalPill.style.borderColor = '#063D3B';
+                globalPill.style.color = '#063D3B';
+                globalPill.style.boxShadow = '0 0 0 1px #063D3B';
+            }
+        }
+
+        updateEtsProgramSummary();
+        updateEtsLivePreview();
+    };
+
+    function updateEtsProgramSummary() {
+        var summaryEl = document.getElementById('etsProgramSelectionSummary');
+        if (!summaryEl) return;
+        var checkedCbs = document.querySelectorAll('input[name="ets_programs"]:checked');
+        if (checkedCbs.length === 0) {
+            summaryEl.innerText = 'Entire Organization (General Tour)';
+            summaryEl.style.background = '#ECFDF5';
+            summaryEl.style.borderColor = '#A7F3D0';
+            summaryEl.style.color = '#047857';
+        } else {
+            summaryEl.innerText = checkedCbs.length + ' Specialized Program(s) Mapped';
+            summaryEl.style.background = '#EFF6FF';
+            summaryEl.style.borderColor = '#BFDBFE';
+            summaryEl.style.color = '#1D4ED8';
+        }
+    }
+
+    window.updateEtsLivePreview = function() {
+        var title = document.getElementById('etsTitle') ? document.getElementById('etsTitle').value : '';
+        var campusId = document.getElementById('etsCampusId') ? document.getElementById('etsCampusId').value : '';
+        var dateVal = document.getElementById('etsDate') ? document.getElementById('etsDate').value : '';
+        var startVal = document.getElementById('etsStartTime') ? document.getElementById('etsStartTime').value : '';
+        var endVal = document.getElementById('etsEndTime') ? document.getElementById('etsEndTime').value : '';
+        var capacityVal = document.getElementById('etsCapacity') ? document.getElementById('etsCapacity').value : '15';
+        var counselorId = document.getElementById('etsCounselorId') ? document.getElementById('etsCounselorId').value : '';
+
+        if (document.getElementById('etsPreviewTitle')) {
+            document.getElementById('etsPreviewTitle').innerText = title || 'Guided Campus & Lab Discovery Tour';
+        }
+
+        var campusName = 'Campus Location';
+        if (campusId && campusesCache.length > 0) {
+            var foundC = campusesCache.find(function(c) { return String(c.id) === String(campusId); });
+            if (foundC) campusName = foundC.name;
+        }
+        if (document.getElementById('etsPreviewCampus')) {
+            document.getElementById('etsPreviewCampus').innerText = campusName;
+        }
+
+        var counselorName = 'Admissions Office Guide';
+        var initials = 'CT';
+        if (counselorId && staffCache.length > 0) {
+            var foundStaff = staffCache.find(function(s) { return String(s.id) === String(counselorId); });
+            if (foundStaff) {
+                counselorName = foundStaff.name;
+                var parts = foundStaff.name.split(' ');
+                initials = (parts[0] ? parts[0][0] : '') + (parts[1] ? parts[1][0] : '');
+            }
+        }
+        if (document.getElementById('etsPreviewCounselorName')) {
+            document.getElementById('etsPreviewCounselorName').innerText = counselorName;
+        }
+        if (document.getElementById('etsPreviewAvatar')) {
+            document.getElementById('etsPreviewAvatar').innerText = initials || 'CT';
+        }
+
+        if (document.getElementById('etsPreviewCapacity')) {
+            document.getElementById('etsPreviewCapacity').innerText = (capacityVal || 15) + ' Max Seats';
+        }
+
+        var previewProgTag = document.getElementById('etsPreviewProgramTag');
+        if (previewProgTag) {
+            var checkedCbs = document.querySelectorAll('input[name="ets_programs"]:checked');
+            if (checkedCbs.length === 0) {
+                previewProgTag.innerText = '🌐 General Tour';
+                previewProgTag.style.background = '#ECFDF5';
+                previewProgTag.style.borderColor = '#A7F3D0';
+                previewProgTag.style.color = '#047857';
+            } else if (checkedCbs.length === 1) {
+                var pId = checkedCbs[0].value;
+                var matchP = programsCache.find(function(p) { return String(p.id) === String(pId); });
+                var pName = matchP ? (matchP.course_code || matchP.course_name) : 'Specialized';
+                previewProgTag.innerText = '🎓 ' + pName + ' Focus';
+                previewProgTag.style.background = '#EFF6FF';
+                previewProgTag.style.borderColor = '#BFDBFE';
+                previewProgTag.style.color = '#1D4ED8';
+            } else {
+                previewProgTag.innerText = '🎓 ' + checkedCbs.length + ' Programs Focus';
+                previewProgTag.style.background = '#EFF6FF';
+                previewProgTag.style.borderColor = '#BFDBFE';
+                previewProgTag.style.color = '#1D4ED8';
+            }
+        }
+
+        var durationText = '90 mins';
+        if (startVal && endVal) {
+            var sParts = startVal.split(':');
+            var eParts = endVal.split(':');
+            var sMins = parseInt(sParts[0], 10) * 60 + parseInt(sParts[1], 10);
+            var eMins = parseInt(eParts[0], 10) * 60 + parseInt(eParts[1], 10);
+            var diff = eMins - sMins;
+            if (diff > 0) {
+                durationText = diff + ' mins';
+            }
+        }
+        if (document.getElementById('etsPreviewDuration')) {
+            document.getElementById('etsPreviewDuration').innerText = durationText;
+        }
+
+        if (document.getElementById('etsPreviewSlotTimeText') && startVal) {
+            var hours = parseInt(startVal.split(':')[0], 10);
+            var minutes = startVal.split(':')[1];
+            var ampm = hours >= 12 ? 'pm' : 'am';
+            var h12 = hours % 12 || 12;
+            document.getElementById('etsPreviewSlotTimeText').innerText = h12 + ':' + minutes + ampm;
+        }
+
+        renderEtsPreviewCalendar(dateVal);
+    };
+
+    function renderEtsPreviewCalendar(dateStr) {
+        var calDays = document.getElementById('etsPreviewCalendarDays');
+        var monthYear = document.getElementById('etsPreviewMonthYear');
+        var dayTitle = document.getElementById('etsPreviewSelectedDayTitle');
+        if (!calDays) return;
+
+        var targetDate = dateStr ? new Date(dateStr + 'T00:00:00') : new Date();
+        var year = targetDate.getFullYear();
+        var month = targetDate.getMonth();
+        var currentDay = targetDate.getDate();
+
+        var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        var dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        if (monthYear) monthYear.innerText = monthNames[month] + ' ' + year;
+        if (dayTitle) dayTitle.innerText = (dayNames[targetDate.getDay()] || 'Day') + ' ' + currentDay + (getOrdinal(currentDay)) + ' Slots';
+
+        var firstDayIndex = new Date(year, month, 1).getDay();
+        var totalDays = new Date(year, month + 1, 0).getDate();
+
+        var html = '';
+        for (var i = 0; i < firstDayIndex; i++) {
+            html += '<div style="color: transparent; padding: 4px;">0</div>';
+        }
+        for (var d = 1; d <= totalDays; d++) {
+            var isSelected = (d === currentDay);
+            if (isSelected) {
+                html += '<div style="background: #063D3B; color: #FFFFFF; font-weight: 800; border-radius: 6px; padding: 4px; box-shadow: 0 2px 4px rgba(6, 61, 59, 0.2);">' + d + '</div>';
+            } else {
+                html += '<div style="color: #475569; padding: 4px; border-radius: 4px;">' + d + '</div>';
+            }
+        }
+        calDays.innerHTML = html;
+    }
+
+    function getOrdinal(n) {
+        var s = ["th", "st", "nd", "rd"], v = n % 100;
+        return s[(v - 20) % 10] || s[v] || s[0];
+    }
+
+    window.handleDedicatedEditTourSlot = function(e) {
+        if (e) e.preventDefault();
+
+        var slotId = document.getElementById('etsSlotId').value;
+        if (!slotId) {
+            alert('Missing slot ID.');
+            return;
+        }
+
+        var checkedProgCbs = document.querySelectorAll('input[name="ets_programs"]:checked');
+        var selectedProgramIds = [];
+        checkedProgCbs.forEach(function(cb) {
+            selectedProgramIds.push(parseInt(cb.value, 10));
+        });
+
+        var globalChecked = document.getElementById('etsProgGlobal') ? document.getElementById('etsProgGlobal').checked : (selectedProgramIds.length === 0);
+
+        var payload = {
+            campus_id: document.getElementById('etsCampusId').value,
+            title: document.getElementById('etsTitle').value,
+            tour_date: document.getElementById('etsDate').value,
+            start_time: document.getElementById('etsStartTime').value,
+            end_time: document.getElementById('etsEndTime').value,
+            max_capacity: document.getElementById('etsCapacity').value,
+            counselor_user_id: document.getElementById('etsCounselorId').value,
+            is_general: globalChecked && selectedProgramIds.length === 0 ? 1 : 0,
+            program_ids: selectedProgramIds
+        };
+
+        if (!payload.campus_id) {
+            alert('Please select a campus location.');
+            return;
+        }
+
+        var topBtn = document.getElementById('etsTopSaveBtn');
+        var bottomBtn = document.getElementById('etsBottomSaveBtn');
+        if (topBtn) topBtn.disabled = true;
+        if (bottomBtn) { bottomBtn.disabled = true; bottomBtn.innerText = 'Saving Changes...'; }
+
+        fetch('/v1/campus-tours/slots/' + slotId, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(res) {
+            if (res.status === 'success') {
+                if (typeof showToast === 'function') {
+                    showToast('Tour slot #' + slotId + ' updated successfully!', 'success');
+                } else {
+                    alert('Tour slot updated successfully!');
+                }
+                switchNavTab('campus-tours-scheduling');
+            } else {
+                alert(res.message || 'Failed to update tour slot.');
+            }
+        })
+        .catch(function(err) {
+            console.error(err);
+            alert('Network error while updating tour slot.');
+        })
+        .finally(function() {
+            if (topBtn) topBtn.disabled = false;
+            if (bottomBtn) { bottomBtn.disabled = false; bottomBtn.innerHTML = '<span>💾</span> Save Changes'; }
+        });
+    };
+
+    window.handleDeleteCurrentSlot = function() {
+        var slotId = document.getElementById('etsSlotId').value;
+        if (!slotId) return;
+
+        if (!confirm('Are you sure you want to cancel / remove this tour slot? This action cannot be undone.')) {
+            return;
+        }
+
+        fetch('/v1/campus-tours/slots/' + slotId, { method: 'DELETE' })
+            .then(function(res) { return res.json(); })
+            .then(function(res) {
+                if (res.status === 'success') {
+                    if (typeof showToast === 'function') {
+                        showToast('Tour slot cancelled.', 'info');
+                    } else {
+                        alert('Tour slot cancelled.');
+                    }
+                    switchNavTab('campus-tours-scheduling');
+                } else {
+                    alert(res.message || 'Failed to cancel slot.');
+                }
+            })
+            .catch(function() {
+                alert('Network error while cancelling tour slot.');
+            });
+    };
+
+    setTimeout(function() {
+        initEditTourSlotPage();
+    }, 100);
+})();
+</script>

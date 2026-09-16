@@ -303,7 +303,10 @@ $router->get('/v1/campus-tours/export', [CampusTourController::class, 'export'],
 
 // Campus Tour Scheduling & Rules Routes — must be BEFORE the {id} wildcard
 $router->get('/v1/campus-tours/slots', [CampusTourSchedulingController::class, 'indexSlots']);
+$router->get('/v1/campus-tours/slots/{id}', [CampusTourSchedulingController::class, 'showSlot'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->post('/v1/campus-tours/slots', [CampusTourSchedulingController::class, 'storeSlot'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->put('/v1/campus-tours/slots/{id}', [CampusTourSchedulingController::class, 'updateSlot'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->post('/v1/campus-tours/slots/{id}', [CampusTourSchedulingController::class, 'updateSlot'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->delete('/v1/campus-tours/slots/{id}', [CampusTourSchedulingController::class, 'deleteSlot'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->get('/v1/campus-tours/settings', [CampusTourSchedulingController::class, 'getSettings'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->post('/v1/campus-tours/settings', [CampusTourSchedulingController::class, 'saveSettings'], [AuthMiddleware::class, TenantMiddleware::class]);
