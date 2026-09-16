@@ -3389,7 +3389,7 @@
             bubble.className = 'onb-chat-bubble';
             if (isTyping) {
                 bubble.className += ' edvora-typing-bubble';
-                bubble.style.cssText = 'background: #E2F8E7; border: 1px solid #B8ECC5; padding: 10px 14px; border-radius: 16px 16px 16px 4px; display: inline-flex; align-items: center; justify-content: center; gap: 4px;';
+                bubble.style.cssText = 'background: #E6F7D2; border: 1px solid #B9D7C7; padding: 6px 11px; border-radius: 10px 10px 10px 2px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-height: 28px;';
                 bubble.innerHTML = '<span class="edvora-typing-dot"></span><span class="edvora-typing-dot"></span><span class="edvora-typing-dot"></span>';
             } else {
                 bubble.style.cssText = sender === 'user'

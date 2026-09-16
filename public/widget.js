@@ -80,12 +80,12 @@
         .edvora-send-btn svg { width: 15px; height: 15px; fill: currentColor; margin-left: 2px; display: block; }
         .edvora-lead-banner { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; padding: 12px; border-radius: 8px; font-size: 13px; margin-top: 8px; }
         .edvora-lead-btn { background: #2563EB; color: white; border: none; padding: 6px 12px; border-radius: 4px; margin-top: 8px; cursor: pointer; font-weight: 500; }
-        .edvora-typing-bubble { display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 10px 14px; background: #E2F8E7; border: 1px solid #B8ECC5; border-radius: 16px 16px 16px 4px; min-width: 48px; height: 28px; box-sizing: border-box; }
-        .edvora-typing-dot { width: 7px; height: 7px; border-radius: 50%; background-color: #092F2E; opacity: 0.4; animation: edvoraDotPulse 1.4s infinite ease-in-out both; }
+        .edvora-typing-bubble { display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 6px 11px; background: #E6F7D2; border: 1px solid #B9D7C7; border-radius: 10px 10px 10px 2px; min-height: 28px; box-sizing: border-box; }
+        .edvora-typing-dot { width: 5px; height: 5px; border-radius: 50%; background-color: #063D3B; display: inline-block; animation: typingBounce 1.3s infinite ease-in-out; }
         .edvora-typing-dot:nth-child(1) { animation-delay: 0s; }
         .edvora-typing-dot:nth-child(2) { animation-delay: 0.2s; }
         .edvora-typing-dot:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes edvoraDotPulse { 0%, 80%, 100% { transform: scale(0.7); opacity: 0.3; } 40% { transform: scale(1.15); opacity: 1; } }
+        @keyframes typingBounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.35; } 30% { transform: translateY(-4px); opacity: 1; } }
     `;
     document.head.appendChild(style);
 
