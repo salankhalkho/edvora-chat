@@ -347,66 +347,113 @@
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;');
 
-        // 2. Headings
-        html = html.replace(/^### (.*$)/gim, '<div style="font-weight:700; font-size:13px; margin: 6px 0 2px 0;">$1</div>');
-        html = html.replace(/^## (.*$)/gim, '<div style="font-weight:700; font-size:14px; margin: 6px 0 2px 0;">$1</div>');
-        html = html.replace(/^# (.*$)/gim, '<div style="font-weight:700; font-size:15px; margin: 6px 0 2px 0;">$1</div>');
-
-        // 3. Bold & Italics
+        // 2. Bold & Italics
         html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         html = html.replace(/__(.*?)__/g, '<strong>$1</strong>');
         html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
         html = html.replace(/_(.*?)_/g, '<em>$1</em>');
 
-        // 4. Bullet & Numbered lists
+        // 3. Headings (### Title, ## Title, # Title)
+        html = html.replace(/^### (.*$)/gim, '<div style="font-weight:700; font-size:12.5px; color:#1E293B; margin:6px 0 2px 0;">$1</div>');
+        html = html.replace(/^## (.*$)/gim, '<div style="font-weight:700; font-size:13px; color:#1E293B; margin:8px 0 3px 0;">$1</div>');
+        html = html.replace(/^# (.*$)/gim, '<div style="font-weight:700; font-size:14px; color:#1E293B; margin:10px 0 4px 0;">$1</div>');
+
+        // 4. Line-by-line structured layout with compact category headers & lists
         var lines = html.split('\n');
         var inList = false;
         var listType = null;
-        var result = [];
+        var processedLines = [];
 
         for (var i = 0; i < lines.length; i++) {
-            var line = lines[i];
-            var bulletMatch = line.match(/^\s*[-\*]\s+(.*)/);
-            var numMatch = line.match(/^\s*(\d+)\.\s+(.*)/);
+            var rawLine = lines[i];
+            var trimmed = rawLine.trim();
 
-            if (bulletMatch) {
-                if (!inList || listType !== 'ul') {
-                    if (inList) result.push(listType === 'ul' ? '</ul>' : '</ol>');
-                    inList = true;
-                    listType = 'ul';
-                    result.push('<ul style="margin: 4px 0 6px 0; padding-left: 18px; list-style-type: disc;">');
+            var bulletMatch = trimmed.match(/^[-*•]\s+(.*)/);
+            var numMatch = trimmed.match(/^(\d+)\.\s+(.*)/);
+
+            // Check if this line is an empty line inside a list
+            if (trimmed === '') {
+                // Peek ahead to see if the next non-empty line is also a list item
+                var nextIsList = false;
+                for (var j = i + 1; j < lines.length; j++) {
+                    var peekTrim = lines[j].trim();
+                    if (peekTrim !== '') {
+                        if (peekTrim.match(/^[-*•]\s+/) || peekTrim.match(/^\d+\.\s+/)) {
+                            nextIsList = true;
+                        }
+                        break;
+                    }
                 }
-                result.push('<li style="margin-bottom: 3px;">' + bulletMatch[1] + '</li>');
-            } else if (numMatch) {
-                if (!inList || listType !== 'ol') {
-                    if (inList) result.push(listType === 'ul' ? '</ul>' : '</ol>');
-                    inList = true;
-                    listType = 'ol';
-                    result.push('<ol style="margin: 4px 0 6px 0; padding-left: 18px;">');
+                // If the list continues, skip the blank line so we don't split into multiple <ul> blocks
+                if (inList && nextIsList) {
+                    continue;
                 }
-                result.push('<li style="margin-bottom: 3px;">' + numMatch[2] + '</li>');
-            } else {
+                // Otherwise close list if open
                 if (inList) {
-                    result.push(listType === 'ul' ? '</ul>' : '</ol>');
+                    processedLines.push(listType === 'ul' ? '</ul>' : '</ol>');
                     inList = false;
                     listType = null;
                 }
-                result.push(line);
+                processedLines.push('');
+                continue;
+            }
+
+            if (bulletMatch) {
+                if (!inList || listType !== 'ul') {
+                    if (inList) processedLines.push(listType === 'ul' ? '</ul>' : '</ol>');
+                    inList = true;
+                    listType = 'ul';
+                    processedLines.push('<ul style="margin: 2px 0 5px 0; padding-left: 14px; list-style-type: disc;">');
+                }
+
+                // Format inline duration or pill tags like (4 Years) or (18 Months) with non-breaking pill style
+                var itemContent = bulletMatch[1].replace(/\((\d+[^)]*)\)/g, '<span style="font-size:10.5px; font-weight:600; color:#475569; background:#F1F5F9; border:1px solid #E2E8F0; padding:1px 5px; border-radius:4px; margin-left:4px; white-space:nowrap; display:inline-block;">$1</span>');
+
+                processedLines.push('<li style="margin-bottom: 2px; line-height: 1.38;">' + itemContent + '</li>');
+            } else if (numMatch) {
+                if (!inList || listType !== 'ol') {
+                    if (inList) processedLines.push(listType === 'ul' ? '</ul>' : '</ol>');
+                    inList = true;
+                    listType = 'ol';
+                    processedLines.push('<ol style="margin: 2px 0 5px 0; padding-left: 14px;">');
+                }
+                var itemContentNum = numMatch[2].replace(/\((\d+[^)]*)\)/g, '<span style="font-size:10.5px; font-weight:600; color:#475569; background:#F1F5F9; border:1px solid #E2E8F0; padding:1px 5px; border-radius:4px; margin-left:4px; white-space:nowrap; display:inline-block;">$1</span>');
+                processedLines.push('<li style="margin-bottom: 2px; line-height: 1.38;">' + itemContentNum + '</li>');
+            } else {
+                if (inList) {
+                    processedLines.push(listType === 'ul' ? '</ul>' : '</ol>');
+                    inList = false;
+                    listType = null;
+                }
+
+                // Detect category sub-headings like "**Undergraduate Programs:**" or "Undergraduate Programs:"
+                var catHeaderMatch = trimmed.match(/^(?:<strong>)?([A-Za-z\s&]{2,35}(?:Programs?|Courses?|Degrees?|Certificates?|Undergraduate|Postgraduate|Doctoral|Diploma|Specializations?)):?(?:<\/strong>)?:?$/i);
+                if (catHeaderMatch && trimmed.length < 50) {
+                    var cleanTitle = catHeaderMatch[1].replace(/[:*]/g, '').trim();
+                    processedLines.push('<div style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748B; margin: 7px 0 2px 0; display: flex; align-items: center; gap: 4px;"><span style="display:inline-block; width:4px; height:4px; border-radius:50%; background:#2563EB;"></span> ' + cleanTitle + '</div>');
+                } else {
+                    processedLines.push(trimmed);
+                }
             }
         }
+
         if (inList) {
-            result.push(listType === 'ul' ? '</ul>' : '</ol>');
+            processedLines.push(listType === 'ul' ? '</ul>' : '</ol>');
         }
 
-        html = result.join('\n');
+        html = processedLines.join('\n');
 
         // 5. Links: [text](url)
         html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #2563EB; text-decoration: underline;">$1</a>');
 
-        // 6. Line breaks
+        // 6. Line breaks: collapse multiple empty newlines into a single break
+        html = html.replace(/\n{2,}/g, '\n');
         html = html.replace(/\n/g, '<br>');
-        html = html.replace(/<br>\s*<ul/g, '<ul').replace(/<\/ul>\s*<br>/g, '</ul>');
-        html = html.replace(/<br>\s*<ol/g, '<ol').replace(/<\/ol>\s*<br>/g, '</ol>');
+
+        // 7. Strip unnecessary <br> tags immediately before/after lists and category headers
+        html = html.replace(/<br>\s*(<ul|<ol|<div style="font-size: 10px)/gi, '$1');
+        html = html.replace(/(<\/ul>|<\/ol>)\s*<br>/gi, '$1');
+        html = html.replace(/(<br>\s*){2,}/gi, '<br>');
 
         return html;
     }
