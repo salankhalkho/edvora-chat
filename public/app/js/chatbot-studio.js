@@ -81,12 +81,12 @@
             const deptList = Array.isArray(depts) ? depts : [];
             const dedicatedDepts = deptList.filter(d => d.enable_dedicated_widget != 0 && d.enable_dedicated_widget !== '0' && d.enable_dedicated_widget !== false);
 
-            let optionsHtml = '<option value="org">ðŸ›ï¸ Main Organization Widget</option>';
+            let optionsHtml = '<option value="org">🏛️ Main Organization Widget</option>';
             if (dedicatedDepts.length > 0) {
-                optionsHtml += '<optgroup label="ðŸ¢ Dedicated Department Widgets">';
+                optionsHtml += '<optgroup label="🏢 Dedicated Department Widgets">';
                 dedicatedDepts.forEach(d => {
                     const isSelected = (currentEmbedTarget === String(d.id)) ? ' selected' : '';
-                    optionsHtml += '<option value="' + d.id + '"' + isSelected + '>' + (d.icon || 'ðŸ¢') + ' ' + d.name + '</option>';
+                    optionsHtml += '<option value="' + d.id + '"' + isSelected + '>' + (d.icon || '🏢') + ' ' + (d.name || 'Department') + '</option>';
                 });
                 optionsHtml += '</optgroup>';
             }
@@ -105,10 +105,10 @@
             const badge = document.getElementById('embedDeptStatusBadge');
             if (badge) {
                 if (val === 'org') {
-                    badge.innerHTML = 'ðŸŒ Organization-wide general concierge widget';
+                    badge.innerHTML = '🌐 Organization-wide general concierge widget';
                     badge.style.color = '#047857';
                 } else {
-                    badge.innerHTML = 'ðŸŽ¯ Dedicated Department Assistant â€¢ Scoped directly to department';
+                    badge.innerHTML = '🎯 Dedicated Department Assistant • Scoped directly to department';
                     badge.style.color = '#1D4ED8';
                 }
             }
