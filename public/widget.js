@@ -373,7 +373,6 @@
 
             // Check if this line is an empty line inside a list
             if (trimmed === '') {
-                // Peek ahead to see if the next non-empty line is also a list item
                 var nextIsList = false;
                 for (var j = i + 1; j < lines.length; j++) {
                     var peekTrim = lines[j].trim();
@@ -384,11 +383,9 @@
                         break;
                     }
                 }
-                // If the list continues, skip the blank line so we don't split into multiple <ul> blocks
                 if (inList && nextIsList) {
                     continue;
                 }
-                // Otherwise close list if open
                 if (inList) {
                     processedLines.push(listType === 'ul' ? '</ul>' : '</ol>');
                     inList = false;
@@ -406,10 +403,10 @@
                     processedLines.push('<ul style="margin: 2px 0 5px 0; padding-left: 14px; list-style-type: disc;">');
                 }
 
-                // Format inline duration or pill tags like (4 Years) or (18 Months) with non-breaking pill style
-                var itemContent = bulletMatch[1].replace(/\((\d+[^)]*)\)/g, '<span style="font-size:10.5px; font-weight:600; color:#475569; background:#F1F5F9; border:1px solid #E2E8F0; padding:1px 5px; border-radius:4px; margin-left:4px; white-space:nowrap; display:inline-block;">$1</span>');
+                // Format inline duration like (4 Years) or (18 Months) with non-breaking pill style
+                var itemContent = bulletMatch[1].replace(/\((\d+[^)]*)\)/g, '<span style="font-size:10px; font-weight:600; color:#475569; background:#F1F5F9; border:1px solid #CBD5E1; padding:0 5px; border-radius:3px; margin-left:4px; white-space:nowrap; display:inline-block;">$1</span>');
 
-                processedLines.push('<li style="margin-bottom: 2px; line-height: 1.38;">' + itemContent + '</li>');
+                processedLines.push('<li style="margin-bottom: 2px; line-height: 1.35;">' + itemContent + '</li>');
             } else if (numMatch) {
                 if (!inList || listType !== 'ol') {
                     if (inList) processedLines.push(listType === 'ul' ? '</ul>' : '</ol>');
@@ -417,8 +414,8 @@
                     listType = 'ol';
                     processedLines.push('<ol style="margin: 2px 0 5px 0; padding-left: 14px;">');
                 }
-                var itemContentNum = numMatch[2].replace(/\((\d+[^)]*)\)/g, '<span style="font-size:10.5px; font-weight:600; color:#475569; background:#F1F5F9; border:1px solid #E2E8F0; padding:1px 5px; border-radius:4px; margin-left:4px; white-space:nowrap; display:inline-block;">$1</span>');
-                processedLines.push('<li style="margin-bottom: 2px; line-height: 1.38;">' + itemContentNum + '</li>');
+                var itemContentNum = numMatch[2].replace(/\((\d+[^)]*)\)/g, '<span style="font-size:10px; font-weight:600; color:#475569; background:#F1F5F9; border:1px solid #CBD5E1; padding:0 5px; border-radius:3px; margin-left:4px; white-space:nowrap; display:inline-block;">$1</span>');
+                processedLines.push('<li style="margin-bottom: 2px; line-height: 1.35;">' + itemContentNum + '</li>');
             } else {
                 if (inList) {
                     processedLines.push(listType === 'ul' ? '</ul>' : '</ol>');
@@ -426,11 +423,12 @@
                     listType = null;
                 }
 
-                // Detect category sub-headings like "**Undergraduate Programs:**" or "Undergraduate Programs:"
-                var catHeaderMatch = trimmed.match(/^(?:<strong>)?([A-Za-z\s&]{2,35}(?:Programs?|Courses?|Degrees?|Certificates?|Undergraduate|Postgraduate|Doctoral|Diploma|Specializations?)):?(?:<\/strong>)?:?$/i);
-                if (catHeaderMatch && trimmed.length < 50) {
-                    var cleanTitle = catHeaderMatch[1].replace(/[:*]/g, '').trim();
-                    processedLines.push('<div style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748B; margin: 7px 0 2px 0; display: flex; align-items: center; gap: 4px;"><span style="display:inline-block; width:4px; height:4px; border-radius:50%; background:#2563EB;"></span> ' + cleanTitle + '</div>');
+                // Cleanly match category sub-headings like "<strong>Undergraduate:</strong>" or "Undergraduate Programs:"
+                var strippedTag = trimmed.replace(/<\/?strong>/gi, '').replace(/[:*]/g, '').trim();
+                var isCatHeader = /^(?:[A-Za-z\s&]{2,35}(?:Programs?|Courses?|Degrees?|Certificates?|Executive|Undergraduate|Postgraduate|Doctoral|Diploma|Specializations?)|Undergraduate|Postgraduate|Doctoral|Executive|Certificates?)$/i.test(strippedTag);
+
+                if (isCatHeader && trimmed.length < 50) {
+                    processedLines.push('<div style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #475569; margin: 8px 0 2px 0; display: flex; align-items: center; gap: 4px;"><span style="display:inline-block; width:5px; height:5px; border-radius:50%; background:#2563EB;"></span> ' + strippedTag + '</div>');
                 } else {
                     processedLines.push(trimmed);
                 }
@@ -441,18 +439,32 @@
             processedLines.push(listType === 'ul' ? '</ul>' : '</ol>');
         }
 
-        html = processedLines.join('\n');
+        // 5. Build final HTML without inserting <br> inside list tags
+        var output = [];
+        for (var k = 0; k < processedLines.length; k++) {
+            var pl = processedLines[k];
+            if (pl === '') {
+                // Only push break if previous item was regular text
+                if (output.length > 0 && !output[output.length - 1].endsWith('</ul>') && !output[output.length - 1].endsWith('</ol>') && !output[output.length - 1].startsWith('<div style="font-size: 10px')) {
+                    output.push('<br>');
+                }
+            } else if (pl.startsWith('<ul') || pl.startsWith('<ol') || pl.startsWith('<li') || pl === '</ul>' || pl === '</ol>' || pl.startsWith('<div style="font-size: 10px')) {
+                output.push(pl);
+            } else {
+                // Regular text paragraph line
+                if (output.length > 0 && !output[output.length - 1].endsWith('</ul>') && !output[output.length - 1].endsWith('</ol>') && output[output.length - 1] !== '<br>' && !output[output.length - 1].startsWith('<div style="font-size: 10px')) {
+                    output.push('<br>');
+                }
+                output.push(pl);
+            }
+        }
 
-        // 5. Links: [text](url)
+        html = output.join('');
+
+        // 6. Links: [text](url)
         html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #2563EB; text-decoration: underline;">$1</a>');
 
-        // 6. Line breaks: collapse multiple empty newlines into a single break
-        html = html.replace(/\n{2,}/g, '\n');
-        html = html.replace(/\n/g, '<br>');
-
-        // 7. Strip unnecessary <br> tags immediately before/after lists and category headers
-        html = html.replace(/<br>\s*(<ul|<ol|<div style="font-size: 10px)/gi, '$1');
-        html = html.replace(/(<\/ul>|<\/ol>)\s*<br>/gi, '$1');
+        // 7. Clean up any accidental double <br>
         html = html.replace(/(<br>\s*){2,}/gi, '<br>');
 
         return html;
