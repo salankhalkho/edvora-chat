@@ -85,7 +85,7 @@ class CampusTourController
                 // If program_id not specified, check if slot maps to a program
                 if (!$programId) {
                     $stmtSlotProg = $db->prepare("
-                        SELECT p.id, p.course_name, p.department_id 
+                        SELECT p.id, p.course_name 
                         FROM campus_tour_slot_programs stp
                         JOIN programs p ON stp.program_id = p.id
                         WHERE stp.slot_id = :sid LIMIT 1
@@ -96,9 +96,6 @@ class CampusTourController
                         $programId = (int)$slotProg['id'];
                         if (empty($programInterest)) {
                             $programInterest = $slotProg['course_name'];
-                        }
-                        if (!$departmentId && $slotProg['department_id']) {
-                            $departmentId = (int)$slotProg['department_id'];
                         }
                     }
                 }

@@ -270,9 +270,8 @@ EOT;
             if (!empty($src['program_id'])) {
                 $pId = (int)$src['program_id'];
                 $stmtProg = $db->prepare("
-                    SELECT p.id, p.course_name, p.course_code, p.department_id, d.name as department_name
+                    SELECT p.id, p.course_name, p.course_code
                     FROM programs p
-                    LEFT JOIN departments d ON p.department_id = d.id
                     WHERE p.id = :pid AND p.organization_id = :org_id
                 ");
                 $stmtProg->execute([':pid' => $pId, ':org_id' => $organizationId]);
@@ -285,9 +284,8 @@ EOT;
 
         // 2. Scan knowledge source titles against active programs for exact or strong match
         $stmtAllProgs = $db->prepare("
-            SELECT p.id, p.course_name, p.course_code, p.department_id, d.name as department_name
+            SELECT p.id, p.course_name, p.course_code
             FROM programs p
-            LEFT JOIN departments d ON p.department_id = d.id
             WHERE p.organization_id = :org_id
         ");
         $stmtAllProgs->execute([':org_id' => $organizationId]);

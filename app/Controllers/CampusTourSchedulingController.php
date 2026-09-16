@@ -100,10 +100,9 @@ class CampusTourSchedulingController
         if (!empty($slotIds)) {
             $inPlaceholders = implode(',', array_fill(0, count($slotIds), '?'));
             $stmtProg = $db->prepare("
-                SELECT stp.slot_id, p.id as program_id, p.course_name as program_name, p.course_code, p.department_id, d.name as department_name
+                SELECT stp.slot_id, p.id as program_id, p.course_name as program_name, p.course_code
                 FROM campus_tour_slot_programs stp
                 JOIN programs p ON stp.program_id = p.id
-                LEFT JOIN departments d ON p.department_id = d.id
                 WHERE stp.slot_id IN ({$inPlaceholders})
             ");
             $stmtProg->execute($slotIds);
@@ -111,9 +110,7 @@ class CampusTourSchedulingController
                 $slotProgramsMap[$row['slot_id']][] = [
                     'id' => (int)$row['program_id'],
                     'name' => $row['program_name'],
-                    'code' => $row['course_code'],
-                    'department_id' => $row['department_id'],
-                    'department_name' => $row['department_name']
+                    'code' => $row['course_code']
                 ];
             }
         }
@@ -180,29 +177,18 @@ class CampusTourSchedulingController
 
         $db = Database::getConnection();
 
-        // Determine department_id and auto counselor if not set
-        $deptId = null;
-        if (!empty($programIds)) {
-            $firstProgId = reset($programIds);
-            $stmtDept = $db->prepare("SELECT department_id FROM programs WHERE id = :pid AND organization_id = :org_id");
-            $stmtDept->execute([':pid' => $firstProgId, ':org_id' => $orgId]);
-            $deptRow = $stmtDept->fetch();
-            if ($deptRow && !empty($deptRow['department_id'])) {
-                $deptId = (int)$deptRow['department_id'];
-            }
-        }
-
-        // If counselor not assigned, try finding on-duty counselor from department
-        if (!$counselorUserId && $deptId) {
+        // Determine counselor if not set
+        if (!$counselorUserId) {
+            // Find any on-duty counselor for the organization
             $stmtStaff = $db->prepare("
-                SELECT user_id FROM department_staff 
-                WHERE department_id = :did AND is_on_duty = 1 
-                ORDER BY id ASC LIMIT 1
+                SELECT u.id FROM users u
+                WHERE u.organization_id = :org_id AND u.role IN ('counselor', 'admission_officer', 'agent', 'admin')
+                ORDER BY u.id ASC LIMIT 1
             ");
-            $stmtStaff->execute([':did' => $deptId]);
+            $stmtStaff->execute([':org_id' => $orgId]);
             $staffRow = $stmtStaff->fetch();
             if ($staffRow) {
-                $counselorUserId = (int)$staffRow['user_id'];
+                $counselorUserId = (int)$staffRow['id'];
             }
         }
 
