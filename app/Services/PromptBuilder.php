@@ -56,10 +56,10 @@ class PromptBuilder
             $contextBlock .= "\n[NO SPECIFIC KNOWLEDGE BASE CONTEXT MATCHED FOR THIS QUERY. ANSWER POLITELY BASED ON GENERAL ADMISSIONS GUIDELINES AND OFFER TO CONNECT THE VISITOR WITH ADMISSIONS COUNSELORS].\n";
         }
 
-        // 6. Fetch Active Departments Context
-        $deptBlock = self::buildDepartmentsBlock($db, $organizationId);
+        // 6. Fetch Active Programs Context
+        $progBlock = self::buildProgramsBlock($db, $organizationId);
 
-        // 7. Fetch Active Campuses, Course Offerings & Derived Departments Directory
+        // 7. Fetch Active Campuses & Course Offerings Directory
         $campusBlock = self::buildCampusesAndCoursesBlock($db, $organizationId);
 
         // 8. Program-Aware Campus Tour Recommendation Engine
@@ -77,7 +77,7 @@ class PromptBuilder
                 ? "Turn Count is {$turnCount} (>= {$minTurns}). You MAY contextually offer an asset, counselor callback, or campus tour if it genuinely adds value." 
                 : "Turn Count is {$turnCount} (< {$minTurns}). Do NOT offer lead triggers yet. Answer questions directly and build rapport first.");
 
-        $fullContext = $contextBlock . "\n" . $deptBlock . "\n" . $campusBlock . (!empty($tourSlotsBlock) ? ("\n" . $tourSlotsBlock) : "") . "\n[SESSION LEAD STATE]: " . $leadStateNotice;
+        $fullContext = $contextBlock . "\n" . $progBlock . "\n" . $campusBlock . (!empty($tourSlotsBlock) ? ("\n" . $tourSlotsBlock) : "") . "\n[SESSION LEAD STATE]: " . $leadStateNotice;
 
         $prompt = str_replace(
             ['{{COLLEGE_NAME}}', '{{KNOWLEDGE_CONTEXT}}'],
@@ -130,10 +130,10 @@ GUIDELINES:
 1. Politely apologize for the misunderstanding with warmth and empathy.
 2. Ask a clarifying question to understand their specific requirement.
 3. Automatically match the visitor's language and script.
-4. Guide them using the available college departments or offer to connect them directly to an admissions counselor.
+4. Guide them using the available college academic programs or offer to connect them directly to an admissions counselor.
 5. Do NOT output any [LEAD_TRIGGER:*] tag.
 
-{$deptBlock}
+{$progBlock}
 EOT;
         if (!empty($override)) {
             $prompt .= "\n" . trim($override);
@@ -142,43 +142,40 @@ EOT;
     }
 
     /**
-     * Active departments block helper
+     * Active academic programs block helper
      */
-    private static function buildDepartmentsBlock(PDO $db, int $organizationId): string
+    private static function buildProgramsBlock(PDO $db, int $organizationId): string
     {
-        $deptBlock = "";
-        $stmtDepts = $db->prepare("SELECT id, name, icon, description, greeting_message, email, phone, whatsapp FROM departments WHERE organization_id = ? AND is_active = 1");
-        $stmtDepts->execute([$organizationId]);
-        $activeDepts = $stmtDepts->fetchAll();
+        $progBlock = "";
+        $stmtProg = $db->prepare("
+            SELECT course_name, course_code, program_type, duration, mode, tuition_fee, total_fee, currency, eligibility, application_deadline
+            FROM programs 
+            WHERE organization_id = ? AND is_admissions_open = 1
+            ORDER BY sort_order ASC, course_name ASC
+        ");
+        $stmtProg->execute([$organizationId]);
+        $activeProgs = $stmtProg->fetchAll(PDO::FETCH_ASSOC);
 
-        if (!empty($activeDepts)) {
-            $deptBlock .= "\n--- ACTIVE COLLEGE DEPARTMENTS & OFFERED PROGRAMS ---\n";
-            $deptBlock .= "Guide visitors using these available academic departments and their degree programs:\n";
-            foreach ($activeDepts as $d) {
-                $deptId = (int)$d['id'];
-                $crsStmt = $db->prepare("SELECT course_name, program_type, duration, mode, tuition_fee, currency FROM department_courses WHERE department_id = ? ORDER BY id ASC");
-                $crsStmt->execute([$deptId]);
-                $courses = $crsStmt->fetchAll();
-
-                $courseStrings = [];
-                foreach ($courses as $c) {
-                    $cStr = $c['course_name'];
-                    $details = [];
-                    if (!empty($c['program_type'])) $details[] = $c['program_type'];
-                    if (!empty($c['duration'])) $details[] = $c['duration'];
-                    if (!empty($c['tuition_fee'])) $details[] = ($c['currency'] ?: '$') . ' ' . number_format((float)$c['tuition_fee']);
-                    if (!empty($details)) {
-                        $cStr .= ' (' . implode(', ', $details) . ')';
-                    }
-                    $courseStrings[] = $cStr;
-                }
-
-                $courseList = !empty($courseStrings) ? " | Programs: " . implode('; ', $courseStrings) : "";
-                $deptBlock .= "- {$d['icon']} {$d['name']}: " . ($d['description'] ?: 'Academic division') . "{$courseList}\n";
+        if (!empty($activeProgs)) {
+            $progBlock .= "\n--- ACTIVE COLLEGE ACADEMIC PROGRAMS & DEGREES ---\n";
+            $progBlock .= "Guide visitors using these available academic programs and degree offerings:\n";
+            foreach ($activeProgs as $p) {
+                $pStr = $p['course_name'];
+                $code = !empty($p['course_code']) ? " [{$p['course_code']}]" : "";
+                $details = [];
+                if (!empty($p['program_type'])) $details[] = ucfirst($p['program_type']);
+                if (!empty($p['duration'])) $details[] = $p['duration'];
+                if (!empty($p['mode'])) $details[] = str_replace('_', ' ', $p['mode']);
+                $feeVal = $p['total_fee'] ?? $p['tuition_fee'] ?? null;
+                if (!empty($feeVal)) $details[] = ($p['currency'] ?: 'INR') . ' ' . number_format((float)$feeVal);
+                if (!empty($p['application_deadline'])) $details[] = "Deadline: " . $p['application_deadline'];
+                $meta = !empty($details) ? " (" . implode(', ', $details) . ")" : "";
+                $elig = !empty($p['eligibility']) ? " | Eligibility: " . $p['eligibility'] : "";
+                $progBlock .= "- {$pStr}{$code}{$meta}{$elig}\n";
             }
-            $deptBlock .= "--- END ACTIVE COLLEGE DEPARTMENTS & OFFERED PROGRAMS ---\n";
+            $progBlock .= "--- END ACTIVE COLLEGE ACADEMIC PROGRAMS & DEGREES ---\n";
         }
-        return $deptBlock;
+        return $progBlock;
     }
 
     /**
@@ -219,30 +216,26 @@ EOT;
                 $block .= "  - Virtual Tour: " . $campus['virtual_tour_url'] . "\n";
             }
 
-            // Fetch courses mapped to this campus
+            // Fetch programs mapped to this campus
             $stmtCourses = $db->prepare("
-                SELECT dc.course_name, dc.course_code, d.name AS dept_name
+                SELECT p.course_name, p.course_code
                 FROM campus_courses cc
-                JOIN department_courses dc ON cc.course_id = dc.id
-                JOIN departments d ON dc.department_id = d.id
-                WHERE cc.campus_id = ? AND cc.organization_id = ? AND d.is_active = 1
-                ORDER BY d.name ASC, dc.sort_order ASC, dc.course_name ASC
+                JOIN programs p ON cc.course_id = p.id
+                WHERE cc.campus_id = ? AND cc.organization_id = ? AND p.is_admissions_open = 1
+                ORDER BY p.sort_order ASC, p.course_name ASC
             ");
             $stmtCourses->execute([$cId, $organizationId]);
             $mappedCourses = $stmtCourses->fetchAll(PDO::FETCH_ASSOC);
 
             if (!empty($mappedCourses)) {
-                $deptNames = array_values(array_unique(array_column($mappedCourses, 'dept_name')));
-                $block .= "  - Academic Departments Available: " . implode(', ', $deptNames) . "\n";
-
                 $courseItems = [];
                 foreach ($mappedCourses as $mc) {
                     $codeStr = !empty($mc['course_code']) ? " (" . $mc['course_code'] . ")" : "";
                     $courseItems[] = $mc['course_name'] . $codeStr;
                 }
-                $block .= "  - Courses Offered at this Campus: " . implode(', ', $courseItems) . "\n";
+                $block .= "  - Programs Offered at this Campus: " . implode(', ', $courseItems) . "\n";
             } else {
-                $block .= "  - Courses Offered: General admissions and prospective counselor consultation (specific branch course allocation is ongoing).\n";
+                $block .= "  - Programs Offered: General admissions and prospective counselor consultation (specific branch course allocation is ongoing).\n";
             }
             $block .= "\n";
         }

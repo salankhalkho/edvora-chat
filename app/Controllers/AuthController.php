@@ -279,15 +279,8 @@ class AuthController
 
         $onboardingRequired = ($user['role'] !== 'superadmin' && $user['organization_id'] && (int)$user['onboarding_completed'] === 0);
 
-        // Fetch assigned departments for user
-        $stmtDepts = $db->prepare("
-            SELECT d.id, d.name, d.icon, ds.role as dept_role
-            FROM department_staff ds
-            JOIN departments d ON ds.department_id = d.id
-            WHERE ds.user_id = :user_id
-        ");
-        $stmtDepts->execute([':user_id' => (int)$user['id']]);
-        $userDepartments = $stmtDepts->fetchAll();
+        // Departments deprecated - return empty list
+        $userDepartments = [];
 
         Response::success([
             'access_token' => $accessToken,
@@ -352,15 +345,8 @@ class AuthController
             $botToken = $bot['bot_token'] ?? null;
         }
 
-        // Fetch assigned departments for user
-        $stmtDepts = $db->prepare("
-            SELECT d.id, d.name, d.icon, ds.role as dept_role
-            FROM department_staff ds
-            JOIN departments d ON ds.department_id = d.id
-            WHERE ds.user_id = :user_id
-        ");
-        $stmtDepts->execute([':user_id' => (int)$user['id']]);
-        $userDepartments = $stmtDepts->fetchAll();
+        // Departments deprecated - return empty list
+        $userDepartments = [];
 
         Response::success([
             'user' => [

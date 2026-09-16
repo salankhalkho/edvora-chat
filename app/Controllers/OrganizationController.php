@@ -167,16 +167,9 @@ class OrganizationController
         $stmt->execute([':org_id' => $orgId]);
         $users = $stmt->fetchAll();
 
-        // Attach assigned departments for each user
+        // Attach assigned departments (deprecated, return empty array)
         foreach ($users as &$user) {
-            $stmtDepts = $db->prepare("
-                SELECT d.id, d.name, d.icon, ds.role as dept_role
-                FROM department_staff ds
-                JOIN departments d ON ds.department_id = d.id
-                WHERE ds.user_id = :user_id
-            ");
-            $stmtDepts->execute([':user_id' => $user['id']]);
-            $user['departments'] = $stmtDepts->fetchAll();
+            $user['departments'] = [];
             $user['can_manage_structure'] = (int)$user['can_manage_structure'];
         }
 
@@ -255,18 +248,6 @@ class OrganizationController
         ");
         $stmtIns->execute([$orgId, $name, $email, $hash, $role, $canManageStructure]);
         $newUserId = (int)$db->lastInsertId();
-
-        // Auto-link to department if department_id or department_ids array was passed
-        $departmentIds = $data['department_ids'] ?? [];
-        if (!empty($data['department_id'])) {
-            $departmentIds[] = (int)$data['department_id'];
-        }
-        $departmentIds = array_unique($departmentIds);
-
-        foreach ($departmentIds as $dId) {
-            $stmtDeptStaff = $db->prepare("INSERT IGNORE INTO department_staff (department_id, user_id, role, is_on_duty) VALUES (?, ?, 'agent', 1)");
-            $stmtDeptStaff->execute([(int)$dId, $newUserId]);
-        }
 
         AuditLogger::log('staff_user_created', 'user', $newUserId, [
             'name' => $name,
@@ -388,20 +369,6 @@ class OrganizationController
                 WHERE id = ? AND organization_id = ?
             ");
             $stmtUp->execute([$name, $email, $role, $canManageStructure, $userId, $orgId]);
-        }
-
-        // Update department assignments if department_ids is provided
-        if (isset($data['department_ids']) && is_array($data['department_ids'])) {
-            $stmtDelDept = $db->prepare("DELETE FROM department_staff WHERE user_id = ?");
-            $stmtDelDept->execute([$userId]);
-
-            $departmentIds = array_unique(array_map('intval', $data['department_ids']));
-            foreach ($departmentIds as $dId) {
-                if ($dId > 0) {
-                    $stmtDeptStaff = $db->prepare("INSERT IGNORE INTO department_staff (department_id, user_id, role, is_on_duty) VALUES (?, ?, 'agent', 1)");
-                    $stmtDeptStaff->execute([$dId, $userId]);
-                }
-            }
         }
 
         AuditLogger::log('staff_user_updated', 'user', $userId, [

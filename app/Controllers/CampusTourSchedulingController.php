@@ -68,11 +68,10 @@ class CampusTourSchedulingController
         }
 
         $query = "
-            SELECT s.*, COALESCE(c.name, 'Main Campus') as campus_name, COALESCE(c.is_primary, 1) as is_primary, u.name as counselor_name, d.name as department_name
+            SELECT s.*, COALESCE(c.name, 'Main Campus') as campus_name, COALESCE(c.is_primary, 1) as is_primary, u.name as counselor_name
             FROM campus_tour_slots s
             LEFT JOIN campuses c ON s.campus_id = c.id
             LEFT JOIN users u ON s.counselor_user_id = u.id
-            LEFT JOIN departments d ON s.department_id = d.id
             WHERE s.organization_id = :org_id AND s.status = 'active'
         ";
         $paramsMap = [':org_id' => $orgId];
@@ -195,10 +194,10 @@ class CampusTourSchedulingController
         $stmt = $db->prepare("
             INSERT INTO campus_tour_slots (
                 organization_id, campus_id, title, is_general, tour_date, start_time, end_time,
-                max_capacity, counselor_user_id, department_id, status, created_at, updated_at
+                max_capacity, counselor_user_id, status, created_at, updated_at
             ) VALUES (
                 :org_id, :campus_id, :title, :is_general, :tour_date, :start_time, :end_time,
-                :max_capacity, :counselor_uid, :dept_id, 'active', NOW(), NOW()
+                :max_capacity, :counselor_uid, 'active', NOW(), NOW()
             )
         ");
         $stmt->execute([
@@ -210,8 +209,7 @@ class CampusTourSchedulingController
             ':start_time' => $startTime,
             ':end_time' => $endTime,
             ':max_capacity' => $maxCapacity,
-            ':counselor_uid' => $counselorUserId,
-            ':dept_id' => $deptId
+            ':counselor_uid' => $counselorUserId
         ]);
         $slotId = (int)$db->lastInsertId();
 

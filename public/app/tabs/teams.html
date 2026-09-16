@@ -6,7 +6,7 @@
       <span class="ops-live-dot"></span>
       <div>
         <div class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important;">Teams &amp; People Management</div>
-        <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">Onboard team members, configure Admin vs. Team roles, set structure privileges, and manage department assignments</div>
+        <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">Onboard team members, configure Admin vs. Team roles, and set administrative privileges</div>
       </div>
     </div>
 
@@ -22,72 +22,59 @@
     </div>
   </div>
 
-  <!-- 5 LIFECYCLE STATUS KPI TILES -->
+  <!-- 4 LIFECYCLE STATUS KPI TILES -->
   <div class="ckh-kpi-ribbon">
     
-    <!-- 1. Total Team Members -->
+    <!-- 1. Total Team Roster -->
     <div class="ckh-kpi-tile active-kpi" id="teamsKpiTileAll" onclick="setTeamsRoleFilter('all', this)">
       <div class="ckh-kpi-header">
         <div class="ckh-kpi-icon" style="background:#ECFDF5; color:#047857;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
         </div>
-        <span class="ckh-kpi-badge" style="background:#ECFDF5; color:#047857;">Active Directory</span>
+        <span class="ckh-kpi-badge" style="background:#ECFDF5; color:#047857;">All Accounts</span>
       </div>
       <div class="ckh-kpi-val"><span class="cnum-ckh" id="statTotalMembers">0</span></div>
-      <div class="ckh-kpi-lbl">Total Team Members</div>
-      <div class="ckh-kpi-sub">Verified institutional logins</div>
+      <div class="ckh-kpi-lbl">Total Roster</div>
+      <div class="ckh-kpi-sub">Active institutional users</div>
     </div>
 
     <!-- 2. Full Administrators -->
     <div class="ckh-kpi-tile" id="teamsKpiTileFullAdmin" onclick="setTeamsRoleFilter('full_admin', this)">
       <div class="ckh-kpi-header">
-        <div class="ckh-kpi-icon" style="background:#F5F3FF; color:#7C3AED;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        <div class="ckh-kpi-icon" style="background:#EFF6FF; color:#1D4ED8;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
         </div>
-        <span class="ckh-kpi-badge" style="background:#F5F3FF; color:#7C3AED;">Full Privileges</span>
+        <span class="ckh-kpi-badge" style="background:#EFF6FF; color:#1D4ED8;">Unrestricted</span>
       </div>
       <div class="ckh-kpi-val"><span class="cnum-ckh" id="statFullAdmins">0</span></div>
-      <div class="ckh-kpi-lbl">Full Administrators</div>
-      <div class="ckh-kpi-sub">Structure &amp; settings control</div>
+      <div class="ckh-kpi-lbl">Full Admins</div>
+      <div class="ckh-kpi-sub">Root administrative owners</div>
     </div>
 
     <!-- 3. Content Admins -->
     <div class="ckh-kpi-tile" id="teamsKpiTileContentAdmin" onclick="setTeamsRoleFilter('content_admin', this)">
       <div class="ckh-kpi-header">
         <div class="ckh-kpi-icon" style="background:#FEF3C7; color:#D97706;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
         </div>
-        <span class="ckh-kpi-badge" style="background:#FEF3C7; color:#B45309;">Content Access</span>
+        <span class="ckh-kpi-badge" style="background:#FEF3C7; color:#B45309;">Restricted</span>
       </div>
       <div class="ckh-kpi-val"><span class="cnum-ckh" id="statContentAdmins">0</span></div>
       <div class="ckh-kpi-lbl">Content Admins</div>
-      <div class="ckh-kpi-sub">Knowledge &amp; chat management</div>
+      <div class="ckh-kpi-sub">Knowledge &amp; chat operators</div>
     </div>
 
-    <!-- 4. Counselors & Staff -->
+    <!-- 4. Team Members -->
     <div class="ckh-kpi-tile" id="teamsKpiTileTeamMember" onclick="setTeamsRoleFilter('team_member', this)">
       <div class="ckh-kpi-header">
         <div class="ckh-kpi-icon" style="background:#E0F2FE; color:#0284C7;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
         </div>
-        <span class="ckh-kpi-badge" style="background:#E0F2FE; color:#0284C7;">Counselors</span>
+        <span class="ckh-kpi-badge" style="background:#E0F2FE; color:#0284C7;">Admissions Staff</span>
       </div>
       <div class="ckh-kpi-val"><span class="cnum-ckh" id="statTeamMembers">0</span></div>
       <div class="ckh-kpi-lbl">Team Members</div>
-      <div class="ckh-kpi-sub">Admissions routing queues</div>
-    </div>
-
-    <!-- 5. Assigned Departments -->
-    <div class="ckh-kpi-tile" id="teamsKpiTileDepts" onclick="setTeamsRoleFilter('all', this)">
-      <div class="ckh-kpi-header">
-        <div class="ckh-kpi-icon" style="background:#F1F5F9; color:#64748B;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="22.01"/><line x1="15" y1="22" x2="15" y2="22.01"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/></svg>
-        </div>
-        <span class="ckh-kpi-badge" style="background:#F1F5F9; color:#64748B;">Campus Units</span>
-      </div>
-      <div class="ckh-kpi-val"><span class="cnum-ckh" id="statAssignedDepts">0</span></div>
-      <div class="ckh-kpi-lbl">Assigned Units</div>
-      <div class="ckh-kpi-sub">Department routing covered</div>
+      <div class="ckh-kpi-sub">Admissions counselors</div>
     </div>
 
   </div>
@@ -109,10 +96,10 @@
         <span>All Members</span>
         <span class="ckh-tab-count" id="tabCountAll">0</span>
       </button>
-      <button class="ckh-tab-btn" id="teamsTabBtnFullAdmin" onclick="setTeamsRoleFilter('full_admin', this)" style="color:#7C3AED;">
-        <span style="width:6px; height:6px; border-radius:50%; background:#7C3AED; display:inline-block;"></span>
+      <button class="ckh-tab-btn" id="teamsTabBtnFullAdmin" onclick="setTeamsRoleFilter('full_admin', this)" style="color:#1D4ED8;">
+        <span style="width:6px; height:6px; border-radius:50%; background:#1D4ED8; display:inline-block;"></span>
         <span>Full Admins</span>
-        <span class="ckh-tab-count" id="tabCountFullAdmin" style="background:#F5F3FF; color:#7C3AED;">0</span>
+        <span class="ckh-tab-count" id="tabCountFullAdmin" style="background:#EFF6FF; color:#1D4ED8;">0</span>
       </button>
       <button class="ckh-tab-btn" id="teamsTabBtnContentAdmin" onclick="setTeamsRoleFilter('content_admin', this)" style="color:#B45309;">
         <span style="width:6px; height:6px; border-radius:50%; background:#D97706; display:inline-block;"></span>
@@ -127,15 +114,10 @@
     </div>
 
     <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-      <!-- Department Filter Dropdown -->
-      <select id="teamsDeptFilter" onchange="filterTeamsRosterTable()" style="font-size: 11.5px; font-weight: 600; color: #063D3B; background: #ffffff; border: 1.5px solid #D1E5DE; border-radius: 8px; padding: 6px 12px; outline: none; cursor: pointer;">
-        <option value="all">All Departments</option>
-      </select>
-
       <!-- Search Input -->
       <div class="ckh-search-box">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#648781" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        <input type="text" id="teamsSearchInput" class="ckh-search-input" placeholder="Search by name, email, department..." oninput="filterTeamsRosterTable()">
+        <input type="text" id="teamsSearchInput" class="ckh-search-input" placeholder="Search by name, email, role..." oninput="filterTeamsRosterTable()">
         <span style="font-size: 9.5px; font-family: 'JetBrains Mono', monospace; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: #F1F7F4; color: #648781; border: 1px solid #DCE9E5;">⌘K</span>
       </div>
     </div>
@@ -148,7 +130,6 @@
         <tr>
           <th>Team Member &amp; Account</th>
           <th>Role &amp; Privilege Level</th>
-          <th>Department Units</th>
           <th>Account Status</th>
           <th id="teamsActionColHeader" style="text-align: right;">Action</th>
         </tr>
@@ -176,7 +157,7 @@
         <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: #ECFDF5; color: #047857; font-weight: 800; font-size: 16px;">+</span>
         <div>
           <div class="ckh-modal-title">Add Team Member</div>
-          <div style="font-size: 11px; color: #648781; margin-top: 2px;">Provision credentials, select role permissions, and assign departments</div>
+          <div style="font-size: 11px; color: #648781; margin-top: 2px;">Provision credentials and select role permissions</div>
         </div>
       </div>
       <button type="button" class="ckh-modal-close" onclick="closeAddTeamMemberModal()" title="Close">&times;</button>
@@ -220,20 +201,12 @@
           <div style="display: flex; flex-direction: column; gap: 8px;">
             <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #092F2E; cursor: pointer;">
               <input type="radio" name="add_admin_privilege" value="1" checked style="accent-color: #063D3B;" />
-              <span><strong>Full Admin:</strong> Full permissions &mdash; can manage knowledge, settings, team members &amp; departments</span>
+              <span><strong>Full Admin:</strong> Full permissions &mdash; can manage knowledge, settings &amp; team members</span>
             </label>
             <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #092F2E; cursor: pointer;">
               <input type="radio" name="add_admin_privilege" value="0" style="accent-color: #063D3B;" />
-              <span><strong>Content Admin:</strong> Restricted &mdash; can manage knowledge and chat only (cannot modify team roster or departments)</span>
+              <span><strong>Content Admin:</strong> Restricted &mdash; can manage knowledge and chat only (cannot modify team roster)</span>
             </label>
-          </div>
-        </div>
-
-        <!-- Department Assignment Checklist -->
-        <div>
-          <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:#063D3B; margin-bottom:6px; letter-spacing: 0.04em;">Assign to Department Routing Queues (Optional):</label>
-          <div id="addMemberDeptChecklist" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; background: #F4FAF7; border-radius: 10px; border: 1.5px solid #D1E5DE;">
-            <!-- Populated dynamically -->
           </div>
         </div>
       </div>
@@ -259,7 +232,7 @@
         <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: #EFF6FF; color: #1D4ED8; font-weight: 800; font-size: 15px;">✏️</span>
         <div>
           <div class="ckh-modal-title">Edit Team Member</div>
-          <div style="font-size: 11px; color: #648781; margin-top: 2px;">Update profile details, role permissions, and assigned department queues</div>
+          <div style="font-size: 11px; color: #648781; margin-top: 2px;">Update profile details and role permissions</div>
         </div>
       </div>
       <button type="button" class="ckh-modal-close" onclick="closeEditTeamMemberModal()" title="Close">&times;</button>
@@ -304,20 +277,12 @@
           <div style="display: flex; flex-direction: column; gap: 8px;">
             <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #092F2E; cursor: pointer;">
               <input type="radio" name="edit_admin_privilege" value="1" checked style="accent-color: #063D3B;" />
-              <span><strong>Full Admin:</strong> Full permissions &mdash; can manage knowledge, settings, team members &amp; departments</span>
+              <span><strong>Full Admin:</strong> Full permissions &mdash; can manage knowledge, settings &amp; team members</span>
             </label>
             <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #092F2E; cursor: pointer;">
               <input type="radio" name="edit_admin_privilege" value="0" style="accent-color: #063D3B;" />
-              <span><strong>Content Admin:</strong> Restricted &mdash; can manage knowledge and chat only (cannot modify team roster or departments)</span>
+              <span><strong>Content Admin:</strong> Restricted &mdash; can manage knowledge and chat only (cannot modify team roster)</span>
             </label>
-          </div>
-        </div>
-
-        <!-- Department Assignment Checklist -->
-        <div>
-          <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:#063D3B; margin-bottom:6px; letter-spacing: 0.04em;">Assigned Department Routing Queues:</label>
-          <div id="editMemberDeptChecklist" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; background: #F4FAF7; border-radius: 10px; border: 1.5px solid #D1E5DE;">
-            <!-- Populated dynamically -->
           </div>
         </div>
       </div>

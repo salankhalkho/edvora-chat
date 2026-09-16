@@ -1,4 +1,4 @@
-﻿<!-- ═══════════════════════════════════════════════════════════════════
+<!-- ═══════════════════════════════════════════════════════════════════
      APP-MODALS.HTML - All modal overlays, slide-over drawer, and status footer
      PARENT: #appModalsContainer in index.html (injected via fetch())
      BUG AREAS:
@@ -181,27 +181,6 @@
             <!-- Tab: Teams Workspace & Staff Roster -->
             <div class="tab-content" id="tab-teams" data-loaded="false"></div>
 
-            <!-- Tab: Departments Management -->
-            <div class="tab-content" id="tab-departments" data-loaded="false"></div>
-
-            <!-- Tab: Department Editor Studio -->
-            <div class="tab-content" id="tab-department-editor" data-loaded="false"></div>
-
-            <!-- Tab: Department Courses Focused Editor -->
-            <div class="tab-content" id="tab-dept-courses-editor" data-loaded="false"></div>
-
-            <!-- Tab: Department Staff Focused Editor -->
-            <div class="tab-content" id="tab-dept-staff-editor" data-loaded="false"></div>
-
-            <!-- Tab: Department Knowledge Focused Editor -->
-            <div class="tab-content" id="tab-dept-knowledge-editor" data-loaded="false"></div>
-
-            <!-- Tab: Department Hours Focused Editor -->
-            <div class="tab-content" id="tab-dept-hours-editor" data-loaded="false"></div>
-
-            <!-- Tab: Department Escalations Focused Editor -->
-            <div class="tab-content" id="tab-dept-escalations-editor" data-loaded="false"></div>
-
             <!-- Tab: Knowledge Document Editor Studio -->
             <div class="tab-content" id="tab-knowledge-edit" data-loaded="false"></div>
             <div class="tab-content" id="tab-knowledge-editor" data-loaded="false"></div>
@@ -214,31 +193,7 @@
 
         </main>
 
-        <!-- â”€â”€ PRESET CATALOG MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
-        <div id="presetsModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
-            <div style="background: #FFFFFF; border: 1px solid var(--brand-border-strong); border-radius: var(--brand-radius-md); max-width: 900px; width: 100%; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--brand-shadow-modal);">
-                <div style="padding: 20px; border-bottom: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
-                    <div>
-                        <h3 style="font-family: var(--brand-font-display); font-size: 18px; font-weight: 700; color: #092F2E; margin: 0;">
-                            14 Pre-Built College Department Templates
-                        </h3>
-                        <p style="font-size: 13px; color: #648781; margin-top: 4px; line-height: 1.4;">
-                            Select a department template to import and configure for your college workspace.
-                        </p>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
-                        <button class="brand-btn-primary" style="font-size: 14px; height: 38px; padding: 0 20px; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center;" onclick="importSelectedPresets()">
-                            Import Selected Preset
-                        </button>
-                        <button class="brand-btn-secondary" style="font-size: 14px; min-width: 96px; height: 38px; padding: 0 18px; white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" onclick="closePresetsModal()">âœ• Close</button>
-                    </div>
-                </div>
 
-                <div id="presetsGrid" style="padding: 20px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px;">
-                    <!-- Populated via JavaScript -->
-                </div>
-            </div>
-        </div>
 
         <!-- â”€â”€ LEAD DETAILS & REASSIGNMENT MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <div id="leadDetailModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
@@ -288,24 +243,15 @@
                         </div>
                     </div>
 
-                    <!-- Department & Assigned Staff Assignment Row -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
-                        <div>
-                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
-                                Assigned Department
-                            </label>
-                            <select id="leadModalDeptSelect" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
-                                <option value="">ðŸ›ï¸ General (No Department)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
-                                Assigned Counselor / Staff
-                            </label>
-                            <select id="leadModalStaffSelect" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
-                                <option value="">ðŸ‘¤ Unassigned</option>
-                            </select>
-                        </div>
+                    <!-- Assigned Staff Assignment Row -->
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                            Assigned Counselor / Staff
+                        </label>
+                        <select id="leadModalStaffSelect" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
+                            <option value="">👤 Unassigned</option>
+                        </select>
+                        <select id="leadModalDeptSelect" style="display: none;"><option value=""></option></select>
                     </div>
 
                     <!-- Status & Counselor Notes -->
@@ -623,38 +569,26 @@
                         <input type="text" id="assetFormTitle" class="brand-input" placeholder="e.g. 2026-27 Comprehensive Fee Structure &amp; Installment Payment Guide" required />
                     </div>
 
-                    <!-- Row 2: Category & Department Mapping -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
-                        <div>
-                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
-                                Document Category *
-                            </label>
-                            <select id="assetFormCategory" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;" required>
-                                <option value="brochure">ðŸ“„ Official Brochure / Prospectus</option>
-                                <option value="fee_structure">ðŸ’° Fee Structure &amp; Installments</option>
-                                <option value="scholarship_guide">ðŸ† Scholarship Matrix</option>
-                                <option value="placement_report">ðŸ“ˆ Placement &amp; Salary Report</option>
-                                <option value="curriculum">ðŸ“š Curriculum &amp; Syllabus</option>
-                                <option value="hostel_guide">ðŸ¡ Hostel &amp; Campus Life</option>
-                                <option value="exam_cutoff">ðŸŽ¯ Cutoff &amp; Exam Prep Kit</option>
-                                <option value="international_guide">ðŸŒ International / NRI Guide</option>
-                                <option value="other">ðŸ“‘ Other Resource</option>
-                            </select>
+                    <!-- Row 2: Category -->
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                            Document Category *
+                        </label>
+                        <select id="assetFormCategory" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;" required>
+                            <option value="brochure">📄 Official Brochure / Prospectus</option>
+                            <option value="fee_structure">💰 Fee Structure &amp; Installments</option>
+                            <option value="scholarship_guide">🏆 Scholarship Matrix</option>
+                            <option value="placement_report">📈 Placement &amp; Salary Report</option>
+                            <option value="curriculum">📚 Curriculum &amp; Syllabus</option>
+                            <option value="hostel_guide">🏡 Hostel &amp; Campus Life</option>
+                            <option value="exam_cutoff">🎯 Cutoff &amp; Exam Prep Kit</option>
+                            <option value="international_guide">🌍 International / NRI Guide</option>
+                            <option value="other">📑 Other Resource</option>
+                        </select>
+                        <div id="assetFormDeptWrapper" style="display: none;">
+                            <input type="hidden" id="assetFormDept" value="org" />
                         </div>
-
-                        <div>
-                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
-                                Department Scope *
-                            </label>
-                            <div id="assetFormDeptWrapper">
-                                <select id="assetFormDept" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
-                                    <option value="org">ðŸŒ Org-wide (All Departments / General)</option>
-                                </select>
-                            </div>
-                            <div id="assetFormDeptLockedBadge" style="display: none; margin-top: 4px; font-size: 11px; color: var(--brand-cyan-400);">
-                                ðŸ”’ Locked to your assigned department
-                            </div>
-                        </div>
+                        <div id="assetFormDeptLockedBadge" style="display: none;"></div>
                     </div>
 
                     <!-- Row 3: File Input (Hidden when editing metadata only) -->

@@ -308,129 +308,113 @@ class SmartOnboardingService
                 'state'            => $state
             ]);
 
-            // ── STEP 9: Save Departments & Offered Academic Programs ─────────────
+            // ── STEP 9: Save Offered Academic Programs ─────────────
             $departments = $extracted['departments'] ?? [];
-            $deptCount   = 0;
+            $programsList = $extracted['programs'] ?? [];
             $courseCount = 0;
             $savedCourseNames = [];
 
+            $insCourse = $db->prepare("
+                INSERT INTO programs 
+                    (organization_id, name, slug, program_type, duration, mode, is_admissions_open, created_at, updated_at)
+                VALUES 
+                    (:oid, :name, :slug, :type, :duration, :mode, 1, NOW(), NOW())
+            ");
+
+            $allExtractedProgs = [];
+            if (!empty($programsList) && is_array($programsList)) {
+                foreach ($programsList as $p) {
+                    $allExtractedProgs[] = $p;
+                }
+            }
             if (!empty($departments) && is_array($departments)) {
-                $emit('saving_departments', 'Structuring academic departments and degree programs in database...', 67);
-
-                foreach (array_slice($departments, 0, self::MAX_DEPTS_TO_SAVE) as $dept) {
-                    $deptName = trim((string)($dept['name'] ?? ''));
-                    if (empty($deptName)) continue;
-
-                    // Lowercase before regex replace so capital letters like 'C' in 'College' are NOT stripped
-                    $deptSlug = trim(preg_replace('/[^a-z0-9]+/', '-', strtolower($deptName)), '-');
-                    if (empty($deptSlug)) {
-                        $deptSlug = 'dept-' . substr(bin2hex(random_bytes(3)), 0, 6);
-                    }
-
-                    $baseSlug = $deptSlug;
-                    $suffix = 1;
-                    while (true) {
-                        $exists = $db->prepare("SELECT id FROM departments WHERE organization_id = :oid AND slug = :slug LIMIT 1");
-                        $exists->execute([':oid' => $orgId, ':slug' => $deptSlug]);
-                        if (!$exists->fetch()) break;
-                        $deptSlug = $baseSlug . '-' . (++$suffix);
-                    }
-
-                    $icon = !empty($dept['icon']) ? mb_substr(trim($dept['icon']), 0, 8) : '🏫';
-
-                    $insD = $db->prepare("
-                        INSERT INTO departments (organization_id, name, slug, icon, is_active, created_at, updated_at)
-                        VALUES (:org_id, :name, :slug, :icon, 1, NOW(), NOW())
-                    ");
-                    $insD->execute([
-                        ':org_id' => $orgId,
-                        ':name'   => $deptName,
-                        ':slug'   => $deptSlug,
-                        ':icon'   => $icon,
-                    ]);
-                    $deptId = (int)$db->lastInsertId();
-                    $deptCount++;
-
-                    // Visual pacing pause + live department discovery event
-                    usleep(60000);
-                    $emit('dept_found', "├── 🏛️ {$deptName}", 70, [
-                        'name'              => $deptName,
-                        'icon'              => $icon,
-                        'departments_count' => $deptCount
-                    ]);
-
-                    // Map programs / courses under this department
+                foreach ($departments as $dept) {
                     $deptProgs = $dept['programs'] ?? $dept['courses'] ?? [];
-                    if (!empty($deptProgs) && is_array($deptProgs)) {
-                        $insCourse = $db->prepare("
-                            INSERT INTO department_courses 
-                                (department_id, course_name, program_type, duration, mode, is_admissions_open, created_at, updated_at)
-                            VALUES 
-                                (:dept_id, :name, :type, :duration, :mode, 1, NOW(), NOW())
-                        ");
-
-                        foreach ($deptProgs as $progItem) {
-                            if (is_array($progItem)) {
-                                $cn   = trim((string)($progItem['name'] ?? ''));
-                                $pt   = strtolower((string)($progItem['program_type'] ?? 'undergraduate'));
-                                $dur  = !empty($progItem['duration']) ? substr(trim($progItem['duration']), 0, 50) : null;
-                                $mode = strtolower((string)($progItem['mode'] ?? 'full_time'));
-                            } else {
-                                $cn   = trim((string)$progItem);
-                                $pt   = 'undergraduate';
-                                if (preg_match('/\b(master|m\.?s|m\.?a|mba|m\.?tech|graduate|m\.?sc|m\.?com)\b/i', $cn)) {
-                                    $pt = 'postgraduate';
-                                } elseif (preg_match('/\b(doctor|ph\.?d|doctorate)\b/i', $cn)) {
-                                    $pt = 'doctoral';
-                                } elseif (preg_match('/\b(diploma|certificate)\b/i', $cn)) {
-                                    $pt = 'certificate';
-                                }
-                                $dur  = null;
-                                $mode = 'full_time';
-                            }
-
-                            if ($cn === '' || strlen($cn) < 3) continue;
-                            $normCn = strtolower($cn);
-                            if (isset($savedCourseNames[$normCn])) continue;
-                            $savedCourseNames[$normCn] = true;
-
-                            $validTypes = ['undergraduate', 'postgraduate', 'doctoral', 'executive', 'certificate', 'other'];
-                            if (!in_array($pt, $validTypes)) {
-                                if ($pt === 'doctorate') $pt = 'doctoral';
-                                elseif ($pt === 'diploma') $pt = 'certificate';
-                                else $pt = 'undergraduate';
-                            }
-
-                            $validModes = ['full_time', 'part_time', 'online', 'hybrid', 'weekend'];
-                            if (!in_array($mode, $validModes)) $mode = 'full_time';
-
-                            try {
-                                $insCourse->execute([
-                                    ':dept_id'  => $deptId,
-                                    ':name'     => $cn,
-                                    ':type'     => $pt,
-                                    ':duration' => $dur,
-                                    ':mode'     => $mode,
-                                ]);
-                                $courseCount++;
-
-                                if ($courseCount <= 30) {
-                                    usleep(30000);
-                                    $emit('program_found', "│   ├── 🎓 {$cn} ({$pt})", 72, [
-                                        'name'           => $cn,
-                                        'type'           => $pt,
-                                        'programs_count' => $courseCount
-                                    ]);
-                                }
-                            } catch (Throwable $ce) {
-                                // Skip duplicate or constraint error
-                            }
+                    if (is_array($deptProgs)) {
+                        foreach ($deptProgs as $p) {
+                            $allExtractedProgs[] = $p;
                         }
                     }
                 }
             }
 
-            // Fallback: If candidate degrees discovered from DOM were missed by LLM, nest them into a default department
+            if (!empty($allExtractedProgs)) {
+                $emit('saving_departments', 'Structuring academic programs in database...', 67);
+
+                foreach ($allExtractedProgs as $progItem) {
+                    if (is_array($progItem)) {
+                        $cn   = trim((string)($progItem['name'] ?? ''));
+                        $pt   = strtolower((string)($progItem['program_type'] ?? 'undergraduate'));
+                        $dur  = !empty($progItem['duration']) ? substr(trim($progItem['duration']), 0, 50) : null;
+                        $mode = strtolower((string)($progItem['mode'] ?? 'full_time'));
+                    } else {
+                        $cn   = trim((string)$progItem);
+                        $pt   = 'undergraduate';
+                        if (preg_match('/\b(master|m\.?s|m\.?a|mba|m\.?tech|graduate|m\.?sc|m\.?com)\b/i', $cn)) {
+                            $pt = 'postgraduate';
+                        } elseif (preg_match('/\b(doctor|ph\.?d|doctorate)\b/i', $cn)) {
+                            $pt = 'doctoral';
+                        } elseif (preg_match('/\b(diploma|certificate)\b/i', $cn)) {
+                            $pt = 'certificate';
+                        }
+                        $dur  = null;
+                        $mode = 'full_time';
+                    }
+
+                    if ($cn === '' || strlen($cn) < 3) continue;
+                    $normCn = strtolower($cn);
+                    if (isset($savedCourseNames[$normCn])) continue;
+                    $savedCourseNames[$normCn] = true;
+
+                    $validTypes = ['undergraduate', 'postgraduate', 'doctoral', 'executive', 'certificate', 'other'];
+                    if (!in_array($pt, $validTypes)) {
+                        if ($pt === 'doctorate') $pt = 'doctoral';
+                        elseif ($pt === 'diploma') $pt = 'certificate';
+                        else $pt = 'undergraduate';
+                    }
+
+                    $validModes = ['full_time', 'part_time', 'online', 'hybrid', 'weekend'];
+                    if (!in_array($mode, $validModes)) $mode = 'full_time';
+
+                    $slug = trim(preg_replace('/[^a-z0-9]+/', '-', strtolower($cn)), '-');
+                    if (empty($slug)) {
+                        $slug = 'prog-' . substr(bin2hex(random_bytes(3)), 0, 6);
+                    }
+                    $baseSlug = $slug;
+                    $suffix = 1;
+                    while (true) {
+                        $chk = $db->prepare("SELECT id FROM programs WHERE organization_id = :oid AND slug = :slug LIMIT 1");
+                        $chk->execute([':oid' => $orgId, ':slug' => $slug]);
+                        if (!$chk->fetch()) break;
+                        $slug = $baseSlug . '-' . (++$suffix);
+                    }
+
+                    try {
+                        $insCourse->execute([
+                            ':oid'      => $orgId,
+                            ':name'     => $cn,
+                            ':slug'     => $slug,
+                            ':type'     => $pt,
+                            ':duration' => $dur,
+                            ':mode'     => $mode,
+                        ]);
+                        $courseCount++;
+
+                        if ($courseCount <= 30) {
+                            usleep(30000);
+                            $emit('program_found', "├── 🎓 {$cn} ({$pt})", 72, [
+                                'name'           => $cn,
+                                'type'           => $pt,
+                                'programs_count' => $courseCount
+                            ]);
+                        }
+                    } catch (Throwable $ce) {
+                        // Skip duplicate
+                    }
+                }
+            }
+
+            // Fallback: If candidate degrees discovered from DOM were missed by LLM, save them into programs
             if (!empty($candidateDegrees)) {
                 $unassigned = [];
                 foreach ($candidateDegrees as $cd) {
@@ -441,34 +425,6 @@ class SmartOnboardingService
                 }
 
                 if (!empty($unassigned)) {
-                    $defDeptName = $deptCount > 0 ? "General Academics & Degree Programs" : "Academic Programs & Degrees";
-                    $defSlug = 'academics-degrees-' . substr(bin2hex(random_bytes(2)), 0, 4);
-
-                    $insD = $db->prepare("
-                        INSERT INTO departments (organization_id, name, slug, icon, is_active, created_at, updated_at)
-                        VALUES (:org_id, :name, :slug, '🎓', 1, NOW(), NOW())
-                    ");
-                    $insD->execute([
-                        ':org_id' => $orgId,
-                        ':name'   => $defDeptName,
-                        ':slug'   => $defSlug,
-                    ]);
-                    $defDeptId = (int)$db->lastInsertId();
-                    $deptCount++;
-
-                    $emit('dept_found', "├── 🏛️ {$defDeptName}", 74, [
-                        'name'              => $defDeptName,
-                        'icon'              => '🎓',
-                        'departments_count' => $deptCount
-                    ]);
-
-                    $insCourse = $db->prepare("
-                        INSERT INTO department_courses 
-                            (department_id, course_name, program_type, duration, mode, is_admissions_open, created_at, updated_at)
-                        VALUES 
-                            (:dept_id, :name, :type, NULL, 'full_time', 1, NOW(), NOW())
-                    ");
-
                     foreach (array_slice($unassigned, 0, 50) as $cd) {
                         $normCd = strtolower($cd);
                         if (isset($savedCourseNames[$normCd])) continue;
@@ -483,16 +439,32 @@ class SmartOnboardingService
                             $pt = 'certificate';
                         }
 
+                        $slug = trim(preg_replace('/[^a-z0-9]+/', '-', strtolower($cd)), '-');
+                        if (empty($slug)) {
+                            $slug = 'prog-' . substr(bin2hex(random_bytes(3)), 0, 6);
+                        }
+                        $baseSlug = $slug;
+                        $suffix = 1;
+                        while (true) {
+                            $chk = $db->prepare("SELECT id FROM programs WHERE organization_id = :oid AND slug = :slug LIMIT 1");
+                            $chk->execute([':oid' => $orgId, ':slug' => $slug]);
+                            if (!$chk->fetch()) break;
+                            $slug = $baseSlug . '-' . (++$suffix);
+                        }
+
                         try {
                             $insCourse->execute([
-                                ':dept_id' => $defDeptId,
-                                ':name'    => $cd,
-                                ':type'    => $pt,
+                                ':oid'      => $orgId,
+                                ':name'     => $cd,
+                                ':slug'     => $slug,
+                                ':type'     => $pt,
+                                ':duration' => null,
+                                ':mode'     => 'full_time',
                             ]);
                             $courseCount++;
                             if ($courseCount <= 30) {
                                 usleep(30000);
-                                $emit('program_found', "│   ├── 🎓 {$cd} ({$pt})", 75, [
+                                $emit('program_found', "├── 🎓 {$cd} ({$pt})", 75, [
                                     'name'           => $cd,
                                     'type'           => $pt,
                                     'programs_count' => $courseCount
@@ -504,11 +476,9 @@ class SmartOnboardingService
             }
 
             $emit('departments_written',
-                $deptCount > 0
-                    ? "Saved {$deptCount} department" . ($deptCount > 1 ? 's' : '') . " and {$courseCount} verified academic degree program" . ($courseCount > 1 ? 's' : '') . "."
-                    : "No specific department breakdown found on website (can be added later).",
+                "Saved {$courseCount} verified academic degree program" . ($courseCount > 1 ? 's' : '') . ".",
                 78,
-                ['departments_count' => $deptCount, 'courses_count' => $courseCount, 'programs_count' => $courseCount]
+                ['departments_count' => 0, 'courses_count' => $courseCount, 'programs_count' => $courseCount]
             );
 
             // ── STEP 11: Save Knowledge Sources ─────────────────────────────────
@@ -591,11 +561,10 @@ class SmartOnboardingService
             $emit('configuring_chatbot', 'Tuning AI student assistant prompt and interactive chips...', 95);
 
             $progRows = $db->prepare("
-                SELECT dc.course_name 
-                FROM department_courses dc 
-                JOIN departments d ON d.id = dc.department_id 
-                WHERE d.organization_id = :oid 
-                ORDER BY dc.id ASC 
+                SELECT p.name 
+                FROM programs p 
+                WHERE p.organization_id = :oid 
+                ORDER BY p.id ASC 
                 LIMIT 4
             ");
             $progRows->execute([':oid' => $orgId]);
@@ -654,7 +623,7 @@ class SmartOnboardingService
                 'institution_name' => $orgFinal['name'] ?? $orgName,
                 'logo_url'         => $orgFinal['logo_url'] ?? null,
                 'summary' => [
-                    'departments'       => $deptCount,
+                    'departments'       => 0,
                     'courses'           => $courseCount,
                     'programs'          => $courseCount,
                     'knowledge_sources' => $ksCount,

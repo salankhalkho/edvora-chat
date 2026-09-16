@@ -1,4 +1,4 @@
-﻿# Environment & Secrets
+# Environment & Secrets
 .env
 credentials.md
 
@@ -15,8 +15,13 @@ credentials.md
 /scratch/
 /trash/
 
+# Backups & Dumps
+backups/
+*.sql
+
 # IDE & OS
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
+

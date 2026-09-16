@@ -39,48 +39,25 @@ class ChatController
             Response::error('Chatbot not found or inactive.', 404);
         }
 
-        // Load widget customization with cascade: dept → org → defaults
-        $deptId = $request->get('dept_id') ? (int)$request->get('dept_id') : (isset($bot['department_id']) ? (int)$bot['department_id'] : null);
-        $deptInfo = null;
-        if ($deptId) {
-            $stmtDept = $db->prepare("SELECT id, name, icon, greeting_message FROM departments WHERE id = :did AND organization_id = :oid AND (is_active = 1 OR enable_dedicated_widget = 1)");
-            $stmtDept->execute([':did' => $deptId, ':oid' => (int)$bot['organization_id']]);
-            $deptInfo = $stmtDept->fetch();
-        }
-
+        // Load widget customization with cascade: org → defaults
         $customization = \App\Controllers\WidgetCustomizationController::cascadeLookup(
             $db,
             (int)$bot['id'],
-            (int)$bot['organization_id'],
-            $deptId
+            (int)$bot['organization_id']
         );
 
-        $botDisplayName = !empty($customization['header_bot_name']) ? $customization['header_bot_name'] : ($deptInfo ? ($deptInfo['name'] . ' Assistant') : ($bot['name'] ?: $bot['org_name']));
-        $welcomeMsg = !empty($customization['welcome_message']) ? $customization['welcome_message'] : ($deptInfo['greeting_message'] ?? ($bot['welcome_message'] ?: "Hi there! 👋 Welcome to {$bot['org_name']}. How can I assist you with admissions, programs, or campus life today?"));
+        $botDisplayName = !empty($customization['header_bot_name']) ? $customization['header_bot_name'] : ($bot['name'] ?: $bot['org_name']);
+        $welcomeMsg = !empty($customization['welcome_message']) ? $customization['welcome_message'] : ($bot['welcome_message'] ?: "Hi there! 👋 Welcome to {$bot['org_name']}. How can I assist you with admissions, programs, or campus life today?");
 
         // Check authoritative counts for passive lead capture action badges
         $hasAssets = (int)$db->query("SELECT COUNT(*) FROM lead_assets WHERE organization_id = " . (int)$bot['organization_id'] . " AND is_active = 1")->fetchColumn() > 0;
         $hasCampuses = (int)$db->query("SELECT COUNT(*) FROM campuses WHERE organization_id = " . (int)$bot['organization_id'] . " AND status = 'active'")->fetchColumn() > 0;
-        // Check if callbacks are actually configured: has department phone OR assigned staff
+        // Check if callbacks are actually configured: has staff users
         $orgIdInt = (int)$bot['organization_id'];
-        $hasPhoneOrStaff = (int)$db->query("SELECT COUNT(*) FROM departments WHERE organization_id = {$orgIdInt} AND is_active = 1 AND (phone IS NOT NULL AND phone != '')")->fetchColumn() > 0;
-        $hasStaff = (int)$db->query("SELECT COUNT(*) FROM department_staff ds JOIN departments d ON ds.department_id = d.id WHERE d.organization_id = {$orgIdInt}")->fetchColumn() > 0;
-        $hasCallbacks = ((bool)$bot['lead_capture_enabled']) && ($hasPhoneOrStaff || $hasStaff);
+        $hasStaff = (int)$db->query("SELECT COUNT(*) FROM users WHERE organization_id = {$orgIdInt} AND role IN ('admin', 'staff')")->fetchColumn() > 0;
+        $hasCallbacks = ((bool)$bot['lead_capture_enabled']) && $hasStaff;
 
         $quickChips = [];
-        if ($deptId) {
-            $stmtFaqs = $db->prepare("SELECT question, answer FROM department_faqs WHERE department_id = ? ORDER BY sort_order ASC LIMIT 5");
-            $stmtFaqs->execute([$deptId]);
-            $deptFaqs = $stmtFaqs->fetchAll();
-            if (!empty($deptFaqs)) {
-                $quickChips = array_map(function($f) {
-                    return [
-                        'label' => $f['question'],
-                        'message' => $f['question']
-                    ];
-                }, $deptFaqs);
-            }
-        }
         if (isset($customization['quick_chips'])) {
             $rawCustChips = $customization['quick_chips'];
             if (is_array($rawCustChips) && !empty($rawCustChips)) {
@@ -113,8 +90,6 @@ class ChatController
 
         Response::success([
             'bot_id' => (int)$bot['id'],
-            'department_id' => $deptId,
-            'department_name' => $deptInfo['name'] ?? null,
             'organization_name' => $bot['org_name'],
             'name' => $botDisplayName,
             'welcome_message' => $welcomeMsg,
@@ -151,7 +126,6 @@ class ChatController
         }
         $userMessage = trim((string)($request->get('message') ?? $request->get('query') ?? $request->get('prompt') ?? ''));
         $isTest = (int)(bool)($request->get('is_test') ?? false);
-        $deptId = $request->get('department_id') ? (int)$request->get('department_id') : null;
 
         if (empty($botToken) || empty($userMessage)) {
             Response::error('bot_token and message are required fields.', 422);
@@ -197,13 +171,12 @@ class ChatController
 
         if (!$conv) {
             $stmtNewConv = $db->prepare("
-                INSERT INTO conversations (organization_id, chatbot_id, department_id, visitor_id, is_test, page_url, page_title, started_at, last_message_at)
-                VALUES (:org_id, :bot_id, :dept_id, :visitor_id, :is_test, :page_url, :page_title, NOW(), NOW())
+                INSERT INTO conversations (organization_id, chatbot_id, visitor_id, is_test, page_url, page_title, started_at, last_message_at)
+                VALUES (:org_id, :bot_id, :visitor_id, :is_test, :page_url, :page_title, NOW(), NOW())
             ");
             $stmtNewConv->execute([
                 ':org_id' => $orgId,
                 ':bot_id' => $botId,
-                ':dept_id' => $deptId,
                 ':visitor_id' => $visitorId,
                 ':is_test' => $isTest,
                 ':page_url' => $request->get('page_url'),
@@ -298,7 +271,7 @@ class ChatController
 
                 // Only generate a trigger form if lead is NOT yet captured AND turn count >= minTurns
                 if (!$leadCaptured && $turnCount >= $minTurns && (bool)$bot['lead_capture_enabled']) {
-                    $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, $deptId, $rawTriggerType, $userMessage);
+                    $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, $rawTriggerType, $userMessage);
                 }
             }
 
@@ -357,20 +330,19 @@ class ChatController
     /**
      * Resolve structured lead trigger and match with active lead_assets if asset_delivery
      */
-    private static function resolveLeadTrigger(PDO $db, int $orgId, ?int $deptId, string $triggerType, string $userMessage): ?array
+    private static function resolveLeadTrigger(PDO $db, int $orgId, string $triggerType, string $userMessage): ?array
     {
         if ($triggerType === 'asset_delivery') {
-            // Find active asset in lead_assets table matching department first, or org-level
+            // Find active asset in lead_assets table
             $stmtAsset = $db->prepare("
                 SELECT id, title, category, description, file_name
                 FROM lead_assets
                 WHERE organization_id = :oid
                   AND is_active = 1
-                  AND (department_id = :did OR department_id IS NULL)
-                ORDER BY (department_id IS NOT NULL) DESC, id DESC
+                ORDER BY id DESC
                 LIMIT 1
             ");
-            $stmtAsset->execute([':oid' => $orgId, ':did' => $deptId]);
+            $stmtAsset->execute([':oid' => $orgId]);
             $asset = $stmtAsset->fetch();
 
             $assetTitle = $asset['title'] ?? 'Detailed Course Fee & Admission Guide (PDF)';

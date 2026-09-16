@@ -62,16 +62,7 @@
                         </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                        <div>
-                            <label for="edit_prog_dept" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
-                                Parent Department
-                            </label>
-                            <select id="edit_prog_dept" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF; color: #063D3B; font-weight: 600;">
-                                <option value="">(No Department &mdash; Orphan Course)</option>
-                            </select>
-                            <span style="font-size: 10.5px; color: #648781; margin-top: 4px; display: block;">Leave unassigned for institution-wide or independent courses.</span>
-                        </div>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 16px;">
                         <div>
                             <label for="edit_prog_type" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
                                 Program Level <span style="color: #EF4444;">*</span>
@@ -209,7 +200,6 @@
         window._currentEditProgramId = targetId;
         sessionStorage.setItem('edvora_edit_program_id', targetId);
 
-        const deptSelect = document.getElementById('edit_prog_dept');
         const campusList = document.getElementById('editProgCampusesChecklist');
 
         try {
@@ -221,7 +211,6 @@
             if (data.status !== 'success') throw new Error(data.message || 'API error');
 
             const courses = data.data.courses || [];
-            const depts = data.data.departments || [];
             const campuses = data.data.campuses || [];
 
             const c = courses.find(x => String(x.id) === String(targetId));
@@ -250,16 +239,6 @@
             document.getElementById('edit_prog_deadline').value = c.application_deadline || '';
             document.getElementById('edit_prog_url').value = c.application_url || '';
 
-            // Populate departments
-            if (deptSelect) {
-                let html = '<option value="">(No Department &mdash; Orphan Course)</option>';
-                depts.forEach(d => {
-                    html += `<option value="${d.id}">${escapeHtml(d.name)}</option>`;
-                });
-                deptSelect.innerHTML = html;
-                deptSelect.value = c.department_id ? String(c.department_id) : '';
-            }
-
             // Populate campuses
             const activeCampIds = (c.campus_ids || []).map(Number);
             if (campusList) {
@@ -278,20 +257,21 @@
                 }
             }
         } catch (err) {
-            console.error('[EditPrograms] Failed to init program data:', err);
-            if (campusList) {
-                campusList.innerHTML = `<span style="font-size:11.5px; color:#DC2626;">Error loading data: ${escapeHtml(err.message)}</span>`;
-            }
+            console.error('[EditPrograms] Load error:', err);
+            alert('Failed to load program data. Please check network connection.');
         }
     };
 
-    window.handleEditProgramSubmit = async function(e) {
+    window.submitEditProgramForm = window.handleEditProgramSubmit = async function(e) {
         if (e) e.preventDefault();
         const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token');
         if (!token) return;
 
         const id = document.getElementById('edit_prog_id')?.value;
-        if (!id) return;
+        if (!id) {
+            alert('Missing program ID.');
+            return;
+        }
 
         const name = document.getElementById('edit_prog_name')?.value.trim();
         if (!name) {
@@ -299,8 +279,6 @@
             return;
         }
 
-        const deptVal = document.getElementById('edit_prog_dept')?.value;
-        const deptId = deptVal ? parseInt(deptVal, 10) : null;
         const code = document.getElementById('edit_prog_code')?.value.trim();
         const type = document.getElementById('edit_prog_type')?.value || 'undergraduate';
         const duration = document.getElementById('edit_prog_duration')?.value.trim();
@@ -318,7 +296,6 @@
 
         const payload = {
             course_name: name,
-            department_id: deptId,
             course_code: code,
             program_type: type,
             duration: duration,

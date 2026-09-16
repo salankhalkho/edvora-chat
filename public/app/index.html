@@ -4096,14 +4096,7 @@
                 <span>Academic Programs</span>
               </a>
             </li>
-            <li>
-              <a class="sidebar-nav-item nav-item" data-tab="departments">
-                <span class="sidebar-nav-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="22.01"/><line x1="15" y1="22" x2="15" y2="22.01"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/><line x1="9" y1="10" x2="9" y2="10.01"/><line x1="15" y1="10" x2="15" y2="10.01"/><line x1="9" y1="14" x2="9" y2="14.01"/><line x1="15" y1="14" x2="15" y2="14.01"/><line x1="9" y1="18" x2="9" y2="18.01"/><line x1="15" y1="18" x2="15" y2="18.01"/></svg>
-                </span>
-                <span>Departments</span>
-              </a>
-            </li>
+
             <li>
               <a class="sidebar-nav-item nav-item" data-tab="teams">
                 <span class="sidebar-nav-icon">
@@ -4353,27 +4346,6 @@
             <!-- Tab: Teams Workspace & Staff Roster -->
             <div class="tab-content" id="tab-teams" data-loaded="false"></div>
 
-            <!-- Tab: Departments Management -->
-            <div class="tab-content" id="tab-departments" data-loaded="false"></div>
-
-            <!-- Tab: Department Editor Studio -->
-            <div class="tab-content" id="tab-department-editor" data-loaded="false"></div>
-
-            <!-- Tab: Department Courses Focused Editor -->
-            <div class="tab-content" id="tab-dept-courses-editor" data-loaded="false"></div>
-
-            <!-- Tab: Department Staff Focused Editor -->
-            <div class="tab-content" id="tab-dept-staff-editor" data-loaded="false"></div>
-
-            <!-- Tab: Department Knowledge Focused Editor -->
-            <div class="tab-content" id="tab-dept-knowledge-editor" data-loaded="false"></div>
-
-            <!-- Tab: Department Hours Focused Editor -->
-            <div class="tab-content" id="tab-dept-hours-editor" data-loaded="false"></div>
-
-            <!-- Tab: Department Escalations Focused Editor -->
-            <div class="tab-content" id="tab-dept-escalations-editor" data-loaded="false"></div>
-
             <!-- Tab: Knowledge Document Editor Studio -->
             <div class="tab-content" id="tab-knowledge-edit" data-loaded="false"></div>
             <div class="tab-content" id="tab-knowledge-editor" data-loaded="false"></div>
@@ -4385,32 +4357,6 @@
             <div class="tab-content" id="tab-profile" data-loaded="false"></div>
 
         </main>
-
-        <!-- ── PRESET CATALOG MODAL ────────────────────────────────────────── -->
-        <div id="presetsModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
-            <div style="background: #FFFFFF; border: 1px solid var(--brand-border-strong); border-radius: var(--brand-radius-md); max-width: 900px; width: 100%; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--brand-shadow-modal);">
-                <div style="padding: 20px; border-bottom: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
-                    <div>
-                        <h3 style="font-family: var(--brand-font-display); font-size: 18px; font-weight: 700; color: #092F2E; margin: 0;">
-                            14 Pre-Built College Department Templates
-                        </h3>
-                        <p style="font-size: 13px; color: #648781; margin-top: 4px; line-height: 1.4;">
-                            Select a department template to import and configure for your college workspace.
-                        </p>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
-                        <button class="brand-btn-primary" style="font-size: 14px; height: 38px; padding: 0 20px; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center;" onclick="importSelectedPresets()">
-                            Import Selected Preset
-                        </button>
-                        <button class="brand-btn-secondary" style="font-size: 14px; min-width: 96px; height: 38px; padding: 0 18px; white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" onclick="closePresetsModal()">✕ Close</button>
-                    </div>
-                </div>
-
-                <div id="presetsGrid" style="padding: 20px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px;">
-                    <!-- Populated via JavaScript -->
-                </div>
-            </div>
-        </div>
 
         <!-- ── LEAD DETAILS & REASSIGNMENT MODAL ───────────────────────────── -->
         <div id="leadDetailModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
@@ -4460,24 +4406,15 @@
                         </div>
                     </div>
 
-                    <!-- Department & Assigned Staff Assignment Row -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
-                        <div>
-                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
-                                Assigned Department
-                            </label>
-                            <select id="leadModalDeptSelect" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
-                                <option value="">🏛️ General (No Department)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
-                                Assigned Counselor / Staff
-                            </label>
-                            <select id="leadModalStaffSelect" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
-                                <option value="">👤 Unassigned</option>
-                            </select>
-                        </div>
+                    <!-- Assigned Staff Assignment Row -->
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                            Assigned Counselor / Staff
+                        </label>
+                        <select id="leadModalStaffSelect" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
+                            <option value="">👤 Unassigned</option>
+                        </select>
+                        <select id="leadModalDeptSelect" style="display: none;"><option value=""></option></select>
                     </div>
 
                     <!-- Status & Counselor Notes -->
@@ -4795,38 +4732,26 @@
                         <input type="text" id="assetFormTitle" class="brand-input" placeholder="e.g. 2026-27 Comprehensive Fee Structure &amp; Installment Payment Guide" required />
                     </div>
 
-                    <!-- Row 2: Category & Department Mapping -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
-                        <div>
-                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
-                                Document Category *
-                            </label>
-                            <select id="assetFormCategory" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;" required>
-                                <option value="brochure">📄 Official Brochure / Prospectus</option>
-                                <option value="fee_structure">💰 Fee Structure &amp; Installments</option>
-                                <option value="scholarship_guide">🏆 Scholarship Matrix</option>
-                                <option value="placement_report">📈 Placement &amp; Salary Report</option>
-                                <option value="curriculum">📚 Curriculum &amp; Syllabus</option>
-                                <option value="hostel_guide">🏡 Hostel &amp; Campus Life</option>
-                                <option value="exam_cutoff">🎯 Cutoff &amp; Exam Prep Kit</option>
-                                <option value="international_guide">🌍 International / NRI Guide</option>
-                                <option value="other">📑 Other Resource</option>
-                            </select>
+                    <!-- Row 2: Category -->
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
+                            Document Category *
+                        </label>
+                        <select id="assetFormCategory" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;" required>
+                            <option value="brochure">📄 Official Brochure / Prospectus</option>
+                            <option value="fee_structure">💰 Fee Structure &amp; Installments</option>
+                            <option value="scholarship_guide">🏆 Scholarship Matrix</option>
+                            <option value="placement_report">📈 Placement &amp; Salary Report</option>
+                            <option value="curriculum">📚 Curriculum &amp; Syllabus</option>
+                            <option value="hostel_guide">🏡 Hostel &amp; Campus Life</option>
+                            <option value="exam_cutoff">🎯 Cutoff &amp; Exam Prep Kit</option>
+                            <option value="international_guide">🌍 International / NRI Guide</option>
+                            <option value="other">📑 Other Resource</option>
+                        </select>
+                        <div id="assetFormDeptWrapper" style="display: none;">
+                            <input type="hidden" id="assetFormDept" value="org" />
                         </div>
-
-                        <div>
-                            <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
-                                Department Scope *
-                            </label>
-                            <div id="assetFormDeptWrapper">
-                                <select id="assetFormDept" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
-                                    <option value="org">🌐 Org-wide (All Departments / General)</option>
-                                </select>
-                            </div>
-                            <div id="assetFormDeptLockedBadge" style="display: none; margin-top: 4px; font-size: 11px; color: var(--brand-cyan-400);">
-                                🔒 Locked to your assigned department
-                            </div>
-                        </div>
+                        <div id="assetFormDeptLockedBadge" style="display: none;"></div>
                     </div>
 
                     <!-- Row 3: File Input (Hidden when editing metadata only) -->
@@ -5451,7 +5376,7 @@
             };
         }
 
-        const VALID_APP_TABS = ['overview', 'knowledge', 'knowledge-ingestion', 'academic-programs', 'academic-program-detail', 'course-staff-assignment', 'program-staff', 'program-lead-magnet', 'add-programs', 'edit-programs', 'departments', 'leads', 'callbacks', 'campus-tours', 'campus-tours-scheduling', 'create-tour-slot', 'scholarships', 'teams', 'assets', 'multilingual', 'conversion-engine', 'placeholder', 'analytics', 'knowledge-gaps', 'integrations', 'chatbot', 'test-chat', 'organization', 'org-settings', 'campuses', 'campus-editor', 'settings', 'knowledge-view', 'knowledge-editor', 'knowledge-edit', 'profile'];
+        const VALID_APP_TABS = ['overview', 'knowledge', 'knowledge-ingestion', 'academic-programs', 'academic-program-detail', 'course-staff-assignment', 'program-staff', 'program-lead-magnet', 'add-programs', 'edit-programs', 'leads', 'callbacks', 'campus-tours', 'campus-tours-scheduling', 'create-tour-slot', 'scholarships', 'teams', 'assets', 'multilingual', 'conversion-engine', 'placeholder', 'analytics', 'knowledge-gaps', 'integrations', 'chatbot', 'test-chat', 'organization', 'org-settings', 'campuses', 'campus-editor', 'settings', 'knowledge-view', 'knowledge-editor', 'knowledge-edit', 'profile'];
 
         // Navigation Tabs Handling with Async Modular Loading
         const _tabLoadPromises = {};
@@ -5494,7 +5419,11 @@
                 syncAuthFromUrl();
             } else {
                 const rawHash = location.hash.replace('#', '').trim();
-                const target = rawHash.split('?')[0];
+                let target = rawHash.split('?')[0];
+                if (target === 'departments' || (target && (target.startsWith('dept-') || target === 'department-editor'))) {
+                    location.hash = '#academic-programs';
+                    return;
+                }
                 if (target && VALID_APP_TABS.includes(target)) {
                     switchNavTab(target, null, false);
                 }
@@ -5621,7 +5550,11 @@
             if (token) {
                 initAppIdentity();
                 const rawH = location.hash.replace('#', '').trim();
-                const h = rawH.split('?')[0];
+                let h = rawH.split('?')[0];
+                if (h === 'departments' || (h && (h.startsWith('dept-') || h === 'department-editor'))) {
+                    h = 'academic-programs';
+                    try { history.replaceState(null, '', '#academic-programs'); } catch(e) {}
+                }
                 const initialTab = (h && VALID_APP_TABS.includes(h)) ? h : (localStorage.getItem('edvora_active_tab') || 'overview');
                 const safeTab = VALID_APP_TABS.includes(initialTab) ? initialTab : 'overview';
                 
@@ -5779,73 +5712,11 @@
         }
         window.updateIngestProgramRadios = updateIngestProgramRadios;
 
-        // Knowledge Ingestion Department Scope Loader
-        async function loadIngestDepartments() {
-            const containers = document.querySelectorAll('.ingest-dept-pill-container');
-            if (!containers.length) return;
-
-            try {
-                const res = await fetch('/v1/departments', {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                const data = await res.json();
-                const depts = (data.status === 'success' && data.data) ? (Array.isArray(data.data) ? data.data : (data.data.departments || [])) : [];
-
-                containers.forEach(container => {
-                    const containerId = container.id || '';
-                    const radioName = containerId.includes('File') ? 'ingest_file_dept' : (containerId.includes('Url') ? 'ingest_url_dept' : 'ingest_text_dept');
-
-                    if (depts.length === 0) {
-                        container.innerHTML = '<span style="font-size: 12px; color: #94A3B8;">No departments configured in workspace. Global scope will be applied.</span>';
-                        return;
-                    }
-
-                    let html = `
-                        <label style="display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px; background: #E8F5F3; border: 1.5px solid #063D3B; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; color: #063D3B; user-select: none; transition: all 0.15s ease; box-shadow: 0 0 0 1px #063D3B;">
-                            <input type="radio" name="${radioName}" value="" checked onchange="updateIngestDeptRadios('${containerId}')" style="cursor: pointer; accent-color: #063D3B;" />
-                            <span>🌐</span>
-                            <span>Entire Organization (Global Scope)</span>
-                        </label>
-                    `;
-
-                    html += depts.map(d => `
-                        <label style="display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; color: #0F172A; user-select: none; transition: all 0.15s ease;">
-                            <input type="radio" name="${radioName}" value="${d.id}" onchange="updateIngestDeptRadios('${containerId}')" style="cursor: pointer; accent-color: #063D3B;" />
-                            <span>${escapeHtml(d.icon || '🏫')}</span>
-                            <span>${escapeHtml(d.name)}</span>
-                        </label>
-                    `).join('');
-
-                    container.innerHTML = html;
-                });
-            } catch(e) {
-                console.error('[Edvora] Error loading departments for ingestion:', e);
-                containers.forEach(c => {
-                    c.innerHTML = '<span style="font-size: 12px; color: #EF4444;">Failed to load departments.</span>';
-                });
-            }
-        }
+        // Knowledge Ingestion Department Scope (Deprecated - No-op)
+        async function loadIngestDepartments() {}
         window.loadIngestDepartments = loadIngestDepartments;
-
-        function updateIngestDeptRadios(containerId) {
-            const container = document.getElementById(containerId);
-            if (!container) return;
-            const labels = container.querySelectorAll('label');
-            labels.forEach(label => {
-                const radio = label.querySelector('input[type="radio"]');
-                if (radio && radio.checked) {
-                    label.style.borderColor = '#063D3B';
-                    label.style.background = '#E8F5F3';
-                    label.style.color = '#063D3B';
-                    label.style.boxShadow = '0 0 0 1px #063D3B';
-                } else if (label) {
-                    label.style.borderColor = '#E2E8F0';
-                    label.style.background = '#FFFFFF';
-                    label.style.color = '#0F172A';
-                    label.style.boxShadow = 'none';
-                }
-            });
-        }
+        function updateIngestDeptRadios() {}
+        window.updateIngestDeptRadios = updateIngestDeptRadios;
         window.updateIngestDeptRadios = updateIngestDeptRadios;
 
         async function submitIngestFile(e) {
@@ -6043,6 +5914,14 @@
 
         async function switchNavTab(tab, subtab = null, saveHistory = true) {
             if (!tab) tab = 'overview';
+            if (tab === 'departments' || (typeof tab === 'string' && (tab.startsWith('dept-') || tab === 'department-editor'))) {
+                tab = 'academic-programs';
+                if (saveHistory) {
+                    try {
+                        history.replaceState(null, '', '#academic-programs');
+                    } catch(e) {}
+                }
+            }
             await loadTabContent(tab);
             if (typeof closeMobileSidebar === "function") closeMobileSidebar();
             const navItem = document.querySelector(`.nav-item[data-tab="${tab}"]`);
@@ -6073,16 +5952,7 @@
 
             // Universal 1-Click Root-Reset on Navigation Click (Personal Preference & Coding Standard)
             try {
-                if (tab === 'departments') {
-                    if (typeof window.closeDeptDeepDive === 'function') {
-                        window.closeDeptDeepDive();
-                    } else {
-                        const grid = document.getElementById('view-departments-grid');
-                        const detail = document.getElementById('view-departments-detail');
-                        if (detail) detail.style.display = 'none';
-                        if (grid) grid.style.display = 'block';
-                    }
-                } else if (tab === 'knowledge') {
+                if (tab === 'knowledge') {
                     const docModal = document.getElementById('docPreviewModal');
                     if (docModal) docModal.style.display = 'none';
                     const editModal = document.getElementById('editDocModal');
@@ -6114,7 +5984,6 @@
                     if (typeof closeAddStaffModal === 'function') closeAddStaffModal();
                 } else if (tab === 'knowledge-ingestion') {
                     if (typeof loadIngestPrograms === 'function') loadIngestPrograms();
-                    if (typeof loadIngestDepartments === 'function') loadIngestDepartments();
                 } else if (tab === 'profile') {
                     if (typeof loadProfileData === 'function') loadProfileData();
                 }
@@ -6195,10 +6064,7 @@
 
             // Trigger data fetch for selected tab with defensive safety
             try {
-                if (tab === 'departments') {
-                    if (typeof closeDeptDeepDive === 'function') closeDeptDeepDive();
-                    if (typeof loadDepartments === 'function') loadDepartments();
-                } else if (tab === 'academic-programs') {
+                if (tab === 'academic-programs') {
                     if (typeof loadAcademicProgramsTab === 'function') loadAcademicProgramsTab();
                 } else if (tab === 'add-programs') {
                     if (typeof initAddProgramsPage === 'function') initAddProgramsPage();
@@ -11032,6 +10898,10 @@ echo $response['reply'];
                 // Determine active tab from URL hash or localStorage
                 let rawUrlHash = location.hash.replace('#', '').trim();
                 let urlHash = rawUrlHash.split('?')[0];
+                if (urlHash === 'departments' || (urlHash && (urlHash.startsWith('dept-') || urlHash === 'department-editor'))) {
+                    urlHash = 'academic-programs';
+                    try { history.replaceState(null, '', '#academic-programs'); } catch(e) {}
+                }
                 let initialTab = (urlHash && VALID_APP_TABS.includes(urlHash)) 
                     ? urlHash 
                     : (localStorage.getItem('edvora_active_tab') || 'overview');
@@ -12395,1780 +12265,15 @@ echo $response['reply'];
             }
         }
 
-        // ── DEPARTMENT MANAGEMENT JS LOGIC ──────────────────────────────────────
+        // ── DEPARTMENT MANAGEMENT JS LOGIC (DEPRECATED - SAFE EMPTY STUBS) ──
         let currentDepartments = [];
         let availableOrgStaff = [];
         let availableOrgKs = [];
         let availableOrgCampuses = [];
-
-        async function loadDepartments() {
-            const isFullAdmin = currentUser && (
-                currentUser.role === 'owner' ||
-                currentUser.role === 'superadmin' ||
-                currentUser.role === 'super_admin' ||
-                (currentUser.role === 'admin' && currentUser.can_manage_structure == 1)
-            );
-            const actions = document.getElementById('deptHeaderActions');
-            if (actions) {
-                actions.style.display = isFullAdmin ? 'flex' : 'none';
-            }
-
-            try {
-                const res = await fetch('/v1/departments', { headers: { 'Authorization': 'Bearer ' + token } });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    const depts = data.data.departments || (Array.isArray(data.data) ? data.data : []);
-                    currentDepartments = depts;
-                    availableOrgStaff = data.data.available_staff || [];
-                    availableOrgKs = data.data.available_knowledge_sources || [];
-                    availableOrgCampuses = data.data.available_campuses || [];
-
-                    updateDeptStats();
-                    renderDepartmentsGrid();
-                    if (typeof updateKnowledgeDeptDropdown === 'function') {
-                        updateKnowledgeDeptDropdown();
-                    }
-                }
-            } catch (err) {
-                console.error('Failed to load departments:', err);
-            }
-        }
-
-        function updateDeptStats() {
-            if (!currentDepartments) return;
-            const activeDepts = currentDepartments.filter(d => d.is_active == 1);
-            let staffCount = 0;
-            let ksCount = 0;
-            let escCount = 0;
-
-            currentDepartments.forEach(d => {
-                if (d.staff) staffCount += d.staff.length;
-                if (d.knowledge_sources) ksCount += d.knowledge_sources.length;
-                if (d.escalation_rules && (d.escalation_rules.notify_email || d.escalation_rules.notify_whatsapp)) escCount++;
-            });
-
-            const statDepts = document.getElementById('statDeptsCount') || document.getElementById('statActiveDeptsCount');
-            if (statDepts) statDepts.innerText = activeDepts.length;
-            const statStaff = document.getElementById('statStaffCount') || document.getElementById('statAssignedStaffCount');
-            if (statStaff) statStaff.innerText = staffCount;
-            const statKs = document.getElementById('statDeptKsCount') || document.getElementById('statScopedDocsCount');
-            if (statKs) statKs.innerText = ksCount;
-            const statEsc = document.getElementById('statEscalationsCount') || document.getElementById('statAutoEscalationCount');
-            if (statEsc) statEsc.innerText = escCount;
-        }
-
-        function renderDepartmentsGrid() {
-            const container = document.getElementById('departmentsGrid') || document.getElementById('landingDeptCardsGrid');
-            if (!container) return;
-
-            if (typeof loadRealDashboardDepartments === 'function') {
-                loadRealDashboardDepartments();
-                return;
-            }
-
-            if (!currentDepartments || currentDepartments.length === 0) {
-                container.innerHTML = `
-                    <div class="dept-card-create" onclick="openCreateDeptModal()" style="grid-column: 1 / -1; min-height: 220px;">
-                        <div class="dept-create-icon">+</div>
-                        <h4 class="dept-card-create-title">No Departments Configured Yet</h4>
-                        <p class="dept-card-create-desc">Launch instant admissions routing, knowledge base scoping, and escalation rules with our pre-built college department templates.</p>
-                        <span class="dept-btn-secondary" style="font-size: 11.5px; padding: 5px 12px;">+ Custom Department</span>
-                    </div>
-                `;
-                return;
-            }
-
-            var cardsHtml = currentDepartments.map(function(d, index) {
-                var isPreset = (d.is_preset == 1);
-                var isActive = (d.is_active == 1);
-                var hasWidget = (d.enable_dedicated_widget != 0 && d.enable_dedicated_widget !== false);
-                var key = d.slug || ('dept_' + d.id);
-
-                var staffCount = (d.staff || []).length;
-                var coursesCount = (d.courses && d.courses.length) ? d.courses.length : 0;
-                var ksCount = (d.knowledge_sources || []).length;
-                var faqsCount = (d.faqs || []).length;
-                var leadsCount = (d.leads_count !== undefined && d.leads_count !== null) ? Number(d.leads_count) : 0;
-
-                var statusBadgeHtml = isActive
-                    ? (hasWidget
-                        ? '<span class="dept-status-pill dept-status-active"><span class="w-1.5 h-1.5 rounded-full bg-[#10B981]"></span> Active &bull; Widget</span>'
-                        : '<span class="dept-status-pill dept-status-main"><span class="w-1.5 h-1.5 rounded-full bg-[#0284C7]"></span> Active &bull; Main Bot</span>')
-                    : '<span class="dept-status-pill" style="background:#FFFBEB; color:#B45309; border:1px solid #FDE68A;"><span class="w-1.5 h-1.5 rounded-full bg-[#F59E0B]"></span> Inactive</span>';
-
-                var category = 'admissions';
-                var lowerName = (d.name || '').toLowerCase();
-                if (lowerName.indexOf('fee') !== -1 || lowerName.indexOf('aid') !== -1 || lowerName.indexOf('finance') !== -1 || lowerName.indexOf('bursar') !== -1 || lowerName.indexOf('scholarship') !== -1) category = 'finance';
-                else if (lowerName.indexOf('tour') !== -1 || lowerName.indexOf('housing') !== -1 || lowerName.indexOf('affair') !== -1 || lowerName.indexOf('life') !== -1 || lowerName.indexOf('dean') !== -1 || lowerName.indexOf('compliance') !== -1) category = 'life';
-
-                return `
-                    <div class="dept-card-item" id="card-dept-${key}" onclick="typeof openDeptDeepDive === 'function' ? openDeptDeepDive('${key}') : (typeof openEditDeptModal === 'function' ? openEditDeptModal(${d.id}) : null)" data-category="${category}">
-                        <div>
-                            <div class="dept-card-header">
-                                <div class="flex items-center gap-3">
-                                    <div class="dept-icon-box">${d.icon || '🏫'}</div>
-                                    <div>
-                                        <h3 class="dept-card-title">${d.name}</h3>
-                                        <span class="dept-template-tag">${isPreset ? 'Pre-Built Template' : 'Custom Department'}</span>
-                                    </div>
-                                </div>
-                                ${statusBadgeHtml}
-                            </div>
-                            <p class="dept-card-desc">
-                                ${d.description || 'Primary intake desk for admissions, cutoff policies, fee structures, and counselor routing.'}
-                            </p>
-                            <div class="dept-channels-row">
-                                ${d.email ? `<span class="dept-channel-badge">📧 ${d.email}</span>` : ''}
-                                ${d.phone ? `<span class="dept-channel-badge">📞 ${d.phone}</span>` : ''}
-                                ${d.whatsapp ? `<span class="dept-channel-badge">💬 WA Connected</span>` : ''}
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="dept-card-stats">
-                                <div class="dept-stat-unit">
-                                    <span class="dept-stat-val">${coursesCount}</span>
-                                    <span class="dept-stat-lbl">🎓 Programs</span>
-                                </div>
-                                <div class="dept-stat-unit">
-                                    <span class="dept-stat-val">${staffCount}</span>
-                                    <span class="dept-stat-lbl">👥 Staff</span>
-                                </div>
-                                <div class="dept-stat-unit">
-                                    <span class="dept-stat-val">${ksCount}</span>
-                                    <span class="dept-stat-lbl">📚 Docs</span>
-                                </div>
-                                <div class="dept-stat-unit">
-                                    <span class="dept-stat-val">${faqsCount}</span>
-                                    <span class="dept-stat-lbl">❓ FAQs</span>
-                                </div>
-                                <div class="dept-stat-unit">
-                                    <span class="dept-stat-val">${leadsCount}</span>
-                                    <span class="dept-stat-lbl">📈 Leads</span>
-                                </div>
-                            </div>
-                            <div class="dept-card-footer">
-                                <span class="dept-card-action-text">
-                                    <span>Click to open department console &rarr;</span>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            cardsHtml += `
-                <div class="dept-card-create" onclick="openCreateDeptModal()">
-                    <div class="dept-create-icon">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    </div>
-                    <h4 class="dept-card-create-title">+ Custom Department</h4>
-                    <p class="dept-card-create-desc">Define custom admissions sub-division, upload specific program documents, and assign staff counselors.</p>
-                    <span class="dept-btn-secondary" style="font-size: 11.5px; padding: 5px 12px;">Launch Setup &rarr;</span>
-                </div>
-            `;
-
-            container.innerHTML = cardsHtml;
-        }
-
-        // Toggle Department Active Status
-        async function toggleDeptStatus(deptId, isActive) {
-            try {
-                await fetch('/v1/departments/' + deptId, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ is_active: isActive ? 1 : 0 })
-                });
-                loadDepartments();
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        // Delete Department
-        async function deleteDept(deptId) {
-            if (!confirm('Are you sure you want to delete this department?')) return;
-            try {
-                await fetch('/v1/departments/' + deptId, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                loadDepartments();
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        // Open Presets Catalog Modal
-        async function openPresetsModal() {
-            try {
-                const res = await fetch('/v1/departments/presets', { headers: { 'Authorization': 'Bearer ' + token } });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    const presets = data.data.presets || [];
-                    const existingSlugs = currentDepartments.map(d => d.slug);
-
-                    const grid = document.getElementById('presetsGrid');
-                    grid.innerHTML = presets.map(p => {
-                        const importedDept = currentDepartments.find(d => d.slug === p.slug);
-                        const isImported = !!importedDept;
-                        const isActive = importedDept ? (importedDept.is_active == 1) : false;
-
-                        return `
-                            <div class="preset-card-item" style="background: #F1F7F4; border: 1px solid ${isImported ? (isActive ? 'rgba(52, 211, 153, 0.3)' : 'rgba(251, 191, 36, 0.3)') : 'var(--brand-border-subtle)'}; border-radius: var(--brand-radius-sm); padding: 14px; position: relative; cursor: ${isImported ? 'default' : 'pointer'};" onclick="togglePresetCardClick(event, this)">
-                                <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 6px;">
-                                    <div style="display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0;">
-                                        <span style="font-size: 20px; flex-shrink: 0;">${p.icon}</span>
-                                        <strong style="font-size: 14px; color: #092F2E; line-height: 1.3;">${p.name}</strong>
-                                    </div>
-                                    ${isImported ? 
-                                        (isActive ? 
-                                            '<span style="font-size: 11px; font-weight: 600; color: var(--brand-emerald-400); background: rgba(52, 211, 153, 0.12); padding: 3px 8px; border-radius: 12px; border: 1px solid rgba(52, 211, 153, 0.3); white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px;">● Active</span>' 
-                                            : 
-                                            '<span style="font-size: 11px; font-weight: 600; color: var(--brand-amber-400); background: rgba(251, 191, 36, 0.12); padding: 3px 8px; border-radius: 12px; border: 1px solid rgba(251, 191, 36, 0.3); white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px;">○ Inactive • Setup Required</span>')
-                                        : 
-                                        `<input type="radio" name="preset_selection" class="preset-radio" value="${p.slug}" style="flex-shrink: 0; margin-top: 2px; cursor: pointer; accent-color: var(--brand-indigo-500); width: 16px; height: 16px;" onclick="event.stopPropagation()" />`
-                                    }
-                                </div>
-                                <p style="font-size: 13px; color: #648781; line-height: 1.45; margin-bottom: 8px;">
-                                    ${p.description}
-                                </p>
-                                <div style="font-size: 13px; color: var(--brand-indigo-400); background: rgba(99, 102, 241, 0.1); padding: 6px 10px; border-radius: 4px; line-height: 1.35;">
-                                    "${p.greeting_message}"
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
-
-                    document.getElementById('presetsModal').style.display = 'flex';
-                }
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        function togglePresetCardClick(event, cardEl) {
-            if (event.target.tagName === 'INPUT' || event.target.tagName === 'LABEL') return;
-            const radio = cardEl.querySelector('.preset-radio');
-            if (radio && !radio.disabled) {
-                radio.checked = true;
-                document.querySelectorAll('.preset-card-item').forEach(c => c.style.borderColor = 'var(--brand-border-subtle)');
-                cardEl.style.borderColor = 'var(--brand-indigo-500)';
-            }
-        }
-
-        function closePresetsModal() {
-            document.getElementById('presetsModal').style.display = 'none';
-        }
-
-        async function importSelectedPresets() {
-            const selectedRadio = document.querySelector('.preset-radio:checked');
-            if (!selectedRadio) {
-                alert('Please select a preset department card to import.');
-                return;
-            }
-
-            const selectedSlug = selectedRadio.value;
-
-            try {
-                const res = await fetch('/v1/departments/preset-import', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ selected_slugs: [selectedSlug] })
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    const newDeptId = data.data.department_id;
-                    closePresetsModal();
-                    await loadDepartments();
-
-                    // Immediately open newly imported department in full page edit mode
-                    if (newDeptId) {
-                        openEditDeptModal(newDeptId);
-                    }
-                } else {
-                    alert(data.message || 'Import failed');
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Failed to import preset department');
-            }
-        }
-
-        function updateEditorStatusDisplay(isActive) {
-            const badge = document.getElementById('editorStatusBadge');
-            const title = document.getElementById('editorStatusBoxTitle');
-            const subtitle = document.getElementById('editorStatusBoxSubtitle');
-            const box = document.getElementById('editorStatusBox');
-
-            if (isActive) {
-                if (badge) {
-                    badge.innerText = '● Active';
-                    badge.style.cssText = 'background: rgba(52, 211, 153, 0.12); color: var(--brand-emerald-400); border: 1px solid rgba(52, 211, 153, 0.3); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 12px;';
-                }
-                if (title) title.innerHTML = '✅ Status: Active';
-                if (subtitle) subtitle.innerHTML = 'Department knowledge and inquiries are active and live for student interactions. Enable to display an interactive department selection pill and starter FAQ chips directly inside the chatbot widget for student self-routing.';
-                if (box) {
-                    box.style.background = 'rgba(52, 211, 153, 0.08)';
-                    box.style.borderColor = 'rgba(52, 211, 153, 0.3)';
-                }
-            } else {
-                if (badge) {
-                    badge.innerText = '○ Inactive • Setup Required';
-                    badge.style.cssText = 'background: rgba(251, 191, 36, 0.12); color: var(--brand-amber-400); border: 1px solid rgba(251, 191, 36, 0.3); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 12px;';
-                }
-                if (title) title.innerHTML = '⏳ Status: Inactive (Setup Required)';
-                if (subtitle) subtitle.innerHTML = 'Enable to display an interactive department selection pill and starter FAQ chips directly inside the chatbot widget for student self-routing.';
-                if (box) {
-                    box.style.background = 'rgba(251, 191, 36, 0.08)';
-                    box.style.borderColor = 'rgba(251, 191, 36, 0.25)';
-                }
-            }
-        }
-
-        // Department Icon Emoji Picker Engine with Contextual Tooltips (5 Rows x 8 Columns = 40 Emojis)
-        const DEPARTMENT_EMOJIS = [
-            // Row 1: Academic Disciplines & Core Schools (8)
-            { emoji: '💼', name: 'School of Business & Management' },
-            { emoji: '⚙️', name: 'School of Engineering & Technology' },
-            { emoji: '🩺', name: 'School of Health Sciences, Medicine & Nursing' },
-            { emoji: '⚛️', name: 'School of Physical Sciences & Physics' },
-            { emoji: '🧬', name: 'School of Biological & Life Sciences' },
-            { emoji: '📐', name: 'School of Mathematics & Statistics' },
-            { emoji: '📜', name: 'School of Humanities, History & Literature' },
-            { emoji: '🧠', name: 'School of Social Sciences & Psychology' },
-
-            // Row 2: Applied Disciplines & Professional Schools (8)
-            { emoji: '📖', name: 'School of Education & Teacher Training' },
-            { emoji: '💻', name: 'Computer Science, AI & Information Tech' },
-            { emoji: '⚖️', name: 'School of Law, Legal Studies & Policy' },
-            { emoji: '🎨', name: 'School of Design, Architecture & Fine Arts' },
-            { emoji: '🧪', name: 'Chemistry, Pharmacy & Bio-Chemical Sciences' },
-            { emoji: '🎭', name: 'Performing Arts, Theatre & Music' },
-            { emoji: '📰', name: 'Journalism, Media & Mass Communication' },
-            { emoji: '🌿', name: 'Agriculture, Forestry & Environmental Studies' },
-
-            // Row 3: Central Administration & Governance (8)
-            { emoji: '🏫', name: 'Main Campus & Central Administration' },
-            { emoji: '🎓', name: 'Admissions, Registrations & Degrees' },
-            { emoji: '📚', name: 'University Library & Information Center' },
-            { emoji: '💰', name: 'Finance, Accounts & Fee Management' },
-            { emoji: '📝', name: 'Examinations, Controller of Exams & Records' },
-            { emoji: '🏢', name: 'Deans Office & Academic Governance' },
-            { emoji: '🛡️', name: 'Campus Safety, Security & Vigilance' },
-            { emoji: '🌐', name: 'International Affairs & Global Exchange' },
-
-            // Row 4: Campus Life, Facilities & Services (8)
-            { emoji: '🛏️', name: 'Campus Residence, Student Housing & Hostels' },
-            { emoji: '🍽️', name: 'Cafeteria, Dining Halls & Campus Mess' },
-            { emoji: '🚌', name: 'Transportation, Bus Routes & Campus Shuttle' },
-            { emoji: '⚽', name: 'Sports, Physical Education & Athletics' },
-            { emoji: '🏥', name: 'Campus Hospital, Clinic & Health Center' },
-            { emoji: '🏆', name: 'Scholarships, Financial Aid & Fellowships' },
-            { emoji: '📍', name: 'Campus Tours & Visitor Welcome Center' },
-            { emoji: '🌍', name: 'Global Studies & Foreign Language Center' },
-
-            // Row 5: Student Support, Outreach & Career Launch (8)
-            { emoji: '📞', name: 'Student Support, Helpdesk & Inquiries' },
-            { emoji: '🤝', name: 'Student Welfare, Counseling & Affairs' },
-            { emoji: '🎯', name: 'Admissions Outreach & Candidate Recruitment' },
-            { emoji: '📢', name: 'Public Relations, News & Campus Events' },
-            { emoji: '💡', name: 'Innovation, Incubation & Entrepreneurship Cell' },
-            { emoji: '🚀', name: 'Corporate Relations & Career Placements' },
-            { emoji: '👥', name: 'Alumni Association & Community Affairs' },
-            { emoji: '🔬', name: 'Advanced Research & Central Instrumentation Lab' }
-        ];
-
-        function initDeptEmojiPicker() {
-            const grid = document.getElementById('deptEmojiGrid');
-            if (!grid) return;
-            grid.innerHTML = DEPARTMENT_EMOJIS.map(item => `
-                <button type="button" class="dept-emoji-btn" title="${item.emoji} — ${item.name}" onclick="selectDeptEmoji('${item.emoji}')" onmouseenter="showDeptEmojiHover('${item.emoji}', '${item.name.replace(/'/g, "\\'")}')" onmouseleave="clearDeptEmojiHover()" style="font-size: 20px; height: 36px; display: flex; align-items: center; justify-content: center; background: #F1F7F4; border: 1px solid #DDE9E3; border-radius: 6px; cursor: pointer; transition: all 0.15s; outline: none; position: relative;" onmouseover="this.style.background='var(--brand-surface-200)'; this.style.borderColor='var(--brand-indigo-500)'; this.style.transform='scale(1.15)';" onmouseout="this.style.background='var(--brand-bg-900)'; this.style.borderColor='var(--brand-border-subtle)'; this.style.transform='scale(1)';">
-                    ${item.emoji}
-                </button>
-            `).join('');
-        }
-
-        function showDeptEmojiHover(emoji, name) {
-            const label = document.getElementById('deptEmojiHoverLabel');
-            if (label) label.innerHTML = `<span style="font-size: 14px; margin-right: 4px;">${emoji}</span> <span style="color: #092F2E; font-weight: 600;">${name}</span>`;
-        }
-
-        function clearDeptEmojiHover() {
-            const label = document.getElementById('deptEmojiHoverLabel');
-            if (label) label.innerHTML = `<span style="color: #648781;">Hover an emoji to see suggested department</span>`;
-        }
-
-        function toggleDeptEmojiPicker(event) {
-            if (event) event.stopPropagation();
-            const popover = document.getElementById('deptEmojiPickerPopover');
-            if (!popover) return;
-            const isOpen = popover.style.display === 'block';
-            if (isOpen) {
-                popover.style.display = 'none';
-            } else {
-                initDeptEmojiPicker();
-                clearDeptEmojiHover();
-                popover.style.display = 'block';
-                const customInput = document.getElementById('customEmojiInput');
-                if (customInput) customInput.value = '';
-            }
-        }
-
-        function closeDeptEmojiPicker() {
-            const popover = document.getElementById('deptEmojiPickerPopover');
-            if (popover) popover.style.display = 'none';
-        }
-
-        function selectDeptEmoji(emoji) {
-            if (!emoji) return;
-            const iconInput = document.getElementById('deptIconInput');
-            if (iconInput) iconInput.value = emoji;
-            const preview = document.getElementById('deptIconPreview');
-            if (preview) preview.innerText = emoji;
-            const topHeaderIcon = document.getElementById('modalDeptIcon');
-            if (topHeaderIcon) topHeaderIcon.innerText = emoji;
-            closeDeptEmojiPicker();
-        }
-
-        function onCustomEmojiEntered(val) {
-            if (val && val.trim()) {
-                selectDeptEmoji(val.trim());
-            }
-        }
-
-        // Chatbot Menu Greeting Suggestion Templates
-        const GREETING_PRESETS = {
-            1: "Hello! I can help you with eligibility, course details, fees, and application deadlines. What would you like to explore?",
-            2: "Welcome! Ask me anything about our curriculum, faculty, research labs, campus facilities, or how to get started.",
-            3: "Hi there! I am your virtual department guide. Feel free to ask questions or request a callback from our counseling team."
-        };
-
-        function applyGreetingPreset(optionNum) {
-            const input = document.getElementById('deptGreetingInput');
-            if (!input) return;
-            const deptName = (document.getElementById('deptNameInput')?.value || '').trim();
-            let text = GREETING_PRESETS[optionNum] || '';
-            
-            if (deptName) {
-                if (optionNum === 1) {
-                    text = `Hello! Welcome to ${deptName}. I can help you with eligibility, course details, fees, and application deadlines. What would you like to explore?`;
-                } else if (optionNum === 2) {
-                    text = `Welcome to the ${deptName}! Ask me anything about our curriculum, faculty, research labs, campus facilities, or how to get started.`;
-                } else if (optionNum === 3) {
-                    text = `Hi there! I am your virtual guide for ${deptName}. Feel free to ask questions or request a callback from our counseling team.`;
-                }
-            }
-
-            input.value = text;
-            input.focus();
-            
-            // Subtle flash highlight on textarea to give clear user feedback
-            input.style.transition = 'border-color 0.2s, box-shadow 0.2s';
-            input.style.borderColor = 'var(--brand-indigo-500)';
-            input.style.boxShadow = '0 0 0 2px rgba(99, 102, 241, 0.3)';
-            setTimeout(() => {
-                input.style.borderColor = '';
-                input.style.boxShadow = '';
-            }, 600);
-        }
-
-        // ── DEPARTMENT OPERATING HOURS & AWAY AUTOMATION HELPERS ─────────────
-        const DEPT_DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-
-        function onDeptHourToggle(day) {
-            const cb = document.getElementById('deptHourActive_' + day);
-            const openEl = document.getElementById('deptHourOpen_' + day);
-            const closeEl = document.getElementById('deptHourClose_' + day);
-            const statusEl = document.getElementById('deptHourStatus_' + day);
-
-            const isActive = cb ? cb.checked : false;
-            if (openEl) {
-                openEl.disabled = !isActive;
-                openEl.style.opacity = isActive ? '1' : '0.6';
-            }
-            if (closeEl) {
-                closeEl.disabled = !isActive;
-                closeEl.style.opacity = isActive ? '1' : '0.6';
-            }
-            if (statusEl) {
-                if (isActive) {
-                    statusEl.textContent = 'Open';
-                    statusEl.style.color = '#047857';
-                    statusEl.style.background = '#ECFDF5';
-                    statusEl.style.border = '1px solid #A7F3D0';
-                } else {
-                    statusEl.textContent = 'Closed';
-                    statusEl.style.color = '#648781';
-                    statusEl.style.background = '#F1F5F9';
-                    statusEl.style.border = '1px solid #CBD5E1';
-                }
-            }
-        }
-        window.onDeptHourToggle = onDeptHourToggle;
-
-        function applyDeptHoursPreset(presetType) {
-            DEPT_DAYS.forEach(day => {
-                const cb = document.getElementById('deptHourActive_' + day);
-                const openEl = document.getElementById('deptHourOpen_' + day);
-                const closeEl = document.getElementById('deptHourClose_' + day);
-
-                if (presetType === 'mon_sat') {
-                    const isMonSat = day !== 'sun';
-                    if (cb) cb.checked = isMonSat;
-                    if (openEl) openEl.value = '09:00';
-                    if (closeEl) closeEl.value = '18:00';
-                } else if (presetType === 'mon_fri') {
-                    const isMonFri = day !== 'sat' && day !== 'sun';
-                    if (cb) cb.checked = isMonFri;
-                    if (openEl) openEl.value = '09:00';
-                    if (closeEl) closeEl.value = '17:00';
-                } else if (presetType === '24_7') {
-                    if (cb) cb.checked = true;
-                    if (openEl) openEl.value = '00:00';
-                    if (closeEl) closeEl.value = '23:59';
-                }
-                onDeptHourToggle(day);
-            });
-        }
-        window.applyDeptHoursPreset = applyDeptHoursPreset;
-
-        function getDeptWorkingHoursFromForm() {
-            const hours = {};
-            DEPT_DAYS.forEach(day => {
-                const cb = document.getElementById('deptHourActive_' + day);
-                const openEl = document.getElementById('deptHourOpen_' + day);
-                const closeEl = document.getElementById('deptHourClose_' + day);
-                hours[day] = {
-                    active: cb ? cb.checked : false,
-                    open: openEl ? openEl.value : '09:00',
-                    close: closeEl ? closeEl.value : '18:00'
-                };
-            });
-            return hours;
-        }
-        window.getDeptWorkingHoursFromForm = getDeptWorkingHoursFromForm;
-
-        function setDeptWorkingHoursToForm(workingHours) {
-            let wh = workingHours;
-            if (typeof wh === 'string') {
-                try { wh = JSON.parse(wh); } catch(e) { wh = null; }
-            }
-            if (!wh || typeof wh !== 'object' || Object.keys(wh).length === 0) {
-                applyDeptHoursPreset('mon_sat');
-                return;
-            }
-
-            DEPT_DAYS.forEach(day => {
-                const dayConfig = wh[day] || (wh[day.toUpperCase()] || null);
-                const cb = document.getElementById('deptHourActive_' + day);
-                const openEl = document.getElementById('deptHourOpen_' + day);
-                const closeEl = document.getElementById('deptHourClose_' + day);
-
-                if (dayConfig) {
-                    const isActive = dayConfig.active === true || dayConfig.active === 1 || dayConfig.active === '1';
-                    if (cb) cb.checked = isActive;
-                    if (openEl && dayConfig.open) openEl.value = dayConfig.open;
-                    if (closeEl && dayConfig.close) closeEl.value = dayConfig.close;
-                } else {
-                    if (cb) cb.checked = day !== 'sun';
-                    if (openEl) openEl.value = '09:00';
-                    if (closeEl) closeEl.value = '18:00';
-                }
-                onDeptHourToggle(day);
-            });
-        }
-        window.setDeptWorkingHoursToForm = setDeptWorkingHoursToForm;
-
-        function applyDeptAwayTemplate() {
-            const name = (document.getElementById('deptNameInput') && document.getElementById('deptNameInput').value.trim()) || 'Department';
-            const template = `Our ${name} desk is currently closed for the evening. Your inquiry has been prioritized. A counselor will reach out tomorrow morning at 09:15 AM.`;
-            const awayEl = document.getElementById('deptAwayMessageInput');
-            if (awayEl) {
-                awayEl.value = template;
-                awayEl.focus();
-            }
-        }
-        window.applyDeptAwayTemplate = applyDeptAwayTemplate;
-
-        // Department Editor Page Navigation
-        async function openCreateDeptModal() {
-            // 1. Switch view and ensure department-editor tab content is freshly loaded
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            const editorPane = document.getElementById('tab-department-editor');
-            if (editorPane) editorPane.dataset.loaded = 'false';
-            await loadTabContent('department-editor');
-            const editorTab = document.getElementById('tab-department-editor');
-            if (editorTab) editorTab.classList.add('active');
-
-            // Ensure availableOrgStaff is populated for staff checklist
-            if (!availableOrgStaff || availableOrgStaff.length === 0) {
-                try {
-                    const authToken = localStorage.getItem('edvora_token') || token;
-                    const res = await fetch('/v1/departments', {
-                        headers: { 'Authorization': 'Bearer ' + authToken }
-                    });
-                    const data = await res.json();
-                    if (data.status === 'success' && data.data) {
-                        availableOrgStaff = data.data.available_staff || [];
-                        availableOrgKs = data.data.available_knowledge_sources || [];
-                        availableOrgCampuses = data.data.available_campuses || [];
-                    }
-                } catch(e) {}
-            }
-
-            // 2. Clear inputs safely with defensive checks
-            const editId = document.getElementById('editDeptId');
-            if (editId) editId.value = '';
-            const mIcon = document.getElementById('modalDeptIcon');
-            if (mIcon) mIcon.innerText = '🏫';
-            const mTitle = document.getElementById('modalDeptTitle');
-            if (mTitle) mTitle.innerText = 'Add Custom Department';
-            const mSubtitle = document.getElementById('modalDeptSubtitle');
-            if (mSubtitle) mSubtitle.innerText = 'Create contact handles, staff assignments, knowledge scope & escalation rules';
-            const noticeDeptName = document.getElementById('staffNoticeDeptName');
-            if (noticeDeptName) noticeDeptName.innerText = 'this department';
-            const iconInput = document.getElementById('deptIconInput');
-            if (iconInput) iconInput.value = '🏫';
-            const iconPreview = document.getElementById('deptIconPreview');
-            if (iconPreview) iconPreview.innerText = '🏫';
-            const nameInput = document.getElementById('deptNameInput');
-            if (nameInput) nameInput.value = '';
-            const descInput = document.getElementById('deptDescInput');
-            if (descInput) descInput.value = '';
-            const emailInput = document.getElementById('deptEmailInput');
-            if (emailInput) emailInput.value = '';
-            const phoneInput = document.getElementById('deptPhoneInput');
-            if (phoneInput) phoneInput.value = '';
-            const waInput = document.getElementById('deptWhatsappInput');
-            if (waInput) waInput.value = '';
-            const greetingInput = document.getElementById('deptGreetingInput');
-            if (greetingInput) greetingInput.value = '';
-            const tzInput = document.getElementById('deptTimezoneInput');
-            if (tzInput) tzInput.value = 'America/New_York';
-            const awayInput = document.getElementById('deptAwayMessageInput');
-            if (awayInput) awayInput.value = 'Our department desk is currently closed for the evening. Your inquiry has been prioritized. A counselor will reach out tomorrow morning at 09:15 AM.';
-
-            applyDeptHoursPreset('mon_sat');
-
-            const emailCheck = document.getElementById('escalateEmailCheck');
-            if (emailCheck) emailCheck.checked = true;
-            const waCheck = document.getElementById('escalateWhatsappCheck');
-            if (waCheck) waCheck.checked = true;
-            const leadAssignSelect = document.getElementById('leadAssignmentSelect');
-            if (leadAssignSelect) leadAssignSelect.value = 'round_robin';
-
-            const activeCb = document.getElementById('deptIsActiveInput');
-            if (activeCb) activeCb.checked = false;
-            const widgetCb = document.getElementById('deptEnableDedicatedWidgetInput');
-            if (widgetCb) widgetCb.checked = false;
-            updateEditorStatusDisplay(false);
-
-            renderDeptKsList([]);
-            renderDeptStaffChecklist([]);
-            renderFaqs([]);
-            renderDeptCourses([]);
-
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        async function openEditDeptModal(deptId, targetSection) {
-            // 1. Switch view and ensure department-editor tab content is loaded first
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            const editorPane = document.getElementById('tab-department-editor');
-            if (editorPane) editorPane.dataset.loaded = 'false';
-            await loadTabContent('department-editor');
-            const editorTab = document.getElementById('tab-department-editor');
-            if (editorTab) editorTab.classList.add('active');
-
-            let dept = (currentDepartments || []).find(d => d.id == deptId);
-            if (!dept && window.currentDepartments) {
-                dept = window.currentDepartments.find(d => d.id == deptId);
-            }
-            if (!dept || !dept.courses || !availableOrgStaff || availableOrgStaff.length === 0) {
-                try {
-                    const authToken = localStorage.getItem('edvora_token') || token;
-                    const res = await fetch('/v1/departments', {
-                        headers: { 'Authorization': 'Bearer ' + authToken }
-                    });
-                    const data = await res.json();
-                    if (data.status === 'success' && data.data) {
-                        const depts = data.data.departments || (Array.isArray(data.data) ? data.data : []);
-                        currentDepartments = depts;
-                        window.currentDepartments = depts;
-                        availableOrgStaff = data.data.available_staff || [];
-                        availableOrgKs = data.data.available_knowledge_sources || [];
-                        availableOrgCampuses = data.data.available_campuses || [];
-                        dept = currentDepartments.find(d => d.id == deptId) || dept;
-                    }
-                } catch(e) {
-                    console.warn('Failed to fetch departments in openEditDeptModal', e);
-                }
-            }
-            if (!dept) {
-                console.warn('Could not locate department with ID:', deptId);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                return;
-            }
-
-            const isActive = dept.is_active == 1;
-            const hasDedicatedWidget = (dept.enable_dedicated_widget !== 0 && dept.enable_dedicated_widget !== '0' && dept.enable_dedicated_widget !== false);
-            const deptIcon = dept.icon || '🏫';
-
-            const editId = document.getElementById('editDeptId');
-            if (editId) editId.value = dept.id;
-            const mIcon = document.getElementById('modalDeptIcon');
-            if (mIcon) mIcon.innerText = deptIcon;
-            const mTitle = document.getElementById('modalDeptTitle');
-            if (mTitle) mTitle.innerText = 'Configure ' + dept.name;
-            const noticeDeptName = document.getElementById('staffNoticeDeptName');
-            if (noticeDeptName) noticeDeptName.innerText = dept.name;
-            const mSubtitle = document.getElementById('modalDeptSubtitle');
-            if (mSubtitle) mSubtitle.innerText = 'Edit contact info, staff assignments, knowledge scope & escalation rules';
-            const iconInput = document.getElementById('deptIconInput');
-            if (iconInput) iconInput.value = deptIcon;
-            const iconPreview = document.getElementById('deptIconPreview');
-            if (iconPreview) iconPreview.innerText = deptIcon;
-            const nameInput = document.getElementById('deptNameInput');
-            if (nameInput) nameInput.value = dept.name;
-            const descInput = document.getElementById('deptDescInput');
-            if (descInput) descInput.value = dept.description || '';
-            const emailInput = document.getElementById('deptEmailInput');
-            if (emailInput) emailInput.value = dept.email || '';
-            const phoneInput = document.getElementById('deptPhoneInput');
-            if (phoneInput) phoneInput.value = dept.phone || '';
-            const waInput = document.getElementById('deptWhatsappInput');
-            if (waInput) waInput.value = dept.whatsapp || '';
-            const greetingInput = document.getElementById('deptGreetingInput');
-            if (greetingInput) greetingInput.value = dept.greeting_message || '';
-            const tzInput = document.getElementById('deptTimezoneInput');
-            if (tzInput) tzInput.value = dept.timezone || 'America/New_York';
-            const awayInput = document.getElementById('deptAwayMessageInput');
-            if (awayInput) awayInput.value = dept.auto_away_message || (`Our ${dept.name} desk is currently closed for the evening. Your inquiry has been prioritized. A counselor will reach out tomorrow morning at 09:15 AM.`);
-
-            // Operating Hours
-            setDeptWorkingHoursToForm(dept.working_hours);
-
-            const activeCb = document.getElementById('deptIsActiveInput');
-            if (activeCb) activeCb.checked = isActive;
-            const widgetCb = document.getElementById('deptEnableDedicatedWidgetInput');
-            if (widgetCb) widgetCb.checked = hasDedicatedWidget;
-            updateEditorStatusDisplay(isActive);
-
-            // Escalation rules
-            const escRules = typeof dept.escalation_rules === 'string' ? JSON.parse(dept.escalation_rules || '{}') : (dept.escalation_rules || {});
-            const emailCheck = document.getElementById('escalateEmailCheck');
-            if (emailCheck) emailCheck.checked = escRules.notify_email !== false;
-            const waCheck = document.getElementById('escalateWhatsappCheck');
-            if (waCheck) waCheck.checked = escRules.notify_whatsapp !== false;
-
-            // Lead assignment rules
-            const leadRules = typeof dept.lead_assignment_rules === 'string' ? JSON.parse(dept.lead_assignment_rules || '{}') : (dept.lead_assignment_rules || {});
-            const leadAssignSelect = document.getElementById('leadAssignmentSelect');
-            if (leadAssignSelect) leadAssignSelect.value = leadRules.method || 'round_robin';
-
-            // Attached knowledge documents
-            renderDeptKsList(dept.knowledge_sources || []);
-
-            // Assigned staff checklist
-            const assignedStaff = (dept.staff || []).map(s => s.user_id);
-            renderDeptStaffChecklist(assignedStaff);
-
-            // Starter FAQs & quick chips
-            renderFaqs(dept.faqs || []);
-
-            // Academic Programs & Offered Courses
-            renderDeptCourses(dept.courses || []);
-
-            if (targetSection === 'courses') {
-                setTimeout(() => {
-                    const el = document.getElementById('sectionDeptCourses');
-                    if (el) {
-                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        el.style.transition = 'background 0.5s ease';
-                        el.style.background = 'rgba(16, 185, 129, 0.08)';
-                        setTimeout(() => { el.style.background = 'transparent'; }, 1600);
-                    }
-                }, 250);
-            } else if (targetSection === 'hours') {
-                setTimeout(() => {
-                    const el = document.getElementById('sectionDeptOperatingHours');
-                    if (el) {
-                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        el.style.transition = 'background 0.5s ease';
-                        el.style.background = 'rgba(16, 185, 129, 0.08)';
-                        setTimeout(() => { el.style.background = 'transparent'; }, 1600);
-                    }
-                }, 250);
-            } else if (targetSection === 'escalations') {
-                setTimeout(() => {
-                    const el = document.getElementById('sectionDeptEscalations');
-                    if (el) {
-                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        el.style.transition = 'background 0.5s ease';
-                        el.style.background = 'rgba(217, 119, 6, 0.08)';
-                        setTimeout(() => { el.style.background = 'transparent'; }, 1600);
-                    }
-                }, 250);
-            } else {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-        }
-
-        window.openCreateDeptModal = openCreateDeptModal;
-        window.openEditDeptModal = openEditDeptModal;
-
-        function closeDepartmentModal() {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            const deptTab = document.getElementById('tab-departments');
-            if (deptTab) deptTab.classList.add('active');
-            if (typeof loadDepartments === 'function') loadDepartments();
-            if (typeof loadRealDashboardDepartments === 'function') loadRealDashboardDepartments();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-        window.closeDepartmentModal = closeDepartmentModal;
-
-        // ── 5 DEDICATED FOCUSED DEPARTMENT EDITORS ─────────────────────────────
-        async function openDeptCardEditor(cardType, deptId) {
-            if (!deptId) {
-                deptId = window.currentLandingDeptId;
-                if (!deptId && window.landingDeptData && window.currentLandingDeptKey && window.landingDeptData[window.currentLandingDeptKey]) {
-                    deptId = window.landingDeptData[window.currentLandingDeptKey].id;
-                }
-                if (!deptId && window.currentDepartments && window.currentDepartments.length > 0) {
-                    const curKey = window.currentLandingDeptKey || '';
-                    const match = window.currentDepartments.find(d => d.slug === curKey || ('dept_' + d.id) === curKey || d.id == curKey);
-                    if (match) deptId = match.id;
-                }
-                if (!deptId && window.currentDepartments && window.currentDepartments.length > 0) {
-                    deptId = window.currentDepartments[0].id;
-                }
-            }
-
-
-
-            // If "Documents & Sources" (knowledge) card was clicked:
-            // Route directly to Central Knowledge Hub with this department pre-selected
-            if (cardType === 'knowledge') {
-                const targetDeptFilter = String(deptId);
-                window._userSelectedKnowledgeDeptFilter = targetDeptFilter;
-                window._skipKnowledgeFilterResetOnce = true;
-                await switchNavTab('knowledge');
-                const selectEl = document.getElementById('ckhDeptFilter');
-                if (selectEl) {
-                    selectEl.value = targetDeptFilter;
-                }
-                if (typeof filterKnowledgeTable === 'function') {
-                    filterKnowledgeTable();
-                }
-                return;
-            }
-
-            const validTypes = ['courses', 'staff', 'hours', 'escalations'];
-            const tabMap = {
-                'courses': 'dept-courses-editor',
-                'staff': 'dept-staff-editor',
-                'hours': 'dept-hours-editor',
-                'escalations': 'dept-escalations-editor'
-            };
-            const tabName = tabMap[cardType] || ('dept-' + cardType + '-editor');
-
-            // 1. Switch views and ensure target editor tab content is loaded
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            const editorPane = document.getElementById('tab-' + tabName);
-            if (editorPane) editorPane.dataset.loaded = 'false';
-            await loadTabContent(tabName);
-            const editorTab = document.getElementById('tab-' + tabName);
-            if (editorTab) editorTab.classList.add('active');
-
-            // 2. Locate department data
-            let dept = (currentDepartments || []).find(d => d.id == deptId);
-            if (!dept && window.currentDepartments) {
-                dept = window.currentDepartments.find(d => d.id == deptId);
-            }
-            if (!dept || !dept.courses || !availableOrgStaff || availableOrgStaff.length === 0) {
-                try {
-                    const authToken = localStorage.getItem('edvora_token') || token;
-                    const res = await fetch('/v1/departments', {
-                        headers: { 'Authorization': 'Bearer ' + authToken }
-                    });
-                    const data = await res.json();
-                    if (data.status === 'success' && data.data) {
-                        const depts = data.data.departments || (Array.isArray(data.data) ? data.data : []);
-                        currentDepartments = depts;
-                        window.currentDepartments = depts;
-                        availableOrgStaff = data.data.available_staff || [];
-                        availableOrgKs = data.data.available_knowledge_sources || [];
-                        availableOrgCampuses = data.data.available_campuses || [];
-                        dept = currentDepartments.find(d => d.id == deptId) || dept;
-                    }
-                } catch(e) {
-                    console.warn('Failed to fetch departments in openDeptCardEditor', e);
-                }
-            }
-
-            if (!dept) {
-                console.warn('Could not locate department with ID:', deptId);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                return;
-            }
-
-            const deptIcon = dept.icon || '🏫';
-            const deptName = dept.name || 'Department';
-
-            // 3. Populate specific form based on cardType
-            if (cardType === 'courses') {
-                const idEl = document.getElementById('coursesEditorDeptId');
-                if (idEl) idEl.value = dept.id;
-                const iconEl = document.getElementById('coursesModalDeptIcon');
-                if (iconEl) iconEl.innerText = deptIcon;
-                const titleEl = document.getElementById('coursesModalDeptTitle');
-                if (titleEl) titleEl.innerText = deptName + ' — Programs & Courses';
-                renderFocusedDeptCourses(dept.courses || []);
-            } else if (cardType === 'staff') {
-                const idEl = document.getElementById('staffEditorDeptId');
-                if (idEl) idEl.value = dept.id;
-                const iconEl = document.getElementById('staffModalDeptIcon');
-                if (iconEl) iconEl.innerText = deptIcon;
-                const titleEl = document.getElementById('staffModalDeptTitle');
-                if (titleEl) titleEl.innerText = deptName + ' — Assigned Staff';
-                const noticeDept = document.getElementById('focusedStaffNoticeDeptName');
-                if (noticeDept) noticeDept.innerText = deptName;
-                const assignedStaff = (dept.staff || []).map(s => s.user_id);
-                renderFocusedDeptStaff(assignedStaff);
-            } else if (cardType === 'knowledge') {
-                const idEl = document.getElementById('ksEditorDeptId');
-                if (idEl) idEl.value = dept.id;
-                const iconEl = document.getElementById('ksModalDeptIcon');
-                if (iconEl) iconEl.innerText = deptIcon;
-                const titleEl = document.getElementById('ksModalDeptTitle');
-                if (titleEl) titleEl.innerText = deptName + ' — Knowledge Scope & Sources';
-                if (typeof dismissFocusedDeptKsAlert === 'function') dismissFocusedDeptKsAlert();
-                renderFocusedDeptKsList(dept.knowledge_sources || []);
-            } else if (cardType === 'hours') {
-                const idEl = document.getElementById('hoursEditorDeptId');
-                if (idEl) idEl.value = dept.id;
-                const iconEl = document.getElementById('hoursModalDeptIcon');
-                if (iconEl) iconEl.innerText = deptIcon;
-                const titleEl = document.getElementById('hoursModalDeptTitle');
-                if (titleEl) titleEl.innerText = deptName + ' — Operating Hours & Auto-Away';
-                const tzInput = document.getElementById('focusedDeptTimezoneInput');
-                if (tzInput) tzInput.value = dept.timezone || 'America/New_York';
-                const awayInput = document.getElementById('focusedDeptAwayMessageInput');
-                if (awayInput) awayInput.value = dept.auto_away_message || (`Our ${deptName} desk is currently closed for the evening. Your inquiry has been prioritized. A counselor will reach out tomorrow morning at 09:15 AM.`);
-                setFocusedDeptWorkingHoursToForm(dept.working_hours);
-            } else if (cardType === 'escalations') {
-                const idEl = document.getElementById('escEditorDeptId');
-                if (idEl) idEl.value = dept.id;
-                const iconEl = document.getElementById('escModalDeptIcon');
-                if (iconEl) iconEl.innerText = deptIcon;
-                const titleEl = document.getElementById('escModalDeptTitle');
-                if (titleEl) titleEl.innerText = deptName + ' — Escalations & Assignment Policy';
-                
-                const escRules = typeof dept.escalation_rules === 'string' ? JSON.parse(dept.escalation_rules || '{}') : (dept.escalation_rules || {});
-                const emailCheck = document.getElementById('focusedEscalateEmailCheck');
-                if (emailCheck) emailCheck.checked = escRules.notify_email !== false;
-                const waCheck = document.getElementById('focusedEscalateWhatsappCheck');
-                if (waCheck) waCheck.checked = escRules.notify_whatsapp !== false;
-
-                const leadRules = typeof dept.lead_assignment_rules === 'string' ? JSON.parse(dept.lead_assignment_rules || '{}') : (dept.lead_assignment_rules || {});
-                const leadAssignSelect = document.getElementById('focusedLeadAssignmentSelect');
-                if (leadAssignSelect) leadAssignSelect.value = leadRules.method || 'round_robin';
-            }
-
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-        window.openDeptCardEditor = openDeptCardEditor;
-
-        function closeDeptCardEditor() {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            const deptTab = document.getElementById('tab-departments');
-            if (deptTab) deptTab.classList.add('active');
-
-            const grid = document.getElementById('view-departments-grid');
-            const detail = document.getElementById('view-departments-detail');
-            if (grid) grid.style.display = 'none';
-            if (detail) detail.style.display = 'block';
-
-            if (typeof loadDepartments === 'function') loadDepartments();
-            if (typeof loadRealDashboardDepartments === 'function') {
-                loadRealDashboardDepartments().then(() => {
-                    if (window.currentLandingDeptKey && typeof selectLandingDept === 'function') {
-                        selectLandingDept(window.currentLandingDeptKey);
-                    }
-                });
-            } else if (window.currentLandingDeptKey && typeof selectLandingDept === 'function') {
-                selectLandingDept(window.currentLandingDeptKey);
-            }
-
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-        window.closeDeptCardEditor = closeDeptCardEditor;
-
-        // 1. COURSES HELPERS & SAVE
-        function renderFocusedDeptCourses(courses) {
-            const container = document.getElementById('focusedDeptCoursesContainer');
-            if (!container) return;
-            container.innerHTML = '';
-            if (!courses || courses.length === 0) {
-                addFocusedCourseRow();
-                return;
-            }
-            courses.forEach(c => addFocusedCourseRow(c.id, c.course_name, c.course_code, c.campus_ids || []));
-        }
-        window.renderFocusedDeptCourses = renderFocusedDeptCourses;
-
-        function addFocusedCourseRow(id = null, name = '', code = '', mappedCampusIds = []) {
-            const container = document.getElementById('focusedDeptCoursesContainer');
-            if (!container) return;
-
-            const campuses = availableOrgCampuses || [];
-            let campusChipsHtml = '';
-            if (campuses.length > 0) {
-                campusChipsHtml = campuses.map(c => {
-                    const isChecked = Array.isArray(mappedCampusIds) && mappedCampusIds.includes(c.id);
-                    return `
-                        <label style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: #063D3B; cursor: pointer; background: #FFFFFF; border: 1.5px solid ${isChecked ? '#10B981' : '#D1E5DE'}; border-radius: 6px; padding: 3px 8px; user-select: none;">
-                            <input type="checkbox" class="focused-course-campus-check" value="${c.id}" ${isChecked ? 'checked' : ''} onchange="this.parentElement.style.borderColor = this.checked ? '#10B981' : '#D1E5DE'" style="width: 13px; height: 13px; accent-color: #047857; cursor: pointer;" />
-                            <span>${escapeHtml(c.short_name || c.name)}</span>
-                        </label>
-                    `;
-                }).join('');
-            } else {
-                campusChipsHtml = `<span style="color: #94A3B8; font-style: italic; font-size: 10.5px;">No campuses registered.</span>`;
-            }
-
-            const row = document.createElement('div');
-            row.className = 'focused-course-row';
-            row.style.cssText = 'background: #F8FCFA; border: 1.5px solid #DCE9E5; border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;';
-            row.innerHTML = `
-                <div style="display: grid; grid-template-columns: 2fr 1fr 30px; gap: 8px; align-items: center;">
-                    <input type="hidden" class="focused-course-id" value="${escapeHtml(String(id || ''))}" />
-                    <input type="text" class="brand-input focused-course-name" placeholder="Course / Program Name (e.g. Master of Business Administration)..." value="${escapeHtml(name || '')}" style="height: 34px; font-size: 12px;" />
-                    <input type="text" class="brand-input focused-course-code" placeholder="Code (e.g. MBA-01)..." value="${escapeHtml(code || '')}" style="height: 34px; font-size: 12px;" />
-                    <button type="button" class="brand-btn-secondary brand-btn-sm" style="color: var(--brand-rose-400); height: 32px; font-size: 12px;" onclick="this.closest('.focused-course-row').remove()" title="Remove Course">✕</button>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 11px; padding-top: 6px; border-top: 1px dashed #DCE9E5;">
-                    <span style="font-weight: 700; color: #4F7470; display: inline-flex; align-items: center; gap: 4px;">
-                        <span>🏛️</span> Available at:
-                    </span>
-                    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                        ${campusChipsHtml}
-                    </div>
-                </div>
-            `;
-            container.appendChild(row);
-        }
-        window.addFocusedCourseRow = addFocusedCourseRow;
-
-        async function saveDeptCoursesOnly() {
-            const deptIdEl = document.getElementById('coursesEditorDeptId');
-            if (!deptIdEl || !deptIdEl.value) {
-                alert('No active department selected.');
-                return;
-            }
-            const deptId = deptIdEl.value;
-            const courses = [];
-            document.querySelectorAll('.focused-course-row').forEach(row => {
-                const idVal = row.querySelector('.focused-course-id') ? row.querySelector('.focused-course-id').value.trim() : '';
-                const name = row.querySelector('.focused-course-name') ? row.querySelector('.focused-course-name').value.trim() : '';
-                const code = row.querySelector('.focused-course-code') ? row.querySelector('.focused-course-code').value.trim() : '';
-                const campusIds = Array.from(row.querySelectorAll('.focused-course-campus-check:checked')).map(cb => parseInt(cb.value));
-                if (name) {
-                    courses.push({
-                        id: idVal ? parseInt(idVal) : null,
-                        course_name: name,
-                        course_code: code,
-                        campus_ids: campusIds
-                    });
-                }
-            });
-
-            try {
-                const res = await fetch(`/v1/departments/${deptId}/courses`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ courses })
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    closeDeptCardEditor();
-                } else {
-                    alert(data.message || 'Failed to save courses.');
-                }
-            } catch (e) {
-                console.error('Error saving courses:', e);
-                alert('Error saving programs & courses.');
-            }
-        }
-        window.saveDeptCoursesOnly = saveDeptCoursesOnly;
-
-        // 2. STAFF HELPERS & SAVE
-        function renderFocusedDeptStaff(assignedUserIds) {
-            const container = document.getElementById('focusedDeptStaffChecklist');
-            if (!container) return;
-            if (availableOrgStaff.length === 0) {
-                container.innerHTML = `<div style="font-size: 11px; color: #648781;">No staff users registered.</div>`;
-                return;
-            }
-
-            container.innerHTML = availableOrgStaff.map(u => `
-                <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #092F2E; cursor: pointer; padding: 4px 0;">
-                    <input type="checkbox" class="focused-dept-staff-checkbox" value="${u.id}" ${assignedUserIds.includes(u.id) ? 'checked' : ''} style="width: 15px; height: 15px; accent-color: #047857;" />
-                    <span>👤 <strong>${escapeHtml(u.name)}</strong> <small style="color: #648781;">(${escapeHtml(u.email)} • ${escapeHtml(u.role)})</small></span>
-                </label>
-            `).join('');
-        }
-        window.renderFocusedDeptStaff = renderFocusedDeptStaff;
-
-        async function saveDeptStaffOnly() {
-            const deptIdEl = document.getElementById('staffEditorDeptId');
-            if (!deptIdEl || !deptIdEl.value) {
-                alert('No active department selected.');
-                return;
-            }
-            const deptId = deptIdEl.value;
-            const selectedStaff = Array.from(document.querySelectorAll('.focused-dept-staff-checkbox:checked')).map(cb => ({
-                user_id: parseInt(cb.value),
-                role: 'agent',
-                is_on_duty: 1
-            }));
-
-            try {
-                const res = await fetch(`/v1/departments/${deptId}/staff`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ staff: selectedStaff })
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    closeDeptCardEditor();
-                } else {
-                    alert(data.message || 'Failed to save staff roster.');
-                }
-            } catch (e) {
-                console.error('Error saving staff:', e);
-                alert('Error saving staff roster.');
-            }
-        }
-        window.saveDeptStaffOnly = saveDeptStaffOnly;
-
-        // 3. KNOWLEDGE HELPERS
-        function getDeptKsDocBadge(s) {
-            const type = (s.type || '').toLowerCase();
-            const fn = (s.file_path || s.filename || s.title || '').toLowerCase();
-
-            if (type === 'url') {
-                return `<span style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 6px; background: #E0F2FE; color: #0369A1; font-size: 16px; border: 1.5px solid #BAE6FD; flex-shrink: 0;" title="Web URL">🌐</span>`;
-            }
-            if (type === 'text_paste' || type === 'text') {
-                return `<span style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 6px; background: #FEF3C7; color: #D97706; font-size: 16px; border: 1.5px solid #FDE68A; flex-shrink: 0;" title="Prospectus Text">📝</span>`;
-            }
-            // Document types: evaluate file extension
-            if (fn.includes('.pdf') || fn.endsWith('.pdf')) {
-                return `<span style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 6px; background: #FEE2E2; color: #DC2626; font-size: 11px; font-weight: 800; border: 1.5px solid #FCA5A5; flex-shrink: 0; letter-spacing: -0.2px;" title="PDF Document">PDF</span>`;
-            }
-            if (fn.includes('.doc') || fn.includes('.docx')) {
-                return `<span style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 6px; background: #DBEAFE; color: #1D4ED8; font-size: 11px; font-weight: 800; border: 1.5px solid #93C5FD; flex-shrink: 0; letter-spacing: -0.2px;" title="Word Document">DOC</span>`;
-            }
-            if (fn.includes('.txt')) {
-                return `<span style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 6px; background: #F1F5F9; color: #475569; font-size: 11px; font-weight: 800; border: 1.5px solid #CBD5E1; flex-shrink: 0;" title="Plain Text File">TXT</span>`;
-            }
-            return `<span style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 6px; background: #FEE2E2; color: #DC2626; font-size: 11px; font-weight: 800; border: 1.5px solid #FCA5A5; flex-shrink: 0;" title="Document">DOC</span>`;
-        }
-        window.getDeptKsDocBadge = getDeptKsDocBadge;
-
-        function showFocusedDeptKsAlert(message, type = 'success') {
-            const alertBox = document.getElementById('focusedDeptKsAlert');
-            const msgEl = document.getElementById('focusedDeptKsAlertMsg');
-            const iconEl = document.getElementById('focusedDeptKsAlertIcon');
-            if (!alertBox || !msgEl) return;
-
-            msgEl.textContent = message;
-            if (type === 'success') {
-                alertBox.style.background = '#ECFDF5';
-                alertBox.style.border = '1.5px solid #10B981';
-                alertBox.style.color = '#065F46';
-                if (iconEl) {
-                    iconEl.textContent = '✓';
-                    iconEl.style.background = '#D1FAE5';
-                    iconEl.style.color = '#065F46';
-                }
-            } else if (type === 'error') {
-                alertBox.style.background = '#FEF2F2';
-                alertBox.style.border = '1.5px solid #EF4444';
-                alertBox.style.color = '#991B1B';
-                if (iconEl) {
-                    iconEl.textContent = '✕';
-                    iconEl.style.background = '#FEE2E2';
-                    iconEl.style.color = '#991B1B';
-                }
-            } else {
-                alertBox.style.background = '#EFF6FF';
-                alertBox.style.border = '1.5px solid #3B82F6';
-                alertBox.style.color = '#1E40AF';
-                if (iconEl) {
-                    iconEl.textContent = 'ℹ';
-                    iconEl.style.background = '#DBEAFE';
-                    iconEl.style.color = '#1E40AF';
-                }
-            }
-
-            alertBox.style.display = 'flex';
-            alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-            if (window._deptKsAlertTimeout) clearTimeout(window._deptKsAlertTimeout);
-            window._deptKsAlertTimeout = setTimeout(() => {
-                const b = document.getElementById('focusedDeptKsAlert');
-                if (b) b.style.display = 'none';
-            }, 8000);
-        }
-        window.showFocusedDeptKsAlert = showFocusedDeptKsAlert;
-
-        function dismissFocusedDeptKsAlert() {
-            const alertBox = document.getElementById('focusedDeptKsAlert');
-            if (alertBox) alertBox.style.display = 'none';
-        }
-        window.dismissFocusedDeptKsAlert = dismissFocusedDeptKsAlert;
-
-        function renderFocusedDeptKsList(sources) {
-            const container = document.getElementById('focusedDeptKsList');
-            const badge = document.getElementById('focusedDeptKsCountBadge');
-
-            if (!container) return;
-            if (badge) badge.innerText = `${sources ? sources.length : 0} Document${(sources && sources.length === 1) ? '' : 's'}`;
-
-            if (!sources || sources.length === 0) {
-                container.innerHTML = `<div style="font-size: 12px; color: #648781; padding: 14px; text-align: center;">No knowledge documents added to this department yet. Add a prospectus document or file below.</div>`;
-                return;
-            }
-
-            container.innerHTML = sources.map(s => {
-                const docBadge = getDeptKsDocBadge(s);
-                return `
-                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 16px; background: #DCE8E2; border: 1.5px solid #ABC4B8; border-radius: 8px; box-shadow: 0 1px 3px rgba(6, 61, 59, 0.08); transition: background 0.15s ease;">
-                        <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;">
-                            ${docBadge}
-                            <div style="flex: 1; min-width: 0;">
-                                <strong style="font-size: 13px; font-weight: 800; color: #063D3B; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.35;">${escapeHtml(s.title)}</strong>
-                                <div style="display: flex; align-items: center; gap: 8px; margin-top: 2px;">
-                                    <span style="font-size: 10.5px; font-weight: 700; color: #1E4D45; text-transform: uppercase; letter-spacing: 0.3px;">${escapeHtml(s.type)}</span>
-                                    <span style="color: #6C8E86; font-size: 10px;">•</span>
-                                    <span style="font-size: 10.5px; font-weight: 600; color: ${s.status === 'active' ? '#047857' : '#B45309'}; text-transform: uppercase;">STATUS: ${escapeHtml(s.status)}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <button type="button" class="brand-btn-secondary" style="background: #FFFFFF; border: 1.5px solid #C2D8CE; color: #DC2626; font-weight: 700; flex-shrink: 0; padding: 5px 12px; font-size: 11px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);" onclick="deleteFocusedDeptKnowledgeSource(${s.id})">
-                            🗑️ Delete
-                        </button>
-                    </div>
-                `;
-            }).join('');
-        }
-        window.renderFocusedDeptKsList = renderFocusedDeptKsList;
-
-        function switchFocusedDeptKsMode(mode) {
-            document.querySelectorAll('.focused-dept-ks-mode-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.focused-dept-ks-mode-panel').forEach(p => p.style.display = 'none');
-
-            const activeBtn = document.querySelector(`.focused-dept-ks-mode-btn[data-mode="${mode}"]`);
-            if (activeBtn) activeBtn.classList.add('active');
-
-            const targetPanel = document.getElementById(mode === 'text' ? 'focusedDeptKsModeText' : (mode === 'file' ? 'focusedDeptKsModeFile' : 'focusedDeptKsModeUrl'));
-            if (targetPanel) targetPanel.style.display = 'block';
-        }
-        window.switchFocusedDeptKsMode = switchFocusedDeptKsMode;
-
-        async function refreshFocusedDeptKnowledgeSources(deptId) {
-            await loadDepartments();
-            const updatedDept = currentDepartments.find(d => d.id == deptId);
-            if (updatedDept) {
-                renderFocusedDeptKsList(updatedDept.knowledge_sources || []);
-            }
-        }
-
-        async function addFocusedDeptKnowledgeText() {
-            const deptId = document.getElementById('ksEditorDeptId').value;
-            if (!deptId) return alert('No department selected.');
-            const title = document.getElementById('focusedDeptKsTitleText').value.trim();
-            const content = document.getElementById('focusedDeptKsContentText').value.trim();
-            if (!title || !content) return alert('Please provide both document title and prospectus text content.');
-
-            try {
-                const res = await fetch('/v1/knowledge/paste', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ title, content, department_id: deptId })
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    document.getElementById('focusedDeptKsTitleText').value = '';
-                    document.getElementById('focusedDeptKsContentText').value = '';
-                    showFocusedDeptKsAlert('Prospectus text knowledge added and attached to department successfully!', 'success');
-                    await refreshFocusedDeptKnowledgeSources(deptId);
-                } else {
-                    showFocusedDeptKsAlert(data.message || 'Failed to add knowledge source', 'error');
-                }
-            } catch (err) {
-                console.error(err);
-                showFocusedDeptKsAlert('Error adding text knowledge source', 'error');
-            }
-        }
-        window.addFocusedDeptKnowledgeText = addFocusedDeptKnowledgeText;
-
-        async function addFocusedDeptKnowledgeFile() {
-            const deptId = document.getElementById('ksEditorDeptId').value;
-            if (!deptId) return alert('No department selected.');
-            const title = document.getElementById('focusedDeptKsTitleFile').value.trim();
-            const fileInput = document.getElementById('focusedDeptKsFileInput');
-            if (!fileInput.files || fileInput.files.length === 0) return alert('Please select a file to upload (.pdf, .docx, .txt).');
-
-            const btn = document.getElementById('btnFocusedDeptKsUpload');
-            const origText = btn ? btn.innerHTML : '';
-            if (btn) {
-                btn.disabled = true;
-                btn.innerHTML = '<span>Uploading &amp; Extracting...</span>';
-            }
-
-            const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
-            if (title) formData.append('title', title);
-            formData.append('department_id', deptId);
-
-            try {
-                const res = await fetch('/v1/knowledge/upload', {
-                    method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + token },
-                    body: formData
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    const uploadedTitle = (data.data && data.data.title) ? data.data.title : (title || fileInput.files[0].name);
-                    document.getElementById('focusedDeptKsTitleFile').value = '';
-                    fileInput.value = '';
-                    showFocusedDeptKsAlert(`Document "${uploadedTitle}" uploaded and processed successfully! It is now attached to this department.`, 'success');
-                    await refreshFocusedDeptKnowledgeSources(deptId);
-                } else {
-                    showFocusedDeptKsAlert(data.message || 'Failed to upload document', 'error');
-                }
-            } catch (err) {
-                console.error(err);
-                showFocusedDeptKsAlert('Error uploading document: ' + (err.message || err), 'error');
-            } finally {
-                if (btn) {
-                    btn.disabled = false;
-                    btn.innerHTML = origText;
-                }
-            }
-        }
-        window.addFocusedDeptKnowledgeFile = addFocusedDeptKnowledgeFile;
-
-        async function addFocusedDeptKnowledgeUrl() {
-            const deptId = document.getElementById('ksEditorDeptId').value;
-            if (!deptId) return alert('No department selected.');
-            const title = document.getElementById('focusedDeptKsTitleUrl').value.trim();
-            const url = document.getElementById('focusedDeptKsUrlInput').value.trim();
-            if (!url) return alert('Please enter a valid URL.');
-
-            try {
-                const res = await fetch('/v1/knowledge/url', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ url, title, department_id: deptId })
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    document.getElementById('focusedDeptKsTitleUrl').value = '';
-                    document.getElementById('focusedDeptKsUrlInput').value = '';
-                    showFocusedDeptKsAlert('Web page scraped and attached to department successfully!', 'success');
-                    await refreshFocusedDeptKnowledgeSources(deptId);
-                } else {
-                    showFocusedDeptKsAlert(data.message || 'Failed to add web URL', 'error');
-                }
-            } catch (err) {
-                console.error(err);
-                showFocusedDeptKsAlert('Error adding web URL', 'error');
-            }
-        }
-        window.addFocusedDeptKnowledgeUrl = addFocusedDeptKnowledgeUrl;
-
-        async function deleteFocusedDeptKnowledgeSource(ksId) {
-            if (!confirm('Are you sure you want to delete this knowledge source?')) return;
-            const deptId = document.getElementById('ksEditorDeptId').value;
-            try {
-                const res = await fetch(`/v1/knowledge/${ksId}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    showFocusedDeptKsAlert('Knowledge document removed from this department.', 'info');
-                    await refreshFocusedDeptKnowledgeSources(deptId);
-                } else {
-                    showFocusedDeptKsAlert(data.message || 'Failed to delete knowledge source', 'error');
-                }
-            } catch (err) {
-                console.error(err);
-                showFocusedDeptKsAlert('Error deleting knowledge source', 'error');
-            }
-        }
-        window.deleteFocusedDeptKnowledgeSource = deleteFocusedDeptKnowledgeSource;
-
-        // 4. OPERATING HOURS HELPERS & SAVE
-        function onFocusedDeptHourToggle(day) {
-            const cb = document.getElementById('focusedDeptHourActive_' + day);
-            const openEl = document.getElementById('focusedDeptHourOpen_' + day);
-            const closeEl = document.getElementById('focusedDeptHourClose_' + day);
-            const statusEl = document.getElementById('focusedDeptHourStatus_' + day);
-
-            if (!cb || !statusEl) return;
-            const isActive = cb.checked;
-            if (openEl) {
-                openEl.disabled = !isActive;
-                openEl.style.opacity = isActive ? '1' : '0.6';
-            }
-            if (closeEl) {
-                closeEl.disabled = !isActive;
-                closeEl.style.opacity = isActive ? '1' : '0.6';
-            }
-            if (isActive) {
-                statusEl.innerText = 'Open';
-                statusEl.style.color = '#047857';
-                statusEl.style.background = '#ECFDF5';
-                statusEl.style.border = '1px solid #A7F3D0';
-            } else {
-                statusEl.innerText = 'Closed';
-                statusEl.style.color = '#648781';
-                statusEl.style.background = '#F1F5F9';
-                statusEl.style.border = '1px solid #CBD5E1';
-            }
-        }
-        window.onFocusedDeptHourToggle = onFocusedDeptHourToggle;
-
-        function applyFocusedDeptHoursPreset(presetType) {
-            DEPT_DAYS.forEach(day => {
-                const cb = document.getElementById('focusedDeptHourActive_' + day);
-                const openEl = document.getElementById('focusedDeptHourOpen_' + day);
-                const closeEl = document.getElementById('focusedDeptHourClose_' + day);
-
-                if (presetType === 'mon_sat') {
-                    const isMonSat = day !== 'sun';
-                    if (cb) cb.checked = isMonSat;
-                    if (openEl) openEl.value = '09:00';
-                    if (closeEl) closeEl.value = '18:00';
-                } else if (presetType === 'mon_fri') {
-                    const isMonFri = day !== 'sat' && day !== 'sun';
-                    if (cb) cb.checked = isMonFri;
-                    if (openEl) openEl.value = '09:00';
-                    if (closeEl) closeEl.value = '17:00';
-                } else if (presetType === '24_7') {
-                    if (cb) cb.checked = true;
-                    if (openEl) openEl.value = '00:00';
-                    if (closeEl) closeEl.value = '23:59';
-                }
-                onFocusedDeptHourToggle(day);
-            });
-        }
-        window.applyFocusedDeptHoursPreset = applyFocusedDeptHoursPreset;
-
-        function getFocusedDeptWorkingHoursFromForm() {
-            const hours = {};
-            DEPT_DAYS.forEach(day => {
-                const cb = document.getElementById('focusedDeptHourActive_' + day);
-                const openEl = document.getElementById('focusedDeptHourOpen_' + day);
-                const closeEl = document.getElementById('focusedDeptHourClose_' + day);
-                hours[day] = {
-                    active: cb ? cb.checked : false,
-                    open: openEl ? openEl.value : '09:00',
-                    close: closeEl ? closeEl.value : '18:00'
-                };
-            });
-            return hours;
-        }
-        window.getFocusedDeptWorkingHoursFromForm = getFocusedDeptWorkingHoursFromForm;
-
-        function setFocusedDeptWorkingHoursToForm(workingHours) {
-            let wh = workingHours;
-            if (typeof wh === 'string') {
-                try { wh = JSON.parse(wh); } catch(e) { wh = null; }
-            }
-            if (!wh || typeof wh !== 'object' || Object.keys(wh).length === 0) {
-                applyFocusedDeptHoursPreset('mon_sat');
-                return;
-            }
-
-            DEPT_DAYS.forEach(day => {
-                const dayConfig = wh[day] || (wh[day.toUpperCase()] || null);
-                const cb = document.getElementById('focusedDeptHourActive_' + day);
-                const openEl = document.getElementById('focusedDeptHourOpen_' + day);
-                const closeEl = document.getElementById('focusedDeptHourClose_' + day);
-
-                if (dayConfig) {
-                    const isActive = dayConfig.active === true || dayConfig.active === 1 || dayConfig.active === '1';
-                    if (cb) cb.checked = isActive;
-                    if (openEl && dayConfig.open) openEl.value = dayConfig.open;
-                    if (closeEl && dayConfig.close) closeEl.value = dayConfig.close;
-                } else {
-                    if (cb) cb.checked = day !== 'sun';
-                    if (openEl) openEl.value = '09:00';
-                    if (closeEl) closeEl.value = '18:00';
-                }
-                onFocusedDeptHourToggle(day);
-            });
-        }
-        window.setFocusedDeptWorkingHoursToForm = setFocusedDeptWorkingHoursToForm;
-
-        function applyFocusedDeptAwayTemplate() {
-            const template = `Our department desk is currently closed for the evening. Your inquiry has been prioritized. A counselor will reach out tomorrow morning at 09:15 AM.`;
-            const awayEl = document.getElementById('focusedDeptAwayMessageInput');
-            if (awayEl) awayEl.value = template;
-        }
-        window.applyFocusedDeptAwayTemplate = applyFocusedDeptAwayTemplate;
-
-        async function saveDeptHoursOnly() {
-            const deptIdEl = document.getElementById('hoursEditorDeptId');
-            if (!deptIdEl || !deptIdEl.value) return alert('No active department selected.');
-            const deptId = deptIdEl.value;
-
-            const payload = {
-                timezone: document.getElementById('focusedDeptTimezoneInput') ? document.getElementById('focusedDeptTimezoneInput').value : 'America/New_York',
-                auto_away_message: document.getElementById('focusedDeptAwayMessageInput') ? document.getElementById('focusedDeptAwayMessageInput').value : '',
-                working_hours: getFocusedDeptWorkingHoursFromForm()
-            };
-
-            try {
-                const res = await fetch('/v1/departments/' + deptId, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    closeDeptCardEditor();
-                } else {
-                    alert(data.message || 'Failed to save operating hours.');
-                }
-            } catch (e) {
-                console.error('Error saving operating hours:', e);
-                alert('Error saving operating hours.');
-            }
-        }
-        window.saveDeptHoursOnly = saveDeptHoursOnly;
-
-        // 5. ESCALATIONS HELPERS & SAVE
-        async function saveDeptEscalationsOnly() {
-            const deptIdEl = document.getElementById('escEditorDeptId');
-            if (!deptIdEl || !deptIdEl.value) return alert('No active department selected.');
-            const deptId = deptIdEl.value;
-
-            const payload = {
-                escalation_rules: {
-                    notify_email: document.getElementById('focusedEscalateEmailCheck') ? document.getElementById('focusedEscalateEmailCheck').checked : false,
-                    notify_whatsapp: document.getElementById('focusedEscalateWhatsappCheck') ? document.getElementById('focusedEscalateWhatsappCheck').checked : false
-                },
-                lead_assignment_rules: {
-                    method: document.getElementById('focusedLeadAssignmentSelect') ? document.getElementById('focusedLeadAssignmentSelect').value : 'round_robin'
-                }
-            };
-
-            try {
-                const res = await fetch('/v1/departments/' + deptId, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    closeDeptCardEditor();
-                } else {
-                    alert(data.message || 'Failed to save escalation policy.');
-                }
-            } catch (e) {
-                console.error('Error saving escalations:', e);
-                alert('Error saving escalation policy.');
-            }
-        }
-        window.saveDeptEscalationsOnly = saveDeptEscalationsOnly;
-
-        function switchDeptSubtab(subtabKey) {
-            document.querySelectorAll('.dept-subtab').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.dept-subtab-content').forEach(c => c.style.display = 'none');
-
-            const targetBtn = document.querySelector(`.dept-subtab[data-subtab="${subtabKey}"]`);
-            const targetContent = document.getElementById(`subtab-${subtabKey}`);
-            if (targetBtn) targetBtn.classList.add('active');
-            if (targetContent) targetContent.style.display = 'block';
-        }
-
-        function switchDeptKsMode(mode) {
-            document.querySelectorAll('.dept-ks-mode-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.dept-ks-mode-panel').forEach(p => p.style.display = 'none');
-
-            const activeBtn = document.querySelector(`.dept-ks-mode-btn[data-mode="${mode}"]`);
-            if (activeBtn) activeBtn.classList.add('active');
-
-            if (mode === 'text') document.getElementById('deptKsModeText').style.display = 'block';
-            if (mode === 'file') document.getElementById('deptKsModeFile').style.display = 'block';
-            if (mode === 'url') document.getElementById('deptKsModeUrl').style.display = 'block';
-        }
-
-        function renderDeptKsList(sources) {
-            const container = document.getElementById('deptKsList');
-            const badge = document.getElementById('deptKsCountBadge');
-
-            if (!container) return;
-            if (badge) badge.innerText = `${sources ? sources.length : 0} Document${(sources && sources.length === 1) ? '' : 's'}`;
-
-            if (!sources || sources.length === 0) {
-                container.innerHTML = `<div style="font-size: 12px; color: #648781; padding: 12px; text-align: center;">No knowledge documents added to this department yet. Add a prospectus document below.</div>`;
-                return;
-            }
-
-            container.innerHTML = sources.map(s => {
-                const icon = s.type === 'url' ? '🌐' : (s.type === 'document' ? '📁' : '📝');
-                return `
-                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; background: #F1F7F4; border: 1px solid #DDE9E3; border-radius: var(--brand-radius-sm);">
-                        <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
-                            <span style="font-size: 18px; flex-shrink: 0;">${icon}</span>
-                            <div style="flex: 1; min-width: 0;">
-                                <strong style="font-size: 13px; color: #092F2E; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${s.title}</strong>
-                                <span style="font-size: 10px; color: #648781; text-transform: uppercase;">${s.type} • Status: ${s.status}</span>
-                            </div>
-                        </div>
-                        <button type="button" class="brand-btn-secondary brand-btn-sm" style="color: var(--brand-rose-400); flex-shrink: 0; padding: 4px 10px; font-size: 11px;" onclick="deleteDeptKnowledgeSource(${s.id})">
-                            🗑️ Delete
-                        </button>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        async function addDeptKnowledgeText() {
-            const deptId = document.getElementById('editDeptId').value;
-            if (!deptId) {
-                alert('Please save the department basic details first before adding knowledge sources.');
-                return;
-            }
-            const title = document.getElementById('deptKsTitleText').value.trim();
-            const content = document.getElementById('deptKsContentText').value.trim();
-
-            if (!title || !content) {
-                alert('Please provide both document title and prospectus text content.');
-                return;
-            }
-
-            try {
-                const res = await fetch('/v1/knowledge/paste', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ title, content, department_id: deptId })
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    document.getElementById('deptKsTitleText').value = '';
-                    document.getElementById('deptKsContentText').value = '';
-                    await refreshDeptKnowledgeSources(deptId);
-                } else {
-                    alert(data.message || 'Failed to add knowledge source');
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Error adding text knowledge source');
-            }
-        }
-
-        async function addDeptKnowledgeFile() {
-            const deptId = document.getElementById('editDeptId').value;
-            if (!deptId) {
-                alert('Please save the department basic details first before adding knowledge sources.');
-                return;
-            }
-            const title = document.getElementById('deptKsTitleFile').value.trim();
-            const fileInput = document.getElementById('deptKsFileInput');
-            if (!fileInput.files || fileInput.files.length === 0) {
-                alert('Please select a file to upload (.pdf, .docx, .txt).');
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
-            if (title) formData.append('title', title);
-            formData.append('department_id', deptId);
-
-            try {
-                const res = await fetch('/v1/knowledge/upload', {
-                    method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + token },
-                    body: formData
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    document.getElementById('deptKsTitleFile').value = '';
-                    fileInput.value = '';
-                    await refreshDeptKnowledgeSources(deptId);
-                } else {
-                    alert(data.message || 'Failed to upload document');
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Error uploading document');
-            }
-        }
-
-        async function addDeptKnowledgeUrl() {
-            const deptId = document.getElementById('editDeptId').value;
-            if (!deptId) {
-                alert('Please save the department basic details first before adding knowledge sources.');
-                return;
-            }
-            const title = document.getElementById('deptKsTitleUrl').value.trim();
-            const url = document.getElementById('deptKsUrlInput').value.trim();
-
-            if (!url) {
-                alert('Please enter a valid URL.');
-                return;
-            }
-
-            try {
-                const res = await fetch('/v1/knowledge/url', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ url, title, department_id: deptId })
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    document.getElementById('deptKsTitleUrl').value = '';
-                    document.getElementById('deptKsUrlInput').value = '';
-                    await refreshDeptKnowledgeSources(deptId);
-                } else {
-                    alert(data.message || 'Failed to add web URL');
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Error adding web URL');
-            }
-        }
-
-        async function deleteDeptKnowledgeSource(ksId) {
-            if (!confirm('Are you sure you want to delete this knowledge source from the department?')) return;
-            const deptId = document.getElementById('editDeptId').value;
-            try {
-                const res = await fetch(`/v1/knowledge/${ksId}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    await refreshDeptKnowledgeSources(deptId);
-                } else {
-                    alert(data.message || 'Failed to delete knowledge source');
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Error deleting knowledge source');
-            }
-        }
-
+        async function loadDepartments() { currentDepartments = []; }
+        window.loadDepartments = loadDepartments;
+        function updateDeptStats() {}
+        function renderDepartmentsGrid() {}
         // ── MAIN KNOWLEDGE BASE & VALIDITY LIFECYCLE ENGINE ───────────────────
         let allKnowledgeSources = [];
         let filteredKnowledgeSources = [];
@@ -16273,27 +14378,12 @@ echo $response['reply'];
         }
 
         function updateAssetDeptFilterOptions() {
-            const filterSel = document.getElementById('assetDeptFilter');
-            if (!filterSel) return;
-            const curVal = filterSel.value;
-            let options = `<option value="">🏢 All Scopes</option><option value="org">🌐 Org-wide Only</option>`;
-            
-            const deptsToShow = userAssetContext.is_admin 
-                ? currentDepartments 
-                : currentDepartments.filter(d => userAssetContext.assigned_dept_ids.includes(d.id));
-
-            deptsToShow.forEach(d => {
-                options += `<option value="${d.id}">${d.icon || '🏢'} ${d.name}</option>`;
-            });
-
-            filterSel.innerHTML = options;
-            if (curVal) filterSel.value = curVal;
+            // No-op: departments removed
         }
 
         function filterAssetsList() {
             const query = (document.getElementById('assetSearchInput')?.value || '').toLowerCase().trim();
             const cat = document.getElementById('assetCategoryFilter')?.value || '';
-            const dept = document.getElementById('assetDeptFilter')?.value || '';
 
             let filtered = currentAssetsList.filter(a => {
                 // Search query matching
@@ -16302,19 +14392,11 @@ echo $response['reply'];
                     const matchDesc = (a.description || '').toLowerCase().includes(query);
                     const matchTrigger = (a.lead_intent_trigger || '').toLowerCase().includes(query);
                     const matchFile = (a.file_name || '').toLowerCase().includes(query);
-                    const matchDept = (a.department_name || '').toLowerCase().includes(query);
-                    if (!matchTitle && !matchDesc && !matchTrigger && !matchFile && !matchDept) return false;
+                    if (!matchTitle && !matchDesc && !matchTrigger && !matchFile) return false;
                 }
 
                 // Category filter
                 if (cat && a.category !== cat) return false;
-
-                // Department filter
-                if (dept === 'org') {
-                    if (!a.is_org_wide) return false;
-                } else if (dept) {
-                    if (a.department_id != dept) return false;
-                }
 
                 return true;
             });
@@ -16329,8 +14411,8 @@ echo $response['reply'];
             if (assets.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="8" style="text-align: center; color: #648781; padding: 36px 24px;">
-                            <div style="font-size: 32px; margin-bottom: 8px;">📁</div>
+                        <td colspan="7" style="text-align: center; color: #648781; padding: 36px 24px;">
+                            <div style="font-size: 32px; margin-bottom: 8px;">📑</div>
                             <strong style="font-size: 14px; color: #092F2E; display: block;">No lead-magnet assets found</strong>
                             <span style="font-size: 12px; color: #648781;">
                                 Upload institutional brochures, fee schedules, or placement reports to automatically generate verified admissions leads.
@@ -16345,15 +14427,6 @@ echo $response['reply'];
             }
 
             tbody.innerHTML = assets.map(a => {
-                const isOrgWide = a.is_org_wide;
-                const deptBadge = isOrgWide
-                    ? `<span style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--brand-indigo-300); background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); padding: 2px 8px; border-radius: 12px; white-space: nowrap;">
-                        <span>🌐</span> <span>Org-wide (General)</span>
-                       </span>`
-                    : `<span style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--brand-cyan-400); background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); padding: 2px 8px; border-radius: 12px; white-space: nowrap;">
-                        <span>${a.department_icon || '🏢'}</span> <span>${a.department_name || 'Department'}</span>
-                       </span>`;
-
                 const categoryLabels = {
                     brochure: '📄 Brochure / Prospectus',
                     fee_structure: '💰 Fee Structure',
@@ -16373,7 +14446,7 @@ echo $response['reply'];
                     ? '<span class="badge" style="background: rgba(52, 211, 153, 0.12); color: var(--brand-emerald-400); border: 1px solid rgba(52, 211, 153, 0.25); white-space: nowrap;">● Active</span>'
                     : '<span class="badge" style="background: rgba(244, 63, 94, 0.12); color: var(--brand-rose-400); border: 1px solid rgba(244, 63, 94, 0.25); white-space: nowrap;">○ Inactive</span>';
 
-                const canEdit = userAssetContext.is_admin || (a.department_id && userAssetContext.assigned_dept_ids.includes(parseInt(a.department_id)));
+                const canEdit = userAssetContext.is_admin;
 
                 const actionBtns = `
                     <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
@@ -16408,7 +14481,6 @@ echo $response['reply'];
                         <td>
                             <span style="font-size: 11px; color: #4F7470; white-space: nowrap;">${catLabel}</span>
                         </td>
-                        <td>${deptBadge}</td>
                         <td style="font-size: 11px; color: #4F7470; white-space: nowrap;">
                             <div style="font-family: var(--brand-font-mono); color: #092F2E;">${a.file_size_formatted || '—'}</div>
                             <div style="color: #648781; font-size: 10px; max-width: 140px; overflow: hidden; text-overflow: ellipsis;" title="${a.file_name}">${a.file_name}</div>
@@ -16434,53 +14506,9 @@ echo $response['reply'];
         function populateAssetDeptDropdown(selectedDeptId = null) {
             const wrapper = document.getElementById('assetFormDeptWrapper');
             const lockedBadge = document.getElementById('assetFormDeptLockedBadge');
+            if (lockedBadge) lockedBadge.style.display = 'none';
             if (!wrapper) return;
-
-            if (userAssetContext.is_admin) {
-                if (lockedBadge) lockedBadge.style.display = 'none';
-                let html = `<select id="assetFormDept" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
-                    <option value="org" ${!selectedDeptId ? 'selected' : ''}>🌐 Org-wide (All Departments / General)</option>`;
-                
-                currentDepartments.forEach(d => {
-                    html += `<option value="${d.id}" ${selectedDeptId == d.id ? 'selected' : ''}>${d.icon || '🏢'} ${d.name}</option>`;
-                });
-                html += `</select>`;
-                wrapper.innerHTML = html;
-            } else {
-                // Staff member: check assigned departments
-                const assigned = currentDepartments.filter(d => userAssetContext.assigned_dept_ids.includes(d.id));
-                if (assigned.length === 1) {
-                    // Only 1 department assigned: lock to this department
-                    const singleDept = assigned[0];
-                    wrapper.innerHTML = `
-                        <select id="assetFormDept" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
-                            <option value="${singleDept.id}" selected>${singleDept.icon || '🏢'} ${singleDept.name}</option>
-                        </select>
-                    `;
-                    if (lockedBadge) {
-                        lockedBadge.innerText = `🔒 Scoped to assigned: ${singleDept.name}`;
-                        lockedBadge.style.display = 'block';
-                    }
-                } else if (assigned.length > 1) {
-                    // Multiple assigned departments
-                    let html = `<select id="assetFormDept" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">`;
-                    assigned.forEach(d => {
-                        html += `<option value="${d.id}" ${selectedDeptId == d.id ? 'selected' : ''}>${d.icon || '🏢'} ${d.name}</option>`;
-                    });
-                    html += `</select>`;
-                    wrapper.innerHTML = html;
-                    if (lockedBadge) {
-                        lockedBadge.innerText = `🔒 Limited to your ${assigned.length} assigned departments`;
-                        lockedBadge.style.display = 'block';
-                    }
-                } else {
-                    wrapper.innerHTML = `<select id="assetFormDept" class="brand-input" disabled style="height: 38px;"><option value="">No Assigned Department</option></select>`;
-                    if (lockedBadge) {
-                        lockedBadge.innerText = '⚠️ Please contact Admin to assign you to a department first.';
-                        lockedBadge.style.display = 'block';
-                    }
-                }
-            }
+            wrapper.innerHTML = `<input type="hidden" id="assetFormDept" value="org" />`;
         }
 
         function openAssetUploadModal(prefillData = null) {
@@ -16664,270 +14692,15 @@ echo $response['reply'];
             }
         }
 
-        async function refreshDeptKnowledgeSources(deptId) {
-            await loadDepartments();
-            const updatedDept = currentDepartments.find(d => d.id == deptId);
-            if (updatedDept) {
-                renderDeptKsList(updatedDept.knowledge_sources || []);
-            }
-        }
-
-        function renderDeptStaffChecklist(assignedUserIds) {
-            const container = document.getElementById('deptStaffChecklist');
-            if (availableOrgStaff.length === 0) {
-                container.innerHTML = `<div style="font-size: 11px; color: #648781;">No staff users registered.</div>`;
-                return;
-            }
-
-            container.innerHTML = availableOrgStaff.map(u => `
-                <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #092F2E; cursor: pointer;">
-                    <input type="checkbox" class="dept-staff-checkbox" value="${u.id}" ${assignedUserIds.includes(u.id) ? 'checked' : ''} />
-                    <span>👤 ${u.name} <small style="color: #648781;">(${u.email} - ${u.role})</small></span>
-                </label>
-            `).join('');
-        }
-
-        function renderFaqs(faqs) {
-            const container = document.getElementById('deptFaqsContainer');
-            if (!container) return;
-            container.innerHTML = '';
-            if (!faqs || faqs.length === 0) {
-                addFaqRow();
-                return;
-            }
-            faqs.forEach(f => addFaqRow(f.question, f.answer));
-        }
-
-        function addFaqRow(q = '', a = '') {
-            const container = document.getElementById('deptFaqsContainer');
-            if (!container) return;
-            const row = document.createElement('div');
-            row.className = 'faq-row';
-            row.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr 30px; gap: 8px; align-items: center;';
-            row.innerHTML = `
-                <input type="text" class="brand-input faq-q" placeholder="Question chip..." value="${escapeHtml(q || '')}" />
-                <input type="text" class="brand-input faq-a" placeholder="Preset Answer..." value="${escapeHtml(a || '')}" />
-                <button type="button" class="brand-btn-secondary brand-btn-sm" style="color: var(--brand-rose-400);" onclick="this.parentElement.remove()">✕</button>
-            `;
-            container.appendChild(row);
-        }
-        window.addFaqRow = addFaqRow;
-        window.renderFaqs = renderFaqs;
-
-        function renderDeptCourses(courses) {
-            const container = document.getElementById('deptCoursesContainer');
-            if (!container) return;
-            container.innerHTML = '';
-            if (!courses || courses.length === 0) {
-                addCourseRow();
-                return;
-            }
-            courses.forEach(c => addCourseRow(c.id, c.course_name, c.course_code, c.campus_ids || []));
-        }
-
-        function addCourseRow(id = null, name = '', code = '', mappedCampusIds = []) {
-            const container = document.getElementById('deptCoursesContainer');
-            if (!container) return;
-
-            const campuses = availableOrgCampuses || [];
-            let campusChipsHtml = '';
-            if (campuses.length > 0) {
-                campusChipsHtml = campuses.map(c => {
-                    const isChecked = Array.isArray(mappedCampusIds) && mappedCampusIds.includes(c.id);
-                    return `
-                        <label style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: #063D3B; cursor: pointer; background: #FFFFFF; border: 1.5px solid ${isChecked ? '#10B981' : '#D1E5DE'}; border-radius: 6px; padding: 3px 8px; user-select: none;">
-                            <input type="checkbox" class="course-campus-check" value="${c.id}" ${isChecked ? 'checked' : ''} onchange="this.parentElement.style.borderColor = this.checked ? '#10B981' : '#D1E5DE'" style="width: 13px; height: 13px; accent-color: #047857; cursor: pointer;" />
-                            <span>${escapeHtml(c.short_name || c.name)}</span>
-                        </label>
-                    `;
-                }).join('');
-            } else {
-                campusChipsHtml = `<span style="color: #94A3B8; font-style: italic; font-size: 10.5px;">No campuses registered. Configure campuses in the Campuses tab to map locations.</span>`;
-            }
-
-            const row = document.createElement('div');
-            row.className = 'course-row';
-            row.style.cssText = 'background: #F8FCFA; border: 1.5px solid #DCE9E5; border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;';
-            row.innerHTML = `
-                <div style="display: grid; grid-template-columns: 2fr 1fr 30px; gap: 8px; align-items: center;">
-                    <input type="hidden" class="course-id" value="${escapeHtml(String(id || ''))}" />
-                    <input type="text" class="brand-input course-name" placeholder="Course / Program Name (e.g. Master of Business Administration)..." value="${escapeHtml(name || '')}" style="height: 34px; font-size: 12px;" />
-                    <input type="text" class="brand-input course-code" placeholder="Code (e.g. MBA-01)..." value="${escapeHtml(code || '')}" style="height: 34px; font-size: 12px;" />
-                    <button type="button" class="brand-btn-secondary brand-btn-sm" style="color: var(--brand-rose-400); height: 32px; font-size: 12px;" onclick="this.closest('.course-row').remove()" title="Remove Course">✕</button>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 11px; padding-top: 6px; border-top: 1px dashed #DCE9E5;">
-                    <span style="font-weight: 700; color: #4F7470; display: inline-flex; align-items: center; gap: 4px;">
-                        <span>🏛️</span> Available at:
-                    </span>
-                    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                        ${campusChipsHtml}
-                    </div>
-                </div>
-            `;
-            container.appendChild(row);
-        }
-        window.addCourseRow = addCourseRow;
-        window.renderDeptCourses = renderDeptCourses;
-
-        // Department Form Submit Handler
-        async function handleDeptFormSubmit(e) {
-            if (e) e.preventDefault();
-            const editIdEl = document.getElementById('editDeptId');
-            if (!editIdEl) return;
-            const deptId = editIdEl.value;
-            const payload = {
-                icon: document.getElementById('deptIconInput') ? document.getElementById('deptIconInput').value : '',
-                name: document.getElementById('deptNameInput') ? document.getElementById('deptNameInput').value : '',
-                description: document.getElementById('deptDescInput') ? document.getElementById('deptDescInput').value : '',
-                email: document.getElementById('deptEmailInput') ? document.getElementById('deptEmailInput').value : '',
-                phone: document.getElementById('deptPhoneInput') ? document.getElementById('deptPhoneInput').value : '',
-                whatsapp: document.getElementById('deptWhatsappInput') ? document.getElementById('deptWhatsappInput').value : '',
-                greeting_message: document.getElementById('deptGreetingInput') ? document.getElementById('deptGreetingInput').value : '',
-                timezone: document.getElementById('deptTimezoneInput') ? document.getElementById('deptTimezoneInput').value : 'America/New_York',
-                auto_away_message: document.getElementById('deptAwayMessageInput') ? document.getElementById('deptAwayMessageInput').value : '',
-                working_hours: typeof getDeptWorkingHoursFromForm === 'function' ? getDeptWorkingHoursFromForm() : {},
-                is_active: (document.getElementById('deptIsActiveInput') && document.getElementById('deptIsActiveInput').checked) ? 1 : 0,
-                enable_dedicated_widget: (document.getElementById('deptEnableDedicatedWidgetInput') && document.getElementById('deptEnableDedicatedWidgetInput').checked) ? 1 : 0,
-                escalation_rules: {
-                    notify_email: document.getElementById('escalateEmailCheck') ? document.getElementById('escalateEmailCheck').checked : false,
-                    notify_whatsapp: document.getElementById('escalateWhatsappCheck') ? document.getElementById('escalateWhatsappCheck').checked : false
-                },
-                lead_assignment_rules: {
-                    method: document.getElementById('leadAssignmentSelect') ? document.getElementById('leadAssignmentSelect').value : 'round_robin'
-                }
-            };
-
-            try {
-                let currentDeptId = deptId;
-                if (deptId) {
-                    await fetch('/v1/departments/' + deptId, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                        body: JSON.stringify(payload)
-                    });
-                } else {
-                    const res = await fetch('/v1/departments', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                        body: JSON.stringify(payload)
-                    });
-                    const resData = await res.json();
-                    if (resData.status === 'success') {
-                        currentDeptId = resData.data.id;
-                    }
-                }
-
-                if (currentDeptId) {
-                    // Sync Staff
-                    const selectedStaff = Array.from(document.querySelectorAll('.dept-staff-checkbox:checked')).map(cb => ({
-                        user_id: parseInt(cb.value),
-                        role: 'agent',
-                        is_on_duty: 1
-                    }));
-                    await fetch(`/v1/departments/${currentDeptId}/staff`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                        body: JSON.stringify({ staff: selectedStaff })
-                    });
-
-                    // Sync FAQs
-                    const faqs = [];
-                    document.querySelectorAll('.faq-row').forEach(row => {
-                        const q = row.querySelector('.faq-q') ? row.querySelector('.faq-q').value.trim() : '';
-                        const a = row.querySelector('.faq-a') ? row.querySelector('.faq-a').value.trim() : '';
-                        if (q && a) faqs.push({ question: q, answer: a });
-                    });
-                    await fetch(`/v1/departments/${currentDeptId}/faqs`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                        body: JSON.stringify({ faqs })
-                    });
-
-                    // Sync Courses with campus mappings
-                    const courses = [];
-                    document.querySelectorAll('.course-row').forEach(row => {
-                        const idVal = row.querySelector('.course-id') ? row.querySelector('.course-id').value.trim() : '';
-                        const name = row.querySelector('.course-name') ? row.querySelector('.course-name').value.trim() : '';
-                        const code = row.querySelector('.course-code') ? row.querySelector('.course-code').value.trim() : '';
-                        const campusIds = Array.from(row.querySelectorAll('.course-campus-check:checked')).map(cb => parseInt(cb.value));
-                        if (name) {
-                            courses.push({
-                                id: idVal ? parseInt(idVal) : null,
-                                course_name: name,
-                                course_code: code,
-                                campus_ids: campusIds
-                            });
-                        }
-                    });
-                    await fetch(`/v1/departments/${currentDeptId}/courses`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                        body: JSON.stringify({ courses })
-                    });
-                }
-
-                closeDepartmentModal();
-                loadDepartments();
-            } catch (err) {
-                console.error(err);
-                alert('Failed to save department configuration.');
-            }
-        }
-
-        document.addEventListener('submit', function(e) {
-            if (e.target && e.target.id === 'deptForm') {
-                e.preventDefault();
-                handleDeptFormSubmit(e);
-            }
-        });
-
-        async function registerAndAddStaff() {
-            const name = document.getElementById('newStaffName').value.trim();
-            const email = document.getElementById('newStaffEmail').value.trim();
-            const password = document.getElementById('newStaffPassword').value;
-            const role = document.getElementById('newStaffRole').value;
-            const deptId = document.getElementById('editDeptId').value;
-
-            if (!name || !email || !password) {
-                alert('Please provide staff member Name, Email, and Password.');
-                return;
-            }
-
-            try {
-                const res = await fetch('/v1/organization/staff', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ name, email, password, role, department_id: deptId || null })
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    document.getElementById('newStaffName').value = '';
-                    document.getElementById('newStaffEmail').value = '';
-                    document.getElementById('newStaffPassword').value = '';
-                    
-                    // Reload org staff list & refresh checklist UI
-                    if (deptId) {
-                        const resDept = await fetch('/v1/departments', {
-                            headers: { 'Authorization': 'Bearer ' + token }
-                        });
-                        const dData = await resDept.json();
-                        if (dData.status === 'success') {
-                            availableOrgStaff = dData.meta?.available_staff || [];
-                            const activeDept = dData.data.find(d => d.id == deptId);
-                            renderDeptStaffChecklist(availableOrgStaff, activeDept ? activeDept.staff : []);
-                        }
-                    } else {
-                        alert('Staff member registered successfully!');
-                    }
-                } else {
-                    alert(data.message || 'Failed to register staff member.');
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Error registering staff member.');
-            }
-        }
-
+        // ── DEPARTMENT EDITOR HELPERS (DEPRECATED - SAFE EMPTY STUBS) ────────
+        async function refreshDeptKnowledgeSources() {}
+        function renderDeptStaffChecklist() {}
+        function renderDeptCourses() {}
+        function addCourseRow() {}
+        function renderFaqs() {}
+        function addFaqRow() {}
+        async function handleDeptFormSubmit() {}
+        async function registerAndAddStaff() {}
         async function registerOrgUser() {
             const name = document.getElementById('orgAdminName').value.trim();
             const email = document.getElementById('orgAdminEmail').value.trim();
@@ -17500,7 +15273,7 @@ echo $response['reply'];
             container.innerHTML = `
                 <div style="text-align: center; padding: 24px; color: #648781; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
                     <span style="display:inline-block; width:14px; height:14px; border:2px solid #047857; border-top-color:transparent; border-radius:50%; animation: spin 0.8s linear infinite;"></span>
-                    <span>Loading courses catalog &amp; campus mappings...</span>
+                    <span>Loading programs catalog &amp; campus mappings...</span>
                 </div>
             `;
 
@@ -17511,186 +15284,112 @@ echo $response['reply'];
                     });
                     const d = await res.json();
                     if (d.status === 'success' && d.data) {
-                        _currentCampusCoursesData = d.data.departments || [];
-                        renderCampusEditorCoursesGroups(_currentCampusCoursesData);
+                        const programs = d.data.programs || [];
+                        renderCampusEditorPrograms(programs);
                         return;
                     }
                 }
 
-                // If adding new campus, load all departments with courses
-                const res = await fetch('/v1/departments', {
+                // If adding new campus, load all programs
+                const res = await fetch('/v1/programs', {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 const d = await res.json();
                 if (d.status === 'success' && d.data) {
-                    const depts = d.data.departments || [];
-                    _currentCampusCoursesData = depts.map(dept => ({
-                        id: dept.id,
-                        name: dept.name,
-                        icon: dept.icon || '🏫',
-                        courses: (dept.courses || []).map(c => ({
-                            id: c.id,
-                            course_name: c.course_name,
-                            course_code: c.course_code,
-                            is_offered: false
-                        }))
+                    const courses = (d.data.courses || []).map(c => ({
+                        id: c.id,
+                        course_name: c.course_name,
+                        course_code: c.course_code,
+                        program_type: c.program_type,
+                        is_offered: false
                     }));
-                    renderCampusEditorCoursesGroups(_currentCampusCoursesData);
+                    renderCampusEditorPrograms(courses);
                 }
             } catch (err) {
-                console.error('Error loading campus editor courses:', err);
-                container.innerHTML = `<div style="color: #EF4444; font-size: 12px; padding: 16px; text-align: center;">Failed to load courses catalog.</div>`;
+                console.error('Error loading campus editor programs:', err);
+                container.innerHTML = `<div style="color: #EF4444; font-size: 12px; padding: 16px; text-align: center;">Failed to load programs catalog.</div>`;
             }
         }
 
-        function renderCampusEditorCoursesGroups(departments) {
+        function renderCampusEditorPrograms(programs) {
             const container = document.getElementById('campusCoursesGroupContainer');
             if (!container) return;
 
-            if (!departments || departments.length === 0) {
+            if (!programs || programs.length === 0) {
                 container.innerHTML = `
                     <div style="text-align: center; padding: 20px; color: #648781; font-size: 12px;">
-                        No academic departments or courses found in catalog.<br/>
-                        <a href="javascript:void(0)" onclick="switchNavTab('departments')" style="color: #047857; font-weight: 700; text-decoration: underline; margin-top: 6px; display: inline-block;">+ Create Departments &amp; Courses First</a>
+                        No academic programs found in catalog.<br/>
+                        <a href="javascript:void(0)" onclick="switchNavTab('academic-programs')" style="color: #047857; font-weight: 700; text-decoration: underline; margin-top: 6px; display: inline-block;">+ Create Academic Programs First</a>
                     </div>
                 `;
-                updateCampusDerivedDeptsDisplay();
+                updateCampusOfferedProgramsDisplay();
                 return;
             }
 
-            container.innerHTML = departments.map(dept => {
-                const courses = dept.courses || [];
-                const deptIcon = dept.icon || '🏫';
-                const deptName = escapeHtml(dept.name);
-
-                if (courses.length === 0) {
-                    return `
-                        <div style="background: #F8FCFA; border: 1px solid #E6F0EC; border-radius: 8px; padding: 12px 14px;">
-                            <div style="display: flex; align-items: center; justify-content: space-between;">
-                                <div style="font-weight: 700; color: #063D3B; font-size: 12.5px; display: flex; align-items: center; gap: 7px;">
-                                    <span>${deptIcon}</span>
-                                    <span>${deptName}</span>
-                                </div>
-                                <span style="font-size: 11px; color: #94A3B8; font-style: italic;">No programs configured under this department</span>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                const coursesHtml = courses.map(c => {
-                    const isChecked = !!c.is_offered;
-                    const codeBadge = c.course_code ? `<span style="font-size: 10px; font-weight: 700; color: #648781; background: #FFFFFF; border: 1px solid #D1E5DE; border-radius: 4px; padding: 1px 5px;">${escapeHtml(c.course_code)}</span>` : '';
-
-                    return `
-                        <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #063D3B; cursor: pointer; padding: 7px 10px; background: #FFFFFF; border: 1px solid ${isChecked ? '#10B981' : '#D1E5DE'}; border-radius: 6px; transition: all 0.15s; user-select: none;">
-                            <input type="checkbox" class="campus-course-checkbox" data-dept-id="${dept.id}" data-dept-name="${deptName}" data-dept-icon="${deptIcon}" value="${c.id}" ${isChecked ? 'checked' : ''} onchange="onCampusCourseCheckboxChange(this)" style="width: 15px; height: 15px; accent-color: #047857; cursor: pointer; flex-shrink: 0;" />
-                            <span style="font-weight: 600; flex: 1;">${escapeHtml(c.course_name)}</span>
-                            ${codeBadge}
-                        </label>
-                    `;
-                }).join('');
-
-                const offeredCount = courses.filter(c => c.is_offered).length;
+            const programsHtml = programs.map(c => {
+                const isChecked = !!c.is_offered;
+                const codeBadge = c.course_code ? `<span style="font-size: 10px; font-weight: 700; color: #648781; background: #FFFFFF; border: 1px solid #D1E5DE; border-radius: 4px; padding: 1px 5px;">${escapeHtml(c.course_code)}</span>` : '';
+                const typeBadge = c.program_type ? `<span style="font-size: 9.5px; font-weight: 600; text-transform: uppercase; color: #047857; background: #ECFDF5; border-radius: 3px; padding: 1px 5px;">${escapeHtml(c.program_type)}</span>` : '';
 
                 return `
-                    <div class="campus-dept-group" data-dept-id="${dept.id}" style="background: #FAFCFB; border: 1.5px solid #E6F0EC; border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 10px;">
-                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <span style="font-size: 16px;">${deptIcon}</span>
-                                <strong style="font-size: 13px; color: #063D3B;">${deptName}</strong>
-                                <span class="dept-group-count-badge" style="font-size: 10px; font-weight: 700; color: #047857; background: #ECFDF5; border: 1px solid #A7F3D0; padding: 2px 7px; border-radius: 4px;">
-                                    ${offeredCount}/${courses.length} Offered
-                                </span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 6px;">
-                                <button type="button" class="brand-btn-secondary" style="height: 24px; padding: 0 8px; font-size: 10.5px; font-weight: 600; border-radius: 4px;" onclick="toggleDeptAllCourses(${dept.id}, true)">Select All</button>
-                                <button type="button" class="brand-btn-secondary" style="height: 24px; padding: 0 8px; font-size: 10.5px; font-weight: 600; border-radius: 4px;" onclick="toggleDeptAllCourses(${dept.id}, false)">Deselect All</button>
-                            </div>
-                        </div>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px;">
-                            ${coursesHtml}
-                        </div>
-                    </div>
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #063D3B; cursor: pointer; padding: 8px 12px; background: #FFFFFF; border: 1px solid ${isChecked ? '#10B981' : '#D1E5DE'}; border-radius: 6px; transition: all 0.15s; user-select: none;">
+                        <input type="checkbox" class="campus-course-checkbox" value="${c.id}" ${isChecked ? 'checked' : ''} onchange="onCampusCourseCheckboxChange(this)" style="width: 15px; height: 15px; accent-color: #047857; cursor: pointer; flex-shrink: 0;" />
+                        <span style="font-weight: 600; flex: 1;">${escapeHtml(c.course_name)}</span>
+                        ${typeBadge}
+                        ${codeBadge}
+                    </label>
                 `;
             }).join('');
 
-            updateCampusDerivedDeptsDisplay();
+            container.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin-bottom: 8px;">
+                    <button type="button" class="brand-btn-secondary" style="height: 24px; padding: 0 8px; font-size: 10.5px; font-weight: 600; border-radius: 4px;" onclick="toggleAllCampusPrograms(true)">Select All</button>
+                    <button type="button" class="brand-btn-secondary" style="height: 24px; padding: 0 8px; font-size: 10.5px; font-weight: 600; border-radius: 4px;" onclick="toggleAllCampusPrograms(false)">Deselect All</button>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px;">
+                    ${programsHtml}
+                </div>
+            `;
+
+            updateCampusOfferedProgramsDisplay();
+        }
+        function renderCampusEditorCoursesGroups(depts) {
+            renderCampusEditorPrograms(depts);
         }
 
-        function toggleDeptAllCourses(deptId, select) {
-            const group = document.querySelector(`.campus-dept-group[data-dept-id="${deptId}"]`);
-            if (!group) return;
-            group.querySelectorAll('.campus-course-checkbox').forEach(cb => {
+        function toggleAllCampusPrograms(select) {
+            document.querySelectorAll('.campus-course-checkbox').forEach(cb => {
                 cb.checked = select;
                 cb.parentElement.style.borderColor = select ? '#10B981' : '#D1E5DE';
             });
-            updateCampusDerivedDeptsDisplay();
+            updateCampusOfferedProgramsDisplay();
+        }
+        window.toggleAllCampusPrograms = toggleAllCampusPrograms;
+
+        function toggleDeptAllCourses(deptId, select) {
+            toggleAllCampusPrograms(select);
         }
         window.toggleDeptAllCourses = toggleDeptAllCourses;
 
         function onCampusCourseCheckboxChange(cb) {
             cb.parentElement.style.borderColor = cb.checked ? '#10B981' : '#D1E5DE';
-            updateCampusDerivedDeptsDisplay();
+            updateCampusOfferedProgramsDisplay();
         }
         window.onCampusCourseCheckboxChange = onCampusCourseCheckboxChange;
 
-        function updateCampusDerivedDeptsDisplay() {
+        function updateCampusOfferedProgramsDisplay() {
             const allChecked = Array.from(document.querySelectorAll('.campus-course-checkbox:checked'));
             const totalOffered = allChecked.length;
 
             const badge = document.getElementById('campusEditorCoursesBadge');
             if (badge) {
-                badge.innerText = `${totalOffered} Course${totalOffered === 1 ? '' : 's'} Offered`;
+                badge.innerText = `${totalOffered} Program${totalOffered === 1 ? '' : 's'} Offered`;
                 badge.style.color = totalOffered > 0 ? '#047857' : '#648781';
                 badge.style.background = totalOffered > 0 ? '#ECFDF5' : '#F1F5F9';
                 badge.style.borderColor = totalOffered > 0 ? '#A7F3D0' : '#E2E8F0';
             }
-
-            // Update each department's group badge count
-            document.querySelectorAll('.campus-dept-group').forEach(group => {
-                const totalInDept = group.querySelectorAll('.campus-course-checkbox').length;
-                const checkedInDept = group.querySelectorAll('.campus-course-checkbox:checked').length;
-                const countBadge = group.querySelector('.dept-group-count-badge');
-                if (countBadge) {
-                    countBadge.innerText = `${checkedInDept}/${totalInDept} Offered`;
-                    countBadge.style.color = checkedInDept > 0 ? '#047857' : '#648781';
-                    countBadge.style.background = checkedInDept > 0 ? '#ECFDF5' : '#F1F5F9';
-                    countBadge.style.borderColor = checkedInDept > 0 ? '#A7F3D0' : '#E2E8F0';
-                }
-            });
-
-            // Calculate derived departments
-            const deptsMap = {};
-            allChecked.forEach(cb => {
-                const deptId = cb.dataset.deptId;
-                const deptName = cb.dataset.deptName;
-                const deptIcon = cb.dataset.deptIcon || '🏛️';
-                if (!deptsMap[deptId]) {
-                    deptsMap[deptId] = { name: deptName, icon: deptIcon, count: 0 };
-                }
-                deptsMap[deptId].count++;
-            });
-
-            const derivedListEl = document.getElementById('campusDerivedDeptsList');
-            if (derivedListEl) {
-                const deptKeys = Object.keys(deptsMap);
-                if (deptKeys.length === 0) {
-                    derivedListEl.innerHTML = `<span style="color: #94A3B8; font-style: italic;">No departments derived yet. Check courses below to establish campus departments.</span>`;
-                } else {
-                    derivedListEl.innerHTML = deptKeys.map(k => {
-                        const d = deptsMap[k];
-                        return `
-                            <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: #063D3B; background: #FFFFFF; border: 1px solid #D1E5DE; border-radius: 6px; padding: 3px 9px;">
-                                <span>${d.icon}</span>
-                                <span>${escapeHtml(d.name)}</span>
-                                <span style="font-size: 10px; color: #047857; background: #ECFDF5; border-radius: 4px; padding: 1px 5px; font-weight: 800;">${d.count}</span>
-                            </span>
-                        `;
-                    }).join('');
-                }
-            }
         }
-        window.updateCampusDerivedDeptsDisplay = updateCampusDerivedDeptsDisplay;
+        window.updateCampusDerivedDeptsDisplay = updateCampusOfferedProgramsDisplay;
 
         async function handleCampusPageSubmit(e) {
             if (e) e.preventDefault();
@@ -17807,64 +15506,40 @@ echo $response['reply'];
             setEl('viewCampusEmail', campus.contact_email || 'Not specified');
             setEl('viewCampusPhone', campus.contact_phone || 'Not specified');
 
-            // Populate derived departments and offered courses
-            const deptCountEl = document.getElementById('viewCampusDeptCount');
             const coursesCountEl = document.getElementById('viewCampusCoursesCount');
-            const derivedDeptsEl = document.getElementById('viewCampusDerivedDepts');
             const coursesListEl = document.getElementById('viewCampusCoursesList');
 
-            if (deptCountEl) deptCountEl.innerText = (campus.derived_departments || []).length;
             if (coursesCountEl) coursesCountEl.innerText = `${campus.courses_count || 0} Programs Offered`;
 
-            if (derivedDeptsEl) {
-                const depts = campus.derived_departments || [];
-                if (depts.length === 0) {
-                    derivedDeptsEl.innerHTML = `<span style="color: #94A3B8; font-style: italic;">No departments derived. Map courses to associate departments.</span>`;
-                } else {
-                    derivedDeptsEl.innerHTML = depts.map(d => `
-                        <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 700; color: #063D3B; background: #FFFFFF; border: 1px solid #D1E5DE; border-radius: 5px; padding: 3px 8px; margin: 2px;">
-                            <span>${d.icon || '🏛️'}</span>
-                            <span>${escapeHtml(d.name)}</span>
-                        </span>
-                    `).join('');
-                }
-            }
-
-            // Fetch detailed list of courses for this campus
+            // Fetch detailed list of programs for this campus
             if (coursesListEl) {
-                coursesListEl.innerHTML = `<div style="color: #648781; font-size: 11px;">Loading offered courses...</div>`;
+                coursesListEl.innerHTML = `<div style="color: #648781; font-size: 11px;">Loading offered programs...</div>`;
                 fetch(`/v1/campuses/${id}/courses`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 })
                 .then(r => r.json())
                 .then(res => {
                     if (res.status === 'success' && res.data) {
-                        const depts = (res.data.departments || []).filter(d => d.offered_courses_count > 0);
-                        if (depts.length === 0) {
+                        const programs = (res.data.programs || []).filter(c => c.is_offered);
+                        if (coursesCountEl) coursesCountEl.innerText = `${programs.length} Program${programs.length === 1 ? '' : 's'} Offered`;
+
+                        if (programs.length === 0) {
                             coursesListEl.innerHTML = `<span style="color: #94A3B8; font-style: italic;">No programs currently offered at this campus location.</span>`;
                             return;
                         }
-                        coursesListEl.innerHTML = depts.map(d => {
-                            const offered = (d.courses || []).filter(c => c.is_offered);
-                            return `
-                                <div style="margin-bottom: 8px;">
-                                    <div style="font-weight: 700; color: #063D3B; font-size: 11.5px; margin-bottom: 4px;">
-                                        ${d.icon || '🏛️'} ${escapeHtml(d.name)}
-                                    </div>
-                                    <div style="display: flex; flex-wrap: wrap; gap: 6px; padding-left: 8px;">
-                                        ${offered.map(c => `
-                                            <span style="font-size: 11px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 4px; padding: 2px 7px; color: #334155;">
-                                                ${escapeHtml(c.course_name)} ${c.course_code ? `<strong style="color: #648781;">(${escapeHtml(c.course_code)})</strong>` : ''}
-                                            </span>
-                                        `).join('')}
-                                    </div>
-                                </div>
-                            `;
-                        }).join('');
+                        coursesListEl.innerHTML = `
+                            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                ${programs.map(c => `
+                                    <span style="font-size: 11px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 4px; padding: 3px 8px; color: #334155; display: inline-flex; align-items: center; gap: 4px;">
+                                        <strong>${escapeHtml(c.course_name)}</strong> ${c.course_code ? `<span style="color: #648781;">(${escapeHtml(c.course_code)})</span>` : ''}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        `;
                     }
                 })
                 .catch(() => {
-                    coursesListEl.innerHTML = `<span style="color: #EF4444;">Failed to load offered courses.</span>`;
+                    coursesListEl.innerHTML = `<span style="color: #EF4444;">Failed to load offered programs.</span>`;
                 });
             }
 
@@ -17975,22 +15650,6 @@ echo $response['reply'];
 
             toggleAddAdminPrivPanel();
 
-            // Populate departments checklist
-            const checklist = document.getElementById('addMemberDeptChecklist');
-            if (checklist) {
-                const depts = window.teamsCachedDepts || [];
-                if (depts.length === 0) {
-                    checklist.innerHTML = `<span style="font-size: 11.5px; color: #648781;">No departments available yet.</span>`;
-                } else {
-                    checklist.innerHTML = depts.map(d => `
-                        <label style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: #FFFFFF; border: 1.5px solid #D1E5DE; border-radius: 6px; font-size: 11.5px; color: #063D3B; cursor: pointer;">
-                            <input type="checkbox" class="add-dept-checkbox" value="${d.id}" style="accent-color: #063D3B;" />
-                            <span>${d.icon || '🏫'} ${escapeHtmlString(d.name)}</span>
-                        </label>
-                    `).join('');
-                }
-            }
-
             modal.classList.add('open');
             setTimeout(() => { if (nameEl) nameEl.focus(); }, 100);
         }
@@ -18029,13 +15688,11 @@ echo $response['reply'];
                 can_manage_structure = 0;
             }
 
-            const department_ids = Array.from(document.querySelectorAll('.add-dept-checkbox:checked')).map(cb => parseInt(cb.value));
-
             try {
                 const res = await fetch('/v1/organization/staff', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ name, email, password, role, can_manage_structure, department_ids })
+                    body: JSON.stringify({ name, email, password, role, can_manage_structure })
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
@@ -18085,26 +15742,6 @@ echo $response['reply'];
 
             toggleEditAdminPrivPanel();
 
-            // Populate departments checklist with existing assignments checked
-            const userDeptIds = new Set((user.departments || []).map(d => String(d.id)));
-            const checklist = document.getElementById('editMemberDeptChecklist');
-            if (checklist) {
-                const depts = window.teamsCachedDepts || [];
-                if (depts.length === 0) {
-                    checklist.innerHTML = `<span style="font-size: 11.5px; color: #648781;">No departments available.</span>`;
-                } else {
-                    checklist.innerHTML = depts.map(d => {
-                        const isChecked = userDeptIds.has(String(d.id)) ? 'checked' : '';
-                        return `
-                            <label style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: #FFFFFF; border: 1.5px solid #D1E5DE; border-radius: 6px; font-size: 11.5px; color: #063D3B; cursor: pointer;">
-                                <input type="checkbox" class="edit-dept-checkbox" value="${d.id}" ${isChecked} style="accent-color: #063D3B;" />
-                                <span>${d.icon || '🏫'} ${escapeHtmlString(d.name)}</span>
-                            </label>
-                        `;
-                    }).join('');
-                }
-            }
-
             modal.classList.add('open');
             setTimeout(() => { if (nameEl) nameEl.focus(); }, 100);
         }
@@ -18145,9 +15782,7 @@ echo $response['reply'];
                 can_manage_structure = 0;
             }
 
-            const department_ids = Array.from(document.querySelectorAll('.edit-dept-checkbox:checked')).map(cb => parseInt(cb.value));
-
-            const payload = { name, email, role, can_manage_structure, department_ids };
+            const payload = { name, email, role, can_manage_structure };
             if (password) {
                 payload.password = password;
             }
@@ -18204,9 +15839,7 @@ echo $response['reply'];
 
         function filterTeamsRosterTable() {
             const searchInput = document.getElementById('teamsSearchInput');
-            const deptFilter = document.getElementById('teamsDeptFilter');
             const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
-            const deptVal = deptFilter ? deptFilter.value : 'all';
 
             const filtered = (window.teamsCachedUsers || []).filter(u => {
                 const isAdmin = u.role === 'owner' || u.role === 'org_admin' || u.role === 'admin' || u.role === 'superadmin';
@@ -18219,19 +15852,12 @@ echo $response['reply'];
                 if (window.teamsCurrentRoleFilter === 'content_admin' && !isContentAdmin) return false;
                 if (window.teamsCurrentRoleFilter === 'team_member' && !isTeamMember) return false;
 
-                // Dept check
-                if (deptVal !== 'all') {
-                    const hasDept = (u.departments || []).some(d => String(d.id) === String(deptVal));
-                    if (!hasDept) return false;
-                }
-
                 // Query search
                 if (query) {
                     const name = (u.name || '').toLowerCase();
                     const email = (u.email || '').toLowerCase();
-                    const deptsText = (u.departments || []).map(d => (d.name || '').toLowerCase()).join(' ');
                     const roleText = isFullAdmin ? 'admin full access' : (isContentAdmin ? 'admin content access' : 'team member counselor');
-                    if (!name.includes(query) && !email.includes(query) && !deptsText.includes(query) && !roleText.includes(query)) {
+                    if (!name.includes(query) && !email.includes(query) && !roleText.includes(query)) {
                         return false;
                     }
                 }
@@ -18268,21 +15894,12 @@ echo $response['reply'];
             }
 
             try {
-                // Fetch organization users & departments concurrently
-                const [resUsers, resDepts] = await Promise.all([
-                    fetch('/v1/organization/staff', { headers: { 'Authorization': 'Bearer ' + token } }),
-                    fetch('/v1/departments', { headers: { 'Authorization': 'Bearer ' + token } })
-                ]);
+                // Fetch organization users
+                const resUsers = await fetch('/v1/organization/staff', { headers: { 'Authorization': 'Bearer ' + token } });
                 const usersData = await resUsers.json();
-                const deptsData = await resDepts.json();
 
                 const users = (usersData.status === 'success' && usersData.data) ? usersData.data : [];
-                const depts = (deptsData.status === 'success' && deptsData.data)
-                    ? (Array.isArray(deptsData.data) ? deptsData.data : (deptsData.data.departments || []))
-                    : [];
-
                 window.teamsCachedUsers = users;
-                window.teamsCachedDepts = depts;
 
                 // Update Header Pill
                 const pillCount = document.getElementById('teamsActivePillCount');
@@ -18294,7 +15911,6 @@ echo $response['reply'];
                 let fullAdminsCount = 0;
                 let contentAdminsCount = 0;
                 let teamMembersCount = 0;
-                const assignedDeptIds = new Set();
 
                 users.forEach(u => {
                     const isAdmin = u.role === 'owner' || u.role === 'org_admin' || u.role === 'admin' || u.role === 'superadmin';
@@ -18304,10 +15920,6 @@ echo $response['reply'];
                         contentAdminsCount++;
                     } else {
                         teamMembersCount++;
-                    }
-
-                    if (u.departments && Array.isArray(u.departments)) {
-                        u.departments.forEach(d => assignedDeptIds.add(d.id));
                     }
                 });
 
@@ -18320,23 +15932,12 @@ echo $response['reply'];
                 setElText('statFullAdmins', fullAdminsCount);
                 setElText('statContentAdmins', contentAdminsCount);
                 setElText('statTeamMembers', teamMembersCount);
-                setElText('statAssignedDepts', assignedDeptIds.size);
 
                 // Update Tab Count Badges
                 setElText('tabCountAll', users.length);
                 setElText('tabCountFullAdmin', fullAdminsCount);
                 setElText('tabCountContentAdmin', contentAdminsCount);
                 setElText('tabCountTeamMember', teamMembersCount);
-
-                // Populate Department Filter Dropdown
-                const deptFilter = document.getElementById('teamsDeptFilter');
-                if (deptFilter) {
-                    const currentVal = deptFilter.value;
-                    deptFilter.innerHTML = `<option value="all">All Departments</option>` + depts.map(d => `
-                        <option value="${d.id}">${d.icon || '🏫'} ${escapeHtmlString(d.name)}</option>
-                    `).join('');
-                    deptFilter.value = currentVal || 'all';
-                }
 
                 // Initial render of filtered table
                 filterTeamsRosterTable();
@@ -18345,7 +15946,7 @@ echo $response['reply'];
                 console.error('[Edvora Teams] Load error:', err);
                 const tbody = document.getElementById('teamsRosterTableBody');
                 if (tbody) {
-                    const colSpan = isCurrentFullAdmin ? 5 : 4;
+                    const colSpan = isCurrentFullAdmin ? 4 : 3;
                     tbody.innerHTML = `
                         <tr>
                             <td colspan="${colSpan}" style="text-align: center; padding: 40px 20px; color: #DC2626;">
@@ -18374,7 +15975,7 @@ echo $response['reply'];
                 actionColHeader.style.display = isCurrentFullAdmin ? '' : 'none';
             }
 
-            const colSpan = isCurrentFullAdmin ? 5 : 4;
+            const colSpan = isCurrentFullAdmin ? 4 : 3;
             if (users.length === 0) {
                 tbody.innerHTML = `
                     <tr>
@@ -18412,10 +16013,6 @@ echo $response['reply'];
                             <span>Team Member</span>
                         </span>`;
                 }
-
-                const deptBadges = (u.departments && u.departments.length > 0)
-                    ? u.departments.map(d => `<span class="ckh-dept-badge">${d.icon || '🏫'} ${escapeHtmlString(d.name)}</span>`).join(' ')
-                    : `<span style="font-size: 11px; color: #94A3B8; font-style: italic;">No departments assigned</span>`;
 
                 const initial = u.name ? u.name.charAt(0).toUpperCase() : 'U';
                 const safeName = escapeJsString(u.name || '');
@@ -18461,11 +16058,6 @@ echo $response['reply'];
                         </td>
                         <td>
                             ${roleBadgeHtml}
-                        </td>
-                        <td>
-                            <div style="display: flex; flex-wrap: wrap; gap: 4px; align-items: center;">
-                                ${deptBadges}
-                            </div>
                         </td>
                         <td>
                             <span class="ckh-status-pill ckh-status-live">

@@ -271,66 +271,6 @@ class Migrations
                 metadata JSON NULL,
                 ip_address VARCHAR(45) NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
-
-            // 17. DEPARTMENTS
-            "CREATE TABLE IF NOT EXISTS departments (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                organization_id INT NOT NULL,
-                name VARCHAR(255) NOT NULL,
-                slug VARCHAR(255) NOT NULL,
-                icon VARCHAR(50) DEFAULT '🏫',
-                description TEXT NULL,
-                email VARCHAR(255) NULL,
-                phone VARCHAR(50) NULL,
-                whatsapp VARCHAR(50) NULL,
-                working_hours JSON NULL,
-                timezone VARCHAR(50) DEFAULT 'America/New_York',
-                auto_away_message TEXT NULL,
-                escalation_rules JSON NULL,
-                lead_assignment_rules JSON NULL,
-                greeting_message TEXT NULL,
-                is_active TINYINT(1) DEFAULT 0,
-                enable_dedicated_widget TINYINT(1) DEFAULT 0,
-                is_preset TINYINT(1) DEFAULT 0,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
-                UNIQUE KEY org_dept_slug (organization_id, slug)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
-
-            // 18. DEPARTMENT STAFF
-            "CREATE TABLE IF NOT EXISTS department_staff (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                department_id INT NOT NULL,
-                user_id INT NOT NULL,
-                role ENUM('lead', 'agent') DEFAULT 'agent',
-                is_on_duty TINYINT(1) DEFAULT 1,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE,
-                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-                UNIQUE KEY dept_user (department_id, user_id)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
-
-            // 19. DEPARTMENT KNOWLEDGE
-            "CREATE TABLE IF NOT EXISTS department_knowledge (
-                department_id INT NOT NULL,
-                knowledge_source_id INT NOT NULL,
-                PRIMARY KEY (department_id, knowledge_source_id),
-                FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE,
-                FOREIGN KEY (knowledge_source_id) REFERENCES knowledge_sources(id) ON DELETE CASCADE
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
-
-            // 20. DEPARTMENT FAQS
-            "CREATE TABLE IF NOT EXISTS department_faqs (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                department_id INT NOT NULL,
-                question VARCHAR(500) NOT NULL,
-                answer TEXT NOT NULL,
-                keywords JSON NULL,
-                sort_order INT DEFAULT 0,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
         ];
 
@@ -368,16 +308,6 @@ class Migrations
             // Index may already exist
         }
 
-        // Add department_id to conversations table if missing
-        try {
-            $checkConvDept = $this->db->query("SHOW COLUMNS FROM conversations LIKE 'department_id'");
-            if (!$checkConvDept->fetch()) {
-                $this->db->exec("ALTER TABLE conversations ADD COLUMN department_id INT NULL AFTER chatbot_id, ADD CONSTRAINT fk_conversations_dept FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL;");
-            }
-        } catch (Throwable $e) {
-            // Column may already exist
-        }
-
         // Add is_test column to conversations table if missing
         try {
             $checkConvTest = $this->db->query("SHOW COLUMNS FROM conversations LIKE 'is_test'");
@@ -388,20 +318,10 @@ class Migrations
             // Column may already exist
         }
 
-        // Add department_id and assigned_user_id to leads table if missing
-        try {
-            $checkLeadDept = $this->db->query("SHOW COLUMNS FROM leads LIKE 'department_id'");
-            if (!$checkLeadDept->fetch()) {
-                $this->db->exec("ALTER TABLE leads ADD COLUMN department_id INT NULL AFTER conversation_id, ADD CONSTRAINT fk_leads_dept FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL;");
-            }
-        } catch (Throwable $e) {
-            // Column may already exist
-        }
-
         try {
             $checkLeadUser = $this->db->query("SHOW COLUMNS FROM leads LIKE 'assigned_user_id'");
             if (!$checkLeadUser->fetch()) {
-                $this->db->exec("ALTER TABLE leads ADD COLUMN assigned_user_id INT NULL AFTER department_id, ADD CONSTRAINT fk_leads_assigned_user FOREIGN KEY (assigned_user_id) REFERENCES users(id) ON DELETE SET NULL;");
+                $this->db->exec("ALTER TABLE leads ADD COLUMN assigned_user_id INT NULL AFTER conversation_id, ADD CONSTRAINT fk_leads_assigned_user FOREIGN KEY (assigned_user_id) REFERENCES users(id) ON DELETE SET NULL;");
             }
         } catch (Throwable $e) {
             // Column may already exist
@@ -442,7 +362,6 @@ class Migrations
                 id              INT AUTO_INCREMENT PRIMARY KEY,
                 chatbot_id      INT NOT NULL,
                 organization_id INT NOT NULL,
-                department_id   INT NULL DEFAULT NULL,
                 config          JSON NOT NULL,
                 created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -451,16 +370,6 @@ class Migrations
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
         } catch (Throwable $e) {
             // Table may already exist
-        }
-
-        // Add enable_dedicated_widget column to departments table if missing
-        try {
-            $checkDeptWidget = $this->db->query("SHOW COLUMNS FROM departments LIKE 'enable_dedicated_widget'");
-            if (!$checkDeptWidget->fetch()) {
-                $this->db->exec("ALTER TABLE departments ADD COLUMN enable_dedicated_widget TINYINT(1) DEFAULT 1 AFTER is_active;");
-            }
-        } catch (Throwable $e) {
-            // Column may already exist
         }
 
         // Add supported_languages column to organizations table if missing
@@ -483,22 +392,11 @@ class Migrations
             // Column may already exist
         }
 
-        // Add scholarship_config column to departments table if missing
-        try {
-            $checkDeptScholarship = $this->db->query("SHOW COLUMNS FROM departments LIKE 'scholarship_config'");
-            if (!$checkDeptScholarship->fetch()) {
-                $this->db->exec("ALTER TABLE departments ADD COLUMN scholarship_config JSON NULL COMMENT 'Department specific scholarship override rules' AFTER enable_dedicated_widget;");
-            }
-        } catch (Throwable $e) {
-            // Column may already exist
-        }
-
         // Create course_scholarships table
         try {
             $this->db->exec("CREATE TABLE IF NOT EXISTS course_scholarships (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 organization_id INT NOT NULL,
-                department_id INT NULL,
                 course_name VARCHAR(255) NOT NULL,
                 course_code VARCHAR(50) NULL,
                 degree_level ENUM('undergraduate', 'postgraduate', 'diploma', 'doctorate', 'certificate') DEFAULT 'undergraduate',
@@ -513,8 +411,7 @@ class Migrations
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
-                FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL,
-                INDEX idx_org_dept (organization_id, department_id)
+                INDEX idx_org (organization_id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
         } catch (Throwable $e) {
             // Table may already exist
@@ -541,7 +438,6 @@ class Migrations
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 organization_id INT NOT NULL,
                 chatbot_id INT NOT NULL,
-                department_id INT NULL,
                 conversation_id INT NULL,
                 assigned_user_id INT NULL,
                 student_name VARCHAR(255) NOT NULL,
@@ -558,10 +454,8 @@ class Migrations
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
                 FOREIGN KEY (chatbot_id) REFERENCES chatbots(id) ON DELETE CASCADE,
-                FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL,
                 FOREIGN KEY (assigned_user_id) REFERENCES users(id) ON DELETE SET NULL,
                 INDEX idx_org_status (organization_id, status),
-                INDEX idx_org_dept (organization_id, department_id),
                 INDEX idx_org_assigned (organization_id, assigned_user_id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
         } catch (Throwable $e) {
@@ -573,7 +467,6 @@ class Migrations
             $this->db->exec("CREATE TABLE IF NOT EXISTS lead_assets (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 organization_id INT NOT NULL,
-                department_id INT NULL COMMENT 'NULL indicates Org-wide / General Asset',
                 title VARCHAR(255) NOT NULL,
                 category ENUM('brochure', 'fee_structure', 'scholarship_guide', 'placement_report', 'curriculum', 'hostel_guide', 'exam_cutoff', 'international_guide', 'other') DEFAULT 'brochure',
                 description TEXT NULL,
@@ -588,9 +481,8 @@ class Migrations
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
-                FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL,
                 FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
-                INDEX idx_org_dept (organization_id, department_id),
+                INDEX idx_org (organization_id),
                 INDEX idx_category (category)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
         } catch (Throwable $e) {
@@ -603,7 +495,6 @@ class Migrations
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 organization_id INT NOT NULL,
                 chatbot_id INT NOT NULL,
-                department_id INT NULL,
                 conversation_id INT NULL,
                 assigned_user_id INT NULL,
                 student_name VARCHAR(255) NOT NULL,
@@ -621,10 +512,8 @@ class Migrations
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
                 FOREIGN KEY (chatbot_id) REFERENCES chatbots(id) ON DELETE CASCADE,
-                FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL,
                 FOREIGN KEY (assigned_user_id) REFERENCES users(id) ON DELETE SET NULL,
                 INDEX idx_org_status (organization_id, status),
-                INDEX idx_org_dept (organization_id, department_id),
                 INDEX idx_org_assigned (organization_id, assigned_user_id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
         } catch (Throwable $e) {
@@ -860,56 +749,47 @@ class Migrations
             // Table may already exist
         }
 
-        // Create department_courses table
+        // Clean deprecation and permanent removal of departments architecture
         try {
-            $this->db->exec("CREATE TABLE IF NOT EXISTS department_courses (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                organization_id INT NULL,
-                department_id INT NOT NULL,
-                course_name VARCHAR(255) NOT NULL,
-                course_code VARCHAR(50) NULL,
-                sort_order INT DEFAULT 0,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                INDEX idx_dept_id (department_id),
-                INDEX idx_org (organization_id),
-                FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+            // Drop foreign key constraints referencing department_courses
+            try { $this->db->exec("ALTER TABLE campus_courses DROP FOREIGN KEY campus_courses_ibfk_3;"); } catch (Throwable $e) {}
+            try { $this->db->exec("ALTER TABLE campus_courses DROP FOREIGN KEY fk_campus_courses_program;"); } catch (Throwable $e) {}
+
+            // Drop foreign key constraints & columns referencing departments
+            try { $this->db->exec("ALTER TABLE conversations DROP FOREIGN KEY fk_conversations_dept;"); } catch (Throwable $e) {}
+            try { $this->db->exec("ALTER TABLE conversations DROP COLUMN department_id;"); } catch (Throwable $e) {}
+
+            try { $this->db->exec("ALTER TABLE leads DROP FOREIGN KEY fk_leads_dept;"); } catch (Throwable $e) {}
+            try { $this->db->exec("ALTER TABLE leads DROP COLUMN department_id;"); } catch (Throwable $e) {}
+
+            try { $this->db->exec("ALTER TABLE campus_tour_bookings DROP FOREIGN KEY campus_tour_bookings_ibfk_3;"); } catch (Throwable $e) {}
+            try { $this->db->exec("ALTER TABLE campus_tour_bookings DROP COLUMN department_id;"); } catch (Throwable $e) {}
+
+            try { $this->db->exec("ALTER TABLE campus_tour_slots DROP FOREIGN KEY fk_slot_dept;"); } catch (Throwable $e) {}
+            try { $this->db->exec("ALTER TABLE campus_tour_slots DROP COLUMN department_id;"); } catch (Throwable $e) {}
+
+            try { $this->db->exec("ALTER TABLE counselor_callbacks DROP FOREIGN KEY counselor_callbacks_ibfk_3;"); } catch (Throwable $e) {}
+            try { $this->db->exec("ALTER TABLE counselor_callbacks DROP COLUMN department_id;"); } catch (Throwable $e) {}
+
+            try { $this->db->exec("ALTER TABLE lead_assets DROP FOREIGN KEY lead_assets_ibfk_2;"); } catch (Throwable $e) {}
+            try { $this->db->exec("ALTER TABLE lead_assets DROP COLUMN department_id;"); } catch (Throwable $e) {}
+
+            try { $this->db->exec("ALTER TABLE course_scholarships DROP FOREIGN KEY course_scholarships_ibfk_2;"); } catch (Throwable $e) {}
+            try { $this->db->exec("ALTER TABLE course_scholarships DROP COLUMN department_id;"); } catch (Throwable $e) {}
+
+            try { $this->db->exec("ALTER TABLE widget_customizations DROP COLUMN department_id;"); } catch (Throwable $e) {}
+
+            // Drop the 5 department tables
+            $this->db->exec("DROP TABLE IF EXISTS department_staff;");
+            $this->db->exec("DROP TABLE IF EXISTS department_knowledge;");
+            $this->db->exec("DROP TABLE IF EXISTS department_faqs;");
+            $this->db->exec("DROP TABLE IF EXISTS department_courses;");
+            $this->db->exec("DROP TABLE IF EXISTS departments;");
         } catch (Throwable $e) {
-            // Table may already exist
+            // Ignored
         }
 
-        // Backfill organization_id in department_courses if column missing
-        try {
-            $this->db->exec("ALTER TABLE department_courses ADD COLUMN IF NOT EXISTS organization_id INT NULL AFTER id;");
-            $this->db->exec("UPDATE department_courses dc JOIN departments d ON dc.department_id = d.id SET dc.organization_id = d.organization_id WHERE dc.organization_id IS NULL;");
-            // Allow department_id to be NULL for orphan courses across departments
-            $this->db->exec("ALTER TABLE department_courses MODIFY COLUMN department_id INT NULL;");
-        } catch (Throwable $e) {
-            // Column may already exist
-        }
-
-        // Enhance department_courses with unified academic program metadata
-        try {
-            $this->db->exec("ALTER TABLE department_courses 
-                ADD COLUMN IF NOT EXISTS program_type ENUM('undergraduate', 'postgraduate', 'doctoral', 'executive', 'certificate', 'other') DEFAULT 'undergraduate' AFTER course_code,
-                ADD COLUMN IF NOT EXISTS duration VARCHAR(50) NULL AFTER program_type,
-                ADD COLUMN IF NOT EXISTS mode ENUM('full_time', 'part_time', 'online', 'hybrid', 'weekend') DEFAULT 'full_time' AFTER duration,
-                ADD COLUMN IF NOT EXISTS is_admissions_open TINYINT(1) DEFAULT 1 AFTER mode,
-                ADD COLUMN IF NOT EXISTS tuition_fee DECIMAL(12,2) NULL AFTER is_admissions_open,
-                ADD COLUMN IF NOT EXISTS registration_fee DECIMAL(12,2) NULL AFTER tuition_fee,
-                ADD COLUMN IF NOT EXISTS other_fees DECIMAL(12,2) NULL AFTER registration_fee,
-                ADD COLUMN IF NOT EXISTS total_fee DECIMAL(12,2) NULL AFTER other_fees,
-                ADD COLUMN IF NOT EXISTS currency VARCHAR(10) DEFAULT 'INR' AFTER total_fee,
-                ADD COLUMN IF NOT EXISTS eligibility TEXT NULL AFTER currency,
-                ADD COLUMN IF NOT EXISTS application_deadline VARCHAR(100) NULL AFTER eligibility,
-                ADD COLUMN IF NOT EXISTS application_fee VARCHAR(50) NULL AFTER application_deadline,
-                ADD COLUMN IF NOT EXISTS application_url VARCHAR(500) NULL AFTER application_fee;");
-        } catch (Throwable $e) {
-            // Columns may already exist
-        }
-
-        // Create campus_courses junction table
+        // Create campus_courses junction table linked directly to programs
         try {
             $this->db->exec("CREATE TABLE IF NOT EXISTS campus_courses (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -922,27 +802,18 @@ class Migrations
                 INDEX idx_campus (campus_id),
                 INDEX idx_course (course_id),
                 FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
-                FOREIGN KEY (campus_id) REFERENCES campuses(id) ON DELETE CASCADE,
-                FOREIGN KEY (course_id) REFERENCES department_courses(id) ON DELETE CASCADE
+                FOREIGN KEY (campus_id) REFERENCES campuses(id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
+            // Clean invalid course_id references before adding foreign key to programs
+            try {
+                $this->db->exec("DELETE FROM campus_courses WHERE course_id NOT IN (SELECT id FROM programs);");
+                $this->db->exec("ALTER TABLE campus_courses ADD CONSTRAINT fk_campus_courses_program FOREIGN KEY (course_id) REFERENCES programs(id) ON DELETE CASCADE;");
+            } catch (Throwable $e) {
+                // Constraint may already exist
+            }
         } catch (Throwable $e) {
             // Table may already exist
-        }
-
-        // Ensure default for is_active and enable_dedicated_widget is 0 (OFF) on creation
-        try {
-            $this->db->exec("ALTER TABLE departments ALTER COLUMN is_active SET DEFAULT 0;");
-            $this->db->exec("ALTER TABLE departments ALTER COLUMN enable_dedicated_widget SET DEFAULT 0;");
-        } catch (Throwable $e) {
-            // Ignored
-        }
-
-        // Ensure default timezone for departments is America/New_York (US & Canada Eastern Time)
-        try {
-            $this->db->exec("ALTER TABLE departments ALTER COLUMN timezone SET DEFAULT 'America/New_York';");
-            $this->db->exec("UPDATE departments SET timezone = 'America/New_York' WHERE timezone = 'Asia/Kolkata' OR timezone IS NULL;");
-        } catch (Throwable $e) {
-            // Ignored
         }
 
         // Create standalone programs table (identical to department_courses except without department_id)
@@ -1029,7 +900,7 @@ class Migrations
             $checkCbProgram = $this->db->query("SHOW COLUMNS FROM counselor_callbacks LIKE 'program_id'");
             if (!$checkCbProgram->fetch()) {
                 $this->db->exec("ALTER TABLE counselor_callbacks 
-                    ADD COLUMN program_id INT NULL AFTER department_id,
+                    ADD COLUMN program_id INT NULL AFTER conversation_id,
                     ADD INDEX idx_cb_program (program_id),
                     ADD CONSTRAINT fk_cb_program FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE SET NULL;");
             }
@@ -1042,7 +913,7 @@ class Migrations
             $checkTourProgram = $this->db->query("SHOW COLUMNS FROM campus_tour_bookings LIKE 'program_id'");
             if (!$checkTourProgram->fetch()) {
                 $this->db->exec("ALTER TABLE campus_tour_bookings 
-                    ADD COLUMN program_id INT NULL AFTER department_id,
+                    ADD COLUMN program_id INT NULL AFTER conversation_id,
                     ADD INDEX idx_tour_program (program_id),
                     ADD CONSTRAINT fk_tour_program FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE SET NULL;");
             }
@@ -1055,7 +926,7 @@ class Migrations
             $checkLeadProgram = $this->db->query("SHOW COLUMNS FROM leads LIKE 'program_id'");
             if (!$checkLeadProgram->fetch()) {
                 $this->db->exec("ALTER TABLE leads 
-                    ADD COLUMN program_id INT NULL AFTER department_id,
+                    ADD COLUMN program_id INT NULL AFTER conversation_id,
                     ADD INDEX idx_leads_program (program_id),
                     ADD CONSTRAINT fk_leads_program FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE SET NULL;");
             }
@@ -1068,7 +939,7 @@ class Migrations
             $checkAssetProgram = $this->db->query("SHOW COLUMNS FROM lead_assets LIKE 'program_id'");
             if (!$checkAssetProgram->fetch()) {
                 $this->db->exec("ALTER TABLE lead_assets 
-                    ADD COLUMN program_id INT NULL AFTER department_id,
+                    ADD COLUMN program_id INT NULL AFTER organization_id,
                     ADD INDEX idx_assets_program (program_id),
                     ADD CONSTRAINT fk_assets_program FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE SET NULL;");
             }
@@ -1147,15 +1018,13 @@ class Migrations
             // Table may already exist
         }
 
-        // Campus Tour Slots: is_general & department_id columns
+        // Campus Tour Slots: is_general column
         try {
             $checkIsGeneral = $this->db->query("SHOW COLUMNS FROM campus_tour_slots LIKE 'is_general'");
             if (!$checkIsGeneral->fetch()) {
                 $this->db->exec("ALTER TABLE campus_tour_slots 
                     ADD COLUMN is_general TINYINT(1) NOT NULL DEFAULT 1 AFTER title,
-                    ADD COLUMN department_id INT NULL AFTER counselor_user_id,
-                    ADD INDEX idx_slot_general (organization_id, is_general),
-                    ADD CONSTRAINT fk_slot_dept FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL;");
+                    ADD INDEX idx_slot_general (organization_id, is_general);");
             }
         } catch (Throwable $e) {
             // Columns may already exist

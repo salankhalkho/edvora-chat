@@ -18,19 +18,6 @@
                     </div>
                 </div>
 
-                <!-- Staff Scoped Permission Notice (Shown only for staff users) -->
-                <div id="staffAssetNotice" class="brand-card" style="display: none; margin-bottom: 20px; padding: 14px 18px; border: 1px solid rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.08);">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="font-size: 20px;">🛡️</span>
-                        <div>
-                            <strong style="font-size: 13px; font-weight: 700; color: var(--brand-cyan-300);">Departmental Asset Management Scope</strong>
-                            <p id="staffAssetNoticeText" style="font-size: 12px; color: #4F7470; margin: 2px 0 0 0;">
-                                You can upload and manage assets mapped to your assigned departments, as well as view org-wide college assets.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Quick Stats Grid -->
                 <div class="stats-grid" style="margin-bottom: 20px;">
                     <div class="stat-card">
@@ -38,12 +25,8 @@
                         <div class="stat-value" id="statTotalAssets">0</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-label">Org-Wide Assets</div>
+                        <div class="stat-label">Active Assets</div>
                         <div class="stat-value" id="statOrgWideAssets">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Department Mapped</div>
-                        <div class="stat-value" id="statDeptAssets">0</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">Total Downloads</div>
@@ -70,11 +53,6 @@
                                 <option value="international_guide">🌍 International / NRI Guide</option>
                                 <option value="other">📑 Other Resources</option>
                             </select>
-
-                            <select id="assetDeptFilter" class="brand-input" onchange="filterAssetsList()" style="height: 36px; font-size: 12px; min-width: 170px; background-color: #FFFFFF; color: #063D3B;">
-                                <option value="">🏢 All Scopes</option>
-                                <option value="org">🌐 Org-wide Only</option>
-                            </select>
                         </div>
                     </div>
                 </div>
@@ -94,7 +72,6 @@
                                 <tr>
                                     <th>Asset Title &amp; Description</th>
                                     <th>Category</th>
-                                    <th>Scope / Department</th>
                                     <th>File Details</th>
                                     <th>AI Intent Trigger</th>
                                     <th>Status</th>
@@ -155,7 +132,7 @@
                                 <div style="font-size: 20px; margin-bottom: 8px;">📊</div>
                                 <strong style="font-size: 13px; color: #092F2E; display: block; margin-bottom: 6px;">3. Automated Lead Routing &amp; Attribution</strong>
                                 <p style="font-size: 12px; color: #648781; margin: 0; line-height: 1.5;">
-                                    Captured leads are instantly logged in your <strong>Student Leads CRM</strong>, tagged with the exact asset requested, and automatically routed to the mapped department counselor for immediate phone or WhatsApp follow-up.
+                                    Captured leads are instantly logged in your <strong>Student Leads CRM</strong>, tagged with the exact asset requested, and automatically routed to the admissions team for immediate phone or WhatsApp follow-up.
                                 </p>
                             </div>
 
@@ -309,11 +286,11 @@
                                 <div>
                                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                                         <span style="font-size: 24px;">📚</span>
-                                        <span class="badge" style="background: rgba(236, 72, 153, 0.15); color: #f472b6; font-size: 9px; font-weight: 700;">DEPARTMENT SCOPED</span>
+                                        <span class="badge" style="background: rgba(236, 72, 153, 0.15); color: #f472b6; font-size: 9px; font-weight: 700;">PROGRAM SCOPED</span>
                                     </div>
                                     <strong style="font-size: 13px; color: #092F2E; display: block; margin-bottom: 4px;">6. Semester-wise Syllabus &amp; Curriculum Structure</strong>
                                     <p style="font-size: 11px; color: #648781; line-height: 1.5; margin: 0 0 10px 0;">
-                                        Detailed elective tracks, lab modules, industry certifications, and capstone project guidelines mapped per department.
+                                        Detailed elective tracks, lab modules, industry certifications, and capstone project guidelines mapped per academic program.
                                     </p>
                                     <div style="font-size: 10px; color: var(--brand-cyan-400); font-family: var(--brand-font-mono); margin-bottom: 12px;">
                                         Trigger: syllabus, curriculum, subjects list, course modules

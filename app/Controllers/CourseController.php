@@ -86,15 +86,7 @@ class CourseController
             }
             unset($crs);
 
-            // Fetch available departments for UI dropdown selector compatibility
-            $stmtDepts = $db->prepare("
-                SELECT id, name, slug, color, is_active
-                FROM departments
-                WHERE organization_id = ?
-                ORDER BY name ASC
-            ");
-            $stmtDepts->execute([$orgId]);
-            $departments = $stmtDepts->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $departments = [];
 
             // Fetch available campuses for dropdown / checkbox selector
             $stmtCampuses = $db->prepare("

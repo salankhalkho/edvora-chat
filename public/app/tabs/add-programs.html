@@ -20,7 +20,7 @@
                         </span>
                     </div>
                     <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">
-                        Configure degree curriculum, parent department, duration, tuition fee, and campus delivery
+                        Configure degree curriculum, duration, tuition fee, and campus delivery
                     </div>
                 </div>
             </div>
@@ -38,20 +38,20 @@
     <div style="padding: 28px 32px 48px 32px; box-sizing: border-box; width: 100%;">
         <div style="max-width: 900px; width: 100%; margin: 0; box-sizing: border-box;">
             
-            <form id="addProgramForm" onsubmit="handleAddProgramSubmit(event)">
+            <form id="addProgramForm" onsubmit="handleAddProgramSubmit(event)" style="padding: 24px 28px; display: flex; flex-direction: column; gap: 20px;">
 
-                <!-- SECTION 1: Program Core Identity & Degree Details -->
-                <div style="margin-bottom: 28px;">
-                    <div style="font-size: 14px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
-                        <span>📜</span> Program Identity &amp; Curriculum Code
+                <!-- SECTION 1: Core Identification -->
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                    <div style="display: flex; align-items: center; gap: 8px; border-bottom: 1.5px solid #E6F0EC; padding-bottom: 8px;">
+                        <span style="font-size: 13px; font-weight: 800; color: #063D3B; text-transform: uppercase; letter-spacing: 0.5px;">1. Core Program Information</span>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px;">
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
                         <div>
                             <label for="add_prog_name" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
                                 Program / Degree Name <span style="color: #EF4444;">*</span>
                             </label>
-                            <input type="text" id="add_prog_name" required placeholder="e.g. B.S. in Computer Science & Artificial Intelligence" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                            <input type="text" id="add_prog_name" required placeholder="e.g. B.Tech Computer Science & Engineering" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
                         </div>
                         <div>
                             <label for="add_prog_code" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
@@ -61,16 +61,7 @@
                         </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                        <div>
-                            <label for="add_prog_dept" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
-                                Parent Department
-                            </label>
-                            <select id="add_prog_dept" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF; color: #063D3B; font-weight: 600;">
-                                <option value="">(No Department &mdash; Orphan Course)</option>
-                            </select>
-                            <span style="font-size: 10.5px; color: #648781; margin-top: 4px; display: block;">Leave unassigned for institution-wide or independent courses.</span>
-                        </div>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 16px;">
                         <div>
                             <label for="add_prog_type" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
                                 Program Level <span style="color: #EF4444;">*</span>
@@ -197,7 +188,6 @@
         const form = document.getElementById('addProgramForm');
         if (form) form.reset();
 
-        const deptSelect = document.getElementById('add_prog_dept');
         const campusList = document.getElementById('addProgCampusesChecklist');
 
         try {
@@ -208,17 +198,7 @@
             const data = await res.json();
             if (data.status !== 'success') throw new Error(data.message || 'API error');
 
-            const depts = data.data.departments || [];
             const campuses = data.data.campuses || [];
-
-            // Populate departments
-            if (deptSelect) {
-                let html = '<option value="">(No Department &mdash; Orphan Course)</option>';
-                depts.forEach(d => {
-                    html += `<option value="${d.id}">${escapeHtml(d.name)}</option>`;
-                });
-                deptSelect.innerHTML = html;
-            }
 
             // Populate campuses
             if (campusList) {
@@ -252,8 +232,6 @@
             return;
         }
 
-        const deptVal = document.getElementById('add_prog_dept')?.value;
-        const deptId = deptVal ? parseInt(deptVal, 10) : null;
         const code = document.getElementById('add_prog_code')?.value.trim();
         const type = document.getElementById('add_prog_type')?.value || 'undergraduate';
         const duration = document.getElementById('add_prog_duration')?.value.trim();
@@ -271,7 +249,6 @@
 
         const payload = {
             course_name: name,
-            department_id: deptId,
             course_code: code,
             program_type: type,
             duration: duration,

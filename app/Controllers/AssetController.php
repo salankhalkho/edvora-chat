@@ -34,17 +34,9 @@ class AssetController
 
         $isAdmin = in_array($role, ['owner', 'superadmin', 'super_admin', 'admin', 'org_admin']);
 
-        $assignedDeptIds = [];
-        if (!$isAdmin) {
-            $stmtDept = $db->prepare("SELECT department_id FROM department_staff WHERE user_id = ?");
-            $stmtDept->execute([$userId]);
-            $assignedDeptIds = $stmtDept->fetchAll(PDO::FETCH_COLUMN);
-            $assignedDeptIds = array_map('intval', $assignedDeptIds);
-        }
-
         return [
             'is_admin' => $isAdmin,
-            'assigned_dept_ids' => $assignedDeptIds,
+            'assigned_dept_ids' => [],
             'role' => $role
         ];
     }
@@ -64,42 +56,19 @@ class AssetController
         $db = Database::getConnection();
         $userContext = $this->getUserContext($db, $authUserId, $orgId);
 
-        $deptFilter = $request->get('department_id');
         $categoryFilter = $request->get('category');
 
         $query = "
-            SELECT a.id, a.organization_id, a.department_id, a.title, a.category, a.description,
+            SELECT a.id, a.organization_id, a.title, a.category, a.description,
                    a.file_path, a.file_name, a.file_size_bytes, a.mime_type, a.lead_intent_trigger,
                    a.is_active, a.downloads_count, a.created_by, a.created_at, a.updated_at,
-                   d.name as department_name, d.icon as department_icon,
                    u.name as creator_name
             FROM lead_assets a
-            LEFT JOIN departments d ON a.department_id = d.id
             LEFT JOIN users u ON a.created_by = u.id
             WHERE a.organization_id = :org_id
         ";
 
         $binds = [':org_id' => $orgId];
-
-        // If staff, limit to org-wide assets OR their assigned departments
-        if (!$userContext['is_admin']) {
-            if (empty($userContext['assigned_dept_ids'])) {
-                $query .= " AND a.department_id IS NULL";
-            } else {
-                $inClause = implode(',', $userContext['assigned_dept_ids']);
-                $query .= " AND (a.department_id IS NULL OR a.department_id IN ($inClause))";
-            }
-        }
-
-        // Optional department filter
-        if ($deptFilter !== null && $deptFilter !== '') {
-            if ($deptFilter === 'org') {
-                $query .= " AND a.department_id IS NULL";
-            } else {
-                $query .= " AND a.department_id = :dept_filter";
-                $binds[':dept_filter'] = (int)$deptFilter;
-            }
-        }
 
         // Optional category filter
         if (!empty($categoryFilter)) {
@@ -113,7 +82,15 @@ class AssetController
         $stmt->execute($binds);
         $assets = $stmt->fetchAll();
 
-        // Format and compute readable size
+        foreach ($assets as &$a) {
+            $a['department_id'] = null;
+            $a['department_name'] = null;
+            $a['department_icon'] = null;
+            $a['is_org_wide'] = true;
+            $a['formatted_size'] = $this->formatBytes($a['file_size_bytes']);
+            $a['download_url'] = '/v1/assets/' . $a['id'] . '/download';
+        }
+        unset($a);// Format and compute readable size
         $formatted = array_map(function ($a) {
             $bytes = (int)$a['file_size_bytes'];
             if ($bytes >= 1048576) {
@@ -189,22 +166,6 @@ class AssetController
         $description = trim($request->get('description') ?? '');
         $leadIntentTrigger = trim($request->get('lead_intent_trigger') ?? '');
 
-        // Department mapping validation
-        $rawDeptId = $request->get('department_id');
-        $deptId = (!empty($rawDeptId) && $rawDeptId !== 'org' && $rawDeptId !== '0') ? (int)$rawDeptId : null;
-
-        // Permission check for Staff
-        if (!$userContext['is_admin']) {
-            if ($deptId === null) {
-                Response::error('Staff members cannot upload Org-wide assets. Please select your assigned department.', 403);
-                return;
-            }
-            if (!in_array($deptId, $userContext['assigned_dept_ids'])) {
-                Response::error('You are not authorized to upload assets for this department.', 403);
-                return;
-            }
-        }
-
         // Save file to storage/uploads/assets/
         $storageDir = dirname(__DIR__, 2) . '/storage/uploads/assets/';
         if (!file_exists($storageDir)) {
@@ -226,11 +187,11 @@ class AssetController
         try {
             $stmt = $db->prepare("
                 INSERT INTO lead_assets (
-                    organization_id, department_id, title, category, description,
+                    organization_id, title, category, description,
                     file_path, file_name, file_size_bytes, mime_type,
                     lead_intent_trigger, is_active, created_by, created_at, updated_at
                 ) VALUES (
-                    :org_id, :dept_id, :title, :category, :description,
+                    :org_id, :title, :category, :description,
                     :file_path, :file_name, :file_size_bytes, :mime_type,
                     :lead_intent_trigger, 1, :created_by, NOW(), NOW()
                 )
@@ -238,7 +199,6 @@ class AssetController
 
             $stmt->execute([
                 ':org_id' => $orgId,
-                ':dept_id' => $deptId,
                 ':title' => $title,
                 ':category' => $category,
                 ':description' => $description,
@@ -255,7 +215,6 @@ class AssetController
             AuditLogger::log('lead_asset_uploaded', 'lead_asset', $assetId, [
                 'title' => $title,
                 'category' => $category,
-                'department_id' => $deptId,
                 'file_name' => $originalFilename
             ]);
 
@@ -263,7 +222,7 @@ class AssetController
                 'id' => $assetId,
                 'title' => $title,
                 'category' => $category,
-                'department_id' => $deptId,
+                'department_id' => null,
                 'file_name' => $originalFilename,
                 'file_size_bytes' => $fileSize
             ], 'Asset uploaded successfully!', 201);
@@ -287,9 +246,8 @@ class AssetController
 
         $db = Database::getConnection();
         $stmt = $db->prepare("
-            SELECT a.*, d.name as department_name, d.icon as department_icon, u.name as creator_name
+            SELECT a.*, u.name as creator_name
             FROM lead_assets a
-            LEFT JOIN departments d ON a.department_id = d.id
             LEFT JOIN users u ON a.created_by = u.id
             WHERE a.id = :id AND a.organization_id = :org_id
         ");
@@ -301,6 +259,11 @@ class AssetController
             return;
         }
 
+        $asset['department_id'] = null;
+        $asset['department_name'] = null;
+        $asset['department_icon'] = null;
+        $asset['is_org_wide'] = true;
+
         Response::success($asset);
     }
 
@@ -311,10 +274,8 @@ class AssetController
     {
         $orgId = $this->getOrgId($request);
         $assetId = (int)($params['id'] ?? 0);
-        $authUserId = $GLOBALS['auth_user']['user_id'] ?? null;
 
         $db = Database::getConnection();
-        $userContext = $this->getUserContext($db, $authUserId, $orgId);
 
         // Fetch existing asset
         $stmt = $db->prepare("SELECT * FROM lead_assets WHERE id = ? AND organization_id = ?");
@@ -326,14 +287,6 @@ class AssetController
             return;
         }
 
-        // Permission check
-        if (!$userContext['is_admin']) {
-            if (empty($existing['department_id']) || !in_array((int)$existing['department_id'], $userContext['assigned_dept_ids'])) {
-                Response::error('You are not authorized to update this asset.', 403);
-                return;
-            }
-        }
-
         $data = $request->all();
         $title = !empty($data['title']) ? trim($data['title']) : $existing['title'];
         $category = !empty($data['category']) ? $data['category'] : $existing['category'];
@@ -341,19 +294,12 @@ class AssetController
         $leadIntentTrigger = isset($data['lead_intent_trigger']) ? trim($data['lead_intent_trigger']) : $existing['lead_intent_trigger'];
         $isActive = isset($data['is_active']) ? (int)$data['is_active'] : (int)$existing['is_active'];
 
-        $deptId = $existing['department_id'];
-        if ($userContext['is_admin'] && array_key_exists('department_id', $data)) {
-            $rawDept = $data['department_id'];
-            $deptId = (!empty($rawDept) && $rawDept !== 'org' && $rawDept !== '0') ? (int)$rawDept : null;
-        }
-
         $stmtUpdate = $db->prepare("
             UPDATE lead_assets
             SET title = :title,
                 category = :category,
                 description = :description,
                 lead_intent_trigger = :trigger,
-                department_id = :dept_id,
                 is_active = :is_active,
                 updated_at = NOW()
             WHERE id = :id AND organization_id = :org_id
@@ -364,7 +310,6 @@ class AssetController
             ':category' => $category,
             ':description' => $description,
             ':trigger' => $leadIntentTrigger,
-            ':dept_id' => $deptId,
             ':is_active' => $isActive,
             ':id' => $assetId,
             ':org_id' => $orgId
@@ -376,7 +321,7 @@ class AssetController
             'id' => $assetId,
             'title' => $title,
             'category' => $category,
-            'department_id' => $deptId,
+            'department_id' => null,
             'is_active' => $isActive
         ], 'Asset updated successfully.');
     }
@@ -388,10 +333,8 @@ class AssetController
     {
         $orgId = $this->getOrgId($request);
         $assetId = (int)($params['id'] ?? 0);
-        $authUserId = $GLOBALS['auth_user']['user_id'] ?? null;
 
         $db = Database::getConnection();
-        $userContext = $this->getUserContext($db, $authUserId, $orgId);
 
         $stmt = $db->prepare("SELECT * FROM lead_assets WHERE id = ? AND organization_id = ?");
         $stmt->execute([$assetId, $orgId]);
@@ -400,13 +343,6 @@ class AssetController
         if (!$existing) {
             Response::error('Asset not found.', 404);
             return;
-        }
-
-        if (!$userContext['is_admin']) {
-            if (empty($existing['department_id']) || !in_array((int)$existing['department_id'], $userContext['assigned_dept_ids'])) {
-                Response::error('You are not authorized to delete this asset.', 403);
-                return;
-            }
         }
 
         // Delete physical file

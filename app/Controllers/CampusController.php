@@ -75,18 +75,7 @@ class CampusController
                 $stmtCount = $db->prepare("SELECT COUNT(*) FROM campus_courses WHERE campus_id = ? AND organization_id = ?");
                 $stmtCount->execute([$cId, $orgId]);
                 $c['courses_count'] = (int)$stmtCount->fetchColumn();
-
-                // Derived departments (departments with at least 1 course mapped to this campus)
-                $stmtDepts = $db->prepare("
-                    SELECT DISTINCT d.id, d.name, d.icon
-                    FROM departments d
-                    JOIN department_courses dc ON d.id = dc.department_id
-                    JOIN campus_courses cc ON dc.id = cc.course_id
-                    WHERE cc.campus_id = ? AND cc.organization_id = ? AND d.is_active = 1
-                    ORDER BY d.name ASC
-                ");
-                $stmtDepts->execute([$cId, $orgId]);
-                $c['derived_departments'] = $stmtDepts->fetchAll(PDO::FETCH_ASSOC) ?: [];
+                $c['derived_departments'] = [];
             }
 
             Response::success([
@@ -137,17 +126,7 @@ class CampusController
             $stmtCount = $db->prepare("SELECT COUNT(*) FROM campus_courses WHERE campus_id = ? AND organization_id = ?");
             $stmtCount->execute([$campusId, $orgId]);
             $campus['courses_count'] = (int)$stmtCount->fetchColumn();
-
-            $stmtDepts = $db->prepare("
-                SELECT DISTINCT d.id, d.name, d.icon
-                FROM departments d
-                JOIN department_courses dc ON d.id = dc.department_id
-                JOIN campus_courses cc ON dc.id = cc.course_id
-                WHERE cc.campus_id = ? AND cc.organization_id = ? AND d.is_active = 1
-                ORDER BY d.name ASC
-            ");
-            $stmtDepts->execute([$campusId, $orgId]);
-            $campus['derived_departments'] = $stmtDepts->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $campus['derived_departments'] = [];
 
             Response::success([
                 'campus' => $campus,
@@ -472,65 +451,33 @@ class CampusController
             $mappedCourseIds = array_map('intval', $mappedCourseIds);
             $mappedCourseIdsMap = array_flip($mappedCourseIds);
 
-            // Fetch all departments for this organization
-            $stmtDepts = $db->prepare("SELECT id, name, icon, is_active FROM departments WHERE organization_id = ? ORDER BY is_preset DESC, name ASC");
-            $stmtDepts->execute([$orgId]);
-            $departments = $stmtDepts->fetchAll(PDO::FETCH_ASSOC);
+            // Fetch all programs for this organization
+            $stmtProg = $db->prepare("
+                SELECT id, course_name, course_code, program_type, duration, mode, sort_order
+                FROM programs 
+                WHERE organization_id = ?
+                ORDER BY sort_order ASC, course_name ASC
+            ");
+            $stmtProg->execute([$orgId]);
+            $programs = $stmtProg->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-            $groupedDepartments = [];
-            $derivedDepartments = [];
             $totalOffered = 0;
-
-            foreach ($departments as $d) {
-                $dId = (int)$d['id'];
-                $stmtCourses = $db->prepare("
-                    SELECT id, department_id, course_name, course_code, sort_order
-                    FROM department_courses
-                    WHERE department_id = ?
-                    ORDER BY sort_order ASC, id ASC
-                ");
-                $stmtCourses->execute([$dId]);
-                $courses = $stmtCourses->fetchAll(PDO::FETCH_ASSOC) ?: [];
-
-                $deptCourses = [];
-                $deptOfferedCount = 0;
-
-                foreach ($courses as $c) {
-                    $cId = (int)$c['id'];
-                    $isOffered = isset($mappedCourseIdsMap[$cId]);
-                    if ($isOffered) {
-                        $deptOfferedCount++;
-                        $totalOffered++;
-                    }
-                    $c['id'] = $cId;
-                    $c['is_offered'] = $isOffered;
-                    $deptCourses[] = $c;
+            foreach ($programs as &$p) {
+                $pId = (int)$p['id'];
+                $isOffered = isset($mappedCourseIdsMap[$pId]);
+                if ($isOffered) {
+                    $totalOffered++;
                 }
-
-                if ($deptOfferedCount > 0) {
-                    $derivedDepartments[] = [
-                        'id' => $dId,
-                        'name' => $d['name'],
-                        'icon' => $d['icon'],
-                        'offered_courses_count' => $deptOfferedCount
-                    ];
-                }
-
-                $groupedDepartments[] = [
-                    'id' => $dId,
-                    'name' => $d['name'],
-                    'icon' => $d['icon'],
-                    'courses' => $deptCourses,
-                    'offered_courses_count' => $deptOfferedCount,
-                    'total_courses_count' => count($deptCourses),
-                    'is_active_at_campus' => ($deptOfferedCount > 0)
-                ];
+                $p['id'] = $pId;
+                $p['is_offered'] = $isOffered;
             }
+            unset($p);
 
             Response::success([
                 'campus' => $campus,
-                'departments' => $groupedDepartments,
-                'derived_departments' => $derivedDepartments,
+                'programs' => $programs,
+                'departments' => [],
+                'derived_departments' => [],
                 'total_offered_courses' => $totalOffered,
                 'mapped_course_ids' => $mappedCourseIds
             ]);
@@ -579,17 +526,16 @@ class CampusController
                 $courseIds = [];
             }
 
-            // Validate that all course IDs actually belong to this tenant's departments
+            // Validate that all course IDs actually belong to this tenant's programs
             $validCourseIds = [];
             if (!empty($courseIds)) {
                 $cleanIds = array_values(array_unique(array_filter(array_map('intval', $courseIds), fn($val) => $val > 0)));
                 if (!empty($cleanIds)) {
                     $inPlaceholders = implode(',', array_fill(0, count($cleanIds), '?'));
                     $sqlVal = "
-                        SELECT dc.id
-                        FROM department_courses dc
-                        JOIN departments d ON dc.department_id = d.id
-                        WHERE dc.id IN ($inPlaceholders) AND d.organization_id = ?
+                        SELECT p.id
+                        FROM programs p
+                        WHERE p.id IN ($inPlaceholders) AND p.organization_id = ?
                     ";
                     $stmtVal = $db->prepare($sqlVal);
                     $stmtVal->execute(array_merge($cleanIds, [$orgId]));
@@ -617,23 +563,11 @@ class CampusController
                 'courses_count' => count($validCourseIds)
             ]);
 
-            // Re-fetch derived departments
-            $stmtDepts = $db->prepare("
-                SELECT DISTINCT d.id, d.name, d.icon
-                FROM departments d
-                JOIN department_courses dc ON d.id = dc.department_id
-                JOIN campus_courses cc ON dc.id = cc.course_id
-                WHERE cc.campus_id = ? AND cc.organization_id = ?
-                ORDER BY d.name ASC
-            ");
-            $stmtDepts->execute([$campusId, $orgId]);
-            $derivedDepts = $stmtDepts->fetchAll(PDO::FETCH_ASSOC) ?: [];
-
             Response::success([
                 'message' => 'Campus courses updated successfully',
                 'campus_id' => $campusId,
                 'total_offered' => count($validCourseIds),
-                'derived_departments' => $derivedDepts
+                'derived_departments' => []
             ]);
         } catch (Throwable $e) {
             if (isset($db) && $db->inTransaction()) {

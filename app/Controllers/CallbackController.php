@@ -23,7 +23,6 @@ class CallbackController
         $timeSlot = trim((string)($request->get('preferred_time_slot') ?? 'Immediate (ASAP)'));
         $topic = trim((string)($request->get('topic_or_query') ?? $request->get('topic') ?? ''));
         $conversationId = (int)$request->get('conversation_id');
-        $departmentId = $request->get('department_id') ? (int)$request->get('department_id') : null;
 
         if (empty($name) || empty($phone)) {
             Response::error('Student name and phone number are required to request a callback.', 422);
@@ -45,76 +44,31 @@ class CallbackController
         $orgId = (int)$bot['organization_id'];
         $botId = (int)$bot['id'];
 
-        // Determine department_id from conversation if not explicitly passed
-        if (!$departmentId && $conversationId > 0) {
-            $stmtConvDept = $db->prepare("SELECT department_id FROM conversations WHERE id = :cid AND organization_id = :oid");
-            $stmtConvDept->execute([':cid' => $conversationId, ':oid' => $orgId]);
-            $convRow = $stmtConvDept->fetch();
-            if ($convRow && !empty($convRow['department_id'])) {
-                $departmentId = (int)$convRow['department_id'];
-            }
-        }
-
-        // Auto-assign callback to department staff / counselor
+        // Auto-assign callback to active counselor in organization
         $assignedUserId = null;
-        if ($departmentId) {
-            $stmtDeptRules = $db->prepare("SELECT lead_assignment_rules FROM departments WHERE id = :did AND organization_id = :oid");
-            $stmtDeptRules->execute([':did' => $departmentId, ':oid' => $orgId]);
-            $deptRow = $stmtDeptRules->fetch();
-            $assignmentRules = $deptRow ? json_decode($deptRow['lead_assignment_rules'] ?? '{}', true) : [];
-            $method = $assignmentRules['method'] ?? 'round_robin';
-
-            if ($method === 'direct') {
-                $stmtLeadStaff = $db->prepare("
-                    SELECT ds.user_id
-                    FROM department_staff ds
-                    WHERE ds.department_id = :did AND ds.is_on_duty = 1 AND ds.role = 'lead'
-                    LIMIT 1
-                ");
-                $stmtLeadStaff->execute([':did' => $departmentId]);
-                $leadStaff = $stmtLeadStaff->fetch();
-                if ($leadStaff) {
-                    $assignedUserId = (int)$leadStaff['user_id'];
-                }
-            }
-
-            if (!$assignedUserId) {
-                // Round-robin distribution across on-duty staff based on active callbacks count
-                $stmtRr = $db->prepare("
-                    SELECT ds.user_id
-                    FROM department_staff ds
-                    LEFT JOIN counselor_callbacks cb ON cb.assigned_user_id = ds.user_id AND cb.status IN ('pending', 'scheduled', 'in_progress')
-                    WHERE ds.department_id = :did AND ds.is_on_duty = 1
-                    GROUP BY ds.user_id
-                    ORDER BY COUNT(cb.id) ASC, ds.id ASC
-                    LIMIT 1
-                ");
-                $stmtRr->execute([':did' => $departmentId]);
-                $rrStaff = $stmtRr->fetch();
-                if ($rrStaff) {
-                    $assignedUserId = (int)$rrStaff['user_id'];
-                }
-            }
-        }
-
-        // Fallback: assign to first active org admin/owner if no department staff found
-        if (!$assignedUserId) {
-            $stmtDefaultUser = $db->prepare("SELECT id FROM users WHERE organization_id = :oid AND role IN ('owner', 'admin') ORDER BY id ASC LIMIT 1");
-            $stmtDefaultUser->execute([':oid' => $orgId]);
-            $defUser = $stmtDefaultUser->fetch();
-            if ($defUser) {
-                $assignedUserId = (int)$defUser['id'];
-            }
+        $stmtRr = $db->prepare("
+            SELECT u.id
+            FROM users u
+            LEFT JOIN counselor_callbacks cb ON cb.assigned_user_id = u.id AND cb.status IN ('pending', 'scheduled', 'in_progress')
+            WHERE u.organization_id = :oid AND u.role IN ('counselor', 'agent', 'admin', 'owner')
+            GROUP BY u.id
+            ORDER BY COUNT(cb.id) ASC, u.id ASC
+            LIMIT 1
+        ");
+        $stmtRr->execute([':oid' => $orgId]);
+        $rrStaff = $stmtRr->fetch();
+        if ($rrStaff) {
+            $assignedUserId = (int)$rrStaff['id'];
         }
 
         // Insert callback record
         $stmtInsert = $db->prepare("
             INSERT INTO counselor_callbacks (
-                organization_id, chatbot_id, department_id, conversation_id, assigned_user_id,
+                organization_id, chatbot_id, conversation_id, assigned_user_id,
                 student_name, student_phone, student_email, preferred_time_slot, topic_or_query,
                 status, created_at, updated_at
             ) VALUES (
-                :org_id, :bot_id, :dept_id, :conv_id, :assigned_user_id,
+                :org_id, :bot_id, :conv_id, :assigned_user_id,
                 :name, :phone, :email, :time_slot, :topic,
                 'pending', NOW(), NOW()
             )
@@ -122,7 +76,6 @@ class CallbackController
         $stmtInsert->execute([
             ':org_id' => $orgId,
             ':bot_id' => $botId,
-            ':dept_id' => $departmentId ?: null,
             ':conv_id' => $conversationId ?: null,
             ':assigned_user_id' => $assignedUserId ?: null,
             ':name' => $name,
@@ -136,18 +89,23 @@ class CallbackController
         // Also record as a student lead in leads table for consolidated CRM tracking
         try {
             $stmtLead = $db->prepare("
-                INSERT INTO leads (organization_id, chatbot_id, conversation_id, department_id, assigned_user_id, name, email, phone, program_interest, notes, status, created_at, updated_at)
-                VALUES (:org_id, :bot_id, :conv_id, :dept_id, :assigned_user_id, :name, :email, :phone, :program, :notes, 'new', NOW(), NOW())
+                INSERT INTO leads (organization_id, chatbot_id, conversation_id, assigned_user_id, name, email, phone, program_interest, notes, status, created_at, updated_at)
+                VALUES (:org_id, :bot_id, :conv_id, :assigned_user_id, :name, :email, :phone, :program, :notes, 'new', NOW(), NOW())
             ");
             $stmtLead->execute([
                 ':org_id' => $orgId,
                 ':bot_id' => $botId,
                 ':conv_id' => $conversationId ?: null,
-                ':dept_id' => $departmentId ?: null,
                 ':assigned_user_id' => $assignedUserId ?: null,
                 ':name' => $name,
                 ':email' => $email ?: null,
                 ':phone' => $phone,
+                ':program' => $topic ?: 'Counselor Callback Request',
+                ':notes' => "Callback requested for time slot: {$timeSlot}. Student query: " . ($topic ?: 'No specific question stated.')
+            ]);
+        } catch (Throwable $e) {
+            error_log('[CallbackController] Lead mirror failed: ' . $e->getMessage());
+        }
                 ':program' => $topic ?: 'Counselor Callback Request',
                 ':notes' => "Callback requested for: {$timeSlot}. Topic: " . ($topic ?: 'General Admissions')
             ]);
@@ -175,7 +133,6 @@ class CallbackController
             'name' => $name,
             'phone' => $phone,
             'preferred_time_slot' => $timeSlot,
-            'department_id' => $departmentId,
             'assigned_user_id' => $assignedUserId
         ]);
 
@@ -213,7 +170,6 @@ class CallbackController
             'student_name' => $name,
             'student_phone' => $phone,
             'preferred_time_slot' => $timeSlot,
-            'department_id' => $departmentId,
             'assigned_user_id' => $assignedUserId,
             'status' => 'pending'
         ], 'Counselor callback registered successfully', 201);
@@ -233,20 +189,16 @@ class CallbackController
         $db = Database::getConnection();
 
         $statusFilter = trim((string)$request->get('status'));
-        $deptFilter = $request->get('department_id') ? (int)$request->get('department_id') : null;
         $assignedFilter = $request->get('assigned_user_id') ? (int)$request->get('assigned_user_id') : null;
         $search = trim((string)$request->get('search'));
 
         $sql = "
             SELECT cb.*,
-                   d.name as department_name,
-                   d.icon as department_icon,
                    u.name as assigned_user_name,
                    u.email as assigned_user_email,
                    c.visitor_id,
                    c.page_url
             FROM counselor_callbacks cb
-            LEFT JOIN departments d ON cb.department_id = d.id
             LEFT JOIN users u ON cb.assigned_user_id = u.id
             LEFT JOIN conversations c ON cb.conversation_id = c.id
             WHERE cb.organization_id = :org_id
@@ -257,11 +209,6 @@ class CallbackController
         if (!empty($statusFilter) && $statusFilter !== 'all') {
             $sql .= " AND cb.status = :status";
             $bindParams[':status'] = $statusFilter;
-        }
-
-        if ($deptFilter) {
-            $sql .= " AND cb.department_id = :dept_id";
-            $bindParams[':dept_id'] = $deptFilter;
         }
 
         if ($assignedFilter) {
@@ -319,14 +266,11 @@ class CallbackController
         $db = Database::getConnection();
         $stmt = $db->prepare("
             SELECT cb.*,
-                   d.name as department_name,
-                   d.icon as department_icon,
                    u.name as assigned_user_name,
                    u.email as assigned_user_email,
                    c.visitor_id,
                    c.page_url
             FROM counselor_callbacks cb
-            LEFT JOIN departments d ON cb.department_id = d.id
             LEFT JOIN users u ON cb.assigned_user_id = u.id
             LEFT JOIN conversations c ON cb.conversation_id = c.id
             WHERE cb.id = :id AND cb.organization_id = :org_id
@@ -386,10 +330,6 @@ class CallbackController
             ? ($data['assigned_user_id'] ? (int)$data['assigned_user_id'] : null) 
             : $existing['assigned_user_id'];
 
-        $departmentId = array_key_exists('department_id', $data)
-            ? ($data['department_id'] ? (int)$data['department_id'] : null)
-            : $existing['department_id'];
-
         $completedAt = $existing['completed_at'];
         if ($status === 'completed' && empty($completedAt)) {
             $completedAt = date('Y-m-d H:i:s');
@@ -404,7 +344,6 @@ class CallbackController
                 preferred_time_slot = :time_slot,
                 call_attempts = :call_attempts,
                 assigned_user_id = :assigned_user_id,
-                department_id = :department_id,
                 completed_at = :completed_at,
                 updated_at = NOW()
             WHERE id = :id AND organization_id = :org_id
@@ -415,7 +354,6 @@ class CallbackController
             ':time_slot' => $timeSlot,
             ':call_attempts' => $callAttempts,
             ':assigned_user_id' => $assignedUserId,
-            ':department_id' => $departmentId,
             ':completed_at' => $completedAt,
             ':id' => $id,
             ':org_id' => $orgId
@@ -433,7 +371,6 @@ class CallbackController
             'counselor_notes' => $notes,
             'call_attempts' => $callAttempts,
             'assigned_user_id' => $assignedUserId,
-            'department_id' => $departmentId,
             'completed_at' => $completedAt
         ], 'Counselor callback updated successfully');
     }
@@ -448,7 +385,6 @@ class CallbackController
 
         $stmt = $db->prepare("
             SELECT cb.student_name, cb.student_phone, cb.student_email,
-                   d.name as department_name,
                    u.name as assigned_counselor_name,
                    cb.preferred_time_slot,
                    cb.topic_or_query,
@@ -458,7 +394,6 @@ class CallbackController
                    cb.created_at,
                    cb.completed_at
             FROM counselor_callbacks cb
-            LEFT JOIN departments d ON cb.department_id = d.id
             LEFT JOIN users u ON cb.assigned_user_id = u.id
             WHERE cb.organization_id = :org_id
             ORDER BY cb.id DESC
@@ -471,7 +406,7 @@ class CallbackController
 
         $output = fopen('php://output', 'w');
         fputcsv($output, [
-            'Student Name', 'Phone Number', 'Email Address', 'Department', 'Assigned Counselor',
+            'Student Name', 'Phone Number', 'Email Address', 'Assigned Counselor',
             'Preferred Time Slot', 'Discussion Topic', 'Status', 'Call Attempts', 'Counselor Resolution Notes',
             'Requested Date & Time (IST)', 'Completed Date & Time (IST)'
         ]);
@@ -504,7 +439,6 @@ class CallbackController
                 $r['student_name'],
                 $r['student_phone'],
                 $r['student_email'] ?: 'N/A',
-                $r['department_name'] ?: 'General Admissions',
                 $r['assigned_counselor_name'] ?: 'Unassigned',
                 $r['preferred_time_slot'] ?: 'Immediate',
                 $r['topic_or_query'] ?: 'General Inquiry',

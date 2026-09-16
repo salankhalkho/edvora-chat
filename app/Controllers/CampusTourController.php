@@ -29,7 +29,6 @@ class CampusTourController
         $groupSize = max(1, (int)($request->get('group_size') ?: 1));
         $notes = trim((string)$request->get('notes')) ?: null;
         $conversationId = (int)$request->get('conversation_id');
-        $departmentId = $request->get('department_id') ? (int)$request->get('department_id') : null;
 
         if (empty($name) || empty($email) || empty($phone)) {
             Response::error('Full Name, Email Address, and Phone Number are required to book a campus tour.', 422);
@@ -58,7 +57,7 @@ class CampusTourController
         $slotId = $request->get('slot_id') ? (int)$request->get('slot_id') : null;
         $programId = $request->get('program_id') ? (int)$request->get('program_id') : null;
 
-        // If slot_id is provided, resolve slot details, counselor, department, and program
+        // If slot_id is provided, resolve slot details, counselor, and program
         if ($slotId) {
             $stmtSlot = $db->prepare("
                 SELECT s.*, c.name as campus_name
@@ -77,9 +76,6 @@ class CampusTourController
                 }
                 if ($slotRow['counselor_user_id']) {
                     $assignedUserId = (int)$slotRow['counselor_user_id'];
-                }
-                if ($slotRow['department_id'] && !$departmentId) {
-                    $departmentId = (int)$slotRow['department_id'];
                 }
 
                 // If program_id not specified, check if slot maps to a program
@@ -102,28 +98,28 @@ class CampusTourController
             }
         }
 
-        // Auto-assign staff if department specified and no counselor assigned yet
-        if ($departmentId && !$assignedUserId) {
+        // Auto-assign staff if no counselor assigned yet
+        if (!$assignedUserId) {
             $stmtStaff = $db->prepare("
-                SELECT user_id FROM department_staff
-                WHERE department_id = :did AND is_on_duty = 1
+                SELECT id FROM users
+                WHERE organization_id = :oid AND role IN ('counselor', 'agent', 'admin', 'owner')
                 ORDER BY id ASC LIMIT 1
             ");
-            $stmtStaff->execute([':did' => $departmentId]);
+            $stmtStaff->execute([':oid' => $orgId]);
             $staffRow = $stmtStaff->fetch();
             if ($staffRow) {
-                $assignedUserId = (int)$staffRow['user_id'];
+                $assignedUserId = (int)$staffRow['id'];
             }
         }
 
         // 1. Insert into campus_tour_bookings
         $stmtTour = $db->prepare("
             INSERT INTO campus_tour_bookings (
-                organization_id, chatbot_id, department_id, conversation_id, slot_id, program_id, assigned_user_id,
+                organization_id, chatbot_id, conversation_id, slot_id, program_id, assigned_user_id,
                 student_name, student_email, student_phone, preferred_date, preferred_time,
                 program_interest, group_size, notes, status, created_at, updated_at
             ) VALUES (
-                :org_id, :bot_id, :dept_id, :conv_id, :slot_id, :prog_id, :assigned_uid,
+                :org_id, :bot_id, :conv_id, :slot_id, :prog_id, :assigned_uid,
                 :name, :email, :phone, :pref_date, :pref_time,
                 :program, :group_size, :notes, 'pending', NOW(), NOW()
             )
@@ -131,7 +127,6 @@ class CampusTourController
         $stmtTour->execute([
             ':org_id' => $orgId,
             ':bot_id' => $botId,
-            ':dept_id' => $departmentId ?: null,
             ':conv_id' => $conversationId ?: null,
             ':slot_id' => $slotId ?: null,
             ':prog_id' => $programId ?: null,
@@ -155,10 +150,10 @@ class CampusTourController
         // 2. Also register in unified leads master table with lead_type = 'campus_tour'
         $stmtLead = $db->prepare("
             INSERT INTO leads (
-                organization_id, chatbot_id, lead_type, conversation_id, department_id, assigned_user_id,
+                organization_id, chatbot_id, lead_type, conversation_id, assigned_user_id,
                 name, email, phone, program_interest, notes, status, created_at, updated_at
             ) VALUES (
-                :org_id, :bot_id, 'campus_tour', :conv_id, :dept_id, :assigned_uid,
+                :org_id, :bot_id, 'campus_tour', :conv_id, :assigned_uid,
                 :name, :email, :phone, :program, :notes, 'new', NOW(), NOW()
             )
         ");
@@ -168,7 +163,6 @@ class CampusTourController
             ':org_id' => $orgId,
             ':bot_id' => $botId,
             ':conv_id' => $conversationId ?: null,
-            ':dept_id' => $departmentId ?: null,
             ':assigned_uid' => $assignedUserId ?: null,
             ':name' => $name,
             ':email' => $email,
@@ -247,12 +241,9 @@ class CampusTourController
 
         $stmt = $db->prepare("
             SELECT t.*,
-                   d.name as department_name,
-                   d.icon as department_icon,
                    u.name as assigned_user_name,
                    u.email as assigned_user_email
             FROM campus_tour_bookings t
-            LEFT JOIN departments d ON t.department_id = d.id
             LEFT JOIN users u ON t.assigned_user_id = u.id
             WHERE t.organization_id = :org_id
             ORDER BY t.id DESC
@@ -292,10 +283,8 @@ class CampusTourController
         $db = Database::getConnection();
         $stmt = $db->prepare("
             SELECT t.*,
-                   d.name as department_name,
                    u.name as assigned_user_name
             FROM campus_tour_bookings t
-            LEFT JOIN departments d ON t.department_id = d.id
             LEFT JOIN users u ON t.assigned_user_id = u.id
             WHERE t.id = :id AND t.organization_id = :org_id
         ");
@@ -423,12 +412,10 @@ class CampusTourController
 
         $stmt = $db->prepare("
             SELECT t.student_name, t.student_email, t.student_phone,
-                   d.name as department_name,
                    u.name as assigned_user_name,
                    t.preferred_date, t.preferred_time, t.group_size,
                    t.program_interest, t.status, t.counselor_notes, t.created_at
             FROM campus_tour_bookings t
-            LEFT JOIN departments d ON t.department_id = d.id
             LEFT JOIN users u ON t.assigned_user_id = u.id
             WHERE t.organization_id = :org_id
             ORDER BY t.id DESC
@@ -440,7 +427,7 @@ class CampusTourController
         header('Content-Disposition: attachment; filename=edvora_campus_tours_' . date('Y-m-d') . '.csv');
 
         $output = fopen('php://output', 'w');
-        fputcsv($output, ['Student Name', 'Email', 'Phone', 'Department', 'Assigned Coordinator', 'Preferred Date', 'Preferred Time', 'Group Size', 'Program Interest', 'Status', 'Counselor Notes', 'Booked On (IST)']);
+        fputcsv($output, ['Student Name', 'Email', 'Phone', 'Assigned Coordinator', 'Preferred Date', 'Preferred Time', 'Group Size', 'Program Interest', 'Status', 'Counselor Notes', 'Booked On (IST)']);
 
         $tz = new DateTimeZone('Asia/Kolkata');
         foreach ($tours as $row) {
@@ -459,7 +446,6 @@ class CampusTourController
                 $row['student_name'],
                 $row['student_email'] ?: 'N/A',
                 $row['student_phone'] ?: 'N/A',
-                $row['department_name'] ?: 'General Campus',
                 $row['assigned_user_name'] ?: 'Unassigned',
                 $row['preferred_date'] ?: 'Flexible',
                 $row['preferred_time'] ?: 'Morning',

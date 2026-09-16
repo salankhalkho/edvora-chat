@@ -90,27 +90,12 @@
         }
 
         function updateAssetDeptFilterOptions() {
-            const filterSel = document.getElementById('assetDeptFilter');
-            if (!filterSel) return;
-            const curVal = filterSel.value;
-            let options = `<option value="">ðŸ¢ All Scopes</option><option value="org">ðŸŒ Org-wide Only</option>`;
-            
-            const deptsToShow = userAssetContext.is_admin 
-                ? currentDepartments 
-                : currentDepartments.filter(d => userAssetContext.assigned_dept_ids.includes(d.id));
-
-            deptsToShow.forEach(d => {
-                options += `<option value="${d.id}">${d.icon || 'ðŸ¢'} ${d.name}</option>`;
-            });
-
-            filterSel.innerHTML = options;
-            if (curVal) filterSel.value = curVal;
+            // No-op: departments removed
         }
 
         function filterAssetsList() {
             const query = (document.getElementById('assetSearchInput')?.value || '').toLowerCase().trim();
             const cat = document.getElementById('assetCategoryFilter')?.value || '';
-            const dept = document.getElementById('assetDeptFilter')?.value || '';
 
             let filtered = currentAssetsList.filter(a => {
                 // Search query matching
@@ -119,19 +104,11 @@
                     const matchDesc = (a.description || '').toLowerCase().includes(query);
                     const matchTrigger = (a.lead_intent_trigger || '').toLowerCase().includes(query);
                     const matchFile = (a.file_name || '').toLowerCase().includes(query);
-                    const matchDept = (a.department_name || '').toLowerCase().includes(query);
-                    if (!matchTitle && !matchDesc && !matchTrigger && !matchFile && !matchDept) return false;
+                    if (!matchTitle && !matchDesc && !matchTrigger && !matchFile) return false;
                 }
 
                 // Category filter
                 if (cat && a.category !== cat) return false;
-
-                // Department filter
-                if (dept === 'org') {
-                    if (!a.is_org_wide) return false;
-                } else if (dept) {
-                    if (a.department_id != dept) return false;
-                }
 
                 return true;
             });
@@ -146,14 +123,14 @@
             if (assets.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="8" style="text-align: center; color: #648781; padding: 36px 24px;">
-                            <div style="font-size: 32px; margin-bottom: 8px;">ðŸ“</div>
+                        <td colspan="7" style="text-align: center; color: #648781; padding: 36px 24px;">
+                            <div style="font-size: 32px; margin-bottom: 8px;">📑</div>
                             <strong style="font-size: 14px; color: #092F2E; display: block;">No lead-magnet assets found</strong>
                             <span style="font-size: 12px; color: #648781;">
                                 Upload institutional brochures, fee schedules, or placement reports to automatically generate verified admissions leads.
                             </span>
                             <div style="margin-top: 14px;">
-                                <button type="button" class="brand-btn-primary brand-btn-sm" onclick="openAssetUploadModal()">âž• Upload New Asset</button>
+                                <button type="button" class="brand-btn-primary brand-btn-sm" onclick="openAssetUploadModal()">➕ Upload New Asset</button>
                             </div>
                         </td>
                     </tr>
@@ -162,56 +139,47 @@
             }
 
             tbody.innerHTML = assets.map(a => {
-                const isOrgWide = a.is_org_wide;
-                const deptBadge = isOrgWide
-                    ? `<span style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--brand-indigo-300); background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); padding: 2px 8px; border-radius: 12px; white-space: nowrap;">
-                        <span>ðŸŒ</span> <span>Org-wide (General)</span>
-                       </span>`
-                    : `<span style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--brand-cyan-400); background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); padding: 2px 8px; border-radius: 12px; white-space: nowrap;">
-                        <span>${a.department_icon || 'ðŸ¢'}</span> <span>${a.department_name || 'Department'}</span>
-                       </span>`;
-
                 const categoryLabels = {
-                    brochure: 'ðŸ“„ Brochure / Prospectus',
-                    fee_structure: 'ðŸ’° Fee Structure',
-                    scholarship_guide: 'ðŸ† Scholarship Matrix',
-                    placement_report: 'ðŸ“ˆ Placement Report',
-                    curriculum: 'ðŸ“š Syllabus & Curriculum',
-                    hostel_guide: 'ðŸ¡ Hostel & Mess',
-                    exam_cutoff: 'ðŸŽ¯ Cutoff / Exam Prep',
-                    international_guide: 'ðŸŒ International Guide',
-                    other: 'ðŸ“‘ Other Document'
+                    brochure: '📄 Brochure / Prospectus',
+                    fee_structure: '💰 Fee Structure',
+                    scholarship_guide: '🏆 Scholarship Matrix',
+                    placement_report: '📈 Placement Report',
+                    curriculum: '📚 Syllabus & Curriculum',
+                    hostel_guide: '🏡 Hostel & Mess',
+                    exam_cutoff: '🎯 Cutoff / Exam Prep',
+                    international_guide: '🌍 International Guide',
+                    other: '📑 Other Document'
                 };
 
-                const catLabel = categoryLabels[a.category] || 'ðŸ“‘ Resource';
+                const catLabel = categoryLabels[a.category] || '📑 Resource';
 
                 const isActive = (a.is_active == 1 || a.is_active === true);
                 const statusBadge = isActive
-                    ? '<span class="badge" style="background: rgba(52, 211, 153, 0.12); color: var(--brand-emerald-400); border: 1px solid rgba(52, 211, 153, 0.25); white-space: nowrap;">â— Active</span>'
-                    : '<span class="badge" style="background: rgba(244, 63, 94, 0.12); color: var(--brand-rose-400); border: 1px solid rgba(244, 63, 94, 0.25); white-space: nowrap;">â—‹ Inactive</span>';
+                    ? '<span class="badge" style="background: rgba(52, 211, 153, 0.12); color: var(--brand-emerald-400); border: 1px solid rgba(52, 211, 153, 0.25); white-space: nowrap;">● Active</span>'
+                    : '<span class="badge" style="background: rgba(244, 63, 94, 0.12); color: var(--brand-rose-400); border: 1px solid rgba(244, 63, 94, 0.25); white-space: nowrap;">○ Inactive</span>';
 
-                const canEdit = userAssetContext.is_admin || (a.department_id && userAssetContext.assigned_dept_ids.includes(parseInt(a.department_id)));
+                const canEdit = userAssetContext.is_admin;
 
                 const actionBtns = `
                     <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
                         <a href="/v1/assets/${a.id}/download" target="_blank" class="brand-btn-secondary brand-btn-sm" style="font-size: 11px; height: 28px; padding: 0 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; color: var(--brand-cyan-400); border-color: rgba(56, 189, 248, 0.3);">
-                            <span>ðŸ“¥</span> Download
+                            <span>📥</span> Download
                         </a>
                         ${canEdit ? `
                             <button type="button" class="brand-btn-secondary brand-btn-sm" style="font-size: 11px; height: 28px; padding: 0 10px; display: inline-flex; align-items: center; gap: 4px;" onclick="openAssetEditModal(${a.id})">
-                                <span>âœï¸</span> Edit
+                                <span>✏️</span> Edit
                             </button>
                             <button type="button" class="brand-btn-secondary brand-btn-sm" style="font-size: 11px; height: 28px; padding: 0 8px; color: var(--brand-rose-400); border-color: rgba(244, 63, 94, 0.3);" onclick="deleteAsset(${a.id})">
-                                <span>ðŸ—‘ï¸</span>
+                                <span>🗑️</span>
                             </button>
                         ` : `
-                            <span style="font-size: 10px; color: #648781; font-style: italic; padding: 0 4px;">ðŸ”’ Read-Only</span>
+                            <span style="font-size: 10px; color: #648781; font-style: italic; padding: 0 4px;">🔒 Read-Only</span>
                         `}
                     </div>
                 `;
 
                 const triggerChip = a.lead_intent_trigger
-                    ? `<span style="font-size: 11px; font-family: var(--brand-font-mono); color: var(--brand-cyan-400); background: rgba(56, 189, 248, 0.08); padding: 2px 6px; border-radius: 4px; border: 1px dashed rgba(56, 189, 248, 0.25); display: inline-block; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${a.lead_intent_trigger}">âš¡ ${a.lead_intent_trigger}</span>`
+                    ? `<span style="font-size: 11px; font-family: var(--brand-font-mono); color: var(--brand-cyan-400); background: rgba(56, 189, 248, 0.08); padding: 2px 6px; border-radius: 4px; border: 1px dashed rgba(56, 189, 248, 0.25); display: inline-block; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${a.lead_intent_trigger}">⚡ ${a.lead_intent_trigger}</span>`
                     : `<span style="font-size: 11px; color: #648781; font-style: italic;">Auto-matched</span>`;
 
                 return `
@@ -225,9 +193,8 @@
                         <td>
                             <span style="font-size: 11px; color: #4F7470; white-space: nowrap;">${catLabel}</span>
                         </td>
-                        <td>${deptBadge}</td>
                         <td style="font-size: 11px; color: #4F7470; white-space: nowrap;">
-                            <div style="font-family: var(--brand-font-mono); color: #092F2E;">${a.file_size_formatted || 'â€”'}</div>
+                            <div style="font-family: var(--brand-font-mono); color: #092F2E;">${a.file_size_formatted || '—'}</div>
                             <div style="color: #648781; font-size: 10px; max-width: 140px; overflow: hidden; text-overflow: ellipsis;" title="${a.file_name}">${a.file_name}</div>
                         </td>
                         <td>${triggerChip}</td>
@@ -251,53 +218,9 @@
         function populateAssetDeptDropdown(selectedDeptId = null) {
             const wrapper = document.getElementById('assetFormDeptWrapper');
             const lockedBadge = document.getElementById('assetFormDeptLockedBadge');
+            if (lockedBadge) lockedBadge.style.display = 'none';
             if (!wrapper) return;
-
-            if (userAssetContext.is_admin) {
-                if (lockedBadge) lockedBadge.style.display = 'none';
-                let html = `<select id="assetFormDept" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
-                    <option value="org" ${!selectedDeptId ? 'selected' : ''}>ðŸŒ Org-wide (All Departments / General)</option>`;
-                
-                currentDepartments.forEach(d => {
-                    html += `<option value="${d.id}" ${selectedDeptId == d.id ? 'selected' : ''}>${d.icon || 'ðŸ¢'} ${d.name}</option>`;
-                });
-                html += `</select>`;
-                wrapper.innerHTML = html;
-            } else {
-                // Staff member: check assigned departments
-                const assigned = currentDepartments.filter(d => userAssetContext.assigned_dept_ids.includes(d.id));
-                if (assigned.length === 1) {
-                    // Only 1 department assigned: lock to this department
-                    const singleDept = assigned[0];
-                    wrapper.innerHTML = `
-                        <select id="assetFormDept" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
-                            <option value="${singleDept.id}" selected>${singleDept.icon || 'ðŸ¢'} ${singleDept.name}</option>
-                        </select>
-                    `;
-                    if (lockedBadge) {
-                        lockedBadge.innerText = `ðŸ”’ Scoped to assigned: ${singleDept.name}`;
-                        lockedBadge.style.display = 'block';
-                    }
-                } else if (assigned.length > 1) {
-                    // Multiple assigned departments
-                    let html = `<select id="assetFormDept" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">`;
-                    assigned.forEach(d => {
-                        html += `<option value="${d.id}" ${selectedDeptId == d.id ? 'selected' : ''}>${d.icon || 'ðŸ¢'} ${d.name}</option>`;
-                    });
-                    html += `</select>`;
-                    wrapper.innerHTML = html;
-                    if (lockedBadge) {
-                        lockedBadge.innerText = `ðŸ”’ Limited to your ${assigned.length} assigned departments`;
-                        lockedBadge.style.display = 'block';
-                    }
-                } else {
-                    wrapper.innerHTML = `<select id="assetFormDept" class="brand-input" disabled style="height: 38px;"><option value="">No Assigned Department</option></select>`;
-                    if (lockedBadge) {
-                        lockedBadge.innerText = 'âš ï¸ Please contact Admin to assign you to a department first.';
-                        lockedBadge.style.display = 'block';
-                    }
-                }
-            }
+            wrapper.innerHTML = `<input type="hidden" id="assetFormDept" value="org" />`;
         }
 
         function openAssetUploadModal(prefillData = null) {
@@ -481,270 +404,15 @@
             }
         }
 
-        async function refreshDeptKnowledgeSources(deptId) {
-            await loadDepartments();
-            const updatedDept = currentDepartments.find(d => d.id == deptId);
-            if (updatedDept) {
-                renderDeptKsList(updatedDept.knowledge_sources || []);
-            }
-        }
-
-        function renderDeptStaffChecklist(assignedUserIds) {
-            const container = document.getElementById('deptStaffChecklist');
-            if (availableOrgStaff.length === 0) {
-                container.innerHTML = `<div style="font-size: 11px; color: #648781;">No staff users registered.</div>`;
-                return;
-            }
-
-            container.innerHTML = availableOrgStaff.map(u => `
-                <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #092F2E; cursor: pointer;">
-                    <input type="checkbox" class="dept-staff-checkbox" value="${u.id}" ${assignedUserIds.includes(u.id) ? 'checked' : ''} />
-                    <span>ðŸ‘¤ ${u.name} <small style="color: #648781;">(${u.email} - ${u.role})</small></span>
-                </label>
-            `).join('');
-        }
-
-        function renderFaqs(faqs) {
-            const container = document.getElementById('deptFaqsContainer');
-            if (!container) return;
-            container.innerHTML = '';
-            if (!faqs || faqs.length === 0) {
-                addFaqRow();
-                return;
-            }
-            faqs.forEach(f => addFaqRow(f.question, f.answer));
-        }
-
-        function addFaqRow(q = '', a = '') {
-            const container = document.getElementById('deptFaqsContainer');
-            if (!container) return;
-            const row = document.createElement('div');
-            row.className = 'faq-row';
-            row.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr 30px; gap: 8px; align-items: center;';
-            row.innerHTML = `
-                <input type="text" class="brand-input faq-q" placeholder="Question chip..." value="${escapeHtml(q || '')}" />
-                <input type="text" class="brand-input faq-a" placeholder="Preset Answer..." value="${escapeHtml(a || '')}" />
-                <button type="button" class="brand-btn-secondary brand-btn-sm" style="color: var(--brand-rose-400);" onclick="this.parentElement.remove()">âœ•</button>
-            `;
-            container.appendChild(row);
-        }
-        window.addFaqRow = addFaqRow;
-        window.renderFaqs = renderFaqs;
-
-        function renderDeptCourses(courses) {
-            const container = document.getElementById('deptCoursesContainer');
-            if (!container) return;
-            container.innerHTML = '';
-            if (!courses || courses.length === 0) {
-                addCourseRow();
-                return;
-            }
-            courses.forEach(c => addCourseRow(c.id, c.course_name, c.course_code, c.campus_ids || []));
-        }
-
-        function addCourseRow(id = null, name = '', code = '', mappedCampusIds = []) {
-            const container = document.getElementById('deptCoursesContainer');
-            if (!container) return;
-
-            const campuses = availableOrgCampuses || [];
-            let campusChipsHtml = '';
-            if (campuses.length > 0) {
-                campusChipsHtml = campuses.map(c => {
-                    const isChecked = Array.isArray(mappedCampusIds) && mappedCampusIds.includes(c.id);
-                    return `
-                        <label style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: #063D3B; cursor: pointer; background: #FFFFFF; border: 1.5px solid ${isChecked ? '#10B981' : '#D1E5DE'}; border-radius: 6px; padding: 3px 8px; user-select: none;">
-                            <input type="checkbox" class="course-campus-check" value="${c.id}" ${isChecked ? 'checked' : ''} onchange="this.parentElement.style.borderColor = this.checked ? '#10B981' : '#D1E5DE'" style="width: 13px; height: 13px; accent-color: #047857; cursor: pointer;" />
-                            <span>${escapeHtml(c.short_name || c.name)}</span>
-                        </label>
-                    `;
-                }).join('');
-            } else {
-                campusChipsHtml = `<span style="color: #94A3B8; font-style: italic; font-size: 10.5px;">No campuses registered. Configure campuses in the Campuses tab to map locations.</span>`;
-            }
-
-            const row = document.createElement('div');
-            row.className = 'course-row';
-            row.style.cssText = 'background: #F8FCFA; border: 1.5px solid #DCE9E5; border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;';
-            row.innerHTML = `
-                <div style="display: grid; grid-template-columns: 2fr 1fr 30px; gap: 8px; align-items: center;">
-                    <input type="hidden" class="course-id" value="${escapeHtml(String(id || ''))}" />
-                    <input type="text" class="brand-input course-name" placeholder="Course / Program Name (e.g. Master of Business Administration)..." value="${escapeHtml(name || '')}" style="height: 34px; font-size: 12px;" />
-                    <input type="text" class="brand-input course-code" placeholder="Code (e.g. MBA-01)..." value="${escapeHtml(code || '')}" style="height: 34px; font-size: 12px;" />
-                    <button type="button" class="brand-btn-secondary brand-btn-sm" style="color: var(--brand-rose-400); height: 32px; font-size: 12px;" onclick="this.closest('.course-row').remove()" title="Remove Course">âœ•</button>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 11px; padding-top: 6px; border-top: 1px dashed #DCE9E5;">
-                    <span style="font-weight: 700; color: #4F7470; display: inline-flex; align-items: center; gap: 4px;">
-                        <span>ðŸ›ï¸</span> Available at:
-                    </span>
-                    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                        ${campusChipsHtml}
-                    </div>
-                </div>
-            `;
-            container.appendChild(row);
-        }
-        window.addCourseRow = addCourseRow;
-        window.renderDeptCourses = renderDeptCourses;
-
-        // Department Form Submit Handler
-        async function handleDeptFormSubmit(e) {
-            if (e) e.preventDefault();
-            const editIdEl = document.getElementById('editDeptId');
-            if (!editIdEl) return;
-            const deptId = editIdEl.value;
-            const payload = {
-                icon: document.getElementById('deptIconInput') ? document.getElementById('deptIconInput').value : '',
-                name: document.getElementById('deptNameInput') ? document.getElementById('deptNameInput').value : '',
-                description: document.getElementById('deptDescInput') ? document.getElementById('deptDescInput').value : '',
-                email: document.getElementById('deptEmailInput') ? document.getElementById('deptEmailInput').value : '',
-                phone: document.getElementById('deptPhoneInput') ? document.getElementById('deptPhoneInput').value : '',
-                whatsapp: document.getElementById('deptWhatsappInput') ? document.getElementById('deptWhatsappInput').value : '',
-                greeting_message: document.getElementById('deptGreetingInput') ? document.getElementById('deptGreetingInput').value : '',
-                timezone: document.getElementById('deptTimezoneInput') ? document.getElementById('deptTimezoneInput').value : 'America/New_York',
-                auto_away_message: document.getElementById('deptAwayMessageInput') ? document.getElementById('deptAwayMessageInput').value : '',
-                working_hours: typeof getDeptWorkingHoursFromForm === 'function' ? getDeptWorkingHoursFromForm() : {},
-                is_active: (document.getElementById('deptIsActiveInput') && document.getElementById('deptIsActiveInput').checked) ? 1 : 0,
-                enable_dedicated_widget: (document.getElementById('deptEnableDedicatedWidgetInput') && document.getElementById('deptEnableDedicatedWidgetInput').checked) ? 1 : 0,
-                escalation_rules: {
-                    notify_email: document.getElementById('escalateEmailCheck') ? document.getElementById('escalateEmailCheck').checked : false,
-                    notify_whatsapp: document.getElementById('escalateWhatsappCheck') ? document.getElementById('escalateWhatsappCheck').checked : false
-                },
-                lead_assignment_rules: {
-                    method: document.getElementById('leadAssignmentSelect') ? document.getElementById('leadAssignmentSelect').value : 'round_robin'
-                }
-            };
-
-            try {
-                let currentDeptId = deptId;
-                if (deptId) {
-                    await fetch('/v1/departments/' + deptId, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                        body: JSON.stringify(payload)
-                    });
-                } else {
-                    const res = await fetch('/v1/departments', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                        body: JSON.stringify(payload)
-                    });
-                    const resData = await res.json();
-                    if (resData.status === 'success') {
-                        currentDeptId = resData.data.id;
-                    }
-                }
-
-                if (currentDeptId) {
-                    // Sync Staff
-                    const selectedStaff = Array.from(document.querySelectorAll('.dept-staff-checkbox:checked')).map(cb => ({
-                        user_id: parseInt(cb.value),
-                        role: 'agent',
-                        is_on_duty: 1
-                    }));
-                    await fetch(`/v1/departments/${currentDeptId}/staff`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                        body: JSON.stringify({ staff: selectedStaff })
-                    });
-
-                    // Sync FAQs
-                    const faqs = [];
-                    document.querySelectorAll('.faq-row').forEach(row => {
-                        const q = row.querySelector('.faq-q') ? row.querySelector('.faq-q').value.trim() : '';
-                        const a = row.querySelector('.faq-a') ? row.querySelector('.faq-a').value.trim() : '';
-                        if (q && a) faqs.push({ question: q, answer: a });
-                    });
-                    await fetch(`/v1/departments/${currentDeptId}/faqs`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                        body: JSON.stringify({ faqs })
-                    });
-
-                    // Sync Courses with campus mappings
-                    const courses = [];
-                    document.querySelectorAll('.course-row').forEach(row => {
-                        const idVal = row.querySelector('.course-id') ? row.querySelector('.course-id').value.trim() : '';
-                        const name = row.querySelector('.course-name') ? row.querySelector('.course-name').value.trim() : '';
-                        const code = row.querySelector('.course-code') ? row.querySelector('.course-code').value.trim() : '';
-                        const campusIds = Array.from(row.querySelectorAll('.course-campus-check:checked')).map(cb => parseInt(cb.value));
-                        if (name) {
-                            courses.push({
-                                id: idVal ? parseInt(idVal) : null,
-                                course_name: name,
-                                course_code: code,
-                                campus_ids: campusIds
-                            });
-                        }
-                    });
-                    await fetch(`/v1/departments/${currentDeptId}/courses`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                        body: JSON.stringify({ courses })
-                    });
-                }
-
-                closeDepartmentModal();
-                loadDepartments();
-            } catch (err) {
-                console.error(err);
-                alert('Failed to save department configuration.');
-            }
-        }
-
-        document.addEventListener('submit', function(e) {
-            if (e.target && e.target.id === 'deptForm') {
-                e.preventDefault();
-                handleDeptFormSubmit(e);
-            }
-        });
-
-        async function registerAndAddStaff() {
-            const name = document.getElementById('newStaffName').value.trim();
-            const email = document.getElementById('newStaffEmail').value.trim();
-            const password = document.getElementById('newStaffPassword').value;
-            const role = document.getElementById('newStaffRole').value;
-            const deptId = document.getElementById('editDeptId').value;
-
-            if (!name || !email || !password) {
-                alert('Please provide staff member Name, Email, and Password.');
-                return;
-            }
-
-            try {
-                const res = await fetch('/v1/organization/staff', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ name, email, password, role, department_id: deptId || null })
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    document.getElementById('newStaffName').value = '';
-                    document.getElementById('newStaffEmail').value = '';
-                    document.getElementById('newStaffPassword').value = '';
-                    
-                    // Reload org staff list & refresh checklist UI
-                    if (deptId) {
-                        const resDept = await fetch('/v1/departments', {
-                            headers: { 'Authorization': 'Bearer ' + token }
-                        });
-                        const dData = await resDept.json();
-                        if (dData.status === 'success') {
-                            availableOrgStaff = dData.meta?.available_staff || [];
-                            const activeDept = dData.data.find(d => d.id == deptId);
-                            renderDeptStaffChecklist(availableOrgStaff, activeDept ? activeDept.staff : []);
-                        }
-                    } else {
-                        alert('Staff member registered successfully!');
-                    }
-                } else {
-                    alert(data.message || 'Failed to register staff member.');
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Error registering staff member.');
-            }
-        }
-
+        // ── DEPARTMENT EDITOR HELPERS (DEPRECATED - SAFE EMPTY STUBS) ────────
+        async function refreshDeptKnowledgeSources() {}
+        function renderDeptStaffChecklist() {}
+        function renderDeptCourses() {}
+        function addCourseRow() {}
+        function renderFaqs() {}
+        function addFaqRow() {}
+        async function handleDeptFormSubmit() {}
+        async function registerAndAddStaff() {}
         async function registerOrgUser() {
             const name = document.getElementById('orgAdminName').value.trim();
             const email = document.getElementById('orgAdminEmail').value.trim();
@@ -1317,7 +985,7 @@
             container.innerHTML = `
                 <div style="text-align: center; padding: 24px; color: #648781; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
                     <span style="display:inline-block; width:14px; height:14px; border:2px solid #047857; border-top-color:transparent; border-radius:50%; animation: spin 0.8s linear infinite;"></span>
-                    <span>Loading courses catalog &amp; campus mappings...</span>
+                    <span>Loading programs catalog &amp; campus mappings...</span>
                 </div>
             `;
 
@@ -1328,186 +996,112 @@
                     });
                     const d = await res.json();
                     if (d.status === 'success' && d.data) {
-                        _currentCampusCoursesData = d.data.departments || [];
-                        renderCampusEditorCoursesGroups(_currentCampusCoursesData);
+                        const programs = d.data.programs || [];
+                        renderCampusEditorPrograms(programs);
                         return;
                     }
                 }
 
-                // If adding new campus, load all departments with courses
-                const res = await fetch('/v1/departments', {
+                // If adding new campus, load all programs
+                const res = await fetch('/v1/programs', {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 const d = await res.json();
                 if (d.status === 'success' && d.data) {
-                    const depts = d.data.departments || [];
-                    _currentCampusCoursesData = depts.map(dept => ({
-                        id: dept.id,
-                        name: dept.name,
-                        icon: dept.icon || 'ðŸ«',
-                        courses: (dept.courses || []).map(c => ({
-                            id: c.id,
-                            course_name: c.course_name,
-                            course_code: c.course_code,
-                            is_offered: false
-                        }))
+                    const courses = (d.data.courses || []).map(c => ({
+                        id: c.id,
+                        course_name: c.course_name,
+                        course_code: c.course_code,
+                        program_type: c.program_type,
+                        is_offered: false
                     }));
-                    renderCampusEditorCoursesGroups(_currentCampusCoursesData);
+                    renderCampusEditorPrograms(courses);
                 }
             } catch (err) {
-                console.error('Error loading campus editor courses:', err);
-                container.innerHTML = `<div style="color: #EF4444; font-size: 12px; padding: 16px; text-align: center;">Failed to load courses catalog.</div>`;
+                console.error('Error loading campus editor programs:', err);
+                container.innerHTML = `<div style="color: #EF4444; font-size: 12px; padding: 16px; text-align: center;">Failed to load programs catalog.</div>`;
             }
         }
 
-        function renderCampusEditorCoursesGroups(departments) {
+        function renderCampusEditorPrograms(programs) {
             const container = document.getElementById('campusCoursesGroupContainer');
             if (!container) return;
 
-            if (!departments || departments.length === 0) {
+            if (!programs || programs.length === 0) {
                 container.innerHTML = `
                     <div style="text-align: center; padding: 20px; color: #648781; font-size: 12px;">
-                        No academic departments or courses found in catalog.<br/>
-                        <a href="javascript:void(0)" onclick="switchNavTab('departments')" style="color: #047857; font-weight: 700; text-decoration: underline; margin-top: 6px; display: inline-block;">+ Create Departments &amp; Courses First</a>
+                        No academic programs found in catalog.<br/>
+                        <a href="javascript:void(0)" onclick="switchNavTab('academic-programs')" style="color: #047857; font-weight: 700; text-decoration: underline; margin-top: 6px; display: inline-block;">+ Create Academic Programs First</a>
                     </div>
                 `;
-                updateCampusDerivedDeptsDisplay();
+                updateCampusOfferedProgramsDisplay();
                 return;
             }
 
-            container.innerHTML = departments.map(dept => {
-                const courses = dept.courses || [];
-                const deptIcon = dept.icon || 'ðŸ«';
-                const deptName = escapeHtml(dept.name);
-
-                if (courses.length === 0) {
-                    return `
-                        <div style="background: #F8FCFA; border: 1px solid #E6F0EC; border-radius: 8px; padding: 12px 14px;">
-                            <div style="display: flex; align-items: center; justify-content: space-between;">
-                                <div style="font-weight: 700; color: #063D3B; font-size: 12.5px; display: flex; align-items: center; gap: 7px;">
-                                    <span>${deptIcon}</span>
-                                    <span>${deptName}</span>
-                                </div>
-                                <span style="font-size: 11px; color: #94A3B8; font-style: italic;">No programs configured under this department</span>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                const coursesHtml = courses.map(c => {
-                    const isChecked = !!c.is_offered;
-                    const codeBadge = c.course_code ? `<span style="font-size: 10px; font-weight: 700; color: #648781; background: #FFFFFF; border: 1px solid #D1E5DE; border-radius: 4px; padding: 1px 5px;">${escapeHtml(c.course_code)}</span>` : '';
-
-                    return `
-                        <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #063D3B; cursor: pointer; padding: 7px 10px; background: #FFFFFF; border: 1px solid ${isChecked ? '#10B981' : '#D1E5DE'}; border-radius: 6px; transition: all 0.15s; user-select: none;">
-                            <input type="checkbox" class="campus-course-checkbox" data-dept-id="${dept.id}" data-dept-name="${deptName}" data-dept-icon="${deptIcon}" value="${c.id}" ${isChecked ? 'checked' : ''} onchange="onCampusCourseCheckboxChange(this)" style="width: 15px; height: 15px; accent-color: #047857; cursor: pointer; flex-shrink: 0;" />
-                            <span style="font-weight: 600; flex: 1;">${escapeHtml(c.course_name)}</span>
-                            ${codeBadge}
-                        </label>
-                    `;
-                }).join('');
-
-                const offeredCount = courses.filter(c => c.is_offered).length;
+            const programsHtml = programs.map(c => {
+                const isChecked = !!c.is_offered;
+                const codeBadge = c.course_code ? `<span style="font-size: 10px; font-weight: 700; color: #648781; background: #FFFFFF; border: 1px solid #D1E5DE; border-radius: 4px; padding: 1px 5px;">${escapeHtml(c.course_code)}</span>` : '';
+                const typeBadge = c.program_type ? `<span style="font-size: 9.5px; font-weight: 600; text-transform: uppercase; color: #047857; background: #ECFDF5; border-radius: 3px; padding: 1px 5px;">${escapeHtml(c.program_type)}</span>` : '';
 
                 return `
-                    <div class="campus-dept-group" data-dept-id="${dept.id}" style="background: #FAFCFB; border: 1.5px solid #E6F0EC; border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 10px;">
-                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <span style="font-size: 16px;">${deptIcon}</span>
-                                <strong style="font-size: 13px; color: #063D3B;">${deptName}</strong>
-                                <span class="dept-group-count-badge" style="font-size: 10px; font-weight: 700; color: #047857; background: #ECFDF5; border: 1px solid #A7F3D0; padding: 2px 7px; border-radius: 4px;">
-                                    ${offeredCount}/${courses.length} Offered
-                                </span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 6px;">
-                                <button type="button" class="brand-btn-secondary" style="height: 24px; padding: 0 8px; font-size: 10.5px; font-weight: 600; border-radius: 4px;" onclick="toggleDeptAllCourses(${dept.id}, true)">Select All</button>
-                                <button type="button" class="brand-btn-secondary" style="height: 24px; padding: 0 8px; font-size: 10.5px; font-weight: 600; border-radius: 4px;" onclick="toggleDeptAllCourses(${dept.id}, false)">Deselect All</button>
-                            </div>
-                        </div>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px;">
-                            ${coursesHtml}
-                        </div>
-                    </div>
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #063D3B; cursor: pointer; padding: 8px 12px; background: #FFFFFF; border: 1px solid ${isChecked ? '#10B981' : '#D1E5DE'}; border-radius: 6px; transition: all 0.15s; user-select: none;">
+                        <input type="checkbox" class="campus-course-checkbox" value="${c.id}" ${isChecked ? 'checked' : ''} onchange="onCampusCourseCheckboxChange(this)" style="width: 15px; height: 15px; accent-color: #047857; cursor: pointer; flex-shrink: 0;" />
+                        <span style="font-weight: 600; flex: 1;">${escapeHtml(c.course_name)}</span>
+                        ${typeBadge}
+                        ${codeBadge}
+                    </label>
                 `;
             }).join('');
 
-            updateCampusDerivedDeptsDisplay();
+            container.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin-bottom: 8px;">
+                    <button type="button" class="brand-btn-secondary" style="height: 24px; padding: 0 8px; font-size: 10.5px; font-weight: 600; border-radius: 4px;" onclick="toggleAllCampusPrograms(true)">Select All</button>
+                    <button type="button" class="brand-btn-secondary" style="height: 24px; padding: 0 8px; font-size: 10.5px; font-weight: 600; border-radius: 4px;" onclick="toggleAllCampusPrograms(false)">Deselect All</button>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px;">
+                    ${programsHtml}
+                </div>
+            `;
+
+            updateCampusOfferedProgramsDisplay();
+        }
+        function renderCampusEditorCoursesGroups(depts) {
+            renderCampusEditorPrograms(depts);
         }
 
-        function toggleDeptAllCourses(deptId, select) {
-            const group = document.querySelector(`.campus-dept-group[data-dept-id="${deptId}"]`);
-            if (!group) return;
-            group.querySelectorAll('.campus-course-checkbox').forEach(cb => {
+        function toggleAllCampusPrograms(select) {
+            document.querySelectorAll('.campus-course-checkbox').forEach(cb => {
                 cb.checked = select;
                 cb.parentElement.style.borderColor = select ? '#10B981' : '#D1E5DE';
             });
-            updateCampusDerivedDeptsDisplay();
+            updateCampusOfferedProgramsDisplay();
+        }
+        window.toggleAllCampusPrograms = toggleAllCampusPrograms;
+
+        function toggleDeptAllCourses(deptId, select) {
+            toggleAllCampusPrograms(select);
         }
         window.toggleDeptAllCourses = toggleDeptAllCourses;
 
         function onCampusCourseCheckboxChange(cb) {
             cb.parentElement.style.borderColor = cb.checked ? '#10B981' : '#D1E5DE';
-            updateCampusDerivedDeptsDisplay();
+            updateCampusOfferedProgramsDisplay();
         }
         window.onCampusCourseCheckboxChange = onCampusCourseCheckboxChange;
 
-        function updateCampusDerivedDeptsDisplay() {
+        function updateCampusOfferedProgramsDisplay() {
             const allChecked = Array.from(document.querySelectorAll('.campus-course-checkbox:checked'));
             const totalOffered = allChecked.length;
 
             const badge = document.getElementById('campusEditorCoursesBadge');
             if (badge) {
-                badge.innerText = `${totalOffered} Course${totalOffered === 1 ? '' : 's'} Offered`;
+                badge.innerText = `${totalOffered} Program${totalOffered === 1 ? '' : 's'} Offered`;
                 badge.style.color = totalOffered > 0 ? '#047857' : '#648781';
                 badge.style.background = totalOffered > 0 ? '#ECFDF5' : '#F1F5F9';
                 badge.style.borderColor = totalOffered > 0 ? '#A7F3D0' : '#E2E8F0';
             }
-
-            // Update each department's group badge count
-            document.querySelectorAll('.campus-dept-group').forEach(group => {
-                const totalInDept = group.querySelectorAll('.campus-course-checkbox').length;
-                const checkedInDept = group.querySelectorAll('.campus-course-checkbox:checked').length;
-                const countBadge = group.querySelector('.dept-group-count-badge');
-                if (countBadge) {
-                    countBadge.innerText = `${checkedInDept}/${totalInDept} Offered`;
-                    countBadge.style.color = checkedInDept > 0 ? '#047857' : '#648781';
-                    countBadge.style.background = checkedInDept > 0 ? '#ECFDF5' : '#F1F5F9';
-                    countBadge.style.borderColor = checkedInDept > 0 ? '#A7F3D0' : '#E2E8F0';
-                }
-            });
-
-            // Calculate derived departments
-            const deptsMap = {};
-            allChecked.forEach(cb => {
-                const deptId = cb.dataset.deptId;
-                const deptName = cb.dataset.deptName;
-                const deptIcon = cb.dataset.deptIcon || 'ðŸ›ï¸';
-                if (!deptsMap[deptId]) {
-                    deptsMap[deptId] = { name: deptName, icon: deptIcon, count: 0 };
-                }
-                deptsMap[deptId].count++;
-            });
-
-            const derivedListEl = document.getElementById('campusDerivedDeptsList');
-            if (derivedListEl) {
-                const deptKeys = Object.keys(deptsMap);
-                if (deptKeys.length === 0) {
-                    derivedListEl.innerHTML = `<span style="color: #94A3B8; font-style: italic;">No departments derived yet. Check courses below to establish campus departments.</span>`;
-                } else {
-                    derivedListEl.innerHTML = deptKeys.map(k => {
-                        const d = deptsMap[k];
-                        return `
-                            <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: #063D3B; background: #FFFFFF; border: 1px solid #D1E5DE; border-radius: 6px; padding: 3px 9px;">
-                                <span>${d.icon}</span>
-                                <span>${escapeHtml(d.name)}</span>
-                                <span style="font-size: 10px; color: #047857; background: #ECFDF5; border-radius: 4px; padding: 1px 5px; font-weight: 800;">${d.count}</span>
-                            </span>
-                        `;
-                    }).join('');
-                }
-            }
         }
-        window.updateCampusDerivedDeptsDisplay = updateCampusDerivedDeptsDisplay;
+        window.updateCampusDerivedDeptsDisplay = updateCampusOfferedProgramsDisplay;
 
         async function handleCampusPageSubmit(e) {
             if (e) e.preventDefault();
@@ -1633,55 +1227,35 @@
             if (deptCountEl) deptCountEl.innerText = (campus.derived_departments || []).length;
             if (coursesCountEl) coursesCountEl.innerText = `${campus.courses_count || 0} Programs Offered`;
 
-            if (derivedDeptsEl) {
-                const depts = campus.derived_departments || [];
-                if (depts.length === 0) {
-                    derivedDeptsEl.innerHTML = `<span style="color: #94A3B8; font-style: italic;">No departments derived. Map courses to associate departments.</span>`;
-                } else {
-                    derivedDeptsEl.innerHTML = depts.map(d => `
-                        <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 700; color: #063D3B; background: #FFFFFF; border: 1px solid #D1E5DE; border-radius: 5px; padding: 3px 8px; margin: 2px;">
-                            <span>${d.icon || 'ðŸ›ï¸'}</span>
-                            <span>${escapeHtml(d.name)}</span>
-                        </span>
-                    `).join('');
-                }
-            }
-
-            // Fetch detailed list of courses for this campus
+            // Fetch detailed list of programs for this campus
             if (coursesListEl) {
-                coursesListEl.innerHTML = `<div style="color: #648781; font-size: 11px;">Loading offered courses...</div>`;
+                coursesListEl.innerHTML = `<div style="color: #648781; font-size: 11px;">Loading offered programs...</div>`;
                 fetch(`/v1/campuses/${id}/courses`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 })
                 .then(r => r.json())
                 .then(res => {
                     if (res.status === 'success' && res.data) {
-                        const depts = (res.data.departments || []).filter(d => d.offered_courses_count > 0);
-                        if (depts.length === 0) {
+                        const programs = (res.data.programs || []).filter(c => c.is_offered);
+                        if (coursesCountEl) coursesCountEl.innerText = `${programs.length} Program${programs.length === 1 ? '' : 's'} Offered`;
+
+                        if (programs.length === 0) {
                             coursesListEl.innerHTML = `<span style="color: #94A3B8; font-style: italic;">No programs currently offered at this campus location.</span>`;
                             return;
                         }
-                        coursesListEl.innerHTML = depts.map(d => {
-                            const offered = (d.courses || []).filter(c => c.is_offered);
-                            return `
-                                <div style="margin-bottom: 8px;">
-                                    <div style="font-weight: 700; color: #063D3B; font-size: 11.5px; margin-bottom: 4px;">
-                                        ${d.icon || 'ðŸ›ï¸'} ${escapeHtml(d.name)}
-                                    </div>
-                                    <div style="display: flex; flex-wrap: wrap; gap: 6px; padding-left: 8px;">
-                                        ${offered.map(c => `
-                                            <span style="font-size: 11px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 4px; padding: 2px 7px; color: #334155;">
-                                                ${escapeHtml(c.course_name)} ${c.course_code ? `<strong style="color: #648781;">(${escapeHtml(c.course_code)})</strong>` : ''}
-                                            </span>
-                                        `).join('')}
-                                    </div>
-                                </div>
-                            `;
-                        }).join('');
+                        coursesListEl.innerHTML = `
+                            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                ${programs.map(c => `
+                                    <span style="font-size: 11px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 4px; padding: 3px 8px; color: #334155; display: inline-flex; align-items: center; gap: 4px;">
+                                        <strong>${escapeHtml(c.course_name)}</strong> ${c.course_code ? `<span style="color: #648781;">(${escapeHtml(c.course_code)})</span>` : ''}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        `;
                     }
                 })
                 .catch(() => {
-                    coursesListEl.innerHTML = `<span style="color: #EF4444;">Failed to load offered courses.</span>`;
+                    coursesListEl.innerHTML = `<span style="color: #EF4444;">Failed to load offered programs.</span>`;
                 });
             }
 
@@ -1792,22 +1366,6 @@
 
             toggleAddAdminPrivPanel();
 
-            // Populate departments checklist
-            const checklist = document.getElementById('addMemberDeptChecklist');
-            if (checklist) {
-                const depts = window.teamsCachedDepts || [];
-                if (depts.length === 0) {
-                    checklist.innerHTML = `<span style="font-size: 11.5px; color: #648781;">No departments available yet.</span>`;
-                } else {
-                    checklist.innerHTML = depts.map(d => `
-                        <label style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: #FFFFFF; border: 1.5px solid #D1E5DE; border-radius: 6px; font-size: 11.5px; color: #063D3B; cursor: pointer;">
-                            <input type="checkbox" class="add-dept-checkbox" value="${d.id}" style="accent-color: #063D3B;" />
-                            <span>${d.icon || 'ðŸ«'} ${escapeHtmlString(d.name)}</span>
-                        </label>
-                    `).join('');
-                }
-            }
-
             modal.classList.add('open');
             setTimeout(() => { if (nameEl) nameEl.focus(); }, 100);
         }
@@ -1846,18 +1404,16 @@
                 can_manage_structure = 0;
             }
 
-            const department_ids = Array.from(document.querySelectorAll('.add-dept-checkbox:checked')).map(cb => parseInt(cb.value));
-
             try {
                 const res = await fetch('/v1/organization/staff', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ name, email, password, role, can_manage_structure, department_ids })
+                    body: JSON.stringify({ name, email, password, role, can_manage_structure })
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
                     const roleLabel = (role === 'admin') ? (can_manage_structure == 1 ? 'Full Admin' : 'Content Admin') : 'Team Member';
-                    alert(`ðŸŽ‰ Success! ${name} has been added as a ${roleLabel}.`);
+                    alert(`🎉 Success! ${name} has been added as a ${roleLabel}.`);
                     closeAddTeamMemberModal();
                     await loadTeamsWorkspace();
                 } else {
@@ -1902,26 +1458,6 @@
 
             toggleEditAdminPrivPanel();
 
-            // Populate departments checklist with existing assignments checked
-            const userDeptIds = new Set((user.departments || []).map(d => String(d.id)));
-            const checklist = document.getElementById('editMemberDeptChecklist');
-            if (checklist) {
-                const depts = window.teamsCachedDepts || [];
-                if (depts.length === 0) {
-                    checklist.innerHTML = `<span style="font-size: 11.5px; color: #648781;">No departments available.</span>`;
-                } else {
-                    checklist.innerHTML = depts.map(d => {
-                        const isChecked = userDeptIds.has(String(d.id)) ? 'checked' : '';
-                        return `
-                            <label style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: #FFFFFF; border: 1.5px solid #D1E5DE; border-radius: 6px; font-size: 11.5px; color: #063D3B; cursor: pointer;">
-                                <input type="checkbox" class="edit-dept-checkbox" value="${d.id}" ${isChecked} style="accent-color: #063D3B;" />
-                                <span>${d.icon || 'ðŸ«'} ${escapeHtmlString(d.name)}</span>
-                            </label>
-                        `;
-                    }).join('');
-                }
-            }
-
             modal.classList.add('open');
             setTimeout(() => { if (nameEl) nameEl.focus(); }, 100);
         }
@@ -1962,9 +1498,7 @@
                 can_manage_structure = 0;
             }
 
-            const department_ids = Array.from(document.querySelectorAll('.edit-dept-checkbox:checked')).map(cb => parseInt(cb.value));
-
-            const payload = { name, email, role, can_manage_structure, department_ids };
+            const payload = { name, email, role, can_manage_structure };
             if (password) {
                 payload.password = password;
             }
@@ -1977,7 +1511,7 @@
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
-                    alert(`ðŸŽ‰ Success! Team member details updated successfully.`);
+                    alert(`🎉 Success! Team member details updated successfully.`);
                     closeEditTeamMemberModal();
                     await loadTeamsWorkspace();
                 } else {
@@ -2021,9 +1555,7 @@
 
         function filterTeamsRosterTable() {
             const searchInput = document.getElementById('teamsSearchInput');
-            const deptFilter = document.getElementById('teamsDeptFilter');
             const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
-            const deptVal = deptFilter ? deptFilter.value : 'all';
 
             const filtered = (window.teamsCachedUsers || []).filter(u => {
                 const isAdmin = u.role === 'owner' || u.role === 'org_admin' || u.role === 'admin' || u.role === 'superadmin';
@@ -2036,19 +1568,12 @@
                 if (window.teamsCurrentRoleFilter === 'content_admin' && !isContentAdmin) return false;
                 if (window.teamsCurrentRoleFilter === 'team_member' && !isTeamMember) return false;
 
-                // Dept check
-                if (deptVal !== 'all') {
-                    const hasDept = (u.departments || []).some(d => String(d.id) === String(deptVal));
-                    if (!hasDept) return false;
-                }
-
                 // Query search
                 if (query) {
                     const name = (u.name || '').toLowerCase();
                     const email = (u.email || '').toLowerCase();
-                    const deptsText = (u.departments || []).map(d => (d.name || '').toLowerCase()).join(' ');
                     const roleText = isFullAdmin ? 'admin full access' : (isContentAdmin ? 'admin content access' : 'team member counselor');
-                    if (!name.includes(query) && !email.includes(query) && !deptsText.includes(query) && !roleText.includes(query)) {
+                    if (!name.includes(query) && !email.includes(query) && !roleText.includes(query)) {
                         return false;
                     }
                 }
@@ -2085,21 +1610,12 @@
             }
 
             try {
-                // Fetch organization users & departments concurrently
-                const [resUsers, resDepts] = await Promise.all([
-                    fetch('/v1/organization/staff', { headers: { 'Authorization': 'Bearer ' + token } }),
-                    fetch('/v1/departments', { headers: { 'Authorization': 'Bearer ' + token } })
-                ]);
+                // Fetch organization users
+                const resUsers = await fetch('/v1/organization/staff', { headers: { 'Authorization': 'Bearer ' + token } });
                 const usersData = await resUsers.json();
-                const deptsData = await resDepts.json();
 
                 const users = (usersData.status === 'success' && usersData.data) ? usersData.data : [];
-                const depts = (deptsData.status === 'success' && deptsData.data)
-                    ? (Array.isArray(deptsData.data) ? deptsData.data : (deptsData.data.departments || []))
-                    : [];
-
                 window.teamsCachedUsers = users;
-                window.teamsCachedDepts = depts;
 
                 // Update Header Pill
                 const pillCount = document.getElementById('teamsActivePillCount');
@@ -2111,7 +1627,6 @@
                 let fullAdminsCount = 0;
                 let contentAdminsCount = 0;
                 let teamMembersCount = 0;
-                const assignedDeptIds = new Set();
 
                 users.forEach(u => {
                     const isAdmin = u.role === 'owner' || u.role === 'org_admin' || u.role === 'admin' || u.role === 'superadmin';
@@ -2121,10 +1636,6 @@
                         contentAdminsCount++;
                     } else {
                         teamMembersCount++;
-                    }
-
-                    if (u.departments && Array.isArray(u.departments)) {
-                        u.departments.forEach(d => assignedDeptIds.add(d.id));
                     }
                 });
 
@@ -2137,23 +1648,12 @@
                 setElText('statFullAdmins', fullAdminsCount);
                 setElText('statContentAdmins', contentAdminsCount);
                 setElText('statTeamMembers', teamMembersCount);
-                setElText('statAssignedDepts', assignedDeptIds.size);
 
                 // Update Tab Count Badges
                 setElText('tabCountAll', users.length);
                 setElText('tabCountFullAdmin', fullAdminsCount);
                 setElText('tabCountContentAdmin', contentAdminsCount);
                 setElText('tabCountTeamMember', teamMembersCount);
-
-                // Populate Department Filter Dropdown
-                const deptFilter = document.getElementById('teamsDeptFilter');
-                if (deptFilter) {
-                    const currentVal = deptFilter.value;
-                    deptFilter.innerHTML = `<option value="all">All Departments</option>` + depts.map(d => `
-                        <option value="${d.id}">${d.icon || 'ðŸ«'} ${escapeHtmlString(d.name)}</option>
-                    `).join('');
-                    deptFilter.value = currentVal || 'all';
-                }
 
                 // Initial render of filtered table
                 filterTeamsRosterTable();
@@ -2162,12 +1662,12 @@
                 console.error('[Edvora Teams] Load error:', err);
                 const tbody = document.getElementById('teamsRosterTableBody');
                 if (tbody) {
-                    const colSpan = isCurrentFullAdmin ? 5 : 4;
+                    const colSpan = isCurrentFullAdmin ? 4 : 3;
                     tbody.innerHTML = `
                         <tr>
                             <td colspan="${colSpan}" style="text-align: center; padding: 40px 20px; color: #DC2626;">
                                 <div style="font-size: 13.5px; font-weight: 700; margin-bottom: 6px;">Failed to load team roster</div>
-                                <button class="ckh-action-btn" onclick="loadTeamsWorkspace()" style="margin-top: 6px; padding: 4px 12px; background: #FFFFFF; font-weight: 700;">â†» Try Again</button>
+                                <button class="ckh-action-btn" onclick="loadTeamsWorkspace()" style="margin-top: 6px; padding: 4px 12px; background: #FFFFFF; font-weight: 700;">↻ Try Again</button>
                             </td>
                         </tr>
                     `;
@@ -2191,7 +1691,7 @@
                 actionColHeader.style.display = isCurrentFullAdmin ? '' : 'none';
             }
 
-            const colSpan = isCurrentFullAdmin ? 5 : 4;
+            const colSpan = isCurrentFullAdmin ? 4 : 3;
             if (users.length === 0) {
                 tbody.innerHTML = `
                     <tr>
@@ -2229,10 +1729,6 @@
                             <span>Team Member</span>
                         </span>`;
                 }
-
-                const deptBadges = (u.departments && u.departments.length > 0)
-                    ? u.departments.map(d => `<span class="ckh-dept-badge">${d.icon || 'ðŸ«'} ${escapeHtmlString(d.name)}</span>`).join(' ')
-                    : `<span style="font-size: 11px; color: #94A3B8; font-style: italic;">No departments assigned</span>`;
 
                 const initial = u.name ? u.name.charAt(0).toUpperCase() : 'U';
                 const safeName = escapeJsString(u.name || '');
@@ -2278,11 +1774,6 @@
                         </td>
                         <td>
                             ${roleBadgeHtml}
-                        </td>
-                        <td>
-                            <div style="display: flex; flex-wrap: wrap; gap: 4px; align-items: center;">
-                                ${deptBadges}
-                            </div>
                         </td>
                         <td>
                             <span class="ckh-status-pill ckh-status-live">

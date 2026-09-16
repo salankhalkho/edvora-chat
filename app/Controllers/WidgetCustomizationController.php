@@ -91,26 +91,25 @@ class WidgetCustomizationController
         // Fetch authoritative prerequisite status for lead capture action cards
         $hasAssets = (int)$db->query("SELECT COUNT(*) FROM lead_assets WHERE organization_id = " . (int)$orgId . " AND is_active = 1")->fetchColumn() > 0;
         $hasCampuses = (int)$db->query("SELECT COUNT(*) FROM campuses WHERE organization_id = " . (int)$orgId . " AND status = 'active'")->fetchColumn() > 0;
-        $hasPhoneOrStaff = (int)$db->query("SELECT COUNT(*) FROM departments WHERE organization_id = " . (int)$orgId . " AND is_active = 1 AND (phone IS NOT NULL AND phone != '')")->fetchColumn() > 0;
-        $hasStaff = (int)$db->query("SELECT COUNT(*) FROM department_staff ds JOIN departments d ON ds.department_id = d.id WHERE d.organization_id = " . (int)$orgId)->fetchColumn() > 0;
+        $hasStaff = (int)$db->query("SELECT COUNT(*) FROM users WHERE organization_id = " . (int)$orgId . " AND role IN ('staff', 'counselor', 'agent', 'admin', 'org_admin')")->fetchColumn() > 0;
         
         $stmtBotLead = $db->prepare("SELECT lead_capture_enabled FROM chatbots WHERE id = :id");
         $stmtBotLead->execute([':id' => $botId]);
         $botLeadRow = $stmtBotLead->fetch(\PDO::FETCH_ASSOC);
         $leadCaptureEnabled = (bool)($botLeadRow['lead_capture_enabled'] ?? false);
-        $hasCallbacks = $leadCaptureEnabled && ($hasPhoneOrStaff || $hasStaff);
+        $hasCallbacks = $leadCaptureEnabled && $hasStaff;
 
         Response::success([
-            'scope'   => $scope,
-            'dept_id' => $deptId,
+            'scope'   => 'org',
+            'dept_id' => null,
             'config'  => $config,
-            'is_override' => $scope === 'dept' && $deptId !== null,
+            'is_override' => false,
             'prerequisites' => [
                 'has_assets' => $hasAssets,
                 'has_campuses' => $hasCampuses,
                 'has_callbacks' => $hasCallbacks,
                 'lead_capture_enabled' => $leadCaptureEnabled,
-                'has_counselor_contact' => ($hasPhoneOrStaff || $hasStaff)
+                'has_counselor_contact' => $hasStaff
             ]
         ]);
     }
@@ -151,32 +150,21 @@ class WidgetCustomizationController
         $configJson = json_encode($sanitized, JSON_UNESCAPED_UNICODE);
 
         // Find existing record
-        if ($deptId !== null) {
-            $checkStmt = $db->prepare("SELECT id FROM widget_customizations WHERE chatbot_id = :bot AND organization_id = :org AND department_id = :dept ORDER BY id DESC LIMIT 1");
-            $checkStmt->execute([':bot' => $botId, ':org' => $orgId, ':dept' => $deptId]);
-        } else {
-            $checkStmt = $db->prepare("SELECT id FROM widget_customizations WHERE chatbot_id = :bot AND organization_id = :org AND department_id IS NULL ORDER BY id DESC LIMIT 1");
-            $checkStmt->execute([':bot' => $botId, ':org' => $orgId]);
-        }
+        $checkStmt = $db->prepare("SELECT id FROM widget_customizations WHERE chatbot_id = :bot AND organization_id = :org ORDER BY id DESC LIMIT 1");
+        $checkStmt->execute([':bot' => $botId, ':org' => $orgId]);
         $existing = $checkStmt->fetch(PDO::FETCH_ASSOC);
 
         if ($existing) {
             $stmt = $db->prepare("UPDATE widget_customizations SET config = :cfg, updated_at = NOW() WHERE id = :id");
             $stmt->execute([':cfg' => $configJson, ':id' => $existing['id']]);
             // Clean up any extraneous duplicate rows
-            if ($deptId !== null) {
-                $delStmt = $db->prepare("DELETE FROM widget_customizations WHERE chatbot_id = :bot AND organization_id = :org AND department_id = :dept AND id != :id");
-                $delStmt->execute([':bot' => $botId, ':org' => $orgId, ':dept' => $deptId, ':id' => $existing['id']]);
-            } else {
-                $delStmt = $db->prepare("DELETE FROM widget_customizations WHERE chatbot_id = :bot AND organization_id = :org AND department_id IS NULL AND id != :id");
-                $delStmt->execute([':bot' => $botId, ':org' => $orgId, ':id' => $existing['id']]);
-            }
+            $delStmt = $db->prepare("DELETE FROM widget_customizations WHERE chatbot_id = :bot AND organization_id = :org AND id != :id");
+            $delStmt->execute([':bot' => $botId, ':org' => $orgId, ':id' => $existing['id']]);
         } else {
-            $stmt = $db->prepare("INSERT INTO widget_customizations (chatbot_id, organization_id, department_id, config) VALUES (:bot, :org, :dept, :cfg)");
+            $stmt = $db->prepare("INSERT INTO widget_customizations (chatbot_id, organization_id, config) VALUES (:bot, :org, :cfg)");
             $stmt->execute([
                 ':bot'  => $botId,
                 ':org'  => $orgId,
-                ':dept' => $deptId,
                 ':cfg'  => $configJson,
             ]);
         }
@@ -366,9 +354,9 @@ class WidgetCustomizationController
             }
         }
 
-        // Fetch org-level config first
+        // Fetch org-level config
         $orgCfg = [];
-        $stmtOrg = $db->prepare("SELECT config FROM widget_customizations WHERE chatbot_id = :b AND organization_id = :o AND department_id IS NULL ORDER BY id DESC LIMIT 1");
+        $stmtOrg = $db->prepare("SELECT config FROM widget_customizations WHERE chatbot_id = :b AND organization_id = :o ORDER BY id DESC LIMIT 1");
         $stmtOrg->execute([':b' => $botId, ':o' => $orgId]);
         $rowOrg = $stmtOrg->fetch();
         if ($rowOrg) {
@@ -378,26 +366,7 @@ class WidgetCustomizationController
             }
         }
 
-        $baseConfig = array_merge($defaults, $orgCfg);
-
-        // If dept-level requested, merge department overrides on top of org-level
-        if ($deptId) {
-            $stmt = $db->prepare("SELECT config FROM widget_customizations WHERE chatbot_id = :b AND organization_id = :o AND department_id = :d ORDER BY id DESC LIMIT 1");
-            $stmt->execute([':b' => $botId, ':o' => $orgId, ':d' => $deptId]);
-            $row = $stmt->fetch();
-            if ($row) {
-                $cfg = json_decode($row['config'], true);
-                if (is_array($cfg)) {
-                    // Filter out null or empty strings so untouched properties cascade from org
-                    $cleanOverrides = array_filter($cfg, function($val) {
-                        return $val !== null && $val !== '';
-                    });
-                    return array_merge($baseConfig, $cleanOverrides);
-                }
-            }
-        }
-
-        return $baseConfig;
+        return array_merge($defaults, $orgCfg);
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -427,11 +396,9 @@ class WidgetCustomizationController
             }
         }
 
-        $deptIdForQuery = ($scope === 'dept' && $deptId) ? $deptId : null;
-
-        // Fetch org-level config first
+        // Fetch org-level config
         $orgCfg = [];
-        $stmtOrgCfg = $db->prepare("SELECT config FROM widget_customizations WHERE chatbot_id = :b AND organization_id = :o AND department_id IS NULL ORDER BY id DESC LIMIT 1");
+        $stmtOrgCfg = $db->prepare("SELECT config FROM widget_customizations WHERE chatbot_id = :b AND organization_id = :o ORDER BY id DESC LIMIT 1");
         $stmtOrgCfg->execute([':b' => $botId, ':o' => $orgId]);
         $rowOrgCfg = $stmtOrgCfg->fetch();
         if ($rowOrgCfg) {
@@ -441,31 +408,7 @@ class WidgetCustomizationController
             }
         }
 
-        $baseConfig = array_merge($defaults, $orgCfg);
-
-        if ($deptIdForQuery !== null) {
-            $stmt = $db->prepare("SELECT config FROM widget_customizations WHERE chatbot_id = :b AND organization_id = :o AND department_id = :d ORDER BY id DESC LIMIT 1");
-            $stmt->execute([':b' => $botId, ':o' => $orgId, ':d' => $deptIdForQuery]);
-            $row = $stmt->fetch();
-            if ($row) {
-                $cfg = json_decode($row['config'], true);
-                if (is_array($cfg)) {
-                    $cleanOverrides = array_filter($cfg, function($val) {
-                        return $val !== null && $val !== '';
-                    });
-                    $merged = array_merge($baseConfig, $cleanOverrides);
-                    return $merged;
-                }
-            }
-            return $baseConfig;
-        }
-
-        if ($rowOrgCfg && is_array($orgCfg)) {
-            $merged = array_merge($defaults, $orgCfg);
-            return $merged;
-        }
-
-        return $defaults;
+        return array_merge($defaults, $orgCfg);
     }
 
     private function sanitizeConfig(array $config): array

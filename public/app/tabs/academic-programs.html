@@ -6,13 +6,13 @@
       <span class="ops-live-dot"></span>
       <div>
         <div class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important;">Academic Programs &amp; Degrees</div>
-        <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">Explore, manage, and configure degrees across all university departments and institutional orphan courses</div>
+        <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">Explore, manage, and configure degrees across all university offerings and degree curricula</div>
       </div>
     </div>
 
     <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
       <div class="ckh-ctrl-pill" style="font-size: 11px !important; font-weight: 700 !important; color: var(--e-teal) !important; background: #F4FAF7 !important; border: 1px solid #D1E5DE !important; border-radius: 8px !important; padding: 5px 11px !important; display: inline-flex !important; align-items: center !important; gap: 5px !important;">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
         <span id="programsActivePillCount">Catalog: 0 Programs</span>
       </div>
       <button id="programsAddBtn" onclick="switchNavTab('add-programs')" class="ckh-btn-ingest" title="Add Academic Program" style="background: #063D3B !important; color: #C8FF63 !important; border: none !important; border-radius: 8px !important; padding: 6px 14px !important; font-size: 11.5px !important; font-weight: 700 !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; gap: 6px !important;">
@@ -77,17 +77,17 @@
       <div class="ckh-kpi-sub">Ph.D., Fellowships &amp; Exec</div>
     </div>
 
-    <!-- 5. Orphan / Unassigned Courses -->
-    <div class="ckh-kpi-tile" id="progKpiTileOrphan" onclick="setProgramFilterType('orphan', this)">
+    <!-- 5. Admissions Open -->
+    <div class="ckh-kpi-tile" id="progKpiTileOpen" onclick="setProgramFilterType('open', this)">
       <div class="ckh-kpi-header">
-        <div class="ckh-kpi-icon" style="background:#FEF2F2; color:#DC2626;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        <div class="ckh-kpi-icon" style="background:#ECFDF5; color:#059669;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
         </div>
-        <span class="ckh-kpi-badge" style="background:#FEF2F2; color:#DC2626;">Unassigned</span>
+        <span class="ckh-kpi-badge" style="background:#ECFDF5; color:#059669;">Active Intake</span>
       </div>
-      <div class="ckh-kpi-val"><span class="cnum-ckh" id="statOrphanPrograms">0</span></div>
-      <div class="ckh-kpi-lbl">Orphan Courses</div>
-      <div class="ckh-kpi-sub">Not linked to any department</div>
+      <div class="ckh-kpi-val"><span class="cnum-ckh" id="statOpenPrograms">0</span></div>
+      <div class="ckh-kpi-lbl">Admissions Open</div>
+      <div class="ckh-kpi-sub">Accepting prospective student leads</div>
     </div>
 
   </div>
@@ -131,7 +131,7 @@
       <!-- Search Input -->
       <div class="ckh-search-box">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#648781" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        <input type="text" id="programsSearchInput" class="ckh-search-input" placeholder="Search by degree name, code, department..." oninput="filterProgramsTable()">
+        <input type="text" id="programsSearchInput" class="ckh-search-input" placeholder="Search by degree name, code, curriculum..." oninput="filterProgramsTable()">
         <span style="font-size: 9.5px; font-family: 'JetBrains Mono', monospace; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: #F1F7F4; color: #648781; border: 1px solid #DCE9E5;">⌘K</span>
       </div>
     </div>
@@ -168,7 +168,6 @@
 (function() {
   window._academicProgramsData = {
     courses: [],
-    departments: [],
     campuses: [],
     currentTypeFilter: 'all'
   };
@@ -186,7 +185,6 @@
       if (data.status !== 'success') throw new Error(data.message || 'API error');
 
       window._academicProgramsData.courses = data.data.courses || [];
-      window._academicProgramsData.departments = data.data.departments || [];
       window._academicProgramsData.campuses = data.data.campuses || [];
 
       renderProgramFilters();
@@ -209,7 +207,7 @@
     const ug = courses.filter(c => (c.program_type || '').toLowerCase() === 'undergraduate').length;
     const pg = courses.filter(c => (c.program_type || '').toLowerCase() === 'postgraduate').length;
     const doc = courses.filter(c => ['doctoral', 'executive', 'certificate', 'other'].includes((c.program_type || '').toLowerCase())).length;
-    const orphan = courses.filter(c => !c.department_id || !c.department_name).length;
+    const openCount = courses.filter(c => parseInt(c.is_admissions_open, 10) === 1).length;
 
     // Update KPI Ribbon
     const elTot = document.getElementById('statTotalPrograms');
@@ -220,8 +218,8 @@
     if (elPG) elPG.textContent = pg;
     const elDoc = document.getElementById('statDocPrograms');
     if (elDoc) elDoc.textContent = doc;
-    const elOrphan = document.getElementById('statOrphanPrograms');
-    if (elOrphan) elOrphan.textContent = orphan;
+    const elOpen = document.getElementById('statOpenPrograms');
+    if (elOpen) elOpen.textContent = openCount;
 
     // Update Pill
     const elPill = document.getElementById('programsActivePillCount');
@@ -236,45 +234,39 @@
     if (tPG) tPG.textContent = pg;
     const tDoc = document.getElementById('progTabCountDoc');
     if (tDoc) tDoc.textContent = doc;
-    const tOrphan = document.getElementById('progTabCountOrphan');
-    if (tOrphan) tOrphan.textContent = orphan;
 
-
-    // Populate Campus Filter Select
-    const campusSelect = document.getElementById('progCampusFilter');
-    if (campusSelect) {
-      const curVal = campusSelect.value;
-      let html = '<option value="all">All Campuses</option>';
+    // Campuses dropdown
+    const selCampus = document.getElementById('progCampusFilter');
+    if (selCampus && d.campuses.length > 0) {
+      let optHtml = '<option value="all">Campus: All Delivery Sites</option>';
       d.campuses.forEach(cmp => {
-        html += `<option value="${cmp.id}">${escapeHtml(cmp.name)}${cmp.is_primary ? ' (Main)' : ''}</option>`;
+        optHtml += `<option value="${cmp.id}">${escapeHtml(cmp.name)}</option>`;
       });
-      campusSelect.innerHTML = html;
-      if (curVal) campusSelect.value = curVal;
+      selCampus.innerHTML = optHtml;
     }
-
   }
 
   window.setProgramFilterType = function(type, el) {
     window._academicProgramsData.currentTypeFilter = type;
-    document.querySelectorAll('#programsTabsContainer .ckh-tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.ckh-kpi-ribbon .ckh-kpi-tile').forEach(tile => tile.classList.remove('active-kpi'));
 
-    if (type === 'all') {
-      document.getElementById('progTabBtnAll')?.classList.add('active');
-      document.getElementById('progKpiTileAll')?.classList.add('active-kpi');
-    } else if (type === 'undergraduate') {
-      document.getElementById('progTabBtnUG')?.classList.add('active');
-      document.getElementById('progKpiTileUG')?.classList.add('active-kpi');
-    } else if (type === 'postgraduate') {
-      document.getElementById('progTabBtnPG')?.classList.add('active');
-      document.getElementById('progKpiTilePG')?.classList.add('active-kpi');
-    } else if (type === 'doctoral') {
-      document.getElementById('progTabBtnDoc')?.classList.add('active');
-      document.getElementById('progKpiTileDoc')?.classList.add('active-kpi');
-    } else if (type === 'orphan') {
-      document.getElementById('progTabBtnOrphan')?.classList.add('active');
-      document.getElementById('progKpiTileOrphan')?.classList.add('active-kpi');
-    }
+    // Update tab bar active class
+    document.querySelectorAll('#programsTabsContainer .ckh-tab-btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    if (type === 'all') document.getElementById('progTabBtnAll')?.classList.add('active');
+    else if (type === 'undergraduate') document.getElementById('progTabBtnUG')?.classList.add('active');
+    else if (type === 'postgraduate') document.getElementById('progTabBtnPG')?.classList.add('active');
+    else if (type === 'doctoral') document.getElementById('progTabBtnDoc')?.classList.add('active');
+
+    // Update KPI Ribbon active class
+    document.querySelectorAll('.ckh-kpi-tile').forEach(tile => {
+      tile.classList.remove('active-kpi');
+    });
+    if (type === 'all') document.getElementById('progKpiTileAll')?.classList.add('active-kpi');
+    else if (type === 'undergraduate') document.getElementById('progKpiTileUG')?.classList.add('active-kpi');
+    else if (type === 'postgraduate') document.getElementById('progKpiTilePG')?.classList.add('active-kpi');
+    else if (type === 'doctoral') document.getElementById('progKpiTileDoc')?.classList.add('active-kpi');
+    else if (type === 'open') document.getElementById('progKpiTileOpen')?.classList.add('active-kpi');
 
     renderProgramsTable();
   };
@@ -295,12 +287,11 @@
     const filtered = d.courses.filter(course => {
       // Program Level filter
       const pType = (course.program_type || '').toLowerCase();
-      const isOrphan = !course.department_id || !course.department_name;
 
       if (typeFilter === 'undergraduate' && pType !== 'undergraduate') return false;
       if (typeFilter === 'postgraduate' && pType !== 'postgraduate') return false;
       if (typeFilter === 'doctoral' && !['doctoral', 'executive', 'certificate', 'other'].includes(pType)) return false;
-      if (typeFilter === 'orphan' && !isOrphan) return false;
+      if (typeFilter === 'open' && parseInt(course.is_admissions_open, 10) !== 1) return false;
 
       // Campus filter
       if (campusFilter !== 'all') {
@@ -313,7 +304,6 @@
         const text = [
           course.course_name,
           course.course_code,
-          course.department_name,
           course.duration,
           course.program_type
         ].filter(Boolean).join(' ').toLowerCase();

@@ -37,11 +37,10 @@ class OnboardingController
 
         // 2. Fetch Programs & Courses
         $stmtProg = $db->prepare("
-            SELECT dc.*, dc.course_name AS name 
-            FROM department_courses dc 
-            JOIN departments d ON d.id = dc.department_id 
-            WHERE d.organization_id = :org_id 
-            ORDER BY dc.id ASC
+            SELECT p.*, p.name AS name, p.name AS course_name 
+            FROM programs p 
+            WHERE p.organization_id = :org_id 
+            ORDER BY p.id ASC
         ");
         $stmtProg->execute([':org_id' => $orgId]);
         $programs = $stmtProg->fetchAll();
@@ -217,29 +216,22 @@ class OnboardingController
 
                 case 4: // Programs
                     if (!empty($stepData['programs']) && is_array($stepData['programs'])) {
-                        // Ensure there is at least one active department for this org
-                        $stmtDept = $db->prepare("SELECT id FROM departments WHERE organization_id = :oid AND is_active = 1 ORDER BY id ASC LIMIT 1");
-                        $stmtDept->execute([':oid' => $orgId]);
-                        $deptId = $stmtDept->fetchColumn();
-                        if (!$deptId) {
-                            $db->prepare("INSERT INTO departments (organization_id, name, slug, icon, is_active, created_at, updated_at) VALUES (:oid, 'Academic Programs & Degrees', 'academics', '🎓', 1, NOW(), NOW())")
-                               ->execute([':oid' => $orgId]);
-                            $deptId = (int)$db->lastInsertId();
-                        }
-
                         $stmtProg = $db->prepare("
-                            INSERT INTO department_courses (
-                                department_id, course_name, program_type, duration, mode, is_admissions_open, created_at, updated_at
+                            INSERT INTO programs (
+                                organization_id, name, slug, program_type, duration, mode, is_admissions_open, created_at, updated_at
                             ) VALUES (
-                                :dept_id, :name, :type, :duration, :mode, :is_open, NOW(), NOW()
+                                :oid, :name, :slug, :type, :duration, :mode, :is_open, NOW(), NOW()
                             )
                         ");
 
                         foreach ($stepData['programs'] as $p) {
                             if (empty($p['name'])) continue;
+                            $name = trim($p['name']);
+                            $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $name), '-')) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
                             $stmtProg->execute([
-                                ':dept_id' => $deptId,
-                                ':name' => trim($p['name']),
+                                ':oid' => $orgId,
+                                ':name' => $name,
+                                ':slug' => $slug,
                                 ':type' => $p['program_type'] ?? 'undergraduate',
                                 ':duration' => $p['duration'] ?? '2 years',
                                 ':mode' => $p['mode'] ?? 'full_time',
@@ -273,13 +265,13 @@ class OnboardingController
                         foreach ($stepData['programs'] as $p) {
                             if (!empty($p['id'])) {
                                 $stmtUpdProg = $db->prepare("
-                                    UPDATE department_courses 
+                                    UPDATE programs 
                                     SET eligibility = :eligibility,
                                         application_deadline = :deadline,
                                         application_fee = :app_fee,
                                         application_url = :app_url,
                                         updated_at = NOW()
-                                    WHERE id = :id
+                                    WHERE id = :id AND organization_id = :oid
                                 ");
                                 $stmtUpdProg->execute([
                                     ':eligibility' => $p['eligibility'] ?? null,
@@ -287,6 +279,7 @@ class OnboardingController
                                     ':app_fee' => $p['application_fee'] ?? null,
                                     ':app_url' => $p['application_url'] ?? null,
                                     ':id' => $p['id'],
+                                    ':oid' => $orgId
                                 ]);
                             }
                         }
@@ -306,13 +299,13 @@ class OnboardingController
                                 $total = $tuition !== null ? ($tuition + $reg + $other) : (isset($p['total_fee']) ? (float)$p['total_fee'] : null);
 
                                 $stmtUpdFee = $db->prepare("
-                                    UPDATE department_courses 
+                                    UPDATE programs 
                                     SET tuition_fee = :tuition,
                                         registration_fee = :reg,
                                         other_fees = :other,
                                         total_fee = :total,
                                         updated_at = NOW()
-                                    WHERE id = :id
+                                    WHERE id = :id AND organization_id = :oid
                                 ");
                                 $stmtUpdFee->execute([
                                     ':tuition' => $tuition,
@@ -320,6 +313,7 @@ class OnboardingController
                                     ':other' => $other,
                                     ':total' => $total,
                                     ':id' => $p['id'],
+                                    ':oid' => $orgId
                                 ]);
 
                                 // Also sync to course_scholarships table
@@ -492,10 +486,9 @@ class OnboardingController
             $updatedOrg = $stmtOrg->fetch();
 
             $stmtProg = $db->prepare("
-                SELECT dc.*, dc.course_name AS name 
-                FROM department_courses dc 
-                JOIN departments d ON d.id = dc.department_id 
-                WHERE d.organization_id = :org_id
+                SELECT p.*, p.name AS name, p.name AS course_name 
+                FROM programs p 
+                WHERE p.organization_id = :org_id
             ");
             $stmtProg->execute([':org_id' => $orgId]);
             $updatedPrograms = $stmtProg->fetchAll();
@@ -729,10 +722,9 @@ class OnboardingController
         $org = $stmtOrg->fetch();
 
         $stmtProg = $db->prepare("
-            SELECT dc.*, dc.course_name AS name 
-            FROM department_courses dc 
-            JOIN departments d ON d.id = dc.department_id 
-            WHERE d.organization_id = :org_id
+            SELECT p.*, p.name AS name, p.name AS course_name 
+            FROM programs p 
+            WHERE p.organization_id = :org_id
         ");
         $stmtProg->execute([':org_id' => $orgId]);
         $programs = $stmtProg->fetchAll();

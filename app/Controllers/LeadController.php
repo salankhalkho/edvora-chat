@@ -22,7 +22,6 @@ class LeadController
         $phone = trim((string)$request->get('phone'));
         $programInterest = trim((string)$request->get('program_interest'));
         $conversationId = (int)$request->get('conversation_id');
-        $departmentId = $request->get('department_id') ? (int)$request->get('department_id') : null;
         $leadType = trim((string)($request->get('lead_type') ?: 'general'));
         $academicScore = trim((string)$request->get('academic_score'));
         $scholarshipTier = trim((string)$request->get('scholarship_tier'));
@@ -49,80 +48,40 @@ class LeadController
 
         // Determine conversation_id from visitor_id if not passed directly
         if (!$conversationId && !empty($request->get('visitor_id'))) {
-            $stmtConvVid = $db->prepare("SELECT id, department_id FROM conversations WHERE organization_id = :oid AND visitor_id = :vid ORDER BY id DESC LIMIT 1");
+            $stmtConvVid = $db->prepare("SELECT id FROM conversations WHERE organization_id = :oid AND visitor_id = :vid ORDER BY id DESC LIMIT 1");
             $stmtConvVid->execute([':oid' => $orgId, ':vid' => trim((string)$request->get('visitor_id'))]);
             $convRowVid = $stmtConvVid->fetch();
             if ($convRowVid) {
                 $conversationId = (int)$convRowVid['id'];
-                if (!$departmentId && !empty($convRowVid['department_id'])) {
-                    $departmentId = (int)$convRowVid['department_id'];
-                }
             }
         }
 
-        // Determine department_id from conversation if not passed
-        if (!$departmentId && $conversationId > 0) {
-            $stmtConvDept = $db->prepare("SELECT department_id FROM conversations WHERE id = :cid AND organization_id = :oid");
-            $stmtConvDept->execute([':cid' => $conversationId, ':oid' => $orgId]);
-            $convRow = $stmtConvDept->fetch();
-            if ($convRow && !empty($convRow['department_id'])) {
-                $departmentId = (int)$convRow['department_id'];
-            }
-        }
-
-        // Auto-assign lead to department staff member based on department rules
+        // Auto-assign lead to active counselor in organization
         $assignedUserId = null;
-        if ($departmentId) {
-            $stmtDeptRules = $db->prepare("SELECT lead_assignment_rules FROM departments WHERE id = :did AND organization_id = :oid");
-            $stmtDeptRules->execute([':did' => $departmentId, ':oid' => $orgId]);
-            $deptRow = $stmtDeptRules->fetch();
-            $assignmentRules = $deptRow ? json_decode($deptRow['lead_assignment_rules'] ?? '{}', true) : [];
-            $method = $assignmentRules['method'] ?? 'round_robin';
-
-            if ($method === 'direct') {
-                // Direct lead: prioritize staff member with role 'lead'
-                $stmtLeadStaff = $db->prepare("
-                    SELECT ds.user_id
-                    FROM department_staff ds
-                    WHERE ds.department_id = :did AND ds.is_on_duty = 1 AND ds.role = 'lead'
-                    LIMIT 1
-                ");
-                $stmtLeadStaff->execute([':did' => $departmentId]);
-                $leadStaff = $stmtLeadStaff->fetch();
-                if ($leadStaff) {
-                    $assignedUserId = (int)$leadStaff['user_id'];
-                }
-            }
-
-            if (!$assignedUserId) {
-                // Round-robin distribution across on-duty staff
-                $stmtRr = $db->prepare("
-                    SELECT ds.user_id
-                    FROM department_staff ds
-                    LEFT JOIN leads l ON l.assigned_user_id = ds.user_id AND l.department_id = :did
-                    WHERE ds.department_id = :did AND ds.is_on_duty = 1
-                    GROUP BY ds.user_id
-                    ORDER BY COUNT(l.id) ASC, ds.id ASC
-                    LIMIT 1
-                ");
-                $stmtRr->execute([':did' => $departmentId]);
-                $rrStaff = $stmtRr->fetch();
-                if ($rrStaff) {
-                    $assignedUserId = (int)$rrStaff['user_id'];
-                }
-            }
+        $stmtRr = $db->prepare("
+            SELECT u.id
+            FROM users u
+            LEFT JOIN leads l ON l.assigned_user_id = u.id
+            WHERE u.organization_id = :oid AND u.role IN ('counselor', 'agent', 'admin', 'owner')
+            GROUP BY u.id
+            ORDER BY COUNT(l.id) ASC, u.id ASC
+            LIMIT 1
+        ");
+        $stmtRr->execute([':oid' => $orgId]);
+        $rrStaff = $stmtRr->fetch();
+        if ($rrStaff) {
+            $assignedUserId = (int)$rrStaff['id'];
         }
 
         $stmtLead = $db->prepare("
-            INSERT INTO leads (organization_id, chatbot_id, lead_type, conversation_id, department_id, assigned_user_id, name, email, phone, program_interest, academic_score, scholarship_tier, estimated_waiver_amount, evaluation_payload, status, created_at, updated_at)
-            VALUES (:org_id, :bot_id, :lead_type, :conv_id, :dept_id, :assigned_user_id, :name, :email, :phone, :program, :score, :tier, :waiver, :eval, 'new', NOW(), NOW())
+            INSERT INTO leads (organization_id, chatbot_id, lead_type, conversation_id, assigned_user_id, name, email, phone, program_interest, academic_score, scholarship_tier, estimated_waiver_amount, evaluation_payload, status, created_at, updated_at)
+            VALUES (:org_id, :bot_id, :lead_type, :conv_id, :assigned_user_id, :name, :email, :phone, :program, :score, :tier, :waiver, :eval, 'new', NOW(), NOW())
         ");
         $stmtLead->execute([
             ':org_id' => $orgId,
             ':bot_id' => $botId,
             ':lead_type' => $leadType,
             ':conv_id' => $conversationId ?: null,
-            ':dept_id' => $departmentId ?: null,
             ':assigned_user_id' => $assignedUserId ?: null,
             ':name' => $name,
             ':email' => $email,
@@ -163,7 +122,7 @@ class LeadController
             ON DUPLICATE KEY UPDATE leads_captured = leads_captured + 1
         ");
 
-        AuditLogger::log('lead_captured', 'lead', $leadId, ['name' => $name, 'email' => $email, 'assigned_user_id' => $assignedUserId, 'department_id' => $departmentId]);
+        AuditLogger::log('lead_captured', 'lead', $leadId, ['name' => $name, 'email' => $email, 'assigned_user_id' => $assignedUserId]);
 
         // Send instant lead notification email
         $recipientEmail = null;
@@ -200,7 +159,6 @@ class LeadController
 
         Response::success([
             'id' => $leadId,
-            'department_id' => $departmentId,
             'assigned_user_id' => $assignedUserId,
             'status' => 'new'
         ], 'Lead captured successfully', 201);
@@ -280,13 +238,10 @@ class LeadController
             SELECT l.*, 
                    c.visitor_id, 
                    c.started_at as chat_started_at,
-                   d.name as department_name,
-                   d.icon as department_icon,
                    u.name as assigned_user_name,
                    u.email as assigned_user_email
             FROM leads l
             LEFT JOIN conversations c ON l.conversation_id = c.id
-            LEFT JOIN departments d ON l.department_id = d.id
             LEFT JOIN users u ON l.assigned_user_id = u.id
             WHERE l.organization_id = :org_id {$filter['sql']}
             ORDER BY l.id DESC
@@ -372,12 +327,9 @@ class LeadController
         $db = Database::getConnection();
         $stmt = $db->prepare("
             SELECT l.*,
-                   d.name as department_name,
-                   d.icon as department_icon,
                    u.name as assigned_user_name,
                    u.email as assigned_user_email
             FROM leads l
-            LEFT JOIN departments d ON l.department_id = d.id
             LEFT JOIN users u ON l.assigned_user_id = u.id
             WHERE l.id = :id AND l.organization_id = :org_id
         ");
@@ -442,14 +394,12 @@ class LeadController
         $status = in_array($data['status'] ?? '', ['new', 'contacted', 'converted']) ? $data['status'] : 'new';
         $notes = $data['notes'] ?? null;
         $assignedUserId = isset($data['assigned_user_id']) ? ($data['assigned_user_id'] ? (int)$data['assigned_user_id'] : null) : null;
-        $departmentId = isset($data['department_id']) ? ($data['department_id'] ? (int)$data['department_id'] : null) : null;
 
         $stmtUpdate = $db->prepare("
             UPDATE leads
             SET status = :status, 
                 notes = :notes, 
                 assigned_user_id = :assigned_user_id,
-                department_id = :department_id,
                 updated_at = NOW()
             WHERE id = :id AND organization_id = :org_id
         ");
@@ -457,19 +407,17 @@ class LeadController
             ':status' => $status,
             ':notes' => $notes,
             ':assigned_user_id' => $assignedUserId,
-            ':department_id' => $departmentId,
             ':id' => $id,
             ':org_id' => $orgId
         ]);
 
-        AuditLogger::log('lead_updated', 'lead', $id, ['status' => $status, 'assigned_user_id' => $assignedUserId, 'department_id' => $departmentId]);
+        AuditLogger::log('lead_updated', 'lead', $id, ['status' => $status, 'assigned_user_id' => $assignedUserId]);
 
         Response::success([
             'id' => $id,
             'status' => $status,
             'notes' => $notes,
-            'assigned_user_id' => $assignedUserId,
-            'department_id' => $departmentId
+            'assigned_user_id' => $assignedUserId
         ], 'Lead updated successfully');
     }
 
@@ -520,11 +468,9 @@ class LeadController
 
         $query = "
             SELECT l.id, l.name, l.email, l.phone, l.lead_type,
-                   d.name as department_name,
                    u.name as assigned_user_name,
                    l.program_interest, l.status, l.notes, l.created_at
             FROM leads l
-            LEFT JOIN departments d ON l.department_id = d.id
             LEFT JOIN users u ON l.assigned_user_id = u.id
             WHERE l.organization_id = :org_id {$filter['sql']}
             ORDER BY l.id DESC
@@ -558,7 +504,6 @@ class LeadController
                     'email' => $row['email'],
                     'phone' => $row['phone'],
                     'lead_type' => $row['lead_type'] ?: 'general',
-                    'department' => $row['department_name'] ?: 'General',
                     'assigned_to' => $row['assigned_user_name'] ?: 'Unassigned',
                     'program_interest' => $row['program_interest'],
                     'status' => $row['status'],
@@ -582,7 +527,7 @@ class LeadController
         header('Content-Disposition: attachment; filename=edvora_leads_' . date('Y-m-d') . '.csv');
 
         $output = fopen('php://output', 'w');
-        fputcsv($output, ['Name', 'Email', 'Phone', 'Lead Type', 'Department', 'Assigned To', 'Program Interest', 'Status', 'Counselor Notes', 'Date & Time Captured (IST)']);
+        fputcsv($output, ['Name', 'Email', 'Phone', 'Lead Type', 'Assigned To', 'Program Interest', 'Status', 'Counselor Notes', 'Date & Time Captured (IST)']);
 
         foreach ($leads as $row) {
             $formattedDate = 'N/A';
@@ -603,7 +548,6 @@ class LeadController
                 $row['email'] ?: 'N/A',
                 $row['phone'] ?: 'N/A',
                 $typeLabel,
-                $row['department_name'] ?: 'General',
                 $row['assigned_user_name'] ?: 'Unassigned',
                 $row['program_interest'] ?: 'N/A',
                 strtoupper($row['status']),

@@ -63,18 +63,10 @@ class AnalyticsController
             $totalKnowledgeSources = $activeKnowledgeSources;
         }
 
-        // 5. Active Departments Count & Preview
-        $stmtDepts = $db->prepare("SELECT COUNT(*) FROM departments WHERE organization_id = :org_id AND is_active = 1");
-        $stmtDepts->execute([':org_id' => $orgId]);
-        $totalDepartments = (int)$stmtDepts->fetchColumn();
-
-        $stmtDeptAll = $db->prepare("SELECT COUNT(*) FROM departments WHERE organization_id = :org_id");
-        $stmtDeptAll->execute([':org_id' => $orgId]);
-        $allDepartments = (int)$stmtDeptAll->fetchColumn();
-
-        $stmtDeptPreview = $db->prepare("SELECT id, name, slug, icon FROM departments WHERE organization_id = :org_id AND is_active = 1 ORDER BY id ASC LIMIT 4");
-        $stmtDeptPreview->execute([':org_id' => $orgId]);
-        $departmentPreview = $stmtDeptPreview->fetchAll() ?: [];
+        // 5. Active Departments (Deprecated) - Default to empty
+        $totalDepartments = 0;
+        $allDepartments = 0;
+        $departmentPreview = [];
 
         // 5b. Academic Programs Breakdown & Counts from `programs` table
         $totalCourses = 0;
@@ -386,7 +378,7 @@ class AnalyticsController
         $maxKnowledge = isset($rawQuotas['max_knowledge_sources']) ? (int)$rawQuotas['max_knowledge_sources'] : 20;
         $maxChatbots = isset($rawQuotas['max_chatbots']) ? (int)$rawQuotas['max_chatbots'] : 1;
         $maxStaff = isset($rawQuotas['max_staff_users']) ? (int)$rawQuotas['max_staff_users'] : 1;
-        $maxDepts = isset($rawQuotas['max_departments']) ? (int)$rawQuotas['max_departments'] : ($subPlan['plan_name'] === 'Starter' ? 5 : ($subPlan['plan_name'] === 'Growth' ? 15 : -1));
+        $maxDepts = -1;
 
         $calcQuota = function($used, $limit) {
             if ($limit === -1) {

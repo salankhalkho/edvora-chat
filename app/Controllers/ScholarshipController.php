@@ -54,25 +54,12 @@ class ScholarshipController
                 ? array_merge($defaultOrgConfig, json_decode($org['scholarship_config'], true) ?: [])
                 : $defaultOrgConfig;
 
-            // Fetch Departments with their specific overrides
-            $stmtDepts = $db->prepare("
-                SELECT id, name, slug, icon, scholarship_config
-                FROM departments
-                WHERE organization_id = ? AND is_active = 1
-                ORDER BY name ASC
-            ");
-            $stmtDepts->execute([$orgId]);
-            $depts = $stmtDepts->fetchAll();
-
-            foreach ($depts as &$d) {
-                $d['scholarship_config'] = !empty($d['scholarship_config']) ? json_decode($d['scholarship_config'], true) : ['mode' => 'inherit'];
-            }
+            $depts = [];
 
             // Fetch all course scholarships
             $stmtCourses = $db->prepare("
-                SELECT cs.*, d.name as department_name, d.icon as department_icon
+                SELECT cs.*
                 FROM course_scholarships cs
-                LEFT JOIN departments d ON cs.department_id = d.id
                 WHERE cs.organization_id = ?
                 ORDER BY cs.degree_level ASC, cs.course_name ASC
             ");
@@ -108,25 +95,13 @@ class ScholarshipController
         $db = Database::getConnection();
 
         try {
-            if (isset($data['department_id']) && $data['department_id'] > 0) {
-                // Update Department override
-                $deptId = (int)$data['department_id'];
-                $deptConfig = $data['config'] ?? ['mode' => 'inherit'];
+            // Update Org global config
+            $orgConfig = $data['config'] ?? $data;
+            $stmt = $db->prepare("UPDATE organizations SET scholarship_config = ? WHERE id = ?");
+            $stmt->execute([json_encode($orgConfig), $orgId]);
 
-                $stmt = $db->prepare("UPDATE departments SET scholarship_config = ? WHERE id = ? AND organization_id = ?");
-                $stmt->execute([json_encode($deptConfig), $deptId, $orgId]);
-
-                AuditLogger::log('department_scholarship_updated', 'department', $deptId, $deptConfig);
-                Response::success(['department_id' => $deptId, 'config' => $deptConfig], 'Department scholarship settings updated.');
-            } else {
-                // Update Org global config
-                $orgConfig = $data['config'] ?? $data;
-                $stmt = $db->prepare("UPDATE organizations SET scholarship_config = ? WHERE id = ?");
-                $stmt->execute([json_encode($orgConfig), $orgId]);
-
-                AuditLogger::log('organization_scholarship_updated', 'organization', $orgId, $orgConfig);
-                Response::success(['config' => $orgConfig], 'Organization scholarship settings updated.');
-            }
+            AuditLogger::log('organization_scholarship_updated', 'organization', $orgId, $orgConfig);
+            Response::success(['config' => $orgConfig], 'Organization scholarship settings updated.');
         } catch (Throwable $e) {
             Response::error('Failed to update scholarship settings: ' . $e->getMessage(), 500);
         }
@@ -156,7 +131,6 @@ class ScholarshipController
 
         $courseName = trim($data['course_name']);
         $courseCode = trim($data['course_code'] ?? '');
-        $deptId = !empty($data['department_id']) ? (int)$data['department_id'] : null;
         $degreeLevel = in_array($data['degree_level'] ?? '', ['undergraduate', 'postgraduate', 'diploma', 'doctorate', 'certificate']) ? $data['degree_level'] : 'undergraduate';
         $hasScholarship = isset($data['has_scholarship']) ? (int)(bool)$data['has_scholarship'] : 1;
         $noScholarshipReason = trim($data['no_scholarship_reason'] ?? '');
@@ -192,8 +166,7 @@ class ScholarshipController
                 // Update
                 $stmt = $db->prepare("
                     UPDATE course_scholarships
-                    SET department_id = :dept_id,
-                        course_name = :name,
+                    SET course_name = :name,
                         course_code = :code,
                         degree_level = :deg,
                         has_scholarship = :has_sch,
@@ -208,7 +181,6 @@ class ScholarshipController
                     WHERE id = :id AND organization_id = :org_id
                 ");
                 $stmt->execute([
-                    ':dept_id' => $deptId,
                     ':name' => $courseName,
                     ':code' => $courseCode,
                     ':deg' => $degreeLevel,
@@ -230,13 +202,12 @@ class ScholarshipController
                 // Insert
                 $stmt = $db->prepare("
                     INSERT INTO course_scholarships
-                    (organization_id, department_id, course_name, course_code, degree_level, has_scholarship, no_scholarship_reason, evaluation_metric, exam_name, slabs, annual_tuition_fee, currency, is_active, created_at, updated_at)
+                    (organization_id, course_name, course_code, degree_level, has_scholarship, no_scholarship_reason, evaluation_metric, exam_name, slabs, annual_tuition_fee, currency, is_active, created_at, updated_at)
                     VALUES
-                    (:org_id, :dept_id, :name, :code, :deg, :has_sch, :no_reason, :metric, :exam, :slabs, :fee, :curr, :active, NOW(), NOW())
+                    (:org_id, :name, :code, :deg, :has_sch, :no_reason, :metric, :exam, :slabs, :fee, :curr, :active, NOW(), NOW())
                 ");
                 $stmt->execute([
                     ':org_id' => $orgId,
-                    ':dept_id' => $deptId,
                     ':name' => $courseName,
                     ':code' => $courseCode,
                     ':deg' => $degreeLevel,
@@ -328,41 +299,16 @@ class ScholarshipController
             return;
         }
 
-        // Check Dept setting if scoped
-        if ($deptId) {
-            $stmtDept = $db->prepare("SELECT scholarship_config FROM departments WHERE id = ? AND organization_id = ?");
-            $stmtDept->execute([$deptId, $orgId]);
-            $deptRow = $stmtDept->fetch();
-            $deptConfig = $deptRow && !empty($deptRow['scholarship_config']) ? json_decode($deptRow['scholarship_config'], true) : ['mode' => 'inherit'];
-            if (($deptConfig['mode'] ?? 'inherit') === 'disabled') {
-                Response::success([
-                    'scholarships_enabled' => false,
-                    'courses' => [],
-                    'boosters' => []
-                ]);
-                return;
-            }
-        }
-
         // Query active courses
         $sql = "
             SELECT cs.id, cs.course_name, cs.course_code, cs.degree_level, cs.has_scholarship,
-                   cs.no_scholarship_reason, cs.evaluation_metric, cs.exam_name, cs.annual_tuition_fee, cs.currency,
-                   d.name as department_name, d.icon as department_icon
+                   cs.no_scholarship_reason, cs.evaluation_metric, cs.exam_name, cs.annual_tuition_fee, cs.currency
             FROM course_scholarships cs
-            LEFT JOIN departments d ON cs.department_id = d.id
             WHERE cs.organization_id = :org_id AND cs.is_active = 1
+            ORDER BY cs.degree_level ASC, cs.course_name ASC
         ";
-        $params = [':org_id' => $orgId];
-
-        if ($deptId) {
-            $sql .= " AND (cs.department_id = :dept_id OR cs.department_id IS NULL)";
-            $params[':dept_id'] = $deptId;
-        }
-
-        $sql .= " ORDER BY cs.degree_level ASC, cs.course_name ASC";
         $stmtCourses = $db->prepare($sql);
-        $stmtCourses->execute($params);
+        $stmtCourses->execute([':org_id' => $orgId]);
         $courses = $stmtCourses->fetchAll();
 
         // Boosters config

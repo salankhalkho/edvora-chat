@@ -29,14 +29,10 @@ class KnowledgeController
                    ks.type, ks.title, ks.category, ks.academic_version,
                    ks.effective_from, ks.expires_on, ks.last_reviewed_at, ks.review_frequency_days,
                    ks.previous_version_id, ks.replaced_by_id, ks.lead_magnet,
-                   ks.source_url, ks.file_path, ks.status, ks.keywords, ks.last_fetched_at, ks.created_at, ks.updated_at,
-                   GROUP_CONCAT(CONCAT(d.id, ':::', d.name, ':::', IFNULL(d.icon, '🏫')) SEPARATOR '|||') as departments_raw
+                   ks.source_url, ks.file_path, ks.status, ks.keywords, ks.last_fetched_at, ks.created_at, ks.updated_at
             FROM knowledge_sources ks
             LEFT JOIN programs p ON ks.program_id = p.id
-            LEFT JOIN department_knowledge dk ON ks.id = dk.knowledge_source_id
-            LEFT JOIN departments d ON dk.department_id = d.id
             WHERE ks.organization_id = :org_id
-            GROUP BY ks.id
             ORDER BY ks.id DESC
         ");
         $stmt->execute([':org_id' => $orgId]);
@@ -47,23 +43,8 @@ class KnowledgeController
 
         $formatted = [];
         foreach ($sources as $s) {
-            $depts = [];
-            if (!empty($s['departments_raw'])) {
-                $rawList = explode('|||', $s['departments_raw']);
-                foreach ($rawList as $raw) {
-                    $parts = explode(':::', $raw);
-                    if (count($parts) >= 3) {
-                        $depts[] = [
-                            'id' => (int)$parts[0],
-                            'name' => $parts[1],
-                            'icon' => $parts[2]
-                        ];
-                    }
-                }
-            }
-            unset($s['departments_raw']);
-            $s['departments'] = $depts;
-            $s['is_global'] = empty($depts);
+            $s['departments'] = [];
+            $s['is_global'] = true;
             $s['category'] = !empty($s['category']) ? $s['category'] : 'General / Institutional';
 
             // Health and validity metrics
@@ -251,16 +232,9 @@ class KnowledgeController
         }
 
         // Fetch attached departments
-        $deptStmt = $db->prepare("
-            SELECT d.id, d.name, IFNULL(d.icon, '🏫') as icon
-            FROM departments d
-            INNER JOIN department_knowledge dk ON d.id = dk.department_id
-            WHERE dk.knowledge_source_id = :ks_id AND d.organization_id = :org_id
-        ");
-        $deptStmt->execute([':ks_id' => $id, ':org_id' => $orgId]);
-        $source['departments'] = $deptStmt->fetchAll();
-        $source['department_ids'] = array_map(fn($d) => (int)$d['id'], $source['departments']);
-        $source['is_global'] = empty($source['departments']);
+        $source['departments'] = [];
+        $source['department_ids'] = [];
+        $source['is_global'] = true;
 
         $today = date('Y-m-d');
         $todayTime = strtotime($today);
@@ -398,21 +372,7 @@ class KnowledgeController
         $updateStmt = $db->prepare($sql);
         $updateStmt->execute($params);
 
-        // Update department linkages if provided
-        if (isset($body['departments']) && is_array($body['departments'])) {
-            $delStmt = $db->prepare("DELETE FROM department_knowledge WHERE knowledge_source_id = :ks_id");
-            $delStmt->execute([':ks_id' => $id]);
 
-            if (!empty($body['departments'])) {
-                $insDept = $db->prepare("INSERT IGNORE INTO department_knowledge (department_id, knowledge_source_id) VALUES (:dept_id, :ks_id)");
-                foreach ($body['departments'] as $deptId) {
-                    $deptId = (int)$deptId;
-                    if ($deptId > 0) {
-                        $insDept->execute([':dept_id' => $deptId, ':ks_id' => $id]);
-                    }
-                }
-            }
-        }
 
         AuditLogger::log('knowledge_source_updated', 'knowledge_source', $id, ['title' => $title, 'status' => $status]);
 
@@ -472,13 +432,6 @@ class KnowledgeController
             ':keywords' => $compacted['keywords']
         ]);
         $id = (int)$db->lastInsertId();
-
-        // Auto-link to department if department_id was passed
-        $deptId = $data['department_id'] ?? $request->get('department_id') ?? $_POST['department_id'] ?? null;
-        if (!empty($deptId)) {
-            $stmtDeptKs = $db->prepare("INSERT IGNORE INTO department_knowledge (department_id, knowledge_source_id) VALUES (?, ?)");
-            $stmtDeptKs->execute([(int)$deptId, $id]);
-        }
 
         // Dispatch async job to enrich semantic_keywords via LLM
         $db->prepare("INSERT INTO jobs (type, payload, status, run_at, created_at) VALUES ('enrich_keywords', :payload, 'pending', NOW(), NOW())")
@@ -553,12 +506,6 @@ class KnowledgeController
                 ':hash' => $scraped['content_hash']
             ]);
             $id = (int)$db->lastInsertId();
-
-            $deptId = $request->get('department_id') ?? $_POST['department_id'] ?? null;
-            if (!empty($deptId)) {
-                $stmtDeptKs = $db->prepare("INSERT IGNORE INTO department_knowledge (department_id, knowledge_source_id) VALUES (?, ?)");
-                $stmtDeptKs->execute([(int)$deptId, $id]);
-            }
 
             $db->prepare("INSERT INTO jobs (type, payload, status, run_at, created_at) VALUES ('enrich_keywords', :payload, 'pending', NOW(), NOW())")
                ->execute([':payload' => json_encode(['knowledge_source_id' => $id])]);
@@ -655,12 +602,6 @@ class KnowledgeController
                 ':file_path' => 'storage/uploads/' . $savedFilename
             ]);
             $id = (int)$db->lastInsertId();
-
-            $deptId = $request->get('department_id') ?? $_POST['department_id'] ?? null;
-            if (!empty($deptId)) {
-                $stmtDeptKs = $db->prepare("INSERT IGNORE INTO department_knowledge (department_id, knowledge_source_id) VALUES (?, ?)");
-                $stmtDeptKs->execute([(int)$deptId, $id]);
-            }
 
             $db->prepare("INSERT INTO jobs (type, payload, status, run_at, created_at) VALUES ('enrich_keywords', :payload, 'pending', NOW(), NOW())")
                ->execute([':payload' => json_encode(['knowledge_source_id' => $id])]);
@@ -800,14 +741,7 @@ class KnowledgeController
             ");
             $stmtArchive->execute([':new_id' => $newId, ':old_id' => $oldId]);
 
-            // 3. Copy department links from old source to new source
-            $stmtCopyDepts = $db->prepare("
-                INSERT IGNORE INTO department_knowledge (department_id, knowledge_source_id)
-                SELECT department_id, :new_id FROM department_knowledge WHERE knowledge_source_id = :old_id
-            ");
-            $stmtCopyDepts->execute([':new_id' => $newId, ':old_id' => $oldId]);
-
-            // 4. Dispatch async enrichment job for new version
+            // 3. Dispatch async enrichment job for new version
             $db->prepare("INSERT INTO jobs (type, payload, status, run_at, created_at) VALUES ('enrich_keywords', :payload, 'pending', NOW(), NOW())")
                ->execute([':payload' => json_encode(['knowledge_source_id' => $newId])]);
 
@@ -940,21 +874,10 @@ class KnowledgeController
             Response::error('Knowledge source not found.', 404);
         }
 
-        // Authorization: Staff users can only delete knowledge sources assigned to their departments
-        if ($userRole === 'staff') {
-            $stmtAuth = $db->prepare("
-                SELECT COUNT(*) as cnt
-                FROM department_knowledge dk
-                INNER JOIN department_staff ds ON dk.department_id = ds.department_id
-                WHERE dk.knowledge_source_id = :ks_id AND ds.user_id = :user_id
-            ");
-            $stmtAuth->execute([':ks_id' => $id, ':user_id' => $userId]);
-            $authCheck = $stmtAuth->fetch();
-
-            if (!$authCheck || (int)$authCheck['cnt'] === 0) {
-                Response::error('Permission denied. Staff members cannot delete global college knowledge sources or sources from unassigned departments.', 403);
-                return;
-            }
+        // Authorization: Staff users without management privileges cannot delete
+        if ($userRole === 'staff' && empty($user['can_manage_structure'])) {
+            Response::error('Permission denied. Staff members without management privileges cannot delete knowledge sources.', 403);
+            return;
         }
 
         // Remove associated file if document type
