@@ -17,12 +17,10 @@
         return;
     }
 
-    var deptIdAttr = currentScript ? currentScript.getAttribute('data-dept-id') : null;
     var isTestAttr = currentScript ? (currentScript.getAttribute('data-is-test') === '1' || currentScript.getAttribute('data-is-test') === 'true') : false;
 
     // Check URL parameters if embedded in preview/standalone page
     var urlParams = typeof window !== 'undefined' && window.location ? new URLSearchParams(window.location.search) : new URLSearchParams();
-    var deptId = deptIdAttr || urlParams.get('dept_id') || urlParams.get('dept');
     var isTest = isTestAttr || (urlParams.get('is_test') === '1' || urlParams.get('test') === '1');
 
     var apiBaseUrl = currentScript ? currentScript.src.substring(0, currentScript.src.lastIndexOf('/')) : '';
@@ -31,7 +29,7 @@
     }
 
     // 2. Generate or fetch persistent visitor UUID
-    var visitorKey = 'edvora_visitor_' + botToken + (deptId ? ('_d' + deptId) : '') + (isTest ? '_test' : '');
+    var visitorKey = 'edvora_visitor_' + botToken + (isTest ? '_test' : '');
     var visitorId = localStorage.getItem(visitorKey);
     if (!visitorId) {
         visitorId = (isTest ? 'test_' : 'v_') + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
@@ -57,7 +55,7 @@
         @keyframes edvoraSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .edvora-header { background: #2563EB; color: #ffffff; padding: 8px 12px; height: 48px; min-height: 48px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0; }
         .edvora-header-left { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; }
-        .edvora-header-logo-box { width: 28px; height: 28px; border-radius: 4px; display: none; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
+        .edvora-header-logo-box { width: 28px; height: 28px; border-radius: 4px; display: none; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; background: #ffffff; border: 1px solid #ffffff; box-shadow: 0 1px 2px rgba(0,0,0,0.12); }
         .edvora-header-logo-box img { max-height: 28px; max-width: 65px; object-fit: contain; }
         .edvora-header-text { display: flex; flex-direction: column; min-width: 0; justify-content: center; }
         .edvora-header-title { font-size: 13px; font-weight: 700; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -66,7 +64,12 @@
         .edvora-close-btn { background: none; border: none; color: #ffffff; font-size: 18px; cursor: pointer; opacity: 0.75; padding: 4px; line-height: 1; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: opacity 0.15s ease; }
         .edvora-close-btn:hover { opacity: 1; }
         .edvora-messages { flex: 1; padding: 10px 8px 10px 6px; overflow-y: auto; background: #F9FAFB; display: flex; flex-direction: column; gap: 10px; }
-        .edvora-msg { max-width: 98%; padding: 5px 7px; border-radius: 12px; font-size: 13px; line-height: 1.45; word-wrap: break-word; }
+        .edvora-msg-row { display: flex; align-items: flex-start; gap: 5px; width: 100%; box-sizing: border-box; }
+        .edvora-msg-row.assistant { align-self: flex-start; max-width: 98%; }
+        .edvora-msg-row.user { align-self: flex-end; flex-direction: row-reverse; max-width: 85%; }
+        .edvora-msg-avatar { width: 24px; height: 24px; border-radius: 50%; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
+        .edvora-msg-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+        .edvora-msg { max-width: 100%; padding: 6px 10px; border-radius: 12px; font-size: 13px; line-height: 1.45; word-wrap: break-word; }
         .edvora-msg.assistant { background: #ffffff; color: #1F2937; align-self: flex-start; border: 1px solid #E5E7EB; border-top-left-radius: 2px; }
         .edvora-msg.user { background: #2563EB; color: #ffffff; align-self: flex-end; border-top-right-radius: 2px; max-width: 85%; }
         .edvora-input-area { padding: 12px; background: #ffffff; border-top: 1px solid #E5E7EB; display: flex; gap: 8px; }
@@ -131,7 +134,7 @@
     }
 
     // 6. Fetch Widget Config
-    var configUrl = apiBaseUrl + '/v1/widget/config/' + botToken + (deptId ? ('?dept_id=' + encodeURIComponent(deptId)) : '');
+    var configUrl = apiBaseUrl + '/v1/widget/config/' + botToken;
     fetch(configUrl)
         .then(function (res) { return res.json(); })
         .then(function (res) {
@@ -141,7 +144,7 @@
 
                 var titleEl = document.getElementById('edvoraTitle');
                 if (titleEl) {
-                    titleEl.innerText = cust.header_bot_name || config.organization_name || config.name || 'College Assistant';
+                    titleEl.innerText = cust.header_bot_name || config.name || config.organization_name || 'College Assistant';
                     if (cust.header_text_color) titleEl.style.color = cust.header_text_color;
                 }
                 var subEl = document.getElementById('edvoraSubtitle');
@@ -228,11 +231,24 @@
                     chatWindow.style.right = pos.endsWith('right') ? '20px' : 'auto';
                 }
 
+                // Resolve avatar / header logo
+                var resolvedAvatarSrc = (cust.avatar_type === 'upload' && cust.avatar_url) ? cust.avatar_url : ('/avatars/avatar' + (cust.avatar_preset || 1) + '.png');
+                if (resolvedAvatarSrc.startsWith('/')) {
+                    resolvedAvatarSrc = apiBaseUrl + resolvedAvatarSrc;
+                }
+                config._resolvedAvatarSrc = resolvedAvatarSrc;
+
                 var headerEl = document.getElementById('edvoraHeader');
                 if (headerEl) {
                     headerEl.style.background = pColor;
                     headerEl.style.color = headerTextColor;
                     var logoUrl = (cust && cust.header_logo_url) ? cust.header_logo_url : (config.org_logo || null);
+                    // If no explicit header logo, fallback to avatar if header or both is active
+                    if (!logoUrl && (cust.avatar_location === 'header' || cust.avatar_location === 'both')) {
+                        logoUrl = resolvedAvatarSrc;
+                    } else if (!logoUrl) {
+                        logoUrl = '/default_logo.png';
+                    }
                     var logoBox = document.getElementById('edvoraHeaderLogoBox');
                     var logoImg = document.getElementById('edvoraHeaderLogo');
                     if (logoUrl) {
@@ -284,7 +300,7 @@
 
     function renderPromptChips(chips, cust) {
         var div = document.createElement('div');
-        div.style.cssText = 'display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;';
+        div.style.cssText = 'display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; padding-left: 28px;';
         var cBorder = (cust && cust.chip_border_color) ? cust.chip_border_color : '#6366F1';
         var cText = (cust && cust.chip_text_color) ? cust.chip_text_color : '#6366F1';
         var cBg = (cust && cust.chip_bg) ? cust.chip_bg : 'transparent';
@@ -317,10 +333,50 @@
 
     // 7. Message Appending Helper
     function appendMessage(role, text) {
+        var cust = (config && config.customization) ? config.customization : {};
+        var showBubbleAv = (role === 'assistant') && (cust.avatar_location === 'bubbles' || cust.avatar_location === 'both' || !cust.avatar_location);
+        var avatarSrc = config._resolvedAvatarSrc || (apiBaseUrl + '/avatars/avatar1.png');
+
+        var rowDiv = document.createElement('div');
+        rowDiv.className = 'edvora-msg-row ' + role;
+
+        if (role === 'assistant' && showBubbleAv) {
+            var avDiv = document.createElement('div');
+            avDiv.className = 'edvora-msg-avatar';
+            var avImg = document.createElement('img');
+            avImg.src = avatarSrc;
+            avImg.alt = 'Bot Avatar';
+            avDiv.appendChild(avImg);
+            rowDiv.appendChild(avDiv);
+        }
+
         var msgDiv = document.createElement('div');
         msgDiv.className = 'edvora-msg ' + role;
         msgDiv.innerText = text;
-        messagesContainer.appendChild(msgDiv);
+
+        // Apply custom bubble styling
+        if (role === 'assistant') {
+            if (cust.bot_bubble_bg) msgDiv.style.background = cust.bot_bubble_bg;
+            if (cust.bot_bubble_text) msgDiv.style.color = cust.bot_bubble_text;
+            if (cust.bot_bubble_radius !== undefined) {
+                var br = cust.bot_bubble_radius;
+                msgDiv.style.borderRadius = br + 'px ' + br + 'px ' + br + 'px 3px';
+            }
+            if (cust.message_font_size) msgDiv.style.fontSize = cust.message_font_size + 'px';
+        } else if (role === 'user') {
+            var userBg = cust.user_bubble_bg || cust.header_bg || config.primary_color || config.primaryColor || '#2563EB';
+            var userText = cust.user_bubble_text || '#ffffff';
+            msgDiv.style.background = userBg;
+            msgDiv.style.color = userText;
+            if (cust.user_bubble_radius !== undefined) {
+                var ur = cust.user_bubble_radius;
+                msgDiv.style.borderRadius = ur + 'px ' + ur + 'px 3px ' + ur + 'px';
+            }
+            if (cust.message_font_size) msgDiv.style.fontSize = cust.message_font_size + 'px';
+        }
+
+        rowDiv.appendChild(msgDiv);
+        messagesContainer.appendChild(rowDiv);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 
@@ -333,11 +389,36 @@
         inputField.value = '';
 
         // Show typing indicator
+        var cust = (config && config.customization) ? config.customization : {};
+        var showBubbleAv = (cust.avatar_location === 'bubbles' || cust.avatar_location === 'both' || !cust.avatar_location);
+        var avatarSrc = config._resolvedAvatarSrc || (apiBaseUrl + '/avatars/avatar1.png');
+
+        var typingRow = document.createElement('div');
+        typingRow.className = 'edvora-msg-row assistant';
+        typingRow.id = 'edvoraTyping';
+
+        if (showBubbleAv) {
+            var avDiv = document.createElement('div');
+            avDiv.className = 'edvora-msg-avatar';
+            var avImg = document.createElement('img');
+            avImg.src = avatarSrc;
+            avImg.alt = 'Bot Avatar';
+            avDiv.appendChild(avImg);
+            typingRow.appendChild(avDiv);
+        }
+
         var typingDiv = document.createElement('div');
         typingDiv.className = 'edvora-msg assistant';
-        typingDiv.id = 'edvoraTyping';
         typingDiv.innerText = 'Thinking...';
-        messagesContainer.appendChild(typingDiv);
+        if (cust.bot_bubble_bg) typingDiv.style.background = cust.bot_bubble_bg;
+        if (cust.bot_bubble_text) typingDiv.style.color = cust.bot_bubble_text;
+        if (cust.bot_bubble_radius !== undefined) {
+            var br = cust.bot_bubble_radius;
+            typingDiv.style.borderRadius = br + 'px ' + br + 'px ' + br + 'px 3px';
+        }
+
+        typingRow.appendChild(typingDiv);
+        messagesContainer.appendChild(typingRow);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
         fetch(apiBaseUrl + '/v1/chat/completions', {
@@ -347,7 +428,6 @@
                 bot_token: botToken,
                 visitor_id: visitorId,
                 message: text,
-                department_id: deptId ? parseInt(deptId) : null,
                 is_test: isTest ? 1 : 0,
                 page_url: window.location.href,
                 page_title: document.title

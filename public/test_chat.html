@@ -326,13 +326,9 @@
             <span class="test-logo-icon" id="logoIcon">🤖</span>
         </div>
 
-        <div id="deptBadgeContainer" style="display:none;">
-            <span class="test-dept-badge" id="deptBadge">Department Assistant</span>
-        </div>
-
         <h1 class="test-title" id="botTitle">Loading Assistant...</h1>
         <p class="test-subtitle" id="botSubtitle">
-            Live AI institutional assistant test environment. Test answers, department knowledge routing, and student admission workflows in real time.
+            Live AI institutional assistant test environment. Test answers, knowledge routing, and student admission workflows in real time.
         </p>
 
         <!-- Explicit Share Card for Decision Makers & Faculty -->
@@ -405,7 +401,7 @@
 
     <script>
         (function() {
-            // Extract token and dept_id from path or URL query parameters
+            // Extract token from path or URL query parameters
             const pathParts = window.location.pathname.split('/').filter(Boolean);
             let token = null;
             if ((pathParts[0] === 'test' || pathParts[0] === 'widget') && pathParts[1]) {
@@ -415,7 +411,6 @@
             if (!token) {
                 token = urlParams.get('token') || urlParams.get('bot_token');
             }
-            const deptId = urlParams.get('dept_id') || urlParams.get('dept');
 
             if (!token) {
                 document.getElementById('botTitle').innerText = 'No Chatbot Token Specified';
@@ -428,7 +423,7 @@
             document.getElementById('shareUrlInput').value = fullUrl;
 
             // Fetch config to populate title, subtitle, logo
-            const configUrl = '/v1/widget/config/' + encodeURIComponent(token) + (deptId ? ('?dept_id=' + encodeURIComponent(deptId)) : '');
+            const configUrl = '/v1/widget/config/' + encodeURIComponent(token);
             fetch(configUrl)
                 .then(res => res.json())
                 .then(res => {
@@ -436,22 +431,17 @@
                         const data = res.data;
                         const cust = data.customization || {};
                         
-                        document.title = (data.name || 'Chatbot') + ' — Test Environment';
-                        document.getElementById('botTitle').innerText = data.name || (data.organization_name + ' Assistant');
-                        
-                        if (data.department_name) {
-                            const deptBadge = document.getElementById('deptBadge');
-                            deptBadge.innerText = '🏢 ' + data.department_name;
-                            document.getElementById('deptBadgeContainer').style.display = 'block';
-                        }
+                        const orgName = data.organization_name || 'Institution';
+                        const botName = cust.header_bot_name || data.name || (orgName + ' Assistant');
+                        document.title = botName + ' — Test Environment';
+                        document.getElementById('botTitle').innerText = orgName;
+                        document.getElementById('botSubtitle').innerText = 'Live AI assistant test environment for ' + orgName + '. Test answers, admissions info, and conversation quality in real time.';
 
                         // Logo / Avatar
-                        const logoUrl = cust.header_logo_url || data.bot_avatar;
+                        const logoUrl = cust.header_logo_url || data.bot_avatar || (cust.avatar_type === 'upload' && cust.avatar_url ? cust.avatar_url : (cust.avatar_preset ? ('/avatars/avatar' + cust.avatar_preset + '.png') : null));
                         const logoBadge = document.getElementById('logoBadge');
                         if (logoUrl) {
-                            logoBadge.innerHTML = '<img src="' + logoUrl + '" alt="Logo" class="test-logo-img">';
-                        } else if (cust.avatar_preset) {
-                            logoBadge.innerHTML = '<img src="/avatars/avatar' + cust.avatar_preset + '.png" alt="Avatar" class="test-logo-img">';
+                            logoBadge.innerHTML = '<img src="' + logoUrl + '" alt="Avatar" class="test-logo-img">';
                         }
                     }
                 })
@@ -463,9 +453,6 @@
             const script = document.createElement('script');
             script.src = '/widget.js?v=' + Date.now();
             script.setAttribute('data-bot-token', token);
-            if (deptId) {
-                script.setAttribute('data-dept-id', deptId);
-            }
             script.setAttribute('data-is-test', '1');
             script.async = true;
             script.onload = function() {

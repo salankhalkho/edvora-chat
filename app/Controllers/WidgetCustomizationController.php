@@ -66,12 +66,10 @@ class WidgetCustomizationController
      * GET /v1/widget/customization?bot_id=X&scope=org|dept&dept_id=Y
      * Loads config for a given bot+scope. Falls back through cascade.
      */
-    public function show(Request $request, array $params = []): void
+    public function get(Request $request, array $params = []): void
     {
         $orgId   = $GLOBALS['organization_id'] ?? null;
         $botId   = (int)($request->get('bot_id') ?? 0);
-        $scope   = $request->get('scope') === 'dept' ? 'dept' : 'org';
-        $deptId  = ($scope === 'dept') ? ((int)($request->get('dept_id') ?? 0) ?: null) : null;
 
         if (!$botId) {
             Response::error('bot_id is required.', 400);
@@ -86,7 +84,7 @@ class WidgetCustomizationController
             Response::error('Chatbot not found.', 404);
         }
 
-        $config = $this->loadConfig($db, $botId, $orgId, $scope, $deptId);
+        $config = $this->loadConfig($db, $botId, $orgId);
 
         // Fetch authoritative prerequisite status for lead capture action cards
         $hasAssets = (int)$db->query("SELECT COUNT(*) FROM lead_assets WHERE organization_id = " . (int)$orgId . " AND is_active = 1")->fetchColumn() > 0;
@@ -124,8 +122,6 @@ class WidgetCustomizationController
         $orgId  = $GLOBALS['organization_id'] ?? null;
         $data   = $request->all();
         $botId  = (int)($data['bot_id'] ?? 0);
-        $scope  = ($data['scope'] ?? 'org') === 'dept' ? 'dept' : 'org';
-        $deptId = ($scope === 'dept') ? ((int)($data['dept_id'] ?? 0) ?: null) : null;
         $config = $data['config'] ?? [];
 
         if (!$botId) {
@@ -330,10 +326,10 @@ class WidgetCustomizationController
     // ──────────────────────────────────────────────────────────────────────
 
     /**
-     * Cascade lookup: dept → org → defaults.
+     * Org-level customization lookup: org -> defaults.
      * Returns merged config array.
      */
-    public static function cascadeLookup(PDO $db, int $botId, int $orgId, ?int $deptId): array
+    public static function cascadeLookup(PDO $db, int $botId, int $orgId): array
     {
         $defaults = self::$defaults;
         $stmtOrgInfo = $db->prepare("SELECT name, primary_color FROM organizations WHERE id = :org");
@@ -373,7 +369,7 @@ class WidgetCustomizationController
     // Private helpers
     // ──────────────────────────────────────────────────────────────────────
 
-    private function loadConfig(PDO $db, int $botId, int $orgId, string $scope, ?int $deptId): array
+    private function loadConfig(PDO $db, int $botId, int $orgId): array
     {
         $defaults = self::$defaults;
 
@@ -432,7 +428,7 @@ class WidgetCustomizationController
             'avatar_type'          => in_array($config['avatar_type'] ?? '', ['preset','upload']) ? $config['avatar_type'] : $d['avatar_type'],
             'avatar_preset'        => max(1, min(11, (int)($config['avatar_preset'] ?? $d['avatar_preset']))),
             'avatar_url'           => $this->sanitizeUrl($config['avatar_url'] ?? null),
-            'avatar_location'      => in_array($config['avatar_location'] ?? '', ['bubbles','header']) ? $config['avatar_location'] : $d['avatar_location'],
+            'avatar_location'      => in_array($config['avatar_location'] ?? '', ['bubbles','header','both']) ? $config['avatar_location'] : $d['avatar_location'],
             'bot_bubble_bg'        => $this->sanitizeColor($config['bot_bubble_bg'] ?? $d['bot_bubble_bg']),
             'bot_bubble_text'      => $this->sanitizeColor($config['bot_bubble_text'] ?? $d['bot_bubble_text']),
             'bot_bubble_radius'    => max(0, min(28, (int)($config['bot_bubble_radius'] ?? $d['bot_bubble_radius']))),
