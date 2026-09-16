@@ -1146,7 +1146,53 @@ class Migrations
         } catch (Throwable $e) {
             // Table may already exist
         }
+
+        // Campus Tour Slots: is_general & department_id columns
+        try {
+            $checkIsGeneral = $this->db->query("SHOW COLUMNS FROM campus_tour_slots LIKE 'is_general'");
+            if (!$checkIsGeneral->fetch()) {
+                $this->db->exec("ALTER TABLE campus_tour_slots 
+                    ADD COLUMN is_general TINYINT(1) NOT NULL DEFAULT 1 AFTER title,
+                    ADD COLUMN department_id INT NULL AFTER counselor_user_id,
+                    ADD INDEX idx_slot_general (organization_id, is_general),
+                    ADD CONSTRAINT fk_slot_dept FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL;");
+            }
+        } catch (Throwable $e) {
+            // Columns may already exist
+        }
+
+        // Campus Tour Slot Programs Junction Table
+        try {
+            $this->db->exec("CREATE TABLE IF NOT EXISTS campus_tour_slot_programs (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                organization_id INT NOT NULL,
+                slot_id INT NOT NULL,
+                program_id INT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
+                FOREIGN KEY (slot_id) REFERENCES campus_tour_slots(id) ON DELETE CASCADE,
+                FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE CASCADE,
+                UNIQUE KEY uniq_slot_prog (slot_id, program_id),
+                INDEX idx_org_prog (organization_id, program_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+        } catch (Throwable $e) {
+            // Table may already exist
+        }
+
+        // Campus Tour Bookings: slot_id column
+        try {
+            $checkBookingSlot = $this->db->query("SHOW COLUMNS FROM campus_tour_bookings LIKE 'slot_id'");
+            if (!$checkBookingSlot->fetch()) {
+                $this->db->exec("ALTER TABLE campus_tour_bookings 
+                    ADD COLUMN slot_id INT NULL AFTER conversation_id,
+                    ADD INDEX idx_booking_slot (slot_id),
+                    ADD CONSTRAINT fk_booking_slot FOREIGN KEY (slot_id) REFERENCES campus_tour_slots(id) ON DELETE SET NULL;");
+            }
+        } catch (Throwable $e) {
+            // Column may already exist
+        }
     }
 }
+
 
 

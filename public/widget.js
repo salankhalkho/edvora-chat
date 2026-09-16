@@ -807,14 +807,19 @@
         `;
 
         // Fetch active slots for this bot
+        var selectedSlotId = null;
         fetch(apiBaseUrl + '/v1/campus-tours/slots?bot_token=' + encodeURIComponent(botToken))
             .then(function(res) { return res.json(); })
             .then(function(res) {
                 var slotBox = card.querySelector('#edvoraTourSlotContainer');
                 if (slotBox && res.status === 'success' && res.data && res.data.slots && res.data.slots.length > 0) {
-                    var html = '<div style="font-weight:700; margin-bottom:4px;">Select Available Schedule:</div><div style="display:flex; flex-wrap:wrap; gap:4px;">';
+                    var html = '<div style="font-weight:700; margin-bottom:4px;">Available Tour Schedules:</div><div style="display:flex; flex-wrap:wrap; gap:5px;">';
                     res.data.slots.slice(0, 4).forEach(function(s) {
-                        html += '<button type="button" class="edvora-slot-chip" data-date="' + s.tour_date + '" data-time="' + s.start_time + '" style="background:#fff; border:1px solid #C4B5FD; color:#6D28D9; border-radius:4px; padding:3px 6px; font-size:10px; cursor:pointer; font-weight:600;">' + s.tour_date + ' (' + s.start_time.substring(0, 5) + ')</button>';
+                        var progTag = (parseInt(s.is_general, 10) === 1 || !s.programs || s.programs.length === 0) ? 'General' : (s.programs[0].code || 'Specialized');
+                        html += '<button type="button" class="edvora-slot-chip" data-slot-id="' + s.id + '" data-date="' + s.tour_date + '" data-time="' + s.start_time + '" style="background:#fff; border:1px solid #C4B5FD; color:#6D28D9; border-radius:6px; padding:4px 8px; font-size:10.5px; cursor:pointer; font-weight:600; text-align:left;">' +
+                                '📅 ' + s.tour_date + ' (' + s.start_time.substring(0, 5) + ')' +
+                                '<div style="font-size:9.5px; opacity:0.85;">' + progTag + ' • ' + (s.campus_name || 'Campus') + '</div>' +
+                                '</button>';
                     });
                     html += '</div>';
                     slotBox.innerHTML = html;
@@ -822,9 +827,11 @@
                     var chips = slotBox.querySelectorAll('.edvora-slot-chip');
                     chips.forEach(function(btn) {
                         btn.onclick = function() {
-                            chips.forEach(function(b) { b.style.background = '#fff'; b.style.color = '#6D28D9'; });
+                            chips.forEach(function(b) { b.style.background = '#fff'; b.style.color = '#6D28D9'; b.style.borderColor = '#C4B5FD'; });
                             btn.style.background = '#7C3AED';
                             btn.style.color = '#fff';
+                            btn.style.borderColor = '#7C3AED';
+                            selectedSlotId = parseInt(btn.getAttribute('data-slot-id'), 10);
                             var dateInput = card.querySelector('#edvoraTourPrefDate');
                             if (dateInput) dateInput.value = btn.getAttribute('data-date');
                         };
@@ -864,6 +871,7 @@
                     name: name,
                     email: email,
                     phone: phone,
+                    slot_id: selectedSlotId,
                     preferred_date: prefDate || null,
                     preferred_time: prefTime,
                     department_id: deptId ? parseInt(deptId) : null,

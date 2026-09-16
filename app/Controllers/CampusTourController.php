@@ -55,9 +55,58 @@ class CampusTourController
         $botId = (int)$bot['id'];
         $orgName = $bot['org_name'] ?? 'College Campus';
 
-        // Auto-assign staff if department specified
-        $assignedUserId = null;
-        if ($departmentId) {
+        $slotId = $request->get('slot_id') ? (int)$request->get('slot_id') : null;
+        $programId = $request->get('program_id') ? (int)$request->get('program_id') : null;
+
+        // If slot_id is provided, resolve slot details, counselor, department, and program
+        if ($slotId) {
+            $stmtSlot = $db->prepare("
+                SELECT s.*, c.name as campus_name
+                FROM campus_tour_slots s
+                LEFT JOIN campuses c ON s.campus_id = c.id
+                WHERE s.id = :sid AND s.organization_id = :org_id AND s.status = 'active'
+            ");
+            $stmtSlot->execute([':sid' => $slotId, ':org_id' => $orgId]);
+            $slotRow = $stmtSlot->fetch();
+            if ($slotRow) {
+                if (empty($preferredDate)) {
+                    $preferredDate = $slotRow['tour_date'];
+                }
+                if ($preferredTime === 'Morning' || empty($preferredTime)) {
+                    $preferredTime = substr($slotRow['start_time'], 0, 5) . ' - ' . substr($slotRow['end_time'], 0, 5);
+                }
+                if ($slotRow['counselor_user_id']) {
+                    $assignedUserId = (int)$slotRow['counselor_user_id'];
+                }
+                if ($slotRow['department_id'] && !$departmentId) {
+                    $departmentId = (int)$slotRow['department_id'];
+                }
+
+                // If program_id not specified, check if slot maps to a program
+                if (!$programId) {
+                    $stmtSlotProg = $db->prepare("
+                        SELECT p.id, p.course_name, p.department_id 
+                        FROM campus_tour_slot_programs stp
+                        JOIN programs p ON stp.program_id = p.id
+                        WHERE stp.slot_id = :sid LIMIT 1
+                    ");
+                    $stmtSlotProg->execute([':sid' => $slotId]);
+                    $slotProg = $stmtSlotProg->fetch();
+                    if ($slotProg) {
+                        $programId = (int)$slotProg['id'];
+                        if (empty($programInterest)) {
+                            $programInterest = $slotProg['course_name'];
+                        }
+                        if (!$departmentId && $slotProg['department_id']) {
+                            $departmentId = (int)$slotProg['department_id'];
+                        }
+                    }
+                }
+            }
+        }
+
+        // Auto-assign staff if department specified and no counselor assigned yet
+        if ($departmentId && !$assignedUserId) {
             $stmtStaff = $db->prepare("
                 SELECT user_id FROM department_staff
                 WHERE department_id = :did AND is_on_duty = 1
@@ -73,11 +122,11 @@ class CampusTourController
         // 1. Insert into campus_tour_bookings
         $stmtTour = $db->prepare("
             INSERT INTO campus_tour_bookings (
-                organization_id, chatbot_id, department_id, conversation_id, assigned_user_id,
+                organization_id, chatbot_id, department_id, conversation_id, slot_id, program_id, assigned_user_id,
                 student_name, student_email, student_phone, preferred_date, preferred_time,
                 program_interest, group_size, notes, status, created_at, updated_at
             ) VALUES (
-                :org_id, :bot_id, :dept_id, :conv_id, :assigned_uid,
+                :org_id, :bot_id, :dept_id, :conv_id, :slot_id, :prog_id, :assigned_uid,
                 :name, :email, :phone, :pref_date, :pref_time,
                 :program, :group_size, :notes, 'pending', NOW(), NOW()
             )
@@ -87,6 +136,8 @@ class CampusTourController
             ':bot_id' => $botId,
             ':dept_id' => $departmentId ?: null,
             ':conv_id' => $conversationId ?: null,
+            ':slot_id' => $slotId ?: null,
+            ':prog_id' => $programId ?: null,
             ':assigned_uid' => $assignedUserId ?: null,
             ':name' => $name,
             ':email' => $email,
@@ -98,6 +149,11 @@ class CampusTourController
             ':notes' => $notes
         ]);
         $tourId = (int)$db->lastInsertId();
+
+        // Increment booked_count on slot if slot_id given
+        if ($slotId) {
+            $db->exec("UPDATE campus_tour_slots SET booked_count = booked_count + {$groupSize} WHERE id = {$slotId} AND organization_id = {$orgId}");
+        }
 
         // 2. Also register in unified leads master table with lead_type = 'campus_tour'
         $stmtLead = $db->prepare("

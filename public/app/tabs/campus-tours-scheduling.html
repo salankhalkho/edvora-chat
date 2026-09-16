@@ -89,7 +89,7 @@
                         <tr style="background: #FAFCFB; border-bottom: 1px solid #E6F0EC; color: #648781; font-weight: 700; text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.5px;">
                             <th style="padding: 12px 18px;">Date &amp; Time</th>
                             <th style="padding: 12px 18px;">Campus</th>
-                            <th style="padding: 12px 18px;">Title / Type</th>
+                            <th style="padding: 12px 18px;">Title &amp; Program Scope</th>
                             <th style="padding: 12px 18px;">Assigned Counselor</th>
                             <th style="padding: 12px 18px;">Capacity / Booked</th>
                             <th style="padding: 12px 18px;">Status</th>
@@ -252,10 +252,18 @@
 
                     var html = '';
                     slots.forEach(function(s) {
+                        var progBadgeHtml = '';
+                        if (parseInt(s.is_general, 10) === 1 || !s.programs || s.programs.length === 0) {
+                            progBadgeHtml = '<span style="display:inline-flex; align-items:center; gap:3px; background:#ECFDF5; color:#047857; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:700; margin-top:4px;">🌐 All Programs (General Tour)</span>';
+                        } else {
+                            var progNames = s.programs.map(function(p){ return p.code || p.name; }).join(', ');
+                            progBadgeHtml = '<span style="display:inline-flex; align-items:center; gap:3px; background:#EFF6FF; color:#1D4ED8; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:700; margin-top:4px;" title="' + s.programs.map(function(p){ return p.name; }).join(', ') + '">🎓 ' + progNames + '</span>';
+                        }
+
                         html += '<tr style="border-bottom: 1px solid #E6F0EC;">';
                         html += '<td style="padding: 12px 18px; font-weight: 700; color: #063D3B;">' + s.tour_date + '<div style="font-size:11px; color:#648781; font-weight:500;">' + s.start_time.substring(0,5) + ' - ' + s.end_time.substring(0,5) + '</div></td>';
                         html += '<td style="padding: 12px 18px; font-weight: 600;">' + s.campus_name + (s.is_primary ? ' <span style="font-size:10px; background:#ECFDF5; color:#047857; padding:2px 5px; border-radius:4px;">Main</span>' : '') + '</td>';
-                        html += '<td style="padding: 12px 18px;">' + s.title + '</td>';
+                        html += '<td style="padding: 12px 18px;"><div style="font-weight:700; color:#063D3B;">' + s.title + '</div>' + progBadgeHtml + '</td>';
                         html += '<td style="padding: 12px 18px;">' + (s.counselor_name || '<span style="color:#94A3B8;">Auto-routed</span>') + '</td>';
                         html += '<td style="padding: 12px 18px; font-weight: 700;">' + (s.booked_count || 0) + ' / ' + s.max_capacity + '</td>';
                         html += '<td style="padding: 12px 18px;"><span style="background:#ECFDF5; color:#047857; font-weight:700; padding:3px 8px; border-radius:9999px; font-size:10.5px;">ACTIVE</span></td>';

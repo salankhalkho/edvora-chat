@@ -68,10 +68,11 @@ class CampusTourSchedulingController
         }
 
         $query = "
-            SELECT s.*, COALESCE(c.name, 'Main Campus') as campus_name, COALESCE(c.is_primary, 1) as is_primary, u.name as counselor_name
+            SELECT s.*, COALESCE(c.name, 'Main Campus') as campus_name, COALESCE(c.is_primary, 1) as is_primary, u.name as counselor_name, d.name as department_name
             FROM campus_tour_slots s
             LEFT JOIN campuses c ON s.campus_id = c.id
             LEFT JOIN users u ON s.counselor_user_id = u.id
+            LEFT JOIN departments d ON s.department_id = d.id
             WHERE s.organization_id = :org_id AND s.status = 'active'
         ";
         $paramsMap = [':org_id' => $orgId];
@@ -81,11 +82,41 @@ class CampusTourSchedulingController
             $paramsMap[':campus_id'] = $campusId;
         }
 
+        if ($programId) {
+            // When filtered by program_id, return slots mapped to that program OR general slots
+            $query .= " AND (s.is_general = 1 OR s.id IN (SELECT slot_id FROM campus_tour_slot_programs WHERE program_id = :filter_prog_id AND organization_id = :org_id))";
+            $paramsMap[':filter_prog_id'] = $programId;
+        }
+
         $query .= " ORDER BY s.tour_date ASC, s.start_time ASC";
 
         $stmt = $db->prepare($query);
         $stmt->execute($paramsMap);
         $slots = $stmt->fetchAll();
+
+        // Attach mapped programs to each slot
+        $slotIds = array_column($slots, 'id');
+        $slotProgramsMap = [];
+        if (!empty($slotIds)) {
+            $inPlaceholders = implode(',', array_fill(0, count($slotIds), '?'));
+            $stmtProg = $db->prepare("
+                SELECT stp.slot_id, p.id as program_id, p.course_name as program_name, p.course_code, p.department_id, d.name as department_name
+                FROM campus_tour_slot_programs stp
+                JOIN programs p ON stp.program_id = p.id
+                LEFT JOIN departments d ON p.department_id = d.id
+                WHERE stp.slot_id IN ({$inPlaceholders})
+            ");
+            $stmtProg->execute($slotIds);
+            while ($row = $stmtProg->fetch()) {
+                $slotProgramsMap[$row['slot_id']][] = [
+                    'id' => (int)$row['program_id'],
+                    'name' => $row['program_name'],
+                    'code' => $row['course_code'],
+                    'department_id' => $row['department_id'],
+                    'department_name' => $row['department_name']
+                ];
+            }
+        }
 
         // Calculate summary stats
         $stats = [
@@ -96,11 +127,13 @@ class CampusTourSchedulingController
         $counselorIds = [];
 
         foreach ($slots as &$slot) {
+            $slot['programs'] = $slotProgramsMap[$slot['id']] ?? [];
             $stats['total_capacity'] += (int)$slot['max_capacity'];
             if (!empty($slot['counselor_user_id'])) {
                 $counselorIds[$slot['counselor_user_id']] = true;
             }
         }
+        unset($slot);
         $stats['assigned_counselors'] = count($counselorIds);
 
         Response::success([
@@ -127,6 +160,19 @@ class CampusTourSchedulingController
         $endTime = trim((string)$request->get('end_time'));
         $maxCapacity = max(1, (int)($request->get('max_capacity') ?: 15));
         $counselorUserId = $request->get('counselor_user_id') ? (int)$request->get('counselor_user_id') : null;
+        $isGeneral = isset($_POST['is_general']) || isset($request->all()['is_general']) ? (int)(bool)$request->get('is_general') : 1;
+        $programIds = $request->get('program_ids');
+        if (!is_array($programIds)) {
+            $programIds = [];
+        }
+        $programIds = array_filter(array_map('intval', $programIds));
+
+        // If specific programs are selected, is_general is 0; otherwise 1
+        if (!empty($programIds)) {
+            $isGeneral = 0;
+        } else {
+            $isGeneral = 1;
+        }
 
         if (!$campusId || empty($tourDate) || empty($startTime) || empty($endTime)) {
             Response::error('Campus, Date, Start Time, and End Time are required.', 422);
@@ -134,30 +180,75 @@ class CampusTourSchedulingController
 
         $db = Database::getConnection();
 
+        // Determine department_id and auto counselor if not set
+        $deptId = null;
+        if (!empty($programIds)) {
+            $firstProgId = reset($programIds);
+            $stmtDept = $db->prepare("SELECT department_id FROM programs WHERE id = :pid AND organization_id = :org_id");
+            $stmtDept->execute([':pid' => $firstProgId, ':org_id' => $orgId]);
+            $deptRow = $stmtDept->fetch();
+            if ($deptRow && !empty($deptRow['department_id'])) {
+                $deptId = (int)$deptRow['department_id'];
+            }
+        }
+
+        // If counselor not assigned, try finding on-duty counselor from department
+        if (!$counselorUserId && $deptId) {
+            $stmtStaff = $db->prepare("
+                SELECT user_id FROM department_staff 
+                WHERE department_id = :did AND is_on_duty = 1 
+                ORDER BY id ASC LIMIT 1
+            ");
+            $stmtStaff->execute([':did' => $deptId]);
+            $staffRow = $stmtStaff->fetch();
+            if ($staffRow) {
+                $counselorUserId = (int)$staffRow['user_id'];
+            }
+        }
+
         $stmt = $db->prepare("
             INSERT INTO campus_tour_slots (
-                organization_id, campus_id, title, tour_date, start_time, end_time,
-                max_capacity, counselor_user_id, status, created_at, updated_at
+                organization_id, campus_id, title, is_general, tour_date, start_time, end_time,
+                max_capacity, counselor_user_id, department_id, status, created_at, updated_at
             ) VALUES (
-                :org_id, :campus_id, :title, :tour_date, :start_time, :end_time,
-                :max_capacity, :counselor_uid, 'active', NOW(), NOW()
+                :org_id, :campus_id, :title, :is_general, :tour_date, :start_time, :end_time,
+                :max_capacity, :counselor_uid, :dept_id, 'active', NOW(), NOW()
             )
         ");
         $stmt->execute([
             ':org_id' => $orgId,
             ':campus_id' => $campusId,
             ':title' => $title,
+            ':is_general' => $isGeneral,
             ':tour_date' => $tourDate,
             ':start_time' => $startTime,
             ':end_time' => $endTime,
             ':max_capacity' => $maxCapacity,
-            ':counselor_uid' => $counselorUserId
+            ':counselor_uid' => $counselorUserId,
+            ':dept_id' => $deptId
         ]);
         $slotId = (int)$db->lastInsertId();
+
+        // Insert program mappings if specific programs selected
+        if (!empty($programIds)) {
+            $stmtProgInsert = $db->prepare("
+                INSERT IGNORE INTO campus_tour_slot_programs (organization_id, slot_id, program_id)
+                VALUES (:org_id, :slot_id, :prog_id)
+            ");
+            foreach ($programIds as $pId) {
+                $stmtProgInsert->execute([
+                    ':org_id' => $orgId,
+                    ':slot_id' => $slotId,
+                    ':prog_id' => $pId
+                ]);
+            }
+        }
 
         AuditLogger::log('campus_tour_slot_created', 'campus_tour_slot', $slotId, [
             'campus_id' => $campusId,
             'tour_date' => $tourDate,
+            'is_general' => $isGeneral,
+            'program_count' => count($programIds),
             'max_capacity' => $maxCapacity
         ]);
 

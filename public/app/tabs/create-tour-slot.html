@@ -1,4 +1,4 @@
-﻿<!-- Dedicated Create Tour Slot Command Frame (1 Unified Big Card matching Settings, Campuses & Campus-Editor) -->
+<!-- Dedicated Create Tour Slot Command Frame (1 Unified Big Card matching Settings, Campuses & Campus-Editor) -->
 <div id="view-create-tour-slot" class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
     
     <!-- Top Control Bar (Inside the Big Card) -->
@@ -95,6 +95,30 @@
                             </div>
                         </div>
 
+                        <!-- Academic Program Mapping Checkbox Pills (Modeled after knowledge-edit.html) -->
+                        <div>
+                            <label style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 8px;">
+                                <span style="display: flex; align-items: center; gap: 6px;">
+                                    <span>🎓</span> Mapped Academic Programs / Interest Areas
+                                </span>
+                                <span id="ctsProgramSelectionSummary" style="font-size: 10px; color: #047857; text-transform: none; font-weight: 700; background: #ECFDF5; border: 1px solid #A7F3D0; padding: 2px 8px; border-radius: 9999px;">
+                                    Entire Organization (General Tour)
+                                </span>
+                            </label>
+                            
+                            <div id="ctsProgramContainer" class="ingest-program-pill-container" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; background: #FFFFFF; border: 1.5px solid #CFE6BA; border-radius: 6px; min-height: 48px; align-items: center;">
+                                <label id="ctsPillGlobal" style="display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px; background: #E8F5F3; border: 1.5px solid #063D3B; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; color: #063D3B; user-select: none; transition: all 0.15s ease; box-shadow: 0 0 0 1px #063D3B;">
+                                    <input type="checkbox" id="ctsProgGlobal" value="global" checked onchange="handleCtsGlobalToggle()" style="cursor: pointer; accent-color: #063D3B;" />
+                                    <span>🌐</span>
+                                    <span>Entire Organization (General Campus Tour)</span>
+                                </label>
+                                <span id="ctsLoadingPrograms" style="font-size: 12px; color: #94A3B8;">Loading academic programs...</span>
+                            </div>
+                            <span style="font-size: 10.5px; color: #648781; margin-top: 5px; display: block;">
+                                Check specific academic programs to create a dedicated visit (e.g. Engineering Lab Walkthrough). Leave "Entire Organization" selected for a general visit open to all applicants.
+                            </span>
+                        </div>
+
                         <div>
                             <label for="ctsCounselorId" style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
                                 <span>👔</span> Assigned Admissions Guide / Counselor
@@ -162,6 +186,9 @@
                                     <span style="display: inline-flex; align-items: center; gap: 4px; color: #059669;">
                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                                         <span id="previewCapacity">15 Max Seats</span>
+                                    </span>
+                                    <span id="previewProgramTag" style="display: inline-flex; align-items: center; gap: 4px; color: #047857; background: #ECFDF5; padding: 1px 6px; border-radius: 4px; border: 1px solid #A7F3D0; font-size: 10.5px;">
+                                        🌐 General Tour
                                     </span>
                                 </div>
                             </div>
@@ -239,6 +266,7 @@
 (function() {
     var campusesCache = [];
     var staffCache = [];
+    var programsCache = [];
 
     window.initCreateTourSlotPage = function() {
         var d = new Date();
@@ -252,6 +280,7 @@
         }
 
         loadCtsCampusesAndStaff();
+        loadCtsPrograms();
     };
 
     function loadCtsCampusesAndStaff() {
@@ -291,6 +320,137 @@
                     updateCtsLivePreview();
                 }
             }).catch(function(){});
+    }
+
+    function loadCtsPrograms() {
+        fetch('/v1/programs')
+            .then(function(res) { return res.json(); })
+            .then(function(res) {
+                var container = document.getElementById('ctsProgramContainer');
+                var loading = document.getElementById('ctsLoadingPrograms');
+                if (loading) loading.style.display = 'none';
+                if (!container) return;
+
+                if (res.status === 'success' && res.data) {
+                    programsCache = res.data.courses || (Array.isArray(res.data) ? res.data : []);
+                    if (programsCache.length === 0) {
+                        container.innerHTML += '<span style="font-size: 11px; color: #648781;">No programs found. Defaulting to general campus visits.</span>';
+                        return;
+                    }
+
+                    programsCache.forEach(function(p) {
+                        var label = document.createElement('label');
+                        label.className = 'cts-prog-pill';
+                        label.id = 'ctsPillProg_' + p.id;
+                        label.style.cssText = 'display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; color: #0F172A; user-select: none; transition: all 0.15s ease;';
+                        
+                        var codeLabel = p.course_code ? ' (' + p.course_code + ')' : '';
+                        label.innerHTML = '<input type="checkbox" name="cts_programs" value="' + p.id + '" onchange="handleCtsProgramToggle(' + p.id + ')" style="cursor: pointer; accent-color: #063D3B;" />' +
+                                          '<span>🎓</span>' +
+                                          '<span>' + (p.course_name || 'Program') + codeLabel + '</span>';
+                        container.appendChild(label);
+                    });
+                }
+            })
+            .catch(function(err) {
+                var loading = document.getElementById('ctsLoadingPrograms');
+                if (loading) loading.innerText = 'Failed to load programs.';
+            });
+    }
+
+    window.handleCtsGlobalToggle = function() {
+        var globalCb = document.getElementById('ctsProgGlobal');
+        var globalPill = document.getElementById('ctsPillGlobal');
+        var progCbs = document.querySelectorAll('input[name="cts_programs"]');
+
+        if (globalCb && globalCb.checked) {
+            // Uncheck all individual program checkboxes
+            progCbs.forEach(function(cb) {
+                cb.checked = false;
+                var pill = document.getElementById('ctsPillProg_' + cb.value);
+                if (pill) {
+                    pill.style.background = '#FFFFFF';
+                    pill.style.borderColor = '#E2E8F0';
+                    pill.style.color = '#0F172A';
+                    pill.style.boxShadow = 'none';
+                }
+            });
+            if (globalPill) {
+                globalPill.style.background = '#E8F5F3';
+                globalPill.style.borderColor = '#063D3B';
+                globalPill.style.color = '#063D3B';
+                globalPill.style.boxShadow = '0 0 0 1px #063D3B';
+            }
+        } else if (globalPill) {
+            globalPill.style.background = '#FFFFFF';
+            globalPill.style.borderColor = '#E2E8F0';
+            globalPill.style.color = '#0F172A';
+            globalPill.style.boxShadow = 'none';
+        }
+
+        updateCtsProgramSummary();
+        updateCtsLivePreview();
+    };
+
+    window.handleCtsProgramToggle = function(progId) {
+        var globalCb = document.getElementById('ctsProgGlobal');
+        var globalPill = document.getElementById('ctsPillGlobal');
+        var progPill = document.getElementById('ctsPillProg_' + progId);
+        var clickedCb = progPill ? progPill.querySelector('input[name="cts_programs"]') : null;
+
+        if (clickedCb && clickedCb.checked) {
+            // Uncheck global tour if a specific program is selected
+            if (globalCb) globalCb.checked = false;
+            if (globalPill) {
+                globalPill.style.background = '#FFFFFF';
+                globalPill.style.borderColor = '#E2E8F0';
+                globalPill.style.color = '#0F172A';
+                globalPill.style.boxShadow = 'none';
+            }
+            if (progPill) {
+                progPill.style.background = '#E8F5F3';
+                progPill.style.borderColor = '#063D3B';
+                progPill.style.color = '#063D3B';
+                progPill.style.boxShadow = '0 0 0 1px #063D3B';
+            }
+        } else if (progPill) {
+            progPill.style.background = '#FFFFFF';
+            progPill.style.borderColor = '#E2E8F0';
+            progPill.style.color = '#0F172A';
+            progPill.style.boxShadow = 'none';
+        }
+
+        // If no program checkboxes remain checked, re-check global
+        var checkedProgCbs = document.querySelectorAll('input[name="cts_programs"]:checked');
+        if (checkedProgCbs.length === 0 && globalCb) {
+            globalCb.checked = true;
+            if (globalPill) {
+                globalPill.style.background = '#E8F5F3';
+                globalPill.style.borderColor = '#063D3B';
+                globalPill.style.color = '#063D3B';
+                globalPill.style.boxShadow = '0 0 0 1px #063D3B';
+            }
+        }
+
+        updateCtsProgramSummary();
+        updateCtsLivePreview();
+    };
+
+    function updateCtsProgramSummary() {
+        var summaryEl = document.getElementById('ctsProgramSelectionSummary');
+        if (!summaryEl) return;
+        var checkedCbs = document.querySelectorAll('input[name="cts_programs"]:checked');
+        if (checkedCbs.length === 0) {
+            summaryEl.innerText = 'Entire Organization (General Tour)';
+            summaryEl.style.background = '#ECFDF5';
+            summaryEl.style.borderColor = '#A7F3D0';
+            summaryEl.style.color = '#047857';
+        } else {
+            summaryEl.innerText = checkedCbs.length + ' Specialized Program(s) Mapped';
+            summaryEl.style.background = '#EFF6FF';
+            summaryEl.style.borderColor = '#BFDBFE';
+            summaryEl.style.color = '#1D4ED8';
+        }
     }
 
     window.updateCtsLivePreview = function() {
@@ -334,6 +494,31 @@
 
         if (document.getElementById('previewCapacity')) {
             document.getElementById('previewCapacity').innerText = (capacityVal || 15) + ' Max Seats';
+        }
+
+        // Preview program mapping tag
+        var previewProgTag = document.getElementById('previewProgramTag');
+        if (previewProgTag) {
+            var checkedCbs = document.querySelectorAll('input[name="cts_programs"]:checked');
+            if (checkedCbs.length === 0) {
+                previewProgTag.innerText = '🌐 General Tour';
+                previewProgTag.style.background = '#ECFDF5';
+                previewProgTag.style.borderColor = '#A7F3D0';
+                previewProgTag.style.color = '#047857';
+            } else if (checkedCbs.length === 1) {
+                var pId = checkedCbs[0].value;
+                var matchP = programsCache.find(function(p) { return String(p.id) === String(pId); });
+                var pName = matchP ? (matchP.course_code || matchP.course_name) : 'Specialized';
+                previewProgTag.innerText = '🎓 ' + pName + ' Focus';
+                previewProgTag.style.background = '#EFF6FF';
+                previewProgTag.style.borderColor = '#BFDBFE';
+                previewProgTag.style.color = '#1D4ED8';
+            } else {
+                previewProgTag.innerText = '🎓 ' + checkedCbs.length + ' Programs Focus';
+                previewProgTag.style.background = '#EFF6FF';
+                previewProgTag.style.borderColor = '#BFDBFE';
+                previewProgTag.style.color = '#1D4ED8';
+            }
         }
 
         var durationText = '90 mins';
@@ -403,6 +588,15 @@
 
     window.handleDedicatedCreateTourSlot = function(e) {
         e.preventDefault();
+
+        var checkedProgCbs = document.querySelectorAll('input[name="cts_programs"]:checked');
+        var selectedProgramIds = [];
+        checkedProgCbs.forEach(function(cb) {
+            selectedProgramIds.push(parseInt(cb.value, 10));
+        });
+
+        var globalChecked = document.getElementById('ctsProgGlobal') ? document.getElementById('ctsProgGlobal').checked : (selectedProgramIds.length === 0);
+
         var payload = {
             campus_id: document.getElementById('ctsCampusId').value,
             title: document.getElementById('ctsTitle').value,
@@ -410,7 +604,9 @@
             start_time: document.getElementById('ctsStartTime').value,
             end_time: document.getElementById('ctsEndTime').value,
             max_capacity: document.getElementById('ctsCapacity').value,
-            counselor_user_id: document.getElementById('ctsCounselorId').value
+            counselor_user_id: document.getElementById('ctsCounselorId').value,
+            is_general: globalChecked && selectedProgramIds.length === 0 ? 1 : 0,
+            program_ids: selectedProgramIds
         };
 
         if (!payload.campus_id) {
@@ -426,7 +622,7 @@
         .then(function(res) { return res.json(); })
         .then(function(res) {
             if (res.status === 'success') {
-                alert('Campus tour slot created successfully!');
+                alert('Campus tour slot created successfully with mapped academic programs!');
                 switchNavTab('campus-tours-scheduling');
             } else {
                 alert(res.message || 'Failed to create slot');
@@ -442,3 +638,4 @@
     }, 100);
 })();
 </script>
+

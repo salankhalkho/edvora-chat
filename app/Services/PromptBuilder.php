@@ -62,14 +62,22 @@ class PromptBuilder
         // 7. Fetch Active Campuses, Course Offerings & Derived Departments Directory
         $campusBlock = self::buildCampusesAndCoursesBlock($db, $organizationId);
 
-        // 8. Inject Variables & Dynamic Counselor State
+        // 8. Program-Aware Campus Tour Recommendation Engine
+        // Intelligent recommendation ONLY operates after a prospect's academic program interest has been identified.
+        $detectedProgram = self::detectProgramInterest($db, $organizationId, $knowledgeContextSources);
+        $tourSlotsBlock = "";
+        if ($detectedProgram) {
+            $tourSlotsBlock = self::buildProgramTourSlotsBlock($db, $organizationId, $detectedProgram);
+        }
+
+        // 9. Inject Variables & Dynamic Counselor State
         $leadStateNotice = $leadCaptured 
             ? "NOTICE: Visitor has already submitted contact details. Do NOT request or trigger any lead forms." 
             : ($turnCount >= $minTurns 
                 ? "Turn Count is {$turnCount} (>= {$minTurns}). You MAY contextually offer an asset, counselor callback, or campus tour if it genuinely adds value." 
                 : "Turn Count is {$turnCount} (< {$minTurns}). Do NOT offer lead triggers yet. Answer questions directly and build rapport first.");
 
-        $fullContext = $contextBlock . "\n" . $deptBlock . "\n" . $campusBlock . "\n[SESSION LEAD STATE]: " . $leadStateNotice;
+        $fullContext = $contextBlock . "\n" . $deptBlock . "\n" . $campusBlock . (!empty($tourSlotsBlock) ? ("\n" . $tourSlotsBlock) : "") . "\n[SESSION LEAD STATE]: " . $leadStateNotice;
 
         $prompt = str_replace(
             ['{{COLLEGE_NAME}}', '{{KNOWLEDGE_CONTEXT}}'],
@@ -244,6 +252,124 @@ EOT;
         $block .= "2. When asked which campuses offer a course (e.g. MBA or B.Tech), list the exact campuses where that course is offered based on the directory above.\n";
         $block .= "3. Confirm department presence at a campus based on the Academic Departments Available listed above.\n";
         $block .= "--- END OFFICIAL CAMPUSES & COURSES DIRECTORY ---\n";
+
+        return $block;
+    }
+
+    /**
+     * Identify visitor's academic program interest from retrieved knowledge sources
+     */
+    private static function detectProgramInterest(PDO $db, int $organizationId, array $knowledgeSources): ?array
+    {
+        if (empty($knowledgeSources)) {
+            return null;
+        }
+
+        // 1. Check if any retrieved knowledge source is explicitly tagged with program_id
+        foreach ($knowledgeSources as $src) {
+            if (!empty($src['program_id'])) {
+                $pId = (int)$src['program_id'];
+                $stmtProg = $db->prepare("
+                    SELECT p.id, p.course_name, p.course_code, p.department_id, d.name as department_name
+                    FROM programs p
+                    LEFT JOIN departments d ON p.department_id = d.id
+                    WHERE p.id = :pid AND p.organization_id = :org_id
+                ");
+                $stmtProg->execute([':pid' => $pId, ':org_id' => $organizationId]);
+                $prog = $stmtProg->fetch(PDO::FETCH_ASSOC);
+                if ($prog) {
+                    return $prog;
+                }
+            }
+        }
+
+        // 2. Scan knowledge source titles against active programs for exact or strong match
+        $stmtAllProgs = $db->prepare("
+            SELECT p.id, p.course_name, p.course_code, p.department_id, d.name as department_name
+            FROM programs p
+            LEFT JOIN departments d ON p.department_id = d.id
+            WHERE p.organization_id = :org_id
+        ");
+        $stmtAllProgs->execute([':org_id' => $organizationId]);
+        $allProgs = $stmtAllProgs->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($knowledgeSources as $src) {
+            $titleLower = strtolower($src['title'] ?? '');
+            foreach ($allProgs as $p) {
+                $pNameLower = strtolower($p['course_name'] ?? '');
+                $pCodeLower = strtolower($p['course_code'] ?? '');
+                if (!empty($pNameLower) && strpos($titleLower, $pNameLower) !== false) {
+                    return $p;
+                }
+                if (!empty($pCodeLower) && strlen($pCodeLower) >= 3 && preg_match('/\b' . preg_quote($pCodeLower, '/') . '\b/i', $titleLower)) {
+                    return $p;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Build active program-matched upcoming tour slots block
+     * Fetches slots where program_id = :progId OR is_general = 1 for the campus
+     */
+    private static function buildProgramTourSlotsBlock(PDO $db, int $organizationId, array $program): string
+    {
+        $progId = (int)$program['id'];
+        $progName = $program['course_name'];
+
+        $stmt = $db->prepare("
+            SELECT s.id, s.title, s.tour_date, s.start_time, s.end_time, s.max_capacity, s.booked_count, s.is_general,
+                   COALESCE(c.name, 'Main Campus') as campus_name,
+                   COALESCE(u.name, 'Admissions Counselor') as counselor_name
+            FROM campus_tour_slots s
+            LEFT JOIN campuses c ON s.campus_id = c.id
+            LEFT JOIN users u ON s.counselor_user_id = u.id
+            WHERE s.organization_id = :org_id 
+              AND s.status = 'active'
+              AND s.tour_date >= CURDATE()
+              AND (
+                  s.is_general = 1 
+                  OR s.id IN (SELECT slot_id FROM campus_tour_slot_programs WHERE program_id = :prog_id AND organization_id = :org_id)
+              )
+            ORDER BY s.is_general ASC, s.tour_date ASC, s.start_time ASC
+            LIMIT 3
+        ");
+        $stmt->execute([':org_id' => $organizationId, ':prog_id' => $progId]);
+        $slots = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (empty($slots)) {
+            return "";
+        }
+
+        $block = "\n--- UPCOMING RELEVANT CAMPUS TOUR SCHEDULES FOR [{$progName}] ---\n";
+        $block .= "PROSPECT PROGRAM INTEREST IDENTIFIED: \"{$progName}\"\n";
+        $block .= "Available upcoming tour slots matching this interest:\n";
+
+        foreach ($slots as $s) {
+            $formattedDate = date('l, d M Y', strtotime($s['tour_date']));
+            $sTime = date('h:i A', strtotime($s['start_time']));
+            $seatsLeft = max(0, (int)$s['max_capacity'] - (int)$s['booked_count']);
+            $typeStr = ((int)$s['is_general'] === 1) ? "General Campus Tour" : "Specialized {$progName} Program Visit";
+
+            $block .= "• Slot ID #{$s['id']}: \"{$s['title']}\" ({$typeStr})\n";
+            $block .= "  - When: {$formattedDate} at {$sTime}\n";
+            $block .= "  - Campus: {$s['campus_name']}\n";
+            $block .= "  - Availability: {$seatsLeft} seats remaining (Guide: {$s['counselor_name']})\n";
+        }
+
+        $firstSlot = $slots[0];
+        $sampleDate = date('l, d M', strtotime($firstSlot['tour_date']));
+        $sampleTime = date('h:i A', strtotime($firstSlot['start_time']));
+        $sampleTitle = $firstSlot['title'];
+        $sampleCampus = $firstSlot['campus_name'];
+
+        $block .= "\nINTELLIGENT TOUR RECOMMENDATION GUIDELINES:\n";
+        $block .= "1. Because the visitor is interested in {$progName}, tailor your campus tour bridge directly to the upcoming slot:\n";
+        $block .= "   Suggestion Example: \"We have a specialized {$sampleTitle} this {$sampleDate} at {$sampleTime} at our {$sampleCampus}. Would you like me to reserve a spot for you?\"\n";
+        $block .= "2. If the visitor accepts or says yes, warmly confirm and append `[LEAD_TRIGGER:campus_tour]` on the last line.\n";
+        $block .= "--- END UPCOMING RELEVANT CAMPUS TOUR SCHEDULES ---\n";
 
         return $block;
     }
