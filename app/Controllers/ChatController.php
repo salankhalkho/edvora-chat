@@ -296,6 +296,12 @@ class ChatController
                     && (bool)$bot['lead_capture_enabled']
                 ) {
                     $followUpMessage = $rawFollowUp;
+
+                    // Clean duplicate trailing question from main response if LLM repeated it before [FOLLOW_UP]
+                    $quotedFu = preg_quote($followUpMessage, '/');
+                    $aiResponseText = trim(preg_replace('/' . $quotedFu . '\s*$/i', '', $aiResponseText));
+                    // If main response still ends with a standalone trailing question, remove it so only Bubble 2 asks it
+                    $aiResponseText = trim(preg_replace('/\n+[^\n\.\!\?]+\?\s*$/i', '', $aiResponseText));
                 }
             }
 
