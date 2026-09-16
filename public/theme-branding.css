@@ -3335,34 +3335,40 @@ select.brand-input option {
       text-align: right;
     }
 
-    /* TEAMS ROSTER TABLE COLUMN SIZING */
+    /* TEAMS ROSTER TABLE RESPONSIVE 4-COLUMN SIZING & PADDING */
+    .teams-roster-table tbody::before {
+      display: none;
+    }
+
+    .teams-roster-table td {
+      padding: 14px 14px !important;
+    }
+
     .teams-roster-table th:nth-child(1),
     .teams-roster-table td:nth-child(1) {
-      width: 300px !important;
-      max-width: 380px !important;
+      width: 35% !important;
+      min-width: 220px !important;
+      max-width: none !important;
     }
 
     .teams-roster-table th:nth-child(2),
     .teams-roster-table td:nth-child(2) {
-      width: 210px !important;
+      width: 25% !important;
+      min-width: 170px !important;
       white-space: nowrap !important;
     }
 
     .teams-roster-table th:nth-child(3),
     .teams-roster-table td:nth-child(3) {
-      width: auto !important;
-      white-space: normal !important;
+      width: 20% !important;
+      min-width: 140px !important;
+      white-space: nowrap !important;
     }
 
     .teams-roster-table th:nth-child(4),
     .teams-roster-table td:nth-child(4) {
-      width: 160px !important;
-      white-space: nowrap !important;
-    }
-
-    .teams-roster-table th:nth-child(5),
-    .teams-roster-table td:nth-child(5) {
-      width: 240px !important;
+      width: 20% !important;
+      min-width: 120px !important;
       white-space: nowrap !important;
       text-align: right !important;
     }
