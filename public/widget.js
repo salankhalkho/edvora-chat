@@ -337,7 +337,80 @@
         messagesContainer.appendChild(div);
     }
 
-    // 7. Message Appending Helper
+    // 7. Markdown Formatting Helper & Message Appending
+    function formatMarkdown(text) {
+        if (!text) return '';
+
+        // 1. XSS Escaping
+        var html = String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+
+        // 2. Headings
+        html = html.replace(/^### (.*$)/gim, '<div style="font-weight:700; font-size:13px; margin: 6px 0 2px 0;">$1</div>');
+        html = html.replace(/^## (.*$)/gim, '<div style="font-weight:700; font-size:14px; margin: 6px 0 2px 0;">$1</div>');
+        html = html.replace(/^# (.*$)/gim, '<div style="font-weight:700; font-size:15px; margin: 6px 0 2px 0;">$1</div>');
+
+        // 3. Bold & Italics
+        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        html = html.replace(/__(.*?)__/g, '<strong>$1</strong>');
+        html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        html = html.replace(/_(.*?)_/g, '<em>$1</em>');
+
+        // 4. Bullet & Numbered lists
+        var lines = html.split('\n');
+        var inList = false;
+        var listType = null;
+        var result = [];
+
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            var bulletMatch = line.match(/^\s*[-\*]\s+(.*)/);
+            var numMatch = line.match(/^\s*(\d+)\.\s+(.*)/);
+
+            if (bulletMatch) {
+                if (!inList || listType !== 'ul') {
+                    if (inList) result.push(listType === 'ul' ? '</ul>' : '</ol>');
+                    inList = true;
+                    listType = 'ul';
+                    result.push('<ul style="margin: 4px 0 6px 0; padding-left: 18px; list-style-type: disc;">');
+                }
+                result.push('<li style="margin-bottom: 3px;">' + bulletMatch[1] + '</li>');
+            } else if (numMatch) {
+                if (!inList || listType !== 'ol') {
+                    if (inList) result.push(listType === 'ul' ? '</ul>' : '</ol>');
+                    inList = true;
+                    listType = 'ol';
+                    result.push('<ol style="margin: 4px 0 6px 0; padding-left: 18px;">');
+                }
+                result.push('<li style="margin-bottom: 3px;">' + numMatch[2] + '</li>');
+            } else {
+                if (inList) {
+                    result.push(listType === 'ul' ? '</ul>' : '</ol>');
+                    inList = false;
+                    listType = null;
+                }
+                result.push(line);
+            }
+        }
+        if (inList) {
+            result.push(listType === 'ul' ? '</ul>' : '</ol>');
+        }
+
+        html = result.join('\n');
+
+        // 5. Links: [text](url)
+        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #2563EB; text-decoration: underline;">$1</a>');
+
+        // 6. Line breaks
+        html = html.replace(/\n/g, '<br>');
+        html = html.replace(/<br>\s*<ul/g, '<ul').replace(/<\/ul>\s*<br>/g, '</ul>');
+        html = html.replace(/<br>\s*<ol/g, '<ol').replace(/<\/ol>\s*<br>/g, '</ol>');
+
+        return html;
+    }
+
     function appendMessage(role, text) {
         var cust = (config && config.customization) ? config.customization : {};
         var showBubbleAv = (role === 'assistant') && (cust.avatar_location === 'bubbles' || cust.avatar_location === 'both' || !cust.avatar_location);
@@ -358,7 +431,11 @@
 
         var msgDiv = document.createElement('div');
         msgDiv.className = 'edvora-msg ' + role;
-        msgDiv.innerText = text;
+        if (role === 'assistant') {
+            msgDiv.innerHTML = formatMarkdown(text);
+        } else {
+            msgDiv.innerText = text;
+        }
 
         // Apply custom bubble styling
         if (role === 'assistant') {
