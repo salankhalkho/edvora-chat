@@ -253,6 +253,10 @@ class ChatController
         $hasProgramLeadInDb = false;
         $activeProgramData = null;
 
+        // Check if current user query is a broad catalog inquiry or generic fee inquiry
+        $isCatalogQuery = ProgramDetector::isGenericCatalogQuery($userMessage);
+        $isFeeQuery = ProgramDetector::isGenericFeeQuery($userMessage);
+
         // If user explicitly inquired about a program on this current turn, prioritize it immediately
         if ($detectedProgram) {
             $hasProgramLeadInDb = true;
@@ -260,7 +264,8 @@ class ChatController
                 'id' => $currentProgramId,
                 'course_name' => $currentProgramInterest
             ];
-        } else {
+        } elseif (!$isCatalogQuery) {
+            // Only inherit prior program interest if this is NOT a broad catalog query
             $stmtLeadCheck = $db->prepare("
                 SELECT id, program_interest, program_id
                 FROM leads
@@ -304,7 +309,8 @@ class ChatController
             && ((bool)$bot['lead_capture_enabled'])
             && ($turnCount >= $minTurns)
             && ($totalOffersCount < $maxOffersPerSession)
-            && (($turnCount - $lastOfferTurn) >= $cooldownTurns);
+            && (($turnCount - $lastOfferTurn) >= $cooldownTurns)
+            && !$isCatalogQuery;
 
         // 8. Build System Prompt with Counselor Brain, Intent Tier, and Offer Cadence
         $systemPrompt = PromptBuilder::build(
@@ -316,7 +322,9 @@ class ChatController
             $leadCaptured,
             $minTurns,
             $canMakeOffer,
-            $activeProgramData
+            $activeProgramData,
+            $isCatalogQuery,
+            $isFeeQuery
         );
 
         // 9. Invoke LLM Service

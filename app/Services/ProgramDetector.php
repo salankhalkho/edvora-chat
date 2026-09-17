@@ -13,9 +13,14 @@ class ProgramDetector
         'what courses do you offer',
         'what programs are available',
         'what programs do you offer',
+        'what degrees are available',
+        'which degrees do you offer',
+        'what courses can i study',
+        'what can i study',
         'list of courses',
         'list all courses',
         'list of programs',
+        'list all programs',
         'show courses',
         'show programs',
         'all courses',
@@ -24,20 +29,55 @@ class ProgramDetector
         'available programs',
         'courses offered',
         'programs offered',
-        'what can i study',
-        'which degrees do you offer',
-        'what degrees are available'
+        'courses you have',
+        'programs you have',
+        'degrees offered'
     ];
+
+    private static array $genericFeeKeywords = [
+        'what is the fee',
+        'what is the fees',
+        'what are the fees',
+        'how much is the fee',
+        'how much are the fees',
+        'how much does it cost',
+        'fee structure',
+        'tuition fee',
+        'course fee',
+        'program fee'
+    ];
+
+    public static function isGenericCatalogQuery(string $query): bool
+    {
+        $clean = trim(mb_strtolower($query, 'UTF-8'));
+        $clean = preg_replace('/[?!.,]/', '', $clean);
+        foreach (self::$genericCatalogKeywords as $kw) {
+            if (str_contains($clean, $kw) && strlen($clean) <= strlen($kw) + 15) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static function isGenericFeeQuery(string $query): bool
+    {
+        $clean = trim(mb_strtolower($query, 'UTF-8'));
+        $clean = preg_replace('/[?!.,]/', '', $clean);
+        foreach (self::$genericFeeKeywords as $kw) {
+            if (str_contains($clean, $kw) && strlen($clean) <= strlen($kw) + 15) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public static function detect(PDO $db, int $orgId, string $query, array $contextSources = []): ?array
     {
-        $cleanQuery = trim(mb_strtolower($query, 'UTF-8'));
-
-        foreach (self::$genericCatalogKeywords as $broad) {
-            if (str_contains($cleanQuery, $broad) && strlen($cleanQuery) <= strlen($broad) + 15) {
-                return null;
-            }
+        if (self::isGenericCatalogQuery($query)) {
+            return null;
         }
+
+        $cleanQuery = trim(mb_strtolower($query, 'UTF-8'));
 
         $stmtProgs = $db->prepare("
             SELECT id, course_name, course_code, program_type

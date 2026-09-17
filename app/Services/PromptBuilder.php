@@ -19,7 +19,9 @@ class PromptBuilder
         bool $leadCaptured = false,
         int $minTurns = 2,
         bool $canMakeOffer = true,
-        ?array $activeProgram = null
+        ?array $activeProgram = null,
+        bool $isCatalogQuery = false,
+        bool $isFeeQuery = false
     ): string {
         $db = Database::getConnection();
 
@@ -68,17 +70,24 @@ class PromptBuilder
         // Intelligent recommendation ONLY operates after a prospect's academic program interest has been identified.
         $detectedProgram = $activeProgram ?? self::detectProgramInterest($db, $organizationId, $knowledgeContextSources);
         $tourSlotsBlock = "";
-        if ($detectedProgram) {
+        if ($detectedProgram && !$isCatalogQuery) {
             $tourSlotsBlock = self::buildProgramTourSlotsBlock($db, $organizationId, $detectedProgram);
         }
 
         // 9. Inject Dynamic Counselor State & Strict Program-Qualification Rule
-        if ($leadCaptured) {
+        if ($isCatalogQuery) {
+            $leadStateNotice = "GENERAL CATALOG QUERY: Visitor is asking about all available courses/degrees/programs. INSTRUCTION: List ALL available college academic programs from the 'ACTIVE COLLEGE ACADEMIC PROGRAMS & DEGREES' block above, neatly categorized by degree level (Undergraduate, Postgraduate, Doctoral, etc.). Do NOT restrict your answer to only one program. Do NOT output [FOLLOW_UP] or any lead pitch. End warmly by asking which field or degree interests them.";
+        } elseif ($leadCaptured) {
             $leadStateNotice = "NOTICE: Visitor contact details already collected. DO NOT MAKE ANY OFFER or trigger any lead forms. Focus 100% on answering questions directly.";
         } elseif (!$activeProgram) {
-            $leadStateNotice = "PROGRAM DISCOVERY PHASE: Visitor program/degree interest is NOT yet known or recorded. STRICT MANDATE: DO NOT MAKE ANY OF THE 4 OFFERS (NO campus tour, NO counselor callback, NO scholarship calculator, NO brochure/lead-magnet). Do NOT output [FOLLOW_UP]. Provide a helpful, concise answer. You may ask an open-ended conversational counseling question to understand their academic interest (e.g. asking what degree or area they wish to pursue).";
+            if ($isFeeQuery) {
+                $leadStateNotice = "FEE INQUIRY (NO PROGRAM SPECIFIED): Visitor is asking for course fees without mentioning which program. INSTRUCTION: Politely ask which specific program's fee details they would like to know (mentioning 2-3 popular options). Do NOT make any offer.";
+            } else {
+                $leadStateNotice = "PROGRAM DISCOVERY PHASE: Visitor program/degree interest is NOT yet known or recorded. STRICT MANDATE: DO NOT MAKE ANY OF THE 4 OFFERS (NO campus tour, NO counselor callback, NO scholarship calculator, NO brochure/lead-magnet). Do NOT output [FOLLOW_UP]. Provide a helpful, concise answer. You may ask an open-ended conversational counseling question to understand their academic interest (e.g. asking what degree or area they wish to pursue).";
+            }
         } elseif (!$canMakeOffer) {
-            $leadStateNotice = "ANTI-FATIGUE COOLDOWN IN EFFECT: DO NOT MAKE ANY OFFER on this turn. Do NOT mention campus tours, brochures, callbacks, or scholarships. Do NOT output [FOLLOW_UP]. Provide a pure, helpful, factual answer ending with a period.";
+            $progTitle = $activeProgram['course_name'] ?? 'their chosen program';
+            $leadStateNotice = "ANTI-FATIGUE COOLDOWN IN EFFECT: Visitor is inquiring about {$progTitle}. Answer their specific question directly, factually, and completely using the provided details (including tuition fees if asked). DO NOT MAKE ANY OFFER on this turn. Do NOT mention campus tours, brochures, callbacks, or scholarships. Do NOT output [FOLLOW_UP]. End with a helpful period or polite closer.";
         } elseif ($turnCount < $minTurns) {
             $leadStateNotice = "TURN 1 GREETING & RAPPORT: Turn Count is {$turnCount} (< {$minTurns}). DO NOT MAKE ANY OFFER. Answer the question directly and cleanly without pitch language.";
         } else {
