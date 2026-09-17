@@ -199,15 +199,18 @@ class ProgramDetector
                         50, 'Academic program interest identified', :notes, NOW(), NOW()
                     )
                 ");
-                $stmtInsert->execute([
-                    ':oid' => $orgId,
-                    ':bot_id' => $botId,
-                    ':cid' => $convId,
-                    ':pid' => $programId,
-                    ':assigned_uid' => $assignedUserId,
-                    ':pname' => $programName,
-                    ':notes' => 'Identified interest in ' . $programName . ' during admissions counseling.'
-                ]);
+                $stmtInsert->bindValue(':oid', $orgId, PDO::PARAM_INT);
+                $stmtInsert->bindValue(':bot_id', $botId, PDO::PARAM_INT);
+                $stmtInsert->bindValue(':cid', $convId, PDO::PARAM_INT);
+                $stmtInsert->bindValue(':pid', $programId, PDO::PARAM_INT);
+                if ($assignedUserId !== null) {
+                    $stmtInsert->bindValue(':assigned_uid', $assignedUserId, PDO::PARAM_INT);
+                } else {
+                    $stmtInsert->bindValue(':assigned_uid', null, PDO::PARAM_NULL);
+                }
+                $stmtInsert->bindValue(':pname', $programName, PDO::PARAM_STR);
+                $stmtInsert->bindValue(':notes', 'Identified interest in ' . $programName . ' during admissions counseling.', PDO::PARAM_STR);
+                $stmtInsert->execute();
             }
         } catch (Throwable $e) {
             error_log('[ProgramDetector] syncProgramLead error: ' . $e->getMessage());
