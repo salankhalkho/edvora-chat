@@ -697,15 +697,16 @@ class ScholarshipController
      */
     public function evaluate(Request $request): void
     {
-        $botToken = trim((string)($request->getBotToken() ?: $request->get('bot_token') ?: $request->get('bot')));
-        $courseId = (int)($request->get('course_id') ?: $request->get('courseId'));
-        $score = (float)$request->get('score');
-        $selectedBoosters = is_array($request->get('boosters')) ? $request->get('boosters') : (is_array($request->get('selected_boosters')) ? $request->get('selected_boosters') : []);
+        try {
+            $botToken = trim((string)($request->getBotToken() ?: $request->get('bot_token') ?: $request->get('bot')));
+            $courseId = (int)($request->get('course_id') ?: $request->get('courseId'));
+            $score = (float)$request->get('score');
+            $selectedBoosters = is_array($request->get('boosters')) ? $request->get('boosters') : (is_array($request->get('selected_boosters')) ? $request->get('selected_boosters') : []);
 
-        if (empty($botToken) || empty($courseId)) {
-            Response::error('bot_token and course_id are required.', 422);
-            return;
-        }
+            if (empty($botToken) || empty($courseId)) {
+                Response::error('bot_token and course_id are required.', 422);
+                return;
+            }
 
         $db = Database::getConnection();
         $stmtBot = $db->prepare("SELECT organization_id FROM chatbots WHERE bot_token = :token AND is_active = 1");
@@ -871,5 +872,8 @@ class ScholarshipController
             'currency' => $currency,
             'active_boosters' => $activeBoosterNames
         ]);
+        } catch (Throwable $e) {
+            Response::error('Evaluation failed: ' . $e->getMessage(), 500);
+        }
     }
 }
