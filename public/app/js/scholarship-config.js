@@ -25,11 +25,8 @@ async function loadScholarshipPrograms() {
     try {
         const res = await fetch('/v1/programs');
         const json = await res.json();
-        if (json.success && Array.isArray(json.data)) {
-            window._scholarshipPrograms = json.data;
-        } else {
-            window._scholarshipPrograms = [];
-        }
+        const rawList = (json.data && Array.isArray(json.data.courses)) ? json.data.courses : (Array.isArray(json.data) ? json.data : []);
+        window._scholarshipPrograms = rawList;
     } catch (e) {
         console.warn('Failed to load academic programs for scholarship:', e);
         window._scholarshipPrograms = [];
