@@ -445,6 +445,13 @@ $router->put('/v1/scholarships/config', [ScholarshipController::class, 'updateCo
 $router->post('/v1/scholarships/courses', [ScholarshipController::class, 'saveCourse'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->delete('/v1/scholarships/courses/{id}', [ScholarshipController::class, 'deleteCourse'], [AuthMiddleware::class, TenantMiddleware::class]);
 
+// Dedicated Scholarship Rules Routes (Mapped to Programs)
+$router->get('/v1/scholarship-rules', [ScholarshipController::class, 'indexRules'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->get('/v1/scholarship-rules/{id}', [ScholarshipController::class, 'showRule'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->post('/v1/scholarship-rules', [ScholarshipController::class, 'storeRule'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->put('/v1/scholarship-rules/{id}', [ScholarshipController::class, 'updateRule'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->delete('/v1/scholarship-rules/{id}', [ScholarshipController::class, 'deleteRule'], [AuthMiddleware::class, TenantMiddleware::class]);
+
 // Widget Config, Scholarships & Chat Completion Routes (Public Widget & Mobile REST API)
 $router->get('/v1/widget/config/{bot_token}', [ChatController::class, 'widgetConfig']);
 $router->get('/v1/widget/departments/{bot_token}', [DepartmentController::class, 'publicList']);

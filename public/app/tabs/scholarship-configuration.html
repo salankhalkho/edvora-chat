@@ -1,0 +1,101 @@
+<div class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
+
+  <!-- Top Control Bar (Title) -->
+  <div class="ops-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 20px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important;">
+    <div class="ops-dash-title-group" style="display: flex !important; align-items: center !important; gap: 10px !important;">
+      <span class="ops-live-dot"></span>
+      <div>
+        <div class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important;">Scholarships &amp; Financial Aid Rules</div>
+        <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">Manage program-mapped merit scholarships, admission waivers, exam criteria, and lead incentives</div>
+      </div>
+    </div>
+
+    <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
+      <button type="button" onclick="switchNavTab('org-settings')" class="brand-btn-secondary" style="height: 32px; padding: 0 11px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; border-radius: 6px; background: #F4FAF7; border: 1.5px solid #D1E5DE; color: var(--e-teal, #063D3B);" title="Return to Control Panel">
+        <span>←</span> <span>Control Panel</span>
+      </button>
+      <div class="ckh-ctrl-pill" style="font-size: 11px !important; font-weight: 700 !important; color: var(--e-teal) !important; background: #F4FAF7 !important; border: 1px solid #D1E5DE !important; border-radius: 8px !important; padding: 5px 11px !important; display: inline-flex !important; align-items: center !important; gap: 5px !important;">
+        <span style="font-size: 13px;">💰</span>
+        <span id="scholarshipsActivePillCount">Scholarships: Active</span>
+      </div>
+      <button id="scholarshipAddBtn" onclick="openCreateScholarshipPage()" class="ckh-btn-ingest" title="Add Scholarship" style="background: #063D3B !important; color: #C8FF63 !important; border: none !important; border-radius: 8px !important; padding: 6px 14px !important; font-size: 11.5px !important; font-weight: 700 !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; gap: 6px !important;">
+        <span style="font-size: 14px; line-height: 1; font-weight: 800;">+</span>
+        <span>Add Scholarship</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- FILTER & SEARCH TOOLBAR (MATCHES TEAMS FILTER BAR) -->
+  <div class="ckh-toolbar" style="margin-top: 20px;">
+    <div class="ckh-tabs-group" id="scholarshipsTabsContainer">
+      <button class="ckh-tab-btn active" id="schTabBtnAll" onclick="setScholarshipFilter('all', this)">
+        <span>All Scholarships</span>
+        <span class="ckh-tab-count" id="tabCountSchAll">0</span>
+      </button>
+      <button class="ckh-tab-btn" id="schTabBtnActive" onclick="setScholarshipFilter('active', this)" style="color:#047857;">
+        <span style="width:6px; height:6px; border-radius:50%; background:#10B981; display:inline-block;"></span>
+        <span>Active</span>
+        <span class="ckh-tab-count" id="tabCountSchActive" style="background:#ECFDF5; color:#047857;">0</span>
+      </button>
+      <button class="ckh-tab-btn" id="schTabBtnInactive" onclick="setScholarshipFilter('inactive', this)" style="color:#64748B;">
+        <span style="width:6px; height:6px; border-radius:50%; background:#94A3B8; display:inline-block;"></span>
+        <span>Inactive</span>
+        <span class="ckh-tab-count" id="tabCountSchInactive" style="background:#F1F5F9; color:#64748B;">0</span>
+      </button>
+      <button class="ckh-tab-btn" id="schTabBtnUndergrad" onclick="setScholarshipFilter('undergraduate', this)" style="color:#1D4ED8;">
+        <span style="width:6px; height:6px; border-radius:50%; background:#1D4ED8; display:inline-block;"></span>
+        <span>Undergraduate</span>
+        <span class="ckh-tab-count" id="tabCountSchUndergrad" style="background:#EFF6FF; color:#1D4ED8;">0</span>
+      </button>
+      <button class="ckh-tab-btn" id="schTabBtnPostgrad" onclick="setScholarshipFilter('postgraduate', this)" style="color:#7C3AED;">
+        <span style="width:6px; height:6px; border-radius:50%; background:#7C3AED; display:inline-block;"></span>
+        <span>Postgraduate</span>
+        <span class="ckh-tab-count" id="tabCountSchPostgrad" style="background:#F5F3FF; color:#7C3AED;">0</span>
+      </button>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+      <!-- Search Input -->
+      <div class="ckh-search-box">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#648781" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="scholarshipsSearchInput" class="ckh-search-input" placeholder="Search by scholarship, program, code..." oninput="filterScholarshipsTable()">
+        <span style="font-size: 9.5px; font-family: 'JetBrains Mono', monospace; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: #F1F7F4; color: #648781; border: 1px solid #DCE9E5;">⌘K</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCHOLARSHIPS TABLE (MATCHES KNOWLEDGE HUB / TEAMS ROSTER TABLE) -->
+  <div class="ckh-table-wrap">
+    <table class="ckh-doc-table scholarships-list-table">
+      <thead>
+        <tr>
+          <th>Scholarship Details</th>
+          <th>Mapped Academic Program</th>
+          <th>Evaluation Criteria</th>
+          <th>Waiver / Award Value</th>
+          <th>Status</th>
+          <th style="text-align: right;">Action</th>
+        </tr>
+      </thead>
+      <tbody id="scholarshipsTableBody">
+        <tr>
+          <td colspan="6" style="text-align: center; padding: 36px 20px; color: #648781;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; font-size: 12.5px;">
+              <span>Loading scholarships...</span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="/app/js/scholarship-config.js?v=1.0"></script>
+<script>
+(function() {
+  if (typeof initScholarshipConfiguration === 'function') {
+    initScholarshipConfiguration();
+  }
+})();
+</script>

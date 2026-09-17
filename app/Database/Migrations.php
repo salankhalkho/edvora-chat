@@ -1103,6 +1103,35 @@ class Migrations
         } catch (Throwable $e) {
             // Table comment update
         }
+
+        // Scholarship Rules Table mapped to programs
+        try {
+            $this->db->exec("CREATE TABLE IF NOT EXISTS scholarship_rules (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                organization_id INT NOT NULL,
+                program_id INT NOT NULL,
+                title VARCHAR(255) NOT NULL,
+                code VARCHAR(50) NULL,
+                description TEXT NULL,
+                evaluation_metric ENUM('percentage_12th', 'graduation_cgpa', 'entrance_exam', 'merit_rank', 'general_merit') DEFAULT 'percentage_12th',
+                exam_name VARCHAR(100) NULL,
+                discount_type ENUM('percentage', 'fixed_amount') DEFAULT 'percentage',
+                discount_value DECIMAL(12,2) DEFAULT 0.00,
+                slabs JSON NULL COMMENT '[{\"min\":90,\"max\":100,\"waiver_pct\":50,\"label\":\"90%+ Waiver\"}]',
+                eligibility_criteria TEXT NULL,
+                terms_conditions TEXT NULL,
+                max_recipients INT NULL,
+                is_active TINYINT(1) DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
+                FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE CASCADE,
+                INDEX idx_org_prog (organization_id, program_id),
+                INDEX idx_active (organization_id, is_active)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+        } catch (Throwable $e) {
+            // Table may already exist
+        }
     }
 }
 

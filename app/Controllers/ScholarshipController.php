@@ -260,6 +260,346 @@ class ScholarshipController
     }
 
     /**
+     * GET /v1/scholarship-rules — List all scholarship rules with mapped program details
+     */
+    public function indexRules(Request $request): void
+    {
+        $orgId = $this->getOrgId($request);
+        if (!$orgId) {
+            Response::error('Organization context required', 400);
+            return;
+        }
+
+        try {
+            $db = Database::getConnection();
+            $stmt = $db->prepare("
+                SELECT sr.*,
+                       p.course_name as program_name,
+                       p.course_code as program_code,
+                       p.program_type,
+                       p.tuition_fee as program_tuition_fee,
+                       p.currency as program_currency
+                FROM scholarship_rules sr
+                LEFT JOIN programs p ON sr.program_id = p.id AND p.organization_id = sr.organization_id
+                WHERE sr.organization_id = ?
+                ORDER BY sr.is_active DESC, p.course_name ASC, sr.title ASC
+            ");
+            $stmt->execute([$orgId]);
+            $rules = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($rules as &$rule) {
+                $rule['slabs'] = !empty($rule['slabs']) ? json_decode($rule['slabs'], true) : [];
+            }
+
+            Response::success($rules);
+        } catch (Throwable $e) {
+            Response::error('Failed to fetch scholarship rules: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * GET /v1/scholarship-rules/{id} — Get a single scholarship rule by ID
+     */
+    public function showRule(Request $request, array $params = []): void
+    {
+        $orgId = $this->getOrgId($request);
+        if (!$orgId) {
+            Response::error('Organization context required', 400);
+            return;
+        }
+
+        $id = (int)($params['id'] ?? 0);
+        if (!$id) {
+            Response::error('Scholarship rule ID is required', 400);
+            return;
+        }
+
+        try {
+            $db = Database::getConnection();
+            $stmt = $db->prepare("
+                SELECT sr.*,
+                       p.course_name as program_name,
+                       p.course_code as program_code,
+                       p.program_type,
+                       p.tuition_fee as program_tuition_fee,
+                       p.currency as program_currency
+                FROM scholarship_rules sr
+                LEFT JOIN programs p ON sr.program_id = p.id AND p.organization_id = sr.organization_id
+                WHERE sr.id = ? AND sr.organization_id = ?
+            ");
+            $stmt->execute([$id, $orgId]);
+            $rule = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$rule) {
+                Response::error('Scholarship rule not found', 404);
+                return;
+            }
+
+            $rule['slabs'] = !empty($rule['slabs']) ? json_decode($rule['slabs'], true) : [];
+            Response::success($rule);
+        } catch (Throwable $e) {
+            Response::error('Failed to fetch scholarship rule: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * POST /v1/scholarship-rules — Create a new scholarship rule mapped to a program
+     */
+    public function storeRule(Request $request): void
+    {
+        $orgId = $this->getOrgId($request);
+        if (!$orgId) {
+            Response::error('Organization context required', 400);
+            return;
+        }
+
+        $data = $request->all();
+        $title = trim($data['title'] ?? '');
+        $programId = (int)($data['program_id'] ?? 0);
+
+        if (empty($title)) {
+            Response::error('Scholarship title is required', 422);
+            return;
+        }
+
+        if (!$programId) {
+            Response::error('Program mapping is mandatory (program_id is required)', 422);
+            return;
+        }
+
+        try {
+            $db = Database::getConnection();
+
+            // Verify program belongs to organization
+            $stmtProg = $db->prepare("SELECT id, course_name FROM programs WHERE id = ? AND organization_id = ?");
+            $stmtProg->execute([$programId, $orgId]);
+            $prog = $stmtProg->fetch(PDO::FETCH_ASSOC);
+            if (!$prog) {
+                Response::error('Selected program was not found in your organization', 404);
+                return;
+            }
+
+            $code = trim($data['code'] ?? '') ?: null;
+            $description = trim($data['description'] ?? '') ?: null;
+            $evaluationMetric = trim($data['evaluation_metric'] ?? 'percentage_12th');
+            $allowedMetrics = ['percentage_12th', 'graduation_cgpa', 'entrance_exam', 'merit_rank', 'general_merit'];
+            if (!in_array($evaluationMetric, $allowedMetrics)) {
+                $evaluationMetric = 'percentage_12th';
+            }
+
+            $examName = trim($data['exam_name'] ?? '') ?: null;
+            $discountType = ($data['discount_type'] ?? 'percentage') === 'fixed_amount' ? 'fixed_amount' : 'percentage';
+            $discountValue = isset($data['discount_value']) ? (float)$data['discount_value'] : 0.00;
+
+            $slabs = is_array($data['slabs'] ?? null) ? $data['slabs'] : [];
+            $cleanSlabs = [];
+            foreach ($slabs as $s) {
+                if (!is_array($s)) continue;
+                $min = isset($s['min']) ? (float)$s['min'] : 0;
+                $max = isset($s['max']) ? (float)$s['max'] : 100;
+                $waiver = isset($s['waiver_pct']) ? (float)$s['waiver_pct'] : (isset($s['waiver_percentage']) ? (float)$s['waiver_percentage'] : (float)($s['waiver'] ?? 0));
+                $label = trim($s['label'] ?? "{$waiver}% Waiver");
+                $cleanSlabs[] = [
+                    'min' => $min,
+                    'max' => $max,
+                    'waiver_pct' => $waiver,
+                    'label' => $label
+                ];
+            }
+
+            $eligibilityCriteria = trim($data['eligibility_criteria'] ?? '') ?: null;
+            $termsConditions = trim($data['terms_conditions'] ?? '') ?: null;
+            $maxRecipients = !empty($data['max_recipients']) ? (int)$data['max_recipients'] : null;
+            $isActive = isset($data['is_active']) ? ((int)$data['is_active'] ? 1 : 0) : 1;
+
+            $stmt = $db->prepare("
+                INSERT INTO scholarship_rules
+                (organization_id, program_id, title, code, description, evaluation_metric, exam_name, discount_type, discount_value, slabs, eligibility_criteria, terms_conditions, max_recipients, is_active, created_at, updated_at)
+                VALUES
+                (:org_id, :prog_id, :title, :code, :desc, :metric, :exam, :disc_type, :disc_val, :slabs, :elig, :terms, :max_rec, :active, NOW(), NOW())
+            ");
+            $stmt->execute([
+                ':org_id' => $orgId,
+                ':prog_id' => $programId,
+                ':title' => $title,
+                ':code' => $code,
+                ':desc' => $description,
+                ':metric' => $evaluationMetric,
+                ':exam' => $examName,
+                ':disc_type' => $discountType,
+                ':disc_val' => $discountValue,
+                ':slabs' => json_encode($cleanSlabs),
+                ':elig' => $eligibilityCriteria,
+                ':terms' => $termsConditions,
+                ':max_rec' => $maxRecipients,
+                ':active' => $isActive
+            ]);
+
+            $newId = (int)$db->lastInsertId();
+            AuditLogger::log('scholarship_rule_created', 'scholarship_rules', $newId, ['title' => $title, 'program_id' => $programId]);
+
+            Response::success(['id' => $newId], 'Scholarship rule created successfully.', 201);
+        } catch (Throwable $e) {
+            Response::error('Failed to create scholarship rule: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * PUT /v1/scholarship-rules/{id} — Update an existing scholarship rule
+     */
+    public function updateRule(Request $request, array $params = []): void
+    {
+        $orgId = $this->getOrgId($request);
+        if (!$orgId) {
+            Response::error('Organization context required', 400);
+            return;
+        }
+
+        $id = (int)($params['id'] ?? 0);
+        if (!$id) {
+            Response::error('Scholarship rule ID is required', 400);
+            return;
+        }
+
+        $data = $request->all();
+        $title = trim($data['title'] ?? '');
+        $programId = (int)($data['program_id'] ?? 0);
+
+        if (empty($title)) {
+            Response::error('Scholarship title is required', 422);
+            return;
+        }
+
+        if (!$programId) {
+            Response::error('Program mapping is mandatory (program_id is required)', 422);
+            return;
+        }
+
+        try {
+            $db = Database::getConnection();
+
+            // Verify rule exists
+            $stmtCheck = $db->prepare("SELECT id FROM scholarship_rules WHERE id = ? AND organization_id = ?");
+            $stmtCheck->execute([$id, $orgId]);
+            if (!$stmtCheck->fetch()) {
+                Response::error('Scholarship rule not found', 404);
+                return;
+            }
+
+            // Verify program belongs to organization
+            $stmtProg = $db->prepare("SELECT id, course_name FROM programs WHERE id = ? AND organization_id = ?");
+            $stmtProg->execute([$programId, $orgId]);
+            if (!$stmtProg->fetch()) {
+                Response::error('Selected program was not found in your organization', 404);
+                return;
+            }
+
+            $code = trim($data['code'] ?? '') ?: null;
+            $description = trim($data['description'] ?? '') ?: null;
+            $evaluationMetric = trim($data['evaluation_metric'] ?? 'percentage_12th');
+            $allowedMetrics = ['percentage_12th', 'graduation_cgpa', 'entrance_exam', 'merit_rank', 'general_merit'];
+            if (!in_array($evaluationMetric, $allowedMetrics)) {
+                $evaluationMetric = 'percentage_12th';
+            }
+
+            $examName = trim($data['exam_name'] ?? '') ?: null;
+            $discountType = ($data['discount_type'] ?? 'percentage') === 'fixed_amount' ? 'fixed_amount' : 'percentage';
+            $discountValue = isset($data['discount_value']) ? (float)$data['discount_value'] : 0.00;
+
+            $slabs = is_array($data['slabs'] ?? null) ? $data['slabs'] : [];
+            $cleanSlabs = [];
+            foreach ($slabs as $s) {
+                if (!is_array($s)) continue;
+                $min = isset($s['min']) ? (float)$s['min'] : 0;
+                $max = isset($s['max']) ? (float)$s['max'] : 100;
+                $waiver = isset($s['waiver_pct']) ? (float)$s['waiver_pct'] : (isset($s['waiver_percentage']) ? (float)$s['waiver_percentage'] : (float)($s['waiver'] ?? 0));
+                $label = trim($s['label'] ?? "{$waiver}% Waiver");
+                $cleanSlabs[] = [
+                    'min' => $min,
+                    'max' => $max,
+                    'waiver_pct' => $waiver,
+                    'label' => $label
+                ];
+            }
+
+            $eligibilityCriteria = trim($data['eligibility_criteria'] ?? '') ?: null;
+            $termsConditions = trim($data['terms_conditions'] ?? '') ?: null;
+            $maxRecipients = !empty($data['max_recipients']) ? (int)$data['max_recipients'] : null;
+            $isActive = isset($data['is_active']) ? ((int)$data['is_active'] ? 1 : 0) : 1;
+
+            $stmt = $db->prepare("
+                UPDATE scholarship_rules
+                SET program_id = :prog_id,
+                    title = :title,
+                    code = :code,
+                    description = :desc,
+                    evaluation_metric = :metric,
+                    exam_name = :exam,
+                    discount_type = :disc_type,
+                    discount_value = :disc_val,
+                    slabs = :slabs,
+                    eligibility_criteria = :elig,
+                    terms_conditions = :terms,
+                    max_recipients = :max_rec,
+                    is_active = :active,
+                    updated_at = NOW()
+                WHERE id = :id AND organization_id = :org_id
+            ");
+            $stmt->execute([
+                ':prog_id' => $programId,
+                ':title' => $title,
+                ':code' => $code,
+                ':desc' => $description,
+                ':metric' => $evaluationMetric,
+                ':exam' => $examName,
+                ':disc_type' => $discountType,
+                ':disc_val' => $discountValue,
+                ':slabs' => json_encode($cleanSlabs),
+                ':elig' => $eligibilityCriteria,
+                ':terms' => $termsConditions,
+                ':max_rec' => $maxRecipients,
+                ':active' => $isActive,
+                ':id' => $id,
+                ':org_id' => $orgId
+            ]);
+
+            AuditLogger::log('scholarship_rule_updated', 'scholarship_rules', $id, ['title' => $title, 'program_id' => $programId]);
+            Response::success(['id' => $id], 'Scholarship rule updated successfully.');
+        } catch (Throwable $e) {
+            Response::error('Failed to update scholarship rule: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * DELETE /v1/scholarship-rules/{id} — Delete scholarship rule
+     */
+    public function deleteRule(Request $request, array $params = []): void
+    {
+        $orgId = $this->getOrgId($request);
+        if (!$orgId) {
+            Response::error('Organization context required', 400);
+            return;
+        }
+
+        $id = (int)($params['id'] ?? 0);
+        if (!$id) {
+            Response::error('Scholarship rule ID is required', 400);
+            return;
+        }
+
+        try {
+            $db = Database::getConnection();
+            $stmt = $db->prepare("DELETE FROM scholarship_rules WHERE id = ? AND organization_id = ?");
+            $stmt->execute([$id, $orgId]);
+
+            AuditLogger::log('scholarship_rule_deleted', 'scholarship_rules', $id);
+            Response::success(null, 'Scholarship rule deleted successfully.');
+        } catch (Throwable $e) {
+            Response::error('Failed to delete scholarship rule: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
      * GET /v1/widget/scholarship/courses/{bot_token} — Public widget endpoint to fetch active course list
      */
     public function publicCourses(Request $request, array $params = []): void

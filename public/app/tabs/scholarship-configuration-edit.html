@@ -1,0 +1,208 @@
+<!-- Dedicated Scholarship Creation & Editor Workspace (Unified Frame matching Knowledge-Edit) -->
+<div id="view-scholarship-editor" class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
+    
+    <!-- Top Control Bar (Inside Unified Card) -->
+    <div class="ops-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 24px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important; flex-wrap: wrap; gap: 12px;">
+        <div class="ops-dash-title-group" style="display: flex !important; align-items: center !important; gap: 14px !important;">
+            <button type="button" class="brand-btn-secondary" style="height: 36px; padding: 0 14px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;" onclick="closeScholarshipEditor()">
+                <span>←</span> Back to Scholarships
+            </button>
+            <div style="height: 24px; width: 1px; background: #E2E8F0;"></div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span id="schEditorTypeIcon" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #FFFBEB; font-size: 16px; font-weight: 800; color: #D97706; border: 1px solid #FDE68A;">💰</span>
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span id="schEditorHeaderTitle" class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important; letter-spacing: -0.01em !important; line-height: 1.25 !important; max-width: 480px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            Create New Scholarship
+                        </span>
+                        <span id="schEditorStatusBadge" style="display: inline-flex !important; align-items: center !important; gap: 7px !important; padding: 5px 14px !important; border-radius: 9999px !important; font-size: 11.5px !important; font-weight: 800 !important; background: #ECFDF5; border: 1.5px solid #34D399; color: #047857; box-shadow: 0 1px 3px rgba(0,0,0,0.06); flex-shrink: 0 !important;">
+                            <span style="width: 7px; height: 7px; border-radius: 50%; background: #10B981; display: inline-block;"></span>
+                            <span>Active</span>
+                        </span>
+                    </div>
+                    <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">
+                        Rule ID: <strong id="schEditorIdTag" style="color: #063D3B;">New Record</strong> &bull; Mapped to Specific Academic Program
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
+            <button type="button" class="brand-btn-secondary" style="height: 36px; padding: 0 16px; font-size: 12px; font-weight: 600;" onclick="closeScholarshipEditor()">Cancel</button>
+            <button type="button" id="btnSaveSchTop" class="brand-btn-primary" style="height: 36px; padding: 0 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;" onclick="document.getElementById('schEditorFormSubmitBtn').click()">
+                <span>💾</span> Save Scholarship
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Form Content Area bounded cleanly -->
+    <div style="padding: 28px 32px 48px 32px; box-sizing: border-box; width: 100%;">
+        <div style="max-width: 920px; width: 100%; margin: 0; box-sizing: border-box;">
+            
+            <form id="scholarshipEditorForm" onsubmit="handleScholarshipEditorSubmit(event)">
+                <input type="hidden" id="editSchId" value="" />
+
+                <!-- SECTION 1: Scholarship Identity & Program Mapping -->
+                <div style="background: #E7F4D7; border: 1.5px solid #CFE6BA; border-radius: 8px; padding: 22px 24px; margin-bottom: 24px;">
+                    <div style="font-size: 13.5px; font-weight: 800; color: #092F2E; display: flex; align-items: center; gap: 8px; margin-bottom: 18px;">
+                        <span>🎓</span> Scholarship Identity &amp; Mandatory Academic Program Mapping
+                    </div>
+
+                    <!-- Mandatory Program Mapping Selector -->
+                    <div style="margin-bottom: 18px;">
+                        <label for="sch_program_id" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                            Academic Program Mapping <span style="color: #EF4444;">* (Required)</span>
+                        </label>
+                        <select id="sch_program_id" name="program_id" required class="brand-input" onchange="handleSchProgramChange(this.value)" style="width: 100%; box-sizing: border-box; height: 40px; font-size: 13px; font-weight: 600; border: 1.5px solid #063D3B; border-radius: 6px; padding: 0 12px; background: #FFFFFF; color: #063D3B;">
+                            <option value="">-- Select Academic Program to Map Scholarship --</option>
+                        </select>
+                        <div id="schProgramFeeHint" style="font-size: 11.5px; color: #047857; margin-top: 5px; font-weight: 600; display: none;"></div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px;">
+                        <div>
+                            <label for="sch_title" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Scholarship Name / Title <span style="color: #EF4444;">*</span>
+                            </label>
+                            <input type="text" id="sch_title" name="title" class="brand-input" required placeholder="e.g. Dean's Merit Fellowship for Computer Science" oninput="const h = document.getElementById('schEditorHeaderTitle'); if(h) { h.textContent = this.value || 'Untitled Scholarship'; h.title = this.value || ''; }" style="width: 100%; box-sizing: border-box; height: 42px; font-size: 15px; font-weight: 700; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;" />
+                        </div>
+                        <div>
+                            <label for="sch_code" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Scholarship Code
+                            </label>
+                            <input type="text" id="sch_code" name="code" class="brand-input" placeholder="e.g. SCH-CSE-01" style="width: 100%; box-sizing: border-box; height: 42px; font-size: 13px; font-family: monospace; font-weight: 600; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="sch_description" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                            Scholarship Summary / Student Overview
+                        </label>
+                        <textarea id="sch_description" name="description" rows="2" class="brand-input" placeholder="Brief summary of who this scholarship is intended for and what fee support it provides..." style="width: 100%; box-sizing: border-box; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 10px 12px; background: #FFFFFF; resize: vertical;"></textarea>
+                    </div>
+                </div>
+
+                <!-- SECTION 2: Evaluation Metric & Award Slabs -->
+                <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 8px; padding: 22px 24px; margin-bottom: 24px;">
+                    <div style="font-size: 13.5px; font-weight: 800; color: #092F2E; display: flex; align-items: center; gap: 8px; margin-bottom: 18px;">
+                        <span>📊</span> Evaluation Metric &amp; Award Calculation
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 18px;">
+                        <div>
+                            <label for="sch_evaluation_metric" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Evaluation Metric <span style="color: #EF4444;">*</span>
+                            </label>
+                            <select id="sch_evaluation_metric" name="evaluation_metric" onchange="toggleExamNameField(this.value)" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+                                <option value="percentage_12th">Class 12th / Intermediate Percentage (%)</option>
+                                <option value="graduation_cgpa">Graduation CGPA (out of 10)</option>
+                                <option value="entrance_exam">National / State Entrance Exam Score</option>
+                                <option value="merit_rank">Merit Rank / Percentile</option>
+                                <option value="general_merit">General Merit / Direct Evaluation</option>
+                            </select>
+                        </div>
+                        <div id="schExamNameWrap" style="display: none;">
+                            <label for="sch_exam_name" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Entrance Examination Name
+                            </label>
+                            <input type="text" id="sch_exam_name" name="exam_name" class="brand-input" placeholder="e.g. JEE Main, CAT, MAT, GATE, CUET" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;" />
+                        </div>
+                        <div>
+                            <label for="sch_discount_type" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Primary Award Type <span style="color: #EF4444;">*</span>
+                            </label>
+                            <select id="sch_discount_type" name="discount_type" onchange="toggleDiscountType(this.value)" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;">
+                                <option value="percentage">Tuition Fee Waiver Percentage (%)</option>
+                                <option value="fixed_amount">Fixed Scholarship Amount (Flat ₹/USD)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="sch_discount_value" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                <span id="schDiscountValueLabel">Base Waiver Percentage (%)</span>
+                            </label>
+                            <input type="number" step="0.01" min="0" id="sch_discount_value" name="discount_value" class="brand-input" placeholder="e.g. 50 or 50000" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 13px; font-weight: 700; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;" />
+                        </div>
+                    </div>
+
+                    <!-- Tiered Slabs Matrix Builder -->
+                    <div style="border: 1px solid #E2E8F0; border-radius: 6px; padding: 14px; background: #F8FAFC; margin-top: 14px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                            <div>
+                                <strong style="font-size: 12px; color: #1E293B;">Tiered Score Slabs (Optional Multi-Bracket)</strong>
+                                <div style="font-size: 11px; color: #64748B;">Define multiple percentage or score brackets (e.g. 95%+ = 100% waiver, 90-94% = 50% waiver).</div>
+                            </div>
+                            <button type="button" class="brand-btn-secondary" onclick="addSchSlabRow()" style="height: 28px; padding: 0 10px; font-size: 11px; font-weight: 700; background: #FFFFFF;">
+                                + Add Bracket Slab
+                            </button>
+                        </div>
+                        <div id="schSlabsContainer" style="display: flex; flex-direction: column; gap: 8px;">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 3: Eligibility Rules & Governance -->
+                <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 8px; padding: 22px 24px; margin-bottom: 24px;">
+                    <div style="font-size: 13.5px; font-weight: 800; color: #092F2E; display: flex; align-items: center; gap: 8px; margin-bottom: 18px;">
+                        <span>📋</span> Eligibility Criteria &amp; Policy Terms
+                    </div>
+
+                    <div style="margin-bottom: 16px;">
+                        <label for="sch_eligibility_criteria" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                            Eligibility Criteria
+                        </label>
+                        <textarea id="sch_eligibility_criteria" name="eligibility_criteria" rows="3" class="brand-input" placeholder="e.g. Minimum 85% aggregate in PCM/PCB, must be first-attempt candidate, applicable for first year tuition only..." style="width: 100%; box-sizing: border-box; font-size: 12px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 10px 12px; background: #FFFFFF; resize: vertical;"></textarea>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px;">
+                        <div>
+                            <label for="sch_terms_conditions" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Terms &amp; Renewal Conditions
+                            </label>
+                            <textarea id="sch_terms_conditions" name="terms_conditions" rows="2" class="brand-input" placeholder="e.g. Must maintain 8.0 CGPA throughout program without backlogs to renew in subsequent academic years." style="width: 100%; box-sizing: border-box; font-size: 12px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 10px 12px; background: #FFFFFF; resize: vertical;"></textarea>
+                        </div>
+                        <div>
+                            <label for="sch_max_recipients" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Max Seat Quota (Optional)
+                            </label>
+                            <input type="number" min="1" id="sch_max_recipients" name="max_recipients" class="brand-input" placeholder="e.g. 25 (Blank = Unlimited)" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF;" />
+                        </div>
+                    </div>
+
+                    <!-- Active Toggle Switch -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #F8FAF8; border: 1px solid #DCE9E5; border-radius: 6px;">
+                        <div>
+                            <div style="font-size: 12.5px; font-weight: 700; color: #063D3B;">Scholarship Status: Active &amp; Discoverable</div>
+                            <div style="font-size: 11px; color: #648781;">When enabled, prospective students inquiring about this program can evaluate and qualify for this scholarship in the AI widget.</div>
+                        </div>
+                        <label style="cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="sch_is_active" name="is_active" checked onchange="toggleSchActiveBadge(this.checked)" style="width: 20px; height: 20px; accent-color: #047857; cursor: pointer;" />
+                            <span id="schActiveLabel" style="font-size: 12px; font-weight: 700; color: #047857;">Active</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Bottom Sticky-style Action Bar -->
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 8px;">
+                    <button type="button" class="brand-btn-secondary" style="height: 38px; padding: 0 18px; font-size: 12px; font-weight: 700;" onclick="closeScholarshipEditor()">
+                        Cancel &amp; Return
+                    </button>
+                    <button type="submit" id="schEditorFormSubmitBtn" class="brand-btn-primary" style="height: 38px; padding: 0 24px; font-size: 12.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;">
+                        <span>💾</span>
+                        <span id="schSubmitBtnText">Save Scholarship Rule</span>
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="/app/js/scholarship-config.js?v=1.0"></script>
+<script>
+(function() {
+  if (typeof initScholarshipEditor === 'function') {
+    initScholarshipEditor();
+  }
+})();
+</script>

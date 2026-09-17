@@ -297,7 +297,7 @@
         document.addEventListener('DOMContentLoaded', bindAuthToggleListeners);
         document.addEventListener('edvora:partials-ready', bindAuthToggleListeners);
 
-        const VALID_APP_TABS = ['overview', 'knowledge', 'knowledge-ingestion', 'academic-programs', 'academic-program-detail', 'course-staff-assignment', 'program-staff', 'program-lead-magnet', 'add-programs', 'edit-programs', 'departments', 'leads', 'callbacks', 'campus-tours', 'campus-tours-scheduling', 'create-tour-slot', 'edit-tour-slot', 'scholarships', 'teams', 'assets', 'multilingual', 'conversion-engine', 'placeholder', 'analytics', 'knowledge-gaps', 'integrations', 'chatbot', 'test-chat', 'organization', 'org-settings', 'campuses', 'campus-editor', 'settings', 'knowledge-view', 'knowledge-editor', 'knowledge-edit', 'profile'];
+        const VALID_APP_TABS = ['overview', 'knowledge', 'knowledge-ingestion', 'academic-programs', 'academic-program-detail', 'course-staff-assignment', 'program-staff', 'program-lead-magnet', 'add-programs', 'edit-programs', 'departments', 'leads', 'callbacks', 'campus-tours', 'campus-tours-scheduling', 'create-tour-slot', 'edit-tour-slot', 'scholarships', 'scholarship-configuration', 'scholarship-configuration-edit', 'teams', 'assets', 'multilingual', 'conversion-engine', 'placeholder', 'analytics', 'knowledge-gaps', 'integrations', 'chatbot', 'test-chat', 'organization', 'org-settings', 'campuses', 'campus-editor', 'settings', 'knowledge-view', 'knowledge-editor', 'knowledge-edit', 'profile'];
 
         // Navigation Tabs Handling with Async Modular Loading
         const _tabLoadPromises = {};
@@ -901,7 +901,7 @@
             } else if (tab === 'knowledge-gaps') {
                 const anItem = document.querySelector(`.nav-item[data-tab="analytics"]`);
                 if (anItem) anItem.classList.add('active');
-            } else if (tab === 'chatbot' || tab === 'settings') {
+            } else if (tab === 'chatbot' || tab === 'settings' || tab === 'scholarships' || tab === 'scholarship-configuration' || tab === 'scholarship-configuration-edit') {
                 const orgItem = document.querySelector(`.nav-item[data-tab="org-settings"]`);
                 if (orgItem) orgItem.classList.add('active');
             } else if (tab === 'add-programs' || tab === 'edit-programs' || tab === 'academic-program-detail' || tab === 'course-staff-assignment' || tab === 'program-staff' || tab === 'program-lead-magnet') {
@@ -1096,6 +1096,10 @@
                     if (typeof initEditTourSlotPage === 'function') initEditTourSlotPage();
                 } else if (tab === 'scholarships') {
                     if (typeof loadScholarships === 'function') loadScholarships();
+                } else if (tab === 'scholarship-configuration') {
+                    if (typeof initScholarshipConfiguration === 'function') initScholarshipConfiguration();
+                } else if (tab === 'scholarship-configuration-edit') {
+                    if (typeof initScholarshipEditor === 'function') initScholarshipEditor();
                 } else if (tab === 'chatbot') {
                     if (typeof loadWidgetCustomization === 'function') loadWidgetCustomization();
                 } else if (tab === 'test-chat') {
