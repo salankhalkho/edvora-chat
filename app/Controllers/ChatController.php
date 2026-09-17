@@ -331,6 +331,24 @@ class ChatController
                 }
             }
 
+            // Fail-safe: If visitor replied affirmatively to an offer and LLM confirmed but forgot the explicit [LEAD_TRIGGER:*] tag
+            if (!$leadCaptured && empty($leadTriggerPayload) && (bool)$bot['lead_capture_enabled'] && IntentClassifier::isAffirmativeResponse($userMessage, $prevHistory)) {
+                $lastOfferText = '';
+                for ($hIdx = count($prevHistory) - 1; $hIdx >= 0; $hIdx--) {
+                    if (($prevHistory[$hIdx]['role'] ?? '') === 'assistant') {
+                        $lastOfferText = strtolower($prevHistory[$hIdx]['content'] ?? '');
+                        break;
+                    }
+                }
+                if (str_contains($lastOfferText, 'tour') || str_contains($lastOfferText, 'visit')) {
+                    $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, 'campus_tour', $userMessage);
+                } elseif (str_contains($lastOfferText, 'syllabus') || str_contains($lastOfferText, 'brochure') || str_contains($lastOfferText, 'fee structure')) {
+                    $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, 'asset_delivery', $userMessage);
+                } elseif (str_contains($lastOfferText, 'call') || str_contains($lastOfferText, 'advisor') || str_contains($lastOfferText, 'counselor')) {
+                    $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, 'counselor_callback', $userMessage);
+                }
+            }
+
             // 11. Parse and strip structured [FOLLOW_UP] tag
             $followUpMessage = null;
             if (preg_match('/\[FOLLOW_UP\]\s*(.*?)(?=\[LEAD_TRIGGER:|$)/is', $aiResponseText, $fuMatches)) {
@@ -339,11 +357,13 @@ class ChatController
                 $aiResponseText = trim(preg_replace('/\[FOLLOW_UP\]\s*(.*?)(?=\[LEAD_TRIGGER:|$)/is', '', $aiResponseText));
 
                 // Strict Cadence & Program Qualification Gate for Follow-Up message:
+                // Ensure the model did not output literal template placeholder text like "Would you like me to ...?"
                 if (!empty($rawFollowUp) 
                     && $canMakeOffer
                     && $hasProgramLeadInDb
                     && $intentTier === IntentClassifier::TIER_KNOWLEDGE_QUERY 
                     && empty($leadTriggerPayload)
+                    && !preg_match('/^Would you like me to \.\.\.\?/i', $rawFollowUp)
                 ) {
                     $followUpMessage = $rawFollowUp;
                 }
