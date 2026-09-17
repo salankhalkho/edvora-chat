@@ -58,7 +58,7 @@ class LlmService
             $result = self::executeEnvFallback($systemPrompt, $userMessage, $conversationHistory);
         }
 
-        // Record entry in recent logs JSON (strictly maximum 7 entries)
+        // Record entry in recent logs JSON (strictly maximum 1 entry)
         try {
             self::recordDebugLog($systemPrompt, $userMessage, $conversationHistory, $result);
         } catch (Throwable $t) {
@@ -69,7 +69,7 @@ class LlmService
     }
 
     /**
-     * Record interaction to storage/logs/llm_debug_logs.json (max 7 entries, FIFO)
+     * Record interaction to storage/logs/llm_debug_logs.json (max 1 entry, FIFO)
      */
     public static function recordDebugLog(string $systemPrompt, string $userMessage, array $conversationHistory, array $result): void
     {
@@ -121,9 +121,9 @@ class LlmService
         // Prepend newest entry to the top
         array_unshift($logs, $entry);
 
-        // Keep maximum 7 entries
-        if (count($logs) > 7) {
-            $logs = array_slice($logs, 0, 7);
+        // Keep maximum 1 entry (latest only)
+        if (count($logs) > 1) {
+            $logs = array_slice($logs, 0, 1);
         }
 
         @file_put_contents($logFile, json_encode($logs, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), LOCK_EX);

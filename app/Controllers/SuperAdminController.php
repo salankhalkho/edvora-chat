@@ -1016,7 +1016,7 @@ class SuperAdminController
     }
 
     /**
-     * GET /v1/superadmin/llm-debug-logs — Return past 7 LLM interactions
+     * GET /v1/superadmin/llm-debug-logs — Return past 1 LLM interaction
      */
     public function getLlmDebugLogs(Request $request, array $params = []): void
     {
@@ -1033,9 +1033,9 @@ class SuperAdminController
             }
         }
 
-        // Strictly enforce 7 or fewer
-        if (count($logs) > 7) {
-            $logs = array_slice($logs, 0, 7);
+        // Strictly enforce 1 entry (latest only)
+        if (count($logs) > 1) {
+            $logs = array_slice($logs, 0, 1);
         }
 
         Response::success([

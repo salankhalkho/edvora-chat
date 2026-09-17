@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -206,7 +206,7 @@
         <div class="header-title">
             <span>🔬</span>
             <span>LLM Prompt &amp; Conversation Inspector</span>
-            <span id="logCountBadge" class="badge badge-primary">0 / 7 Records</span>
+            <span id="logCountBadge" class="badge badge-primary">0 / 1 Record</span>
             <span id="autoPollBadge" class="badge badge-success" style="cursor: pointer;" onclick="toggleAutoPoll()">● Live Polling Active (3s)</span>
         </div>
         <div class="header-actions">
@@ -225,7 +225,7 @@
     <main id="contentWrapper">
         <div class="desc-banner">
             <div>
-                Displaying the past <strong>7 or fewer</strong> prompts sent to the LLM during chatbot usage. Live auto-refreshes every 3 seconds.
+                Displaying the <strong>latest LLM interaction</strong> recorded during chatbot usage. Live auto-refreshes every 3 seconds.
             </div>
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px;">
                 Server: <span id="serverTimeText" style="color: #fff;">Connecting...</span>
@@ -295,7 +295,7 @@
                 if (json && json.status === 'success') {
                     const logs = json.data.logs || [];
                     document.getElementById('serverTimeText').innerText = json.data.server_time || new Date().toLocaleTimeString();
-                    document.getElementById('logCountBadge').innerText = `${logs.length} / 7 Records`;
+                    document.getElementById('logCountBadge').innerText = `${logs.length} / 1 Record`;
 
                     const currentHash = JSON.stringify(logs.map(l => l.id || l.timestamp));
                     if (currentHash !== lastRenderHash || manual) {
@@ -344,9 +344,7 @@
             list.innerHTML = logs.map((item, idx) => {
                 const isLatest = idx === 0;
                 const num = idx + 1;
-                const latestBadge = isLatest 
-                    ? `<span class="badge badge-success">● Latest (#${num})</span>` 
-                    : `<span class="badge badge-inactive">#${num} of ${logs.length}</span>`;
+                const latestBadge = `<span class="badge badge-success">● Latest Interaction</span>`;
                 const modelBadge = item.model ? `<span class="badge badge-primary">${escapeHtml(item.model)}</span>` : '';
                 const tokensBadge = item.tokens_used ? `<span class="badge badge-fallback">${item.tokens_used} tokens</span>` : '';
 
@@ -423,10 +421,10 @@
         }
 
         async function clearLogs() {
-            if (!confirm('Clear all 7 recent LLM debug log entries?')) return;
+            if (!confirm('Clear the latest LLM debug log entry?')) return;
             try {
                 const res = await fetch('/v1/superadmin/llm-debug-logs', { method: 'DELETE' });
-                showToast('Cleared logs.');
+                showToast('Cleared log.');
                 lastRenderHash = '';
                 fetchLogs(true);
             } catch (err) {
