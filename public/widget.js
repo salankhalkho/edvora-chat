@@ -403,19 +403,33 @@
                     processedLines.push('<ul style="margin: 2px 0 5px 0; padding-left: 14px; list-style-type: disc;">');
                 }
 
-                // Format inline duration like (4 Years) or (18 Months) with non-breaking pill style
-                var itemContent = bulletMatch[1].replace(/\((\d+[^)]*)\)/g, '<span style="font-size:10px; font-weight:600; color:#475569; background:#F1F5F9; border:1px solid #CBD5E1; padding:0 5px; border-radius:3px; margin-left:4px; white-space:nowrap; display:inline-block;">$1</span>');
+                // Format inline duration like (4 Years) or (18 Months) with non-breaking inline pill style
+                var itemContent = bulletMatch[1].replace(/\((\d+[^)]*)\)/g, '<span style="font-size:10px; font-weight:600; color:#475569; background:#F1F5F9; border:1px solid #CBD5E1; padding:0 4px; border-radius:3px; margin-left:4px; white-space:nowrap; display:inline;">$1</span>');
 
                 processedLines.push('<li style="margin-bottom: 2px; line-height: 1.35;">' + itemContent + '</li>');
             } else if (numMatch) {
-                if (!inList || listType !== 'ol') {
-                    if (inList) processedLines.push(listType === 'ul' ? '</ul>' : '</ol>');
-                    inList = true;
-                    listType = 'ol';
-                    processedLines.push('<ol style="margin: 2px 0 5px 0; padding-left: 14px;">');
+                // Check if this numbered item is actually a category header like "1. **Undergraduate Programs:**"
+                var numItemText = numMatch[2].trim();
+                var strippedNumTag = numItemText.replace(/<\/?strong>/gi, '').replace(/[:*]/g, '').trim();
+                var isNumCatHeader = /^(?:[A-Za-z\s&]{2,35}(?:Programs?|Courses?|Degrees?|Certificates?|Executive|Undergraduate|Postgraduate|Doctoral|Diploma|Specializations?)|Undergraduate|Postgraduate|Doctoral|Executive|Certificates?)$/i.test(strippedNumTag);
+
+                if (isNumCatHeader && numItemText.length < 50) {
+                    if (inList) {
+                        processedLines.push(listType === 'ul' ? '</ul>' : '</ol>');
+                        inList = false;
+                        listType = null;
+                    }
+                    processedLines.push('<div style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #475569; margin: 8px 0 2px 0; display: flex; align-items: center; gap: 4px;"><span style="display:inline-block; width:5px; height:5px; border-radius:50%; background:#2563EB;"></span> ' + strippedNumTag + '</div>');
+                } else {
+                    if (!inList || listType !== 'ol') {
+                        if (inList) processedLines.push(listType === 'ul' ? '</ul>' : '</ol>');
+                        inList = true;
+                        listType = 'ol';
+                        processedLines.push('<ol style="margin: 2px 0 5px 0; padding-left: 14px;">');
+                    }
+                    var itemContentNum = numMatch[2].replace(/\((\d+[^)]*)\)/g, '<span style="font-size:10px; font-weight:600; color:#475569; background:#F1F5F9; border:1px solid #CBD5E1; padding:0 4px; border-radius:3px; margin-left:4px; white-space:nowrap; display:inline;">$1</span>');
+                    processedLines.push('<li style="margin-bottom: 2px; line-height: 1.35;">' + itemContentNum + '</li>');
                 }
-                var itemContentNum = numMatch[2].replace(/\((\d+[^)]*)\)/g, '<span style="font-size:10px; font-weight:600; color:#475569; background:#F1F5F9; border:1px solid #CBD5E1; padding:0 5px; border-radius:3px; margin-left:4px; white-space:nowrap; display:inline-block;">$1</span>');
-                processedLines.push('<li style="margin-bottom: 2px; line-height: 1.35;">' + itemContentNum + '</li>');
             } else {
                 if (inList) {
                     processedLines.push(listType === 'ul' ? '</ul>' : '</ol>');
