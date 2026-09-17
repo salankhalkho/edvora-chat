@@ -59,7 +59,8 @@ async function loadScholarshipRules() {
             headers: token ? { 'Authorization': 'Bearer ' + token } : {}
         });
         const json = await res.json();
-        if (json.success && Array.isArray(json.data)) {
+        const isOk = json.status === 'success' || json.success;
+        if (isOk && Array.isArray(json.data)) {
             window._scholarshipRules = json.data;
             updateScholarshipStats();
             renderScholarshipsTable();
@@ -69,7 +70,7 @@ async function loadScholarshipRules() {
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="6" style="text-align: center; padding: 36px 20px; color: #DC2626;">
-                            Failed to load scholarships: ${escapeHtml(json.error || 'Unknown error')}
+                            Failed to load scholarships: ${escapeHtml(json.message || json.error || 'Unknown error')}
                         </td>
                     </tr>
                 `;
@@ -392,9 +393,13 @@ async function loadScholarshipRuleForEdit(id) {
     document.getElementById('schSubmitBtnText').textContent = 'Save Changes';
 
     try {
-        const res = await fetch(`/v1/scholarship-rules/${id}`);
+        const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token');
+        const res = await fetch(`/v1/scholarship-rules/${id}`, {
+            headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+        });
         const json = await res.json();
-        if (json.success && json.data) {
+        const isOk = json.status === 'success' || json.success;
+        if (isOk && json.data) {
             const r = json.data;
             document.getElementById('schEditorHeaderTitle').textContent = r.title || 'Edit Scholarship';
             document.getElementById('sch_title').value = r.title || '';
@@ -595,21 +600,26 @@ async function handleScholarshipEditorSubmit(e) {
     if (submitBtn) submitBtn.disabled = true;
 
     try {
+        const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token');
         const url = id ? `/v1/scholarship-rules/${id}` : '/v1/scholarship-rules';
         const method = id ? 'PUT' : 'POST';
 
         const res = await fetch(url, {
             method: method,
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { 'Authorization': 'Bearer ' + token } : {})
+            },
             body: JSON.stringify(payload)
         });
 
         const json = await res.json();
-        if (json.success) {
+        const isOk = json.status === 'success' || json.success;
+        if (isOk) {
             showToast(id ? 'Scholarship updated successfully!' : 'Scholarship created successfully!', 'success');
             closeScholarshipEditor();
         } else {
-            showToast(json.error || 'Failed to save scholarship', 'error');
+            showToast(json.message || json.error || 'Failed to save scholarship', 'error');
         }
     } catch (err) {
         console.error('Error saving scholarship:', err);
@@ -628,9 +638,14 @@ async function deleteScholarshipRule(id, title) {
     }
 
     try {
-        const res = await fetch(`/v1/scholarship-rules/${id}`, { method: 'DELETE' });
+        const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token');
+        const res = await fetch(`/v1/scholarship-rules/${id}`, {
+            method: 'DELETE',
+            headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+        });
         const json = await res.json();
-        if (json.success) {
+        const isOk = json.status === 'success' || json.success;
+        if (isOk) {
             showToast('Scholarship deleted successfully', 'success');
             await loadScholarshipRules();
         } else {
