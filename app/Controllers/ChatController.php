@@ -492,7 +492,7 @@ class ChatController
             return [
                 'type' => 'asset_delivery',
                 'asset_id' => $assetId,
-                'headline' => "Download " . $assetTitle,
+                'headline' => "Get " . $assetTitle,
                 'description' => "Enter your details to receive the official document and scholarship matrix sent directly to your email.",
                 'fields' => ['name', 'email', 'phone']
             ];

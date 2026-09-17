@@ -715,7 +715,7 @@
         banner.style.cssText = 'background: #EFF6FF; border: 1.5px solid #93C5FD; border-radius: 12px; padding: 14px; margin-top: 8px; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.08); font-size: 12px;';
         banner.innerHTML = `
             <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
-                <span style="font-size:16px;">📥</span>
+                <span style="font-size:16px;">📧</span>
                 <strong style="color: #1E3A8A; font-size: 13px;">${trigger.headline}</strong>
             </div>
             <div style="margin-bottom: 10px; font-size: 11px; color: #475569; line-height: 1.4;">${trigger.description}</div>
@@ -733,7 +733,7 @@
                     <input type="tel" placeholder="e.g. 9876543210" required class="edvora-lead-input" style="width:100%; box-sizing:border-box; padding: 7px 10px; font-size: 12px; border: 1px solid #CBD5E1; border-radius: 6px; outline: none; background:#fff;" />
                 </div>
                 <button type="button" class="edvora-lead-btn" style="background: #2563EB; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; margin-top: 4px;">
-                    Send Document Now &rarr;
+                    Email Document Now &rarr;
                 </button>
                 <div style="font-size:10px; color:#64748B; text-align:center; margin-top:2px;">🔒 No spam. We only use your details to deliver requested information.</div>
             </form>
@@ -801,13 +801,13 @@
                     `;
                 } else {
                     alert(res.message || 'Submission failed');
-                    submitBtn.innerText = 'Send Document Now →';
+                    submitBtn.innerText = 'Email Document Now →';
                     submitBtn.disabled = false;
                 }
             })
             .catch(function () {
                 alert('Network error. Please try again.');
-                submitBtn.innerText = 'Send Document Now →';
+                submitBtn.innerText = 'Email Document Now →';
                 submitBtn.disabled = false;
             });
         };
