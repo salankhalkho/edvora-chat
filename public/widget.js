@@ -685,7 +685,7 @@
         }
 
         if (trigger.type === 'scholarship_eval') {
-            startScholarshipEvaluation();
+            startScholarshipEvaluation(trigger);
             return;
         }
 
@@ -1165,7 +1165,7 @@
     }
 
     // --- Interactive Scholarship Evaluation Stepper ---
-    function startScholarshipEvaluation() {
+    function startScholarshipEvaluation(trigger) {
         var card = document.createElement('div');
         card.className = 'edvora-scholarship-card';
         card.style.cssText = 'background: #ffffff; border: 1.5px solid #6366F1; border-radius: 12px; padding: 12px; margin-top: 8px; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.12); font-size: 12px;';
@@ -1210,17 +1210,22 @@
                 var courses = res.data.courses;
                 var boosters = res.data.boosters || [];
 
-                renderScholarshipStep1(card, courses, boosters);
+                renderScholarshipStep1(card, courses, boosters, trigger ? (trigger.program_name || trigger.headline) : null);
             })
             .catch(function () {
                 card.innerHTML = '<div style="color:#EF4444; font-size:12px;">Failed to load scholarship schemes. Please try again.</div>';
             });
     }
 
-    function renderScholarshipStep1(card, courses, boosters) {
+    function renderScholarshipStep1(card, courses, boosters, preferredProgName) {
+        var prefLower = preferredProgName ? preferredProgName.toLowerCase() : '';
         var optionsHtml = courses.map(function (c) {
             var badge = c.has_scholarship ? ' (Merit Scholarships Available)' : ' (Fixed Fee / 0% EMI)';
-            return `<option value="${c.id}">${c.course_name} [${c.degree_level.toUpperCase()}]${badge}</option>`;
+            var isSelected = false;
+            if (prefLower && (c.course_name.toLowerCase().indexOf(prefLower) !== -1 || prefLower.indexOf(c.course_name.toLowerCase()) !== -1)) {
+                isSelected = true;
+            }
+            return `<option value="${c.id}" ${isSelected ? 'selected' : ''}>${c.course_name} [${c.degree_level.toUpperCase()}]${badge}</option>`;
         }).join('');
 
         card.innerHTML = `

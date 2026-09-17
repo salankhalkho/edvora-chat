@@ -342,6 +342,8 @@ class ChatController
                 }
                 if (str_contains($lastOfferText, 'tour') || str_contains($lastOfferText, 'visit')) {
                     $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, 'campus_tour', $userMessage, $activeProgramData);
+                } elseif (str_contains($lastOfferText, 'scholarship') || str_contains($lastOfferText, 'waiver')) {
+                    $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, 'scholarship_eval', $userMessage, $activeProgramData);
                 } elseif (str_contains($lastOfferText, 'syllabus') || str_contains($lastOfferText, 'brochure') || str_contains($lastOfferText, 'fee structure')) {
                     $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, 'asset_delivery', $userMessage, $activeProgramData);
                 } elseif (str_contains($lastOfferText, 'call') || str_contains($lastOfferText, 'advisor') || str_contains($lastOfferText, 'counselor')) {
@@ -532,6 +534,16 @@ class ChatController
                 'headline' => "Schedule a Guided Campus Tour",
                 'program_name' => $progName,
                 'description' => "Experience our campus, labs, and academic facilities firsthand with a personalized guided visit.",
+                'fields' => ['name', 'email', 'phone']
+            ];
+        }
+
+        if ($triggerType === 'scholarship_calculator' || $triggerType === 'scholarship_eval' || $triggerType === 'scholarship') {
+            return [
+                'type' => 'scholarship_eval',
+                'headline' => "Evaluate Scholarship Eligibility",
+                'program_name' => $progName,
+                'description' => "Check your merit score and calculate tuition fee waiver in 30 seconds.",
                 'fields' => ['name', 'email', 'phone']
             ];
         }
