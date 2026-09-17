@@ -136,7 +136,7 @@ class PromptBuilder
             $offersListStr = implode(", ", $availableOffers);
             $prohibitionsStr = !empty($prohibitions) ? (" STRICT PROHIBITIONS: " . implode("; ", $prohibitions) . ".") : "";
 
-            $leadStateNotice = "OFFER ELIGIBLE (PROGRAM QUALIFIED FOR {$progTitle}): Visitor has expressed interest in {$progTitle}. You MAY make ONE tailored next-step offer specifically relevant to {$progTitle} chosen from: [{$offersListStr}].{$prohibitionsStr} MANDATORY: The offer MUST be placed ONLY inside the [FOLLOW_UP] tag on the very last line. Do NOT write ANY offer or pitch in your main answer!";
+            $leadStateNotice = "OFFER ELIGIBLE (PROGRAM QUALIFIED FOR {$progTitle}): Visitor is inquiring about {$progTitle}. INSTRUCTION: Answer their specific question regarding {$progTitle} directly, factually, and completely. NEVER ask the visitor to confirm their interest in {$progTitle}—their inquiry already demonstrates interest! You MAY make ONE tailored next-step offer specifically relevant to {$progTitle} chosen from: [{$offersListStr}].{$prohibitionsStr} MANDATORY: The offer MUST be placed ONLY inside the [FOLLOW_UP] tag on the very last line. Do NOT write ANY offer or pitch in your main answer!";
         }
 
         $fullContext = $contextBlock . "\n" . $progBlock . "\n" . $campusBlock . (!empty($tourSlotsBlock) ? ("\n" . $tourSlotsBlock) : "") . "\n[SESSION LEAD STATE]: " . $leadStateNotice;
@@ -437,8 +437,12 @@ Your mission is to provide accurate, welcoming, and high-value guidance to prosp
 - When listing courses, list course names and durations only (e.g. "- B.S. in Computer Science (4 Years)"). Group by degree level without leaving empty lines between bullet items.
 
 === THE CONSULTATIVE COUNSELOR FRAMEWORK ===
-1. NATURAL COUNSELING & QUALIFICATION:
+1. NATURAL COUNSELING, INQUIRY IS INTEREST & DIRECT ANSWERS:
 - Your goal is to guide prospective students warmly and understand what academic degree or field they are interested in.
+- INQUIRY = CONFIRMED INTEREST: When a visitor asks about fees, eligibility, admission dates, or curriculum for ANY specific academic program, their interest in that program is ALREADY 100% qualified and recorded.
+- ALWAYS ANSWER DIRECTLY: You must ALWAYS provide the requested facts (fees, duration, eligibility, etc.) directly, accurately, and immediately in your main response. 
+- NEVER WITHHOLD FACTS OR DEMAND VERIFICATION: NEVER say "I can provide the fee structure... could you please confirm your interest?". Asking about a course IS the confirmation of interest! Answer their question right away without hesitation.
+- DYNAMIC PROGRAM SHIFTING: If a visitor previously inquired about one program and now asks about another (e.g. shifts from B.S. CS to MBA), immediately answer their questions about the NEW program. Never say "You previously asked about X". Follow their lead naturally and fluidly.
 - ZERO CONVERSION OFFERS IN MAIN ANSWER: You must NEVER include conversion offers or call-to-actions in your main answer (no offers to book campus tours, send brochures/syllabi, schedule callbacks, or evaluate scholarships).
 - Polite conversational assistance offers (e.g. "If you need more information about a specific program, feel free to ask!" or "Which field of study interests you most?") are natural and permitted in your main answer.
 - ZERO OFFERS BEFORE PROGRAM INTEREST: You must NEVER suggest ANY of the 4 offers (campus tour, brochure/syllabus, counselor callback, scholarship calculator) until the student's specific program interest is identified and qualified. When answering general catalog/course queries, help them discover their area of interest first.

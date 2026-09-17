@@ -253,27 +253,36 @@ class ChatController
         $hasProgramLeadInDb = false;
         $activeProgramData = null;
 
-        $stmtLeadCheck = $db->prepare("
-            SELECT id, program_interest, program_id
-            FROM leads
-            WHERE conversation_id = :cid AND organization_id = :oid AND program_interest IS NOT NULL AND program_interest != ''
-            ORDER BY id DESC LIMIT 1
-        ");
-        $stmtLeadCheck->execute([':cid' => $convId, ':oid' => $orgId]);
-        $leadRecord = $stmtLeadCheck->fetch(PDO::FETCH_ASSOC);
-
-        if ($leadRecord && !empty($leadRecord['program_interest'])) {
-            $hasProgramLeadInDb = true;
-            $activeProgramData = [
-                'id' => (int)($leadRecord['program_id'] ?? $currentProgramId),
-                'course_name' => $leadRecord['program_interest']
-            ];
-        } elseif (!empty($currentProgramInterest)) {
+        // If user explicitly inquired about a program on this current turn, prioritize it immediately
+        if ($detectedProgram) {
             $hasProgramLeadInDb = true;
             $activeProgramData = [
                 'id' => $currentProgramId,
                 'course_name' => $currentProgramInterest
             ];
+        } else {
+            $stmtLeadCheck = $db->prepare("
+                SELECT id, program_interest, program_id
+                FROM leads
+                WHERE conversation_id = :cid AND organization_id = :oid AND program_interest IS NOT NULL AND program_interest != ''
+                ORDER BY id DESC LIMIT 1
+            ");
+            $stmtLeadCheck->execute([':cid' => $convId, ':oid' => $orgId]);
+            $leadRecord = $stmtLeadCheck->fetch(PDO::FETCH_ASSOC);
+
+            if ($leadRecord && !empty($leadRecord['program_interest'])) {
+                $hasProgramLeadInDb = true;
+                $activeProgramData = [
+                    'id' => (int)($leadRecord['program_id'] ?? $currentProgramId),
+                    'course_name' => $leadRecord['program_interest']
+                ];
+            } elseif (!empty($currentProgramInterest)) {
+                $hasProgramLeadInDb = true;
+                $activeProgramData = [
+                    'id' => $currentProgramId,
+                    'course_name' => $currentProgramInterest
+                ];
+            }
         }
 
         // 7. Calculate Current Turn Count and Anti-Fatigue Offer Cadence

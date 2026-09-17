@@ -161,16 +161,26 @@ class ProgramDetector
             $existingLead = $stmtLead->fetch(PDO::FETCH_ASSOC);
 
             if ($existingLead) {
+                $oldProg = $existingLead['program_interest'] ?? '';
+                $appendNoteSql = "";
+                if (!empty($oldProg) && strcasecmp($oldProg, $programName) !== 0) {
+                    $appendNoteSql = ", notes = CONCAT(COALESCE(notes, ''), '\n[Shifted interest from ', :old_pname, ' to ', :pname, ' on ', NOW(), ']')";
+                }
+
                 $stmtUpdate = $db->prepare("
                     UPDATE leads
-                    SET program_interest = :pname, program_id = :pid, updated_at = NOW()
+                    SET program_interest = :pname, program_id = :pid, updated_at = NOW() {$appendNoteSql}
                     WHERE id = :lid
                 ");
-                $stmtUpdate->execute([
+                $params = [
                     ':pname' => $programName,
                     ':pid' => $programId,
                     ':lid' => (int)$existingLead['id']
-                ]);
+                ];
+                if (!empty($appendNoteSql)) {
+                    $params[':old_pname'] = $oldProg;
+                }
+                $stmtUpdate->execute($params);
             } else {
                 $assignedUserId = null;
                 $stmtRr = $db->prepare("
