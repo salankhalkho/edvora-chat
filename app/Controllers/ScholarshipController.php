@@ -745,10 +745,10 @@ class ScholarshipController
                 sr.is_active as rule_is_active
             FROM programs p
             LEFT JOIN scholarship_rules sr ON sr.program_id = p.id AND sr.organization_id = p.organization_id AND sr.is_active = 1
-            WHERE (p.id = :course_id OR sr.id = :course_id) AND p.organization_id = :org_id
+            WHERE (p.id = :course_id_1 OR sr.id = :course_id_2) AND p.organization_id = :org_id
             LIMIT 1
         ");
-        $stmtProg->execute([':course_id' => $courseId, ':org_id' => $orgId]);
+        $stmtProg->execute([':course_id_1' => $courseId, ':course_id_2' => $courseId, ':org_id' => $orgId]);
         $progRow = $stmtProg->fetch();
 
         $courseName = '';
