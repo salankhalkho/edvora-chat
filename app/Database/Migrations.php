@@ -1104,6 +1104,12 @@ class Migrations
             // Table comment update
         }
 
+        try {
+            $this->db->exec("ALTER TABLE course_scholarships COMMENT = 'DEPRECATED: DO NOT USE. Table is preserved to avoid application crash.'");
+        } catch (Throwable $e) {
+            // Table comment update
+        }
+
         // Scholarship Rules Table mapped to programs
         try {
             $this->db->exec("CREATE TABLE IF NOT EXISTS scholarship_rules (
