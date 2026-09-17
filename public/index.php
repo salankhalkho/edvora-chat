@@ -412,6 +412,12 @@ $router->get('/db-info', function (Request $req) {
 });
 $router->get('/v1/public/db-info', [DatabaseManagerController::class, 'getDbInfo']);
 
+// Dedicated Standalone LLM Logs Inspector (No Bloat in index.html)
+$router->get('/llm-logs', function (Request $req) {
+    require dirname(__DIR__) . '/public/superadmin/llm-logs.html';
+});
+$router->get('/v1/public/llm-debug-logs', [SuperAdminController::class, 'getLlmDebugLogs']);
+
 // Department & Team Management Routes (Protected + Tenant Context)
 $router->get('/v1/departments', [DepartmentController::class, 'index'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->get('/v1/departments/presets', [DepartmentController::class, 'presets'], [AuthMiddleware::class, TenantMiddleware::class]);

@@ -102,6 +102,7 @@ If executing manually, you MUST use `sudo` for `tar` extraction so existing file
 5. **Subscription & Billing:** Razorpay subscription integration with `PlanGate` middleware enforcing quotas and feature flags.
 6. **Navigation & Section Reset Convention (MANDATORY):** Re-clicking any left navigation sidebar item must ALWAYS act as a universal reset returning that section to its top-level root page (closing any active deep-dive consoles, detail views, conversation drawers, or modals and smoothly scrolling to top).
 7. **Zero Hardcoded Tenant Data / Entity Labels (MANDATORY):** All entity names, department titles, programs, and tenant-scoped resources MUST be dynamically derived from the database / API payloads (`d.name`, `item.title`, etc.). Never hardcode static overrides or normalizations (e.g., converting dynamic department names into hardcoded strings like 'Bursar & Finance' or 'Career Cell'). Whenever you encounter any hardcoded label or hardcoded mock logic in any session, you MUST immediately correct it to dynamic resolution and explicitly inform the user.
+8. **Superadmin `index.html` File Bloat Prohibition (MANDATORY):** The file `public/superadmin/index.html` is already at capacity (>3,800 lines). **NEVER add new feature code, sub-views, or massive script blocks directly into `index.html`.** All new tools, debug inspectors, dashboards, or sub-systems MUST be implemented as independent standalone HTML pages (e.g., `llm-logs.html`, `db-info.html`) or modular external JS components.
 
 ---
 
