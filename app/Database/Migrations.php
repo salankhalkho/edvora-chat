@@ -1097,6 +1097,12 @@ class Migrations
         } catch (Throwable $e) {
             // Index may already exist
         }
+
+        try {
+            $this->db->exec("ALTER TABLE lead_assets COMMENT = 'DEPRECATED: DO NOT USE. Table is preserved to avoid application crash.'");
+        } catch (Throwable $e) {
+            // Table comment update
+        }
     }
 }
 
