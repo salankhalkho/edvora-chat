@@ -375,6 +375,8 @@ $router->post('/v1/superadmin/llm-providers', [SuperAdminController::class, 'cre
 $router->put('/v1/superadmin/llm-providers/{id}', [SuperAdminController::class, 'updateLlmProvider'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
 $router->delete('/v1/superadmin/llm-providers/{id}', [SuperAdminController::class, 'deleteLlmProvider'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
 $router->post('/v1/superadmin/llm-providers/{id}/test', [SuperAdminController::class, 'testLlmProvider'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->get('/v1/superadmin/llm-debug-logs', [SuperAdminController::class, 'getLlmDebugLogs'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->delete('/v1/superadmin/llm-debug-logs', [SuperAdminController::class, 'clearLlmDebugLogs'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
 $router->get('/v1/superadmin/organizations', [SuperAdminController::class, 'getOrganizations'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
 $router->put('/v1/superadmin/organizations/{id}/status', [SuperAdminController::class, 'updateOrgStatus'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
 $router->delete('/v1/superadmin/organizations/{id}', [SuperAdminController::class, 'deleteOrganization'], [AuthMiddleware::class, SuperAdminMiddleware::class]);

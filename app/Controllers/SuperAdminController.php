@@ -1014,6 +1014,49 @@ class SuperAdminController
         $encrypted = openssl_encrypt($key, 'AES-256-CBC', md5($secret), 0, $iv);
         return bin2hex($iv . $encrypted);
     }
+
+    /**
+     * GET /v1/superadmin/llm-debug-logs — Return past 7 LLM interactions
+     */
+    public function getLlmDebugLogs(Request $request, array $params = []): void
+    {
+        $logFile = dirname(__DIR__, 2) . '/storage/logs/llm_debug_logs.json';
+        $logs = [];
+
+        if (file_exists($logFile)) {
+            $raw = @file_get_contents($logFile);
+            if ($raw) {
+                $decoded = json_decode($raw, true);
+                if (is_array($decoded)) {
+                    $logs = $decoded;
+                }
+            }
+        }
+
+        // Strictly enforce 7 or fewer
+        if (count($logs) > 7) {
+            $logs = array_slice($logs, 0, 7);
+        }
+
+        Response::success([
+            'logs' => $logs,
+            'count' => count($logs),
+            'server_time' => date('Y-m-d H:i:s')
+        ]);
+    }
+
+    /**
+     * DELETE /v1/superadmin/llm-debug-logs — Clear debug logs
+     */
+    public function clearLlmDebugLogs(Request $request, array $params = []): void
+    {
+        $logFile = dirname(__DIR__, 2) . '/storage/logs/llm_debug_logs.json';
+        if (file_exists($logFile)) {
+            @file_put_contents($logFile, json_encode([]));
+        }
+
+        Response::success([], 'LLM debug logs cleared successfully');
+    }
 }
 
 

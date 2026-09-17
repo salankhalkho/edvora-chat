@@ -848,6 +848,9 @@
                 <a class="nav-link" data-tab="branding">
                     <span>🎨</span> Branding
                 </a>
+                <a class="nav-link" data-tab="llm-inspector">
+                    <span>🔬</span> LLM Inspector (Live)
+                </a>
             </nav>
             <div class="sidebar-footer">
                 <span style="color: var(--brand-text-muted); font-size: 11px;">v1.2.0 • VPS Live</span>
@@ -1993,6 +1996,38 @@
                             </div>
                         </div>
                     </div>
+                <!-- 9. LLM PROMPT INSPECTOR (LIVE) -->
+                <div class="tab-view" id="tab-llm-inspector">
+                    <div class="brand-panel" style="margin-bottom: 30px;">
+                        <div class="brand-panel-header" style="flex-wrap: wrap; height: auto; gap: 12px; padding-bottom: 12px;">
+                            <div class="panel-heading">
+                                <span>🔬</span> Live LLM Prompt &amp; Conversation Inspector
+                                <span id="llmInspectorCountBadge" class="badge badge-primary" style="margin-left: 8px;">0 / 7 Records</span>
+                                <span id="llmAutoPollBadge" class="badge badge-success" style="margin-left: 6px; cursor: pointer;" onclick="toggleLlmAutoPoll()">
+                                    ● Live Polling Active (3s)
+                                </span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <button onclick="loadLlmDebugLogs(true)" class="brand-btn brand-btn-secondary brand-btn-sm" id="btnRefreshLlmLogs">
+                                    🔄 Refresh Now
+                                </button>
+                                <button onclick="clearLlmDebugLogs()" class="brand-btn brand-btn-danger brand-btn-sm" title="Clear recorded logs">
+                                    🗑️ Clear (0/7)
+                                </button>
+                            </div>
+                        </div>
+
+                        <div style="font-size: 11.5px; color: var(--brand-text-muted); margin-bottom: 16px; line-height: 1.5;">
+                            Real-time record of the past <strong>7 or fewer</strong> prompts and instructions sent to the LLM during chatbot conversations (e.g. from <code>test_chat.html</code> or live widgets). Fits natural page height with full transparency into prompts and raw responses.
+                        </div>
+
+                        <!-- Container for the 7 entries (no internal scrollbar, stretches naturally) -->
+                        <div id="llmInspectorList" style="display: flex; flex-direction: column; gap: 20px;">
+                            <div style="text-align: center; color: var(--brand-text-muted); padding: 40px;">
+                                Initializing LLM logs...
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -2157,6 +2192,8 @@
                     loadDemos(1);
                 } else if (tab === 'smtp') {
                     loadSmtpSettings();
+                } else if (tab === 'llm-inspector') {
+                    loadLlmDebugLogs(true);
                 }
             };
         });
@@ -3889,9 +3926,216 @@
             }
         }
 
+        // ==========================================
+        // LLM DEBUG LOGS / PROMPT INSPECTOR
+        // ==========================================
+        let llmAutoPollInterval = null;
+        let llmAutoPollActive = true;
+        let lastRenderedLlmHash = '';
+
+        function toggleLlmAutoPoll() {
+            llmAutoPollActive = !llmAutoPollActive;
+            const badge = document.getElementById('llmAutoPollBadge');
+            if (badge) {
+                if (llmAutoPollActive) {
+                    badge.className = 'badge badge-success';
+                    badge.innerHTML = '● Live Polling Active (3s)';
+                    badge.style.color = '#6ee7b7';
+                    startLlmAutoPoll();
+                } else {
+                    badge.className = 'badge badge-inactive';
+                    badge.innerHTML = '○ Polling Paused';
+                    badge.style.color = '#9ca3af';
+                    stopLlmAutoPoll();
+                }
+            }
+        }
+
+        function startLlmAutoPoll() {
+            if (llmAutoPollInterval) clearInterval(llmAutoPollInterval);
+            llmAutoPollInterval = setInterval(() => {
+                const inspectorTab = document.getElementById('tab-llm-inspector');
+                if (inspectorTab && inspectorTab.classList.contains('active') && llmAutoPollActive) {
+                    loadLlmDebugLogs(false);
+                }
+            }, 3000);
+        }
+
+        function stopLlmAutoPoll() {
+            if (llmAutoPollInterval) {
+                clearInterval(llmAutoPollInterval);
+                llmAutoPollInterval = null;
+            }
+        }
+
+        async function loadLlmDebugLogs(showToastNotification = false) {
+            const btn = document.getElementById('btnRefreshLlmLogs');
+            if (btn && showToastNotification) {
+                btn.disabled = true;
+                btn.innerText = 'Refreshing...';
+            }
+
+            try {
+                const res = await apiFetch('/v1/superadmin/llm-debug-logs');
+                if (res && res.status === 'success') {
+                    const logs = res.data.logs || [];
+                    const currentHash = JSON.stringify(logs.map(l => l.id || l.timestamp));
+                    
+                    // Only re-render if data has changed to avoid interrupting selections or scrolling
+                    if (currentHash !== lastRenderedLlmHash || showToastNotification) {
+                        lastRenderedLlmHash = currentHash;
+                        renderLlmDebugLogs(logs);
+                    }
+
+                    const countBadge = document.getElementById('llmInspectorCountBadge');
+                    if (countBadge) {
+                        countBadge.innerText = `${logs.length} / 7 Records`;
+                    }
+
+                    if (showToastNotification) {
+                        showToast(`Refreshed: ${logs.length} LLM interaction(s) loaded.`, 'success');
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to load LLM debug logs:', err);
+                if (showToastNotification) {
+                    showToast('Failed to fetch LLM debug logs.', 'error');
+                }
+            } finally {
+                if (btn && showToastNotification) {
+                    btn.disabled = false;
+                    btn.innerText = '🔄 Refresh Now';
+                }
+            }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function renderLlmDebugLogs(logs) {
+            const container = document.getElementById('llmInspectorList');
+            if (!container) return;
+
+            if (!logs || logs.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 48px 24px; background: rgba(255,255,255,0.02); border: 1px dashed var(--brand-border-color); border-radius: 8px;">
+                        <div style="font-size: 26px; margin-bottom: 8px;">📭</div>
+                        <div style="font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 4px;">No LLM prompts recorded yet</div>
+                        <div style="font-size: 11.5px; color: var(--brand-text-muted);">
+                            Open <a href="/test_chat.html?token=22cc0a443b4bec08b5337f914726c40c" target="_blank" style="color: #818cf8; text-decoration: underline;">test_chat.html</a> in another tab, send a question, and it will appear here automatically within 3 seconds.
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = logs.map((item, index) => {
+                const entryNum = index + 1;
+                const isLatest = index === 0;
+                const modelBadge = item.model ? `<span class="badge badge-primary" style="font-size: 10px;">${escapeHtml(item.model)}</span>` : '';
+                const tokensBadge = item.tokens_used ? `<span class="badge badge-fallback" style="font-size: 10px;">${item.tokens_used} tokens</span>` : '';
+                const latestBadge = isLatest ? `<span class="badge badge-success" style="font-size: 10px;">● Latest (#${entryNum})</span>` : `<span class="badge badge-inactive" style="font-size: 10px;">#${entryNum} of ${logs.length}</span>`;
+
+                // History snippet formatting
+                let historyHtml = '<div style="color: var(--brand-text-muted); font-style: italic;">No prior conversation history in this turn (Turn 1).</div>';
+                if (Array.isArray(item.conversation_history) && item.conversation_history.length > 0) {
+                    historyHtml = item.conversation_history.map((h, hIdx) => {
+                        const isUser = h.role === 'user';
+                        const roleColor = isUser ? '#38bdf8' : '#a78bfa';
+                        const roleLabel = isUser ? 'Visitor' : 'Chatbot';
+                        return `
+                            <div style="margin-bottom: 6px; padding: 6px 10px; background: rgba(0,0,0,0.25); border-left: 3px solid ${roleColor}; border-radius: 4px;">
+                                <span style="color: ${roleColor}; font-weight: 700; font-size: 10.5px; text-transform: uppercase;">${roleLabel}:</span>
+                                <span style="color: #e2e8f0; font-size: 11.5px; margin-left: 6px;">${escapeHtml(h.content)}</span>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                return `
+                    <div style="background: #0d1322; border: 1px solid ${isLatest ? 'rgba(99, 102, 241, 0.6)' : 'var(--brand-border-color)'}; border-radius: 10px; padding: 18px; box-shadow: 0 4px 16px rgba(0,0,0,0.3);">
+                        <!-- Header with meta info -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 10px; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                ${latestBadge}
+                                <span style="color: #fff; font-weight: 700; font-family: 'JetBrains Mono', monospace; font-size: 12.5px;">
+                                    ⏱️ ${escapeHtml(item.timestamp)}
+                                </span>
+                                ${modelBadge}
+                                ${tokensBadge}
+                            </div>
+                            <div style="font-size: 11px; color: var(--brand-text-muted); font-family: 'JetBrains Mono', monospace;">
+                                ID: ${escapeHtml(item.id || 'N/A')}
+                            </div>
+                        </div>
+
+                        <!-- 1. USER PROMPT (VISITOR QUESTION) -->
+                        <div style="margin-bottom: 14px;">
+                            <div style="font-size: 11px; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 5px;">
+                                <span>💬</span> User Prompt (Visitor Query)
+                            </div>
+                            <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 6px; padding: 10px 14px; font-size: 12.5px; font-weight: 600; color: #fff; line-height: 1.5;">
+                                ${escapeHtml(item.user_prompt)}
+                            </div>
+                        </div>
+
+                        <!-- 2. CONVERSATION HISTORY SNIPPET -->
+                        <div style="margin-bottom: 14px;">
+                            <div style="font-size: 11px; font-weight: 700; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 5px;">
+                                <span>📜</span> Conversation History Snippet (Previous Turns Sent to LLM)
+                            </div>
+                            <div style="background: #080c14; border: 1px solid var(--brand-border-color); border-radius: 6px; padding: 10px 14px; font-size: 11.5px;">
+                                ${historyHtml}
+                            </div>
+                        </div>
+
+                        <!-- 3. FULL SYSTEM PROMPT (STRETCHES NATURALLY TO FIT ALL CONTENT) -->
+                        <div style="margin-bottom: 14px;">
+                            <div style="font-size: 11px; font-weight: 700; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between;">
+                                <span style="display: flex; align-items: center; gap: 5px;"><span>⚙️</span> Full System Prompt (Instructions, Knowledge Context &amp; Guardrails)</span>
+                                <span style="font-size: 10px; color: var(--brand-text-muted); font-weight: 400;">(${item.system_prompt ? item.system_prompt.length.toLocaleString() : 0} chars)</span>
+                            </div>
+                            <pre style="background: #060911; border: 1px solid var(--brand-border-color); border-radius: 6px; padding: 12px 14px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; line-height: 1.6; color: #cbd5e1; white-space: pre-wrap; word-break: break-word; margin: 0;">${escapeHtml(item.system_prompt)}</pre>
+                        </div>
+
+                        <!-- 4. RAW LLM RESPONSE -->
+                        <div>
+                            <div style="font-size: 11px; font-weight: 700; color: #34d399; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 5px;">
+                                <span>🤖</span> LLM Response Generated
+                            </div>
+                            <pre style="background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 6px; padding: 12px 14px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.6; color: #a7f3d0; white-space: pre-wrap; word-break: break-word; margin: 0;">${escapeHtml(item.llm_response)}</pre>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function clearLlmDebugLogs() {
+            if (!confirm('Are you sure you want to clear the 7 recent LLM debug log entries?')) return;
+
+            try {
+                const res = await apiFetch('/v1/superadmin/llm-debug-logs', { method: 'DELETE' });
+                if (res && res.status === 'success') {
+                    showToast('LLM debug logs cleared.', 'info');
+                    lastRenderedLlmHash = '';
+                    loadLlmDebugLogs(true);
+                }
+            } catch (err) {
+                showToast('Failed to clear logs: ' + err.message, 'error');
+            }
+        }
+
         // Initialization
         if (token) {
             initSuperAdmin();
+            startLlmAutoPoll();
         }
     </script>
 </body>

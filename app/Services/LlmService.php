@@ -33,26 +33,95 @@ class LlmService
         $stmtFallback->execute();
         $fallback = $stmtFallback->fetch();
 
+        $result = null;
+
         // Attempt Primary Provider
         if ($primary) {
             try {
-                return self::executeProvider($primary, $systemPrompt, $userMessage, $conversationHistory);
+                $result = self::executeProvider($primary, $systemPrompt, $userMessage, $conversationHistory);
             } catch (Exception $e) {
                 error_log("[LlmService] Primary LLM Provider failed: " . $e->getMessage() . ". Switching to fallback...");
             }
         }
 
         // Attempt Fallback Provider
-        if ($fallback) {
+        if (!$result && $fallback) {
             try {
-                return self::executeProvider($fallback, $systemPrompt, $userMessage, $conversationHistory);
+                $result = self::executeProvider($fallback, $systemPrompt, $userMessage, $conversationHistory);
             } catch (Exception $e) {
                 error_log("[LlmService] Fallback LLM Provider failed: " . $e->getMessage());
             }
         }
 
         // Fallback to Environment Variables (OpenAI / Gemini) if DB providers fail or not set
-        return self::executeEnvFallback($systemPrompt, $userMessage, $conversationHistory);
+        if (!$result) {
+            $result = self::executeEnvFallback($systemPrompt, $userMessage, $conversationHistory);
+        }
+
+        // Record entry in recent logs JSON (strictly maximum 7 entries)
+        try {
+            self::recordDebugLog($systemPrompt, $userMessage, $conversationHistory, $result);
+        } catch (Throwable $t) {
+            error_log("[LlmService] Debug log recording error: " . $t->getMessage());
+        }
+
+        return $result;
+    }
+
+    /**
+     * Record interaction to storage/logs/llm_debug_logs.json (max 7 entries, FIFO)
+     */
+    public static function recordDebugLog(string $systemPrompt, string $userMessage, array $conversationHistory, array $result): void
+    {
+        $logDir = dirname(__DIR__, 2) . '/storage/logs';
+        if (!is_dir($logDir)) {
+            @mkdir($logDir, 0775, true);
+        }
+
+        $logFile = $logDir . '/llm_debug_logs.json';
+
+        // Prepare conversation history snippet (roles & contents)
+        $historySnippet = [];
+        foreach ($conversationHistory as $msg) {
+            if (isset($msg['role'], $msg['content'])) {
+                $historySnippet[] = [
+                    'role' => $msg['role'],
+                    'content' => $msg['content']
+                ];
+            }
+        }
+
+        $entry = [
+            'id' => 'req_' . bin2hex(random_bytes(4)),
+            'timestamp' => date('Y-m-d H:i:s'),
+            'system_prompt' => $systemPrompt,
+            'user_prompt' => $userMessage,
+            'conversation_history' => $historySnippet,
+            'llm_response' => $result['text'] ?? '',
+            'model' => $result['model'] ?? 'unknown',
+            'tokens_used' => $result['tokens_used'] ?? 0
+        ];
+
+        $logs = [];
+        if (file_exists($logFile)) {
+            $raw = @file_get_contents($logFile);
+            if ($raw) {
+                $decoded = json_decode($raw, true);
+                if (is_array($decoded)) {
+                    $logs = $decoded;
+                }
+            }
+        }
+
+        // Prepend newest entry to the top
+        array_unshift($logs, $entry);
+
+        // Keep maximum 7 entries
+        if (count($logs) > 7) {
+            $logs = array_slice($logs, 0, 7);
+        }
+
+        @file_put_contents($logFile, json_encode($logs, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), LOCK_EX);
     }
 
     /**
