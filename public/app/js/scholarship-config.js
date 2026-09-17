@@ -23,7 +23,10 @@ async function initScholarshipConfiguration() {
  */
 async function loadScholarshipPrograms() {
     try {
-        const res = await fetch('/v1/programs');
+        const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token');
+        const res = await fetch('/v1/programs', {
+            headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+        });
         const json = await res.json();
         const rawList = (json.data && Array.isArray(json.data.courses)) ? json.data.courses : (Array.isArray(json.data) ? json.data : []);
         window._scholarshipPrograms = rawList;
@@ -51,7 +54,10 @@ async function loadScholarshipRules() {
     }
 
     try {
-        const res = await fetch('/v1/scholarship-rules');
+        const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token');
+        const res = await fetch('/v1/scholarship-rules', {
+            headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+        });
         const json = await res.json();
         if (json.success && Array.isArray(json.data)) {
             window._scholarshipRules = json.data;
