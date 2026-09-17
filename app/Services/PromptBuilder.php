@@ -325,12 +325,12 @@ EOT;
               AND s.tour_date >= CURDATE()
               AND (
                   s.is_general = 1 
-                  OR s.id IN (SELECT slot_id FROM campus_tour_slot_programs WHERE program_id = :prog_id AND organization_id = :org_id)
+                  OR s.id IN (SELECT slot_id FROM campus_tour_slot_programs WHERE program_id = :prog_id AND organization_id = :sub_org_id)
               )
             ORDER BY s.is_general ASC, s.tour_date ASC, s.start_time ASC
             LIMIT 3
         ");
-        $stmt->execute([':org_id' => $organizationId, ':prog_id' => $progId]);
+        $stmt->execute([':org_id' => $organizationId, ':prog_id' => $progId, ':sub_org_id' => $organizationId]);
         $slots = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         if (empty($slots)) {
