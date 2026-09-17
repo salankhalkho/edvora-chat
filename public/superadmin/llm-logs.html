@@ -423,10 +423,15 @@
         async function clearLogs() {
             if (!confirm('Clear the latest LLM debug log entry?')) return;
             try {
-                const res = await fetch('/v1/superadmin/llm-debug-logs', { method: 'DELETE' });
-                showToast('Cleared log.');
-                lastRenderHash = '';
-                fetchLogs(true);
+                const res = await fetch('/v1/public/llm-debug-logs', { method: 'DELETE' });
+                const json = await res.json();
+                if (json && json.status === 'success') {
+                    showToast('Cleared log successfully.');
+                    lastRenderHash = '';
+                    fetchLogs(true);
+                } else {
+                    showToast('Clear failed: ' + (json.message || 'Unknown error'));
+                }
             } catch (err) {
                 showToast('Clear failed: ' + err.message);
             }
