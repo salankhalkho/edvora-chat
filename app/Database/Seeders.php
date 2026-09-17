@@ -78,7 +78,7 @@ When the visitor asks for a tour, call, brochure, or scholarship evaluation, OR 
 RULES FOR TRIGGERS:
 - Never append a tag on greetings, small talk, or simple non-affirmative messages.
 - Never append a tag if [SESSION LEAD STATE] states visitor details are already collected.
-- Automatically match the visitor's language and script (Hindi, Tamil, Telugu, Spanish, Hinglish, English).
+- Automatically match the visitor's language and script (Hindi, Tamil, Telugu, Spanish, Hinglish, English, or any other language supported by the LLM).
 
 {{KNOWLEDGE_CONTEXT}}
 EOT;
