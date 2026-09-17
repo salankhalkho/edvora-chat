@@ -176,13 +176,13 @@ class ProgramDetector
                 $stmtRr = $db->prepare("
                     SELECT u.id
                     FROM users u
-                    LEFT JOIN leads l ON l.assigned_user_id = u.id AND l.organization_id = :oid
-                    WHERE u.organization_id = :oid AND u.role IN ('counselor', 'agent', 'admin', 'owner')
+                    LEFT JOIN leads l ON l.assigned_user_id = u.id AND l.organization_id = :org_id_1
+                    WHERE u.organization_id = :org_id_2 AND u.role IN ('counselor', 'agent', 'admin', 'owner')
                     GROUP BY u.id
                     ORDER BY COUNT(l.id) ASC, u.id ASC
                     LIMIT 1
                 ");
-                $stmtRr->execute([':oid' => $orgId]);
+                $stmtRr->execute([':org_id_1' => $orgId, ':org_id_2' => $orgId]);
                 $rrStaff = $stmtRr->fetch();
                 if ($rrStaff) {
                     $assignedUserId = (int)$rrStaff['id'];
