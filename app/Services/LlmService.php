@@ -80,9 +80,14 @@ class LlmService
 
         $logFile = $logDir . '/llm_debug_logs.json';
 
-        // Prepare conversation history snippet (roles & contents)
+        // Prepare conversation history snippet (prior dialogue turns before current message)
         $historySnippet = [];
-        foreach ($conversationHistory as $msg) {
+        $totalMsgs = count($conversationHistory);
+        foreach ($conversationHistory as $idx => $msg) {
+            // Exclude current user message from history snippet if it's the last item
+            if ($idx === ($totalMsgs - 1) && ($msg['role'] ?? '') === 'user' && ($msg['content'] ?? '') === $userMessage) {
+                continue;
+            }
             if (isset($msg['role'], $msg['content'])) {
                 $historySnippet[] = [
                     'role' => $msg['role'],
