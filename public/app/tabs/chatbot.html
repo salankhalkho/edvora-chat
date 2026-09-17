@@ -55,19 +55,6 @@
                 <!-- LEFT: CONTROLS PANEL -->
                 <div class="wc-controls-col">
 
-                    <!-- Scope Selector -->
-                    <div class="wc-scope-bar">
-                        <div class="wc-scope-label">Customization Scope</div>
-                        <div class="wc-scope-btns">
-                            <button class="wc-scope-btn active" id="wcScopeOrgBtn" onclick="onWcScopeChange('org')">🏛️ Org-Wide</button>
-                            <button class="wc-scope-btn" id="wcScopeDeptBtn" onclick="onWcScopeChange('dept')">🏢 Department</button>
-                        </div>
-                        <div id="wcDeptRow" style="display:none;" class="wc-dept-row">
-                            <select id="wcDeptSelect" class="brand-input" style="flex:1; height:32px; font-size:11px;" onchange="onWcDeptChange(this.value)"></select>
-                            <span id="wcOverrideBadge" class="wc-override-badge" style="display:none;">🔵 Dept Override Active</span>
-                        </div>
-                    </div>
-
                     <!-- Section 1: Header Branding -->
                     <div class="wc-section" id="wcSecHeader">
                         <div class="wc-section-header" onclick="toggleWcSection('wcSecHeader')">
@@ -456,18 +443,6 @@
                         <span style="background: #E6F7D2; color: #063D3B; border: 1px solid #C8FF63; font-size: 10.5px; font-weight: 700; padding: 3px 10px; border-radius: 20px;">Async &amp; Lightweight (&lt;25KB)</span>
                     </div>
                     <div style="padding: 24px;">
-                        <!-- Embed Target Selector: Org vs Department -->
-                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; padding: 12px 16px; background: #F4FAF7; border: 1.5px solid #D1E5DE; border-radius: 8px;">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <span style="font-size: 13px; font-weight: 700; color: #063D3B;">Select Target Widget:</span>
-                                <select id="embedTargetSelect" class="brand-input" style="height: 32px; font-size: 12px; font-weight: 600; color: #063D3B; padding: 0 10px; border-radius: 6px;" onchange="onEmbedTargetChange(this.value)">
-                                    <option value="org">🏛️ Main Organization Widget</option>
-                                </select>
-                            </div>
-                            <div id="embedDeptStatusBadge" style="font-size: 11px; color: #047857; font-weight: 600;">
-                                🌐 Organization-wide general concierge widget
-                            </div>
-                        </div>
 
                         <p style="font-size: 13px; color: #4B635E; margin: 0 0 14px 0; line-height: 1.6;">
                             Add your AI chatbot to any website by copying the code snippet below and pasting it just before the closing <code>&lt;/body&gt;</code> tag on your web pages:

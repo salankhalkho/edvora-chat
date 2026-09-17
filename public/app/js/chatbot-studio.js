@@ -65,39 +65,9 @@
         async function populateEmbedTargetSelector() {
             const sel = document.getElementById('embedTargetSelect');
             if (!sel) return;
-
-            let depts = (typeof currentDepartments !== 'undefined' && Array.isArray(currentDepartments) && currentDepartments.length > 0) ? currentDepartments : null;
-            if (!depts && token) {
-                try {
-                    const res = await fetch('/v1/departments', { headers: { 'Authorization': 'Bearer ' + token } });
-                    const data = await res.json();
-                    if (data.status === 'success' && data.data) {
-                        depts = data.data.departments || (Array.isArray(data.data) ? data.data : []);
-                        if (typeof currentDepartments !== 'undefined') currentDepartments = depts;
-                    }
-                } catch(e) {}
-            }
-
-            const deptList = Array.isArray(depts) ? depts : [];
-            const dedicatedDepts = deptList.filter(d => d.enable_dedicated_widget != 0 && d.enable_dedicated_widget !== '0' && d.enable_dedicated_widget !== false);
-
-            let optionsHtml = '<option value="org">🏛️ Main Organization Widget</option>';
-            if (dedicatedDepts.length > 0) {
-                optionsHtml += '<optgroup label="🏢 Dedicated Department Widgets">';
-                dedicatedDepts.forEach(d => {
-                    const isSelected = (currentEmbedTarget === String(d.id)) ? ' selected' : '';
-                    optionsHtml += '<option value="' + d.id + '"' + isSelected + '>' + (d.icon || '🏢') + ' ' + (d.name || 'Department') + '</option>';
-                });
-                optionsHtml += '</optgroup>';
-            }
-
-            sel.innerHTML = optionsHtml;
-            if (currentEmbedTarget !== 'org' && !dedicatedDepts.some(d => String(d.id) === String(currentEmbedTarget))) {
-                currentEmbedTarget = 'org';
-                sel.value = 'org';
-            } else {
-                sel.value = currentEmbedTarget;
-            }
+            sel.innerHTML = '<option value="org">🏛️ Main Organization Widget</option>';
+            currentEmbedTarget = 'org';
+            sel.value = 'org';
         }
 
         async function onEmbedTargetChange(val) {
@@ -916,10 +886,11 @@
             }
             if (!currentWidgetBot || !currentWidgetBot.id) return;
             wcState.botId = currentWidgetBot.id;
+            wcState.scope = 'org';
+            wcState.dept_id = null;
             wcState.loaded = true;
-            await wcPopulateDepts();
-            const params = new URLSearchParams({ bot_id: wcState.botId, scope: wcState.scope });
-            if (wcState.scope === 'dept' && wcState.dept_id) params.append('dept_id', wcState.dept_id);
+            
+            const params = new URLSearchParams({ bot_id: wcState.botId, scope: 'org' });
             try {
                 if (!window.currentOrgProfile || !window.currentOrgName || !window.currentOrgWebsite || !window.currentOrgProfile.website_url) {
                     try {
@@ -935,8 +906,8 @@
                 }
                 const res = await fetch('/v1/widget/customization?' + params, { headers: { 'Authorization': 'Bearer ' + token } });
                 const data = await res.json();
-                if (data.status === 'success') {
-                    wcState.config = { ...WC_DEFAULTS, ...data.data.config };
+                if (data.status === 'success' && data.data) {
+                    wcState.config = { ...WC_DEFAULTS, ...(data.data.config || {}) };
                     wcState.prerequisites = data.data.prerequisites || {
                         has_assets: false,
                         has_campuses: false,
@@ -949,7 +920,7 @@
                         wcState.config.header_bot_name = orgName;
                     }
                     if (!wcState.config.welcome_message || wcState.config.welcome_message.includes('University Admissions Assistant') || wcState.config.welcome_message.includes('Tanya')) {
-                        wcState.config.welcome_message = "Hi there! ðŸ‘‹ Welcome to " + orgName + ". How can I assist you with admissions, programs, or campus life today?";
+                        wcState.config.welcome_message = "Hi there! 👋 Welcome to " + orgName + ". How can I assist you with admissions, programs, or campus life today?";
                     }
                     if (!wcState.config.launcher_icon || wcState.config.launcher_icon === 'chat') {
                         wcState.config.launcher_icon = 'modern_chat';
@@ -964,43 +935,27 @@
                     wcState.config.quick_chips = chipParts.join(', ');
 
                     const badge = document.getElementById('wcOverrideBadge');
-                    if (badge) badge.style.display = data.data.is_override ? 'inline-flex' : 'none';
-                    wcPopulateControls(wcState.config);
-                    applyWcToPreview(wcState.config);
+                    if (badge) badge.style.display = 'none';
+                    try { wcPopulateControls(wcState.config); } catch(errControls) { console.error('Error in wcPopulateControls:', errControls); }
+                    try { applyWcToPreview(wcState.config); } catch(errPreview) { console.error('Error in applyWcToPreview:', errPreview); }
                     if (typeof wcSyncPreviewChips === 'function') wcSyncPreviewChips();
+                } else {
+                    try { applyWcToPreview(wcState.config); } catch(_) {}
                 }
-            } catch(e) { console.error('WC load error:', e); }
+            } catch(e) {
+                console.error('WC load error:', e);
+                try { applyWcToPreview(wcState.config); } catch(_) {}
+            } finally {
+                const loader = document.getElementById('wcChatLoadingOverlay');
+                if (loader) loader.style.display = 'none';
+            }
         }
 
         async function wcPopulateDepts() {
-            try {
-                let depts = (typeof currentDepartments !== 'undefined' && Array.isArray(currentDepartments) && currentDepartments.length > 0) ? currentDepartments : null;
-                if (!depts) {
-                    const res = await fetch('/v1/departments', { headers: { 'Authorization': 'Bearer ' + token } });
-                    const data = await res.json();
-                    if (data.status === 'success' && data.data) {
-                        depts = data.data.departments || (Array.isArray(data.data) ? data.data : []);
-                        if (typeof currentDepartments !== 'undefined') {
-                            currentDepartments = depts;
-                        }
-                    }
-                }
-                wcState.depts = Array.isArray(depts) ? depts : [];
-                const sel = document.getElementById('wcDeptSelect');
-                if (sel) {
-                    if (wcState.depts.length === 0) {
-                        sel.innerHTML = '<option value="">No departments configured yet</option>';
-                    } else {
-                        sel.innerHTML = '<option value="">Select Department...</option>' + wcState.depts.map(d => {
-                            const icon = d.icon ? d.icon + ' ' : '';
-                            const isSelected = (wcState.dept_id && wcState.dept_id == d.id) ? ' selected' : '';
-                            return '<option value="' + d.id + '"' + isSelected + '>' + icon + d.name + '</option>';
-                        }).join('');
-                    }
-                }
-            } catch(e) {
-                console.error('Error populating departments:', e);
-            }
+            // Departments deprecated - retained as graceful no-op
+            wcState.depts = [];
+            const sel = document.getElementById('wcDeptSelect');
+            if (sel) sel.innerHTML = '<option value="">All Institutional Departments</option>';
         }
 
         async function saveWidgetCustomization(silent = false) {
@@ -1014,27 +969,27 @@
                 currentWidgetBot.quick_chips = chipsVal.split(',').map(s => s.trim()).filter(Boolean);
             }
 
-            const btn = document.getElementById('wcSaveBtn');
+            const btn = document.getElementById('wcSaveBtn') || document.getElementById('saveWidgetConfigBtn');
             if (btn && !silent) { btn.textContent = 'Saving...'; btn.disabled = true; }
             try {
                 const res = await fetch('/v1/widget/customization', {
                     method: 'PUT',
                     headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ bot_id: wcState.botId, scope: wcState.scope, dept_id: wcState.dept_id, config: wcState.config })
+                    body: JSON.stringify({ bot_id: wcState.botId, scope: 'org', dept_id: null, config: wcState.config })
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
                     // Also persist quick_chips to the chatbot record
-                    if (!silent && currentWidgetBot.id) {
+                    if (!silent && currentWidgetBot.id && typeof saveChatbotWidgetConfig === 'function') {
                         await saveChatbotWidgetConfig();
                         return; // saveChatbotWidgetConfig handles its own success messaging
                     }
-                    if (!silent) showToast('Widget customization saved & deployed! \u2713', 'success');
+                    if (!silent) showToast('Widget customization saved & deployed! ✓', 'success');
                 } else {
                     showToast(data.message || 'Save failed', 'error');
                 }
             } catch(e) { showToast('Network error', 'error'); }
-            finally { if (btn) { btn.textContent = '\uD83D\uDCBE Save & Apply'; btn.disabled = false; } }
+            finally { if (btn) { btn.textContent = '💾 Save & Apply Customization'; btn.disabled = false; } }
         }
 
         function applyWcToPreview(c) {
@@ -1323,7 +1278,7 @@
         function wcSetSlider(sid, val, lid, unit) {
             const s = document.getElementById(sid), l = document.getElementById(lid);
             if (s) { s.value = val; wcUpdateSliderFill(s); }
-            if (l) l.textContent = val + unit;
+            if (l) l.textContent = val + (unit || '');
         }
 
         function wcSetRadio(gid, val) {
@@ -1332,7 +1287,12 @@
         }
 
         function wcUpdateSliderFill(slider) {
-            const pct = ((parseFloat(slider.value) - parseFloat(slider.min)) / (parseFloat(slider.max) - parseFloat(slider.min))) * 100;
+            if (!slider || slider.min === undefined || slider.max === undefined) return;
+            const min = parseFloat(slider.min) || 0;
+            const max = parseFloat(slider.max) || 100;
+            const val = parseFloat(slider.value) || 0;
+            const range = max - min;
+            const pct = range > 0 ? Math.max(0, Math.min(100, ((val - min) / range) * 100)) : 0;
             slider.style.background = 'linear-gradient(to right, #063D3B 0%, #063D3B ' + pct + '%, #DCE9E5 ' + pct + '%)';
         }
 
@@ -1558,59 +1518,30 @@
         }
 
         async function onWcScopeChange(scope) {
-            wcState.scope = scope;
-            document.getElementById('wcScopeOrgBtn').classList.toggle('active', scope === 'org');
-            document.getElementById('wcScopeDeptBtn').classList.toggle('active', scope === 'dept');
+            wcState.scope = 'org';
+            wcState.dept_id = null;
+            const orgBtn = document.getElementById('wcScopeOrgBtn');
+            if (orgBtn) orgBtn.classList.add('active');
+            const deptBtn = document.getElementById('wcScopeDeptBtn');
+            if (deptBtn) deptBtn.classList.remove('active');
             const dr = document.getElementById('wcDeptRow');
-            if (dr) dr.style.display = (scope === 'dept') ? 'flex' : 'none';
+            if (dr) dr.style.display = 'none';
             const badge = document.getElementById('wcOverrideBadge');
             if (badge) badge.style.display = 'none';
-
-            if (scope === 'dept') {
-                await wcPopulateDepts();
-                const sel = document.getElementById('wcDeptSelect');
-                if (sel && sel.options.length > 1 && !sel.value) {
-                    sel.selectedIndex = 1;
-                    wcState.dept_id = parseInt(sel.value);
-                } else if (sel && sel.value) {
-                    wcState.dept_id = parseInt(sel.value);
-                } else {
-                    wcState.dept_id = null;
-                }
-            } else {
-                wcState.dept_id = null;
-            }
             await loadWidgetCustomization();
         }
 
         async function onWcDeptChange(deptId) {
-            wcState.dept_id = deptId ? parseInt(deptId) : null;
+            wcState.dept_id = null;
             await loadWidgetCustomization();
         }
 
         function goToDeptChatbotSettings(directDeptId = null) {
-            const deptId = directDeptId || (document.getElementById('editDeptId') ? document.getElementById('editDeptId').value : null);
             switchNavTab('chatbot', 'widget');
-            if (deptId) {
-                setTimeout(async () => {
-                    await onWcScopeChange('dept');
-                    const sel = document.getElementById('wcDeptSelect');
-                    if (sel) sel.value = deptId;
-                    await onWcDeptChange(deptId);
-                }, 200);
-            }
         }
 
         function goToDeptEmbedCode(deptId) {
             switchNavTab('chatbot', 'embed');
-            if (deptId) {
-                currentEmbedTarget = String(deptId);
-                setTimeout(async () => {
-                    const sel = document.getElementById('embedTargetSelect');
-                    if (sel) sel.value = String(deptId);
-                    await onEmbedTargetChange(String(deptId));
-                }, 200);
-            }
         }
 
 

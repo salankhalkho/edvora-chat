@@ -166,6 +166,7 @@ class WidgetCustomizationController
         }
 
         // Keep chatbots.quick_chips column synchronized with org-level prompt chips
+        $scope = $data['scope'] ?? 'org';
         if ($scope === 'org' && !empty($sanitized['quick_chips'])) {
             $chipsArr = array_filter(array_map('trim', explode(',', $sanitized['quick_chips'])));
             $db->prepare("UPDATE chatbots SET quick_chips = :qc, updated_at = NOW() WHERE id = :bid AND organization_id = :oid")
