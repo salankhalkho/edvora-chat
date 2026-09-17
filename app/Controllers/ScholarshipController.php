@@ -639,17 +639,41 @@ class ScholarshipController
             return;
         }
 
-        // Query active courses
+        // Query active courses from programs and map scholarship rule info
         $sql = "
-            SELECT cs.id, cs.course_name, cs.course_code, cs.degree_level, cs.has_scholarship,
-                   cs.no_scholarship_reason, cs.evaluation_metric, cs.exam_name, cs.annual_tuition_fee, cs.currency
-            FROM course_scholarships cs
-            WHERE cs.organization_id = :org_id AND cs.is_active = 1
-            ORDER BY cs.degree_level ASC, cs.course_name ASC
+            SELECT 
+                p.id,
+                p.course_name,
+                p.course_code,
+                p.program_type as degree_level,
+                CASE WHEN sr.id IS NOT NULL THEN 1 ELSE 0 END as has_scholarship,
+                NULL as no_scholarship_reason,
+                COALESCE(sr.evaluation_metric, 'percentage_12th') as evaluation_metric,
+                sr.exam_name,
+                p.tuition_fee as annual_tuition_fee,
+                p.currency
+            FROM programs p
+            LEFT JOIN scholarship_rules sr ON sr.program_id = p.id AND sr.organization_id = p.organization_id AND sr.is_active = 1
+            WHERE p.organization_id = :org_id AND p.is_admissions_open = 1
+            ORDER BY p.program_type ASC, p.course_name ASC
         ";
         $stmtCourses = $db->prepare($sql);
         $stmtCourses->execute([':org_id' => $orgId]);
         $courses = $stmtCourses->fetchAll();
+
+        // Fallback to legacy course_scholarships if programs table has no records for this org
+        if (empty($courses)) {
+            $sqlLegacy = "
+                SELECT cs.id, cs.course_name, cs.course_code, cs.degree_level, cs.has_scholarship,
+                       cs.no_scholarship_reason, cs.evaluation_metric, cs.exam_name, cs.annual_tuition_fee, cs.currency
+                FROM course_scholarships cs
+                WHERE cs.organization_id = :org_id AND cs.is_active = 1
+                ORDER BY cs.degree_level ASC, cs.course_name ASC
+            ";
+            $stmtLegacy = $db->prepare($sqlLegacy);
+            $stmtLegacy->execute([':org_id' => $orgId]);
+            $courses = $stmtLegacy->fetchAll();
+        }
 
         // Boosters config
         $boosters = [
@@ -701,22 +725,78 @@ class ScholarshipController
         $orgRow = $stmtOrg->fetch();
         $orgConfig = $orgRow && !empty($orgRow['scholarship_config']) ? json_decode($orgRow['scholarship_config'], true) : [];
 
-        // Fetch Course Scholarship Rule
-        $stmtCourse = $db->prepare("SELECT * FROM course_scholarships WHERE id = ? AND organization_id = ? AND is_active = 1");
-        $stmtCourse->execute([$courseId, $orgId]);
-        $course = $stmtCourse->fetch();
+        // Fetch Program & Scholarship Rule from authoritative tables (programs & scholarship_rules)
+        $stmtProg = $db->prepare("
+            SELECT 
+                p.id as program_id,
+                p.course_name,
+                p.course_code,
+                p.program_type as degree_level,
+                p.tuition_fee as annual_tuition_fee,
+                p.currency,
+                sr.id as rule_id,
+                sr.title as rule_title,
+                sr.evaluation_metric,
+                sr.exam_name,
+                sr.discount_type,
+                sr.discount_value,
+                sr.slabs,
+                sr.is_active as rule_is_active
+            FROM programs p
+            LEFT JOIN scholarship_rules sr ON sr.program_id = p.id AND sr.organization_id = p.organization_id AND sr.is_active = 1
+            WHERE (p.id = :course_id OR sr.id = :course_id) AND p.organization_id = :org_id
+            LIMIT 1
+        ");
+        $stmtProg->execute([':course_id' => $courseId, ':org_id' => $orgId]);
+        $progRow = $stmtProg->fetch();
 
-        if (!$course) {
-            Response::error('Course not found or inactive.', 404);
-            return;
+        $courseName = '';
+        $degreeLevel = 'undergraduate';
+        $annualFee = null;
+        $currency = 'USD';
+        $hasScholarship = false;
+        $noScholarshipReason = '';
+        $evaluationMetric = 'percentage_12th';
+        $examName = null;
+        $slabs = [];
+
+        if ($progRow) {
+            $courseName = $progRow['course_name'];
+            $degreeLevel = $progRow['degree_level'] ?: 'undergraduate';
+            $annualFee = $progRow['annual_tuition_fee'] ? (float)$progRow['annual_tuition_fee'] : null;
+            $currency = $progRow['currency'] ?: 'USD';
+            $hasScholarship = !empty($progRow['rule_id']) && (int)$progRow['rule_is_active'] === 1;
+            $evaluationMetric = $progRow['evaluation_metric'] ?: 'percentage_12th';
+            $examName = $progRow['exam_name'] ?: null;
+            $slabs = !empty($progRow['slabs']) ? json_decode($progRow['slabs'], true) : [];
+        } else {
+            // Fallback to legacy course_scholarships table
+            $stmtCourse = $db->prepare("SELECT * FROM course_scholarships WHERE id = ? AND organization_id = ? AND is_active = 1");
+            $stmtCourse->execute([$courseId, $orgId]);
+            $legacyCourse = $stmtCourse->fetch();
+
+            if (!$legacyCourse) {
+                Response::error('Course not found or inactive.', 404);
+                return;
+            }
+
+            $courseName = $legacyCourse['course_name'];
+            $degreeLevel = $legacyCourse['degree_level'];
+            $annualFee = $legacyCourse['annual_tuition_fee'] ? (float)$legacyCourse['annual_tuition_fee'] : null;
+            $currency = $legacyCourse['currency'] ?? 'INR';
+            $hasScholarship = (bool)$legacyCourse['has_scholarship'];
+            $noScholarshipReason = $legacyCourse['no_scholarship_reason'] ?? '';
+            $evaluationMetric = $legacyCourse['evaluation_metric'] ?? 'percentage_12th';
+            $examName = $legacyCourse['exam_name'] ?? null;
+            $slabs = !empty($legacyCourse['slabs']) ? json_decode($legacyCourse['slabs'], true) : [];
         }
 
         // If course does not offer scholarship
-        if (!(bool)$course['has_scholarship']) {
+        if (!$hasScholarship) {
             Response::success([
                 'has_scholarship' => false,
-                'course_name' => $course['course_name'],
-                'reason' => $course['no_scholarship_reason'] ?: 'This specialized program follows a standard subsidized tuition fee structure.',
+                'course_name' => $courseName,
+                'reason' => $noScholarshipReason ?: 'This specialized program follows a standard subsidized tuition fee structure.',
                 'headline' => 'Standard Fee Structure & Financial Support',
                 'subheadline' => 'Direct merit waivers are not applicable for this course, but flexible financial support is available:',
                 'financial_options' => [
@@ -724,25 +804,26 @@ class ScholarshipController
                     '🏦 Institutional Education Loan Tie-ups with quick sanction',
                     '🤝 Need-Based Financial Aid & Work-Study Programs'
                 ],
-                'annual_fee' => $course['annual_tuition_fee'] ? (float)$course['annual_tuition_fee'] : null,
-                'currency' => $course['currency'] ?? 'INR'
+                'annual_fee' => $annualFee,
+                'currency' => $currency
             ]);
             return;
         }
 
         // Calculate Academic Slab Match
-        $slabs = !empty($course['slabs']) ? json_decode($course['slabs'], true) : [];
         $matchedSlab = null;
 
         // Sort slabs descending by min threshold
-        usort($slabs, fn($a, $b) => ($b['min'] ?? 0) <=> ($a['min'] ?? 0));
+        if (is_array($slabs)) {
+            usort($slabs, fn($a, $b) => ($b['min'] ?? 0) <=> ($a['min'] ?? 0));
 
-        foreach ($slabs as $slab) {
-            $min = (float)($slab['min'] ?? 0);
-            $max = isset($slab['max']) ? (float)$slab['max'] : 100.0;
-            if ($score >= $min && $score <= $max) {
-                $matchedSlab = $slab;
-                break;
+            foreach ($slabs as $slab) {
+                $min = (float)($slab['min'] ?? 0);
+                $max = isset($slab['max']) ? (float)$slab['max'] : 100.0;
+                if ($score >= $min && $score <= $max) {
+                    $matchedSlab = $slab;
+                    break;
+                }
             }
         }
 
@@ -769,18 +850,17 @@ class ScholarshipController
         $maxAllowed = (float)($orgConfig['max_total_waiver_pct'] ?? 100.0);
         $totalWaiverPct = min($maxAllowed, $baseWaiverPct + $boosterWaiverPct);
 
-        $annualFee = $course['annual_tuition_fee'] ? (float)$course['annual_tuition_fee'] : null;
         $estimatedSavings = ($annualFee && $totalWaiverPct > 0) ? round(($annualFee * ($totalWaiverPct / 100)), 2) : null;
         $effectiveFee = ($annualFee && $estimatedSavings) ? ($annualFee - $estimatedSavings) : null;
 
         Response::success([
             'has_scholarship' => true,
             'is_qualified' => $totalWaiverPct > 0,
-            'course_name' => $course['course_name'],
-            'degree_level' => $course['degree_level'],
+            'course_name' => $courseName,
+            'degree_level' => $degreeLevel,
             'score_entered' => $score,
-            'metric_type' => $course['evaluation_metric'],
-            'exam_name' => $course['exam_name'],
+            'metric_type' => $evaluationMetric,
+            'exam_name' => $examName,
             'base_waiver_pct' => $baseWaiverPct,
             'booster_waiver_pct' => $boosterWaiverPct,
             'total_waiver_pct' => $totalWaiverPct,
@@ -788,7 +868,7 @@ class ScholarshipController
             'annual_fee' => $annualFee,
             'estimated_savings' => $estimatedSavings,
             'effective_fee' => $effectiveFee,
-            'currency' => $course['currency'] ?? 'INR',
+            'currency' => $currency,
             'active_boosters' => $activeBoosterNames
         ]);
     }
