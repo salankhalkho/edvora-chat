@@ -327,6 +327,13 @@ class ChatController
                 }
             }
 
+            // If the main response was emptied (e.g. LLM generated ONLY the offer question),
+            // promote the offer question to the main response so we don't send an empty Bubble 1!
+            if (empty($aiResponseText) && !empty($followUpMessage)) {
+                $aiResponseText = $followUpMessage;
+                $followUpMessage = null;
+            }
+
             // 11. Update Cadence State if an offer was delivered on this turn
             if (!empty($followUpMessage)) {
                 $db->exec("UPDATE conversations SET last_offer_turn = {$turnCount}, total_offers_count = total_offers_count + 1 WHERE id = {$convId}");

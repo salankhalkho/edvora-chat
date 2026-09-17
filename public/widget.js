@@ -592,7 +592,9 @@
                 if (res.data.conversation_id) {
                     currentConversationId = res.data.conversation_id;
                 }
-                appendMessage('assistant', res.data.response);
+                if (res.data.response && res.data.response.trim() !== '') {
+                    appendMessage('assistant', res.data.response);
+                }
 
                 if (res.data.lead_capture_trigger) {
                     renderLeadBanner(res.data.lead_capture_trigger);
