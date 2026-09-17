@@ -8,6 +8,7 @@ use App\Core\Response;
 use App\Services\ContentEngine;
 use App\Services\IntentClassifier;
 use App\Services\LlmService;
+use App\Services\ProgramDetector;
 use App\Services\PromptBuilder;
 use App\Services\QueryTranslator;
 use PDO;
@@ -168,6 +169,8 @@ class ChatController
         $leadCaptured = false;
         $visitorEmail = null;
         $visitorName = null;
+        $currentProgramInterest = null;
+        $currentProgramId = null;
 
         if (!$conv) {
             $stmtNewConv = $db->prepare("
@@ -189,6 +192,8 @@ class ChatController
             $leadCaptured = (!empty($conv['lead_captured_at']) || !empty($conv['lead_email_collected']) || !empty($conv['visitor_email']));
             $visitorEmail = $conv['visitor_email'] ?? null;
             $visitorName = $conv['visitor_name'] ?? null;
+            $currentProgramInterest = $conv['lead_program_interest'] ?? null;
+            $currentProgramId = !empty($conv['program_id']) ? (int)$conv['program_id'] : null;
             $db->exec("UPDATE conversations SET last_message_at = NOW() WHERE id = {$convId}");
         }
 
@@ -203,26 +208,7 @@ class ChatController
             ':content' => $userMessage
         ]);
 
-        // 4. Calculate Current Turn Count and Anti-Fatigue Offer Cadence
-        $stmtTurns = $db->prepare("SELECT COUNT(*) FROM messages WHERE conversation_id = :cid AND role = 'user'");
-        $stmtTurns->execute([':cid' => $convId]);
-        $turnCount = (int)$stmtTurns->fetchColumn();
-
-        $minTurns = 2; // Strict Rule: Zero offers on Turn 1
-        $cooldownTurns = 2; // Strict Rule: Minimum 2 turns between proactive offers
-        $maxOffersPerSession = 3; // Strict Rule: Anti-fatigue session cap
-
-        $lastOfferTurn = (int)($conv['last_offer_turn'] ?? 0);
-        $totalOffersCount = (int)($conv['total_offers_count'] ?? 0);
-
-        // Can we make a proactive offer on this turn?
-        $canMakeOffer = (!$leadCaptured)
-            && ((bool)$bot['lead_capture_enabled'])
-            && ($turnCount >= $minTurns)
-            && ($totalOffersCount < $maxOffersPerSession)
-            && (($turnCount - $lastOfferTurn) >= $cooldownTurns);
-
-        // 5. Fetch Recent Conversation History (last 6 messages including current user message)
+        // 4. Fetch Recent Conversation History (last 6 messages including current user message)
         $stmtHistory = $db->prepare("
             SELECT role, content FROM messages
             WHERE conversation_id = :conv_id
@@ -234,7 +220,7 @@ class ChatController
         // Previous messages prior to the current turn
         $prevHistory = array_slice($history, 0, -1);
 
-        // 6. Stage 1: Deterministic Intent Classification with conversational context
+        // 5. Stage 1: Deterministic Intent Classification with conversational context
         $intentTier = IntentClassifier::classify($userMessage, $prevHistory);
 
         $contextSources = [];
@@ -255,7 +241,63 @@ class ChatController
             $contextSources = ContentEngine::selectContext($orgId, $englishQuery, $botId);
         }
 
-        // 7. Build System Prompt with Counselor Brain, Intent Tier, and Offer Cadence
+        // 6. Proactive Program Interest Detection & Early Lead Sync to DB
+        $detectedProgram = ProgramDetector::detect($db, $orgId, $userMessage, $contextSources);
+        if ($detectedProgram) {
+            $currentProgramInterest = $detectedProgram['course_name'];
+            $currentProgramId = (int)$detectedProgram['id'];
+            ProgramDetector::syncProgramLead($db, $orgId, $botId, $convId, $detectedProgram);
+        }
+
+        // Check if an entry exists in the `leads` table with program interest
+        $hasProgramLeadInDb = false;
+        $activeProgramData = null;
+
+        $stmtLeadCheck = $db->prepare("
+            SELECT id, program_interest, program_id
+            FROM leads
+            WHERE conversation_id = :cid AND organization_id = :oid AND program_interest IS NOT NULL AND program_interest != ''
+            ORDER BY id DESC LIMIT 1
+        ");
+        $stmtLeadCheck->execute([':cid' => $convId, ':oid' => $orgId]);
+        $leadRecord = $stmtLeadCheck->fetch(PDO::FETCH_ASSOC);
+
+        if ($leadRecord && !empty($leadRecord['program_interest'])) {
+            $hasProgramLeadInDb = true;
+            $activeProgramData = [
+                'id' => (int)($leadRecord['program_id'] ?? $currentProgramId),
+                'course_name' => $leadRecord['program_interest']
+            ];
+        } elseif (!empty($currentProgramInterest)) {
+            $hasProgramLeadInDb = true;
+            $activeProgramData = [
+                'id' => $currentProgramId,
+                'course_name' => $currentProgramInterest
+            ];
+        }
+
+        // 7. Calculate Current Turn Count and Anti-Fatigue Offer Cadence
+        $stmtTurns = $db->prepare("SELECT COUNT(*) FROM messages WHERE conversation_id = :cid AND role = 'user'");
+        $stmtTurns->execute([':cid' => $convId]);
+        $turnCount = (int)$stmtTurns->fetchColumn();
+
+        $minTurns = 2; // Strict Rule: Zero offers on Turn 1
+        $cooldownTurns = 2; // Strict Rule: Minimum 2 turns between proactive offers
+        $maxOffersPerSession = 3; // Strict Rule: Anti-fatigue session cap
+
+        $lastOfferTurn = (int)($conv['last_offer_turn'] ?? 0);
+        $totalOffersCount = (int)($conv['total_offers_count'] ?? 0);
+
+        // Can we make a proactive offer on this turn?
+        // STRICT RULE: Never make ANY of the 4 offers unless the visitor's program interest is captured in DB!
+        $canMakeOffer = (!$leadCaptured)
+            && $hasProgramLeadInDb
+            && ((bool)$bot['lead_capture_enabled'])
+            && ($turnCount >= $minTurns)
+            && ($totalOffersCount < $maxOffersPerSession)
+            && (($turnCount - $lastOfferTurn) >= $cooldownTurns);
+
+        // 8. Build System Prompt with Counselor Brain, Intent Tier, and Offer Cadence
         $systemPrompt = PromptBuilder::build(
             $orgId,
             $contextSources,
@@ -264,16 +306,17 @@ class ChatController
             $turnCount,
             $leadCaptured,
             $minTurns,
-            $canMakeOffer
+            $canMakeOffer,
+            $activeProgramData
         );
 
-        // 8. Invoke LLM Service
+        // 9. Invoke LLM Service
         try {
             $llmResult = LlmService::complete($systemPrompt, $userMessage, $history);
             $rawAiResponse = $llmResult['text'];
             $tokensUsed = $llmResult['tokens_used'];
 
-            // 9. Parse and strip structured [LEAD_TRIGGER:type] tag
+            // 10. Parse and strip structured [LEAD_TRIGGER:type] tag
             $leadTriggerPayload = null;
             $aiResponseText = $rawAiResponse;
 
@@ -282,22 +325,23 @@ class ChatController
                 // Strip tag from user-facing text
                 $aiResponseText = trim(preg_replace('/\[LEAD_TRIGGER:[a-z_]+\]\s*$/i', '', $aiResponseText));
 
-                // Only generate a trigger form if lead is NOT yet captured AND turn count >= minTurns
-                if (!$leadCaptured && $turnCount >= $minTurns && (bool)$bot['lead_capture_enabled']) {
+                // Only generate a trigger form if lead is NOT yet captured, program interest is known, and turn count >= minTurns
+                if (!$leadCaptured && $hasProgramLeadInDb && $turnCount >= $minTurns && (bool)$bot['lead_capture_enabled']) {
                     $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, $rawTriggerType, $userMessage);
                 }
             }
 
-            // 10. Parse and strip structured [FOLLOW_UP] tag
+            // 11. Parse and strip structured [FOLLOW_UP] tag
             $followUpMessage = null;
             if (preg_match('/\[FOLLOW_UP\]\s*(.*?)(?=\[LEAD_TRIGGER:|$)/is', $aiResponseText, $fuMatches)) {
                 $rawFollowUp = trim($fuMatches[1]);
                 // Strip [FOLLOW_UP] tag and question from main response text
                 $aiResponseText = trim(preg_replace('/\[FOLLOW_UP\]\s*(.*?)(?=\[LEAD_TRIGGER:|$)/is', '', $aiResponseText));
 
-                // Strict Cadence Gate for Follow-Up message:
+                // Strict Cadence & Program Qualification Gate for Follow-Up message:
                 if (!empty($rawFollowUp) 
                     && $canMakeOffer
+                    && $hasProgramLeadInDb
                     && $intentTier === IntentClassifier::TIER_KNOWLEDGE_QUERY 
                     && empty($leadTriggerPayload)
                 ) {
@@ -316,8 +360,8 @@ class ChatController
             // 2. Ironclad Removal of ANY offer question from Bubble 1
             $aiResponseText = trim(preg_replace('/(?:^|\n|\. |\! )[^\n\.\?!]*(?:' . $offerKeywords . ')[^\n\.\?!]*\?\s*$/i', '', $aiResponseText));
 
-            // 3. Ironclad Removal of ANY trailing pitch/proactive sentences from Bubble 1 (declarative invites)
-            $aiResponseText = trim(preg_replace('/(?:^|\n|\. |\! )[^\n\.\?!]*(?:more details|specific program|feel free to|let me know|reach out|contact our|schedule a|arrange a)[^\n\.\?!]*[\.!\?]\s*$/i', '', $aiResponseText));
+            // Note: Natural conversational closers (e.g., "If you need more information about a specific program, feel free to ask")
+            // are explicitly preserved in Bubble 1 per user requirement as long as they don't contain any of the 4 offer actions.
 
             // 4. If Bubble 2 exists, ensure Bubble 1 does not repeat it or end with any dangling question
             if (!empty($followUpMessage)) {

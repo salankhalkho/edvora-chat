@@ -1072,6 +1072,31 @@ class Migrations
         } catch (Throwable $e) {
             // Column may already exist
         }
+
+        // Early Lead Ingestion: leads.name default, conversations.program_id, and indexes
+        try {
+            // Ensure leads.name can accept early-stage leads without immediate name capture
+            $this->db->exec("ALTER TABLE leads MODIFY COLUMN name VARCHAR(255) NOT NULL DEFAULT 'Prospective Student';");
+        } catch (Throwable $e) {
+            // Modify column may already be applied
+        }
+
+        try {
+            $checkConvProg = $this->db->query("SHOW COLUMNS FROM conversations LIKE 'program_id'");
+            if (!$checkConvProg->fetch()) {
+                $this->db->exec("ALTER TABLE conversations 
+                    ADD COLUMN program_id INT NULL AFTER lead_program_interest,
+                    ADD INDEX idx_conv_program (program_id);");
+            }
+        } catch (Throwable $e) {
+            // Column may already exist
+        }
+
+        try {
+            $this->db->exec("ALTER TABLE leads ADD INDEX idx_leads_conversation_id (conversation_id);");
+        } catch (Throwable $e) {
+            // Index may already exist
+        }
     }
 }
 

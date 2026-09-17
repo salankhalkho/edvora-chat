@@ -18,7 +18,8 @@ class PromptBuilder
         int $turnCount = 1,
         bool $leadCaptured = false,
         int $minTurns = 2,
-        bool $canMakeOffer = true
+        bool $canMakeOffer = true,
+        ?array $activeProgram = null
     ): string {
         $db = Database::getConnection();
 
@@ -65,21 +66,24 @@ class PromptBuilder
 
         // 8. Program-Aware Campus Tour Recommendation Engine
         // Intelligent recommendation ONLY operates after a prospect's academic program interest has been identified.
-        $detectedProgram = self::detectProgramInterest($db, $organizationId, $knowledgeContextSources);
+        $detectedProgram = $activeProgram ?? self::detectProgramInterest($db, $organizationId, $knowledgeContextSources);
         $tourSlotsBlock = "";
         if ($detectedProgram) {
             $tourSlotsBlock = self::buildProgramTourSlotsBlock($db, $organizationId, $detectedProgram);
         }
 
-        // 9. Inject Variables & Dynamic Counselor State with Strict Cadence & Anti-Fatigue Guidance
+        // 9. Inject Dynamic Counselor State & Strict Program-Qualification Rule
         if ($leadCaptured) {
             $leadStateNotice = "NOTICE: Visitor contact details already collected. DO NOT MAKE ANY OFFER or trigger any lead forms. Focus 100% on answering questions directly.";
+        } elseif (!$activeProgram) {
+            $leadStateNotice = "PROGRAM DISCOVERY PHASE: Visitor program/degree interest is NOT yet known or recorded. STRICT MANDATE: DO NOT MAKE ANY OF THE 4 OFFERS (NO campus tour, NO counselor callback, NO scholarship calculator, NO brochure/lead-magnet). Do NOT output [FOLLOW_UP]. Provide a helpful, concise answer. You may ask an open-ended conversational counseling question to understand their academic interest (e.g. asking what degree or area they wish to pursue).";
         } elseif (!$canMakeOffer) {
             $leadStateNotice = "ANTI-FATIGUE COOLDOWN IN EFFECT: DO NOT MAKE ANY OFFER on this turn. Do NOT mention campus tours, brochures, callbacks, or scholarships. Do NOT output [FOLLOW_UP]. Provide a pure, helpful, factual answer ending with a period.";
         } elseif ($turnCount < $minTurns) {
             $leadStateNotice = "TURN 1 GREETING & RAPPORT: Turn Count is {$turnCount} (< {$minTurns}). DO NOT MAKE ANY OFFER. Answer the question directly and cleanly without pitch language.";
         } else {
-            $leadStateNotice = "OFFER ELIGIBLE: You MAY make ONE relevant next-step offer (syllabus/fees brochure, campus tour, callback, or scholarship evaluation). MANDATORY: The offer MUST be placed ONLY inside the [FOLLOW_UP] tag on the very last line. Do NOT write ANY offer or pitch in your main answer!";
+            $progTitle = $activeProgram['course_name'] ?? 'their chosen program';
+            $leadStateNotice = "OFFER ELIGIBLE (PROGRAM QUALIFIED FOR {$progTitle}): Visitor has expressed interest in {$progTitle}. You MAY make ONE tailored next-step offer specifically relevant to {$progTitle} (e.g. syllabus/fee brochure for {$progTitle}, visiting facilities/labs for {$progTitle}, or speaking with a counselor). MANDATORY: The offer MUST be placed ONLY inside the [FOLLOW_UP] tag on the very last line. Do NOT write ANY offer or pitch in your main answer!";
         }
 
         $fullContext = $contextBlock . "\n" . $progBlock . "\n" . $campusBlock . (!empty($tourSlotsBlock) ? ("\n" . $tourSlotsBlock) : "") . "\n[SESSION LEAD STATE]: " . $leadStateNotice;
@@ -380,24 +384,26 @@ Your mission is to provide accurate, welcoming, and high-value guidance to prosp
 - When listing courses, list course names and durations only (e.g. "- B.S. in Computer Science (4 Years)"). Group by degree level without leaving empty lines between bullet items.
 
 === THE CONSULTATIVE COUNSELOR FRAMEWORK ===
-1. MAIN ANSWER FIRST & CLEAN: Always answer the visitor's question factually, directly, and concisely using the KNOWLEDGE BASE CONTEXT below.
-- ZERO OFFERS IN MAIN ANSWER: You must NEVER include offers, pitches, or action invitations in your main answer (no mentions of booking tours, emailing brochures/syllabi, scheduling callbacks, or calculating scholarships).
-- Your main answer must be 100% pure factual advice and must conclude with a period (.), NOT a question.
+1. NATURAL COUNSELING & QUALIFICATION:
+- Your goal is to guide prospective students warmly and understand what academic degree or field they are interested in.
+- ZERO CONVERSION OFFERS IN MAIN ANSWER: You must NEVER include conversion offers or call-to-actions in your main answer (no offers to book campus tours, send brochures/syllabi, schedule callbacks, or evaluate scholarships).
+- Polite conversational assistance offers (e.g. "If you need more information about a specific program, feel free to ask!" or "Which field of study interests you most?") are natural and permitted in your main answer.
+- ZERO OFFERS BEFORE PROGRAM INTEREST: You must NEVER suggest ANY of the 4 offers (campus tour, brochure/syllabus, counselor callback, scholarship calculator) until the student's specific program interest is identified and qualified. When answering general catalog/course queries, help them discover their area of interest first.
 
 2. EXCLUSIVE SPLIT OFFER VIA [FOLLOW_UP]:
-If (and ONLY if) [SESSION LEAD STATE] permits an offer AND the visitor's query naturally benefits from a next step:
+If (and ONLY if) [SESSION LEAD STATE] permits an offer AND the visitor's academic program interest has been identified:
 - Append your offer on a separate line at the very end using the [FOLLOW_UP] tag:
 [FOLLOW_UP] Would you like me to ...?
 
 STRICT RULES FOR [FOLLOW_UP]:
-- Only emit [FOLLOW_UP] when permitted by [SESSION LEAD STATE] AND you have answered a substantive inquiry (e.g. academic courses, campus life, admission steps) where a concrete next step genuinely adds value.
-- Permitted offers:
-  * Course/Program inquiries -> Offer to email detailed syllabus and fee structure.
-  * Campus/Hostel/Facility inquiries -> Offer to schedule a guided campus tour.
+- Only emit [FOLLOW_UP] when permitted by [SESSION LEAD STATE] AND you have answered a substantive program inquiry where a concrete next step genuinely adds value to that program.
+- Permitted offers (tailored to their program):
+  * Specific Course/Program inquiries -> Offer to email detailed syllabus and fee structure for that program.
+  * Campus/Facility inquiries for their program -> Offer to schedule a guided campus tour of the relevant department/labs.
   * Cutoff/Eligibility/Counseling inquiries -> Offer a quick callback with an admissions counselor.
-  * Fee/Waiver inquiries -> Offer scholarship evaluation or fee matrix PDF.
-- The question MUST be specific and action-oriented. NEVER ask generic questions like "Can I help with anything else?" or "Would you like to know more?".
-- If [SESSION LEAD STATE] states "DO NOT MAKE ANY OFFER", you must NOT output any [FOLLOW_UP] tag.
+  * Fee/Waiver inquiries -> Offer scholarship evaluation or fee matrix PDF for that program.
+- The question MUST be specific, helpful, and action-oriented.
+- If [SESSION LEAD STATE] states "DO NOT MAKE ANY OFFER" or "PROGRAM DISCOVERY PHASE", you must NOT output any [FOLLOW_UP] tag.
 - NEVER put the offer question inside your main answer. Put it ONLY after [FOLLOW_UP].
 
 === HANDLING VISITOR CONFIRMATIONS / AFFIRMATIVE RESPONSES ===
