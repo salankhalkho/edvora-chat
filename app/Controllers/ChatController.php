@@ -306,11 +306,12 @@ class ChatController
             }
 
             // --- FAIL-SAFE SANITIZER FOR BUBBLE 1 (ZERO INLINE OFFERS) ---
-            // If the model leaked an offer question into Bubble 1, extract it to Bubble 2 or strip it
             $offerQuestionRegex = '/(?:^|\n|\. )([^\n\.\?!]*(?:campus tour|guided tour|visit our campus|visit the campus|detailed syllabus|fee structure|brochure|counselor callback|callback with|speak with an advisor|scholarship evaluation|calculate your scholarship)[^\n\.\?!]*\?)\s*$/i';
+            // Also catch declarative pitch statements (e.g. "If you would like more detailed information about the syllabus...")
+            $offerStatementRegex = '/(?:\n|^|\. )([^\n\.\?!]*(?:syllabus and fee structure|campus tour|counselor callback|fee breakdown|brochure)[^\n\.\?!]*(?:please let me know|feel free to ask|reach out|contact us|let me know)\.?)\s*$/i';
 
             if (empty($followUpMessage) && $canMakeOffer && preg_match($offerQuestionRegex, $aiResponseText, $leakedMatches)) {
-                // Rogue offer found inside Bubble 1 -> Move it cleanly to Bubble 2!
+                // Rogue offer question found inside Bubble 1 -> Move it cleanly to Bubble 2!
                 $followUpMessage = trim($leakedMatches[1]);
                 $aiResponseText = trim(preg_replace($offerQuestionRegex, '', $aiResponseText));
             } else {
@@ -319,8 +320,9 @@ class ChatController
                     $quotedFu = preg_quote($followUpMessage, '/');
                     $aiResponseText = trim(preg_replace('/' . $quotedFu . '\s*$/i', '', $aiResponseText));
                 }
-                // Strip any trailing offer question from Bubble 1
+                // Strip any trailing offer question or pitch statement from Bubble 1
                 $aiResponseText = trim(preg_replace($offerQuestionRegex, '', $aiResponseText));
+                $aiResponseText = trim(preg_replace($offerStatementRegex, '', $aiResponseText));
                 // Strip any general trailing question if Bubble 2 already exists
                 if (!empty($followUpMessage)) {
                     $aiResponseText = trim(preg_replace('/\n+[^\n\.\!\?]+\?\s*$/i', '', $aiResponseText));
