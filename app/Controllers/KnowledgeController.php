@@ -981,8 +981,13 @@ class KnowledgeController
         $id = (int)($params['id'] ?? 0);
 
         $db = Database::getConnection();
-        $stmt = $db->prepare("SELECT id, title, type, file_path, raw_content, source_url FROM knowledge_sources WHERE id = :id AND organization_id = :org_id");
-        $stmt->execute([':id' => $id, ':org_id' => $orgId]);
+        if ($orgId) {
+            $stmt = $db->prepare("SELECT id, title, type, file_path, raw_content, source_url FROM knowledge_sources WHERE id = :id AND organization_id = :org_id");
+            $stmt->execute([':id' => $id, ':org_id' => $orgId]);
+        } else {
+            $stmt = $db->prepare("SELECT id, title, type, file_path, raw_content, source_url FROM knowledge_sources WHERE id = :id AND status = 'active'");
+            $stmt->execute([':id' => $id]);
+        }
         $doc = $stmt->fetch();
 
         if (!$doc) {

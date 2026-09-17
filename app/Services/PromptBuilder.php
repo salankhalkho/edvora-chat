@@ -83,7 +83,60 @@ class PromptBuilder
             $leadStateNotice = "TURN 1 GREETING & RAPPORT: Turn Count is {$turnCount} (< {$minTurns}). DO NOT MAKE ANY OFFER. Answer the question directly and cleanly without pitch language.";
         } else {
             $progTitle = $activeProgram['course_name'] ?? 'their chosen program';
-            $leadStateNotice = "OFFER ELIGIBLE (PROGRAM QUALIFIED FOR {$progTitle}): Visitor has expressed interest in {$progTitle}. You MAY make ONE tailored next-step offer specifically relevant to {$progTitle} (e.g. syllabus/fee brochure for {$progTitle}, visiting facilities/labs for {$progTitle}, or speaking with a counselor). MANDATORY: The offer MUST be placed ONLY inside the [FOLLOW_UP] tag on the very last line. Do NOT write ANY offer or pitch in your main answer!";
+            $progId = !empty($activeProgram['id']) ? (int)$activeProgram['id'] : 0;
+
+            // Check what offers actually exist for this specific program
+            $hasDoc = false;
+            $docTitle = '';
+            if ($progId > 0) {
+                $stmtDocCheck = $db->prepare("
+                    SELECT id, title FROM knowledge_sources
+                    WHERE organization_id = :oid AND program_id = :pid AND lead_magnet = 1 AND status = 'active' AND file_path IS NOT NULL
+                    LIMIT 1
+                ");
+                $stmtDocCheck->execute([':oid' => $organizationId, ':pid' => $progId]);
+                $docRow = $stmtDocCheck->fetch(PDO::FETCH_ASSOC);
+                if ($docRow) {
+                    $hasDoc = true;
+                    $docTitle = $docRow['title'];
+                }
+            }
+
+            $hasTourSlots = !empty($tourSlotsBlock);
+
+            $stmtSchCheck = $db->prepare("
+                SELECT id FROM scholarship_rules
+                WHERE organization_id = :oid AND program_id = :pid AND is_active = 1
+                LIMIT 1
+            ");
+            $stmtSchCheck->execute([':oid' => $organizationId, ':pid' => $progId]);
+            $hasScholarships = (bool)$stmtSchCheck->fetch();
+
+            $availableOffers = ["admissions counselor callback"];
+            $prohibitions = [];
+
+            if ($hasDoc) {
+                $availableOffers[] = "official syllabus / fee brochure (\"{$docTitle}\")";
+            } else {
+                $prohibitions[] = "NO document or brochure (no active lead-magnet document exists in knowledge base for {$progTitle})";
+            }
+
+            if ($hasTourSlots) {
+                $availableOffers[] = "campus tour of facilities";
+            } else {
+                $prohibitions[] = "NO campus tour (no scheduled slots for this program)";
+            }
+
+            if ($hasScholarships) {
+                $availableOffers[] = "merit scholarship evaluation";
+            } else {
+                $prohibitions[] = "NO scholarship calculation";
+            }
+
+            $offersListStr = implode(", ", $availableOffers);
+            $prohibitionsStr = !empty($prohibitions) ? (" STRICT PROHIBITIONS: " . implode("; ", $prohibitions) . ".") : "";
+
+            $leadStateNotice = "OFFER ELIGIBLE (PROGRAM QUALIFIED FOR {$progTitle}): Visitor has expressed interest in {$progTitle}. You MAY make ONE tailored next-step offer specifically relevant to {$progTitle} chosen from: [{$offersListStr}].{$prohibitionsStr} MANDATORY: The offer MUST be placed ONLY inside the [FOLLOW_UP] tag on the very last line. Do NOT write ANY offer or pitch in your main answer!";
         }
 
         $fullContext = $contextBlock . "\n" . $progBlock . "\n" . $campusBlock . (!empty($tourSlotsBlock) ? ("\n" . $tourSlotsBlock) : "") . "\n[SESSION LEAD STATE]: " . $leadStateNotice;
@@ -124,12 +177,12 @@ EOT;
     }
 
     /**
-     * Empathy & Department Guidance Prompt (Tier B: Friction/Clarification)
+     * Empathy & Academic Program Guidance Prompt (Tier B: Friction/Clarification)
      */
     private static function buildClarificationPrompt(string $collegeName, int $organizationId, ?string $override = null): string
     {
         $db = Database::getConnection();
-        $deptBlock = self::buildDepartmentsBlock($db, $organizationId);
+        $progBlock = self::buildProgramsBlock($db, $organizationId);
 
         $prompt = <<<EOT
 You are the AI Admissions Assistant for {$collegeName}.
@@ -246,7 +299,7 @@ EOT;
         $block .= "CAMPUS GUIDELINES:\n";
         $block .= "1. When asked what courses are available at a specific campus (e.g. Noida Campus), cite ONLY the programs listed for that campus.\n";
         $block .= "2. When asked which campuses offer a course (e.g. MBA or B.Tech), list the exact campuses where that course is offered based on the directory above.\n";
-        $block .= "3. Confirm department presence at a campus based on the Academic Departments Available listed above.\n";
+        $block .= "3. Confirm program availability at a campus based on the Programs Offered at this Campus listed above.\n";
         $block .= "--- END OFFICIAL CAMPUSES & COURSES DIRECTORY ---\n";
 
         return $block;

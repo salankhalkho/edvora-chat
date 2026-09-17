@@ -415,6 +415,45 @@ class AssetController
         }
 
         $db = Database::getConnection();
+
+        // 1. Check authoritative knowledge_sources first
+        $stmtKs = $db->prepare("
+            SELECT ks.id, ks.title, ks.category, ks.file_path, ks.organization_id, o.name as org_name
+            FROM knowledge_sources ks
+            JOIN organizations o ON ks.organization_id = o.id
+            WHERE ks.id = ? AND ks.status = 'active'
+        ");
+        $stmtKs->execute([$assetId]);
+        $ksDoc = $stmtKs->fetch();
+
+        if ($ksDoc) {
+            $downloadUrl = "https://edvora.chat/v1/knowledge/" . $ksDoc['id'] . "/download";
+            $salutation = !empty($visitorName) ? "Dear " . htmlspecialchars($visitorName) . "," : "Hello,";
+            $collegeName = $ksDoc['org_name'] ?? 'College Admissions';
+            $subject = "Your Requested " . $ksDoc['title'] . " — " . $collegeName;
+
+            $body = "{$salutation}\n\n";
+            $body .= "Thank you for exploring {$collegeName}!\n\n";
+            $body .= "As requested from our AI Admissions Assistant, here is your official copy of {$ksDoc['title']}.\n\n";
+            $body .= "📥 Download Document: {$downloadUrl}\n\n";
+            $body .= "If you have any questions regarding admission criteria, scholarships, or upcoming batches, our admissions team is here to assist.\n\n";
+            $body .= "Warm regards,\nAdmissions Office, {$collegeName}\nPowered by edvora.chat";
+
+            $sent = \App\Services\EmailService::sendMail($email, $subject, $body);
+
+            $parts = explode('@', $email);
+            $maskedUser = substr($parts[0], 0, 2) . str_repeat('*', max(3, strlen($parts[0]) - 2));
+            $maskedEmail = $maskedUser . '@' . ($parts[1] ?? 'domain.com');
+
+            Response::success([
+                'delivered' => $sent,
+                'asset_title' => $ksDoc['title'],
+                'email_masked' => $maskedEmail
+            ], 'Asset delivery initiated.');
+            return;
+        }
+
+        // 2. Fallback to legacy lead_assets
         $stmt = $db->prepare("
             SELECT a.*, o.name as org_name
             FROM lead_assets a

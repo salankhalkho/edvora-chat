@@ -764,8 +764,7 @@
                     email: email,
                     phone: phone,
                     lead_type: 'asset',
-                    program_interest: trigger.headline,
-                    department_id: deptId || null,
+                    program_interest: trigger.program_name || trigger.headline,
                     conversation_id: currentConversationId,
                     visitor_id: visitorId
                 })
@@ -864,7 +863,6 @@
                         student_email: stored.email,
                         preferred_time_slot: slotSelect.value,
                         topic_or_query: 'Requested via Chatbot',
-                        department_id: deptId ? parseInt(deptId) : null,
                         conversation_id: currentConversationId,
                         visitor_id: visitorId
                     })
@@ -969,7 +967,6 @@
                     student_email: email,
                     student_phone: phone,
                     preferred_time_slot: timeSlot,
-                    department_id: deptId ? parseInt(deptId) : null,
                     conversation_id: currentConversationId,
                     visitor_id: visitorId
                 })
@@ -1131,7 +1128,6 @@
                     slot_id: selectedSlotId,
                     preferred_date: prefDate || null,
                     preferred_time: prefTime,
-                    department_id: deptId ? parseInt(deptId) : null,
                     conversation_id: currentConversationId,
                     visitor_id: visitorId
                 })
@@ -1183,7 +1179,7 @@
         messagesContainer.appendChild(card);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-        var url = apiBaseUrl + '/v1/widget/scholarship/courses/' + botToken + (deptId ? ('?dept_id=' + encodeURIComponent(deptId)) : '');
+        var url = apiBaseUrl + '/v1/widget/scholarship/courses/' + botToken;
         fetch(url)
             .then(function (res) { return res.json(); })
             .then(function (res) {
@@ -1423,7 +1419,6 @@
                     email: email,
                     phone: phone,
                     program_interest: evalData.course_name,
-                    department_id: deptId || null,
                     conversation_id: currentConversationId,
                     visitor_id: visitorId,
                     lead_type: 'scholarship_eval',

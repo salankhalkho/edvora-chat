@@ -106,12 +106,6 @@ class CallbackController
         } catch (Throwable $e) {
             error_log('[CallbackController] Lead mirror failed: ' . $e->getMessage());
         }
-                ':program' => $topic ?: 'Counselor Callback Request',
-                ':notes' => "Callback requested for: {$timeSlot}. Topic: " . ($topic ?: 'General Admissions')
-            ]);
-        } catch (Throwable $e) {
-            // Non-critical if lead already captured
-        }
 
         // Update conversation visitor info if conversationId provided
         if ($conversationId > 0) {

@@ -327,7 +327,7 @@ class ChatController
 
                 // Only generate a trigger form if lead is NOT yet captured, program interest is known, and turn count >= minTurns
                 if (!$leadCaptured && $hasProgramLeadInDb && $turnCount >= $minTurns && (bool)$bot['lead_capture_enabled']) {
-                    $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, $rawTriggerType, $userMessage);
+                    $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, $rawTriggerType, $userMessage, $activeProgramData);
                 }
             }
 
@@ -341,11 +341,11 @@ class ChatController
                     }
                 }
                 if (str_contains($lastOfferText, 'tour') || str_contains($lastOfferText, 'visit')) {
-                    $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, 'campus_tour', $userMessage);
+                    $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, 'campus_tour', $userMessage, $activeProgramData);
                 } elseif (str_contains($lastOfferText, 'syllabus') || str_contains($lastOfferText, 'brochure') || str_contains($lastOfferText, 'fee structure')) {
-                    $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, 'asset_delivery', $userMessage);
+                    $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, 'asset_delivery', $userMessage, $activeProgramData);
                 } elseif (str_contains($lastOfferText, 'call') || str_contains($lastOfferText, 'advisor') || str_contains($lastOfferText, 'counselor')) {
-                    $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, 'counselor_callback', $userMessage);
+                    $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, 'counselor_callback', $userMessage, $activeProgramData);
                 }
             }
 
@@ -469,40 +469,59 @@ class ChatController
     }
 
     /**
-     * Resolve structured lead trigger and match with active lead_assets if asset_delivery
+     * Resolve structured lead trigger and match with active program knowledge_sources or campus tour slots
      */
-    private static function resolveLeadTrigger(PDO $db, int $orgId, string $triggerType, string $userMessage): ?array
+    private static function resolveLeadTrigger(PDO $db, int $orgId, string $triggerType, string $userMessage, ?array $activeProgram = null): ?array
     {
+        $progId = !empty($activeProgram['id']) ? (int)$activeProgram['id'] : 0;
+        $progName = $activeProgram['course_name'] ?? '';
+
         if ($triggerType === 'asset_delivery') {
-            // Find active asset in lead_assets table
+            // Must have a program identified
+            if ($progId <= 0) {
+                return null;
+            }
+
+            // Find active lead_magnet document in knowledge_sources table for this specific program
             $stmtAsset = $db->prepare("
-                SELECT id, title, category, description, file_name
-                FROM lead_assets
+                SELECT id, title, category, raw_content, file_path
+                FROM knowledge_sources
                 WHERE organization_id = :oid
-                  AND is_active = 1
+                  AND program_id = :pid
+                  AND lead_magnet = 1
+                  AND status = 'active'
+                  AND file_path IS NOT NULL
                 ORDER BY id DESC
                 LIMIT 1
             ");
-            $stmtAsset->execute([':oid' => $orgId]);
+            $stmtAsset->execute([':oid' => $orgId, ':pid' => $progId]);
             $asset = $stmtAsset->fetch();
 
-            $assetTitle = $asset['title'] ?? 'Detailed Course Fee & Admission Guide (PDF)';
-            $assetId = $asset['id'] ?? null;
+            if (!$asset) {
+                // If no active lead magnet document exists for this program in knowledge_sources, forbid the offer
+                return null;
+            }
+
+            $assetTitle = $asset['title'] ?? ($progName . ' Detailed Guide (PDF)');
+            $assetId = (int)$asset['id'];
 
             return [
                 'type' => 'asset_delivery',
                 'asset_id' => $assetId,
                 'headline' => "Get " . $assetTitle,
-                'description' => "Enter your details to receive the official document and scholarship matrix sent directly to your email.",
+                'program_name' => $progName,
+                'description' => "Enter your details to receive {$assetTitle} sent directly to your email.",
                 'fields' => ['name', 'email', 'phone']
             ];
         }
 
         if ($triggerType === 'counselor_callback') {
+            $progSubject = !empty($progName) ? " for {$progName}" : "";
             return [
                 'type' => 'counselor_callback',
                 'headline' => "Request a Counselor Callback",
-                'description' => "Leave your contact number so our admissions counselor can connect with you directly at your convenient time.",
+                'program_name' => $progName,
+                'description' => "Leave your contact number so our admissions counselor can connect with you regarding admissions{$progSubject}.",
                 'fields' => ['name', 'email', 'phone']
             ];
         }
@@ -511,7 +530,8 @@ class ChatController
             return [
                 'type' => 'campus_tour',
                 'headline' => "Schedule a Guided Campus Tour",
-                'description' => "Experience our world-class campus, labs, and student facilities firsthand with a personalized guided visit.",
+                'program_name' => $progName,
+                'description' => "Experience our campus, labs, and academic facilities firsthand with a personalized guided visit.",
                 'fields' => ['name', 'email', 'phone']
             ];
         }
