@@ -198,11 +198,15 @@
     </div>
 </div>
 
-<script src="/app/js/scholarship-config.js?v=2.1"></script>
+<script src="/app/js/scholarship-config.js?v=2.2" id="schConfigEditScript"></script>
 <script>
 (function() {
   if (typeof initScholarshipEditor === 'function') {
     initScholarshipEditor();
+  } else {
+    document.getElementById('schConfigEditScript')?.addEventListener('load', () => {
+      if (typeof initScholarshipEditor === 'function') initScholarshipEditor();
+    });
   }
 })();
 </script>
