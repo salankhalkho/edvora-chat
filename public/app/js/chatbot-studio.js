@@ -1220,8 +1220,14 @@
             Object.entries(fields).forEach(([field, [pid, hid]]) => {
                 const v = c[field] || '';
                 const pk = document.getElementById(pid), hx = document.getElementById(hid);
-                if (pk) {
-                    if (v.startsWith('#')) pk.value = v.substring(0,7);
+                if (pk && v) {
+                    let hex = v.trim();
+                    if (hex.startsWith('#') && (hex.length === 7 || hex.length === 4)) {
+                        if (hex.length === 4) {
+                            hex = '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
+                        }
+                        pk.value = hex;
+                    }
                     if (pk.parentElement) pk.parentElement.style.background = v;
                 }
                 if (hx) hx.value = v;
