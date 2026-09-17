@@ -203,12 +203,24 @@ class ChatController
             ':content' => $userMessage
         ]);
 
-        // 4. Calculate Current Turn Count (number of user messages in this session)
+        // 4. Calculate Current Turn Count and Anti-Fatigue Offer Cadence
         $stmtTurns = $db->prepare("SELECT COUNT(*) FROM messages WHERE conversation_id = :cid AND role = 'user'");
         $stmtTurns->execute([':cid' => $convId]);
         $turnCount = (int)$stmtTurns->fetchColumn();
 
-        $minTurns = 2; // Recommended minimum turns before proactive lead triggers
+        $minTurns = 2; // Strict Rule: Zero offers on Turn 1
+        $cooldownTurns = 2; // Strict Rule: Minimum 2 turns between proactive offers
+        $maxOffersPerSession = 3; // Strict Rule: Anti-fatigue session cap
+
+        $lastOfferTurn = (int)($conv['last_offer_turn'] ?? 0);
+        $totalOffersCount = (int)($conv['total_offers_count'] ?? 0);
+
+        // Can we make a proactive offer on this turn?
+        $canMakeOffer = (!$leadCaptured)
+            && ((bool)$bot['lead_capture_enabled'])
+            && ($turnCount >= $minTurns)
+            && ($totalOffersCount < $maxOffersPerSession)
+            && (($turnCount - $lastOfferTurn) >= $cooldownTurns);
 
         // 5. Fetch Recent Conversation History (last 6 messages including current user message)
         $stmtHistory = $db->prepare("
@@ -243,7 +255,7 @@ class ChatController
             $contextSources = ContentEngine::selectContext($orgId, $englishQuery, $botId);
         }
 
-        // 7. Build System Prompt with Counselor Brain & Intent Tier
+        // 7. Build System Prompt with Counselor Brain, Intent Tier, and Offer Cadence
         $systemPrompt = PromptBuilder::build(
             $orgId,
             $contextSources,
@@ -251,7 +263,8 @@ class ChatController
             $intentTier,
             $turnCount,
             $leadCaptured,
-            $minTurns
+            $minTurns,
+            $canMakeOffer
         );
 
         // 8. Invoke LLM Service
@@ -282,32 +295,46 @@ class ChatController
                 // Strip [FOLLOW_UP] tag and question from main response text
                 $aiResponseText = trim(preg_replace('/\[FOLLOW_UP\]\s*(.*?)(?=\[LEAD_TRIGGER:|$)/is', '', $aiResponseText));
 
-                // 4-Layer Gate for Follow-Up message:
-                // Gate 1: LLM provided non-empty follow-up
-                // Gate 2: Turn count >= 2 (never on first turn)
-                // Gate 3: Intent is Knowledge Query (not conversational greeting / clarification)
-                // Gate 4: Lead not yet captured and lead capture enabled
-                // Gate 5: No active lead_trigger form on this exact turn
+                // Strict Cadence Gate for Follow-Up message:
                 if (!empty($rawFollowUp) 
-                    && $turnCount >= 2 
+                    && $canMakeOffer
                     && $intentTier === IntentClassifier::TIER_KNOWLEDGE_QUERY 
-                    && !$leadCaptured 
-                    && empty($leadTriggerPayload) 
-                    && (bool)$bot['lead_capture_enabled']
+                    && empty($leadTriggerPayload)
                 ) {
                     $followUpMessage = $rawFollowUp;
+                }
+            }
 
-                    // Clean duplicate trailing question from main response if LLM repeated it before [FOLLOW_UP]
+            // --- FAIL-SAFE SANITIZER FOR BUBBLE 1 (ZERO INLINE OFFERS) ---
+            // If the model leaked an offer question into Bubble 1, extract it to Bubble 2 or strip it
+            $offerQuestionRegex = '/(?:^|\n|\. )([^\n\.\?!]*(?:campus tour|guided tour|visit our campus|visit the campus|detailed syllabus|fee structure|brochure|counselor callback|callback with|speak with an advisor|scholarship evaluation|calculate your scholarship)[^\n\.\?!]*\?)\s*$/i';
+
+            if (empty($followUpMessage) && $canMakeOffer && preg_match($offerQuestionRegex, $aiResponseText, $leakedMatches)) {
+                // Rogue offer found inside Bubble 1 -> Move it cleanly to Bubble 2!
+                $followUpMessage = trim($leakedMatches[1]);
+                $aiResponseText = trim(preg_replace($offerQuestionRegex, '', $aiResponseText));
+            } else {
+                // Clean any rogue pitch lines or duplicate questions from Bubble 1
+                if (!empty($followUpMessage)) {
                     $quotedFu = preg_quote($followUpMessage, '/');
                     $aiResponseText = trim(preg_replace('/' . $quotedFu . '\s*$/i', '', $aiResponseText));
-                    // If main response still ends with a standalone trailing question, remove it so only Bubble 2 asks it
+                }
+                // Strip any trailing offer question from Bubble 1
+                $aiResponseText = trim(preg_replace($offerQuestionRegex, '', $aiResponseText));
+                // Strip any general trailing question if Bubble 2 already exists
+                if (!empty($followUpMessage)) {
                     $aiResponseText = trim(preg_replace('/\n+[^\n\.\!\?]+\?\s*$/i', '', $aiResponseText));
                 }
             }
 
+            // 11. Update Cadence State if an offer was delivered on this turn
+            if (!empty($followUpMessage)) {
+                $db->exec("UPDATE conversations SET last_offer_turn = {$turnCount}, total_offers_count = total_offers_count + 1 WHERE id = {$convId}");
+            }
+
             $sourceIdsUsed = array_map(fn($s) => $s['id'], $contextSources);
 
-            // 11. Save AI Response Message to DB
+            // 12. Save AI Response Message to DB
             $stmtAiMsg = $db->prepare("
                 INSERT INTO messages (conversation_id, organization_id, role, content, knowledge_sources_used, tokens_used, created_at)
                 VALUES (:conv_id, :org_id, 'assistant', :content, :sources, :tokens, NOW())

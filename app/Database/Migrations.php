@@ -1060,6 +1060,18 @@ class Migrations
         } catch (Throwable $e) {
             // Column may already exist
         }
+
+        // Conversations: last_offer_turn and total_offers_count for Anti-Fatigue Offer Cadence
+        try {
+            $checkOfferTurn = $this->db->query("SHOW COLUMNS FROM conversations LIKE 'last_offer_turn'");
+            if (!$checkOfferTurn->fetch()) {
+                $this->db->exec("ALTER TABLE conversations 
+                    ADD COLUMN last_offer_turn INT DEFAULT 0 AFTER lead_capture_trigger,
+                    ADD COLUMN total_offers_count INT DEFAULT 0 AFTER last_offer_turn;");
+            }
+        } catch (Throwable $e) {
+            // Column may already exist
+        }
     }
 }
 
