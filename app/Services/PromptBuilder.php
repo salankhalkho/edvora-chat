@@ -210,7 +210,7 @@ EOT;
     {
         $progBlock = "";
         $stmtProg = $db->prepare("
-            SELECT course_name, course_code, program_type, duration
+            SELECT course_name, course_code, program_type, duration, tuition_fee, total_fee, currency
             FROM programs 
             WHERE organization_id = ? AND is_admissions_open = 1
             ORDER BY sort_order ASC, course_name ASC
@@ -220,12 +220,17 @@ EOT;
 
         if (!empty($activeProgs)) {
             $progBlock .= "\n--- ACTIVE COLLEGE ACADEMIC PROGRAMS & DEGREES ---\n";
-            $progBlock .= "Guide visitors using these available academic programs (provide names and durations only; provide specific fees, eligibility, or deadlines ONLY when the visitor explicitly asks for them):\n";
+            $progBlock .= "Guide visitors using these available academic programs (provide names and durations; state specific fees directly and accurately when the visitor asks for them):\n";
             foreach ($activeProgs as $p) {
                 $pStr = $p['course_name'];
                 $details = [];
                 if (!empty($p['program_type'])) $details[] = ucfirst($p['program_type']);
                 if (!empty($p['duration'])) $details[] = $p['duration'];
+                if (!empty($p['tuition_fee'])) {
+                    $curr = $p['currency'] ?? 'USD';
+                    $feeFormatted = number_format((float)$p['tuition_fee'], 0);
+                    $details[] = "Tuition Fee: {$feeFormatted} {$curr}";
+                }
                 $meta = !empty($details) ? " (" . implode(', ', $details) . ")" : "";
                 $progBlock .= "- {$pStr}{$meta}\n";
             }

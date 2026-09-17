@@ -389,7 +389,12 @@ class ChatController
             }
 
             // 2. Ironclad Removal of ANY offer question from Bubble 1
-            $aiResponseText = trim(preg_replace('/(?:^|\n|\. |\! )[^\n\.\?!]*(?:' . $offerKeywords . ')[^\n\.\?!]*\?\s*$/i', '', $aiResponseText));
+            $aiResponseText = trim(preg_replace('/(?:\n|\. |\! )+[^\n\.\?!]*(?:' . $offerKeywords . ')[^\n\.\?!]*\?\s*$/i', '', $aiResponseText));
+            // If the whole response was an offer question, clean it
+            $aiResponseText = trim(preg_replace('/^[^\n\.\?!]*(?:' . $offerKeywords . ')[^\n\.\?!]*\?\s*$/i', '', $aiResponseText));
+
+            // Clean up any trailing broken clause or punctuation
+            $aiResponseText = preg_replace('/[,;:\s-]+$/', '.', $aiResponseText);
 
             // Note: Natural conversational closers (e.g., "If you need more information about a specific program, feel free to ask")
             // are explicitly preserved in Bubble 1 per user requirement as long as they don't contain any of the 4 offer actions.
