@@ -240,20 +240,20 @@ function renderScholarshipsTable() {
                         </div>
                     </div>
                 </td>
-                <td>
-                    <div style="font-weight: 600; font-size: 12.5px; color: #0F172A;">
+                <td style="word-break: break-word; overflow-wrap: break-word;">
+                    <div style="font-weight: 600; font-size: 12.5px; color: #0F172A; line-height: 1.4;">
                         ${progName}
                     </div>
-                    <div style="margin-top: 3px; display: flex; align-items: center; gap: 6px;">
+                    <div style="margin-top: 3px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                         ${progType}
                         ${r.program_code ? `<span style="font-size: 11px; color: #64748B; font-family: monospace;">${escapeHtml(r.program_code)}</span>` : ''}
                     </div>
                 </td>
-                <td>
+                <td style="word-break: break-word; overflow-wrap: break-word;">
                     <div style="font-size: 12px; font-weight: 600; color: #334155;">
                         ${metricStr}${escapeHtml(examDetail)}
                     </div>
-                    <div style="font-size: 11px; color: #648781; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(r.eligibility_criteria || '')}">
+                    <div style="font-size: 11px; color: #648781; margin-top: 2px; line-height: 1.35;" title="${escapeHtml(r.eligibility_criteria || '')}">
                         ${r.eligibility_criteria ? escapeHtml(r.eligibility_criteria) : 'Standard eligibility'}
                     </div>
                 </td>
