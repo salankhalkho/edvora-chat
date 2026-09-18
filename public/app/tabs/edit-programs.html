@@ -85,7 +85,7 @@
                         <span>⏱️</span> Delivery Mode &amp; Admissions Timing
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px;">
                         <div>
                             <label for="edit_prog_duration" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
                                 Duration
@@ -110,35 +110,93 @@
                             </label>
                             <select id="edit_prog_admissions" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF; color: #063D3B; font-weight: 600;">
                                 <option value="1">🟢 Admissions Open</option>
-                                <option value="0">⚪ Admissions Closed</option>
+                                <option value="0">🔴 Admissions Closed</option>
                             </select>
                         </div>
+                        <div>
+                            <label for="edit_prog_sort_order" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Display Sort Order
+                            </label>
+                            <input type="number" id="edit_prog_sort_order" value="0" placeholder="0" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 3: Detailed Fee Breakdown & Financials -->
+                <div style="margin-bottom: 28px;">
+                    <div style="font-size: 14px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                        <span>💰</span> Fee Breakdown &amp; Financials
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div style="display: grid; grid-template-columns: 80px 1fr 1fr 1fr 1fr; gap: 12px; align-items: start;">
                         <div>
-                            <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
-                                Total Tuition Fee
+                            <label for="edit_prog_currency" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Currency
                             </label>
-                            <div style="display: flex; gap: 8px;">
-                                <input type="text" id="edit_prog_currency" value="INR" placeholder="INR" class="brand-input" style="width: 80px; height: 38px; font-size: 12px; font-weight: 700; text-transform: uppercase; text-align: center; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 6px;" />
-                                <input type="number" step="0.01" id="edit_prog_fee" placeholder="e.g. 52000" class="brand-input" style="flex: 1; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
-                            </div>
+                            <input type="text" id="edit_prog_currency" value="INR" placeholder="INR" class="brand-input" style="width: 100%; height: 38px; font-size: 12px; font-weight: 700; text-transform: uppercase; text-align: center; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 6px;" />
                         </div>
+                        <div>
+                            <label for="edit_prog_tuition_fee" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Tuition Fee
+                            </label>
+                            <input type="number" step="0.01" id="edit_prog_tuition_fee" placeholder="e.g. 45000" class="brand-input edit-fee-calc-trigger" style="width: 100%; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        </div>
+                        <div>
+                            <label for="edit_prog_registration_fee" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Registration Fee
+                            </label>
+                            <input type="number" step="0.01" id="edit_prog_registration_fee" placeholder="e.g. 2000" class="brand-input edit-fee-calc-trigger" style="width: 100%; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        </div>
+                        <div>
+                            <label for="edit_prog_other_fees" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Other Fees
+                            </label>
+                            <input type="number" step="0.01" id="edit_prog_other_fees" placeholder="e.g. 5000" class="brand-input edit-fee-calc-trigger" style="width: 100%; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        </div>
+                        <div>
+                            <label for="edit_prog_fee" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #047857; margin-bottom: 6px;">
+                                Total Program Fee
+                            </label>
+                            <input type="number" step="0.01" id="edit_prog_fee" placeholder="e.g. 52000" class="brand-input" style="width: 100%; height: 38px; font-size: 12.5px; border: 1.5px solid #A7F3D0; background: #F0FDF4; border-radius: 6px; padding: 0 12px; font-weight: 700; color: #063D3B;" />
+                        </div>
+                    </div>
+                    <span style="font-size: 10.5px; color: #648781; margin-top: 6px; display: block;">Total fee auto-sums Tuition + Registration + Other Fees, or can be manually entered.</span>
+                </div>
+
+                <!-- SECTION 4: Eligibility Criteria & Requirements -->
+                <div style="margin-bottom: 28px;">
+                    <div style="font-size: 14px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                        <span>📋</span> Eligibility Criteria &amp; Admission Requirements
+                    </div>
+                    <div>
+                        <label for="edit_prog_eligibility" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                            Eligibility Details (Prerequisites, Minimum Marks, Entrance Exams)
+                        </label>
+                        <textarea id="edit_prog_eligibility" rows="3" placeholder="e.g. 10+2 with minimum 60% aggregate in Physics, Chemistry, and Mathematics (PCM). Qualified rank in JEE Main or University Entrance Exam." class="brand-input" style="width: 100%; box-sizing: border-box; font-size: 12px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 10px 12px; font-family: inherit; line-height: 1.4;"></textarea>
+                    </div>
+                </div>
+
+                <!-- SECTION 5: Online Application Links & Deadlines -->
+                <div style="margin-bottom: 28px;">
+                    <div style="font-size: 14px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                        <span>🔗</span> Application Links, Fee &amp; Deadline
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
                         <div>
                             <label for="edit_prog_deadline" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
                                 Application Deadline
                             </label>
                             <input type="text" id="edit_prog_deadline" placeholder="e.g. Fall Intake: August 15, 2026" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
                         </div>
+                        <div>
+                            <label for="edit_prog_application_fee" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
+                                Application / Prospectus Fee
+                            </label>
+                            <input type="text" id="edit_prog_application_fee" placeholder="e.g. ₹1,000 / $50" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        </div>
                     </div>
-                </div>
 
-                <!-- SECTION 3: Online Link & Brochure URL -->
-                <div style="margin-bottom: 28px;">
-                    <div style="font-size: 14px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
-                        <span>🔗</span> Application &amp; Curriculum URL
-                    </div>
                     <div>
                         <label for="edit_prog_url" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
                             Official Program or Application URL (Optional)
@@ -148,7 +206,7 @@
                     </div>
                 </div>
 
-                <!-- SECTION 4: Campus Delivery Locations -->
+                <!-- SECTION 6: Campus Delivery Locations -->
                 <div style="margin-bottom: 32px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                         <div style="font-size: 14px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px;">
@@ -186,9 +244,27 @@
 
 <script>
 (function() {
+    function setupEditFeeAutoSum() {
+        const triggers = document.querySelectorAll('#editProgramForm .edit-fee-calc-trigger');
+        const totalFeeInput = document.getElementById('edit_prog_fee');
+        
+        function updateSum() {
+            let t = parseFloat(document.getElementById('edit_prog_tuition_fee')?.value) || 0;
+            let r = parseFloat(document.getElementById('edit_prog_registration_fee')?.value) || 0;
+            let o = parseFloat(document.getElementById('edit_prog_other_fees')?.value) || 0;
+            if (t > 0 || r > 0 || o > 0) {
+                totalFeeInput.value = (t + r + o).toFixed(2);
+            }
+        }
+        
+        triggers.forEach(el => el.addEventListener('input', updateSum));
+    }
+
     window.initEditProgramsPage = async function(passedId) {
         const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token');
         if (!token) return;
+
+        setupEditFeeAutoSum();
 
         const targetId = passedId || window._currentEditProgramId || sessionStorage.getItem('edvora_edit_program_id');
         if (!targetId) {
@@ -234,9 +310,15 @@
             document.getElementById('edit_prog_duration').value = c.duration || '';
             document.getElementById('edit_prog_mode').value = c.mode || 'full_time';
             document.getElementById('edit_prog_admissions').value = String(c.is_admissions_open ?? '1');
+            document.getElementById('edit_prog_sort_order').value = c.sort_order !== undefined && c.sort_order !== null ? String(c.sort_order) : '0';
             document.getElementById('edit_prog_currency').value = c.currency || 'INR';
+            document.getElementById('edit_prog_tuition_fee').value = c.tuition_fee ? String(c.tuition_fee) : '';
+            document.getElementById('edit_prog_registration_fee').value = c.registration_fee ? String(c.registration_fee) : '';
+            document.getElementById('edit_prog_other_fees').value = c.other_fees ? String(c.other_fees) : '';
             document.getElementById('edit_prog_fee').value = c.total_fee ? String(c.total_fee) : '';
+            document.getElementById('edit_prog_eligibility').value = c.eligibility || '';
             document.getElementById('edit_prog_deadline').value = c.application_deadline || '';
+            document.getElementById('edit_prog_application_fee').value = c.application_fee || '';
             document.getElementById('edit_prog_url').value = c.application_url || '';
 
             // Populate campuses
@@ -284,9 +366,15 @@
         const duration = document.getElementById('edit_prog_duration')?.value.trim();
         const mode = document.getElementById('edit_prog_mode')?.value || 'full_time';
         const admissions = parseInt(document.getElementById('edit_prog_admissions')?.value || '1', 10);
+        const sortOrder = parseInt(document.getElementById('edit_prog_sort_order')?.value || '0', 10);
         const currency = document.getElementById('edit_prog_currency')?.value.trim() || 'INR';
+        const tuitionFee = document.getElementById('edit_prog_tuition_fee')?.value.trim();
+        const regFee = document.getElementById('edit_prog_registration_fee')?.value.trim();
+        const otherFees = document.getElementById('edit_prog_other_fees')?.value.trim();
         const totalFee = document.getElementById('edit_prog_fee')?.value.trim();
+        const eligibility = document.getElementById('edit_prog_eligibility')?.value.trim();
         const deadline = document.getElementById('edit_prog_deadline')?.value.trim();
+        const appFee = document.getElementById('edit_prog_application_fee')?.value.trim();
         const url = document.getElementById('edit_prog_url')?.value.trim();
 
         const campusIds = [];
@@ -301,9 +389,15 @@
             duration: duration,
             mode: mode,
             is_admissions_open: admissions,
+            sort_order: sortOrder,
             currency: currency,
+            tuition_fee: tuitionFee !== '' ? parseFloat(tuitionFee) : null,
+            registration_fee: regFee !== '' ? parseFloat(regFee) : null,
+            other_fees: otherFees !== '' ? parseFloat(otherFees) : null,
             total_fee: totalFee !== '' ? parseFloat(totalFee) : null,
+            eligibility: eligibility,
             application_deadline: deadline,
+            application_fee: appFee,
             application_url: url,
             campus_ids: campusIds
         };
