@@ -54,13 +54,14 @@ If executing manually, you MUST use `sudo` for `tar` extraction so existing file
    ```powershell
    tar.exe -czvf deploy_package.tar.gz app public BRANDING_GUIDELINES.md theme-branding.css AGENTS.md architecture.md architecture_department_team_management.md migrate.php deploy.ps1
    ```
-2. **Upload:**
+2. **Upload (MANDATORY: Always use `-O` and `-o BatchMode=yes`):**
    ```powershell
-   scp -i "C:/Users/Salan Khalkho/.ssh/id_ed25519" -o StrictHostKeyChecking=no deploy_package.tar.gz critical@166.1.2.112:/tmp/deploy_package.tar.gz
+   scp -O -i "C:/Users/Salan Khalkho/.ssh/id_ed25519" -o BatchMode=yes -o StrictHostKeyChecking=no deploy_package.tar.gz critical@166.1.2.112:/tmp/deploy_package.tar.gz
    ```
+   > ⚠️ **CRITICAL OPENSSH / SCP RULE (NEVER OMIT `-O`):** OpenSSH 9.0+ defaults to SFTP mode. In headless Windows background execution, SFTP buffering stalls and hangs for 30+ minutes. The `-O` flag forces the legacy SCP protocol, which uploads the 3 MB package in under 3 seconds!
 3. **Root Extract, Migrate, Chown & Reload:**
    ```powershell
-   ssh -i "C:/Users/Salan Khalkho/.ssh/id_ed25519" -o StrictHostKeyChecking=no critical@166.1.2.112 "echo 'dYt2295ZBM_EgUb' | sudo -S tar -xzvf /tmp/deploy_package.tar.gz -C /var/www/edvora.chat/ && php /var/www/edvora.chat/migrate.php && echo 'dYt2295ZBM_EgUb' | sudo -S chown -R critical:www-data /var/www/edvora.chat && echo 'dYt2295ZBM_EgUb' | sudo -S systemctl reload apache2"
+   ssh -i "C:/Users/Salan Khalkho/.ssh/id_ed25519" -o BatchMode=yes -o StrictHostKeyChecking=no critical@166.1.2.112 "echo 'dYt2295ZBM_EgUb' | sudo -S tar -xzf /tmp/deploy_package.tar.gz -C /var/www/edvora.chat/ && php /var/www/edvora.chat/migrate.php && echo 'dYt2295ZBM_EgUb' | sudo -S chown -R critical:www-data /var/www/edvora.chat && echo 'dYt2295ZBM_EgUb' | sudo -S systemctl reload apache2"
    ```
 4. **Git Sync (Mandatory):**
    ```powershell
