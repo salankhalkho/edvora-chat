@@ -216,12 +216,12 @@ class BackfillKnowledgeData
             INSERT INTO knowledge_sources (
                 organization_id, chatbot_id, title, type, file_path, source_url,
                 raw_content, processed_content, category, academic_version, effective_from, expires_on,
-                review_frequency_days, last_reviewed_at, status, keywords, semantic_keywords,
+                review_frequency_days, last_reviewed_at, status, keywords,
                 created_at, updated_at
             ) VALUES (
                 ?, ?, ?, ?, ?, ?,
                 ?, ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?,
+                ?, ?, ?, ?,
                 NOW(), NOW()
             )
         ");
@@ -231,7 +231,7 @@ class BackfillKnowledgeData
                 chatbot_id = ?, type = ?, file_path = ?, source_url = ?,
                 raw_content = ?, processed_content = ?, category = ?, academic_version = ?,
                 effective_from = ?, expires_on = ?, review_frequency_days = ?, last_reviewed_at = ?,
-                status = ?, keywords = ?, semantic_keywords = ?, updated_at = NOW()
+                status = ?, keywords = ?, updated_at = NOW()
             WHERE id = ?
         ");
 
@@ -240,7 +240,6 @@ class BackfillKnowledgeData
 
         foreach ($sources as $s) {
             $filePath = !empty($s['file_name']) ? 'uploads/' . $s['file_name'] : null;
-            $semanticKeywords = !empty($s['semantic_tags']) ? (is_array($s['semantic_tags']) ? implode(', ', $s['semantic_tags']) : str_replace(['[', ']', '"'], '', $s['semantic_tags'])) : $s['keywords'];
 
             $stmtCheckSource->execute([$orgId, $s['title']]);
             $existing = $stmtCheckSource->fetch(PDO::FETCH_ASSOC);
@@ -251,14 +250,14 @@ class BackfillKnowledgeData
                     $botId, $s['type'], $filePath, $s['source_url'],
                     $s['raw_content'], $s['raw_content'], $s['category'], $s['academic_version'],
                     $s['effective_from'], $s['expires_on'], $s['review_frequency_days'], $s['last_reviewed_at'],
-                    $s['status'], $s['keywords'], $semanticKeywords,
+                    $s['status'], $s['keywords'],
                     $sourceId
                 ]);
             } else {
                 $stmtInsertSource->execute([
                     $orgId, $botId, $s['title'], $s['type'], $filePath, $s['source_url'],
                     $s['raw_content'], $s['raw_content'], $s['category'], $s['academic_version'], $s['effective_from'], $s['expires_on'],
-                    $s['review_frequency_days'], $s['last_reviewed_at'], $s['status'], $s['keywords'], $semanticKeywords
+                    $s['review_frequency_days'], $s['last_reviewed_at'], $s['status'], $s['keywords']
                 ]);
                 $sourceId = (int)$db->lastInsertId();
             }

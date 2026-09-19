@@ -1135,8 +1135,23 @@ class Migrations
                 INDEX idx_org_prog (organization_id, program_id),
                 INDEX idx_active (organization_id, is_active)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+        // Drop deprecated ft_semantic_keywords index and semantic_keywords column (idempotent)
+        try {
+            $checkIdx2 = $this->db->query("SHOW INDEX FROM knowledge_sources WHERE Key_name = 'ft_semantic_keywords'");
+            if ($checkIdx2 && $checkIdx2->fetch()) {
+                $this->db->exec("ALTER TABLE knowledge_sources DROP INDEX ft_semantic_keywords;");
+            }
         } catch (Throwable $e) {
-            // Table may already exist
+            // Index may already be dropped
+        }
+
+        try {
+            $checkCol = $this->db->query("SHOW COLUMNS FROM knowledge_sources LIKE 'semantic_keywords'");
+            if ($checkCol && $checkCol->fetch()) {
+                $this->db->exec("ALTER TABLE knowledge_sources DROP COLUMN semantic_keywords;");
+            }
+        } catch (Throwable $e) {
+            // Column may already be dropped
         }
     }
 }

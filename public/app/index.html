@@ -13673,7 +13673,7 @@ echo $response['reply'];
             // Semantic Keywords
             const kwContainer = document.getElementById('viewDocKeywordsContainer');
             if (kwContainer) {
-                const kwStr = doc.semantic_keywords || doc.keywords || '';
+                const kwStr = doc.keywords || '';
                 const kwList = kwStr.split(',').map(s => s.trim()).filter(Boolean);
                 if (kwList.length > 0) {
                     kwContainer.innerHTML = kwList.map(kw => `<span style="font-size:11px; padding:3px 8px; border-radius:4px; background:#F1F5F9; border:1px solid #CBD5E1; color:#334155;">#${escapeHtml(kw)}</span>`).join('');
@@ -13788,13 +13788,13 @@ echo $response['reply'];
             if (expInput) expInput.value = doc.expires_on ? doc.expires_on.split('T')[0] : '';
 
             const freqInput = document.getElementById('edit_doc_review_freq');
-            if (freqInput) freqInput.value = doc.review_frequency_days || 180;
+                if (freqInput) freqInput.value = doc.review_frequency_days || 180;
 
             const revInput = document.getElementById('edit_doc_last_reviewed');
             if (revInput) revInput.value = doc.last_reviewed_at || (doc.created_at ? doc.created_at.substring(0, 10) : 'None');
 
             const semKeyInput = document.getElementById('edit_doc_semantic_keywords');
-            if (semKeyInput) semKeyInput.value = doc.semantic_keywords || doc.keywords || '';
+            if (semKeyInput) semKeyInput.value = doc.keywords || '';
 
             const contentTextarea = document.getElementById('edit_doc_raw_content');
             const raw = doc.raw_content || doc.processed_content || '';

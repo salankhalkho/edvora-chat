@@ -219,7 +219,7 @@ class KnowledgeController
                    ks.type, ks.title, ks.category, ks.academic_version,
                    ks.effective_from, ks.expires_on, ks.last_reviewed_at, ks.review_frequency_days,
                    ks.previous_version_id, ks.replaced_by_id, ks.lead_magnet,
-                   ks.source_url, ks.raw_content, ks.processed_content, ks.keywords, ks.semantic_keywords, ks.file_path, ks.status, ks.last_fetched_at, ks.created_at, ks.updated_at
+                   ks.source_url, ks.raw_content, ks.processed_content, ks.keywords, ks.file_path, ks.status, ks.last_fetched_at, ks.created_at, ks.updated_at
             FROM knowledge_sources ks
             LEFT JOIN programs p ON ks.program_id = p.id
             WHERE ks.id = :id AND ks.organization_id = :org_id
@@ -303,7 +303,6 @@ class KnowledgeController
         $reviewFrequencyDays = !empty($body['review_frequency_days']) ? (int)$body['review_frequency_days'] : 180;
         $status = in_array($body['status'] ?? '', ['active', 'expiring_soon', 'expired', 'archived', 'processing']) ? $body['status'] : $existing['status'];
         $keywords = trim($body['keywords'] ?? '');
-        $semanticKeywords = trim($body['semantic_keywords'] ?? '');
         $rawContent = isset($body['raw_content']) ? (string)$body['raw_content'] : null;
 
         // Academic Program Mapping
@@ -341,7 +340,6 @@ class KnowledgeController
             'review_frequency_days = :review_frequency_days',
             'status = :status',
             'keywords = :keywords',
-            'semantic_keywords = :semantic_keywords',
             'program_id = :program_id',
             'updated_at = NOW()'
         ];
@@ -355,7 +353,6 @@ class KnowledgeController
             ':review_frequency_days' => $reviewFrequencyDays,
             ':status' => $status,
             ':keywords' => $keywords,
-            ':semantic_keywords' => $semanticKeywords,
             ':program_id' => $programId,
             ':id' => $id,
             ':org_id' => $orgId
@@ -433,10 +430,6 @@ class KnowledgeController
         ]);
         $id = (int)$db->lastInsertId();
 
-        // Dispatch async job to enrich semantic_keywords via LLM
-        $db->prepare("INSERT INTO jobs (type, payload, status, run_at, created_at) VALUES ('enrich_keywords', :payload, 'pending', NOW(), NOW())")
-           ->execute([':payload' => json_encode(['knowledge_source_id' => $id])]);
-
         AuditLogger::log('knowledge_source_created', 'knowledge_source', $id, [
             'title' => $title,
             'type' => 'text_paste',
@@ -506,9 +499,6 @@ class KnowledgeController
                 ':hash' => $scraped['content_hash']
             ]);
             $id = (int)$db->lastInsertId();
-
-            $db->prepare("INSERT INTO jobs (type, payload, status, run_at, created_at) VALUES ('enrich_keywords', :payload, 'pending', NOW(), NOW())")
-               ->execute([':payload' => json_encode(['knowledge_source_id' => $id])]);
 
             AuditLogger::log('knowledge_source_created', 'knowledge_source', $id, [
                 'title' => $title,
@@ -602,9 +592,6 @@ class KnowledgeController
                 ':file_path' => 'storage/uploads/' . $savedFilename
             ]);
             $id = (int)$db->lastInsertId();
-
-            $db->prepare("INSERT INTO jobs (type, payload, status, run_at, created_at) VALUES ('enrich_keywords', :payload, 'pending', NOW(), NOW())")
-               ->execute([':payload' => json_encode(['knowledge_source_id' => $id])]);
 
             AuditLogger::log('knowledge_source_created', 'knowledge_source', $id, [
                 'title' => $title,
@@ -740,10 +727,6 @@ class KnowledgeController
                 WHERE id = :old_id
             ");
             $stmtArchive->execute([':new_id' => $newId, ':old_id' => $oldId]);
-
-            // 3. Dispatch async enrichment job for new version
-            $db->prepare("INSERT INTO jobs (type, payload, status, run_at, created_at) VALUES ('enrich_keywords', :payload, 'pending', NOW(), NOW())")
-               ->execute([':payload' => json_encode(['knowledge_source_id' => $newId])]);
 
             AuditLogger::log('knowledge_source_replaced', 'knowledge_source', $newId, [
                 'previous_id' => $oldId,

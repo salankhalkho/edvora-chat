@@ -105,14 +105,6 @@ while (true) {
                         ':id'        => $sourceId
                     ]);
 
-                } elseif ($type === 'enrich_keywords') {
-                    // ──────────────────────────────────────────────────────────
-                    // LLM Semantic Keyword Enrichment
-                    // Generates 10-15 strategic 2-5 word phrases for intent-
-                    // based retrieval and stores them in semantic_keywords.
-                    // ──────────────────────────────────────────────────────────
-                    $sourceId = (int)($payload['knowledge_source_id'] ?? 0);
-                    ContentCompactor::generateSemanticKeywords($sourceId);
 
                 } elseif ($type === 'evaluate_content_health') {
                     // ──────────────────────────────────────────────────────────
