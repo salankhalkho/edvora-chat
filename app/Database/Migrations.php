@@ -1157,6 +1157,30 @@ class Migrations
         } catch (Throwable $e) {
             // Column may already be dropped
         }
+
+        // Knowledge Items table for chunked topic-level content & embeddings
+        try {
+            $this->db->exec("CREATE TABLE IF NOT EXISTS knowledge_items (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                organization_id INT NOT NULL,
+                source_id INT NOT NULL,
+                program_id INT NULL,
+                topic VARCHAR(255) NULL,
+                content TEXT NOT NULL,
+                page INT NULL,
+                embedding JSON NULL COMMENT 'Vector embedding values array',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
+                FOREIGN KEY (source_id) REFERENCES knowledge_sources(id) ON DELETE CASCADE,
+                FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE SET NULL,
+                INDEX idx_org_source (organization_id, source_id),
+                INDEX idx_org_program (organization_id, program_id),
+                FULLTEXT INDEX ft_item_topic_content (topic, content)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+        } catch (Throwable $e) {
+            // Table may already exist
+        }
     }
 }
 
