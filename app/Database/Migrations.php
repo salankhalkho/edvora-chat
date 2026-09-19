@@ -1178,6 +1178,10 @@ class Migrations
                 INDEX idx_org_program (organization_id, program_id),
                 FULLTEXT INDEX ft_item_topic_content (topic, content)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+        } catch (Throwable $e) {
+            // Table may already exist
+        }
+
         // Alter llm_providers role column to add 'embedding'
         try {
             $this->db->exec("ALTER TABLE llm_providers MODIFY COLUMN role ENUM('primary', 'fallback', 'embedding', 'inactive') DEFAULT 'inactive'");
