@@ -24,15 +24,9 @@ tar.exe -czvf deploy_package.tar.gz app public BRANDING_GUIDELINES.md theme-bran
 Write-Host "deploy_package.tar.gz created successfully." -ForegroundColor Green
 
 Write-Host "
-[3/6] Uploading to Production VPS (166.1.2.112)..." -ForegroundColor Cyan
-scp -i "C:/Users/Salan Khalkho/.ssh/id_ed25519" -o BatchMode=yes -o StrictHostKeyChecking=no deploy_package.tar.gz critical@166.1.2.112:/tmp/deploy_package.tar.gz
-Write-Host "Package uploaded to VPS /tmp/" -ForegroundColor Green
-
-Write-Host "
-[4/6] Remote Extract (sudo), Migrate, Chown and Apache Reload..." -ForegroundColor Cyan
-$remoteCmd = "echo 'dYt2295ZBM_EgUb' | sudo -S tar -xzvf /tmp/deploy_package.tar.gz -C /var/www/edvora.chat/ && rm -f /var/www/edvora.chat/public/app/tabs/department*.html /var/www/edvora.chat/public/app/tabs/dept-*.html /var/www/edvora.chat/public/app/js/departments.js && php /var/www/edvora.chat/migrate.php && echo 'dYt2295ZBM_EgUb' | sudo -S chown -R critical:www-data /var/www/edvora.chat && echo 'dYt2295ZBM_EgUb' | sudo -S chmod -R 775 /var/www/edvora.chat/storage && echo 'dYt2295ZBM_EgUb' | sudo -S systemctl reload apache2"
-ssh -i "C:/Users/Salan Khalkho/.ssh/id_ed25519" -o BatchMode=yes -o StrictHostKeyChecking=no critical@166.1.2.112 $remoteCmd
-Write-Host "Remote extraction and Apache reload complete." -ForegroundColor Green
+[3/6] Streaming Package to Production VPS, Extracting, Migrating & Reloading..." -ForegroundColor Cyan
+[Convert]::ToBase64String([System.IO.File]::ReadAllBytes('deploy_package.tar.gz')) | ssh -i "C:/Users/Salan Khalkho/.ssh/id_ed25519" -o BatchMode=yes -o StrictHostKeyChecking=no critical@166.1.2.112 "base64 -d > /tmp/deploy_package.tar.gz && echo 'dYt2295ZBM_EgUb' | sudo -S tar -xzf /tmp/deploy_package.tar.gz -C /var/www/edvora.chat/ && rm -f /var/www/edvora.chat/public/app/tabs/department*.html /var/www/edvora.chat/public/app/tabs/dept-*.html /var/www/edvora.chat/public/app/js/departments.js && php /var/www/edvora.chat/migrate.php && echo 'dYt2295ZBM_EgUb' | sudo -S chown -R critical:www-data /var/www/edvora.chat && echo 'dYt2295ZBM_EgUb' | sudo -S chmod -R 775 /var/www/edvora.chat/storage && echo 'dYt2295ZBM_EgUb' | sudo -S systemctl reload apache2"
+Write-Host "Remote streaming extraction and Apache reload complete." -ForegroundColor Green
 
 Write-Host "
 [5/6] Verifying Live Production Response..." -ForegroundColor Cyan
