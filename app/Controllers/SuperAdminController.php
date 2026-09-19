@@ -90,7 +90,7 @@ class SuperAdminController
 
         $apiKey = trim($data['api_key'] ?? '');
         $encryptedKey = !empty($apiKey) ? self::encryptKey($apiKey) : '';
-        $role = in_array($data['role'] ?? '', ['primary', 'fallback', 'inactive']) ? $data['role'] : 'inactive';
+        $role = in_array($data['role'] ?? '', ['primary', 'fallback', 'embedding', 'inactive']) ? $data['role'] : 'inactive';
 
         $db = Database::getConnection();
 
@@ -148,7 +148,7 @@ class SuperAdminController
             Response::error('LLM Provider not found.', 404);
         }
 
-        $role = in_array($data['role'] ?? '', ['primary', 'fallback', 'inactive']) ? $data['role'] : 'inactive';
+        $role = in_array($data['role'] ?? '', ['primary', 'fallback', 'embedding', 'inactive']) ? $data['role'] : 'inactive';
 
         if ($role !== 'inactive') {
             $stmtUnset = $db->prepare("UPDATE llm_providers SET role = 'inactive' WHERE role = :role AND id != :id");

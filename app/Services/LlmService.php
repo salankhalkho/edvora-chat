@@ -308,6 +308,127 @@ class LlmService
     }
 
     /**
+     * Generate text embedding using Super Admin managed LLM Provider with role 'embedding' (or env fallbacks)
+     */
+    public static function embed(string $text): array
+    {
+        $db = Database::getConnection();
+        $stmt = $db->prepare("
+            SELECT * FROM llm_providers
+            WHERE is_active = 1 AND role = 'embedding'
+            LIMIT 1
+        ");
+        $stmt->execute();
+        $provider = $stmt->fetch();
+
+        if ($provider) {
+            $apiKey = !empty($provider['api_key_encrypted']) ? self::decryptKey($provider['api_key_encrypted']) : '';
+            $providerType = strtolower($provider['provider']);
+            $model = $provider['model_name'];
+            $baseUrl = !empty($provider['api_base_url']) ? rtrim($provider['api_base_url'], '/') : null;
+            $timeout = (int)($provider['timeout_seconds'] ?? 30);
+
+            if ($providerType === 'openai') {
+                return self::callOpenAiEmbedding($baseUrl ?: 'https://api.openai.com/v1', $apiKey, $model ?: 'text-embedding-3-small', $text, $timeout);
+            } elseif ($providerType === 'gemini') {
+                return self::callGeminiEmbedding($apiKey, $model ?: 'text-embedding-004', $text, $timeout);
+            }
+        }
+
+        // Fallback to Env keys if no DB provider configured
+        $openAiKey = Env::get('OPENAI_API_KEY');
+        if (!empty($openAiKey)) {
+            return self::callOpenAiEmbedding('https://api.openai.com/v1', $openAiKey, 'text-embedding-3-small', $text, 30);
+        }
+
+        $geminiKey = Env::get('GEMINI_API_KEY');
+        if (!empty($geminiKey)) {
+            return self::callGeminiEmbedding($geminiKey, 'text-embedding-004', $text, 30);
+        }
+
+        throw new Exception("No embedding LLM provider configured in database or environment variables.");
+    }
+
+    /**
+     * Call OpenAI Embedding API
+     */
+    private static function callOpenAiEmbedding(string $baseUrl, string $apiKey, string $model, string $text, int $timeout): array
+    {
+        $url = $baseUrl . '/embeddings';
+        $payload = [
+            'input' => $text,
+            'model' => $model
+        ];
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer ' . $apiKey,
+            'Content-Type: application/json'
+        ]);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+
+        $res = curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $err = curl_error($ch);
+        curl_close($ch);
+
+        if ($res === false || $code >= 400) {
+            throw new Exception("OpenAI Embedding API HTTP {$code}: {$err} Response: {$res}");
+        }
+
+        $json = json_decode($res, true);
+        $embedding = $json['data'][0]['embedding'] ?? [];
+        $tokens = $json['usage']['total_tokens'] ?? 0;
+
+        return [
+            'embedding' => $embedding,
+            'tokens_used' => $tokens,
+            'model' => $model
+        ];
+    }
+
+    /**
+     * Call Gemini Embedding API
+     */
+    private static function callGeminiEmbedding(string $apiKey, string $model, string $text, int $timeout): array
+    {
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:embedContent?key={$apiKey}";
+        $payload = [
+            'model' => "models/{$model}",
+            'content' => [
+                'parts' => [['text' => $text]]
+            ]
+        ];
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+
+        $res = curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($res === false || $code >= 400) {
+            throw new Exception("Gemini Embedding API HTTP {$code}: {$res}");
+        }
+
+        $json = json_decode($res, true);
+        $embedding = $json['embedding']['values'] ?? [];
+
+        return [
+            'embedding' => $embedding,
+            'tokens_used' => 0,
+            'model' => $model
+        ];
+    }
+
+    /**
      * Decrypt AES-256 encrypted API key
      */
     public static function decryptKey(string $encryptedHex): string

@@ -166,7 +166,7 @@ class Migrations
                 temperature DECIMAL(3,2) DEFAULT 0.30,
                 max_tokens INT DEFAULT 1500,
                 timeout_seconds INT DEFAULT 30,
-                role ENUM('primary', 'fallback', 'inactive') DEFAULT 'inactive',
+                role ENUM('primary', 'fallback', 'embedding', 'inactive') DEFAULT 'inactive',
                 is_active TINYINT(1) DEFAULT 1,
                 last_tested_at TIMESTAMP NULL,
                 last_test_result ENUM('ok', 'error') NULL,
@@ -1178,8 +1178,11 @@ class Migrations
                 INDEX idx_org_program (organization_id, program_id),
                 FULLTEXT INDEX ft_item_topic_content (topic, content)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+        // Alter llm_providers role column to add 'embedding'
+        try {
+            $this->db->exec("ALTER TABLE llm_providers MODIFY COLUMN role ENUM('primary', 'fallback', 'embedding', 'inactive') DEFAULT 'inactive'");
         } catch (Throwable $e) {
-            // Table may already exist
+            // Column modification may already exist or fail gracefully
         }
     }
 }
