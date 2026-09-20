@@ -108,6 +108,60 @@ while (true) {
                         ':id'        => $sourceId
                     ]);
 
+                } elseif ($type === 'chunk_and_embed') {
+                    // ──────────────────────────────────────────────────────────
+                    // chunk_and_embed: Load processed_content from knowledge_sources,
+                    // chunk it into sentences, embed each chunk via OpenAI,
+                    // and insert rows into knowledge_items.
+                    // ──────────────────────────────────────────────────────────
+                    $sourceId  = (int)($payload['source_id'] ?? 0);
+                    $orgId     = (int)($payload['organization_id'] ?? 0);
+                    $programId = !empty($payload['program_id']) ? (int)$payload['program_id'] : null;
+
+                    if (!$sourceId || !$orgId) {
+                        throw new \Exception("chunk_and_embed: missing source_id or organization_id in payload.");
+                    }
+
+                    // 1. Load the source row
+                    $stmtSrc = $db->prepare("SELECT id, processed_content, status FROM knowledge_sources WHERE id = ? AND organization_id = ?");
+                    $stmtSrc->execute([$sourceId, $orgId]);
+                    $source = $stmtSrc->fetch(\PDO::FETCH_ASSOC);
+
+                    if (!$source) {
+                        throw new \Exception("chunk_and_embed: source #{$sourceId} not found for org #{$orgId}.");
+                    }
+
+                    $textToChunk = trim($source['processed_content'] ?? '');
+                    if ($textToChunk === '') {
+                        throw new \Exception("chunk_and_embed: source #{$sourceId} has no processed_content to embed.");
+                    }
+
+                    // 2. Delete any existing knowledge_items for this source (idempotent re-run safe)
+                    $db->prepare("DELETE FROM knowledge_items WHERE source_id = ? AND organization_id = ?")
+                       ->execute([$sourceId, $orgId]);
+
+                    // 3. Chunk the processed content
+                    $chunks = KnowledgeChunker::chunkText($textToChunk);
+
+                    if (empty($chunks)) {
+                        throw new \Exception("chunk_and_embed: no chunks generated for source #{$sourceId}.");
+                    }
+
+                    // 4. Embed each chunk and insert into knowledge_items
+                    $stmtInsert = $db->prepare("
+                        INSERT INTO knowledge_items
+                            (organization_id, source_id, program_id, content, page, embedding, created_at, updated_at)
+                        VALUES (?, ?, ?, ?, NULL, ?, NOW(), NOW())
+                    ");
+
+                    foreach ($chunks as $chunk) {
+                        $vector    = EmbeddingService::embed($chunk);
+                        $embedding = json_encode($vector);
+                        $stmtInsert->execute([$orgId, $sourceId, $programId, $chunk, $embedding]);
+                    }
+
+                    echo "[" . date('Y-m-d H:i:s') . "] chunk_and_embed source #{$sourceId}: " . count($chunks) . " chunks embedded and saved to knowledge_items.\n";
+
 
                 } elseif ($type === 'embed_program') {
                     // ──────────────────────────────────────────────────────────

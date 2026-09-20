@@ -437,6 +437,14 @@ class KnowledgeController
             'expires_on' => $expiresOn
         ]);
 
+        // Dispatch background job to chunk and embed this source into knowledge_items
+        try {
+            $stmtJob = $db->prepare("INSERT INTO jobs (type, payload, status, run_at) VALUES ('chunk_and_embed', :p, 'pending', NOW())");
+            $stmtJob->execute([':p' => json_encode(['source_id' => $id, 'organization_id' => $orgId, 'program_id' => $programId])]);
+        } catch (Throwable $jobEx) {
+            error_log('[KnowledgeController] Failed to dispatch chunk_and_embed job: ' . $jobEx->getMessage());
+        }
+
         Response::success([
             'id' => $id,
             'title' => $title,
@@ -506,6 +514,14 @@ class KnowledgeController
                 'category' => $category,
                 'url' => $url
             ]);
+
+            // Dispatch background job to chunk and embed this source into knowledge_items
+            try {
+                $stmtJob = $db->prepare("INSERT INTO jobs (type, payload, status, run_at) VALUES ('chunk_and_embed', :p, 'pending', NOW())");
+                $stmtJob->execute([':p' => json_encode(['source_id' => $id, 'organization_id' => $orgId, 'program_id' => $programId])]);
+            } catch (Throwable $jobEx) {
+                error_log('[KnowledgeController] Failed to dispatch chunk_and_embed job: ' . $jobEx->getMessage());
+            }
 
             Response::success([
                 'id' => $id,
@@ -599,6 +615,14 @@ class KnowledgeController
                 'category' => $category,
                 'filename' => $originalFilename
             ]);
+
+            // Dispatch background job to chunk and embed this source into knowledge_items
+            try {
+                $stmtJob = $db->prepare("INSERT INTO jobs (type, payload, status, run_at) VALUES ('chunk_and_embed', :p, 'pending', NOW())");
+                $stmtJob->execute([':p' => json_encode(['source_id' => $id, 'organization_id' => $orgId, 'program_id' => $programId])]);
+            } catch (Throwable $jobEx) {
+                error_log('[KnowledgeController] Failed to dispatch chunk_and_embed job: ' . $jobEx->getMessage());
+            }
 
             Response::success([
                 'id' => $id,
