@@ -1268,47 +1268,81 @@ class Migrations
         // Ensure all required comparison matrix feature flags exist in plan_features
         try {
             $standardFeatures = [
-                // Category 2: Conversational Admissions Engine
-                'campus_tour' => 'Campus Tour Booking',
-                'counselor_callback' => 'Counselor 1-on-1 Callback',
-                'asset_delivery' => 'Brochure & Fee Delivery',
-                'intent_scoring' => 'Automated Intent Scoring',
-                // Category 3: Platform & Customization
-                'multilingual' => 'Multilingual Counseling',
-                'mobile_sdk' => 'Mobile Webview & SDK',
-                // Category 4: Analytics & Compliance
-                'knowledge_gap_detection' => 'Knowledge Gap Detection',
-                'institutional_privacy' => 'Institutional Privacy & Encryption',
-                // Category 5: Enterprise & Support
-                'support_channel' => 'Support Channel Tier'
+                'ai_admissions_chatbot' => 'AI Admissions Chatbot',
+                'lead_capture' => 'Lead Capture',
+                'lead_qualification' => 'Lead Qualification',
+                'program_recommendations' => 'Program Recommendations',
+                'counselor_handoff' => 'Counselor Handoff',
+                'whatsapp' => 'WhatsApp',
+                'appointment_booking' => 'Appointment Booking',
+                'campus_visits' => 'Campus Visits',
+                'analytics' => 'Analytics Tier',
+                'crm_integration' => 'CRM Integration',
+                'multiple_campuses' => 'Multiple Campuses',
+                'custom_workflows' => 'Custom Workflows',
+                'dedicated_onboarding' => 'Dedicated Onboarding',
+                'custom_integrations' => 'Custom Integrations'
             ];
 
-            // Default values for plans: Starter (1), Growth (2), Pro (3)
+            // Default values matching exact order & checks from institutional plan matrix:
+            // Starter: AI Chatbot, Lead Capture, Analytics: Basic (0).
+            // Growth: AI Chatbot, Lead Capture, Lead Qualification, Program Recommendations, Counselor Handoff, WhatsApp, Appointment Booking, Campus Visits, Analytics: Advanced (1), CRM Integration, Dedicated Onboarding.
+            // Pro: All included (Multiple Campuses, Custom Workflows, Custom Integrations, Analytics: Advanced (1)).
             $planDefaults = [
                 1 => [
-                    'campus_tour' => 1, 'counselor_callback' => 1, 'asset_delivery' => 1, 'intent_scoring' => 1,
-                    'multilingual' => 1, 'mobile_sdk' => 1,
-                    'knowledge_gap_detection' => 1, 'institutional_privacy' => 1,
-                    'support_channel' => 0 // Email
+                    'ai_admissions_chatbot' => 1,
+                    'lead_capture' => 1,
+                    'lead_qualification' => 0,
+                    'program_recommendations' => 0,
+                    'counselor_handoff' => 0,
+                    'whatsapp' => 0,
+                    'appointment_booking' => 0,
+                    'campus_visits' => 0,
+                    'analytics' => 0, // Basic
+                    'crm_integration' => 0,
+                    'multiple_campuses' => 0,
+                    'custom_workflows' => 0,
+                    'dedicated_onboarding' => 0,
+                    'custom_integrations' => 0
                 ],
                 2 => [
-                    'campus_tour' => 1, 'counselor_callback' => 1, 'asset_delivery' => 1, 'intent_scoring' => 1,
-                    'multilingual' => 1, 'mobile_sdk' => 1,
-                    'knowledge_gap_detection' => 1, 'institutional_privacy' => 1,
-                    'support_channel' => 1 // Priority Email + Chat
+                    'ai_admissions_chatbot' => 1,
+                    'lead_capture' => 1,
+                    'lead_qualification' => 1,
+                    'program_recommendations' => 1,
+                    'counselor_handoff' => 1,
+                    'whatsapp' => 1,
+                    'appointment_booking' => 1,
+                    'campus_visits' => 1,
+                    'analytics' => 1, // Advanced
+                    'crm_integration' => 1,
+                    'multiple_campuses' => 0,
+                    'custom_workflows' => 0,
+                    'dedicated_onboarding' => 1,
+                    'custom_integrations' => 0
                 ],
                 3 => [
-                    'campus_tour' => 1, 'counselor_callback' => 1, 'asset_delivery' => 1, 'intent_scoring' => 1,
-                    'multilingual' => 1, 'mobile_sdk' => 1,
-                    'knowledge_gap_detection' => 1, 'institutional_privacy' => 1,
-                    'support_channel' => 2 // Dedicated Mgr
+                    'ai_admissions_chatbot' => 1,
+                    'lead_capture' => 1,
+                    'lead_qualification' => 1,
+                    'program_recommendations' => 1,
+                    'counselor_handoff' => 1,
+                    'whatsapp' => 1,
+                    'appointment_booking' => 1,
+                    'campus_visits' => 1,
+                    'analytics' => 1, // Advanced
+                    'crm_integration' => 1,
+                    'multiple_campuses' => 1,
+                    'custom_workflows' => 1,
+                    'dedicated_onboarding' => 1,
+                    'custom_integrations' => 1
                 ]
             ];
 
             $stmtInsertFeat = $this->db->prepare("
                 INSERT INTO plan_features (plan_id, feature_key, feature_label, is_enabled)
                 VALUES (:pid, :fkey, :label, :enabled)
-                ON DUPLICATE KEY UPDATE feature_label = :label_upd
+                ON DUPLICATE KEY UPDATE feature_label = :label_upd, is_enabled = :enabled_upd
             ");
 
             foreach ($planDefaults as $pId => $features) {
@@ -1323,7 +1357,8 @@ class Migrations
                             ':fkey' => $fKey,
                             ':label' => $label,
                             ':enabled' => $fVal,
-                            ':label_upd' => $label
+                            ':label_upd' => $label,
+                            ':enabled_upd' => $fVal
                         ]);
                     }
                 }
