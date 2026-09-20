@@ -155,13 +155,13 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: var(--brand-bg-card, #111827);
-            border-bottom: 1px solid var(--brand-border-color, #1f2937);
+            background: var(--brand-bg-card, #111827) !important;
+            border-bottom: 1px solid var(--brand-border-color, #1f2937) !important;
         }
         .header-title {
             font-size: 14px;
             font-weight: 600;
-            color: #fff;
+            color: #fff !important;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -174,9 +174,9 @@
 
         /* Card / Panels */
         .brand-panel {
-            background: var(--brand-bg-card, #111827);
-            border: 1px solid var(--brand-border-color, #1f2937);
-            border-radius: var(--brand-radius-md, 8px);
+            background: var(--brand-bg-card, #111827) !important;
+            border: 1px solid var(--brand-border-color, #1f2937) !important;
+            border-radius: var(--brand-radius-md, 8px) !important;
             padding: 20px;
             margin-bottom: 20px;
         }
@@ -186,13 +186,14 @@
             align-items: center;
             justify-content: space-between;
             margin-bottom: 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
             padding-bottom: 8px;
+            background: transparent !important;
         }
         .panel-heading {
             font-size: 13px;
             font-weight: 600;
-            color: #fff;
+            color: #fff !important;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -1084,9 +1085,9 @@
 
                 <!-- 4. PLANS & PRICING TAB -->
                 <div class="tab-view" id="tab-plans">
-                    <div class="brand-panel">
-                        <div class="brand-panel-header" style="flex-wrap: wrap; gap: 10px; height: auto; padding-bottom: 12px;">
-                            <div class="panel-heading">
+                    <div class="brand-panel" style="background: #111827 !important; border: 1px solid #1f2937 !important;">
+                        <div class="brand-panel-header" style="background: #111827 !important; border-bottom: 1px solid #1f2937 !important; flex-wrap: wrap; gap: 10px; height: auto; padding-bottom: 12px;">
+                            <div class="panel-heading" style="color: #ffffff !important; font-size: 13px; font-weight: 700;">
                                 <span>🏷️</span> Institutional Plans &amp; Decoupled Pricing Manager
                             </div>
                             <div style="display: flex; gap: 8px; align-items: center;">
@@ -1121,13 +1122,13 @@
                     </div>
 
                     <!-- Edit Plan Modal -->
-                    <div id="editPlanModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
-                        <div class="brand-panel" style="max-width: 680px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); border-radius: 12px;">
-                            <div class="brand-panel-header">
-                                <div class="panel-heading" id="editPlanModalTitle">
+                    <div id="editPlanModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+                        <div class="brand-panel" style="max-width: 680px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.6); border-radius: 12px; background: #111827 !important; border: 1px solid #1f2937 !important;">
+                            <div class="brand-panel-header" style="background: #111827 !important; border-bottom: 1px solid #1f2937 !important; height: 42px;">
+                                <div class="panel-heading" id="editPlanModalTitle" style="color: #ffffff !important; font-size: 13px; font-weight: 700;">
                                     <span>✏️</span> Edit Plan &amp; Pricing Configuration
                                 </div>
-                                <button onclick="closeEditPlanModal()" style="background: transparent; border: none; font-size: 18px; cursor: pointer; color: var(--brand-text-muted);">&times;</button>
+                                <button onclick="closeEditPlanModal()" style="background: transparent; border: none; font-size: 20px; line-height: 1; cursor: pointer; color: #9ca3af; padding: 4px 8px;">&times;</button>
                             </div>
                             <form id="editPlanForm" onsubmit="savePlan(event)" style="padding: 16px;">
                                 <input type="hidden" id="planEditId" />
