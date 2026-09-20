@@ -1188,6 +1188,23 @@ class Migrations
         } catch (Throwable $e) {
             // Column modification may already exist or fail gracefully
         }
+
+        // Add program_id column to knowledge_sources (FK to programs, nullable)
+        try {
+            $checkProgCol = $this->db->query("SHOW COLUMNS FROM knowledge_sources LIKE 'program_id'");
+            if (!$checkProgCol->fetch()) {
+                $this->db->exec("ALTER TABLE knowledge_sources ADD COLUMN program_id INT NULL AFTER chatbot_id, ADD INDEX idx_ks_program_id (program_id);");
+            }
+        } catch (Throwable $e) {
+            // Column may already exist
+        }
+
+        // Extend knowledge_sources.type ENUM to include 'program_txt'
+        try {
+            $this->db->exec("ALTER TABLE knowledge_sources MODIFY COLUMN type ENUM('document','url','text_paste','program_txt') NOT NULL;");
+        } catch (Throwable $e) {
+            // Enum may already include program_txt
+        }
     }
 }
 

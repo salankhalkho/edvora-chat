@@ -411,6 +411,20 @@ class ProgramController
 
             $db->commit();
 
+            // Dispatch background job to generate TXT, chunk, and embed this program into knowledge_items
+            try {
+                $stmtJob = $db->prepare("
+                    INSERT INTO jobs (type, payload, status, run_at)
+                    VALUES ('embed_program', :payload, 'pending', NOW())
+                ");
+                $stmtJob->execute([':payload' => json_encode([
+                    'program_id'      => $programId,
+                    'organization_id' => $orgId,
+                ])]);
+            } catch (Throwable $jobEx) {
+                error_log('[ProgramController] Failed to dispatch embed_program job: ' . $jobEx->getMessage());
+            }
+
             Response::success([
                 'id' => $programId,
                 'message' => 'Academic program created successfully'
@@ -529,6 +543,21 @@ class ProgramController
             }
 
             $db->commit();
+
+            // Dispatch background job to re-generate TXT, re-chunk, and re-embed into knowledge_items
+            try {
+                $stmtJob = $db->prepare("
+                    INSERT INTO jobs (type, payload, status, run_at)
+                    VALUES ('embed_program', :payload, 'pending', NOW())
+                ");
+                $stmtJob->execute([':payload' => json_encode([
+                    'program_id'      => $id,
+                    'organization_id' => $orgId,
+                    're_embed'        => true,
+                ])]);
+            } catch (Throwable $jobEx) {
+                error_log('[ProgramController] Failed to dispatch embed_program job: ' . $jobEx->getMessage());
+            }
 
             Response::success([
                 'id' => $id,

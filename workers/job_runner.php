@@ -23,6 +23,9 @@ use App\Config\Database;
 use App\Config\Env;
 use App\Services\ContentCompactor;
 use App\Services\DocumentParser;
+use App\Services\EmbeddingService;
+use App\Services\KnowledgeChunker;
+use App\Services\ProgramTextGenerator;
 use App\Services\UrlScraper;
 
 Env::load();
@@ -105,6 +108,102 @@ while (true) {
                         ':id'        => $sourceId
                     ]);
 
+
+                } elseif ($type === 'embed_program') {
+                    // ──────────────────────────────────────────────────────────
+                    // embed_program: Generate TXT from programs row, chunk it,
+                    // embed each chunk via OpenAI, and save to knowledge_items.
+                    // If re_embed=true, delete existing knowledge_items first.
+                    // ──────────────────────────────────────────────────────────
+                    $programId = (int)($payload['program_id'] ?? 0);
+                    $orgId     = (int)($payload['organization_id'] ?? 0);
+                    $reEmbed   = (bool)($payload['re_embed'] ?? false);
+
+                    if (!$programId || !$orgId) {
+                        throw new \Exception("embed_program: missing program_id or organization_id in payload.");
+                    }
+
+                    // 1. Load the program row
+                    $stmtProg = $db->prepare("SELECT * FROM programs WHERE id = ? AND organization_id = ?");
+                    $stmtProg->execute([$programId, $orgId]);
+                    $program = $stmtProg->fetch(\PDO::FETCH_ASSOC);
+
+                    if (!$program) {
+                        throw new \Exception("embed_program: program #{$programId} not found for org #{$orgId}.");
+                    }
+
+                    // 2. Generate embedding-friendly sentences
+                    $txtContent = ProgramTextGenerator::generateTxt($program);
+
+                    // 3. Write TXT file
+                    $txtDir  = dirname(__DIR__) . "/storage/programs/{$orgId}";
+                    if (!is_dir($txtDir)) {
+                        @mkdir($txtDir, 0775, true);
+                    }
+                    $txtPath = "{$txtDir}/program_{$programId}.txt";
+                    file_put_contents($txtPath, $txtContent);
+
+                    // 4. Upsert knowledge_sources row for this program TXT
+                    $stmtSrc = $db->prepare("
+                        SELECT id FROM knowledge_sources
+                        WHERE program_id = ? AND organization_id = ? AND type = 'program_txt'
+                        LIMIT 1
+                    ");
+                    $stmtSrc->execute([$programId, $orgId]);
+                    $existingSrc = $stmtSrc->fetch(\PDO::FETCH_ASSOC);
+
+                    $relPath = "storage/programs/{$orgId}/program_{$programId}.txt";
+
+                    if ($existingSrc) {
+                        $sourceId = (int)$existingSrc['id'];
+                        $db->prepare("
+                            UPDATE knowledge_sources
+                            SET raw_content = ?, processed_content = ?, file_path = ?, status = 'active', updated_at = NOW()
+                            WHERE id = ?
+                        ")->execute([$txtContent, $txtContent, $relPath, $sourceId]);
+                    } else {
+                        $db->prepare("
+                            INSERT INTO knowledge_sources
+                                (organization_id, program_id, type, title, raw_content, processed_content, file_path, status)
+                            VALUES (?, ?, 'program_txt', ?, ?, ?, ?, 'active')
+                        ")->execute([
+                            $orgId,
+                            $programId,
+                            ($program['course_name'] ?? 'Program') . ' — Auto-generated Knowledge',
+                            $txtContent,
+                            $txtContent,
+                            $relPath,
+                        ]);
+                        $sourceId = (int)$db->lastInsertId();
+                    }
+
+                    // 5. If re-embedding, delete existing knowledge_items for this source
+                    if ($reEmbed || $existingSrc) {
+                        $db->prepare("DELETE FROM knowledge_items WHERE source_id = ? AND organization_id = ?")
+                           ->execute([$sourceId, $orgId]);
+                    }
+
+                    // 6. Chunk the TXT content
+                    $chunks = KnowledgeChunker::chunkText($txtContent);
+
+                    if (empty($chunks)) {
+                        throw new \Exception("embed_program: no chunks generated for program #{$programId}.");
+                    }
+
+                    // 7. Embed each chunk and insert into knowledge_items
+                    $stmtInsert = $db->prepare("
+                        INSERT INTO knowledge_items
+                            (organization_id, source_id, program_id, content, page, embedding, created_at, updated_at)
+                        VALUES (?, ?, ?, ?, NULL, ?, NOW(), NOW())
+                    ");
+
+                    foreach ($chunks as $chunk) {
+                        $vector    = EmbeddingService::embed($chunk);
+                        $embedding = json_encode($vector);
+                        $stmtInsert->execute([$orgId, $sourceId, $programId, $chunk, $embedding]);
+                    }
+
+                    echo "[" . date('Y-m-d H:i:s') . "] embed_program #{$programId}: " . count($chunks) . " chunks embedded and saved to knowledge_items.\n";
 
                 } elseif ($type === 'evaluate_content_health') {
                     // ──────────────────────────────────────────────────────────
