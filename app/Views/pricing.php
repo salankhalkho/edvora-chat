@@ -713,6 +713,35 @@ foreach ($plans as &$plan) {
                             <?php endforeach; ?>
                         </tr>
 
+                        <!-- Row: Total Knowledge -->
+                        <tr>
+                            <td class="font-semibold text-e-teal">Total Knowledge</td>
+                            <?php foreach ($plans as $p): ?>
+                                <?php 
+                                    $val = $p['quota_map']['total_knowledge_mb'] ?? null;
+                                    $isHighlight = (!empty($p['badge_text']) || stripos($p['name'], 'Growth') !== false);
+                                    if ($val === null) {
+                                        // Fallbacks based on plan name
+                                        if (stripos($p['name'], 'Starter') !== false) $display = '250MB';
+                                        elseif (stripos($p['name'], 'Growth') !== false) $display = '1GB';
+                                        elseif (stripos($p['name'], 'Pro') !== false) $display = '5GB';
+                                        else $display = '1GB';
+                                    } elseif ($val == -1) {
+                                        $display = 'Unlimited';
+                                    } elseif ($val >= 1024) {
+                                        $gb = round($val / 1024, 1);
+                                        $display = (floor($gb) == $gb ? intval($gb) : $gb) . 'GB';
+                                    } else {
+                                        $display = $val . 'MB';
+                                    }
+                                    $colorClass = ($isHighlight ? 'font-bold text-e-teal' : '');
+                                ?>
+                                <td class="text-center <?= $isHighlight ? 'highlight-col' : '' ?> <?= $colorClass ?>">
+                                    <?= $display ?>
+                                </td>
+                            <?php endforeach; ?>
+                        </tr>
+
                         <!-- Row: Monthly AI Conversations -->
                         <tr>
                             <td class="font-semibold text-e-teal">Monthly AI Conversations</td>

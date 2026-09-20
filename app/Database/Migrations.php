@@ -1371,6 +1371,34 @@ class Migrations
                     }
                 }
             }
+
+            // Seed Total Knowledge Quota (total_knowledge_mb: Starter 250MB, Growth 1024MB, Pro 5120MB)
+            $totalKnowledgeDefaults = [
+                1 => 250,   // 250MB
+                2 => 1024,  // 1GB (1024MB)
+                3 => 5120   // 5GB (5120MB)
+            ];
+
+            $stmtUpsertQuota = $this->db->prepare("
+                INSERT INTO plan_quotas (plan_id, quota_key, quota_label, quota_value)
+                VALUES (:pid, :qkey, :label, :val)
+                ON DUPLICATE KEY UPDATE quota_label = :label_upd, quota_value = :val_upd
+            ");
+
+            foreach ($totalKnowledgeDefaults as $pId => $mbVal) {
+                $stmtPCheck = $this->db->prepare("SELECT id FROM plans WHERE id = :id");
+                $stmtPCheck->execute([':id' => $pId]);
+                if ($stmtPCheck->fetch()) {
+                    $stmtUpsertQuota->execute([
+                        ':pid' => $pId,
+                        ':qkey' => 'total_knowledge_mb',
+                        ':label' => 'Total Knowledge Storage (MB)',
+                        ':val' => $mbVal,
+                        ':label_upd' => 'Total Knowledge Storage (MB)',
+                        ':val_upd' => $mbVal
+                    ]);
+                }
+            }
         } catch (Throwable $e) {
             // Error handled gracefully
         }

@@ -1243,6 +1243,10 @@
                                             <input type="number" id="quota_max_staff_users" class="form-input" />
                                         </div>
                                         <div class="form-group">
+                                            <label class="form-label">Total Knowledge Storage (MB)</label>
+                                            <input type="number" id="quota_total_knowledge_mb" class="form-input" placeholder="e.g. 250, 1024, 5120" />
+                                        </div>
+                                        <div class="form-group">
                                             <label class="form-label">History Retention (Days)</label>
                                             <input type="number" id="quota_conversation_history_days" class="form-input" />
                                         </div>
@@ -3362,6 +3366,7 @@
             document.getElementById('quota_max_leads_per_month').value = qMap['max_leads_per_month'] !== undefined ? qMap['max_leads_per_month'] : 100;
             document.getElementById('quota_max_file_upload_mb').value = qMap['max_file_upload_mb'] !== undefined ? qMap['max_file_upload_mb'] : 5;
             document.getElementById('quota_max_staff_users').value = qMap['max_staff_users'] !== undefined ? qMap['max_staff_users'] : 1;
+            document.getElementById('quota_total_knowledge_mb').value = qMap['total_knowledge_mb'] !== undefined ? qMap['total_knowledge_mb'] : 250;
             document.getElementById('quota_conversation_history_days').value = qMap['conversation_history_days'] !== undefined ? qMap['conversation_history_days'] : 30;
 
             // Features
@@ -3431,6 +3436,7 @@
                     max_leads_per_month: parseInt(document.getElementById('quota_max_leads_per_month').value) || 100,
                     max_file_upload_mb: parseInt(document.getElementById('quota_max_file_upload_mb').value) || 5,
                     max_staff_users: parseInt(document.getElementById('quota_max_staff_users').value) || 1,
+                    total_knowledge_mb: parseInt(document.getElementById('quota_total_knowledge_mb').value) || 250,
                     conversation_history_days: parseInt(document.getElementById('quota_conversation_history_days').value) || 30
                 },
                 features: {
