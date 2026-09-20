@@ -1205,6 +1205,132 @@ class Migrations
         } catch (Throwable $e) {
             // Enum may already include program_txt
         }
+
+        // Clean up duplicate plan_quotas, keeping the highest/latest ID for each (plan_id, quota_key)
+        try {
+            $this->db->exec("
+                DELETE pq1 FROM plan_quotas pq1
+                INNER JOIN plan_quotas pq2 
+                WHERE pq1.plan_id = pq2.plan_id 
+                  AND pq1.quota_key = pq2.quota_key 
+                  AND pq1.id < pq2.id;
+            ");
+        } catch (Throwable $e) {
+            // Cleanup error handled gracefully
+        }
+
+        // Add UNIQUE constraint on plan_quotas (plan_id, quota_key) if not exists
+        try {
+            $checkIndex = $this->db->query("SHOW INDEX FROM plan_quotas WHERE Key_name = 'uq_plan_quota'");
+            if (!$checkIndex->fetch()) {
+                $this->db->exec("ALTER TABLE plan_quotas ADD UNIQUE KEY uq_plan_quota (plan_id, quota_key);");
+            }
+        } catch (Throwable $e) {
+            // Index may already exist
+        }
+
+        // Clean up duplicate plan_features, keeping the highest/latest ID for each (plan_id, feature_key)
+        try {
+            $this->db->exec("
+                DELETE pf1 FROM plan_features pf1
+                INNER JOIN plan_features pf2 
+                WHERE pf1.plan_id = pf2.plan_id 
+                  AND pf1.feature_key = pf2.feature_key 
+                  AND pf1.id < pf2.id;
+            ");
+        } catch (Throwable $e) {
+            // Cleanup error handled gracefully
+        }
+
+        // Add UNIQUE constraint on plan_features (plan_id, feature_key) if not exists
+        try {
+            $checkFeatIndex = $this->db->query("SHOW INDEX FROM plan_features WHERE Key_name = 'uq_plan_feature'");
+            if (!$checkFeatIndex->fetch()) {
+                $this->db->exec("ALTER TABLE plan_features ADD UNIQUE KEY uq_plan_feature (plan_id, feature_key);");
+            }
+        } catch (Throwable $e) {
+            // Index may already exist
+        }
+
+        // Add badge and cta columns to plans table if missing
+        try {
+            $checkBadge = $this->db->query("SHOW COLUMNS FROM plans LIKE 'badge_text'");
+            if (!$checkBadge->fetch()) {
+                $this->db->exec("ALTER TABLE plans 
+                    ADD COLUMN badge_text VARCHAR(50) NULL AFTER description,
+                    ADD COLUMN cta_text VARCHAR(100) NULL AFTER badge_text,
+                    ADD COLUMN cta_link VARCHAR(255) NULL AFTER cta_text;");
+            }
+        } catch (Throwable $e) {
+            // Columns may already exist
+        }
+
+        // Ensure all required comparison matrix feature flags exist in plan_features
+        try {
+            $standardFeatures = [
+                // Category 2: Conversational Admissions Engine
+                'campus_tour' => 'Campus Tour Booking',
+                'counselor_callback' => 'Counselor 1-on-1 Callback',
+                'asset_delivery' => 'Brochure & Fee Delivery',
+                'intent_scoring' => 'Automated Intent Scoring',
+                // Category 3: Platform & Customization
+                'multilingual' => 'Multilingual Counseling',
+                'mobile_sdk' => 'Mobile Webview & SDK',
+                // Category 4: Analytics & Compliance
+                'knowledge_gap_detection' => 'Knowledge Gap Detection',
+                'institutional_privacy' => 'Institutional Privacy & Encryption',
+                // Category 5: Enterprise & Support
+                'support_channel' => 'Support Channel Tier'
+            ];
+
+            // Default values for plans: Starter (1), Growth (2), Pro (3)
+            $planDefaults = [
+                1 => [
+                    'campus_tour' => 1, 'counselor_callback' => 1, 'asset_delivery' => 1, 'intent_scoring' => 1,
+                    'multilingual' => 1, 'mobile_sdk' => 1,
+                    'knowledge_gap_detection' => 1, 'institutional_privacy' => 1,
+                    'support_channel' => 0 // Email
+                ],
+                2 => [
+                    'campus_tour' => 1, 'counselor_callback' => 1, 'asset_delivery' => 1, 'intent_scoring' => 1,
+                    'multilingual' => 1, 'mobile_sdk' => 1,
+                    'knowledge_gap_detection' => 1, 'institutional_privacy' => 1,
+                    'support_channel' => 1 // Priority Email + Chat
+                ],
+                3 => [
+                    'campus_tour' => 1, 'counselor_callback' => 1, 'asset_delivery' => 1, 'intent_scoring' => 1,
+                    'multilingual' => 1, 'mobile_sdk' => 1,
+                    'knowledge_gap_detection' => 1, 'institutional_privacy' => 1,
+                    'support_channel' => 2 // Dedicated Mgr
+                ]
+            ];
+
+            $stmtInsertFeat = $this->db->prepare("
+                INSERT INTO plan_features (plan_id, feature_key, feature_label, is_enabled)
+                VALUES (:pid, :fkey, :label, :enabled)
+                ON DUPLICATE KEY UPDATE feature_label = :label_upd
+            ");
+
+            foreach ($planDefaults as $pId => $features) {
+                // Check if plan exists
+                $stmtPCheck = $this->db->prepare("SELECT id FROM plans WHERE id = :id");
+                $stmtPCheck->execute([':id' => $pId]);
+                if ($stmtPCheck->fetch()) {
+                    foreach ($features as $fKey => $fVal) {
+                        $label = $standardFeatures[$fKey] ?? ucwords(str_replace('_', ' ', $fKey));
+                        $stmtInsertFeat->execute([
+                            ':pid' => $pId,
+                            ':fkey' => $fKey,
+                            ':label' => $label,
+                            ':enabled' => $fVal,
+                            ':label_upd' => $label
+                        ]);
+                    }
+                }
+            }
+        } catch (Throwable $e) {
+            // Error handled gracefully
+        }
     }
 }
 

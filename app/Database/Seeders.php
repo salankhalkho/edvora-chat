@@ -219,6 +219,7 @@ EOT;
                 $stmtQuota = $this->db->prepare("
                     INSERT INTO plan_quotas (plan_id, quota_key, quota_label, quota_value)
                     VALUES (:pid, :key, :label, :val)
+                    ON DUPLICATE KEY UPDATE quota_value = :val_upd, quota_label = :label_upd
                 ");
                 foreach ($pData['quotas'] as $qKey => $qVal) {
                     $label = ucwords(str_replace('_', ' ', $qKey));
@@ -226,7 +227,9 @@ EOT;
                         ':pid' => $planId,
                         ':key' => $qKey,
                         ':label' => $label,
-                        ':val' => $qVal
+                        ':val' => $qVal,
+                        ':val_upd' => $qVal,
+                        ':label_upd' => $label
                     ]);
                 }
 
@@ -234,6 +237,7 @@ EOT;
                 $stmtFeature = $this->db->prepare("
                     INSERT INTO plan_features (plan_id, feature_key, feature_label, is_enabled)
                     VALUES (:pid, :key, :label, :enabled)
+                    ON DUPLICATE KEY UPDATE is_enabled = :enabled_upd, feature_label = :label_upd
                 ");
                 foreach ($pData['features'] as $fKey => $fEnabled) {
                     $label = ucwords(str_replace('_', ' ', $fKey));
@@ -241,7 +245,9 @@ EOT;
                         ':pid' => $planId,
                         ':key' => $fKey,
                         ':label' => $label,
-                        ':enabled' => $fEnabled
+                        ':enabled' => $fEnabled,
+                        ':enabled_upd' => $fEnabled,
+                        ':label_upd' => $label
                     ]);
                 }
             } else {
@@ -261,8 +267,8 @@ EOT;
                 // Seed missing features for existing plan if any
                 $stmtFeature = $this->db->prepare("
                     INSERT INTO plan_features (plan_id, feature_key, feature_label, is_enabled)
-                    SELECT :pid, :key, :label, :enabled
-                    WHERE NOT EXISTS (SELECT 1 FROM plan_features WHERE plan_id = :pid_check AND feature_key = :key_check)
+                    VALUES (:pid, :key, :label, :enabled)
+                    ON DUPLICATE KEY UPDATE feature_label = :label_upd
                 ");
                 foreach ($pData['features'] as $fKey => $fEnabled) {
                     $label = ucwords(str_replace('_', ' ', $fKey));
@@ -271,8 +277,24 @@ EOT;
                         ':key' => $fKey,
                         ':label' => $label,
                         ':enabled' => $fEnabled,
-                        ':pid_check' => $planId,
-                        ':key_check' => $fKey
+                        ':label_upd' => $label
+                    ]);
+                }
+
+                // Ensure quotas are seeded idempotently
+                $stmtQuota = $this->db->prepare("
+                    INSERT INTO plan_quotas (plan_id, quota_key, quota_label, quota_value)
+                    VALUES (:pid, :key, :label, :val)
+                    ON DUPLICATE KEY UPDATE quota_label = :label_upd
+                ");
+                foreach ($pData['quotas'] as $qKey => $qVal) {
+                    $label = ucwords(str_replace('_', ' ', $qKey));
+                    $stmtQuota->execute([
+                        ':pid' => $planId,
+                        ':key' => $qKey,
+                        ':label' => $label,
+                        ':val' => $qVal,
+                        ':label_upd' => $label
                     ]);
                 }
             }

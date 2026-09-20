@@ -422,6 +422,10 @@ class SuperAdminController
             $isDefault = isset($data['is_default']) ? (int)(bool)$data['is_default'] : 0;
             $sortOrder = isset($data['sort_order']) ? (int)$data['sort_order'] : 0;
 
+            $badgeText = isset($data['badge_text']) ? trim($data['badge_text']) : null;
+            $ctaText = isset($data['cta_text']) ? trim($data['cta_text']) : null;
+            $ctaLink = isset($data['cta_link']) ? trim($data['cta_link']) : null;
+
             if ($isDefault === 1) {
                 $stmtUnsetDefault = $db->prepare("UPDATE plans SET is_default = 0 WHERE id != :id");
                 $stmtUnsetDefault->execute([':id' => $id]);
@@ -431,6 +435,9 @@ class SuperAdminController
                 UPDATE plans SET 
                     name = :name,
                     description = :desc,
+                    badge_text = :badge,
+                    cta_text = :cta_t,
+                    cta_link = :cta_l,
                     price_monthly_paise = :pm_inr,
                     price_yearly_paise = :py_inr,
                     price_monthly_usd_cents = :pm_usd,
@@ -444,6 +451,9 @@ class SuperAdminController
             $stmtUpdate->execute([
                 ':name' => $name,
                 ':desc' => $description,
+                ':badge' => $badgeText,
+                ':cta_t' => $ctaText,
+                ':cta_l' => $ctaLink,
                 ':pm_inr' => $priceMonthlyPaise,
                 ':py_inr' => $priceYearlyPaise,
                 ':pm_usd' => $priceMonthlyUsdCents,
@@ -454,37 +464,43 @@ class SuperAdminController
                 ':id' => $id
             ]);
 
-            // Sync Quotas if provided
+            // Sync Quotas if provided (using ON DUPLICATE KEY UPDATE)
             if (isset($data['quotas']) && is_array($data['quotas'])) {
+                $stmtUpsertQ = $db->prepare("
+                    INSERT INTO plan_quotas (plan_id, quota_key, quota_label, quota_value) 
+                    VALUES (:pid, :key, :label, :val)
+                    ON DUPLICATE KEY UPDATE quota_value = :val_upd, updated_at = NOW()
+                ");
                 foreach ($data['quotas'] as $qKey => $qVal) {
                     $qValue = (int)$qVal;
-                    $stmtCheckQ = $db->prepare("SELECT id FROM plan_quotas WHERE plan_id = :pid AND quota_key = :key");
-                    $stmtCheckQ->execute([':pid' => $id, ':key' => $qKey]);
-                    if ($stmtCheckQ->fetch()) {
-                        $stmtUpdateQ = $db->prepare("UPDATE plan_quotas SET quota_value = :val, updated_at = NOW() WHERE plan_id = :pid AND quota_key = :key");
-                        $stmtUpdateQ->execute([':val' => $qValue, ':pid' => $id, ':key' => $qKey]);
-                    } else {
-                        $label = ucwords(str_replace('_', ' ', $qKey));
-                        $stmtInsertQ = $db->prepare("INSERT INTO plan_quotas (plan_id, quota_key, quota_label, quota_value) VALUES (:pid, :key, :label, :val)");
-                        $stmtInsertQ->execute([':pid' => $id, ':key' => $qKey, ':label' => $label, ':val' => $qValue]);
-                    }
+                    $label = ucwords(str_replace('_', ' ', $qKey));
+                    $stmtUpsertQ->execute([
+                        ':pid' => $id,
+                        ':key' => $qKey,
+                        ':label' => $label,
+                        ':val' => $qValue,
+                        ':val_upd' => $qValue
+                    ]);
                 }
             }
 
-            // Sync Features if provided
+            // Sync Features if provided (using ON DUPLICATE KEY UPDATE)
             if (isset($data['features']) && is_array($data['features'])) {
+                $stmtUpsertF = $db->prepare("
+                    INSERT INTO plan_features (plan_id, feature_key, feature_label, is_enabled)
+                    VALUES (:pid, :key, :label, :enabled)
+                    ON DUPLICATE KEY UPDATE is_enabled = :enabled_upd, updated_at = NOW()
+                ");
                 foreach ($data['features'] as $fKey => $fVal) {
                     $fEnabled = (int)(bool)$fVal;
-                    $stmtCheckF = $db->prepare("SELECT id FROM plan_features WHERE plan_id = :pid AND feature_key = :key");
-                    $stmtCheckF->execute([':pid' => $id, ':key' => $fKey]);
-                    if ($stmtCheckF->fetch()) {
-                        $stmtUpdateF = $db->prepare("UPDATE plan_features SET is_enabled = :enabled, updated_at = NOW() WHERE plan_id = :pid AND feature_key = :key");
-                        $stmtUpdateF->execute([':enabled' => $fEnabled, ':pid' => $id, ':key' => $fKey]);
-                    } else {
-                        $label = ucwords(str_replace('_', ' ', $fKey));
-                        $stmtInsertF = $db->prepare("INSERT INTO plan_features (plan_id, feature_key, feature_label, is_enabled) VALUES (:pid, :key, :label, :enabled)");
-                        $stmtInsertF->execute([':pid' => $id, ':key' => $fKey, ':label' => $label, ':enabled' => $fEnabled]);
-                    }
+                    $label = ucwords(str_replace('_', ' ', $fKey));
+                    $stmtUpsertF->execute([
+                        ':pid' => $id,
+                        ':key' => $fKey,
+                        ':label' => $label,
+                        ':enabled' => $fEnabled,
+                        ':enabled_upd' => $fEnabled
+                    ]);
                 }
             }
 

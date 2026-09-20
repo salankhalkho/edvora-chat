@@ -1133,7 +1133,7 @@
                             <form id="editPlanForm" onsubmit="savePlan(event)" style="padding: 16px;">
                                 <input type="hidden" id="planEditId" />
                                 
-                                <div class="form-grid" style="grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 12px;">
+                                <div class="form-grid" style="grid-template-columns: 2fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px;">
                                     <div class="form-group">
                                         <label class="form-label">Plan Name *</label>
                                         <input type="text" id="planEditName" class="form-input" required />
@@ -1142,11 +1142,36 @@
                                         <label class="form-label">Sort Order</label>
                                         <input type="number" id="planEditSort" class="form-input" required min="1" max="99" />
                                     </div>
+                                    <div class="form-group" style="display: flex; flex-direction: column; justify-content: flex-end;">
+                                        <label style="display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: #e2e8f0; cursor: pointer; height: 32px;">
+                                            <input type="checkbox" id="planEditActive" /> <strong>Active Plan</strong>
+                                        </label>
+                                    </div>
+                                    <div class="form-group" style="display: flex; flex-direction: column; justify-content: flex-end;">
+                                        <label style="display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: #e2e8f0; cursor: pointer; height: 32px;">
+                                            <input type="checkbox" id="planEditDefault" /> <strong>Default Plan</strong>
+                                        </label>
+                                    </div>
                                 </div>
 
-                                <div class="form-group" style="margin-bottom: 16px;">
+                                <div class="form-group" style="margin-bottom: 12px;">
                                     <label class="form-label">Description</label>
                                     <textarea id="planEditDesc" class="form-textarea" rows="2"></textarea>
+                                </div>
+
+                                <div class="form-grid" style="grid-template-columns: 1fr 1fr 1.5fr; gap: 12px; margin-bottom: 14px;">
+                                    <div class="form-group">
+                                        <label class="form-label">Badge Text (Optional)</label>
+                                        <input type="text" id="planEditBadge" class="form-input" placeholder="e.g. Most Popular, Recommended" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">CTA Button Text</label>
+                                        <input type="text" id="planEditCtaText" class="form-input" placeholder="e.g. Register Institution" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">CTA Link / Action</label>
+                                        <input type="text" id="planEditCtaLink" class="form-input" placeholder="e.g. /app#signup?plan=Growth or #demo" />
+                                    </div>
                                 </div>
 
                                 <!-- India Pricing Box -->
@@ -1158,12 +1183,12 @@
                                         <div class="form-group">
                                             <label class="form-label">Monthly Price (₹ Rupee)</label>
                                             <input type="number" id="planEditPriceInrMonthly" class="form-input" required min="0" step="1" />
-                                            <span style="font-size: 10px; color: var(--brand-text-muted, #9ca3af);">e.g. 2999 for ₹2,999/mo</span>
+                                            <span style="font-size: 10px; color: var(--brand-text-muted, #9ca3af);">e.g. 6999 for ₹6,999/mo</span>
                                         </div>
                                         <div class="form-group">
                                             <label class="form-label">Yearly Total Price (₹ Rupee)</label>
                                             <input type="number" id="planEditPriceInrYearly" class="form-input" required min="0" step="1" />
-                                            <span style="font-size: 10px; color: var(--brand-text-muted, #9ca3af);">e.g. 29990 for ₹29,990/yr</span>
+                                            <span style="font-size: 10px; color: var(--brand-text-muted, #9ca3af);">e.g. 69990 for ₹69,990/yr</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1177,12 +1202,12 @@
                                         <div class="form-group">
                                             <label class="form-label">Monthly Price ($ USD)</label>
                                             <input type="number" id="planEditPriceUsdMonthly" class="form-input" required min="0" step="1" />
-                                            <span style="font-size: 10px; color: var(--brand-text-muted, #9ca3af);">e.g. 49 for $49/mo</span>
+                                            <span style="font-size: 10px; color: var(--brand-text-muted, #9ca3af);">e.g. 119 for $119/mo</span>
                                         </div>
                                         <div class="form-group">
                                             <label class="form-label">Yearly Total Price ($ USD)</label>
                                             <input type="number" id="planEditPriceUsdYearly" class="form-input" required min="0" step="1" />
-                                            <span style="font-size: 10px; color: var(--brand-text-muted, #9ca3af);">e.g. 490 for $490/yr</span>
+                                            <span style="font-size: 10px; color: var(--brand-text-muted, #9ca3af);">e.g. 1190 for $1,190/yr</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1226,42 +1251,100 @@
 
                                 <!-- Feature Flags Box -->
                                 <div style="background: #0d121f; border: 1px solid #1f2937; border-radius: 8px; padding: 14px; margin-bottom: 16px;">
-                                    <div style="font-weight: 700; font-size: 12px; color: #fbbf24; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
-                                        <span>⚡</span> Plan Feature Flags
+                                    <div style="font-weight: 700; font-size: 12px; color: #fbbf24; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                                        <span>⚡</span> Comparison Matrix Features &amp; Capabilities
                                     </div>
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px; color: #e2e8f0;">
-                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #e2e8f0;">
-                                            <input type="checkbox" id="feat_lead_capture" /> Lead Capture Engine
+
+                                    <!-- Section 2: Conversational Admissions Engine -->
+                                    <div style="font-size: 11px; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 4px;">
+                                        Admissions Engine &amp; Lead Triggers
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; color: #e2e8f0; margin-bottom: 14px;">
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_lead_capture" /> Instant Lead Capture
                                         </label>
-                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #e2e8f0;">
-                                            <input type="checkbox" id="feat_custom_branding" /> Custom Branding
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_campus_tour" /> Campus Tour Booking
                                         </label>
-                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #e2e8f0;">
-                                            <input type="checkbox" id="feat_allowed_domains" /> Allowed Domains
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_counselor_callback" /> Counselor 1-on-1 Callback
                                         </label>
-                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #e2e8f0;">
-                                            <input type="checkbox" id="feat_csv_export" /> CSV Export
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_asset_delivery" /> PDF Brochure &amp; Fee Delivery
                                         </label>
-                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #e2e8f0;">
-                                            <input type="checkbox" id="feat_analytics_dashboard" /> Analytics Dashboard
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_intent_scoring" /> Intent Scoring &amp; Qualification
                                         </label>
-                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #e2e8f0;">
+                                    </div>
+
+                                    <!-- Section 3: Platform & Customization -->
+                                    <div style="font-size: 11px; font-weight: 700; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 4px;">
+                                        Platform &amp; Customization
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; color: #e2e8f0; margin-bottom: 14px;">
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_custom_branding" /> Custom Branding &amp; Avatar
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_allowed_domains" /> Allowed Domains &amp; Security
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_multilingual" /> Multilingual Counseling
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                                             <input type="checkbox" id="feat_url_auto_refresh" /> URL Auto Refresh
                                         </label>
-                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #e2e8f0;">
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_mobile_sdk" /> Mobile Webview &amp; SDK
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                                             <input type="checkbox" id="feat_multiple_chatbots" /> Multiple Chatbots
                                         </label>
-                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #e2e8f0;">
+                                    </div>
+
+                                    <!-- Section 4: Analytics & Compliance -->
+                                    <div style="font-size: 11px; font-weight: 700; color: #34d399; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 4px;">
+                                        Analytics, Insights &amp; Compliance
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; color: #e2e8f0; margin-bottom: 14px;">
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_analytics_dashboard" /> Analytics Dashboard
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_knowledge_gap_detection" /> Knowledge Gap Detection
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_csv_export" /> CSV Export
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_institutional_privacy" /> Institutional Privacy &amp; Encryption
+                                        </label>
+                                    </div>
+
+                                    <!-- Section 5: Enterprise & Dedicated Support -->
+                                    <div style="font-size: 11px; font-weight: 700; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 4px;">
+                                        Enterprise &amp; Dedicated Support
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; color: #e2e8f0;">
+                                        <div class="form-group" style="grid-column: span 2; margin-bottom: 6px;">
+                                            <label class="form-label" style="font-size: 11px;">Support Channel Tier</label>
+                                            <select id="feat_support_channel" class="form-select" style="font-size: 12px;">
+                                                <option value="0">Email Support</option>
+                                                <option value="1">Priority Email + Chat</option>
+                                                <option value="2">Dedicated Account Mgr</option>
+                                            </select>
+                                        </div>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                                             <input type="checkbox" id="feat_whatsapp_integration" /> WhatsApp Integration
                                         </label>
-                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #e2e8f0;">
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                                             <input type="checkbox" id="feat_sla_guarantee" /> 99.9% SLA Guarantee
                                         </label>
-                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #e2e8f0;">
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                                             <input type="checkbox" id="feat_dedicated_manager" /> Dedicated Success Mgr
                                         </label>
-                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #e2e8f0;">
-                                            <input type="checkbox" id="feat_custom_integrations" /> Custom Integrations
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_custom_integrations" /> Custom Integrations &amp; Webhooks
                                         </label>
                                     </div>
                                 </div>
@@ -3235,6 +3318,12 @@
             document.getElementById('planEditName').value = plan.name || '';
             document.getElementById('planEditSort').value = plan.sort_order || 1;
             document.getElementById('planEditDesc').value = plan.description || '';
+            document.getElementById('planEditActive').checked = plan.is_active == 1;
+            document.getElementById('planEditDefault').checked = plan.is_default == 1;
+
+            document.getElementById('planEditBadge').value = plan.badge_text || '';
+            document.getElementById('planEditCtaText').value = plan.cta_text || '';
+            document.getElementById('planEditCtaLink').value = plan.cta_link || '';
 
             // Decoupled Pricing Inputs
             document.getElementById('planEditPriceInrMonthly').value = Math.round((plan.price_monthly_paise || 0) / 100);
@@ -3258,17 +3347,23 @@
             // Features
             const fMap = {};
             if (plan.features) {
-                plan.features.forEach(f => { fMap[f.feature_key] = (f.is_enabled == 1); });
+                plan.features.forEach(f => { fMap[f.feature_key] = f.is_enabled; });
             }
-            const featureKeys = [
-                'lead_capture', 'custom_branding', 'allowed_domains', 'csv_export',
-                'analytics_dashboard', 'url_auto_refresh', 'multiple_chatbots',
+            const featureCheckboxKeys = [
+                'lead_capture', 'campus_tour', 'counselor_callback', 'asset_delivery', 'intent_scoring',
+                'custom_branding', 'allowed_domains', 'multilingual', 'url_auto_refresh', 'mobile_sdk', 'multiple_chatbots',
+                'analytics_dashboard', 'knowledge_gap_detection', 'csv_export', 'institutional_privacy',
                 'whatsapp_integration', 'sla_guarantee', 'dedicated_manager', 'custom_integrations'
             ];
-            featureKeys.forEach(k => {
+            featureCheckboxKeys.forEach(k => {
                 const el = document.getElementById('feat_' + k);
-                if (el) el.checked = !!fMap[k];
+                if (el) el.checked = (fMap[k] == 1 || fMap[k] === true);
             });
+
+            const supportEl = document.getElementById('feat_support_channel');
+            if (supportEl) {
+                supportEl.value = fMap['support_channel'] !== undefined ? fMap['support_channel'] : '0';
+            }
 
             document.getElementById('editPlanModalTitle').innerHTML = `<span>✏️</span> Edit Plan: <strong>${escapeHtml(plan.name)}</strong>`;
             document.getElementById('editPlanModal').style.display = 'flex';
@@ -3289,6 +3384,11 @@
                 name: document.getElementById('planEditName').value.trim(),
                 sort_order: parseInt(document.getElementById('planEditSort').value) || 1,
                 description: document.getElementById('planEditDesc').value.trim(),
+                is_active: document.getElementById('planEditActive').checked ? 1 : 0,
+                is_default: document.getElementById('planEditDefault').checked ? 1 : 0,
+                badge_text: document.getElementById('planEditBadge').value.trim(),
+                cta_text: document.getElementById('planEditCtaText').value.trim(),
+                cta_link: document.getElementById('planEditCtaLink').value.trim(),
                 price_monthly_paise: Math.round(parseFloat(document.getElementById('planEditPriceInrMonthly').value || 0) * 100),
                 price_yearly_paise: Math.round(parseFloat(document.getElementById('planEditPriceInrYearly').value || 0) * 100),
                 price_monthly_usd_cents: Math.round(parseFloat(document.getElementById('planEditPriceUsdMonthly').value || 0) * 100),
@@ -3304,12 +3404,21 @@
                 },
                 features: {
                     lead_capture: document.getElementById('feat_lead_capture').checked ? 1 : 0,
+                    campus_tour: document.getElementById('feat_campus_tour').checked ? 1 : 0,
+                    counselor_callback: document.getElementById('feat_counselor_callback').checked ? 1 : 0,
+                    asset_delivery: document.getElementById('feat_asset_delivery').checked ? 1 : 0,
+                    intent_scoring: document.getElementById('feat_intent_scoring').checked ? 1 : 0,
                     custom_branding: document.getElementById('feat_custom_branding').checked ? 1 : 0,
                     allowed_domains: document.getElementById('feat_allowed_domains').checked ? 1 : 0,
-                    csv_export: document.getElementById('feat_csv_export').checked ? 1 : 0,
-                    analytics_dashboard: document.getElementById('feat_analytics_dashboard').checked ? 1 : 0,
+                    multilingual: document.getElementById('feat_multilingual').checked ? 1 : 0,
                     url_auto_refresh: document.getElementById('feat_url_auto_refresh').checked ? 1 : 0,
+                    mobile_sdk: document.getElementById('feat_mobile_sdk').checked ? 1 : 0,
                     multiple_chatbots: document.getElementById('feat_multiple_chatbots').checked ? 1 : 0,
+                    analytics_dashboard: document.getElementById('feat_analytics_dashboard').checked ? 1 : 0,
+                    knowledge_gap_detection: document.getElementById('feat_knowledge_gap_detection').checked ? 1 : 0,
+                    csv_export: document.getElementById('feat_csv_export').checked ? 1 : 0,
+                    institutional_privacy: document.getElementById('feat_institutional_privacy').checked ? 1 : 0,
+                    support_channel: parseInt(document.getElementById('feat_support_channel').value) || 0,
                     whatsapp_integration: document.getElementById('feat_whatsapp_integration').checked ? 1 : 0,
                     sla_guarantee: document.getElementById('feat_sla_guarantee').checked ? 1 : 0,
                     dedicated_manager: document.getElementById('feat_dedicated_manager').checked ? 1 : 0,
