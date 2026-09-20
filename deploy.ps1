@@ -20,7 +20,7 @@ Write-Host "
 if (Test-Path "deploy_package.tar.gz") {
     Remove-Item "deploy_package.tar.gz" -Force
 }
-tar.exe -czvf deploy_package.tar.gz app public BRANDING_GUIDELINES.md theme-branding.css AGENTS.md architecture.md architecture_department_team_management.md migrate.php deploy.ps1
+tar.exe -czvf deploy_package.tar.gz app public workers BRANDING_GUIDELINES.md theme-branding.css AGENTS.md architecture.md architecture_department_team_management.md migrate.php deploy.ps1
 Write-Host "deploy_package.tar.gz created successfully." -ForegroundColor Green
 
 Write-Host "
@@ -30,7 +30,7 @@ Write-Host "Package uploaded to VPS /tmp/" -ForegroundColor Green
 
 Write-Host "
 [4/6] Remote Extract (sudo), Migrate, Chown and Apache Reload..." -ForegroundColor Cyan
-$remoteCmd = "echo 'dYt2295ZBM_EgUb' | sudo -S tar -xzf /tmp/deploy_package.tar.gz -C /var/www/edvora.chat/ && rm -f /var/www/edvora.chat/public/app/tabs/department*.html /var/www/edvora.chat/public/app/tabs/dept-*.html /var/www/edvora.chat/public/app/js/departments.js && php /var/www/edvora.chat/migrate.php && echo 'dYt2295ZBM_EgUb' | sudo -S chown -R critical:www-data /var/www/edvora.chat && echo 'dYt2295ZBM_EgUb' | sudo -S chmod -R 775 /var/www/edvora.chat/storage && echo 'dYt2295ZBM_EgUb' | sudo -S systemctl reload apache2"
+$remoteCmd = "echo 'dYt2295ZBM_EgUb' | sudo -S tar -xzf /tmp/deploy_package.tar.gz -C /var/www/edvora.chat/ && rm -f /var/www/edvora.chat/public/app/tabs/department*.html /var/www/edvora.chat/public/app/tabs/dept-*.html /var/www/edvora.chat/public/app/js/departments.js && php /var/www/edvora.chat/migrate.php && echo 'dYt2295ZBM_EgUb' | sudo -S chown -R critical:www-data /var/www/edvora.chat && echo 'dYt2295ZBM_EgUb' | sudo -S chmod -R 775 /var/www/edvora.chat/storage && echo 'dYt2295ZBM_EgUb' | sudo -S supervisorctl restart edvora-worker:* && echo 'dYt2295ZBM_EgUb' | sudo -S systemctl reload apache2"
 ssh -i "C:/Users/Salan Khalkho/.ssh/id_ed25519" -o BatchMode=yes -o StrictHostKeyChecking=no critical@166.1.2.112 $remoteCmd
 Write-Host "Remote extraction, migration, and Apache reload complete." -ForegroundColor Green
 
