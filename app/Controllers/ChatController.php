@@ -237,8 +237,8 @@ class ChatController
             }
             // Translate Visitor Query to English for retrieval if non-English
             $englishQuery = QueryTranslator::translateToEnglish($retrievalTarget);
-            // Retrieve Top 1–3 Knowledge Context Sources
-            $contextSources = ContentEngine::selectContext($orgId, $englishQuery, $botId);
+            // Retrieve Top 1–5 Knowledge Context Items (vector search, scoped by known program)
+            $contextSources = ContentEngine::selectContext($orgId, $englishQuery, $botId, $currentProgramId ?? null);
         }
 
         // 6. Proactive Program Interest Detection & Early Lead Sync to DB
