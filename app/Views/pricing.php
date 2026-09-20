@@ -677,6 +677,272 @@ foreach ($plans as &$plan) {
                                 <?php endforeach; ?>
                             </tr>
                         <?php endforeach; ?>
+
+                        <!-- Section: Core Capacity & Usage Quotas -->
+                        <tr><td colspan="<?= count($plans) + 1 ?>" class="cat-header">Core Capacity &amp; Usage Quotas</td></tr>
+                        
+                        <!-- Row: Department Chatbots -->
+                        <tr>
+                            <td class="font-semibold text-e-teal">Department Chatbots</td>
+                            <?php foreach ($plans as $p): ?>
+                                <?php 
+                                    $val = $p['quota_map']['max_chatbots'] ?? 1;
+                                    $isHighlight = (!empty($p['badge_text']) || stripos($p['name'], 'Growth') !== false);
+                                    $display = ($val == -1) ? 'Unlimited Multi-Campus' : ($val . ' Department' . ($val == 1 ? '' : 's'));
+                                    $colorClass = ($val == -1) ? 'font-bold text-emerald-700' : ($isHighlight ? 'font-bold text-e-teal' : '');
+                                ?>
+                                <td class="text-center <?= $isHighlight ? 'highlight-col' : '' ?> <?= $colorClass ?>">
+                                    <?= $display ?>
+                                </td>
+                            <?php endforeach; ?>
+                        </tr>
+
+                        <!-- Row: Knowledge Sources -->
+                        <tr>
+                            <td class="font-semibold text-e-teal">Knowledge Sources (PDFs/Websites/Text)</td>
+                            <?php foreach ($plans as $p): ?>
+                                <?php 
+                                    $val = $p['quota_map']['max_knowledge_sources'] ?? 20;
+                                    $isHighlight = (!empty($p['badge_text']) || stripos($p['name'], 'Growth') !== false);
+                                    $display = ($val == -1) ? 'Unlimited Knowledge' : ($val . ' Sources');
+                                    $colorClass = ($val == -1) ? 'font-bold text-emerald-700' : ($isHighlight ? 'font-bold text-e-teal' : '');
+                                ?>
+                                <td class="text-center <?= $isHighlight ? 'highlight-col' : '' ?> <?= $colorClass ?>">
+                                    <?= $display ?>
+                                </td>
+                            <?php endforeach; ?>
+                        </tr>
+
+                        <!-- Row: Monthly AI Conversations -->
+                        <tr>
+                            <td class="font-semibold text-e-teal">Monthly AI Conversations</td>
+                            <?php foreach ($plans as $p): ?>
+                                <?php 
+                                    $val = $p['quota_map']['max_messages_per_month'] ?? 2000;
+                                    $isHighlight = (!empty($p['badge_text']) || stripos($p['name'], 'Growth') !== false);
+                                    $display = ($val == -1) ? 'Unlimited' : number_format($val) . ' / mo';
+                                    $colorClass = ($val == -1 || $val >= 50000) ? 'font-bold text-emerald-700' : ($isHighlight ? 'font-bold text-e-teal' : '');
+                                ?>
+                                <td class="text-center <?= $isHighlight ? 'highlight-col' : '' ?> <?= $colorClass ?>">
+                                    <?= $display ?>
+                                </td>
+                            <?php endforeach; ?>
+                        </tr>
+
+                        <!-- Row: Captured Leads & Contacts -->
+                        <tr>
+                            <td class="font-semibold text-e-teal">Captured Leads &amp; Contacts</td>
+                            <?php foreach ($plans as $p): ?>
+                                <?php 
+                                    $val = $p['quota_map']['max_leads_per_month'] ?? 100;
+                                    $isHighlight = (!empty($p['badge_text']) || stripos($p['name'], 'Growth') !== false);
+                                    $display = ($val == -1) ? 'Unlimited Leads' : number_format($val) . ' Leads / mo';
+                                    $colorClass = ($val == -1) ? 'font-bold text-emerald-700' : ($isHighlight ? 'font-bold text-e-teal' : '');
+                                ?>
+                                <td class="text-center <?= $isHighlight ? 'highlight-col' : '' ?> <?= $colorClass ?>">
+                                    <?= $display ?>
+                                </td>
+                            <?php endforeach; ?>
+                        </tr>
+
+                        <!-- Row: Document File Upload Limit -->
+                        <tr>
+                            <td class="font-semibold text-e-teal">Document File Upload Limit</td>
+                            <?php foreach ($plans as $p): ?>
+                                <?php 
+                                    $val = $p['quota_map']['max_file_upload_mb'] ?? 5;
+                                    $isHighlight = (!empty($p['badge_text']) || stripos($p['name'], 'Growth') !== false);
+                                    $display = ($val == -1) ? 'Unlimited' : $val . ' MB per file';
+                                    $colorClass = ($val == -1 || $val >= 50) ? 'font-bold text-emerald-700' : ($isHighlight ? 'font-bold text-e-teal' : '');
+                                ?>
+                                <td class="text-center <?= $isHighlight ? 'highlight-col' : '' ?> <?= $colorClass ?>">
+                                    <?= $display ?>
+                                </td>
+                            <?php endforeach; ?>
+                        </tr>
+
+                        <!-- Row: Staff & Counselor Seats -->
+                        <tr>
+                            <td class="font-semibold text-e-teal">Staff &amp; Counselor Seats</td>
+                            <?php foreach ($plans as $p): ?>
+                                <?php 
+                                    $val = $p['quota_map']['max_staff_users'] ?? 1;
+                                    $isHighlight = (!empty($p['badge_text']) || stripos($p['name'], 'Growth') !== false);
+                                    $display = ($val == -1) ? 'Unlimited Seats' : ($val . ' Seat' . ($val == 1 ? '' : 's'));
+                                    $colorClass = ($val == -1) ? 'font-bold text-emerald-700' : ($isHighlight ? 'font-bold text-e-teal' : '');
+                                ?>
+                                <td class="text-center <?= $isHighlight ? 'highlight-col' : '' ?> <?= $colorClass ?>">
+                                    <?= $display ?>
+                                </td>
+                            <?php endforeach; ?>
+                        </tr>
+
+                        <!-- Row: History Retention -->
+                        <tr>
+                            <td class="font-semibold text-e-teal">Conversation History Retention</td>
+                            <?php foreach ($plans as $p): ?>
+                                <?php 
+                                    $val = $p['quota_map']['conversation_history_days'] ?? 30;
+                                    $isHighlight = (!empty($p['badge_text']) || stripos($p['name'], 'Growth') !== false);
+                                    $display = ($val == -1) ? 'Multi-Year / Custom' : ($val >= 365 ? '365 Days / Multi-Year' : $val . ' Days');
+                                    $colorClass = ($val >= 365 || $val == -1) ? 'font-bold text-emerald-700' : ($isHighlight ? 'font-bold text-e-teal' : '');
+                                ?>
+                                <td class="text-center <?= $isHighlight ? 'highlight-col' : '' ?> <?= $colorClass ?>">
+                                    <?= $display ?>
+                                </td>
+                            <?php endforeach; ?>
+                        </tr>
+
+                        <!-- Section: Conversational Admissions Details -->
+                        <tr><td colspan="<?= count($plans) + 1 ?>" class="cat-header">Admissions Engine Details</td></tr>
+                        <?php 
+                            $admissionsDetails = [
+                                'campus_tour' => 'Campus Tour Booking &amp; Slot Scheduling',
+                                'counselor_callback' => 'Counselor 1-on-1 Callback Dispatch',
+                                'asset_delivery' => 'Instant Fee &amp; Prospectus PDF Delivery',
+                                'intent_scoring' => 'Automated Intent Scoring &amp; Lead Qualification'
+                            ];
+                        ?>
+                        <?php foreach ($admissionsDetails as $fKey => $fLabel): ?>
+                            <tr>
+                                <td class="font-semibold text-e-teal"><?= $fLabel ?></td>
+                                <?php foreach ($plans as $p): ?>
+                                    <?php 
+                                        $isEnabled = !empty($p['feature_map'][$fKey]);
+                                        $isHighlight = (!empty($p['badge_text']) || stripos($p['name'], 'Growth') !== false);
+                                    ?>
+                                    <td class="text-center <?= $isHighlight ? 'highlight-col' : '' ?>">
+                                        <?php if ($isEnabled): ?>
+                                            <span class="matrix-check">✓</span>
+                                        <?php else: ?>
+                                            <span class="matrix-cross">✕</span>
+                                        <?php endif; ?>
+                                    </td>
+                                <?php endforeach; ?>
+                            </tr>
+                        <?php endforeach; ?>
+
+                        <!-- Section: Platform, Embed & Customization -->
+                        <tr><td colspan="<?= count($plans) + 1 ?>" class="cat-header">Platform &amp; Customization</td></tr>
+                        <?php 
+                            $platformDetails = [
+                                'custom_branding' => 'Custom Branding, Colors &amp; Avatar',
+                                'allowed_domains' => 'Allowed Domains &amp; Embed Security',
+                                'multilingual' => 'Multi-Language Admissions Counseling',
+                                'url_auto_refresh' => 'URL Knowledge Source Auto-Refresh',
+                                'mobile_sdk' => 'Mobile Webview &amp; Integration SDK'
+                            ];
+                        ?>
+                        <?php foreach ($platformDetails as $fKey => $fLabel): ?>
+                            <tr>
+                                <td class="font-semibold text-e-teal"><?= $fLabel ?></td>
+                                <?php foreach ($plans as $p): ?>
+                                    <?php 
+                                        $isEnabled = !empty($p['feature_map'][$fKey]);
+                                        $isHighlight = (!empty($p['badge_text']) || stripos($p['name'], 'Growth') !== false);
+                                    ?>
+                                    <td class="text-center <?= $isHighlight ? 'highlight-col' : '' ?>">
+                                        <?php if ($isEnabled): ?>
+                                            <span class="matrix-check">✓</span>
+                                        <?php else: ?>
+                                            <span class="matrix-cross">✕</span>
+                                        <?php endif; ?>
+                                    </td>
+                                <?php endforeach; ?>
+                            </tr>
+                        <?php endforeach; ?>
+
+                        <!-- Section: Analytics, Insights & Compliance -->
+                        <tr><td colspan="<?= count($plans) + 1 ?>" class="cat-header">Analytics, Insights &amp; Compliance</td></tr>
+                        <?php 
+                            $analyticsDetails = [
+                                'analytics_dashboard' => 'Admissions Intelligence &amp; Lead Dashboard',
+                                'knowledge_gap_detection' => 'Knowledge Gap Detection &amp; Resolution',
+                                'csv_export' => 'CSV Lead &amp; Analytics Export',
+                                'institutional_privacy' => 'Institutional Privacy &amp; Data Encryption'
+                            ];
+                        ?>
+                        <?php foreach ($analyticsDetails as $fKey => $fLabel): ?>
+                            <tr>
+                                <td class="font-semibold text-e-teal"><?= $fLabel ?></td>
+                                <?php foreach ($plans as $p): ?>
+                                    <?php 
+                                        $isEnabled = !empty($p['feature_map'][$fKey]);
+                                        $isHighlight = (!empty($p['badge_text']) || stripos($p['name'], 'Growth') !== false);
+                                    ?>
+                                    <td class="text-center <?= $isHighlight ? 'highlight-col' : '' ?>">
+                                        <?php if ($isEnabled): ?>
+                                            <span class="matrix-check">✓</span>
+                                        <?php else: ?>
+                                            <span class="matrix-cross">✕</span>
+                                        <?php endif; ?>
+                                    </td>
+                                <?php endforeach; ?>
+                            </tr>
+                        <?php endforeach; ?>
+
+                        <!-- Section: Enterprise & Dedicated Support -->
+                        <tr><td colspan="<?= count($plans) + 1 ?>" class="cat-header">Enterprise &amp; Dedicated Support</td></tr>
+                        
+                        <!-- Support Channel Row -->
+                        <tr>
+                            <td class="font-semibold text-e-teal">Support Channel</td>
+                            <?php foreach ($plans as $p): ?>
+                                <?php 
+                                    $sTier = $p['feature_map']['support_channel'] ?? 0;
+                                    $isHighlight = (!empty($p['badge_text']) || stripos($p['name'], 'Growth') !== false);
+                                    if ($sTier == 2) {
+                                        $sText = 'Dedicated Account Mgr';
+                                        $sClass = 'font-bold text-emerald-700';
+                                    } elseif ($sTier == 1) {
+                                        $sText = 'Priority Email + Chat';
+                                        $sClass = 'font-bold text-e-teal';
+                                    } else {
+                                        $sText = 'Email Support';
+                                        $sClass = '';
+                                    }
+                                ?>
+                                <td class="text-center <?= $isHighlight ? 'highlight-col' : '' ?> <?= $sClass ?>">
+                                    <?= $sText ?>
+                                </td>
+                            <?php endforeach; ?>
+                        </tr>
+
+                        <!-- WhatsApp Integration -->
+                        <tr>
+                            <td class="font-semibold text-e-teal">WhatsApp Official Business Integration</td>
+                            <?php foreach ($plans as $p): ?>
+                                <?php 
+                                    $isEnabled = !empty($p['feature_map']['whatsapp_integration']);
+                                    $isHighlight = (!empty($p['badge_text']) || stripos($p['name'], 'Growth') !== false);
+                                ?>
+                                <td class="text-center <?= $isHighlight ? 'highlight-col' : '' ?>">
+                                    <?php if ($isEnabled): ?>
+                                        <span class="font-bold text-emerald-700"><span class="matrix-check">✓</span> Included</span>
+                                    <?php else: ?>
+                                        <span class="matrix-cross">✕</span>
+                                    <?php endif; ?>
+                                </td>
+                            <?php endforeach; ?>
+                        </tr>
+
+                        <!-- SLA & 99.9% Uptime Guarantee -->
+                        <tr>
+                            <td class="font-semibold text-e-teal">SLA &amp; 99.9% Uptime Guarantee</td>
+                            <?php foreach ($plans as $p): ?>
+                                <?php 
+                                    $isEnabled = !empty($p['feature_map']['sla_guarantee']);
+                                    $isHighlight = (!empty($p['badge_text']) || stripos($p['name'], 'Growth') !== false);
+                                ?>
+                                <td class="text-center <?= $isHighlight ? 'highlight-col' : '' ?>">
+                                    <?php if ($isEnabled): ?>
+                                        <span class="font-bold text-emerald-700"><span class="matrix-check">✓</span> Included</span>
+                                    <?php else: ?>
+                                        <span class="matrix-cross">✕</span>
+                                    <?php endif; ?>
+                                </td>
+                            <?php endforeach; ?>
+                        </tr>
                     </tbody>
                 </table>
             </div>

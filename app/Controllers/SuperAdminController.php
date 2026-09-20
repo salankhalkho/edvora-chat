@@ -492,7 +492,7 @@ class SuperAdminController
                     ON DUPLICATE KEY UPDATE is_enabled = :enabled_upd, updated_at = NOW()
                 ");
                 foreach ($data['features'] as $fKey => $fVal) {
-                    $fEnabled = (int)(bool)$fVal;
+                    $fEnabled = (int)$fVal;
                     $label = ucwords(str_replace('_', ' ', $fKey));
                     $stmtUpsertF->execute([
                         ':pid' => $id,

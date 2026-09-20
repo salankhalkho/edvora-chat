@@ -1251,11 +1251,12 @@
 
                                 <!-- Feature Flags Box -->
                                 <div style="background: #0d121f; border: 1px solid #1f2937; border-radius: 8px; padding: 14px; margin-bottom: 16px;">
-                                    <div style="font-weight: 700; font-size: 12px; color: #fbbf24; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                                    <div style="font-weight: 700; font-size: 12px; color: #fbbf24; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
                                         <span>⚡</span> Comparison Matrix Features (in Display Order)
                                     </div>
+                                    <div style="font-size: 11px; color: var(--brand-text-muted, #9ca3af); margin-bottom: 10px;">Primary 14 Features (as ordered on pricing page)</div>
 
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px; color: #e2e8f0; margin-bottom: 12px;">
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px; color: #e2e8f0; margin-bottom: 14px;">
                                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                                             <input type="checkbox" id="feat_ai_admissions_chatbot" /> AI Admissions Chatbot
                                         </label>
@@ -1297,9 +1298,72 @@
                                         </label>
                                         <div class="form-group" style="margin-bottom: 0;">
                                             <label class="form-label" style="font-size: 11px;">Analytics Tier</label>
-                                            <select id="feat_analytics" class="form-select" style="font-size: 12px;">
+                                            <select id="feat_analytics" class="form-select" style="font-size: 12px; height: 30px;">
                                                 <option value="0">Basic</option>
                                                 <option value="1">Advanced</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div style="font-weight: 700; font-size: 11.5px; color: #a78bfa; margin-top: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; border-top: 1px dashed #1f2937; padding-top: 10px;">
+                                        <span>🛠️</span> Detailed Platform &amp; Subsystem Capabilities
+                                    </div>
+
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px; color: #e2e8f0;">
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_campus_tour" /> Campus Tour Booking
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_counselor_callback" /> Counselor 1-on-1 Callback
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_asset_delivery" /> Fee &amp; Prospectus PDF Delivery
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_intent_scoring" /> Intent Scoring &amp; Lead Qualification
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_custom_branding" /> Custom Branding &amp; Avatars
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_allowed_domains" /> Allowed Domains Security
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_multilingual" /> Multi-Language Counseling
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_url_auto_refresh" /> URL Knowledge Auto-Refresh
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_mobile_sdk" /> Mobile SDK &amp; Webview
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_multiple_chatbots" /> Multiple Chatbots Enabled
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_analytics_dashboard" /> Intelligence &amp; Lead Dashboard
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_knowledge_gap_detection" /> Knowledge Gap Detection
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_csv_export" /> CSV Lead &amp; Analytics Export
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_institutional_privacy" /> Institutional Privacy &amp; Encryption
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_whatsapp_integration" /> Official WhatsApp Integration
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="feat_sla_guarantee" /> SLA &amp; 99.9% Uptime Guarantee
+                                        </label>
+                                        <div class="form-group" style="margin-bottom: 0; grid-column: span 2;">
+                                            <label class="form-label" style="font-size: 11px;">Support Tier</label>
+                                            <select id="feat_support_channel" class="form-select" style="font-size: 12px; height: 30px;">
+                                                <option value="0">Email Support</option>
+                                                <option value="1">Priority Email + Chat</option>
+                                                <option value="2">Dedicated Account Manager</option>
                                             </select>
                                         </div>
                                     </div>
@@ -3306,10 +3370,16 @@
                 plan.features.forEach(f => { fMap[f.feature_key] = f.is_enabled; });
             }
             const featureCheckboxKeys = [
+                // Top 14 Features
                 'ai_admissions_chatbot', 'lead_capture', 'lead_qualification', 'program_recommendations',
                 'counselor_handoff', 'whatsapp', 'appointment_booking', 'campus_visits',
                 'crm_integration', 'multiple_campuses', 'custom_workflows',
-                'dedicated_onboarding', 'custom_integrations'
+                'dedicated_onboarding', 'custom_integrations',
+                // Detailed Subsystem Features
+                'campus_tour', 'counselor_callback', 'asset_delivery', 'intent_scoring',
+                'custom_branding', 'allowed_domains', 'multilingual', 'url_auto_refresh',
+                'mobile_sdk', 'multiple_chatbots', 'analytics_dashboard', 'knowledge_gap_detection',
+                'csv_export', 'institutional_privacy', 'whatsapp_integration', 'sla_guarantee'
             ];
             featureCheckboxKeys.forEach(k => {
                 const el = document.getElementById('feat_' + k);
@@ -3319,6 +3389,11 @@
             const analyticsEl = document.getElementById('feat_analytics');
             if (analyticsEl) {
                 analyticsEl.value = (fMap['analytics'] !== undefined && fMap['analytics'] == 1) ? '1' : '0';
+            }
+
+            const supportEl = document.getElementById('feat_support_channel');
+            if (supportEl) {
+                supportEl.value = fMap['support_channel'] !== undefined ? String(fMap['support_channel']) : '0';
             }
 
             document.getElementById('editPlanModalTitle').innerHTML = `<span>✏️</span> Edit Plan: <strong>${escapeHtml(plan.name)}</strong>`;
@@ -3359,6 +3434,7 @@
                     conversation_history_days: parseInt(document.getElementById('quota_conversation_history_days').value) || 30
                 },
                 features: {
+                    // Top 14 Features
                     ai_admissions_chatbot: document.getElementById('feat_ai_admissions_chatbot').checked ? 1 : 0,
                     lead_capture: document.getElementById('feat_lead_capture').checked ? 1 : 0,
                     lead_qualification: document.getElementById('feat_lead_qualification').checked ? 1 : 0,
@@ -3372,7 +3448,25 @@
                     multiple_campuses: document.getElementById('feat_multiple_campuses').checked ? 1 : 0,
                     custom_workflows: document.getElementById('feat_custom_workflows').checked ? 1 : 0,
                     dedicated_onboarding: document.getElementById('feat_dedicated_onboarding').checked ? 1 : 0,
-                    custom_integrations: document.getElementById('feat_custom_integrations').checked ? 1 : 0
+                    custom_integrations: document.getElementById('feat_custom_integrations').checked ? 1 : 0,
+                    // Detailed Subsystem Features
+                    campus_tour: document.getElementById('feat_campus_tour').checked ? 1 : 0,
+                    counselor_callback: document.getElementById('feat_counselor_callback').checked ? 1 : 0,
+                    asset_delivery: document.getElementById('feat_asset_delivery').checked ? 1 : 0,
+                    intent_scoring: document.getElementById('feat_intent_scoring').checked ? 1 : 0,
+                    custom_branding: document.getElementById('feat_custom_branding').checked ? 1 : 0,
+                    allowed_domains: document.getElementById('feat_allowed_domains').checked ? 1 : 0,
+                    multilingual: document.getElementById('feat_multilingual').checked ? 1 : 0,
+                    url_auto_refresh: document.getElementById('feat_url_auto_refresh').checked ? 1 : 0,
+                    mobile_sdk: document.getElementById('feat_mobile_sdk').checked ? 1 : 0,
+                    multiple_chatbots: document.getElementById('feat_multiple_chatbots').checked ? 1 : 0,
+                    analytics_dashboard: document.getElementById('feat_analytics_dashboard').checked ? 1 : 0,
+                    knowledge_gap_detection: document.getElementById('feat_knowledge_gap_detection').checked ? 1 : 0,
+                    csv_export: document.getElementById('feat_csv_export').checked ? 1 : 0,
+                    institutional_privacy: document.getElementById('feat_institutional_privacy').checked ? 1 : 0,
+                    whatsapp_integration: document.getElementById('feat_whatsapp_integration').checked ? 1 : 0,
+                    sla_guarantee: document.getElementById('feat_sla_guarantee').checked ? 1 : 0,
+                    support_channel: parseInt(document.getElementById('feat_support_channel').value) || 0
                 }
             };
 

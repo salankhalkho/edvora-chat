@@ -1268,6 +1268,7 @@ class Migrations
         // Ensure all required comparison matrix feature flags exist in plan_features
         try {
             $standardFeatures = [
+                // Top Priority 14 Features from User Image
                 'ai_admissions_chatbot' => 'AI Admissions Chatbot',
                 'lead_capture' => 'Lead Capture',
                 'lead_qualification' => 'Lead Qualification',
@@ -1281,61 +1282,68 @@ class Migrations
                 'multiple_campuses' => 'Multiple Campuses',
                 'custom_workflows' => 'Custom Workflows',
                 'dedicated_onboarding' => 'Dedicated Onboarding',
-                'custom_integrations' => 'Custom Integrations'
+                'custom_integrations' => 'Custom Integrations',
+
+                // Detailed Platform & Sub-System Features
+                'campus_tour' => 'Campus Tour Booking & Slot Scheduling',
+                'counselor_callback' => 'Counselor 1-on-1 Callback Dispatch',
+                'asset_delivery' => 'Instant Fee & Prospectus PDF Delivery',
+                'intent_scoring' => 'Automated Intent Scoring & Lead Qualification',
+                'custom_branding' => 'Custom Branding, Colors & Avatar',
+                'allowed_domains' => 'Allowed Domains & Embed Security',
+                'multilingual' => 'Multi-Language Admissions Counseling',
+                'url_auto_refresh' => 'URL Knowledge Source Auto-Refresh',
+                'mobile_sdk' => 'Mobile Webview & Integration SDK',
+                'multiple_chatbots' => 'Multiple Chatbots & Department Bots',
+                'analytics_dashboard' => 'Admissions Intelligence & Lead Dashboard',
+                'knowledge_gap_detection' => 'Knowledge Gap Detection & Resolution',
+                'csv_export' => 'CSV Lead & Analytics Export',
+                'institutional_privacy' => 'Institutional Privacy & Data Encryption',
+                'support_channel' => 'Support Channel Tier',
+                'whatsapp_integration' => 'WhatsApp Official Business Integration',
+                'sla_guarantee' => 'SLA & 99.9% Uptime Guarantee'
             ];
 
-            // Default values matching exact order & checks from institutional plan matrix:
-            // Starter: AI Chatbot, Lead Capture, Analytics: Basic (0).
-            // Growth: AI Chatbot, Lead Capture, Lead Qualification, Program Recommendations, Counselor Handoff, WhatsApp, Appointment Booking, Campus Visits, Analytics: Advanced (1), CRM Integration, Dedicated Onboarding.
-            // Pro: All included (Multiple Campuses, Custom Workflows, Custom Integrations, Analytics: Advanced (1)).
+            // Default values for plans: Starter (1), Growth (2), Pro (3)
             $planDefaults = [
                 1 => [
-                    'ai_admissions_chatbot' => 1,
-                    'lead_capture' => 1,
-                    'lead_qualification' => 0,
-                    'program_recommendations' => 0,
-                    'counselor_handoff' => 0,
-                    'whatsapp' => 0,
-                    'appointment_booking' => 0,
-                    'campus_visits' => 0,
-                    'analytics' => 0, // Basic
-                    'crm_integration' => 0,
-                    'multiple_campuses' => 0,
-                    'custom_workflows' => 0,
-                    'dedicated_onboarding' => 0,
-                    'custom_integrations' => 0
+                    // Top 14
+                    'ai_admissions_chatbot' => 1, 'lead_capture' => 1, 'lead_qualification' => 0, 'program_recommendations' => 0,
+                    'counselor_handoff' => 0, 'whatsapp' => 0, 'appointment_booking' => 0, 'campus_visits' => 0,
+                    'analytics' => 0, 'crm_integration' => 0, 'multiple_campuses' => 0, 'custom_workflows' => 0,
+                    'dedicated_onboarding' => 0, 'custom_integrations' => 0,
+                    // Detailed Subsystems
+                    'campus_tour' => 1, 'counselor_callback' => 1, 'asset_delivery' => 1, 'intent_scoring' => 1,
+                    'custom_branding' => 1, 'allowed_domains' => 1, 'multilingual' => 1, 'url_auto_refresh' => 0,
+                    'mobile_sdk' => 1, 'multiple_chatbots' => 0, 'analytics_dashboard' => 1, 'knowledge_gap_detection' => 1,
+                    'csv_export' => 1, 'institutional_privacy' => 1, 'support_channel' => 0, 'whatsapp_integration' => 0,
+                    'sla_guarantee' => 0
                 ],
                 2 => [
-                    'ai_admissions_chatbot' => 1,
-                    'lead_capture' => 1,
-                    'lead_qualification' => 1,
-                    'program_recommendations' => 1,
-                    'counselor_handoff' => 1,
-                    'whatsapp' => 1,
-                    'appointment_booking' => 1,
-                    'campus_visits' => 1,
-                    'analytics' => 1, // Advanced
-                    'crm_integration' => 1,
-                    'multiple_campuses' => 0,
-                    'custom_workflows' => 0,
-                    'dedicated_onboarding' => 1,
-                    'custom_integrations' => 0
+                    // Top 14
+                    'ai_admissions_chatbot' => 1, 'lead_capture' => 1, 'lead_qualification' => 1, 'program_recommendations' => 1,
+                    'counselor_handoff' => 1, 'whatsapp' => 1, 'appointment_booking' => 1, 'campus_visits' => 1,
+                    'analytics' => 1, 'crm_integration' => 1, 'multiple_campuses' => 0, 'custom_workflows' => 0,
+                    'dedicated_onboarding' => 1, 'custom_integrations' => 0,
+                    // Detailed Subsystems
+                    'campus_tour' => 1, 'counselor_callback' => 1, 'asset_delivery' => 1, 'intent_scoring' => 1,
+                    'custom_branding' => 1, 'allowed_domains' => 1, 'multilingual' => 1, 'url_auto_refresh' => 1,
+                    'mobile_sdk' => 1, 'multiple_chatbots' => 1, 'analytics_dashboard' => 1, 'knowledge_gap_detection' => 1,
+                    'csv_export' => 1, 'institutional_privacy' => 1, 'support_channel' => 1, 'whatsapp_integration' => 0,
+                    'sla_guarantee' => 0
                 ],
                 3 => [
-                    'ai_admissions_chatbot' => 1,
-                    'lead_capture' => 1,
-                    'lead_qualification' => 1,
-                    'program_recommendations' => 1,
-                    'counselor_handoff' => 1,
-                    'whatsapp' => 1,
-                    'appointment_booking' => 1,
-                    'campus_visits' => 1,
-                    'analytics' => 1, // Advanced
-                    'crm_integration' => 1,
-                    'multiple_campuses' => 1,
-                    'custom_workflows' => 1,
-                    'dedicated_onboarding' => 1,
-                    'custom_integrations' => 1
+                    // Top 14
+                    'ai_admissions_chatbot' => 1, 'lead_capture' => 1, 'lead_qualification' => 1, 'program_recommendations' => 1,
+                    'counselor_handoff' => 1, 'whatsapp' => 1, 'appointment_booking' => 1, 'campus_visits' => 1,
+                    'analytics' => 1, 'crm_integration' => 1, 'multiple_campuses' => 1, 'custom_workflows' => 1,
+                    'dedicated_onboarding' => 1, 'custom_integrations' => 1,
+                    // Detailed Subsystems
+                    'campus_tour' => 1, 'counselor_callback' => 1, 'asset_delivery' => 1, 'intent_scoring' => 1,
+                    'custom_branding' => 1, 'allowed_domains' => 1, 'multilingual' => 1, 'url_auto_refresh' => 1,
+                    'mobile_sdk' => 1, 'multiple_chatbots' => 1, 'analytics_dashboard' => 1, 'knowledge_gap_detection' => 1,
+                    'csv_export' => 1, 'institutional_privacy' => 1, 'support_channel' => 2, 'whatsapp_integration' => 1,
+                    'sla_guarantee' => 1
                 ]
             ];
 
