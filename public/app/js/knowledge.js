@@ -1,4 +1,4 @@
-﻿// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 // KNOWLEDGE.JS - Knowledge hub, document editor, doc viewer, ingestion
 // BUG AREAS:
 //   Dept KS subtab        -> switchDeptSubtab() / switchDeptKsMode()
@@ -2087,8 +2087,16 @@
                 return;
             }
 
+            const selectedFile = fileInput.files[0];
+            const maxAllowedMb = window.currentOrgMaxUploadMb || 15;
+            if (selectedFile.size > maxAllowedMb * 1024 * 1024) {
+                const actualMb = (selectedFile.size / (1024 * 1024)).toFixed(2);
+                alert(`File size (${actualMb} MB) exceeds your plan limit of ${maxAllowedMb} MB per document. Please compress the file or upgrade your plan.`);
+                return;
+            }
+
             const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
+            formData.append('file', selectedFile);
             if (title) formData.append('title', title);
             formData.append('category', category);
             formData.append('academic_version', academic_version);

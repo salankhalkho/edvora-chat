@@ -150,7 +150,7 @@
             <input type="file" id="ingestFileInput" accept=".pdf,.docx,.txt" style="display: none;" onchange="handleFileSelected(this)">
             <div style="font-size: 32px; margin-bottom: 8px;">📁</div>
             <div id="dropZonePromptText" style="font-size: 13.5px; font-weight: 700; color: var(--e-teal, #063D3B); margin-bottom: 4px;">Click or Drag PDF, DOCX, or TXT file here</div>
-            <div style="font-size: 11.5px; color: #648781;">Supports up to 25 MB documents &bull; Auto-indexed into fulltext engine with OCR support</div>
+            <div style="font-size: 11.5px; color: #648781;">Supports up to <strong id="ingestMaxFileLimitText" style="color: #063D3B; font-weight: 700;">15 MB</strong> documents &bull; Auto-indexed into fulltext engine with OCR support</div>
           </div>
 
           <div style="display: flex; justify-content: flex-end; align-items: center; gap: 12px;">

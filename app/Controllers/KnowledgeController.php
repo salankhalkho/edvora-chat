@@ -545,9 +545,36 @@ class KnowledgeController
     public function upload(Request $request, array $params = []): void
     {
         $orgId = $GLOBALS['organization_id'] ?? null;
+        if (!$orgId) {
+            Response::error('Organization context missing.', 401);
+        }
 
-        if (empty($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
-            Response::error('No valid file uploaded or upload error occurred.', 400);
+        // 1. Inspect standard PHP upload error codes
+        if (empty($_FILES['file'])) {
+            Response::error('No file was received in the request. Please select a document to upload.', 400);
+        }
+
+        $uploadError = $_FILES['file']['error'];
+        if ($uploadError !== UPLOAD_ERR_OK) {
+            switch ($uploadError) {
+                case UPLOAD_ERR_INI_SIZE:
+                case UPLOAD_ERR_FORM_SIZE:
+                    Response::error('The uploaded file exceeds the server maximum allowed size limit. Please upload a smaller document.', 413);
+                    break;
+                case UPLOAD_ERR_PARTIAL:
+                    Response::error('The document was only partially uploaded due to network interruption. Please try again.', 400);
+                    break;
+                case UPLOAD_ERR_NO_FILE:
+                    Response::error('No file was uploaded. Please choose a file to upload.', 400);
+                    break;
+                case UPLOAD_ERR_NO_TMP_DIR:
+                case UPLOAD_ERR_CANT_WRITE:
+                    Response::error('Server storage error: unable to write temporary file.', 500);
+                    break;
+                default:
+                    Response::error('File upload failed with error code: ' . $uploadError, 400);
+                    break;
+            }
         }
 
         $file = $_FILES['file'];
@@ -556,6 +583,32 @@ class KnowledgeController
 
         if (!in_array($extension, ['pdf', 'docx', 'txt'])) {
             Response::error('Invalid file type. Allowed file types: .pdf, .docx, .txt', 422);
+        }
+
+        // 2. Enforce Tenant's Plan Upload Limit (max_file_upload_mb) from plan_quotas
+        $planData = $this->getTenantPlanInfo($orgId);
+        $maxFileMb = (int)($planData['quotas']['max_file_upload_mb'] ?? 15);
+        $planName = $planData['plan_name'] ?? 'Starter';
+
+        if ($maxFileMb > 0) {
+            $fileSizeBytes = (int)$file['size'];
+            $maxBytes = $maxFileMb * 1024 * 1024;
+            if ($fileSizeBytes > $maxBytes) {
+                $actualMb = round($fileSizeBytes / (1024 * 1024), 2);
+                Response::error("File size ({$actualMb} MB) exceeds your {$planName} plan limit of {$maxFileMb} MB per document. Please compress the file or upgrade your plan.", 422);
+            }
+        }
+
+        // 3. Enforce Tenant's Knowledge Source Count Limit (max_knowledge_sources)
+        $maxSources = (int)($planData['quotas']['max_knowledge_sources'] ?? 20);
+        if ($maxSources !== -1) {
+            $db = Database::getConnection();
+            $stmtCount = $db->prepare("SELECT COUNT(*) FROM knowledge_sources WHERE organization_id = :org_id AND status != 'archived'");
+            $stmtCount->execute([':org_id' => $orgId]);
+            $currentSources = (int)$stmtCount->fetchColumn();
+            if ($currentSources >= $maxSources) {
+                Response::error("Your {$planName} plan limit of {$maxSources} active knowledge sources has been reached. Please upgrade your plan to add more documents.", 422);
+            }
         }
 
         $storageDir = dirname(__DIR__, 2) . '/storage/uploads/';
@@ -681,6 +734,19 @@ class KnowledgeController
 
                 if (!in_array($extension, ['pdf', 'docx', 'txt'])) {
                     Response::error('Invalid file type for replacement. Allowed: .pdf, .docx, .txt', 422);
+                }
+
+                // Enforce tenant max_file_upload_mb
+                $planData = $this->getTenantPlanInfo($orgId);
+                $maxFileMb = (int)($planData['quotas']['max_file_upload_mb'] ?? 15);
+                $planName = $planData['plan_name'] ?? 'Starter';
+                if ($maxFileMb > 0) {
+                    $fileSizeBytes = (int)$file['size'];
+                    $maxBytes = $maxFileMb * 1024 * 1024;
+                    if ($fileSizeBytes > $maxBytes) {
+                        $actualMb = round($fileSizeBytes / (1024 * 1024), 2);
+                        Response::error("Replacement file size ({$actualMb} MB) exceeds your {$planName} plan limit of {$maxFileMb} MB. Please compress the file or upgrade your plan.", 422);
+                    }
                 }
 
                 $storageDir = dirname(__DIR__, 2) . '/storage/uploads/';
@@ -1042,6 +1108,40 @@ class KnowledgeController
         header('Content-Length: ' . strlen($content));
         echo $content;
         exit;
+    }
+
+    /**
+     * Helper to resolve tenant active plan and associated plan_quotas
+     */
+    private function getTenantPlanInfo(int $orgId): array
+    {
+        $db = Database::getConnection();
+        $stmt = $db->prepare("
+            SELECT o.plan_id, p.name as plan_name
+            FROM organizations o
+            LEFT JOIN plans p ON o.plan_id = p.id
+            WHERE o.id = :org_id
+        ");
+        $stmt->execute([':org_id' => $orgId]);
+        $row = $stmt->fetch();
+
+        $planId = (int)($row['plan_id'] ?? 1);
+        $planName = $row['plan_name'] ?? 'Starter';
+
+        $stmtQ = $db->prepare("SELECT quota_key, quota_value FROM plan_quotas WHERE plan_id = :plan_id");
+        $stmtQ->execute([':plan_id' => $planId]);
+        $rawQuotas = $stmtQ->fetchAll();
+
+        $quotas = [];
+        foreach ($rawQuotas as $q) {
+            $quotas[$q['quota_key']] = is_numeric($q['quota_value']) ? (int)$q['quota_value'] : $q['quota_value'];
+        }
+
+        return [
+            'plan_id' => $planId,
+            'plan_name' => $planName,
+            'quotas' => $quotas
+        ];
     }
 }
 

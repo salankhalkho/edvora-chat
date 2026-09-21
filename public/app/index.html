@@ -5513,6 +5513,21 @@
                 localStorage.setItem('edvora_org_website', org.website_url);
             }
 
+            // Hydrate Plan Badge & Plan Quotas in Header and UI
+            const planBadge = document.getElementById('planBadge');
+            const planName = (org && org.plan_name ? org.plan_name : (user.plan_name || 'Starter')).trim();
+            if (planBadge) {
+                planBadge.textContent = planName + ' Plan';
+            }
+
+            // Hydrate Ingestion File Upload Limit
+            const maxMb = (org && org.quotas && org.quotas.max_file_upload_mb) ? org.quotas.max_file_upload_mb : (planName === 'Pro' ? 50 : (planName === 'Growth' ? 25 : 15));
+            window.currentOrgMaxUploadMb = maxMb;
+            const dropLimitEl = document.getElementById('ingestMaxFileLimitText');
+            if (dropLimitEl) {
+                dropLimitEl.textContent = maxMb + ' MB';
+            }
+
             const ovName = document.getElementById('overviewCollegeName');
             if (ovName) {
                 ovName.innerText = rawName || 'Your Institution';
@@ -5642,7 +5657,17 @@
         function handleFileSelected(input) {
             const textEl = document.getElementById('dropZonePromptText');
             if (input.files && input.files[0]) {
-                if (textEl) textEl.innerText = 'Selected: ' + input.files[0].name;
+                const file = input.files[0];
+                const maxMb = window.currentOrgMaxUploadMb || 15;
+                const fileMb = (file.size / (1024 * 1024)).toFixed(2);
+                if (file.size > maxMb * 1024 * 1024) {
+                    if (textEl) {
+                        textEl.innerHTML = `<span style="color: #EF4444;">⚠️ Selected: ${escapeHtml(file.name)} (${fileMb} MB) — Exceeds ${maxMb} MB limit</span>`;
+                    }
+                    showToast(`Selected file (${fileMb} MB) exceeds your plan limit of ${maxMb} MB. Please choose a smaller file or upgrade.`, 'error');
+                } else {
+                    if (textEl) textEl.innerText = `Selected: ${file.name} (${fileMb} MB)`;
+                }
             }
         }
 
@@ -5765,8 +5790,16 @@
                 return;
             }
 
+            const selectedFile = fileInput.files[0];
+            const maxAllowedMb = window.currentOrgMaxUploadMb || 15;
+            if (selectedFile.size > maxAllowedMb * 1024 * 1024) {
+                const actualMb = (selectedFile.size / (1024 * 1024)).toFixed(2);
+                alert(`File size (${actualMb} MB) exceeds your plan limit of ${maxAllowedMb} MB per document. Please compress the file or upgrade your plan.`);
+                return;
+            }
+
             const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
+            formData.append('file', selectedFile);
             formData.append('title', title);
             formData.append('category', category);
             formData.append('academic_version', academic_version);
@@ -14204,8 +14237,16 @@ echo $response['reply'];
                 return;
             }
 
+            const selectedFile = fileInput.files[0];
+            const maxAllowedMb = window.currentOrgMaxUploadMb || 15;
+            if (selectedFile.size > maxAllowedMb * 1024 * 1024) {
+                const actualMb = (selectedFile.size / (1024 * 1024)).toFixed(2);
+                alert(`File size (${actualMb} MB) exceeds your plan limit of ${maxAllowedMb} MB per document. Please compress the file or upgrade your plan.`);
+                return;
+            }
+
             const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
+            formData.append('file', selectedFile);
             if (title) formData.append('title', title);
             formData.append('category', category);
             formData.append('academic_version', academic_version);

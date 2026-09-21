@@ -345,6 +345,30 @@ class AuthController
             $botToken = $bot['bot_token'] ?? null;
         }
 
+        // Fetch Plan Quotas & Features for the tenant's plan
+        $planQuotas = [];
+        $planFeatures = [];
+        if (!empty($user['organization_id'])) {
+            $stmtOrgPlan = $db->prepare("SELECT plan_id FROM organizations WHERE id = :org_id");
+            $stmtOrgPlan->execute([':org_id' => $user['organization_id']]);
+            $orgRow = $stmtOrgPlan->fetch();
+            $effectivePlanId = (int)($orgRow['plan_id'] ?? 1);
+
+            $stmtQ = $db->prepare("SELECT quota_key, quota_value, quota_label FROM plan_quotas WHERE plan_id = :plan_id");
+            $stmtQ->execute([':plan_id' => $effectivePlanId]);
+            $rawQ = $stmtQ->fetchAll();
+            foreach ($rawQ as $q) {
+                $planQuotas[$q['quota_key']] = is_numeric($q['quota_value']) ? (int)$q['quota_value'] : $q['quota_value'];
+            }
+
+            $stmtF = $db->prepare("SELECT feature_key, is_enabled, feature_label FROM plan_features WHERE plan_id = :plan_id");
+            $stmtF->execute([':plan_id' => $effectivePlanId]);
+            $rawF = $stmtF->fetchAll();
+            foreach ($rawF as $f) {
+                $planFeatures[$f['feature_key']] = (int)$f['is_enabled'];
+            }
+        }
+
         // Departments deprecated - return empty list
         $userDepartments = [];
 
@@ -369,7 +393,10 @@ class AuthController
                 'subscription_status' => $user['subscription_status'],
                 'onboarding_completed' => (int)$user['onboarding_completed'],
                 'onboarding_step' => (int)$user['onboarding_step'],
-                'plan_name' => $user['plan_name'] ?? 'Starter'
+                'plan_name' => $user['plan_name'] ?? 'Starter',
+                'plan_id' => $effectivePlanId ?? 1,
+                'quotas' => $planQuotas,
+                'features' => $planFeatures
             ] : null,
             'bot_token' => $botToken,
             'onboarding_required' => $onboardingRequired
