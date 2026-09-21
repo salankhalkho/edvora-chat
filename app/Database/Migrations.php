@@ -1569,6 +1569,16 @@ class Migrations
         } catch (Throwable $e) {
             error_log('[Migrations] Filesystem-Backed Knowledge Sources migration warning: ' . $e->getMessage());
         }
+
+        // Job Queue index for atomic locking & fast concurrency polling
+        try {
+            $checkIndex = $this->db->query("SHOW INDEX FROM jobs WHERE Key_name = 'idx_jobs_status_run_at'");
+            if (!$checkIndex->fetch()) {
+                $this->db->exec("ALTER TABLE jobs ADD INDEX idx_jobs_status_run_at (status, run_at);");
+            }
+        } catch (Throwable $e) {
+            // Index may already exist
+        }
     }
 }
 

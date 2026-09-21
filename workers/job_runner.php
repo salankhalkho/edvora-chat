@@ -45,12 +45,15 @@ while (true) {
     try {
         $db = Database::getConnection();
 
-        // Fetch pending job with SELECT ... FOR UPDATE
+        // Atomic job claim using transaction with SELECT ... FOR UPDATE SKIP LOCKED
+        $db->beginTransaction();
+
         $stmt = $db->query("
             SELECT * FROM jobs
             WHERE status = 'pending' AND run_at <= NOW()
             ORDER BY id ASC
             LIMIT 1
+            FOR UPDATE SKIP LOCKED
         ");
         $job = $stmt->fetch();
 
@@ -59,8 +62,9 @@ while (true) {
             $type    = $job['type'];
             $payload = json_decode($job['payload'], true) ?? [];
 
-            // Mark job as running and increment attempt counter
+            // Mark job as running and increment attempt counter atomically
             $db->exec("UPDATE jobs SET status = 'running', attempts = attempts + 1 WHERE id = {$jobId}");
+            $db->commit();
 
             // Current attempt number (after the increment above)
             $attemptNumber = (int)$job['attempts'] + 1;
@@ -356,10 +360,17 @@ while (true) {
                 }
             }
         } else {
+            // No pending job found, roll back read transaction
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
             // Idle sleep if no pending jobs
             sleep(3);
         }
     } catch (Throwable $e) {
+        if (isset($db) && $db instanceof \PDO && $db->inTransaction()) {
+            $db->rollBack();
+        }
         echo "[" . date('Y-m-d H:i:s') . "] Worker Error: " . $e->getMessage() . "\n";
         sleep(5);
     }
