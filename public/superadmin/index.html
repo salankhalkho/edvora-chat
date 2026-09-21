@@ -863,6 +863,9 @@
                 <a class="nav-link" href="/llm-logs" target="_blank" rel="noopener noreferrer" style="padding-left: 28px; font-size: 11px; color: #818cf8;">
                     <span>🔬</span> LLM Logs (Live) ↗
                 </a>
+                <a class="nav-link" href="/llm-spendings" target="_blank" rel="noopener noreferrer" style="padding-left: 28px; font-size: 11px; color: #38bdf8;">
+                    <span>💳</span> LLM Spendings &amp; Usage ↗
+                </a>
             </nav>
             <div class="sidebar-footer">
                 <span style="color: var(--brand-text-muted); font-size: 11px;">v1.2.0 • VPS Live</span>
@@ -934,6 +937,7 @@
                                     <select id="provRole" class="form-select" required>
                                         <option value="primary">Primary Provider (Default for All Chatbots)</option>
                                         <option value="fallback">Fallback Provider (Failover when Primary is Down)</option>
+                                        <option value="embedding">Embedding Provider (Vectors for Knowledge Items)</option>
                                         <option value="inactive">Inactive / Standby</option>
                                     </select>
                                 </div>
@@ -944,6 +948,18 @@
                                         <option value="1">Enabled / Active</option>
                                         <option value="0">Disabled</option>
                                     </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Cost / 1M Input Tokens ($ USD)</label>
+                                    <input type="number" step="0.0001" min="0" id="provCostInput" class="form-input" placeholder="0.1500" value="0.0000" />
+                                    <div class="form-hint">e.g. 0.1500 for GPT-4o-mini, 0.0200 for text-embedding-3-small</div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Cost / 1M Output Tokens ($ USD)</label>
+                                    <input type="number" step="0.0001" min="0" id="provCostOutput" class="form-input" placeholder="0.6000" value="0.0000" />
+                                    <div class="form-hint">e.g. 0.6000 for GPT-4o-mini, 0.0000 for embeddings</div>
                                 </div>
 
                                 <!-- Advanced Settings Accordion -->
@@ -1003,13 +1019,14 @@
                                         <th>Service & Model</th>
                                         <th>API Key Status</th>
                                         <th>Role</th>
+                                        <th>Pricing / 1M</th>
                                         <th>Health / Latency</th>
                                         <th>Active</th>
                                         <th style="text-align: right;">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody id="providersTableBody">
-                                    <tr><td colspan="7" style="text-align: center; color: var(--brand-text-muted);">Loading providers...</td></tr>
+                                    <tr><td colspan="8" style="text-align: center; color: var(--brand-text-muted);">Loading providers...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -2378,6 +2395,8 @@
             document.getElementById('provKey').placeholder = 'Enter new API key (e.g. sk-...)';
             document.getElementById('provRole').value = 'primary';
             document.getElementById('provActive').value = '1';
+            document.getElementById('provCostInput').value = '0.0000';
+            document.getElementById('provCostOutput').value = '0.0000';
             document.getElementById('provTemp').value = '0.30';
             document.getElementById('provTokens').value = '1500';
             document.getElementById('provTimeout').value = '30';
@@ -2401,6 +2420,8 @@
             document.getElementById('provKey').placeholder = p.has_api_key ? '•••••••••••••••• (Leave blank to keep existing key)' : 'Enter API key (e.g. sk-...)';
             document.getElementById('provRole').value = p.role;
             document.getElementById('provActive').value = p.is_active ? '1' : '0';
+            document.getElementById('provCostInput').value = parseFloat(p.cost_per_1m_input_tokens || 0).toFixed(4);
+            document.getElementById('provCostOutput').value = parseFloat(p.cost_per_1m_output_tokens || 0).toFixed(4);
             document.getElementById('provTemp').value = p.temperature || '0.30';
             document.getElementById('provTokens').value = p.max_tokens || '1500';
             document.getElementById('provTimeout').value = p.timeout_seconds || '30';
@@ -2422,7 +2443,7 @@
             const tbody = document.getElementById('providersTableBody');
 
             if (!cachedProviders.length) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--brand-text-muted);">No LLM providers configured.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--brand-text-muted);">No LLM providers configured.</td></tr>';
                 return;
             }
 
@@ -2451,6 +2472,10 @@
                         </td>
                         <td>${keyBadge}</td>
                         <td>${roleBadge}</td>
+                        <td style="font-family: 'JetBrains Mono', monospace; font-size: 11px;">
+                            <div style="color: #38bdf8;">In: $${parseFloat(p.cost_per_1m_input_tokens || 0).toFixed(4)}</div>
+                            <div style="color: #34d399;">Out: $${parseFloat(p.cost_per_1m_output_tokens || 0).toFixed(4)}</div>
+                        </td>
                         <td>${testStatus}</td>
                         <td>${p.is_active ? '<span style="color:#34d399;">Active</span>' : '<span style="color:#9ca3af;">Disabled</span>'}</td>
                         <td style="text-align: right; white-space: nowrap;">
@@ -2477,6 +2502,8 @@
                 api_key: document.getElementById('provKey').value.trim(),
                 role: document.getElementById('provRole').value,
                 is_active: parseInt(document.getElementById('provActive').value, 10),
+                cost_per_1m_input_tokens: parseFloat(document.getElementById('provCostInput').value) || 0.0,
+                cost_per_1m_output_tokens: parseFloat(document.getElementById('provCostOutput').value) || 0.0,
                 temperature: parseFloat(document.getElementById('provTemp').value) || 0.30,
                 max_tokens: parseInt(document.getElementById('provTokens').value, 10) || 1500,
                 timeout_seconds: parseInt(document.getElementById('provTimeout').value, 10) || 30,
