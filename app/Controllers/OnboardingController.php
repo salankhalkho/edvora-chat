@@ -645,16 +645,17 @@ class OnboardingController
             // 1. Create knowledge_sources row
             $stmtKs = $db->prepare("
                 INSERT INTO knowledge_sources (
-                    organization_id, type, title, keywords, original_file_path, status, created_at, updated_at
+                    organization_id, type, title, keywords, original_file_path, original_file_size, status, created_at, updated_at
                 ) VALUES (
-                    :org_id, 'document', :title, :kw, :orig_path, 'active', NOW(), NOW()
+                    :org_id, 'document', :title, :kw, :orig_path, :orig_size, 'active', NOW(), NOW()
                 )
             ");
             $stmtKs->execute([
                 ':org_id' => $orgId,
                 ':title' => $title,
                 ':kw' => $keywords,
-                ':orig_path' => $relativePath
+                ':orig_path' => $relativePath,
+                ':orig_size' => (int)$file['size']
             ]);
             $ksId = (int)$db->lastInsertId();
 

@@ -149,7 +149,8 @@ The registry of all knowledge documents, URLs, text pastes, and auto-generated p
 | `source_url` | VARCHAR(500) NULL | For `url` type |
 | `file_path` | VARCHAR(500) NULL | Relative path to `storage/knowledge/{org_id}/source_{id}.txt` |
 | `original_file_path` | VARCHAR(500) NULL | Relative path to original binary in `original/` folder for downloads |
-| `file_size_bytes` | BIGINT UNSIGNED | Text file size in bytes |
+| `original_file_size` | BIGINT UNSIGNED NULL | Original uploaded binary file size in bytes (documents only, NULL for text/url) |
+| `file_size_bytes` | BIGINT UNSIGNED | Text file size in bytes (clean source_{id}.txt on disk) |
 | `token_count` | INT UNSIGNED | Estimated word/subword token count |
 | `checksum_sha256` | CHAR(64) | SHA-256 hash of clean text content |
 | `keywords` | TEXT | Algorithmic frequency-ranked single-word tokens |

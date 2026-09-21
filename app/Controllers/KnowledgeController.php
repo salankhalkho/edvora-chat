@@ -30,7 +30,7 @@ class KnowledgeController
                    ks.type, ks.title, ks.category, ks.academic_version,
                    ks.effective_from, ks.expires_on, ks.last_reviewed_at, ks.review_frequency_days,
                    ks.previous_version_id, ks.replaced_by_id, ks.lead_magnet,
-                   ks.source_url, ks.file_path, ks.original_file_path, ks.file_size_bytes, ks.token_count, ks.checksum_sha256,
+                   ks.source_url, ks.file_path, ks.original_file_path, ks.original_file_size, ks.file_size_bytes, ks.token_count, ks.checksum_sha256,
                    ks.status, ks.keywords, ks.last_fetched_at, ks.created_at, ks.updated_at
             FROM knowledge_sources ks
             LEFT JOIN programs p ON ks.program_id = p.id
@@ -221,7 +221,7 @@ class KnowledgeController
                    ks.type, ks.title, ks.category, ks.academic_version,
                    ks.effective_from, ks.expires_on, ks.last_reviewed_at, ks.review_frequency_days,
                    ks.previous_version_id, ks.replaced_by_id, ks.lead_magnet,
-                   ks.source_url, ks.keywords, ks.file_path, ks.original_file_path, ks.file_size_bytes, ks.token_count, ks.checksum_sha256,
+                   ks.source_url, ks.keywords, ks.file_path, ks.original_file_path, ks.original_file_size, ks.file_size_bytes, ks.token_count, ks.checksum_sha256,
                    ks.status, ks.last_fetched_at, ks.created_at, ks.updated_at
             FROM knowledge_sources ks
             LEFT JOIN programs p ON ks.program_id = p.id
@@ -697,14 +697,16 @@ class KnowledgeController
             $title = !empty($request->get('title')) ? trim($request->get('title')) : pathinfo($originalFilename, PATHINFO_FILENAME);
             $compacted = ContentCompactor::process($rawContent, $title);
 
+            $origUploadBytes = (int)$file['size'];
+
             $db = Database::getConnection();
             $stmt = $db->prepare("
                 INSERT INTO knowledge_sources (organization_id, chatbot_id, program_id, type, title, category, academic_version,
                                                effective_from, expires_on, last_reviewed_at, review_frequency_days,
-                                               original_file_path, keywords, status, created_at, updated_at)
+                                               original_file_path, original_file_size, keywords, status, created_at, updated_at)
                 VALUES (:org_id, :bot_id, :program_id, 'document', :title, :category, :academic_version,
                         :effective_from, :expires_on, NOW(), :review_freq,
-                        :orig_path, :keywords, 'pending', NOW(), NOW())
+                        :orig_path, :orig_size, :keywords, 'pending', NOW(), NOW())
             ");
             $stmt->execute([
                 ':org_id' => $orgId,
@@ -717,6 +719,7 @@ class KnowledgeController
                 ':expires_on' => $expiresOn,
                 ':review_freq' => $reviewFreq,
                 ':orig_path' => $originalFilePath,
+                ':orig_size' => $origUploadBytes,
                 ':keywords' => $compacted['keywords']
             ]);
             $id = (int)$db->lastInsertId();
@@ -765,6 +768,7 @@ class KnowledgeController
                 'status' => 'pending',
                 'file_path' => $saveMeta['file_path'],
                 'original_file_path' => $originalFilePath,
+                'original_file_size' => $origUploadBytes,
                 'file_size_bytes' => $saveMeta['file_size_bytes'],
                 'token_count' => $saveMeta['token_count'],
                 'keywords' => $compacted['keywords']
@@ -861,15 +865,17 @@ class KnowledgeController
             $compacted = ContentCompactor::process($rawContent, $title);
             $programId = !empty($request->get('program_id')) ? (int)$request->get('program_id') : (!empty($oldSource['program_id']) ? (int)$oldSource['program_id'] : null);
 
+            $origUploadBytes = ($newType === 'document' && !empty($file['size'])) ? (int)$file['size'] : null;
+
             // 1. Insert new knowledge source linked to previous version
             $stmtInsert = $db->prepare("
                 INSERT INTO knowledge_sources (organization_id, chatbot_id, program_id, type, title, category, academic_version,
                                                effective_from, expires_on, last_reviewed_at, review_frequency_days,
-                                               previous_version_id, source_url, original_file_path, keywords,
+                                               previous_version_id, source_url, original_file_path, original_file_size, keywords,
                                                content_hash, status, created_at, updated_at)
                 VALUES (:org_id, :bot_id, :program_id, :type, :title, :category, :academic_version,
                         :effective_from, :expires_on, NOW(), :review_freq,
-                        :prev_id, :source_url, :orig_path, :keywords,
+                        :prev_id, :source_url, :orig_path, :orig_size, :keywords,
                         :content_hash, 'pending', NOW(), NOW())
             ");
             $stmtInsert->execute([
@@ -886,6 +892,7 @@ class KnowledgeController
                 ':prev_id' => $oldId,
                 ':source_url' => $sourceUrl,
                 ':orig_path' => $originalFilePath,
+                ':orig_size' => $origUploadBytes,
                 ':keywords' => $compacted['keywords'],
                 ':content_hash' => $contentHash
             ]);
@@ -949,6 +956,8 @@ class KnowledgeController
                 'academic_version' => $academicVersion,
                 'status' => 'pending',
                 'file_path' => $saveMeta['file_path'],
+                'original_file_path' => $originalFilePath,
+                'original_file_size' => $origUploadBytes,
                 'file_size_bytes' => $saveMeta['file_size_bytes'],
                 'token_count' => $saveMeta['token_count'],
                 'expires_on' => $expiresOn

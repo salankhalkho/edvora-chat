@@ -80,6 +80,7 @@ class Migrations
                 source_url VARCHAR(500) NULL,
                 file_path VARCHAR(500) NULL COMMENT 'Relative path to storage/knowledge/{org_id}/source_{id}.txt',
                 original_file_path VARCHAR(500) NULL COMMENT 'Original binary file path for downloads',
+                original_file_size BIGINT UNSIGNED NULL COMMENT 'Original binary upload file size in bytes',
                 file_size_bytes BIGINT UNSIGNED NULL COMMENT 'File size on disk in bytes',
                 token_count INT UNSIGNED NULL COMMENT 'Estimated token count',
                 checksum_sha256 CHAR(64) NULL COMMENT 'SHA-256 hash of clean text content',
@@ -1464,10 +1465,11 @@ class Migrations
         // Filesystem-Backed Knowledge Sources Migration
         // ──────────────────────────────────────────────────────────────────────
         try {
-            // 1. Add file_size_bytes, token_count, checksum_sha256, original_file_path columns
+            // 1. Add file_size_bytes, token_count, checksum_sha256, original_file_path, original_file_size columns
             $colsToAdd = [
                 'original_file_path' => "VARCHAR(500) NULL COMMENT 'Original binary file path for downloads' AFTER file_path",
-                'file_size_bytes'    => "BIGINT UNSIGNED NULL COMMENT 'File size on disk in bytes' AFTER original_file_path",
+                'original_file_size' => "BIGINT UNSIGNED NULL COMMENT 'Original binary upload file size in bytes' AFTER original_file_path",
+                'file_size_bytes'    => "BIGINT UNSIGNED NULL COMMENT 'File size on disk in bytes' AFTER original_file_size",
                 'token_count'        => "INT UNSIGNED NULL COMMENT 'Estimated token count' AFTER file_size_bytes",
                 'checksum_sha256'    => "CHAR(64) NULL COMMENT 'SHA-256 hash of clean text content' AFTER token_count"
             ];
