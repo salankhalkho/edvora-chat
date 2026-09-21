@@ -470,11 +470,6 @@
                 contentEl.innerText = item.processed_content || item.raw_content || 'No extracted text chunks available.';
             }
 
-            const kwEl = document.getElementById('ckhModalKeywords');
-            if (kwEl) {
-                kwEl.innerText = item.keywords || 'None';
-            }
-
             modal.style.display = 'flex';
         }
 
@@ -538,10 +533,9 @@
                     const matchTitle = (item.title || '').toLowerCase().includes(query);
                     const matchCat = (item.category || '').toLowerCase().includes(query);
                     const matchVer = (item.academic_version || '').toLowerCase().includes(query);
-                    const matchKw = (item.keywords || '').toLowerCase().includes(query);
                     const matchProg = (item.program_name || item.course_name || '').toLowerCase().includes(query);
                     const matchDepts = (item.departments || []).some(d => (d.name || '').toLowerCase().includes(query));
-                    if (!matchTitle && !matchCat && !matchVer && !matchKw && !matchProg && !matchDepts) return false;
+                    if (!matchTitle && !matchCat && !matchVer && !matchProg && !matchDepts) return false;
                 }
 
                 // Academic Program filter match
@@ -1604,18 +1598,6 @@
                 if (urlRow) urlRow.style.display = 'none';
             }
 
-            // Semantic Keywords
-            const kwContainer = document.getElementById('viewDocKeywordsContainer');
-            if (kwContainer) {
-                const kwStr = doc.semantic_keywords || doc.keywords || '';
-                const kwList = kwStr.split(',').map(s => s.trim()).filter(Boolean);
-                if (kwList.length > 0) {
-                    kwContainer.innerHTML = kwList.map(kw => `<span style="font-size:11px; padding:3px 8px; border-radius:4px; background:#F1F5F9; border:1px solid #CBD5E1; color:#334155;">#${escapeHtml(kw)}</span>`).join('');
-                } else {
-                    kwContainer.innerHTML = '<span style="font-size:12px; color:#94A3B8;">None specified</span>';
-                }
-            }
-
             // Raw Policy Content
             const rawEl = document.getElementById('view_doc_raw_content');
             if (rawEl) rawEl.innerText = raw || '(No content available)';
@@ -1726,9 +1708,6 @@
 
             const revInput = document.getElementById('edit_doc_last_reviewed');
             if (revInput) revInput.value = doc.last_reviewed_at || (doc.created_at ? doc.created_at.substring(0, 10) : 'None');
-
-            const semKeyInput = document.getElementById('edit_doc_semantic_keywords');
-            if (semKeyInput) semKeyInput.value = doc.semantic_keywords || doc.keywords || '';
 
             const contentTextarea = document.getElementById('edit_doc_raw_content');
             const raw = doc.raw_content || doc.processed_content || '';

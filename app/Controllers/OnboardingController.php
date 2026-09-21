@@ -640,20 +640,18 @@ class OnboardingController
 
             $compacted = ContentCompactor::process($rawText, $title);
             $processedContent = $compacted['processed_content'] ?? substr(preg_replace('/\s+/', ' ', $rawText), 0, 8000);
-            $keywords = $compacted['keywords'] ?? ("admissions, {$category}, " . implode(', ', array_slice(explode(' ', strtolower(preg_replace('/[^a-z0-9 ]/i', '', $title))), 0, 5)));
 
             // 1. Create knowledge_sources row
             $stmtKs = $db->prepare("
                 INSERT INTO knowledge_sources (
-                    organization_id, type, title, keywords, original_file_path, original_file_size, status, created_at, updated_at
+                    organization_id, type, title, original_file_path, original_file_size, status, created_at, updated_at
                 ) VALUES (
-                    :org_id, 'document', :title, :kw, :orig_path, :orig_size, 'active', NOW(), NOW()
+                    :org_id, 'document', :title, :orig_path, :orig_size, 'active', NOW(), NOW()
                 )
             ");
             $stmtKs->execute([
                 ':org_id' => $orgId,
                 ':title' => $title,
-                ':kw' => $keywords,
                 ':orig_path' => $relativePath,
                 ':orig_size' => (int)$file['size']
             ]);

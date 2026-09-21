@@ -84,7 +84,6 @@ class Migrations
                 file_size_bytes BIGINT UNSIGNED NULL COMMENT 'File size on disk in bytes',
                 token_count INT UNSIGNED NULL COMMENT 'Estimated token count',
                 checksum_sha256 CHAR(64) NULL COMMENT 'SHA-256 hash of clean text content',
-                keywords TEXT NULL,
                 content_hash VARCHAR(64) NULL,
                 previous_version_id INT NULL,
                 replaced_by_id INT NULL,
@@ -1531,7 +1530,7 @@ class Migrations
                     }
                 }
 
-                // 3. Drop ft_knowledge_content that indexed processed_content, and re-create on (title, keywords)
+                // 3. Drop ft_knowledge_content and re-create on (title)
                 try {
                     $this->db->exec("ALTER TABLE knowledge_sources DROP INDEX ft_knowledge_content");
                 } catch (Throwable $dropEx) {
@@ -1539,17 +1538,33 @@ class Migrations
                 }
 
                 try {
-                    $this->db->exec("ALTER TABLE knowledge_sources ADD FULLTEXT INDEX ft_knowledge_content (title, keywords)");
+                    $this->db->exec("ALTER TABLE knowledge_sources ADD FULLTEXT INDEX ft_knowledge_content (title)");
                 } catch (Throwable $addEx) {
                     // Index may already exist
                 }
 
-                // 4. Drop raw_content and processed_content columns from knowledge_sources
+                // 4. Drop raw_content, processed_content, and keywords columns from knowledge_sources
                 try {
                     $this->db->exec("ALTER TABLE knowledge_sources DROP COLUMN raw_content, DROP COLUMN processed_content");
                 } catch (Throwable $dropColEx) {
                     // Columns might already be dropped
                 }
+            }
+
+            // 5. Ensure keywords column is dropped and ft_knowledge_content is on (title)
+            try {
+                $checkKw = $this->db->query("SHOW COLUMNS FROM knowledge_sources LIKE 'keywords'");
+                if ($checkKw->fetch()) {
+                    try {
+                        $this->db->exec("ALTER TABLE knowledge_sources DROP INDEX ft_knowledge_content");
+                    } catch (Throwable $e) {}
+                    $this->db->exec("ALTER TABLE knowledge_sources DROP COLUMN keywords");
+                    try {
+                        $this->db->exec("ALTER TABLE knowledge_sources ADD FULLTEXT INDEX ft_knowledge_content (title)");
+                    } catch (Throwable $e) {}
+                }
+            } catch (Throwable $e) {
+                // Ignore if already dropped
             }
         } catch (Throwable $e) {
             error_log('[Migrations] Filesystem-Backed Knowledge Sources migration warning: ' . $e->getMessage());

@@ -496,18 +496,16 @@ class SmartOnboardingService
 
                     $compacted        = ContentCompactor::process($content, $title);
                     $processedContent = $compacted['processed_content'] ?? substr($content, 0, 6000);
-                    $keywords         = $compacted['keywords'] ?? '';
 
                     $insKs = $db->prepare("
                         INSERT INTO knowledge_sources
-                            (organization_id, type, title, category, keywords, source_url, status, created_at, updated_at)
-                        VALUES (:org_id, 'url', :title, :cat, :kw, :src, 'active', NOW(), NOW())
+                            (organization_id, type, title, category, source_url, status, created_at, updated_at)
+                        VALUES (:org_id, 'url', :title, :cat, :src, 'active', NOW(), NOW())
                     ");
                     $insKs->execute([
                         ':org_id' => $orgId,
                         ':title'  => substr($title, 0, 255),
                         ':cat'    => substr($category, 0, 100),
-                        ':kw'     => $keywords,
                         ':src'    => $normalizedUrl,
                     ]);
                     $ksId = (int)$db->lastInsertId();
@@ -550,12 +548,11 @@ class SmartOnboardingService
                 $processedContent = $compacted['processed_content'] ?? substr($finalContext, 0, 6000);
                 $db->prepare("
                     INSERT INTO knowledge_sources
-                        (organization_id, type, title, category, keywords, source_url, status, created_at, updated_at)
-                    VALUES (:org_id, 'url', :title, 'General', :kw, :src, 'active', NOW(), NOW())
+                        (organization_id, type, title, category, source_url, status, created_at, updated_at)
+                    VALUES (:org_id, 'url', :title, 'General', :src, 'active', NOW(), NOW())
                 ")->execute([
                     ':org_id' => $orgId,
                     ':title'  => "Website Overview — {$orgName}",
-                    ':kw'     => $compacted['keywords'] ?? '',
                     ':src'    => $normalizedUrl,
                 ]);
                 $ksId = (int)$db->lastInsertId();

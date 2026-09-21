@@ -31,7 +31,7 @@ class KnowledgeController
                    ks.effective_from, ks.expires_on, ks.last_reviewed_at, ks.review_frequency_days,
                    ks.previous_version_id, ks.replaced_by_id, ks.lead_magnet,
                    ks.source_url, ks.file_path, ks.original_file_path, ks.original_file_size, ks.file_size_bytes, ks.token_count, ks.checksum_sha256,
-                   ks.status, ks.keywords, ks.last_fetched_at, ks.created_at, ks.updated_at
+                   ks.status, ks.last_fetched_at, ks.created_at, ks.updated_at
             FROM knowledge_sources ks
             LEFT JOIN programs p ON ks.program_id = p.id
             WHERE ks.organization_id = :org_id
@@ -221,7 +221,7 @@ class KnowledgeController
                    ks.type, ks.title, ks.category, ks.academic_version,
                    ks.effective_from, ks.expires_on, ks.last_reviewed_at, ks.review_frequency_days,
                    ks.previous_version_id, ks.replaced_by_id, ks.lead_magnet,
-                   ks.source_url, ks.keywords, ks.file_path, ks.original_file_path, ks.original_file_size, ks.file_size_bytes, ks.token_count, ks.checksum_sha256,
+                   ks.source_url, ks.file_path, ks.original_file_path, ks.original_file_size, ks.file_size_bytes, ks.token_count, ks.checksum_sha256,
                    ks.status, ks.last_fetched_at, ks.created_at, ks.updated_at
             FROM knowledge_sources ks
             LEFT JOIN programs p ON ks.program_id = p.id
@@ -311,7 +311,6 @@ class KnowledgeController
         $expiresOn = !empty($body['expires_on']) ? $body['expires_on'] : null;
         $reviewFrequencyDays = !empty($body['review_frequency_days']) ? (int)$body['review_frequency_days'] : 180;
         $status = in_array($body['status'] ?? '', ['active', 'expiring_soon', 'expired', 'archived', 'processing']) ? $body['status'] : $existing['status'];
-        $keywords = trim($body['keywords'] ?? '');
         $rawContent = isset($body['raw_content']) ? (string)$body['raw_content'] : null;
 
         // Academic Program Mapping
@@ -348,7 +347,6 @@ class KnowledgeController
             'expires_on = :expires_on',
             'review_frequency_days = :review_frequency_days',
             'status = :status',
-            'keywords = :keywords',
             'program_id = :program_id',
             'updated_at = NOW()'
         ];
@@ -361,7 +359,6 @@ class KnowledgeController
             ':expires_on' => $expiresOn,
             ':review_frequency_days' => $reviewFrequencyDays,
             ':status' => $status,
-            ':keywords' => $keywords,
             ':program_id' => $programId,
             ':id' => $id,
             ':org_id' => $orgId
@@ -431,10 +428,10 @@ class KnowledgeController
         $stmt = $db->prepare("
             INSERT INTO knowledge_sources (organization_id, chatbot_id, program_id, type, title, category, academic_version,
                                            effective_from, expires_on, last_reviewed_at, review_frequency_days,
-                                           keywords, status, created_at, updated_at)
+                                           status, created_at, updated_at)
             VALUES (:org_id, :bot_id, :program_id, 'text_paste', :title, :category, :academic_version,
                     :effective_from, :expires_on, NOW(), :review_freq,
-                    :keywords, 'pending', NOW(), NOW())
+                    'pending', NOW(), NOW())
         ");
         $stmt->execute([
             ':org_id' => $orgId,
@@ -445,8 +442,7 @@ class KnowledgeController
             ':academic_version' => $academicVersion,
             ':effective_from' => $effectiveFrom,
             ':expires_on' => $expiresOn,
-            ':review_freq' => $reviewFreq,
-            ':keywords' => $compacted['keywords']
+            ':review_freq' => $reviewFreq
         ]);
         $id = (int)$db->lastInsertId();
 
@@ -527,10 +523,10 @@ class KnowledgeController
             $stmt = $db->prepare("
                 INSERT INTO knowledge_sources (organization_id, chatbot_id, program_id, type, title, category, academic_version,
                                                effective_from, expires_on, last_reviewed_at, review_frequency_days,
-                                               source_url, keywords, content_hash, status, last_fetched_at, created_at, updated_at)
+                                               source_url, content_hash, status, last_fetched_at, created_at, updated_at)
                 VALUES (:org_id, :bot_id, :program_id, 'url', :title, :category, :academic_version,
                         :effective_from, :expires_on, NOW(), :review_freq,
-                        :url, :keywords, :hash, 'pending', NOW(), NOW(), NOW())
+                        :url, :hash, 'pending', NOW(), NOW(), NOW())
             ");
             $stmt->execute([
                 ':org_id' => $orgId,
@@ -543,7 +539,6 @@ class KnowledgeController
                 ':expires_on' => $expiresOn,
                 ':review_freq' => $reviewFreq,
                 ':url' => $url,
-                ':keywords' => $compacted['keywords'],
                 ':hash' => $scraped['content_hash']
             ]);
             $id = (int)$db->lastInsertId();
@@ -592,8 +587,7 @@ class KnowledgeController
                 'status' => 'pending',
                 'file_path' => $saveMeta['file_path'],
                 'file_size_bytes' => $saveMeta['file_size_bytes'],
-                'token_count' => $saveMeta['token_count'],
-                'keywords' => $compacted['keywords']
+                'token_count' => $saveMeta['token_count']
             ], 'URL content scraped and queued for vector embedding', 201);
 
         } catch (Throwable $e) {
@@ -703,10 +697,10 @@ class KnowledgeController
             $stmt = $db->prepare("
                 INSERT INTO knowledge_sources (organization_id, chatbot_id, program_id, type, title, category, academic_version,
                                                effective_from, expires_on, last_reviewed_at, review_frequency_days,
-                                               original_file_path, original_file_size, keywords, status, created_at, updated_at)
+                                               original_file_path, original_file_size, status, created_at, updated_at)
                 VALUES (:org_id, :bot_id, :program_id, 'document', :title, :category, :academic_version,
                         :effective_from, :expires_on, NOW(), :review_freq,
-                        :orig_path, :orig_size, :keywords, 'pending', NOW(), NOW())
+                        :orig_path, :orig_size, 'pending', NOW(), NOW())
             ");
             $stmt->execute([
                 ':org_id' => $orgId,
@@ -719,8 +713,7 @@ class KnowledgeController
                 ':expires_on' => $expiresOn,
                 ':review_freq' => $reviewFreq,
                 ':orig_path' => $originalFilePath,
-                ':orig_size' => $origUploadBytes,
-                ':keywords' => $compacted['keywords']
+                ':orig_size' => $origUploadBytes
             ]);
             $id = (int)$db->lastInsertId();
 
@@ -770,8 +763,7 @@ class KnowledgeController
                 'original_file_path' => $originalFilePath,
                 'original_file_size' => $origUploadBytes,
                 'file_size_bytes' => $saveMeta['file_size_bytes'],
-                'token_count' => $saveMeta['token_count'],
-                'keywords' => $compacted['keywords']
+                'token_count' => $saveMeta['token_count']
             ], 'Document uploaded and queued for vector embedding', 201);
 
         } catch (Throwable $e) {
@@ -871,11 +863,11 @@ class KnowledgeController
             $stmtInsert = $db->prepare("
                 INSERT INTO knowledge_sources (organization_id, chatbot_id, program_id, type, title, category, academic_version,
                                                effective_from, expires_on, last_reviewed_at, review_frequency_days,
-                                               previous_version_id, source_url, original_file_path, original_file_size, keywords,
+                                               previous_version_id, source_url, original_file_path, original_file_size,
                                                content_hash, status, created_at, updated_at)
                 VALUES (:org_id, :bot_id, :program_id, :type, :title, :category, :academic_version,
                         :effective_from, :expires_on, NOW(), :review_freq,
-                        :prev_id, :source_url, :orig_path, :orig_size, :keywords,
+                        :prev_id, :source_url, :orig_path, :orig_size,
                         :content_hash, 'pending', NOW(), NOW())
             ");
             $stmtInsert->execute([
@@ -893,7 +885,6 @@ class KnowledgeController
                 ':source_url' => $sourceUrl,
                 ':orig_path' => $originalFilePath,
                 ':orig_size' => $origUploadBytes,
-                ':keywords' => $compacted['keywords'],
                 ':content_hash' => $contentHash
             ]);
             $newId = (int)$db->lastInsertId();

@@ -56,7 +56,7 @@ class ContentEngine
         }
 
         // ──────────────────────────────────────────────────────────────────────
-        // TIER 2: FULLTEXT on knowledge_sources (legacy fallback)
+        // TIER 2: FULLTEXT on knowledge_sources title (legacy fallback)
         // ──────────────────────────────────────────────────────────────────────
         $db          = Database::getConnection();
         $results     = [];
@@ -64,14 +64,14 @@ class ContentEngine
 
         try {
             $sqlTier2 = "
-                SELECT id, title, keywords, program_id, file_path,
-                       MATCH(title, keywords) AGAINST(:query IN NATURAL LANGUAGE MODE) AS score
+                SELECT id, title, program_id, file_path,
+                       MATCH(title) AGAINST(:query IN NATURAL LANGUAGE MODE) AS score
                 FROM knowledge_sources
                 WHERE organization_id = :org_id
                   AND status = 'active'
                   AND (effective_from IS NULL OR effective_from <= CURDATE())
                   AND (expires_on IS NULL OR expires_on >= CURDATE())
-                  AND MATCH(title, keywords) AGAINST(:query IN NATURAL LANGUAGE MODE) > 0
+                  AND MATCH(title) AGAINST(:query IN NATURAL LANGUAGE MODE) > 0
                 ORDER BY score DESC
                 LIMIT 10
             ";
@@ -110,20 +110,19 @@ class ContentEngine
         $mapped = [];
         foreach ($items as $item) {
             $mapped[] = [
-                'id'                => (int)$item['id'],
-                'title'             => $item['title'] ?? 'Knowledge Fact',
-                'processed_content' => $item['content'],   // chunk content IS the context
-                'program_id'        => !empty($item['program_id']) ? (int)$item['program_id'] : null,
-                'score'             => round((float)$item['similarity'], 4),
-                'retrieval_tier'    => 'vector'
+                'id'                => (int)$item['source_id'],
+                'title'             => 'Program / Course Knowledge',
+                'processed_content' => $item['content'],
+                'program_id'        => $item['program_id'] ?? null,
+                'score'             => round((float)$item['score'], 4),
+                'retrieval_tier'    => 'vector_similarity',
             ];
         }
         return $mapped;
     }
 
     /**
-     * Adaptive Selection: Top 1–3 items, score >= 30% of max score.
-     * Applied to FULLTEXT / LIKE results (vector results already trimmed by VectorSearchEngine).
+     * Keep the top item, plus any within 30% of the top score. Max 3 items total.
      */
     private static function adaptiveTrim(array $results, int $organizationId): array
     {
@@ -138,7 +137,7 @@ class ContentEngine
         foreach ($results as $item) {
             if (count($selected) === 0 || (float)$item['score'] >= $threshold) {
                 $sourceId = (int)$item['id'];
-                $content = KnowledgeFileStorage::loadText($organizationId, $sourceId) ?? ($item['keywords'] ?? '');
+                $content = KnowledgeFileStorage::loadText($organizationId, $sourceId) ?? '';
 
                 $selected[] = [
                     'id'                => $sourceId,
@@ -158,7 +157,7 @@ class ContentEngine
     }
 
     /**
-     * Tier 3 fallback: LIKE search across title and keywords.
+     * Tier 3 fallback: LIKE search across title.
      */
     private static function fallbackLikeSearch(PDO $db, int $organizationId, string $query): array
     {
@@ -173,18 +172,15 @@ class ContentEngine
         $params         = [':org_id' => $organizationId];
 
         foreach ($words as $idx => $word) {
-            $p1 = ":w1_{$idx}";
-            $p2 = ":w2_{$idx}";
-
-            $likeConditions[] = "(LOWER(title) LIKE {$p1} OR LOWER(keywords) LIKE {$p2})";
-            $params[$p1]      = "%{$word}%";
-            $params[$p2]      = "%{$word}%";
+            $p = ":w_{$idx}";
+            $likeConditions[] = "LOWER(title) LIKE {$p}";
+            $params[$p]       = "%{$word}%";
         }
 
         $whereClause = implode(' OR ', $likeConditions);
 
         $sql = "
-            SELECT id, title, keywords, program_id, file_path, 1.0000 AS score
+            SELECT id, title, program_id, file_path, 1.0000 AS score
             FROM knowledge_sources
             WHERE organization_id = :org_id
               AND status = 'active'

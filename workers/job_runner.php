@@ -77,13 +77,10 @@ while (true) {
 
                     $stmtUpdate = $db->prepare("
                         UPDATE knowledge_sources
-                        SET raw_content = :raw, processed_content = :processed, keywords = :keywords, content_hash = :hash, status = 'active', last_fetched_at = NOW(), updated_at = NOW()
+                        SET content_hash = :hash, status = 'active', last_fetched_at = NOW(), updated_at = NOW()
                         WHERE id = :id
                     ");
                     $stmtUpdate->execute([
-                        ':raw'       => $scraped['raw_content'],
-                        ':processed' => $compacted['processed_content'],
-                        ':keywords'  => $compacted['keywords'],
                         ':hash'      => $scraped['content_hash'],
                         ':id'        => $sourceId
                     ]);
@@ -98,13 +95,10 @@ while (true) {
 
                     $stmtUpdate = $db->prepare("
                         UPDATE knowledge_sources
-                        SET raw_content = :raw, processed_content = :processed, keywords = :keywords, status = 'active', updated_at = NOW()
+                        SET status = 'active', updated_at = NOW()
                         WHERE id = :id
                     ");
                     $stmtUpdate->execute([
-                        ':raw'       => $rawText,
-                        ':processed' => $compacted['processed_content'],
-                        ':keywords'  => $compacted['keywords'],
                         ':id'        => $sourceId
                     ]);
 

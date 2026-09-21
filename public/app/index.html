@@ -12626,11 +12626,6 @@ echo $response['reply'];
                 contentEl.innerText = item.processed_content || item.raw_content || 'No extracted text chunks available.';
             }
 
-            const kwEl = document.getElementById('ckhModalKeywords');
-            if (kwEl) {
-                kwEl.innerText = item.keywords || 'None';
-            }
-
             modal.style.display = 'flex';
         }
 
@@ -13875,9 +13870,6 @@ echo $response['reply'];
 
             const revInput = document.getElementById('edit_doc_last_reviewed');
             if (revInput) revInput.value = doc.last_reviewed_at || (doc.created_at ? doc.created_at.substring(0, 10) : 'None');
-
-            const semKeyInput = document.getElementById('edit_doc_semantic_keywords');
-            if (semKeyInput) semKeyInput.value = doc.keywords || '';
 
             const contentTextarea = document.getElementById('edit_doc_raw_content');
             const raw = doc.raw_content || doc.processed_content || '';

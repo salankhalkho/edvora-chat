@@ -153,7 +153,6 @@ The registry of all knowledge documents, URLs, text pastes, and auto-generated p
 | `file_size_bytes` | BIGINT UNSIGNED | Text file size in bytes (clean source_{id}.txt on disk) |
 | `token_count` | INT UNSIGNED | Estimated word/subword token count |
 | `checksum_sha256` | CHAR(64) | SHA-256 hash of clean text content |
-| `keywords` | TEXT | Algorithmic frequency-ranked single-word tokens |
 | `content_hash` | VARCHAR(64) | SHA-256 to detect URL content changes |
 | `status` | ENUM | `pending`, `active`, `expiring_soon`, `expired`, `archived`, `failed` |
 | `effective_from` | DATE | AI guardrail: invisible to chatbot before this date |
@@ -163,7 +162,7 @@ The registry of all knowledge documents, URLs, text pastes, and auto-generated p
 | `replaced_by_id` | INT | Forward pointer to the replacement source |
 
 **Indexes:**
-- `ft_knowledge_content` — FULLTEXT on `(title, keywords)` (Tier 2 fallback)
+- `ft_knowledge_content` — FULLTEXT on `(title)` (Tier 2 fallback)
 - `idx_ks_org_validity` — `(organization_id, status, expires_on)`
 
 ---

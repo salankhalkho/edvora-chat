@@ -899,17 +899,16 @@ class AnalyticsController
 
             $stmt = $db->prepare("
                 INSERT INTO knowledge_sources 
-                (organization_id, chatbot_id, type, title, category, keywords, status, created_at, updated_at)
+                (organization_id, chatbot_id, type, title, category, status, created_at, updated_at)
                 VALUES 
-                (:org_id, :bot_id, 'text_paste', :title, :category, :keywords, 'active', NOW(), NOW())
+                (:org_id, :bot_id, 'text_paste', :title, :category, 'active', NOW(), NOW())
             ");
 
             $stmt->execute([
                 ':org_id' => $orgId,
                 ':bot_id' => $botId ?: null,
                 ':title' => $title,
-                ':category' => $category,
-                ':keywords' => strtolower(str_replace(["\n", "\r", ",", "."], " ", $title))
+                ':category' => $category
             ]);
 
             $sourceId = (int)$db->lastInsertId();

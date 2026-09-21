@@ -37,12 +37,8 @@ class ContentCompactor
 
         $processedContent = implode("\n", $compactLines);
 
-        // Extract algorithmic single-word keywords (frequency-ranked)
-        $keywords = self::extractKeywords($rawContent . ' ' . $title);
-
         return [
-            'processed_content' => $processedContent,
-            'keywords'          => implode(', ', $keywords)
+            'processed_content' => $processedContent
         ];
     }
 
@@ -75,36 +71,4 @@ class ContentCompactor
 
         return false;
     }
-
-    /**
-     * Extract key nouns, academic terms, numbers, and important phrases for FULLTEXT index
-     */
-    public static function extractKeywords(string $text): array
-    {
-        // Strip punctuation
-        $clean = preg_replace('/[^\w\s-]/u', ' ', strtolower($text));
-        $words = preg_split('/\s+/', $clean);
-
-        $stopwords = [
-            'the','and','is','in','it','of','to','a','for','with','on','that','by','this','an','be',
-            'are','from','at','as','your','or','have','more','was','not','we','can','will','has',
-            'all','one','about','they','which','our','you','other','been','if','no','out','when',
-            'so','than','what','who','how','where','why','their','some','them','these','into'
-        ];
-
-        $wordCounts = [];
-        foreach ($words as $word) {
-            $word = trim($word);
-            if (strlen($word) < 3 || in_array($word, $stopwords) || is_numeric($word)) {
-                continue;
-            }
-            $wordCounts[$word] = ($wordCounts[$word] ?? 0) + 1;
-        }
-
-        arsort($wordCounts);
-        $topKeywords = array_slice(array_keys($wordCounts), 0, 20);
-
-        return $topKeywords;
-    }
-
 }
