@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Spendings &amp; Usage Intelligence — edvora.chat</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/theme-branding.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: #0b0f19;
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 12px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #topHeader {
+            height: 48px;
+            background: #111827;
+            border-bottom: 1px solid #1f2937;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-title {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-primary { background: rgba(99, 102, 241, 0.2); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.4); }
+        .badge-success { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); }
+        .badge-warning { background: rgba(245, 158, 11, 0.2); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.4); }
+        .badge-danger  { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
+        .badge-neutral { background: rgba(156, 163, 175, 0.2); color: #9ca3af; border: 1px solid rgba(156, 163, 175, 0.4); }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn {
+            height: 30px;
+            padding: 0 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 11.5px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            border: 1px solid transparent;
+            transition: all 0.15s ease;
+        }
+        .btn-primary { background: #4f46e5; color: #fff; border-color: #6366f1; }
+        .btn-primary:hover { background: #4338ca; }
+        .btn-secondary { background: #1f2937; color: #d1d5db; border-color: #374151; }
+        .btn-secondary:hover { background: #374151; color: #fff; }
+
+        .main-container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 24px 20px 48px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Metrics grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 14px;
+        }
+        .metric-card {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 8px;
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .metric-title {
+            font-size: 11px;
+            color: #9ca3af;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .metric-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .metric-sub {
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        /* Two column layout */
+        .grid-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        @media (max-width: 900px) {
+            .grid-split { grid-template-columns: 1fr; }
+        }
+
+        .panel-box {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .panel-header {
+            height: 40px;
+            padding: 0 16px;
+            background: #141d2f;
+            border-bottom: 1px solid #1f2937;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .panel-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Tables */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11.5px;
+            text-align: left;
+        }
+        th {
+            background: #0f172a;
+            padding: 10px 14px;
+            color: #94a3b8;
+            font-weight: 600;
+            border-bottom: 1px solid #1e293b;
+            white-space: nowrap;
+        }
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #cbd5e1;
+            vertical-align: middle;
+        }
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Filters Bar */
+        .filter-bar {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .filter-select, .filter-input {
+            background: #0b0f19;
+            border: 1px solid #374151;
+            color: #e5e7eb;
+            font-size: 11.5px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            outline: none;
+        }
+        .filter-select:focus, .filter-input:focus {
+            border-color: #6366f1;
+        }
+
+        /* Modal styling */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(2px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-card {
+            background: #111827;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 580px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+        .modal-header {
+            padding: 14px 18px;
+            border-bottom: 1px solid #1f2937;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-body {
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .form-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #9ca3af;
+        }
+        .form-input {
+            background: #0b0f19;
+            border: 1px solid #374151;
+            color: #fff;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+
+        /* Toast notification */
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #1e293b;
+            color: #fff;
+            border: 1px solid #334155;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            display: none;
+            z-index: 2000;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header id="topHeader">
+        <div class="header-title">
+            <span>💳</span>
+            <span>LLM Spendings &amp; Usage Intelligence</span>
+            <span class="badge badge-primary">Superadmin Audit</span>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="openPricingModal()">
+                <span>⚙️ Manage Rates &amp; Models</span>
+            </button>
+            <a href="/superadmin" class="btn btn-secondary">
+                <span>← Superadmin Home</span>
+            </a>
+            <button class="btn btn-primary" onclick="loadAllData()">
+                <span>🔄 Refresh</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="main-container">
+
+        <!-- Filter / Range Bar -->
+        <div class="filter-bar">
+            <div class="filter-group">
+                <span style="font-weight: 600; color: #94a3b8;">Time Range:</span>
+                <select id="rangeSelect" class="filter-select" onchange="onRangeChange()">
+                    <option value="1">Last 24 Hours</option>
+                    <option value="7">Last 7 Days</option>
+                    <option value="30" selected>Last 30 Days</option>
+                    <option value="90">Last 90 Days</option>
+                    <option value="0">All Time</option>
+                </select>
+                <input type="date" id="startDate" class="filter-input" style="display:none;" onchange="loadAllData()">
+                <input type="date" id="endDate" class="filter-input" style="display:none;" onchange="loadAllData()">
+            </div>
+            <div class="filter-group">
+                <span id="lastUpdated" style="color: #6b7280; font-size: 11px;">Updated just now</span>
+            </div>
+        </div>
+
+        <!-- Metric Cards -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-title">
+                    <span>Total LLM Spend</span>
+                    <span>💵</span>
+                </div>
+                <div class="metric-value" id="totalCost">$0.0000</div>
+                <div class="metric-sub" id="totalCostSub">In selected range</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">
+                    <span>Prompt Input Cost</span>
+                    <span>📥</span>
+                </div>
+                <div class="metric-value" id="promptCost">$0.0000</div>
+                <div class="metric-sub" id="promptCostSub">0 tokens</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">
+                    <span>Completion Output Cost</span>
+                    <span>📤</span>
+                </div>
+                <div class="metric-value" id="completionCost">$0.0000</div>
+                <div class="metric-sub" id="completionCostSub">0 tokens</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">
+                    <span>Total Tokens</span>
+                    <span>🔢</span>
+                </div>
+                <div class="metric-value" id="totalTokens">0</div>
+                <div class="metric-sub" id="totalTokensSub">Across all activities</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">
+                    <span>Total Operations</span>
+                    <span>⚡</span>
+                </div>
+                <div class="metric-value" id="totalCalls">0</div>
+                <div class="metric-sub" id="avgLatency">Avg Latency: 0ms</div>
+            </div>
+        </div>
+
+        <!-- Split Breakdown Panels -->
+        <div class="grid-split">
+            <!-- Spend by Activity -->
+            <div class="panel-box">
+                <div class="panel-header">
+                    <span class="panel-title">🏷️ Spending by Activity Type</span>
+                </div>
+                <div class="table-responsive">
+                    <table id="activityTable">
+                        <thead>
+                            <tr>
+                                <th>Activity</th>
+                                <th>Calls</th>
+                                <th>Tokens</th>
+                                <th>Total Cost ($)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="4" style="text-align:center; padding: 24px; color:#6b7280;">Loading activity breakdown...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Spend by Model / Provider -->
+            <div class="panel-box">
+                <div class="panel-header">
+                    <span class="panel-title">🤖 Spending by Provider &amp; Model</span>
+                </div>
+                <div class="table-responsive">
+                    <table id="modelTable">
+                        <thead>
+                            <tr>
+                                <th>Provider</th>
+                                <th>Model Name</th>
+                                <th>Calls</th>
+                                <th>Tokens</th>
+                                <th>Total Cost ($)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="5" style="text-align:center; padding: 24px; color:#6b7280;">Loading model breakdown...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tenant Spending Ranking -->
+        <div class="panel-box">
+            <div class="panel-header">
+                <span class="panel-title">🏛️ Top University / Tenant Spendings</span>
+            </div>
+            <div class="table-responsive">
+                <table id="tenantTable">
+                    <thead>
+                        <tr>
+                            <th>Organization Name</th>
+                            <th>Total Operations</th>
+                            <th>Tokens Consumed</th>
+                            <th>Total Spend ($)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="4" style="text-align:center; padding: 24px; color:#6b7280;">Loading tenant spendings...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Detailed Audit Logs -->
+        <div class="panel-box">
+            <div class="panel-header">
+                <span class="panel-title">📋 Detailed LLM Operations Log</span>
+                <div class="filter-group">
+                    <select id="logActivityFilter" class="filter-select" onchange="filterLogs()">
+                        <option value="">All Activities</option>
+                        <option value="chat_completion">Chat Completions</option>
+                        <option value="document_ingestion">Document Ingestion</option>
+                        <option value="query_embedding">Query Embeddings</option>
+                        <option value="system_test">System Tests</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <input type="text" id="logSearch" class="filter-input" placeholder="Search description / model..." oninput="debounceFilterLogs()">
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table id="logsTable">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Activity</th>
+                            <th>Context / Description</th>
+                            <th>Provider / Model</th>
+                            <th>Tokens (In / Out)</th>
+                            <th>Cost ($)</th>
+                            <th>Latency</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="8" style="text-align:center; padding: 30px; color:#6b7280;">Loading logs...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Pagination -->
+            <div style="padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #1f2937;">
+                <span id="paginationInfo" style="color: #6b7280; font-size: 11.5px;">Showing 0 - 0</span>
+                <div class="filter-group">
+                    <button class="btn btn-secondary" id="btnPrevPage" onclick="prevPage()" disabled>Previous</button>
+                    <button class="btn btn-secondary" id="btnNextPage" onclick="nextPage()" disabled>Next</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Provider Pricing Modal -->
+    <div id="pricingModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <span style="font-weight: 700; color: #fff; font-size: 13px;">⚙️ LLM Provider Cost Management</span>
+                <button onclick="closePricingModal()" style="background:none; border:none; color:#9ca3af; font-size:18px; cursor:pointer;">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="color: #9ca3af; font-size: 11.5px; line-height: 1.5;">
+                    Set input and output costs per <strong>1 Million tokens</strong> for each model. Usage logs compute micro-costs automatically based on these values.
+                </p>
+                <div id="providerPricingList" style="display: flex; flex-direction: column; gap: 12px;">
+                    <!-- Rendered dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script>
+        let currentPage = 1;
+        let totalPages = 1;
+        let searchTimeout = null;
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.display = 'block';
+            setTimeout(() => { t.style.display = 'none'; }, 3500);
+        }
+
+        function formatCost(val) {
+            const num = parseFloat(val) || 0;
+            if (num < 0.0001 && num > 0) {
+                return '$' + num.toFixed(6);
+            }
+            return '$' + num.toFixed(4);
+        }
+
+        function formatTokens(val) {
+            const num = parseInt(val, 10) || 0;
+            return num.toLocaleString();
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function onRangeChange() {
+            const r = document.getElementById('rangeSelect').value;
+            loadAllData();
+        }
+
+        async function loadSummary() {
+            const range = document.getElementById('rangeSelect').value;
+            let url = `/v1/superadmin/llm-usage/summary?days=${range}`;
+
+            try {
+                const res = await fetch(url, { credentials: 'same-origin' });
+                const json = await res.json();
+                if (json.status === 'success' && json.data) {
+                    renderSummary(json.data);
+                }
+            } catch (err) {
+                console.error("Failed to load summary:", err);
+            }
+        }
+
+        function renderSummary(data) {
+            const totals = data.totals || {};
+            document.getElementById('totalCost').innerText = formatCost(totals.total_cost);
+            document.getElementById('promptCost').innerText = formatCost(totals.prompt_cost);
+            document.getElementById('promptCostSub').innerText = `${formatTokens(totals.prompt_tokens)} tokens`;
+            document.getElementById('completionCost').innerText = formatCost(totals.completion_cost);
+            document.getElementById('completionCostSub').innerText = `${formatTokens(totals.completion_tokens)} tokens`;
+            document.getElementById('totalTokens').innerText = formatTokens(totals.total_tokens);
+            document.getElementById('totalCalls').innerText = formatTokens(totals.total_calls);
+            document.getElementById('avgLatency').innerText = `Avg Latency: ${Math.round(totals.avg_latency_ms || 0)}ms`;
+
+            // Activity table
+            const actTbody = document.querySelector('#activityTable tbody');
+            const activities = data.by_activity || [];
+            if (activities.length === 0) {
+                actTbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px; color:#6b7280;">No activity in selected period</td></tr>`;
+            } else {
+                actTbody.innerHTML = activities.map(a => `
+                    <tr>
+                        <td>
+                            <span class="badge ${getActivityBadge(a.activity_type)}">${formatActivity(a.activity_type)}</span>
+                        </td>
+                        <td class="mono">${formatTokens(a.calls)}</td>
+                        <td class="mono">${formatTokens(a.total_tokens)}</td>
+                        <td class="mono" style="font-weight:700; color:#38bdf8;">${formatCost(a.total_cost)}</td>
+                    </tr>
+                `).join('');
+            }
+
+            // Model table
+            const modelTbody = document.querySelector('#modelTable tbody');
+            const models = data.by_model || [];
+            if (models.length === 0) {
+                modelTbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:#6b7280;">No model usage in selected period</td></tr>`;
+            } else {
+                modelTbody.innerHTML = models.map(m => `
+                    <tr>
+                        <td style="font-weight:600; text-transform:uppercase;">${escapeHtml(m.provider)}</td>
+                        <td class="mono">${escapeHtml(m.model_name)}</td>
+                        <td class="mono">${formatTokens(m.calls)}</td>
+                        <td class="mono">${formatTokens(m.total_tokens)}</td>
+                        <td class="mono" style="font-weight:700; color:#34d399;">${formatCost(m.total_cost)}</td>
+                    </tr>
+                `).join('');
+            }
+
+            // Tenant table
+            const tenantTbody = document.querySelector('#tenantTable tbody');
+            const orgs = data.by_organization || [];
+            if (orgs.length === 0) {
+                tenantTbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px; color:#6b7280;">No tenant operations recorded</td></tr>`;
+            } else {
+                tenantTbody.innerHTML = orgs.map(o => `
+                    <tr>
+                        <td style="font-weight:600; color:#fff;">${escapeHtml(o.organization_name)}</td>
+                        <td class="mono">${formatTokens(o.calls)}</td>
+                        <td class="mono">${formatTokens(o.total_tokens)}</td>
+                        <td class="mono" style="font-weight:700; color:#f59e0b;">${formatCost(o.total_cost)}</td>
+                    </tr>
+                `).join('');
+            }
+
+            document.getElementById('lastUpdated').innerText = 'Last updated: ' + new Date().toLocaleTimeString();
+        }
+
+        function formatActivity(type) {
+            const map = {
+                'chat_completion': 'Chat Conversation',
+                'document_ingestion': 'Document Ingestion',
+                'query_embedding': 'Query Embedding',
+                'lead_qualification': 'Lead Qualification',
+                'system_test': 'System Test',
+                'other': 'Other'
+            };
+            return map[type] || type;
+        }
+
+        function getActivityBadge(type) {
+            const map = {
+                'chat_completion': 'badge-primary',
+                'document_ingestion': 'badge-warning',
+                'query_embedding': 'badge-success',
+                'lead_qualification': 'badge-neutral',
+                'system_test': 'badge-neutral'
+            };
+            return map[type] || 'badge-neutral';
+        }
+
+        async function loadLogs() {
+            const range = document.getElementById('rangeSelect').value;
+            const activity = document.getElementById('logActivityFilter').value;
+            const search = document.getElementById('logSearch').value;
+
+            let url = `/v1/superadmin/llm-usage/logs?page=${currentPage}&per_page=20`;
+            if (range > 0) url += `&days=${range}`;
+            if (activity) url += `&activity_type=${encodeURIComponent(activity)}`;
+            if (search) url += `&search=${encodeURIComponent(search)}`;
+
+            try {
+                const res = await fetch(url, { credentials: 'same-origin' });
+                const json = await res.json();
+                if (json.status === 'success' && json.data) {
+                    renderLogs(json.data.data, json.data.pagination);
+                }
+            } catch (err) {
+                console.error("Failed to load logs:", err);
+            }
+        }
+
+        function renderLogs(logs, pagination) {
+            const tbody = document.querySelector('#logsTable tbody');
+            if (!logs || logs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:#6b7280;">No matching LLM operations found</td></tr>`;
+                document.getElementById('paginationInfo').innerText = 'Showing 0 - 0';
+                return;
+            }
+
+            totalPages = pagination.total_pages || 1;
+            document.getElementById('paginationInfo').innerText = `Page ${pagination.current_page} of ${totalPages} (${pagination.total_rows} entries)`;
+            document.getElementById('btnPrevPage').disabled = pagination.current_page <= 1;
+            document.getElementById('btnNextPage').disabled = pagination.current_page >= totalPages;
+
+            tbody.innerHTML = logs.map(row => {
+                const statusBadge = row.status === 'success' ? 'badge-success' : (row.status === 'fallback' ? 'badge-warning' : 'badge-danger');
+                const tenantLabel = row.organization_name ? escapeHtml(row.organization_name) : '<span style="color:#6b7280;">Platform</span>';
+
+                return `
+                    <tr>
+                        <td class="mono" style="white-space:nowrap; color:#94a3b8; font-size:11px;">
+                            ${escapeHtml(row.created_at)}
+                        </td>
+                        <td>
+                            <span class="badge ${getActivityBadge(row.activity_type)}">${formatActivity(row.activity_type)}</span>
+                            <div style="font-size:10px; color:#6b7280; margin-top:2px;">${tenantLabel}</div>
+                        </td>
+                        <td style="max-width:280px; word-break:break-word;">
+                            <div style="color:#e2e8f0;">${escapeHtml(row.description || 'N/A')}</div>
+                            ${row.reference_type ? `<div style="font-size:10px; color:#64748b; font-family:'JetBrains Mono';">${escapeHtml(row.reference_type)} #${row.reference_id || ''}</div>` : ''}
+                        </td>
+                        <td>
+                            <div style="font-weight:600; text-transform:uppercase; font-size:10px; color:#818cf8;">${escapeHtml(row.provider)}</div>
+                            <div class="mono" style="font-size:11px; color:#cbd5e1;">${escapeHtml(row.model_name)}</div>
+                        </td>
+                        <td class="mono">
+                            <div>${formatTokens(row.prompt_tokens)} / ${formatTokens(row.completion_tokens)}</div>
+                            <div style="font-size:10px; color:#6b7280;">${formatTokens(row.total_tokens)} total</div>
+                        </td>
+                        <td class="mono" style="font-weight:700; color:#38bdf8;">
+                            ${formatCost(row.cost_total)}
+                        </td>
+                        <td class="mono" style="color:#94a3b8;">
+                            ${row.latency_ms ? row.latency_ms + 'ms' : '-'}
+                        </td>
+                        <td>
+                            <span class="badge ${statusBadge}">${escapeHtml(row.status)}</span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterLogs() {
+            currentPage = 1;
+            loadLogs();
+        }
+
+        function debounceFilterLogs() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                currentPage = 1;
+                loadLogs();
+            }, 300);
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                loadLogs();
+            }
+        }
+
+        function nextPage() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                loadLogs();
+            }
+        }
+
+        // Provider Pricing Editor
+        let providersList = [];
+
+        async function openPricingModal() {
+            document.getElementById('pricingModal').style.display = 'flex';
+            const listEl = document.getElementById('providerPricingList');
+            listEl.innerHTML = '<div style="text-align:center; padding:16px; color:#9ca3af;">Loading providers...</div>';
+
+            try {
+                const res = await fetch('/v1/superadmin/llm-providers', { credentials: 'same-origin' });
+                const json = await res.json();
+                if (json.status === 'success' && json.data) {
+                    providersList = json.data;
+                    renderPricingList();
+                }
+            } catch (err) {
+                listEl.innerHTML = '<div style="color:#ef4444;">Failed to load providers.</div>';
+            }
+        }
+
+        function closePricingModal() {
+            document.getElementById('pricingModal').style.display = 'none';
+        }
+
+        function renderPricingList() {
+            const listEl = document.getElementById('providerPricingList');
+            if (providersList.length === 0) {
+                listEl.innerHTML = '<div style="color:#9ca3af;">No LLM providers configured yet.</div>';
+                return;
+            }
+
+            listEl.innerHTML = providersList.map(p => `
+                <div style="background:#0b0f19; border:1px solid #1f2937; border-radius:6px; padding:14px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <div>
+                            <span style="font-weight:700; color:#fff; font-size:12.5px;">${escapeHtml(p.name)}</span>
+                            <span class="badge badge-primary" style="margin-left:6px;">${escapeHtml(p.provider)}</span>
+                            <span class="badge ${p.role === 'primary' ? 'badge-success' : 'badge-neutral'}" style="margin-left:4px;">${escapeHtml(p.role)}</span>
+                        </div>
+                        <span class="mono" style="color:#818cf8; font-size:11px;">${escapeHtml(p.model_name)}</span>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr 90px; gap:10px; align-items:flex-end;">
+                        <div class="form-group">
+                            <label class="form-label">Cost / 1M Input Tokens ($)</label>
+                            <input type="number" step="0.0001" id="cost_in_${p.id}" class="form-input mono" value="${parseFloat(p.cost_per_1m_input_tokens || 0).toFixed(4)}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Cost / 1M Output Tokens ($)</label>
+                            <input type="number" step="0.0001" id="cost_out_${p.id}" class="form-input mono" value="${parseFloat(p.cost_per_1m_output_tokens || 0).toFixed(4)}">
+                        </div>
+                        <div>
+                            <button class="btn btn-primary" style="width:100%; height:32px;" onclick="saveProviderPricing(${p.id})">Save</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function saveProviderPricing(id) {
+            const provider = providersList.find(p => p.id === id);
+            if (!provider) return;
+
+            const inCost = parseFloat(document.getElementById(`cost_in_${id}`).value) || 0;
+            const outCost = parseFloat(document.getElementById(`cost_out_${id}`).value) || 0;
+
+            const payload = {
+                name: provider.name,
+                provider: provider.provider,
+                model_name: provider.model_name,
+                api_base_url: provider.api_base_url,
+                temperature: provider.temperature,
+                max_tokens: provider.max_tokens,
+                timeout_seconds: provider.timeout_seconds,
+                role: provider.role,
+                is_active: provider.is_active,
+                cost_per_1m_input_tokens: inCost,
+                cost_per_1m_output_tokens: outCost
+            };
+
+            try {
+                const res = await fetch(`/v1/superadmin/llm-providers/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify(payload)
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast(`Updated rates for ${provider.name}`);
+                    provider.cost_per_1m_input_tokens = inCost;
+                    provider.cost_per_1m_output_tokens = outCost;
+                } else {
+                    showToast('Update failed: ' + (json.message || 'Error'));
+                }
+            } catch (err) {
+                showToast('Failed to update provider pricing: ' + err.message);
+            }
+        }
+
+        function loadAllData() {
+            loadSummary();
+            loadLogs();
+        }
+
+        // Initialize on load
+        loadAllData();
+    </script>
+</body>
+</html>

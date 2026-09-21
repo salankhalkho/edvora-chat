@@ -40,7 +40,11 @@ class ContentEngine
         // TIER 1: Vector Similarity Search against knowledge_items
         // ──────────────────────────────────────────────────────────────────────
         try {
-            $questionVector = EmbeddingService::embed($query);
+            $questionVector = EmbeddingService::embed($query, [
+                'organization_id' => $organizationId,
+                'activity_type' => 'query_embedding',
+                'description' => "Vector search query embedding for org #{$organizationId}"
+            ]);
             $items = VectorSearchEngine::findClosest($questionVector, $organizationId, $programId, 5);
 
             if (!empty($items)) {

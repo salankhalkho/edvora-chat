@@ -11,7 +11,7 @@ class LlmService
     /**
      * Complete prompt using Super Admin managed LLM Providers (with primary -> fallback failover)
      */
-    public static function complete(string $systemPrompt, string $userMessage, array $conversationHistory = []): array
+    public static function complete(string $systemPrompt, string $userMessage, array $conversationHistory = [], array $context = []): array
     {
         $db = Database::getConnection();
 
@@ -38,7 +38,7 @@ class LlmService
         // Attempt Primary Provider
         if ($primary) {
             try {
-                $result = self::executeProvider($primary, $systemPrompt, $userMessage, $conversationHistory);
+                $result = self::executeProvider($primary, $systemPrompt, $userMessage, $conversationHistory, $context);
             } catch (Exception $e) {
                 error_log("[LlmService] Primary LLM Provider failed: " . $e->getMessage() . ". Switching to fallback...");
             }
@@ -47,7 +47,9 @@ class LlmService
         // Attempt Fallback Provider
         if (!$result && $fallback) {
             try {
-                $result = self::executeProvider($fallback, $systemPrompt, $userMessage, $conversationHistory);
+                $fallbackContext = $context;
+                $fallbackContext['is_fallback'] = true;
+                $result = self::executeProvider($fallback, $systemPrompt, $userMessage, $conversationHistory, $fallbackContext);
             } catch (Exception $e) {
                 error_log("[LlmService] Fallback LLM Provider failed: " . $e->getMessage());
             }
@@ -55,7 +57,7 @@ class LlmService
 
         // Fallback to Environment Variables (OpenAI / Gemini) if DB providers fail or not set
         if (!$result) {
-            $result = self::executeEnvFallback($systemPrompt, $userMessage, $conversationHistory);
+            $result = self::executeEnvFallback($systemPrompt, $userMessage, $conversationHistory, $context);
         }
 
         // Record entry in recent logs JSON (strictly maximum 1 entry)
@@ -132,15 +134,21 @@ class LlmService
     /**
      * Test a provider directly for health check / latency validation
      */
+    /**
+     * Test a provider directly for health check / latency validation
+     */
     public static function testProviderDirect(array $providerConfig): array
     {
-        return self::executeProvider($providerConfig, "You are a ping test assistant.", "Reply with: PONG", []);
+        return self::executeProvider($providerConfig, "You are a ping test assistant.", "Reply with: PONG", [], [
+            'activity_type' => 'system_test',
+            'description' => 'Superadmin LLM Provider health ping test'
+        ]);
     }
 
     /**
      * Dispatch completion call to provider API
      */
-    private static function executeProvider(array $providerConfig, string $systemPrompt, string $userMessage, array $history): array
+    private static function executeProvider(array $providerConfig, string $systemPrompt, string $userMessage, array $history, array $context = []): array
     {
         $providerType = strtolower($providerConfig['provider']);
         $model = $providerConfig['model_name'];
@@ -153,14 +161,66 @@ class LlmService
             throw new Exception("API Key missing for provider {$providerType}");
         }
 
-        switch ($providerType) {
-            case 'openai':
-            case 'groq':
-                return self::callOpenAiCompatible($providerConfig['api_base_url'] ?? ($providerType === 'groq' ? 'https://api.groq.com/openai/v1' : 'https://api.openai.com/v1'), $apiKey, $model, $systemPrompt, $userMessage, $history, $temperature, $maxTokens, $timeout);
-            case 'gemini':
-                return self::callGemini($apiKey, $model, $systemPrompt, $userMessage, $history, $temperature, $maxTokens, $timeout);
-            default:
-                throw new Exception("Unsupported provider: {$providerType}");
+        $startTime = microtime(true);
+
+        try {
+            switch ($providerType) {
+                case 'openai':
+                case 'groq':
+                    $res = self::callOpenAiCompatible($providerConfig['api_base_url'] ?? ($providerType === 'groq' ? 'https://api.groq.com/openai/v1' : 'https://api.openai.com/v1'), $apiKey, $model, $systemPrompt, $userMessage, $history, $temperature, $maxTokens, $timeout);
+                    break;
+                case 'gemini':
+                    $res = self::callGemini($apiKey, $model, $systemPrompt, $userMessage, $history, $temperature, $maxTokens, $timeout);
+                    break;
+                default:
+                    throw new Exception("Unsupported provider: {$providerType}");
+            }
+
+            $latencyMs = (int)round((microtime(true) - $startTime) * 1000);
+            $promptTokens = (int)($res['prompt_tokens'] ?? 0);
+            $completionTokens = (int)($res['completion_tokens'] ?? 0);
+            $totalTokens = (int)($res['tokens_used'] ?? ($promptTokens + $completionTokens));
+
+            LlmUsageLogger::log([
+                'organization_id' => $context['organization_id'] ?? null,
+                'chatbot_id' => $context['chatbot_id'] ?? null,
+                'activity_type' => $context['activity_type'] ?? 'chat_completion',
+                'reference_type' => $context['reference_type'] ?? null,
+                'reference_id' => $context['reference_id'] ?? null,
+                'description' => $context['description'] ?? 'Chat completion turn',
+                'llm_provider_id' => $providerConfig['id'] ?? null,
+                'provider' => $providerConfig['provider'] ?? 'unknown',
+                'model_name' => $res['model'] ?? $model,
+                'prompt_tokens' => $promptTokens,
+                'completion_tokens' => $completionTokens,
+                'total_tokens' => $totalTokens,
+                'cost_per_1m_input_tokens' => $providerConfig['cost_per_1m_input_tokens'] ?? null,
+                'cost_per_1m_output_tokens' => $providerConfig['cost_per_1m_output_tokens'] ?? null,
+                'latency_ms' => $latencyMs,
+                'status' => !empty($context['is_fallback']) ? 'fallback' : 'success',
+            ]);
+
+            return $res;
+        } catch (Exception $e) {
+            $latencyMs = (int)round((microtime(true) - $startTime) * 1000);
+            LlmUsageLogger::log([
+                'organization_id' => $context['organization_id'] ?? null,
+                'chatbot_id' => $context['chatbot_id'] ?? null,
+                'activity_type' => $context['activity_type'] ?? 'chat_completion',
+                'reference_type' => $context['reference_type'] ?? null,
+                'reference_id' => $context['reference_id'] ?? null,
+                'description' => $context['description'] ?? 'Chat completion turn',
+                'llm_provider_id' => $providerConfig['id'] ?? null,
+                'provider' => $providerConfig['provider'] ?? 'unknown',
+                'model_name' => $model,
+                'prompt_tokens' => 0,
+                'completion_tokens' => 0,
+                'total_tokens' => 0,
+                'latency_ms' => $latencyMs,
+                'status' => 'failed',
+                'error_message' => $e->getMessage()
+            ]);
+            throw $e;
         }
     }
 
@@ -211,11 +271,15 @@ class LlmService
 
         $json = json_decode($res, true);
         $content = $json['choices'][0]['message']['content'] ?? '';
-        $tokens = $json['usage']['total_tokens'] ?? 0;
+        $promptTokens = (int)($json['usage']['prompt_tokens'] ?? 0);
+        $completionTokens = (int)($json['usage']['completion_tokens'] ?? 0);
+        $tokens = (int)($json['usage']['total_tokens'] ?? ($promptTokens + $completionTokens));
 
         return [
             'text' => trim($content),
             'tokens_used' => $tokens,
+            'prompt_tokens' => $promptTokens,
+            'completion_tokens' => $completionTokens,
             'model' => $model
         ];
     }
@@ -275,11 +339,15 @@ class LlmService
 
         $json = json_decode($res, true);
         $text = $json['candidates'][0]['content']['parts'][0]['text'] ?? '';
-        $tokens = $json['usageMetadata']['totalTokenCount'] ?? 0;
+        $promptTokens = (int)($json['usageMetadata']['promptTokenCount'] ?? 0);
+        $completionTokens = (int)($json['usageMetadata']['candidatesTokenCount'] ?? 0);
+        $tokens = (int)($json['usageMetadata']['totalTokenCount'] ?? ($promptTokens + $completionTokens));
 
         return [
             'text' => trim($text),
             'tokens_used' => $tokens,
+            'prompt_tokens' => $promptTokens,
+            'completion_tokens' => $completionTokens,
             'model' => $model
         ];
     }
@@ -287,16 +355,52 @@ class LlmService
     /**
      * Fallback to environment variables if no DB provider exists
      */
-    private static function executeEnvFallback(string $systemPrompt, string $userMessage, array $history): array
+    private static function executeEnvFallback(string $systemPrompt, string $userMessage, array $history, array $context = []): array
     {
         $openAiKey = Env::get('OPENAI_API_KEY');
         if (!empty($openAiKey)) {
-            return self::callOpenAiCompatible('https://api.openai.com/v1', $openAiKey, 'gpt-4o-mini', $systemPrompt, $userMessage, $history, 0.3, 400, 20);
+            $startTime = microtime(true);
+            $res = self::callOpenAiCompatible('https://api.openai.com/v1', $openAiKey, 'gpt-4o-mini', $systemPrompt, $userMessage, $history, 0.3, 400, 20);
+            $latencyMs = (int)round((microtime(true) - $startTime) * 1000);
+            LlmUsageLogger::log([
+                'organization_id' => $context['organization_id'] ?? null,
+                'chatbot_id' => $context['chatbot_id'] ?? null,
+                'activity_type' => $context['activity_type'] ?? 'chat_completion',
+                'reference_type' => $context['reference_type'] ?? null,
+                'reference_id' => $context['reference_id'] ?? null,
+                'description' => $context['description'] ?? 'Chat completion turn (env fallback)',
+                'provider' => 'openai',
+                'model_name' => 'gpt-4o-mini',
+                'prompt_tokens' => (int)($res['prompt_tokens'] ?? 0),
+                'completion_tokens' => (int)($res['completion_tokens'] ?? 0),
+                'total_tokens' => (int)($res['tokens_used'] ?? 0),
+                'latency_ms' => $latencyMs,
+                'status' => 'success',
+            ]);
+            return $res;
         }
 
         $geminiKey = Env::get('GEMINI_API_KEY');
         if (!empty($geminiKey)) {
-            return self::callGemini($geminiKey, 'gemini-1.5-flash', $systemPrompt, $userMessage, $history, 0.3, 400, 20);
+            $startTime = microtime(true);
+            $res = self::callGemini($geminiKey, 'gemini-1.5-flash', $systemPrompt, $userMessage, $history, 0.3, 400, 20);
+            $latencyMs = (int)round((microtime(true) - $startTime) * 1000);
+            LlmUsageLogger::log([
+                'organization_id' => $context['organization_id'] ?? null,
+                'chatbot_id' => $context['chatbot_id'] ?? null,
+                'activity_type' => $context['activity_type'] ?? 'chat_completion',
+                'reference_type' => $context['reference_type'] ?? null,
+                'reference_id' => $context['reference_id'] ?? null,
+                'description' => $context['description'] ?? 'Chat completion turn (gemini env fallback)',
+                'provider' => 'gemini',
+                'model_name' => 'gemini-1.5-flash',
+                'prompt_tokens' => (int)($res['prompt_tokens'] ?? 0),
+                'completion_tokens' => (int)($res['completion_tokens'] ?? 0),
+                'total_tokens' => (int)($res['tokens_used'] ?? 0),
+                'latency_ms' => $latencyMs,
+                'status' => 'success',
+            ]);
+            return $res;
         }
 
         // Default neutral greeting if no external API keys configured yet

@@ -60,7 +60,8 @@ class SuperAdminController
     {
         $db = Database::getConnection();
         $stmt = $db->query("
-            SELECT id, name, provider, model_name, api_base_url, temperature, max_tokens, timeout_seconds, role, is_active, 
+            SELECT id, name, provider, model_name, api_base_url, temperature, max_tokens, timeout_seconds,
+                   cost_per_1m_input_tokens, cost_per_1m_output_tokens, role, is_active, 
                    IF(api_key_encrypted IS NOT NULL AND api_key_encrypted != '', 1, 0) AS has_api_key,
                    last_tested_at, last_test_result, created_at, updated_at
             FROM llm_providers
@@ -100,9 +101,12 @@ class SuperAdminController
             $stmtUnset->execute([':role' => $role]);
         }
 
+        $costInput = isset($data['cost_per_1m_input_tokens']) ? (float)$data['cost_per_1m_input_tokens'] : 0.0;
+        $costOutput = isset($data['cost_per_1m_output_tokens']) ? (float)$data['cost_per_1m_output_tokens'] : 0.0;
+
         $stmt = $db->prepare("
-            INSERT INTO llm_providers (name, provider, model_name, api_key_encrypted, api_base_url, temperature, max_tokens, timeout_seconds, role, is_active, created_at, updated_at)
-            VALUES (:name, :provider, :model, :key, :base_url, :temp, :tokens, :timeout, :role, :active, NOW(), NOW())
+            INSERT INTO llm_providers (name, provider, model_name, api_key_encrypted, api_base_url, temperature, max_tokens, timeout_seconds, cost_per_1m_input_tokens, cost_per_1m_output_tokens, role, is_active, created_at, updated_at)
+            VALUES (:name, :provider, :model, :key, :base_url, :temp, :tokens, :timeout, :cost_input, :cost_output, :role, :active, NOW(), NOW())
         ");
         $stmt->execute([
             ':name' => trim($data['name']),
@@ -113,6 +117,8 @@ class SuperAdminController
             ':temp' => isset($data['temperature']) ? (float)$data['temperature'] : 0.30,
             ':tokens' => isset($data['max_tokens']) ? (int)$data['max_tokens'] : 1500,
             ':timeout' => isset($data['timeout_seconds']) ? (int)$data['timeout_seconds'] : 30,
+            ':cost_input' => $costInput,
+            ':cost_output' => $costOutput,
             ':role' => $role,
             ':active' => isset($data['is_active']) ? (int)(bool)$data['is_active'] : 1
         ]);
@@ -155,7 +161,10 @@ class SuperAdminController
             $stmtUnset->execute([':role' => $role, ':id' => $id]);
         }
 
-        $sql = "UPDATE llm_providers SET name = :name, provider = :provider, model_name = :model, api_base_url = :base_url, temperature = :temp, max_tokens = :tokens, timeout_seconds = :timeout, role = :role, is_active = :active, updated_at = NOW()";
+        $costInput = isset($data['cost_per_1m_input_tokens']) ? (float)$data['cost_per_1m_input_tokens'] : 0.0;
+        $costOutput = isset($data['cost_per_1m_output_tokens']) ? (float)$data['cost_per_1m_output_tokens'] : 0.0;
+
+        $sql = "UPDATE llm_providers SET name = :name, provider = :provider, model_name = :model, api_base_url = :base_url, temperature = :temp, max_tokens = :tokens, timeout_seconds = :timeout, cost_per_1m_input_tokens = :cost_input, cost_per_1m_output_tokens = :cost_output, role = :role, is_active = :active, updated_at = NOW()";
         $binds = [
             ':name' => trim($data['name']),
             ':provider' => strtolower(trim($data['provider'])),
@@ -164,6 +173,8 @@ class SuperAdminController
             ':temp' => isset($data['temperature']) ? (float)$data['temperature'] : 0.30,
             ':tokens' => isset($data['max_tokens']) ? (int)$data['max_tokens'] : 1500,
             ':timeout' => isset($data['timeout_seconds']) ? (int)$data['timeout_seconds'] : 30,
+            ':cost_input' => $costInput,
+            ':cost_output' => $costOutput,
             ':role' => $role,
             ':active' => isset($data['is_active']) ? (int)(bool)$data['is_active'] : 1,
             ':id' => $id
@@ -1072,6 +1083,215 @@ class SuperAdminController
         }
 
         Response::success([], 'LLM debug logs cleared successfully');
+    }
+
+    /**
+     * GET /v1/superadmin/llm-usage/summary — Aggregate LLM spend and activity stats
+     */
+    public function getLlmSpendingSummary(Request $request): void
+    {
+        $db = Database::getConnection();
+        $days = (int)($request->query('days', 30));
+        $startDate = $request->query('start_date');
+        $endDate = $request->query('end_date');
+
+        $where = "WHERE 1=1";
+        $params = [];
+
+        if (!empty($startDate)) {
+            $where .= " AND created_at >= :start_date";
+            $params[':start_date'] = $startDate . ' 00:00:00';
+        } elseif ($days > 0) {
+            $where .= " AND created_at >= DATE_SUB(NOW(), INTERVAL :days DAY)";
+            $params[':days'] = $days;
+        }
+
+        if (!empty($endDate)) {
+            $where .= " AND created_at <= :end_date";
+            $params[':end_date'] = $endDate . ' 23:59:59';
+        }
+
+        // 1. Overall totals
+        $stmtTotals = $db->prepare("
+            SELECT 
+                COUNT(*) as total_calls,
+                COALESCE(SUM(total_tokens), 0) as total_tokens,
+                COALESCE(SUM(prompt_tokens), 0) as prompt_tokens,
+                COALESCE(SUM(completion_tokens), 0) as completion_tokens,
+                COALESCE(SUM(cost_total), 0) as total_cost,
+                COALESCE(SUM(cost_prompt), 0) as prompt_cost,
+                COALESCE(SUM(cost_completion), 0) as completion_cost,
+                AVG(latency_ms) as avg_latency_ms
+            FROM llm_usage_logs
+            {$where}
+        ");
+        $stmtTotals->execute($params);
+        $totals = $stmtTotals->fetch() ?: [];
+
+        // 2. Breakdown by Activity
+        $stmtActivity = $db->prepare("
+            SELECT 
+                activity_type,
+                COUNT(*) as calls,
+                COALESCE(SUM(total_tokens), 0) as total_tokens,
+                COALESCE(SUM(cost_total), 0) as total_cost
+            FROM llm_usage_logs
+            {$where}
+            GROUP BY activity_type
+            ORDER BY total_cost DESC, calls DESC
+        ");
+        $stmtActivity->execute($params);
+        $byActivity = $stmtActivity->fetchAll();
+
+        // 3. Breakdown by Provider & Model
+        $stmtModels = $db->prepare("
+            SELECT 
+                provider,
+                model_name,
+                COUNT(*) as calls,
+                COALESCE(SUM(total_tokens), 0) as total_tokens,
+                COALESCE(SUM(cost_total), 0) as total_cost
+            FROM llm_usage_logs
+            {$where}
+            GROUP BY provider, model_name
+            ORDER BY total_cost DESC
+        ");
+        $stmtModels->execute($params);
+        $byModel = $stmtModels->fetchAll();
+
+        // 4. Top Organizations by Spend
+        $stmtOrgs = $db->prepare("
+            SELECT 
+                l.organization_id,
+                COALESCE(o.name, 'Platform / System') as organization_name,
+                COUNT(*) as calls,
+                COALESCE(SUM(l.total_tokens), 0) as total_tokens,
+                COALESCE(SUM(l.cost_total), 0) as total_cost
+            FROM llm_usage_logs l
+            LEFT JOIN organizations o ON l.organization_id = o.id
+            {$where}
+            GROUP BY l.organization_id, o.name
+            ORDER BY total_cost DESC
+            LIMIT 10
+        ");
+        $stmtOrgs->execute($params);
+        $byOrg = $stmtOrgs->fetchAll();
+
+        // 5. Daily spend trend
+        $stmtDaily = $db->prepare("
+            SELECT 
+                DATE(created_at) as date,
+                COUNT(*) as calls,
+                COALESCE(SUM(cost_total), 0) as cost,
+                COALESCE(SUM(total_tokens), 0) as tokens
+            FROM llm_usage_logs
+            {$where}
+            GROUP BY DATE(created_at)
+            ORDER BY date ASC
+        ");
+        $stmtDaily->execute($params);
+        $dailyTrend = $stmtDaily->fetchAll();
+
+        Response::success([
+            'totals' => $totals,
+            'by_activity' => $byActivity,
+            'by_model' => $byModel,
+            'by_organization' => $byOrg,
+            'daily_trend' => $dailyTrend
+        ]);
+    }
+
+    /**
+     * GET /v1/superadmin/llm-usage/logs — Paginated, filterable LLM usage audit logs
+     */
+    public function getLlmUsageLogs(Request $request): void
+    {
+        $db = Database::getConnection();
+
+        $page = max(1, (int)($request->query('page', 1)));
+        $perPage = min(100, max(10, (int)($request->query('per_page', 25))));
+        $offset = ($page - 1) * $perPage;
+
+        $activity = $request->query('activity_type');
+        $provider = $request->query('provider');
+        $model = $request->query('model');
+        $orgId = $request->query('organization_id');
+        $status = $request->query('status');
+        $search = $request->query('search');
+        $startDate = $request->query('start_date');
+        $endDate = $request->query('end_date');
+
+        $where = "WHERE 1=1";
+        $params = [];
+
+        if (!empty($activity)) {
+            $where .= " AND l.activity_type = :activity";
+            $params[':activity'] = $activity;
+        }
+        if (!empty($provider)) {
+            $where .= " AND l.provider = :provider";
+            $params[':provider'] = $provider;
+        }
+        if (!empty($model)) {
+            $where .= " AND l.model_name = :model";
+            $params[':model'] = $model;
+        }
+        if (!empty($orgId)) {
+            $where .= " AND l.organization_id = :org_id";
+            $params[':org_id'] = (int)$orgId;
+        }
+        if (!empty($status)) {
+            $where .= " AND l.status = :status";
+            $params[':status'] = $status;
+        }
+        if (!empty($search)) {
+            $where .= " AND (l.description LIKE :search OR l.reference_type LIKE :search OR l.model_name LIKE :search)";
+            $params[':search'] = '%' . $search . '%';
+        }
+        if (!empty($startDate)) {
+            $where .= " AND l.created_at >= :start_date";
+            $params[':start_date'] = $startDate . ' 00:00:00';
+        }
+        if (!empty($endDate)) {
+            $where .= " AND l.created_at <= :end_date";
+            $params[':end_date'] = $endDate . ' 23:59:59';
+        }
+
+        // Count
+        $stmtCount = $db->prepare("SELECT COUNT(*) FROM llm_usage_logs l {$where}");
+        $stmtCount->execute($params);
+        $totalRows = (int)$stmtCount->fetchColumn();
+
+        // Query rows with tenant organization name
+        $stmt = $db->prepare("
+            SELECT 
+                l.id, l.organization_id, l.chatbot_id, l.activity_type,
+                l.reference_type, l.reference_id, l.description,
+                l.llm_provider_id, l.provider, l.model_name,
+                l.prompt_tokens, l.completion_tokens, l.total_tokens,
+                l.cost_prompt, l.cost_completion, l.cost_total,
+                l.latency_ms, l.status, l.error_message, l.created_at,
+                o.name AS organization_name,
+                c.name AS chatbot_name
+            FROM llm_usage_logs l
+            LEFT JOIN organizations o ON l.organization_id = o.id
+            LEFT JOIN chatbots c ON l.chatbot_id = c.id
+            {$where}
+            ORDER BY l.id DESC
+            LIMIT {$perPage} OFFSET {$offset}
+        ");
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll();
+
+        Response::success([
+            'data' => $rows,
+            'pagination' => [
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total_rows' => $totalRows,
+                'total_pages' => (int)ceil($totalRows / $perPage)
+            ]
+        ]);
     }
 }
 

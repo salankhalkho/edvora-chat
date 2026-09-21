@@ -419,6 +419,18 @@ $router->get('/llm-logs', function (Request $req) {
 $router->get('/v1/public/llm-debug-logs', [SuperAdminController::class, 'getLlmDebugLogs']);
 $router->delete('/v1/public/llm-debug-logs', [SuperAdminController::class, 'clearLlmDebugLogs']);
 
+// Dedicated Standalone LLM Spendings & Usage Analytics (No Bloat in index.html)
+$router->get('/llm-spendings', function (Request $req) {
+    require dirname(__DIR__) . '/public/superadmin/llm-spendings.html';
+});
+$router->get('/superadmin/llm-spendings', function (Request $req) {
+    require dirname(__DIR__) . '/public/superadmin/llm-spendings.html';
+});
+$router->get('/v1/superadmin/llm-usage/summary', [SuperAdminController::class, 'getLlmSpendingSummary'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->get('/v1/superadmin/llm-usage/logs', [SuperAdminController::class, 'getLlmUsageLogs'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->get('/v1/public/llm-usage/summary', [SuperAdminController::class, 'getLlmSpendingSummary']);
+$router->get('/v1/public/llm-usage/logs', [SuperAdminController::class, 'getLlmUsageLogs']);
+
 // Department & Team Management Routes (Protected + Tenant Context)
 $router->get('/v1/departments', [DepartmentController::class, 'index'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->get('/v1/departments/presets', [DepartmentController::class, 'presets'], [AuthMiddleware::class, TenantMiddleware::class]);

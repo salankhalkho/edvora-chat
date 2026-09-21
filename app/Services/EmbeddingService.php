@@ -33,9 +33,12 @@ class EmbeddingService
     /**
      * Embed a single string. Returns a 1536-dimensional float array.
      *
+     * @param string $text
+     * @param array $context
+     * @return array
      * @throws Exception on API failure or empty input.
      */
-    public static function embed(string $text): array
+    public static function embed(string $text, array $context = []): array
     {
         $text = trim($text);
         if ($text === '') {
@@ -43,7 +46,7 @@ class EmbeddingService
         }
 
         $apiKey = self::resolveApiKey();
-        return self::callApi($apiKey, [$text])[0];
+        return self::callApi($apiKey, [$text], $context)[0];
     }
 
     /**
@@ -52,10 +55,11 @@ class EmbeddingService
      * Empty or whitespace-only strings are skipped and return an empty array [].
      *
      * @param  string[] $texts
+     * @param  array    $context
      * @return array[]           indexed same as $texts
      * @throws Exception on API failure.
      */
-    public static function embedBatch(array $texts): array
+    public static function embedBatch(array $texts, array $context = []): array
     {
         if (empty($texts)) {
             return [];
@@ -78,7 +82,7 @@ class EmbeddingService
             return array_fill(0, count($texts), []);
         }
 
-        $vectors = self::callApi($apiKey, $batch);
+        $vectors = self::callApi($apiKey, $batch, $context);
 
         // Re-map vectors back to original indices
         $result = array_fill(0, count($texts), []);
@@ -123,15 +127,18 @@ class EmbeddingService
      *
      * @param  string   $apiKey
      * @param  string[] $inputs   Non-empty array of non-empty strings.
+     * @param  array    $context
      * @return array[]            Float vectors, indexed 0 … n-1.
      * @throws Exception
      */
-    private static function callApi(string $apiKey, array $inputs): array
+    private static function callApi(string $apiKey, array $inputs, array $context = []): array
     {
         $payload = json_encode([
             'model' => self::MODEL,
             'input' => $inputs,
         ]);
+
+        $startTime = microtime(true);
 
         $ch = curl_init(self::ENDPOINT);
         curl_setopt_array($ch, [
@@ -150,7 +157,27 @@ class EmbeddingService
         $curlErr  = curl_error($ch);
         curl_close($ch);
 
+        $latencyMs = (int)round((microtime(true) - $startTime) * 1000);
+        $providerRow = self::resolveProviderRow();
+
         if ($response === false || $curlErr) {
+            LlmUsageLogger::log([
+                'organization_id' => $context['organization_id'] ?? null,
+                'chatbot_id' => $context['chatbot_id'] ?? null,
+                'activity_type' => $context['activity_type'] ?? 'query_embedding',
+                'reference_type' => $context['reference_type'] ?? null,
+                'reference_id' => $context['reference_id'] ?? null,
+                'description' => $context['description'] ?? ('Embedding generation (' . count($inputs) . ' items)'),
+                'llm_provider_id' => $providerRow['id'] ?? null,
+                'provider' => 'openai',
+                'model_name' => self::MODEL,
+                'prompt_tokens' => 0,
+                'completion_tokens' => 0,
+                'total_tokens' => 0,
+                'latency_ms' => $latencyMs,
+                'status' => 'failed',
+                'error_message' => 'cURL error: ' . $curlErr
+            ]);
             throw new Exception('[EmbeddingService] cURL error: ' . $curlErr);
         }
 
@@ -158,6 +185,23 @@ class EmbeddingService
 
         if ($httpCode !== 200) {
             $errMsg = $decoded['error']['message'] ?? $response;
+            LlmUsageLogger::log([
+                'organization_id' => $context['organization_id'] ?? null,
+                'chatbot_id' => $context['chatbot_id'] ?? null,
+                'activity_type' => $context['activity_type'] ?? 'query_embedding',
+                'reference_type' => $context['reference_type'] ?? null,
+                'reference_id' => $context['reference_id'] ?? null,
+                'description' => $context['description'] ?? ('Embedding generation (' . count($inputs) . ' items)'),
+                'llm_provider_id' => $providerRow['id'] ?? null,
+                'provider' => 'openai',
+                'model_name' => self::MODEL,
+                'prompt_tokens' => 0,
+                'completion_tokens' => 0,
+                'total_tokens' => 0,
+                'latency_ms' => $latencyMs,
+                'status' => 'failed',
+                'error_message' => "OpenAI API error (HTTP {$httpCode}): {$errMsg}"
+            ]);
             throw new Exception("[EmbeddingService] OpenAI API error (HTTP {$httpCode}): {$errMsg}");
         }
 
@@ -165,11 +209,66 @@ class EmbeddingService
             throw new Exception('[EmbeddingService] OpenAI returned no embedding data.');
         }
 
+        $tokens = (int)($decoded['usage']['total_tokens'] ?? ($decoded['usage']['prompt_tokens'] ?? 0));
+
+        LlmUsageLogger::log([
+            'organization_id' => $context['organization_id'] ?? null,
+            'chatbot_id' => $context['chatbot_id'] ?? null,
+            'activity_type' => $context['activity_type'] ?? 'query_embedding',
+            'reference_type' => $context['reference_type'] ?? null,
+            'reference_id' => $context['reference_id'] ?? null,
+            'description' => $context['description'] ?? ('Embedding generation (' . count($inputs) . ' text items)'),
+            'llm_provider_id' => $providerRow['id'] ?? null,
+            'provider' => 'openai',
+            'model_name' => self::MODEL,
+            'prompt_tokens' => $tokens,
+            'completion_tokens' => 0,
+            'total_tokens' => $tokens,
+            'cost_per_1m_input_tokens' => isset($providerRow['cost_per_1m_input_tokens']) ? (float)$providerRow['cost_per_1m_input_tokens'] : null,
+            'cost_per_1m_output_tokens' => 0.0,
+            'latency_ms' => $latencyMs,
+            'status' => 'success',
+        ]);
+
         // Sort by index to guarantee order (OpenAI sorts by index in batch responses)
         $data = $decoded['data'];
         usort($data, fn($a, $b) => $a['index'] <=> $b['index']);
 
         return array_map(fn($item) => $item['embedding'], $data);
+    }
+
+    private static ?array $cachedProviderRow = null;
+
+    /**
+     * Resolve provider record for embedding pricing and attribution
+     */
+    private static function resolveProviderRow(): ?array
+    {
+        if (self::$cachedProviderRow !== null) {
+            return self::$cachedProviderRow;
+        }
+
+        try {
+            $db = Database::getConnection();
+            $stmt = $db->prepare("
+                SELECT id, name, provider, model_name, api_key_encrypted, cost_per_1m_input_tokens, cost_per_1m_output_tokens
+                FROM llm_providers
+                WHERE (model_name = :model OR role = 'embedding')
+                  AND is_active = 1
+                ORDER BY role = 'embedding' DESC, id ASC
+                LIMIT 1
+            ");
+            $stmt->execute([':model' => self::MODEL]);
+            $row = $stmt->fetch();
+            if ($row) {
+                self::$cachedProviderRow = $row;
+                return $row;
+            }
+        } catch (\Throwable $e) {
+            error_log('[EmbeddingService] Provider lookup error: ' . $e->getMessage());
+        }
+
+        return null;
     }
 
     /**
@@ -183,26 +282,12 @@ class EmbeddingService
      */
     private static function resolveApiKey(): string
     {
-        try {
-            $db   = Database::getConnection();
-            $stmt = $db->prepare("
-                SELECT api_key_encrypted
-                FROM llm_providers
-                WHERE model_name = :model
-                  AND is_active  = 1
-                LIMIT 1
-            ");
-            $stmt->execute([':model' => self::MODEL]);
-            $row = $stmt->fetch();
-
-            if ($row && !empty($row['api_key_encrypted'])) {
-                $key = self::decryptKey($row['api_key_encrypted']);
-                if ($key !== '') {
-                    return $key;
-                }
+        $providerRow = self::resolveProviderRow();
+        if ($providerRow && !empty($providerRow['api_key_encrypted'])) {
+            $key = self::decryptKey($providerRow['api_key_encrypted']);
+            if ($key !== '') {
+                return $key;
             }
-        } catch (\Throwable $e) {
-            error_log('[EmbeddingService] DB key lookup failed: ' . $e->getMessage());
         }
 
         // Fallback: environment variable

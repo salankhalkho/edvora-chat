@@ -166,6 +166,8 @@ class Migrations
                 temperature DECIMAL(3,2) DEFAULT 0.30,
                 max_tokens INT DEFAULT 1500,
                 timeout_seconds INT DEFAULT 30,
+                cost_per_1m_input_tokens DECIMAL(10, 4) NOT NULL DEFAULT 0.0000,
+                cost_per_1m_output_tokens DECIMAL(10, 4) NOT NULL DEFAULT 0.0000,
                 role ENUM('primary', 'fallback', 'embedding', 'inactive') DEFAULT 'inactive',
                 is_active TINYINT(1) DEFAULT 1,
                 last_tested_at TIMESTAMP NULL,
@@ -1399,6 +1401,52 @@ class Migrations
                     ]);
                 }
             }
+        } catch (Throwable $e) {
+            // Error handled gracefully
+        }
+
+        // Add LLM Provider Cost columns if missing
+        try {
+            $checkInputCost = $this->db->query("SHOW COLUMNS FROM llm_providers LIKE 'cost_per_1m_input_tokens'");
+            if ($checkInputCost && !$checkInputCost->fetch()) {
+                $this->db->exec("ALTER TABLE llm_providers ADD COLUMN cost_per_1m_input_tokens DECIMAL(10, 4) NOT NULL DEFAULT 0.0000 AFTER timeout_seconds");
+            }
+            $checkOutputCost = $this->db->query("SHOW COLUMNS FROM llm_providers LIKE 'cost_per_1m_output_tokens'");
+            if ($checkOutputCost && !$checkOutputCost->fetch()) {
+                $this->db->exec("ALTER TABLE llm_providers ADD COLUMN cost_per_1m_output_tokens DECIMAL(10, 4) NOT NULL DEFAULT 0.0000 AFTER cost_per_1m_input_tokens");
+            }
+        } catch (Throwable $e) {
+            // Error handled gracefully
+        }
+
+        // Create llm_usage_logs table
+        try {
+            $this->db->exec("CREATE TABLE IF NOT EXISTS llm_usage_logs (
+                id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                organization_id INT NULL,
+                chatbot_id INT NULL,
+                activity_type ENUM('chat_completion', 'document_ingestion', 'query_embedding', 'lead_qualification', 'content_summarization', 'system_test', 'other') NOT NULL DEFAULT 'chat_completion',
+                reference_type VARCHAR(64) NULL,
+                reference_id BIGINT UNSIGNED NULL,
+                description VARCHAR(500) NULL,
+                llm_provider_id INT NULL,
+                provider VARCHAR(50) NOT NULL,
+                model_name VARCHAR(100) NOT NULL,
+                prompt_tokens INT UNSIGNED NOT NULL DEFAULT 0,
+                completion_tokens INT UNSIGNED NOT NULL DEFAULT 0,
+                total_tokens INT UNSIGNED NOT NULL DEFAULT 0,
+                cost_prompt DECIMAL(12, 8) NOT NULL DEFAULT 0.00000000,
+                cost_completion DECIMAL(12, 8) NOT NULL DEFAULT 0.00000000,
+                cost_total DECIMAL(12, 8) NOT NULL DEFAULT 0.00000000,
+                latency_ms INT UNSIGNED NULL,
+                status ENUM('success', 'failed', 'fallback') NOT NULL DEFAULT 'success',
+                error_message TEXT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_llm_created_at (created_at),
+                INDEX idx_llm_org_activity (organization_id, activity_type),
+                INDEX idx_llm_provider_model (provider, model_name),
+                INDEX idx_llm_reference (reference_type, reference_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
         } catch (Throwable $e) {
             // Error handled gracefully
         }

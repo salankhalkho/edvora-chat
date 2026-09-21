@@ -155,7 +155,13 @@ while (true) {
                     ");
 
                     foreach ($chunks as $chunk) {
-                        $vector    = EmbeddingService::embed($chunk);
+                        $vector = EmbeddingService::embed($chunk, [
+                            'organization_id' => $orgId,
+                            'activity_type' => 'document_ingestion',
+                            'reference_type' => 'knowledge_sources',
+                            'reference_id' => $sourceId,
+                            'description' => "Document ingestion chunk for source id: {$sourceId}"
+                        ]);
                         $embedding = json_encode($vector);
                         $stmtInsert->execute([$orgId, $sourceId, $programId, $chunk, $embedding]);
                     }
@@ -252,7 +258,13 @@ while (true) {
                     ");
 
                     foreach ($chunks as $chunk) {
-                        $vector    = EmbeddingService::embed($chunk);
+                        $vector = EmbeddingService::embed($chunk, [
+                            'organization_id' => $orgId,
+                            'activity_type' => 'document_ingestion',
+                            'reference_type' => 'programs',
+                            'reference_id' => $programId,
+                            'description' => "Program ingestion chunk for program id: {$programId} (" . ($program['course_name'] ?? 'Program') . ")"
+                        ]);
                         $embedding = json_encode($vector);
                         $stmtInsert->execute([$orgId, $sourceId, $programId, $chunk, $embedding]);
                     }
