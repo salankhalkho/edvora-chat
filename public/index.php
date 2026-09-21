@@ -258,6 +258,7 @@ $router->get('/v1/knowledge/health-summary', [KnowledgeController::class, 'healt
 $router->get('/v1/knowledge', [KnowledgeController::class, 'index'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->post('/v1/knowledge/upload', [KnowledgeController::class, 'upload'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->post('/v1/knowledge/paste', [KnowledgeController::class, 'paste'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->post('/v1/knowledge/text', [KnowledgeController::class, 'paste'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->post('/v1/knowledge/url', [KnowledgeController::class, 'addUrl'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->post('/v1/knowledge/search', [KnowledgeController::class, 'search'], [AuthMiddleware::class, TenantMiddleware::class]);
 

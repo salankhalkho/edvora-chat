@@ -914,7 +914,7 @@
             if (program_id) payload.program_id = program_id;
 
             try {
-                const res = await fetch('/v1/knowledge/text', {
+                const res = await fetch('/v1/knowledge/paste', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
