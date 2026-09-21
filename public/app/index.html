@@ -5828,8 +5828,23 @@
                 const data = await res.json();
                 if (data.status === 'success') {
                     showToast('Document uploaded, extracted, and indexed successfully!', 'success');
-                    await switchNavTab('knowledge');
-                    if (typeof loadKnowledge === 'function') loadKnowledge();
+                    // Reset form and file selection state
+                    fileInput.value = '';
+                    const promptText = document.getElementById('dropZonePromptText');
+                    if (promptText) promptText.innerText = 'Click or Drag PDF, DOCX, or TXT file here';
+                    
+                    // Reset button before switching tabs
+                    btn.innerHTML = origText;
+                    btn.disabled = false;
+
+                    try {
+                        await switchNavTab('knowledge');
+                        if (typeof loadKnowledge === 'function') loadKnowledge();
+                    } catch(navErr) {
+                        console.warn('[Edvora] Error navigating to knowledge hub:', navErr);
+                        window.location.hash = '#knowledge';
+                    }
+                    return;
                 } else {
                     alert('Upload failed: ' + (data.message || 'Unknown error'));
                 }
