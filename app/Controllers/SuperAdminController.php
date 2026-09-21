@@ -1099,15 +1099,15 @@ class SuperAdminController
         $params = [];
 
         if (!empty($startDate)) {
-            $where .= " AND created_at >= :start_date";
+            $where .= " AND l.created_at >= :start_date";
             $params[':start_date'] = $startDate . ' 00:00:00';
         } elseif ($days > 0) {
-            $where .= " AND created_at >= DATE_SUB(NOW(), INTERVAL :days DAY)";
+            $where .= " AND l.created_at >= DATE_SUB(NOW(), INTERVAL :days DAY)";
             $params[':days'] = $days;
         }
 
         if (!empty($endDate)) {
-            $where .= " AND created_at <= :end_date";
+            $where .= " AND l.created_at <= :end_date";
             $params[':end_date'] = $endDate . ' 23:59:59';
         }
 
@@ -1115,14 +1115,14 @@ class SuperAdminController
         $stmtTotals = $db->prepare("
             SELECT 
                 COUNT(*) as total_calls,
-                COALESCE(SUM(total_tokens), 0) as total_tokens,
-                COALESCE(SUM(prompt_tokens), 0) as prompt_tokens,
-                COALESCE(SUM(completion_tokens), 0) as completion_tokens,
-                COALESCE(SUM(cost_total), 0) as total_cost,
-                COALESCE(SUM(cost_prompt), 0) as prompt_cost,
-                COALESCE(SUM(cost_completion), 0) as completion_cost,
-                AVG(latency_ms) as avg_latency_ms
-            FROM llm_usage_logs
+                COALESCE(SUM(l.total_tokens), 0) as total_tokens,
+                COALESCE(SUM(l.prompt_tokens), 0) as prompt_tokens,
+                COALESCE(SUM(l.completion_tokens), 0) as completion_tokens,
+                COALESCE(SUM(l.cost_total), 0) as total_cost,
+                COALESCE(SUM(l.cost_prompt), 0) as prompt_cost,
+                COALESCE(SUM(l.cost_completion), 0) as completion_cost,
+                AVG(l.latency_ms) as avg_latency_ms
+            FROM llm_usage_logs l
             {$where}
         ");
         $stmtTotals->execute($params);
@@ -1131,13 +1131,13 @@ class SuperAdminController
         // 2. Breakdown by Activity
         $stmtActivity = $db->prepare("
             SELECT 
-                activity_type,
+                l.activity_type,
                 COUNT(*) as calls,
-                COALESCE(SUM(total_tokens), 0) as total_tokens,
-                COALESCE(SUM(cost_total), 0) as total_cost
-            FROM llm_usage_logs
+                COALESCE(SUM(l.total_tokens), 0) as total_tokens,
+                COALESCE(SUM(l.cost_total), 0) as total_cost
+            FROM llm_usage_logs l
             {$where}
-            GROUP BY activity_type
+            GROUP BY l.activity_type
             ORDER BY total_cost DESC, calls DESC
         ");
         $stmtActivity->execute($params);
@@ -1146,14 +1146,14 @@ class SuperAdminController
         // 3. Breakdown by Provider & Model
         $stmtModels = $db->prepare("
             SELECT 
-                provider,
-                model_name,
+                l.provider,
+                l.model_name,
                 COUNT(*) as calls,
-                COALESCE(SUM(total_tokens), 0) as total_tokens,
-                COALESCE(SUM(cost_total), 0) as total_cost
-            FROM llm_usage_logs
+                COALESCE(SUM(l.total_tokens), 0) as total_tokens,
+                COALESCE(SUM(l.cost_total), 0) as total_cost
+            FROM llm_usage_logs l
             {$where}
-            GROUP BY provider, model_name
+            GROUP BY l.provider, l.model_name
             ORDER BY total_cost DESC
         ");
         $stmtModels->execute($params);
@@ -1180,13 +1180,13 @@ class SuperAdminController
         // 5. Daily spend trend
         $stmtDaily = $db->prepare("
             SELECT 
-                DATE(created_at) as date,
+                DATE(l.created_at) as date,
                 COUNT(*) as calls,
-                COALESCE(SUM(cost_total), 0) as cost,
-                COALESCE(SUM(total_tokens), 0) as tokens
-            FROM llm_usage_logs
+                COALESCE(SUM(l.cost_total), 0) as cost,
+                COALESCE(SUM(l.total_tokens), 0) as tokens
+            FROM llm_usage_logs l
             {$where}
-            GROUP BY DATE(created_at)
+            GROUP BY DATE(l.created_at)
             ORDER BY date ASC
         ");
         $stmtDaily->execute($params);
