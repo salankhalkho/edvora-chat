@@ -241,7 +241,7 @@
             if (mode === 'url') document.getElementById('replaceModeUrl').style.display = 'block';
         }
 
-        function applyKsExpiryPreset(targetInputId, presetType) {
+        function applyKsExpiryPreset(targetInputId, presetType, silent = false) {
             const input = document.getElementById(targetInputId);
             if (!input) return;
 
@@ -261,7 +261,7 @@
                 targetDate.setDate(targetDate.getDate() + 180);
             } else if (presetType === 'evergreen') {
                 input.value = '';
-                showToast('Set to Evergreen (No Expiration Date)', 'info');
+                if (!silent) showToast('Set to Evergreen (No Expiration Date)', 'info');
                 return;
             }
 
@@ -269,7 +269,7 @@
             const mm = String(targetDate.getMonth() + 1).padStart(2, '0');
             const dd = String(targetDate.getDate()).padStart(2, '0');
             input.value = `${yyyy}-${mm}-${dd}`;
-            showToast(`Expiry preset applied: ${input.value}`, 'info');
+            if (!silent) showToast(`Expiry preset applied: ${input.value}`, 'info');
         }
 
         function updateDynamicKnowledgeKPIs(scopeDocs) {
@@ -1070,8 +1070,11 @@
         }
 
         function openReplaceKnowledgeModal(ksId) {
-            const item = allKnowledgeSources.find(s => s.id == ksId);
-            if (!item) return;
+            const item = (Array.isArray(allKnowledgeSources) && allKnowledgeSources.find(s => s.id == ksId)) || currentEditingDoc;
+            if (!item) {
+                showToast('Unable to locate document details for replacement.', 'error');
+                return;
+            }
 
             document.getElementById('replaceSourceId').value = item.id;
             document.getElementById('replaceOldTitle').innerText = item.title;
@@ -1094,12 +1097,16 @@
             document.getElementById('replaceVersionInput').value = nextYear;
             document.getElementById('replaceEffectiveFrom').value = new Date().toISOString().split('T')[0];
             
-            // Default 1 year from now
-            applyKsExpiryPreset('replaceExpiresOn', 'academic_year');
+            // Default 1 year from now (silent = true to suppress toast on initial modal load)
+            applyKsExpiryPreset('replaceExpiresOn', 'academic_year', true);
 
             switchReplaceMode(item.type === 'document' ? 'file' : (item.type === 'url' ? 'url' : 'text'));
 
-            document.getElementById('replaceKnowledgeModal').style.display = 'flex';
+            const modal = document.getElementById('replaceKnowledgeModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                modal.style.zIndex = '99999';
+            }
         }
 
         function closeReplaceKnowledgeModal() {

@@ -44,22 +44,30 @@ class VectorSearchEngine
 
         $db = Database::getConnection();
 
-        // Build query — optionally scope by program_id
+        // Build query — join knowledge_sources to ensure active status and date validity guardrails
         if ($programId !== null) {
             $sql = "
-                SELECT id, source_id, program_id, content, embedding
-                FROM knowledge_items
-                WHERE organization_id = :org_id
-                  AND program_id = :prog_id
-                  AND embedding IS NOT NULL
+                SELECT ki.id, ki.source_id, ki.program_id, ki.content, ki.embedding
+                FROM knowledge_items ki
+                JOIN knowledge_sources ks ON ki.source_id = ks.id
+                WHERE ki.organization_id = :org_id
+                  AND ki.program_id = :prog_id
+                  AND ks.status = 'active'
+                  AND (ks.effective_from IS NULL OR ks.effective_from <= CURDATE())
+                  AND (ks.expires_on IS NULL OR ks.expires_on >= CURDATE())
+                  AND ki.embedding IS NOT NULL
             ";
             $params = [':org_id' => $organizationId, ':prog_id' => $programId];
         } else {
             $sql = "
-                SELECT id, source_id, program_id, content, embedding
-                FROM knowledge_items
-                WHERE organization_id = :org_id
-                  AND embedding IS NOT NULL
+                SELECT ki.id, ki.source_id, ki.program_id, ki.content, ki.embedding
+                FROM knowledge_items ki
+                JOIN knowledge_sources ks ON ki.source_id = ks.id
+                WHERE ki.organization_id = :org_id
+                  AND ks.status = 'active'
+                  AND (ks.effective_from IS NULL OR ks.effective_from <= CURDATE())
+                  AND (ks.expires_on IS NULL OR ks.expires_on >= CURDATE())
+                  AND ki.embedding IS NOT NULL
             ";
             $params = [':org_id' => $organizationId];
         }

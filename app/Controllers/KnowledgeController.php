@@ -779,13 +779,15 @@ class KnowledgeController
 
             $compacted = ContentCompactor::process($rawContent, $title);
 
+            $programId = !empty($request->get('program_id')) ? (int)$request->get('program_id') : (!empty($oldSource['program_id']) ? (int)$oldSource['program_id'] : null);
+
             // 1. Insert new knowledge source linked to previous version
             $stmtInsert = $db->prepare("
-                INSERT INTO knowledge_sources (organization_id, chatbot_id, type, title, category, academic_version,
+                INSERT INTO knowledge_sources (organization_id, chatbot_id, program_id, type, title, category, academic_version,
                                                effective_from, expires_on, last_reviewed_at, review_frequency_days,
                                                previous_version_id, source_url, raw_content, processed_content, keywords,
                                                file_path, content_hash, status, created_at, updated_at)
-                VALUES (:org_id, :bot_id, :type, :title, :category, :academic_version,
+                VALUES (:org_id, :bot_id, :program_id, :type, :title, :category, :academic_version,
                         :effective_from, :expires_on, NOW(), :review_freq,
                         :prev_id, :source_url, :raw_content, :processed_content, :keywords,
                         :file_path, :content_hash, 'active', NOW(), NOW())
@@ -793,6 +795,7 @@ class KnowledgeController
             $stmtInsert->execute([
                 ':org_id' => $orgId,
                 ':bot_id' => $oldSource['chatbot_id'],
+                ':program_id' => $programId,
                 ':type' => $newType,
                 ':title' => $title,
                 ':category' => $category,
@@ -818,6 +821,22 @@ class KnowledgeController
             ");
             $stmtArchive->execute([':new_id' => $newId, ':old_id' => $oldId]);
 
+            // 3. Purge obsolete chunks and vector embeddings of predecessor to free DB storage & RAM
+            $stmtPurge = $db->prepare("DELETE FROM knowledge_items WHERE source_id = :old_id AND organization_id = :org_id");
+            $stmtPurge->execute([':old_id' => $oldId, ':org_id' => $orgId]);
+
+            // 4. Dispatch background job to chunk and embed replacement document into knowledge_items
+            try {
+                $stmtJob = $db->prepare("INSERT INTO jobs (type, payload, status, run_at) VALUES ('chunk_and_embed', :p, 'pending', NOW())");
+                $stmtJob->execute([':p' => json_encode([
+                    'source_id' => $newId,
+                    'organization_id' => $orgId,
+                    'program_id' => $programId
+                ])]);
+            } catch (Throwable $jobEx) {
+                error_log('[KnowledgeController] Failed to dispatch chunk_and_embed for replaced version: ' . $jobEx->getMessage());
+            }
+
             AuditLogger::log('knowledge_source_replaced', 'knowledge_source', $newId, [
                 'previous_id' => $oldId,
                 'title' => $title,
@@ -833,7 +852,7 @@ class KnowledgeController
                 'academic_version' => $academicVersion,
                 'status' => 'active',
                 'expires_on' => $expiresOn
-            ], "Document successfully updated to new version ({$academicVersion}). Previous version archived.", 201);
+            ], "Document successfully updated to new version ({$academicVersion}). Previous version archived and embeddings refreshed.", 201);
 
         } catch (Throwable $e) {
             Response::error("Replacement failed: " . $e->getMessage(), 500);
