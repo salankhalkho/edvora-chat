@@ -962,6 +962,13 @@
                             Review Due
                         </span>
                     `;
+                } else if (item.status === 'pending' || item.status === 'processing') {
+                    statusPillHtml = `
+                        <span class="ckh-status-pill" style="background: #EFF6FF; border: 1px solid #BFDBFE; color: #1D4ED8;">
+                            <span style="width: 6px; height: 6px; border-radius: 50%; background: #2563EB; animation: pulse 1.5s infinite;"></span>
+                            Indexing...
+                        </span>
+                    `;
                 } else {
                     statusPillHtml = `
                         <span class="ckh-status-pill ckh-status-live">

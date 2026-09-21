@@ -1479,6 +1479,13 @@ class Migrations
                 }
             }
 
+            // 1b. Update status column ENUM to include 'pending'
+            try {
+                $this->db->exec("ALTER TABLE knowledge_sources MODIFY COLUMN status ENUM('pending', 'processing', 'active', 'expiring_soon', 'expired', 'archived', 'failed') DEFAULT 'pending'");
+            } catch (Throwable $statusEx) {
+                // Ignore if already modified
+            }
+
             // 2. Backfill existing records from raw_content/processed_content into storage/knowledge/{org_id}/source_{id}.txt
             $checkCols = $this->db->query("SHOW COLUMNS FROM knowledge_sources LIKE 'raw_content'");
             if ($checkCols->fetch()) {
