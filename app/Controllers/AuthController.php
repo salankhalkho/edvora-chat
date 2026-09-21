@@ -372,6 +372,8 @@ class AuthController
         // Departments deprecated - return empty list
         $userDepartments = [];
 
+        $onboardingRequired = empty($user['onboarding_completed']);
+
         Response::success([
             'user' => [
                 'id' => (int)$user['id'],

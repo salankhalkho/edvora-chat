@@ -37,7 +37,7 @@ class OnboardingController
 
         // 2. Fetch Programs & Courses
         $stmtProg = $db->prepare("
-            SELECT p.*, p.name AS name, p.name AS course_name 
+            SELECT p.*, p.course_name AS name, p.course_name 
             FROM programs p 
             WHERE p.organization_id = :org_id 
             ORDER BY p.id ASC
