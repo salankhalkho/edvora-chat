@@ -65,7 +65,12 @@ Each tenant (organization) gets one or more embeddable chatbots that answer pros
 ├── workers/
 │   └── job_runner.php          ← Supervisor background worker
 ├── storage/
-│   ├── uploads/                ← Uploaded PDF/document files
+│   ├── knowledge/              ← Filesystem-backed knowledge sources (deterministic per tenant)
+│   │   └── {org_id}/           ← Tenant knowledge folder
+│   │       ├── source_{id}.txt ← Clean UTF-8 text for chunking & embedding
+│   │       └── original/       ← Original binary files (.pdf, .docx) for user download
+│   ├── programs/               ← Auto-generated program TXT files ({org_id}/program_{id}.txt)
+│   ├── uploads/                ← Temporary / legacy uploaded files
 │   └── logs/                   ← Application logs
 ├── architecture.md             ← THIS FILE
 ├── AGENTS.md                   ← Mandatory agent/developer rules
@@ -130,7 +135,7 @@ Each org can have multiple chatbot instances, each with its own embed token and 
 ### 4.4 `knowledge_sources` — Source Registry
 The registry of all knowledge documents, URLs, text pastes, and auto-generated program TXT files.
 
-> **This table stores metadata and raw content only. Retrieval at chat time is done entirely via `knowledge_items`.**
+> **Database Lean Rule:** This table stores **metadata only**. Raw and processed text content is NEVER stored in database rows. Instead, clean UTF-8 text is persisted deterministically on the filesystem at `storage/knowledge/{organization_id}/source_{id}.txt` and loaded on-demand. Original uploaded binaries (.pdf, .docx) are saved at `storage/knowledge/{organization_id}/original/`. At runtime, the chatbot retrieves context from `knowledge_items`.
 
 | Column | Type | Notes |
 |---|---|---|
@@ -140,13 +145,16 @@ The registry of all knowledge documents, URLs, text pastes, and auto-generated p
 | `program_id` | INT FK NULL | FK→programs if source is an auto-generated program TXT |
 | `type` | ENUM | `document`, `url`, `text_paste`, `program_txt` |
 | `title` | VARCHAR(255) | |
+| `category` | VARCHAR(100) | e.g. `Admissions`, `Tuition & Fees`, `Campus Life` |
 | `source_url` | VARCHAR(500) NULL | For `url` type |
-| `file_path` | VARCHAR(500) NULL | For `document` and `program_txt` types |
-| `raw_content` | LONGTEXT | Extracted text (archived, not used for chat retrieval) |
-| `processed_content` | LONGTEXT | Compacted clean text (FULLTEXT fallback during vector migration window) |
+| `file_path` | VARCHAR(500) NULL | Relative path to `storage/knowledge/{org_id}/source_{id}.txt` |
+| `original_file_path` | VARCHAR(500) NULL | Relative path to original binary in `original/` folder for downloads |
+| `file_size_bytes` | BIGINT UNSIGNED | Text file size in bytes |
+| `token_count` | INT UNSIGNED | Estimated word/subword token count |
+| `checksum_sha256` | CHAR(64) | SHA-256 hash of clean text content |
 | `keywords` | TEXT | Algorithmic frequency-ranked single-word tokens |
 | `content_hash` | VARCHAR(64) | SHA-256 to detect URL content changes |
-| `status` | ENUM | `processing`, `active`, `failed`, `archived` |
+| `status` | ENUM | `pending`, `active`, `expiring_soon`, `expired`, `archived`, `failed` |
 | `effective_from` | DATE | AI guardrail: invisible to chatbot before this date |
 | `expires_on` | DATE | AI guardrail: invisible to chatbot after this date |
 | `academic_version` | VARCHAR(50) | e.g. `2026-27`, `Evergreen` |
@@ -154,7 +162,7 @@ The registry of all knowledge documents, URLs, text pastes, and auto-generated p
 | `replaced_by_id` | INT | Forward pointer to the replacement source |
 
 **Indexes:**
-- `ft_knowledge_content` — FULLTEXT on `(title, keywords, processed_content)`
+- `ft_knowledge_content` — FULLTEXT on `(title, keywords)` (Tier 2 fallback)
 - `idx_ks_org_validity` — `(organization_id, status, expires_on)`
 
 ---
@@ -271,30 +279,49 @@ UPDATE knowledge_sources  SET status='active'
 
 ---
 
-### 5.2 Document / PDF / URL / Text Paste Ingestion
+### 5.2 Document / PDF / URL / Text Paste Ingestion (Filesystem-Backed)
 
 ```
-Admin uploads PDF, text, or URL  →  KnowledgeController
+Admin uploads PDF/DOCX, Pastes Text, or Enters URL  →  KnowledgeController
       |
       v
 DocumentParser::extract($file)    [pdftotext for PDFs]
   or  UrlScraper::scrape($url)
-      |  → raw text string
+  or  DocumentParser::sanitizeText($paste)
+      |  → raw extracted text string
       |
-ContentCompactor::process($raw)   → processed_content  (cleaned text)
+      v
+ContentCompactor::process($raw)   → clean normalized UTF-8 text + keywords
       |
-INSERT knowledge_sources  (type, raw_content, processed_content, status='processing')
+      v
+INSERT knowledge_sources  (title, type, category, status='pending')
+      |  → creates row and generates primary key {id}
       |
-INSERT jobs  { type: 'chunk_and_embed', payload: { source_id } }
+      v
+KnowledgeFileStorage::saveText($orgId, $id, $cleanText)
+      |  → writes deterministically to storage/knowledge/{org_id}/source_{id}.txt
+      |  → writes uploaded original binary to storage/knowledge/{org_id}/original/
+      |  → computes file_size_bytes, token_count, checksum_sha256
+      v
+UPDATE knowledge_sources  SET file_path, original_file_path, file_size_bytes, token_count, checksum_sha256
       |
-      v  [Supervisor picks up job]
+      v
+INSERT jobs  { type: 'chunk_and_embed', payload: { source_id, organization_id } }
       |
-KnowledgeChunker::chunkText($processedContent)  →  string[]
+      v  [Supervisor picks up job via workers/job_runner.php]
       |
-EmbeddingService::embed($chunk)  →  float[]
+KnowledgeFileStorage::loadText($orgId, $sourceId)  →  reads clean text directly from disk
       |
-INSERT knowledge_items  (org_id, source_id, program_id=null, content, page, embedding)
+      v
+KnowledgeChunker::chunkText($text)  →  string[]  (300–500 char semantic chunks)
       |
+      v
+EmbeddingService::embed($chunk)  →  float[]  (1536-dim vector via OpenAI text-embedding-3-small)
+      |
+      v
+INSERT knowledge_items  (org_id, source_id, program_id=null, content, embedding)
+      |
+      v
 UPDATE knowledge_sources  SET status='active'
 ```
 

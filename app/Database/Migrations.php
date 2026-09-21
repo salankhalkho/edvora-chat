@@ -68,18 +68,27 @@ class Migrations
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 organization_id INT NOT NULL,
                 chatbot_id INT NULL,
-                type ENUM('document', 'url', 'text_paste') NOT NULL,
+                program_id INT NULL,
+                type ENUM('document', 'url', 'text_paste', 'program_txt') NOT NULL,
                 title VARCHAR(255) NOT NULL,
+                category VARCHAR(100) DEFAULT 'General / Institutional',
+                academic_version VARCHAR(50) NULL,
+                effective_from DATE NULL,
+                expires_on DATE NULL,
+                last_reviewed_at DATE NULL,
+                review_frequency_days INT DEFAULT 180,
                 source_url VARCHAR(500) NULL,
-                raw_content LONGTEXT NULL COMMENT 'Complete, unedited extracted text (from PDF, URL, or paste) and will not be used for context building.',
-                processed_content LONGTEXT NULL COMMENT 'Compacted, maximum-information, minimum-verbosity version specifically engineered for LLM prompt context. This will be used for LLM context building.',
+                file_path VARCHAR(500) NULL COMMENT 'Relative path to storage/knowledge/{org_id}/source_{id}.txt',
+                original_file_path VARCHAR(500) NULL COMMENT 'Original binary file path for downloads',
+                file_size_bytes BIGINT UNSIGNED NULL COMMENT 'File size on disk in bytes',
+                token_count INT UNSIGNED NULL COMMENT 'Estimated token count',
+                checksum_sha256 CHAR(64) NULL COMMENT 'SHA-256 hash of clean text content',
                 keywords TEXT NULL,
-                file_path VARCHAR(500) NULL,
                 content_hash VARCHAR(64) NULL,
                 previous_version_id INT NULL,
                 replaced_by_id INT NULL,
                 lead_magnet TINYINT(1) DEFAULT 0 COMMENT 'Flag indicating if document is a downloadable lead magnet asset',
-                status ENUM('processing', 'active', 'failed', 'archived') DEFAULT 'processing',
+                status ENUM('processing', 'active', 'expiring_soon', 'expired', 'archived', 'failed') DEFAULT 'processing',
                 last_fetched_at TIMESTAMP NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -280,11 +289,11 @@ class Migrations
             $this->db->exec($sql);
         }
 
-        // FULLTEXT index creation on knowledge_sources (title, keywords, processed_content)
+        // FULLTEXT index creation on knowledge_sources (title, keywords)
         try {
             $checkIdx = $this->db->query("SHOW INDEX FROM knowledge_sources WHERE Key_name = 'ft_knowledge_content'");
             if (!$checkIdx->fetch()) {
-                $this->db->exec("ALTER TABLE knowledge_sources ADD FULLTEXT INDEX ft_knowledge_content (title, keywords, processed_content);");
+                $this->db->exec("ALTER TABLE knowledge_sources ADD FULLTEXT INDEX ft_knowledge_content (title, keywords);");
             }
         } catch (Throwable $e) {
             // Index may already exist
@@ -1449,6 +1458,92 @@ class Migrations
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
         } catch (Throwable $e) {
             // Error handled gracefully
+        }
+
+        // ──────────────────────────────────────────────────────────────────────
+        // Filesystem-Backed Knowledge Sources Migration
+        // ──────────────────────────────────────────────────────────────────────
+        try {
+            // 1. Add file_size_bytes, token_count, checksum_sha256, original_file_path columns
+            $colsToAdd = [
+                'original_file_path' => "VARCHAR(500) NULL COMMENT 'Original binary file path for downloads' AFTER file_path",
+                'file_size_bytes'    => "BIGINT UNSIGNED NULL COMMENT 'File size on disk in bytes' AFTER original_file_path",
+                'token_count'        => "INT UNSIGNED NULL COMMENT 'Estimated token count' AFTER file_size_bytes",
+                'checksum_sha256'    => "CHAR(64) NULL COMMENT 'SHA-256 hash of clean text content' AFTER token_count"
+            ];
+
+            foreach ($colsToAdd as $colName => $definition) {
+                $check = $this->db->query("SHOW COLUMNS FROM knowledge_sources LIKE '{$colName}'");
+                if (!$check->fetch()) {
+                    $this->db->exec("ALTER TABLE knowledge_sources ADD COLUMN {$colName} {$definition}");
+                }
+            }
+
+            // 2. Backfill existing records from raw_content/processed_content into storage/knowledge/{org_id}/source_{id}.txt
+            $checkCols = $this->db->query("SHOW COLUMNS FROM knowledge_sources LIKE 'raw_content'");
+            if ($checkCols->fetch()) {
+                $stmtRows = $this->db->query("
+                    SELECT id, organization_id, raw_content, processed_content, file_path, checksum_sha256
+                    FROM knowledge_sources
+                    WHERE (raw_content IS NOT NULL AND raw_content != '')
+                       OR (processed_content IS NOT NULL AND processed_content != '')
+                ");
+                $rows = $stmtRows->fetchAll(PDO::FETCH_ASSOC);
+
+                $updateStmt = $this->db->prepare("
+                    UPDATE knowledge_sources
+                    SET file_path = :file_path,
+                        original_file_path = :orig_path,
+                        file_size_bytes = :size_bytes,
+                        token_count = :tokens,
+                        checksum_sha256 = :sha256,
+                        raw_content = NULL,
+                        processed_content = NULL
+                    WHERE id = :id
+                ");
+
+                foreach ($rows as $row) {
+                    $sourceId = (int)$row['id'];
+                    $orgId = (int)$row['organization_id'];
+                    $content = !empty($row['processed_content']) ? $row['processed_content'] : ($row['raw_content'] ?? '');
+
+                    if (!empty($content)) {
+                        $saveMeta = \App\Services\KnowledgeFileStorage::saveText($orgId, $sourceId, $content);
+                        $origPath = !empty($row['file_path']) && strpos($row['file_path'], 'source_') === false ? $row['file_path'] : null;
+
+                        $updateStmt->execute([
+                            ':file_path'  => $saveMeta['file_path'],
+                            ':orig_path'  => $origPath,
+                            ':size_bytes' => $saveMeta['file_size_bytes'],
+                            ':tokens'     => $saveMeta['token_count'],
+                            ':sha256'     => $saveMeta['checksum_sha256'],
+                            ':id'         => $sourceId
+                        ]);
+                    }
+                }
+
+                // 3. Drop ft_knowledge_content that indexed processed_content, and re-create on (title, keywords)
+                try {
+                    $this->db->exec("ALTER TABLE knowledge_sources DROP INDEX ft_knowledge_content");
+                } catch (Throwable $dropEx) {
+                    // Index may not exist or already dropped
+                }
+
+                try {
+                    $this->db->exec("ALTER TABLE knowledge_sources ADD FULLTEXT INDEX ft_knowledge_content (title, keywords)");
+                } catch (Throwable $addEx) {
+                    // Index may already exist
+                }
+
+                // 4. Drop raw_content and processed_content columns from knowledge_sources
+                try {
+                    $this->db->exec("ALTER TABLE knowledge_sources DROP COLUMN raw_content, DROP COLUMN processed_content");
+                } catch (Throwable $dropColEx) {
+                    // Columns might already be dropped
+                }
+            }
+        } catch (Throwable $e) {
+            error_log('[Migrations] Filesystem-Backed Knowledge Sources migration warning: ' . $e->getMessage());
         }
     }
 }

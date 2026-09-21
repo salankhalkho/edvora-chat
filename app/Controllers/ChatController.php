@@ -515,7 +515,7 @@ class ChatController
 
             // Find active lead_magnet document in knowledge_sources table for this specific program
             $stmtAsset = $db->prepare("
-                SELECT id, title, category, raw_content, file_path
+                SELECT id, title, category, file_path, original_file_path
                 FROM knowledge_sources
                 WHERE organization_id = :oid
                   AND program_id = :pid

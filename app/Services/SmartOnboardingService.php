@@ -500,19 +500,31 @@ class SmartOnboardingService
 
                     $insKs = $db->prepare("
                         INSERT INTO knowledge_sources
-                            (organization_id, type, title, category, raw_content, processed_content, keywords, source_url, status, created_at, updated_at)
-                        VALUES (:org_id, 'url', :title, :cat, :raw, :proc, :kw, :src, 'active', NOW(), NOW())
+                            (organization_id, type, title, category, keywords, source_url, status, created_at, updated_at)
+                        VALUES (:org_id, 'url', :title, :cat, :kw, :src, 'active', NOW(), NOW())
                     ");
                     $insKs->execute([
                         ':org_id' => $orgId,
                         ':title'  => substr($title, 0, 255),
                         ':cat'    => substr($category, 0, 100),
-                        ':raw'    => $content,
-                        ':proc'   => $processedContent,
                         ':kw'     => $keywords,
                         ':src'    => $normalizedUrl,
                     ]);
                     $ksId = (int)$db->lastInsertId();
+
+                    $saveMeta = \App\Services\KnowledgeFileStorage::saveText($orgId, $ksId, $processedContent);
+                    $db->prepare("
+                        UPDATE knowledge_sources
+                        SET file_path = :file_path, file_size_bytes = :size, token_count = :tokens, checksum_sha256 = :sha
+                        WHERE id = :id
+                    ")->execute([
+                        ':file_path' => $saveMeta['file_path'],
+                        ':size'      => $saveMeta['file_size_bytes'],
+                        ':tokens'    => $saveMeta['token_count'],
+                        ':sha'       => $saveMeta['checksum_sha256'],
+                        ':id'        => $ksId
+                    ]);
+
                     $ksCount++;
 
                     usleep(70000);
@@ -522,10 +534,10 @@ class SmartOnboardingService
                         'knowledge_count' => $ksCount
                     ]);
 
-                    // Dispatch async LLM keyword enrichment job
+                    // Dispatch async chunk_and_embed job
                     try {
-                        $db->prepare("INSERT INTO jobs (type, payload, status, run_at, created_at) VALUES ('enrich_keywords', :p, 'pending', NOW(), NOW())")
-                           ->execute([':p' => json_encode(['knowledge_source_id' => $ksId])]);
+                        $db->prepare("INSERT INTO jobs (type, payload, status, run_at, created_at) VALUES ('chunk_and_embed', :p, 'pending', NOW(), NOW())")
+                           ->execute([':p' => json_encode(['source_id' => $ksId, 'organization_id' => $orgId])]);
                     } catch (Throwable $je) {
                         // Optional job dispatch
                     }
@@ -538,15 +550,26 @@ class SmartOnboardingService
                 $processedContent = $compacted['processed_content'] ?? substr($finalContext, 0, 6000);
                 $db->prepare("
                     INSERT INTO knowledge_sources
-                        (organization_id, type, title, category, raw_content, processed_content, keywords, source_url, status, created_at, updated_at)
-                    VALUES (:org_id, 'url', :title, 'General', :raw, :proc, :kw, :src, 'active', NOW(), NOW())
+                        (organization_id, type, title, category, keywords, source_url, status, created_at, updated_at)
+                    VALUES (:org_id, 'url', :title, 'General', :kw, :src, 'active', NOW(), NOW())
                 ")->execute([
                     ':org_id' => $orgId,
                     ':title'  => "Website Overview — {$orgName}",
-                    ':raw'    => $finalContext,
-                    ':proc'   => $processedContent,
                     ':kw'     => $compacted['keywords'] ?? '',
                     ':src'    => $normalizedUrl,
+                ]);
+                $ksId = (int)$db->lastInsertId();
+                $saveMeta = \App\Services\KnowledgeFileStorage::saveText($orgId, $ksId, $processedContent);
+                $db->prepare("
+                    UPDATE knowledge_sources
+                    SET file_path = :file_path, file_size_bytes = :size, token_count = :tokens, checksum_sha256 = :sha
+                    WHERE id = :id
+                ")->execute([
+                    ':file_path' => $saveMeta['file_path'],
+                    ':size'      => $saveMeta['file_size_bytes'],
+                    ':tokens'    => $saveMeta['token_count'],
+                    ':sha'       => $saveMeta['checksum_sha256'],
+                    ':id'        => $ksId
                 ]);
                 $ksCount = 1;
             }

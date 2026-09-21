@@ -110,9 +110,10 @@ while (true) {
 
                 } elseif ($type === 'chunk_and_embed') {
                     // ──────────────────────────────────────────────────────────
-                    // chunk_and_embed: Load processed_content from knowledge_sources,
-                    // chunk it into sentences, embed each chunk via OpenAI,
-                    // and insert rows into knowledge_items.
+                    // chunk_and_embed: Load text directly from filesystem
+                    // (storage/knowledge/{org_id}/source_{source_id}.txt),
+                    // chunk it into semantic segments, embed each chunk via OpenAI,
+                    // insert rows into knowledge_items, and mark source as active.
                     // ──────────────────────────────────────────────────────────
                     $sourceId  = (int)($payload['source_id'] ?? 0);
                     $orgId     = (int)($payload['organization_id'] ?? 0);
@@ -122,8 +123,8 @@ while (true) {
                         throw new \Exception("chunk_and_embed: missing source_id or organization_id in payload.");
                     }
 
-                    // 1. Load the source row
-                    $stmtSrc = $db->prepare("SELECT id, processed_content, status FROM knowledge_sources WHERE id = ? AND organization_id = ?");
+                    // 1. Load the source row metadata
+                    $stmtSrc = $db->prepare("SELECT id, title, file_path, status FROM knowledge_sources WHERE id = ? AND organization_id = ?");
                     $stmtSrc->execute([$sourceId, $orgId]);
                     $source = $stmtSrc->fetch(\PDO::FETCH_ASSOC);
 
@@ -131,23 +132,34 @@ while (true) {
                         throw new \Exception("chunk_and_embed: source #{$sourceId} not found for org #{$orgId}.");
                     }
 
-                    $textToChunk = trim($source['processed_content'] ?? '');
-                    if ($textToChunk === '') {
-                        throw new \Exception("chunk_and_embed: source #{$sourceId} has no processed_content to embed.");
+                    // 2. Load text from filesystem (storage/knowledge/{orgId}/source_{sourceId}.txt)
+                    $textToChunk = \App\Services\KnowledgeFileStorage::loadText($orgId, $sourceId);
+
+                    // Fallback to legacy file_path if not yet in new location
+                    if ($textToChunk === null && !empty($source['file_path'])) {
+                        $legacyAbs = dirname(__DIR__) . '/' . ltrim($source['file_path'], '/');
+                        if (file_exists($legacyAbs) && is_file($legacyAbs)) {
+                            $textToChunk = file_get_contents($legacyAbs);
+                        }
                     }
 
-                    // 2. Delete any existing knowledge_items for this source (idempotent re-run safe)
+                    $textToChunk = trim($textToChunk ?? '');
+                    if ($textToChunk === '') {
+                        throw new \Exception("chunk_and_embed: source #{$sourceId} has no text on disk to embed.");
+                    }
+
+                    // 3. Delete any existing knowledge_items for this source (idempotent re-run safe)
                     $db->prepare("DELETE FROM knowledge_items WHERE source_id = ? AND organization_id = ?")
                        ->execute([$sourceId, $orgId]);
 
-                    // 3. Chunk the processed content
+                    // 4. Chunk the text
                     $chunks = KnowledgeChunker::chunkText($textToChunk);
 
                     if (empty($chunks)) {
                         throw new \Exception("chunk_and_embed: no chunks generated for source #{$sourceId}.");
                     }
 
-                    // 4. Embed each chunk and insert into knowledge_items
+                    // 5. Embed each chunk and insert into knowledge_items
                     $stmtInsert = $db->prepare("
                         INSERT INTO knowledge_items
                             (organization_id, source_id, program_id, content, page, embedding, created_at, updated_at)
@@ -166,7 +178,11 @@ while (true) {
                         $stmtInsert->execute([$orgId, $sourceId, $programId, $chunk, $embedding]);
                     }
 
-                    echo "[" . date('Y-m-d H:i:s') . "] chunk_and_embed source #{$sourceId}: " . count($chunks) . " chunks embedded and saved to knowledge_items.\n";
+                    // 6. Update knowledge_sources status to active
+                    $db->prepare("UPDATE knowledge_sources SET status = 'active', updated_at = NOW() WHERE id = ? AND organization_id = ?")
+                       ->execute([$sourceId, $orgId]);
+
+                    echo "[" . date('Y-m-d H:i:s') . "] chunk_and_embed source #{$sourceId}: " . count($chunks) . " chunks embedded and status marked active in knowledge_sources.\n";
 
 
                 } elseif ($type === 'embed_program') {
@@ -213,26 +229,30 @@ while (true) {
                     $existingSrc = $stmtSrc->fetch(\PDO::FETCH_ASSOC);
 
                     $relPath = "storage/programs/{$orgId}/program_{$programId}.txt";
+                    $fileSizeBytes = strlen($txtContent);
+                    $checksumSha256 = hash('sha256', $txtContent);
+                    $tokenCount = \App\Services\KnowledgeFileStorage::estimateTokenCount($txtContent);
 
                     if ($existingSrc) {
                         $sourceId = (int)$existingSrc['id'];
                         $db->prepare("
                             UPDATE knowledge_sources
-                            SET raw_content = ?, processed_content = ?, file_path = ?, status = 'active', updated_at = NOW()
+                            SET file_path = ?, file_size_bytes = ?, token_count = ?, checksum_sha256 = ?, status = 'active', updated_at = NOW()
                             WHERE id = ?
-                        ")->execute([$txtContent, $txtContent, $relPath, $sourceId]);
+                        ")->execute([$relPath, $fileSizeBytes, $tokenCount, $checksumSha256, $sourceId]);
                     } else {
                         $db->prepare("
                             INSERT INTO knowledge_sources
-                                (organization_id, program_id, type, title, raw_content, processed_content, file_path, status)
-                            VALUES (?, ?, 'program_txt', ?, ?, ?, ?, 'active')
+                                (organization_id, program_id, type, title, file_path, file_size_bytes, token_count, checksum_sha256, status)
+                            VALUES (?, ?, 'program_txt', ?, ?, ?, ?, ?, 'active')
                         ")->execute([
                             $orgId,
                             $programId,
                             ($program['course_name'] ?? 'Program') . ' — Auto-generated Knowledge',
-                            $txtContent,
-                            $txtContent,
                             $relPath,
+                            $fileSizeBytes,
+                            $tokenCount,
+                            $checksumSha256
                         ]);
                         $sourceId = (int)$db->lastInsertId();
                     }

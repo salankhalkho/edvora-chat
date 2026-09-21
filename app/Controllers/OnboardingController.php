@@ -645,20 +645,32 @@ class OnboardingController
             // 1. Create knowledge_sources row
             $stmtKs = $db->prepare("
                 INSERT INTO knowledge_sources (
-                    organization_id, type, title, raw_content, processed_content, keywords, file_path, status, created_at, updated_at
+                    organization_id, type, title, keywords, original_file_path, status, created_at, updated_at
                 ) VALUES (
-                    :org_id, 'document', :title, :raw, :proc, :kw, :path, 'active', NOW(), NOW()
+                    :org_id, 'document', :title, :kw, :orig_path, 'active', NOW(), NOW()
                 )
             ");
             $stmtKs->execute([
                 ':org_id' => $orgId,
                 ':title' => $title,
-                ':raw' => $rawText,
-                ':proc' => $processedContent,
                 ':kw' => $keywords,
-                ':path' => $relativePath
+                ':orig_path' => $relativePath
             ]);
             $ksId = (int)$db->lastInsertId();
+
+            // Save clean text to storage/knowledge/{org_id}/source_{id}.txt
+            $saveMeta = \App\Services\KnowledgeFileStorage::saveText($orgId, $ksId, $processedContent);
+            $db->prepare("
+                UPDATE knowledge_sources
+                SET file_path = :file_path, file_size_bytes = :size, token_count = :tokens, checksum_sha256 = :sha
+                WHERE id = :id
+            ")->execute([
+                ':file_path' => $saveMeta['file_path'],
+                ':size'      => $saveMeta['file_size_bytes'],
+                ':tokens'    => $saveMeta['token_count'],
+                ':sha'       => $saveMeta['checksum_sha256'],
+                ':id'        => $ksId
+            ]);
 
             // 2. Create lead_assets row so bot can also deliver it as a lead magnet
             $stmtAsset = $db->prepare("
@@ -818,31 +830,47 @@ class OnboardingController
         $processed = substr(preg_replace('/\s+/', ' ', $content), 0, 6000);
 
         if ($existing) {
+            $ksId = (int)$existing['id'];
+            $saveMeta = \App\Services\KnowledgeFileStorage::saveText($orgId, $ksId, $processed);
             $stmtUpd = $db->prepare("
                 UPDATE knowledge_sources 
-                SET raw_content = :raw, processed_content = :proc, keywords = :kw, status = 'active', updated_at = NOW()
+                SET file_path = :file_path, file_size_bytes = :size, token_count = :tokens, checksum_sha256 = :sha,
+                    keywords = :kw, status = 'active', updated_at = NOW()
                 WHERE id = :id
             ");
             $stmtUpd->execute([
-                ':raw' => $content,
-                ':proc' => $processed,
-                ':kw' => $keywords,
-                ':id' => $existing['id']
+                ':file_path' => $saveMeta['file_path'],
+                ':size'      => $saveMeta['file_size_bytes'],
+                ':tokens'    => $saveMeta['token_count'],
+                ':sha'       => $saveMeta['checksum_sha256'],
+                ':kw'        => $keywords,
+                ':id'        => $ksId
             ]);
         } else {
             $stmtIns = $db->prepare("
                 INSERT INTO knowledge_sources (
-                    organization_id, type, title, raw_content, processed_content, keywords, status, created_at, updated_at
+                    organization_id, type, title, keywords, status, created_at, updated_at
                 ) VALUES (
-                    :org_id, 'text_paste', :title, :raw, :proc, :kw, 'active', NOW(), NOW()
+                    :org_id, 'text_paste', :title, :kw, 'active', NOW(), NOW()
                 )
             ");
             $stmtIns->execute([
                 ':org_id' => $orgId,
-                ':title' => $title,
-                ':raw' => $content,
-                ':proc' => $processed,
-                ':kw' => $keywords
+                ':title'  => $title,
+                ':kw'     => $keywords
+            ]);
+            $ksId = (int)$db->lastInsertId();
+            $saveMeta = \App\Services\KnowledgeFileStorage::saveText($orgId, $ksId, $processed);
+            $db->prepare("
+                UPDATE knowledge_sources
+                SET file_path = :file_path, file_size_bytes = :size, token_count = :tokens, checksum_sha256 = :sha
+                WHERE id = :id
+            ")->execute([
+                ':file_path' => $saveMeta['file_path'],
+                ':size'      => $saveMeta['file_size_bytes'],
+                ':tokens'    => $saveMeta['token_count'],
+                ':sha'       => $saveMeta['checksum_sha256'],
+                ':id'        => $ksId
             ]);
         }
     }

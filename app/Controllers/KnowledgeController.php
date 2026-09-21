@@ -9,6 +9,7 @@ use App\Helpers\AuditLogger;
 use App\Helpers\Validator;
 use App\Services\ContentCompactor;
 use App\Services\DocumentParser;
+use App\Services\KnowledgeFileStorage;
 use App\Services\UrlScraper;
 use PDO;
 use Throwable;
@@ -29,7 +30,8 @@ class KnowledgeController
                    ks.type, ks.title, ks.category, ks.academic_version,
                    ks.effective_from, ks.expires_on, ks.last_reviewed_at, ks.review_frequency_days,
                    ks.previous_version_id, ks.replaced_by_id, ks.lead_magnet,
-                   ks.source_url, ks.file_path, ks.status, ks.keywords, ks.last_fetched_at, ks.created_at, ks.updated_at
+                   ks.source_url, ks.file_path, ks.original_file_path, ks.file_size_bytes, ks.token_count, ks.checksum_sha256,
+                   ks.status, ks.keywords, ks.last_fetched_at, ks.created_at, ks.updated_at
             FROM knowledge_sources ks
             LEFT JOIN programs p ON ks.program_id = p.id
             WHERE ks.organization_id = :org_id
@@ -219,7 +221,8 @@ class KnowledgeController
                    ks.type, ks.title, ks.category, ks.academic_version,
                    ks.effective_from, ks.expires_on, ks.last_reviewed_at, ks.review_frequency_days,
                    ks.previous_version_id, ks.replaced_by_id, ks.lead_magnet,
-                   ks.source_url, ks.raw_content, ks.processed_content, ks.keywords, ks.file_path, ks.status, ks.last_fetched_at, ks.created_at, ks.updated_at
+                   ks.source_url, ks.keywords, ks.file_path, ks.original_file_path, ks.file_size_bytes, ks.token_count, ks.checksum_sha256,
+                   ks.status, ks.last_fetched_at, ks.created_at, ks.updated_at
             FROM knowledge_sources ks
             LEFT JOIN programs p ON ks.program_id = p.id
             WHERE ks.id = :id AND ks.organization_id = :org_id
@@ -230,6 +233,12 @@ class KnowledgeController
         if (!$source) {
             Response::error('Knowledge source not found.', 404);
         }
+
+        // Load content on-demand from filesystem
+        $diskContent = KnowledgeFileStorage::loadText($orgId, $id);
+        $source['content'] = $diskContent;
+        $source['raw_content'] = $diskContent;
+        $source['processed_content'] = $diskContent;
 
         // Fetch attached departments
         $source['departments'] = [];
@@ -359,10 +368,23 @@ class KnowledgeController
         ];
 
         if ($rawContent !== null) {
-            $fields[] = 'raw_content = :raw_content';
-            $fields[] = 'processed_content = :processed_content';
-            $params[':raw_content'] = $rawContent;
-            $params[':processed_content'] = $rawContent;
+            $saveMeta = KnowledgeFileStorage::saveText($orgId, $id, $rawContent);
+            $fields[] = 'file_path = :file_path';
+            $fields[] = 'file_size_bytes = :file_size_bytes';
+            $fields[] = 'token_count = :token_count';
+            $fields[] = 'checksum_sha256 = :checksum_sha256';
+            $params[':file_path'] = $saveMeta['file_path'];
+            $params[':file_size_bytes'] = $saveMeta['file_size_bytes'];
+            $params[':token_count'] = $saveMeta['token_count'];
+            $params[':checksum_sha256'] = $saveMeta['checksum_sha256'];
+
+            // Dispatch background re-chunking job
+            try {
+                $stmtJob = $db->prepare("INSERT INTO jobs (type, payload, status, run_at) VALUES ('chunk_and_embed', :p, 'pending', NOW())");
+                $stmtJob->execute([':p' => json_encode(['source_id' => $id, 'organization_id' => $orgId, 'program_id' => $programId])]);
+            } catch (Throwable $jobEx) {
+                error_log('[KnowledgeController] Failed to dispatch chunk_and_embed on update: ' . $jobEx->getMessage());
+            }
         }
 
         $sql = "UPDATE knowledge_sources SET " . implode(', ', $fields) . " WHERE id = :id AND organization_id = :org_id";
@@ -409,10 +431,10 @@ class KnowledgeController
         $stmt = $db->prepare("
             INSERT INTO knowledge_sources (organization_id, chatbot_id, program_id, type, title, category, academic_version,
                                            effective_from, expires_on, last_reviewed_at, review_frequency_days,
-                                           raw_content, processed_content, keywords, status, created_at, updated_at)
+                                           keywords, status, created_at, updated_at)
             VALUES (:org_id, :bot_id, :program_id, 'text_paste', :title, :category, :academic_version,
                     :effective_from, :expires_on, NOW(), :review_freq,
-                    :raw_content, :processed_content, :keywords, 'active', NOW(), NOW())
+                    :keywords, 'pending', NOW(), NOW())
         ");
         $stmt->execute([
             ':org_id' => $orgId,
@@ -424,11 +446,28 @@ class KnowledgeController
             ':effective_from' => $effectiveFrom,
             ':expires_on' => $expiresOn,
             ':review_freq' => $reviewFreq,
-            ':raw_content' => $rawContent,
-            ':processed_content' => $compacted['processed_content'],
             ':keywords' => $compacted['keywords']
         ]);
         $id = (int)$db->lastInsertId();
+
+        // Save clean text directly to storage/knowledge/{org_id}/source_{id}.txt
+        $saveMeta = KnowledgeFileStorage::saveText($orgId, $id, $compacted['processed_content']);
+
+        $stmtMeta = $db->prepare("
+            UPDATE knowledge_sources
+            SET file_path = :file_path,
+                file_size_bytes = :size_bytes,
+                token_count = :tokens,
+                checksum_sha256 = :sha256
+            WHERE id = :id
+        ");
+        $stmtMeta->execute([
+            ':file_path'  => $saveMeta['file_path'],
+            ':size_bytes' => $saveMeta['file_size_bytes'],
+            ':tokens'     => $saveMeta['token_count'],
+            ':sha256'     => $saveMeta['checksum_sha256'],
+            ':id'         => $id
+        ]);
 
         AuditLogger::log('knowledge_source_created', 'knowledge_source', $id, [
             'title' => $title,
@@ -451,9 +490,12 @@ class KnowledgeController
             'type' => 'text_paste',
             'category' => $category,
             'expires_on' => $expiresOn,
-            'status' => 'active',
+            'status' => 'pending',
+            'file_path' => $saveMeta['file_path'],
+            'file_size_bytes' => $saveMeta['file_size_bytes'],
+            'token_count' => $saveMeta['token_count'],
             'keywords' => $compacted['keywords']
-        ], 'Knowledge source created successfully', 201);
+        ], 'Knowledge source created and queued for vector embedding', 201);
     }
 
     /**
@@ -485,10 +527,10 @@ class KnowledgeController
             $stmt = $db->prepare("
                 INSERT INTO knowledge_sources (organization_id, chatbot_id, program_id, type, title, category, academic_version,
                                                effective_from, expires_on, last_reviewed_at, review_frequency_days,
-                                               source_url, raw_content, processed_content, keywords, content_hash, status, last_fetched_at, created_at, updated_at)
+                                               source_url, keywords, content_hash, status, last_fetched_at, created_at, updated_at)
                 VALUES (:org_id, :bot_id, :program_id, 'url', :title, :category, :academic_version,
                         :effective_from, :expires_on, NOW(), :review_freq,
-                        :url, :raw_content, :processed_content, :keywords, :hash, 'active', NOW(), NOW(), NOW())
+                        :url, :keywords, :hash, 'pending', NOW(), NOW(), NOW())
             ");
             $stmt->execute([
                 ':org_id' => $orgId,
@@ -501,12 +543,29 @@ class KnowledgeController
                 ':expires_on' => $expiresOn,
                 ':review_freq' => $reviewFreq,
                 ':url' => $url,
-                ':raw_content' => $scraped['raw_content'],
-                ':processed_content' => $compacted['processed_content'],
                 ':keywords' => $compacted['keywords'],
                 ':hash' => $scraped['content_hash']
             ]);
             $id = (int)$db->lastInsertId();
+
+            // Save clean text directly to storage/knowledge/{org_id}/source_{id}.txt
+            $saveMeta = KnowledgeFileStorage::saveText($orgId, $id, $compacted['processed_content']);
+
+            $stmtMeta = $db->prepare("
+                UPDATE knowledge_sources
+                SET file_path = :file_path,
+                    file_size_bytes = :size_bytes,
+                    token_count = :tokens,
+                    checksum_sha256 = :sha256
+                WHERE id = :id
+            ");
+            $stmtMeta->execute([
+                ':file_path'  => $saveMeta['file_path'],
+                ':size_bytes' => $saveMeta['file_size_bytes'],
+                ':tokens'     => $saveMeta['token_count'],
+                ':sha256'     => $saveMeta['checksum_sha256'],
+                ':id'         => $id
+            ]);
 
             AuditLogger::log('knowledge_source_created', 'knowledge_source', $id, [
                 'title' => $title,
@@ -530,9 +589,12 @@ class KnowledgeController
                 'url' => $url,
                 'category' => $category,
                 'expires_on' => $expiresOn,
-                'status' => 'active',
+                'status' => 'pending',
+                'file_path' => $saveMeta['file_path'],
+                'file_size_bytes' => $saveMeta['file_size_bytes'],
+                'token_count' => $saveMeta['token_count'],
                 'keywords' => $compacted['keywords']
-            ], 'URL content scraped and added to knowledge base successfully', 201);
+            ], 'URL content scraped and queued for vector embedding', 201);
 
         } catch (Throwable $e) {
             Response::error("Failed to scrape URL: " . $e->getMessage(), 500);
@@ -611,13 +673,12 @@ class KnowledgeController
             }
         }
 
-        $storageDir = dirname(__DIR__, 2) . '/storage/uploads/';
-        if (!file_exists($storageDir)) {
-            mkdir($storageDir, 0775, true);
-        }
+        $originalDir = KnowledgeFileStorage::getOriginalFilesDirectory($orgId);
+        KnowledgeFileStorage::ensureDirectoryExists($originalDir);
 
         $savedFilename = 'doc_' . $orgId . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $extension;
-        $targetPath = $storageDir . $savedFilename;
+        $targetPath = $originalDir . '/' . $savedFilename;
+        $originalFilePath = "storage/knowledge/{$orgId}/original/{$savedFilename}";
 
         if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
             Response::error('Failed to save uploaded file on server.', 500);
@@ -640,10 +701,10 @@ class KnowledgeController
             $stmt = $db->prepare("
                 INSERT INTO knowledge_sources (organization_id, chatbot_id, program_id, type, title, category, academic_version,
                                                effective_from, expires_on, last_reviewed_at, review_frequency_days,
-                                               raw_content, processed_content, keywords, file_path, status, created_at, updated_at)
+                                               original_file_path, keywords, status, created_at, updated_at)
                 VALUES (:org_id, :bot_id, :program_id, 'document', :title, :category, :academic_version,
                         :effective_from, :expires_on, NOW(), :review_freq,
-                        :raw_content, :processed_content, :keywords, :file_path, 'active', NOW(), NOW())
+                        :orig_path, :keywords, 'pending', NOW(), NOW())
             ");
             $stmt->execute([
                 ':org_id' => $orgId,
@@ -655,12 +716,29 @@ class KnowledgeController
                 ':effective_from' => $effectiveFrom,
                 ':expires_on' => $expiresOn,
                 ':review_freq' => $reviewFreq,
-                ':raw_content' => $rawContent,
-                ':processed_content' => $compacted['processed_content'],
-                ':keywords' => $compacted['keywords'],
-                ':file_path' => 'storage/uploads/' . $savedFilename
+                ':orig_path' => $originalFilePath,
+                ':keywords' => $compacted['keywords']
             ]);
             $id = (int)$db->lastInsertId();
+
+            // Save clean text directly to storage/knowledge/{org_id}/source_{id}.txt
+            $saveMeta = KnowledgeFileStorage::saveText($orgId, $id, $compacted['processed_content']);
+
+            $stmtMeta = $db->prepare("
+                UPDATE knowledge_sources
+                SET file_path = :file_path,
+                    file_size_bytes = :size_bytes,
+                    token_count = :tokens,
+                    checksum_sha256 = :sha256
+                WHERE id = :id
+            ");
+            $stmtMeta->execute([
+                ':file_path'  => $saveMeta['file_path'],
+                ':size_bytes' => $saveMeta['file_size_bytes'],
+                ':tokens'     => $saveMeta['token_count'],
+                ':sha256'     => $saveMeta['checksum_sha256'],
+                ':id'         => $id
+            ]);
 
             AuditLogger::log('knowledge_source_created', 'knowledge_source', $id, [
                 'title' => $title,
@@ -684,13 +762,17 @@ class KnowledgeController
                 'filename' => $originalFilename,
                 'category' => $category,
                 'expires_on' => $expiresOn,
-                'status' => 'active',
+                'status' => 'pending',
+                'file_path' => $saveMeta['file_path'],
+                'original_file_path' => $originalFilePath,
+                'file_size_bytes' => $saveMeta['file_size_bytes'],
+                'token_count' => $saveMeta['token_count'],
                 'keywords' => $compacted['keywords']
-            ], 'Document uploaded and processed successfully', 201);
+            ], 'Document uploaded and queued for vector embedding', 201);
 
         } catch (Throwable $e) {
             if (file_exists($targetPath)) {
-                unlink($targetPath);
+                @unlink($targetPath);
             }
             Response::error("Failed to parse document: " . $e->getMessage(), 500);
         }
@@ -749,19 +831,18 @@ class KnowledgeController
                     }
                 }
 
-                $storageDir = dirname(__DIR__, 2) . '/storage/uploads/';
-                if (!file_exists($storageDir)) {
-                    mkdir($storageDir, 0775, true);
-                }
+                $originalDir = KnowledgeFileStorage::getOriginalFilesDirectory($orgId);
+                KnowledgeFileStorage::ensureDirectoryExists($originalDir);
+
                 $savedFilename = 'doc_' . $orgId . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $extension;
-                $targetPath = $storageDir . $savedFilename;
+                $targetPath = $originalDir . '/' . $savedFilename;
+                $originalFilePath = "storage/knowledge/{$orgId}/original/{$savedFilename}";
 
                 if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
                     Response::error('Failed to save replacement file on server.', 500);
                 }
 
                 $rawContent = DocumentParser::parse($targetPath, $originalFilename);
-                $filePath = 'storage/uploads/' . $savedFilename;
                 $newType = 'document';
             } elseif (!empty($request->get('content'))) {
                 $rawContent = DocumentParser::sanitizeText((string)$request->get('content'));
@@ -778,19 +859,18 @@ class KnowledgeController
             }
 
             $compacted = ContentCompactor::process($rawContent, $title);
-
             $programId = !empty($request->get('program_id')) ? (int)$request->get('program_id') : (!empty($oldSource['program_id']) ? (int)$oldSource['program_id'] : null);
 
             // 1. Insert new knowledge source linked to previous version
             $stmtInsert = $db->prepare("
                 INSERT INTO knowledge_sources (organization_id, chatbot_id, program_id, type, title, category, academic_version,
                                                effective_from, expires_on, last_reviewed_at, review_frequency_days,
-                                               previous_version_id, source_url, raw_content, processed_content, keywords,
-                                               file_path, content_hash, status, created_at, updated_at)
+                                               previous_version_id, source_url, original_file_path, keywords,
+                                               content_hash, status, created_at, updated_at)
                 VALUES (:org_id, :bot_id, :program_id, :type, :title, :category, :academic_version,
                         :effective_from, :expires_on, NOW(), :review_freq,
-                        :prev_id, :source_url, :raw_content, :processed_content, :keywords,
-                        :file_path, :content_hash, 'active', NOW(), NOW())
+                        :prev_id, :source_url, :orig_path, :keywords,
+                        :content_hash, 'pending', NOW(), NOW())
             ");
             $stmtInsert->execute([
                 ':org_id' => $orgId,
@@ -805,13 +885,30 @@ class KnowledgeController
                 ':review_freq' => $reviewFreq,
                 ':prev_id' => $oldId,
                 ':source_url' => $sourceUrl,
-                ':raw_content' => $rawContent,
-                ':processed_content' => $compacted['processed_content'],
+                ':orig_path' => $originalFilePath,
                 ':keywords' => $compacted['keywords'],
-                ':file_path' => $filePath,
                 ':content_hash' => $contentHash
             ]);
             $newId = (int)$db->lastInsertId();
+
+            // Save clean text directly to storage/knowledge/{org_id}/source_{newId}.txt
+            $saveMeta = KnowledgeFileStorage::saveText($orgId, $newId, $compacted['processed_content']);
+
+            $stmtMeta = $db->prepare("
+                UPDATE knowledge_sources
+                SET file_path = :file_path,
+                    file_size_bytes = :size_bytes,
+                    token_count = :tokens,
+                    checksum_sha256 = :sha256
+                WHERE id = :id
+            ");
+            $stmtMeta->execute([
+                ':file_path'  => $saveMeta['file_path'],
+                ':size_bytes' => $saveMeta['file_size_bytes'],
+                ':tokens'     => $saveMeta['token_count'],
+                ':sha256'     => $saveMeta['checksum_sha256'],
+                ':id'         => $newId
+            ]);
 
             // 2. Mark old version as archived and set replaced_by_id
             $stmtArchive = $db->prepare("
@@ -850,9 +947,12 @@ class KnowledgeController
                 'title' => $title,
                 'category' => $category,
                 'academic_version' => $academicVersion,
-                'status' => 'active',
+                'status' => 'pending',
+                'file_path' => $saveMeta['file_path'],
+                'file_size_bytes' => $saveMeta['file_size_bytes'],
+                'token_count' => $saveMeta['token_count'],
                 'expires_on' => $expiresOn
-            ], "Document successfully updated to new version ({$academicVersion}). Previous version archived and embeddings refreshed.", 201);
+            ], "Document successfully updated to new version ({$academicVersion}). Previous version archived and embeddings queued.", 201);
 
         } catch (Throwable $e) {
             Response::error("Replacement failed: " . $e->getMessage(), 500);
@@ -972,16 +1072,26 @@ class KnowledgeController
             return;
         }
 
-        // Remove associated file if document type
+        // Remove associated files from disk
         if (!empty($source['file_path'])) {
             $fullPath = dirname(__DIR__, 2) . '/' . $source['file_path'];
             if (file_exists($fullPath)) {
                 @unlink($fullPath);
             }
         }
+        if (!empty($source['original_file_path'])) {
+            $fullOrig = dirname(__DIR__, 2) . '/' . $source['original_file_path'];
+            if (file_exists($fullOrig)) {
+                @unlink($fullOrig);
+            }
+        }
+        KnowledgeFileStorage::deleteText($orgId, $id);
 
         $stmtDelete = $db->prepare("DELETE FROM knowledge_sources WHERE id = :id");
         $stmtDelete->execute([':id' => $id]);
+
+        // Purge chunks from knowledge_items as well
+        $db->prepare("DELETE FROM knowledge_items WHERE source_id = :id AND organization_id = :org_id")->execute([':id' => $id, ':org_id' => $orgId]);
 
         AuditLogger::log('knowledge_source_deleted', 'knowledge_source', $id, ['title' => $source['title']]);
 
@@ -1016,27 +1126,50 @@ class KnowledgeController
 
             $compacted = ContentCompactor::process($scraped['raw_content'], $source['title']);
 
+            // Save refreshed text to disk
+            $saveMeta = KnowledgeFileStorage::saveText($orgId, $id, $compacted['processed_content']);
+
             $stmtUpdate = $db->prepare("
                 UPDATE knowledge_sources
-                SET raw_content = :raw_content, processed_content = :processed_content, keywords = :keywords, content_hash = :hash,
-                    last_fetched_at = NOW(), last_reviewed_at = NOW(), updated_at = NOW()
+                SET file_path = :file_path,
+                    file_size_bytes = :size_bytes,
+                    token_count = :tokens,
+                    checksum_sha256 = :sha256,
+                    keywords = :keywords,
+                    content_hash = :hash,
+                    status = 'pending',
+                    last_fetched_at = NOW(),
+                    last_reviewed_at = NOW(),
+                    updated_at = NOW()
                 WHERE id = :id
             ");
             $stmtUpdate->execute([
-                ':raw_content' => $scraped['raw_content'],
-                ':processed_content' => $compacted['processed_content'],
-                ':keywords' => $compacted['keywords'],
-                ':hash' => $scraped['content_hash'],
-                ':id' => $id
+                ':file_path'  => $saveMeta['file_path'],
+                ':size_bytes' => $saveMeta['file_size_bytes'],
+                ':tokens'     => $saveMeta['token_count'],
+                ':sha256'     => $saveMeta['checksum_sha256'],
+                ':keywords'   => $compacted['keywords'],
+                ':hash'       => $scraped['content_hash'],
+                ':id'         => $id
             ]);
+
+            // Dispatch background re-chunking job
+            try {
+                $stmtJob = $db->prepare("INSERT INTO jobs (type, payload, status, run_at) VALUES ('chunk_and_embed', :p, 'pending', NOW())");
+                $stmtJob->execute([':p' => json_encode(['source_id' => $id, 'organization_id' => $orgId, 'program_id' => $source['program_id']])]);
+            } catch (Throwable $jobEx) {
+                error_log('[KnowledgeController] Failed to dispatch chunk_and_embed on refresh: ' . $jobEx->getMessage());
+            }
 
             AuditLogger::log('knowledge_source_refreshed', 'knowledge_source', $id, ['title' => $source['title']]);
 
             Response::success([
                 'id' => $id,
-                'status' => 'active',
+                'status' => 'pending',
+                'file_size_bytes' => $saveMeta['file_size_bytes'],
+                'token_count' => $saveMeta['token_count'],
                 'updated_at' => date('Y-m-d H:i:s')
-            ], 'URL content refreshed and re-processed successfully');
+            ], 'URL content refreshed and queued for vector embedding');
 
         } catch (Throwable $e) {
             Response::error("Failed to refresh URL: " . $e->getMessage(), 500);
@@ -1074,10 +1207,10 @@ class KnowledgeController
 
         $db = Database::getConnection();
         if ($orgId) {
-            $stmt = $db->prepare("SELECT id, title, type, file_path, raw_content, source_url FROM knowledge_sources WHERE id = :id AND organization_id = :org_id");
+            $stmt = $db->prepare("SELECT id, organization_id, title, type, file_path, original_file_path, source_url FROM knowledge_sources WHERE id = :id AND organization_id = :org_id");
             $stmt->execute([':id' => $id, ':org_id' => $orgId]);
         } else {
-            $stmt = $db->prepare("SELECT id, title, type, file_path, raw_content, source_url FROM knowledge_sources WHERE id = :id AND status = 'active'");
+            $stmt = $db->prepare("SELECT id, organization_id, title, type, file_path, original_file_path, source_url FROM knowledge_sources WHERE id = :id AND status = 'active'");
             $stmt->execute([':id' => $id]);
         }
         $doc = $stmt->fetch();
@@ -1088,11 +1221,14 @@ class KnowledgeController
             exit;
         }
 
-        // If physical file exists on disk
-        if (!empty($doc['file_path'])) {
-            $absPath = dirname(__DIR__, 2) . '/' . ltrim($doc['file_path'], '/');
-            if (file_exists($absPath) && is_file($absPath)) {
-                $ext = strtolower(pathinfo($absPath, PATHINFO_EXTENSION));
+        $docOrgId = (int)$doc['organization_id'];
+
+        // 1. If original binary file exists (e.g. PDF, DOCX)
+        $origPath = !empty($doc['original_file_path']) ? $doc['original_file_path'] : null;
+        if (!empty($origPath)) {
+            $absOrig = dirname(__DIR__, 2) . '/' . ltrim($origPath, '/');
+            if (file_exists($absOrig) && is_file($absOrig)) {
+                $ext = strtolower(pathinfo($absOrig, PATHINFO_EXTENSION));
                 $mimeTypes = [
                     'pdf' => 'application/pdf',
                     'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -1108,14 +1244,25 @@ class KnowledgeController
                 header('Expires: 0');
                 header('Cache-Control: must-revalidate');
                 header('Pragma: public');
-                header('Content-Length: ' . filesize($absPath));
-                readfile($absPath);
+                header('Content-Length: ' . filesize($absOrig));
+                readfile($absOrig);
                 exit;
             }
         }
 
-        // If URL type and has source_url, redirect to source_url if requested or serve text
-        $content = !empty($doc['raw_content']) ? $doc['raw_content'] : "Document title: " . $doc['title'] . "\nSource: " . ($doc['source_url'] ?? 'N/A');
+        // 2. Otherwise serve the text file from storage/knowledge/{org_id}/source_{id}.txt
+        $textContent = KnowledgeFileStorage::loadText($docOrgId, $id);
+        if ($textContent === null && !empty($doc['file_path'])) {
+            $fallbackAbs = dirname(__DIR__, 2) . '/' . ltrim($doc['file_path'], '/');
+            if (file_exists($fallbackAbs) && is_file($fallbackAbs)) {
+                $textContent = file_get_contents($fallbackAbs);
+            }
+        }
+
+        if ($textContent === null) {
+            $textContent = "Document title: " . $doc['title'] . "\nSource: " . ($doc['source_url'] ?? 'N/A');
+        }
+
         $safeFilename = preg_replace('/[^a-zA-Z0-9_\-\.]/', '_', $doc['title']) . '.txt';
 
         header('Content-Description: File Transfer');
@@ -1124,8 +1271,8 @@ class KnowledgeController
         header('Expires: 0');
         header('Cache-Control: must-revalidate');
         header('Pragma: public');
-        header('Content-Length: ' . strlen($content));
-        echo $content;
+        header('Content-Length: ' . strlen($textContent));
+        echo $textContent;
         exit;
     }
 

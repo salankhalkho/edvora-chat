@@ -899,9 +899,9 @@ class AnalyticsController
 
             $stmt = $db->prepare("
                 INSERT INTO knowledge_sources 
-                (organization_id, chatbot_id, type, title, category, raw_content, processed_content, keywords, status, created_at, updated_at)
+                (organization_id, chatbot_id, type, title, category, keywords, status, created_at, updated_at)
                 VALUES 
-                (:org_id, :bot_id, 'text_paste', :title, :category, :raw_content, :processed_content, :keywords, 'active', NOW(), NOW())
+                (:org_id, :bot_id, 'text_paste', :title, :category, :keywords, 'active', NOW(), NOW())
             ");
 
             $stmt->execute([
@@ -909,12 +909,32 @@ class AnalyticsController
                 ':bot_id' => $botId ?: null,
                 ':title' => $title,
                 ':category' => $category,
-                ':raw_content' => $content,
-                ':processed_content' => $content,
                 ':keywords' => strtolower(str_replace(["\n", "\r", ",", "."], " ", $title))
             ]);
 
             $sourceId = (int)$db->lastInsertId();
+
+            // Save clean text to storage/knowledge/{org_id}/source_{id}.txt
+            $saveMeta = \App\Services\KnowledgeFileStorage::saveText($orgId, $sourceId, $content);
+            $db->prepare("
+                UPDATE knowledge_sources
+                SET file_path = :file_path, file_size_bytes = :size, token_count = :tokens, checksum_sha256 = :sha
+                WHERE id = :id
+            ")->execute([
+                ':file_path' => $saveMeta['file_path'],
+                ':size'      => $saveMeta['file_size_bytes'],
+                ':tokens'    => $saveMeta['token_count'],
+                ':sha'       => $saveMeta['checksum_sha256'],
+                ':id'        => $sourceId
+            ]);
+
+            // Dispatch chunk_and_embed job
+            try {
+                $db->prepare("INSERT INTO jobs (type, payload, status, run_at) VALUES ('chunk_and_embed', :p, 'pending', NOW())")
+                   ->execute([':p' => json_encode(['source_id' => $sourceId, 'organization_id' => $orgId])]);
+            } catch (Throwable $je) {
+                // Optional job dispatch
+            }
 
             // Log in audit logs if table exists
             try {
