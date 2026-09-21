@@ -1,4 +1,4 @@
-﻿# System Architecture — edvora.chat
+# System Architecture — edvora.chat
 
 > **MANDATORY FOR ALL AI AGENTS & HUMAN DEVELOPERS:**
 > This is the canonical, authoritative technical architecture document for **edvora.chat**.
@@ -33,7 +33,8 @@ Each tenant (organization) gets one or more embeddable chatbots that answer pros
 | **Web Server** | Apache 2.4.58 with PHP-FPM 8.2 |
 | **App Root** | `/var/www/edvora.chat/` |
 | **Web Root** | `/var/www/edvora.chat/public/` |
-| **PHP** | 8.2 via `unix:/run/php/php8.2-fpm.sock` |
+| **PHP** | 8.2 via `unix:/run/php/php8.2-fpm.sock` (CLI/FPM) |
+| **PHP-FPM Upload Envelope** | `upload_max_filesize = 60M`, `post_max_size = 65M` (in `/etc/php/8.2/fpm/php.ini`) |
 | **Database** | MariaDB 10.11.14 — database `edvora_chat` |
 | **Cache / Queue** | Redis 7 (`127.0.0.1:6379`) |
 | **Process Manager** | Supervisor — `workers/job_runner.php` |
@@ -299,7 +300,46 @@ UPDATE knowledge_sources  SET status='active'
 
 ---
 
-### 5.3 URL Refresh
+### 5.3 Dynamic Per-Plan File Upload Limits & Server Envelope (MANDATORY ARCHITECTURE)
+
+Edvora enforces strict multi-tenant plan gating for file uploads. Each plan offers a distinct maximum document size configured dynamically in the `plan_quotas` table:
+
+| Plan Tier | Quota Key (`plan_quotas`) | Default Document Limit | Total Storage Limit (`total_knowledge_mb`) |
+|---|---|---|---|
+| **Starter** | `max_file_upload_mb` | **15 MB** | 250 MB |
+| **Growth** | `max_file_upload_mb` | **25 MB** | 1,024 MB (1 GB) |
+| **Pro** | `max_file_upload_mb` | **50 MB** | 5,120 MB (5 GB) |
+
+#### ⚠️ VPS Server-Level Envelope Requirement (Critical for Server Migration / Rebuild)
+Web servers (PHP-FPM) drop multipart payloads before reaching PHP application code if they exceed the PHP ini directives. To ensure the application layer can enforce per-plan limits dynamically without infrastructure interference:
+1. **PHP-FPM (`/etc/php/8.2/fpm/php.ini`) must maintain a server-level envelope exceeding the highest tier:**
+   ```ini
+   upload_max_filesize = 60M
+   post_max_size = 65M
+   ```
+2. **Reload Command (when migrating or provisioning VPS):**
+   ```bash
+   sudo sed -i 's/^upload_max_filesize = .*/upload_max_filesize = 60M/' /etc/php/8.2/fpm/php.ini
+   sudo sed -i 's/^post_max_size = .*/post_max_size = 65M/' /etc/php/8.2/fpm/php.ini
+   sudo systemctl reload php8.2-fpm && sudo systemctl reload apache2
+   ```
+
+#### 3-Tier Enforcement Flow:
+1. **Infrastructure Envelope (VPS):** Accepts requests up to 60 MB without early socket termination.
+2. **Backend Gate (`KnowledgeController.php`):**
+   - Inspects `$_FILES['file']['error']` and maps standard PHP error codes (`UPLOAD_ERR_INI_SIZE`, `UPLOAD_ERR_PARTIAL`, etc.) to informative HTTP 413 / 400 responses.
+   - Resolves tenant's active plan quota from `plan_quotas` via `organizations.plan_id`.
+   - Rejects files exceeding `max_file_upload_mb` with HTTP 422:
+     > *"File size (X.X MB) exceeds your [Plan Name] plan limit of [Y] MB per document. Please compress the file or upgrade your plan."*
+   - Also enforces `max_knowledge_sources` before writing to disk or dispatching jobs.
+3. **Frontend UX & Pre-validation (`/v1/auth/me`, `knowledge-ingestion.html`, `app-core.js`):**
+   - `/v1/auth/me` supplies the tenant's plan quotas in the `organization.quotas` payload.
+   - The dropzone UI updates dynamically (`"Supports up to {max_file_upload_mb} MB documents"`).
+   - Instant client-side validation runs on file selection and form submission, giving instant feedback without network delays.
+
+---
+
+### 5.4 URL Refresh
 
 When an admin manually refreshes a URL source:
 1. Re-scrape the URL.
