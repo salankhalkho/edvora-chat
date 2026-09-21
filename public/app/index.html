@@ -4817,6 +4817,10 @@
                             Deploy Asset
                         </button>
                     </div>
+                </form>
+            </div>
+        </div>
+
         <!-- ── REQUEST CUSTOM INTEGRATION MODAL ───────────────────────── -->
         <div id="requestIntegrationModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
             <div style="background: #FFFFFF; border: 1px solid var(--brand-border-strong); border-radius: var(--brand-radius-md); max-width: 620px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--brand-shadow-modal);">
@@ -5029,6 +5033,8 @@
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
 
         <!-- ── QUICK ADD KNOWLEDGE SOURCE / GAP RESOLUTION MODAL ──────── -->
         <div id="resolveGapModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
@@ -13219,43 +13225,80 @@ echo $response['reply'];
             }
         }
 
-        function openReplaceKnowledgeModal(ksId) {
-            const item = (Array.isArray(allKnowledgeSources) && allKnowledgeSources.find(s => s.id == ksId)) || currentEditingDoc;
-            if (!item) {
-                showToast('Unable to locate document details for replacement.', 'error');
-                return;
-            }
-
-            document.getElementById('replaceSourceId').value = item.id;
-            document.getElementById('replaceOldTitle').innerText = item.title;
-            document.getElementById('replaceOldCategory').innerText = item.category || 'Admissions';
-            document.getElementById('replaceOldVersion').innerText = item.academic_version || '2025-26';
-            document.getElementById('replaceOldExpiry').innerText = item.expires_on || 'None';
-
-            // Next academic year suggestion
-            let nextYear = '2026-27';
-            if (item.academic_version && item.academic_version.includes('-')) {
-                const parts = item.academic_version.split('-');
-                const y1 = parseInt(parts[0]);
-                const y2 = parseInt(parts[1]);
-                if (!isNaN(y1) && !isNaN(y2)) {
-                    nextYear = `${y1 + 1}-${y2 + 1}`;
+        async function openReplaceKnowledgeModal(ksId) {
+            try {
+                let item = (Array.isArray(allKnowledgeSources) && allKnowledgeSources.find(s => s.id == ksId)) 
+                    || (currentEditingDoc && currentEditingDoc.id == ksId ? currentEditingDoc : null)
+                    || currentEditingDoc;
+                
+                if (!item && ksId) {
+                    try {
+                        const res = await fetch(`/v1/knowledge/${ksId}`, {
+                            headers: { 'Authorization': 'Bearer ' + token }
+                        });
+                        const resData = await res.json();
+                        if (resData.status === 'success' && resData.data) {
+                            item = resData.data;
+                            if (!currentEditingDoc) currentEditingDoc = item;
+                        }
+                    } catch (fetchErr) {
+                        console.warn('[Edvora] Failed to fetch doc for replacement modal:', fetchErr);
+                    }
                 }
-            }
 
-            document.getElementById('replaceTitleInput').value = item.title;
-            document.getElementById('replaceVersionInput').value = nextYear;
-            document.getElementById('replaceEffectiveFrom').value = new Date().toISOString().split('T')[0];
-            
-            // Default 1 year from now (silent = true to suppress toast on initial modal load)
-            applyKsExpiryPreset('replaceExpiresOn', 'academic_year', true);
+                if (!item) {
+                    showToast('Unable to locate document details for replacement.', 'error');
+                    return;
+                }
 
-            switchReplaceMode(item.type === 'document' ? 'file' : (item.type === 'url' ? 'url' : 'text'));
+                const srcIdEl = document.getElementById('replaceSourceId');
+                if (srcIdEl) srcIdEl.value = item.id;
+                
+                const oldTitleEl = document.getElementById('replaceOldTitle');
+                if (oldTitleEl) oldTitleEl.innerText = item.title || 'Untitled Document';
+                
+                const oldCatEl = document.getElementById('replaceOldCategory');
+                if (oldCatEl) oldCatEl.innerText = item.category || 'Admissions';
+                
+                const oldVerEl = document.getElementById('replaceOldVersion');
+                if (oldVerEl) oldVerEl.innerText = item.academic_version || '2025-26';
+                
+                const oldExpEl = document.getElementById('replaceOldExpiry');
+                if (oldExpEl) oldExpEl.innerText = item.expires_on || 'None';
 
-            const modal = document.getElementById('replaceKnowledgeModal');
-            if (modal) {
-                modal.style.display = 'flex';
-                modal.style.zIndex = '99999';
+                // Next academic year suggestion
+                let nextYear = '2026-27';
+                if (item.academic_version && item.academic_version.includes('-')) {
+                    const parts = item.academic_version.split('-');
+                    const y1 = parseInt(parts[0]);
+                    const y2 = parseInt(parts[1]);
+                    if (!isNaN(y1) && !isNaN(y2)) {
+                        nextYear = `${y1 + 1}-${y2 + 1}`;
+                    }
+                }
+
+                const titleInp = document.getElementById('replaceTitleInput');
+                if (titleInp) titleInp.value = item.title || '';
+                
+                const verInp = document.getElementById('replaceVersionInput');
+                if (verInp) verInp.value = nextYear;
+                
+                const effInp = document.getElementById('replaceEffectiveFrom');
+                if (effInp) effInp.value = new Date().toISOString().split('T')[0];
+                
+                // Default 1 year from now (silent = true to suppress toast on initial modal load)
+                applyKsExpiryPreset('replaceExpiresOn', 'academic_year', true);
+
+                switchReplaceMode(item.type === 'document' ? 'file' : (item.type === 'url' ? 'url' : 'text'));
+
+                const modal = document.getElementById('replaceKnowledgeModal');
+                if (modal) {
+                    modal.style.setProperty('display', 'flex', 'important');
+                    modal.style.setProperty('z-index', '99999', 'important');
+                }
+            } catch (modalErr) {
+                console.error('[Edvora] openReplaceKnowledgeModal exception:', modalErr);
+                showToast('An error occurred opening the replacement modal.', 'error');
             }
         }
 
@@ -14146,8 +14189,15 @@ echo $response['reply'];
         }
 
         function docEditorTriggerReplace() {
-            if (!currentEditingDoc) return;
-            openReplaceKnowledgeModal(currentEditingDoc.id);
+            const docId = (currentEditingDoc && currentEditingDoc.id)
+                || window._activeEditingDocId
+                || sessionStorage.getItem('edvora_edit_doc_id')
+                || (new URLSearchParams(window.location.hash.includes('?') ? window.location.hash.split('?')[1] : window.location.search)).get('id');
+            if (!docId) {
+                showToast('No active document loaded to replace.', 'warning');
+                return;
+            }
+            openReplaceKnowledgeModal(docId);
         }
 
         function docEditorDownloadOriginal() {
