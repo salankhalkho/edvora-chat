@@ -13,15 +13,31 @@ if (!$provider) {
     die("Error: LLM provider with ID 2 not found in database.");
 }
 
-$encKey = "a7f4e92b8c1d3e5f6a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f";
-$dataBin = hex2bin($provider['api_key_encrypted']);
-$ivLen = openssl_cipher_iv_length('AES-256-CBC');
-$iv = substr($dataBin, 0, $ivLen);
-$encrypted = substr($dataBin, $ivLen);
-$apiKey = openssl_decrypt($encrypted, 'AES-256-CBC', md5($encKey), 0, $iv);
+function decryptApiKey($encryptedHex) {
+    if (empty($encryptedHex)) return '';
+    $data = hex2bin($encryptedHex);
+    if ($data === false) return '';
+    $ivLen = openssl_cipher_iv_length('AES-256-CBC');
+    $iv = substr($data, 0, $ivLen);
+    $encrypted = substr($data, $ivLen);
+    
+    $secrets = [
+        'a7f4e92b8c1d3e5f6a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f',
+        'EdvoraLLM_SecretEncryptionKey2026!'
+    ];
+    
+    foreach ($secrets as $secret) {
+        $decrypted = openssl_decrypt($encrypted, 'AES-256-CBC', md5($secret), 0, $iv);
+        if ($decrypted !== false && !empty($decrypted)) {
+            return $decrypted;
+        }
+    }
+    return '';
+}
 
-if (!$apiKey) {
-    $apiKey = $provider['api_key_encrypted'];
+$apiKey = decryptApiKey($provider['api_key_encrypted']);
+if (empty($apiKey)) {
+    die("Error: Could not decrypt API key for provider ID 2.");
 }
 
 $modelName = $provider['model_name'];
