@@ -52,12 +52,12 @@
             if (chipsCountEl) chipsCountEl.textContent = '0 items';
             smartLiveChipsTotal = 0;
 
-            const deptsEl = document.getElementById('smartTelemetryDepts');
-            if (deptsEl) deptsEl.textContent = '0';
             const progsEl = document.getElementById('smartTelemetryPrograms');
             if (progsEl) progsEl.textContent = '0';
             const ksEl = document.getElementById('smartTelemetryKnowledge');
             if (ksEl) ksEl.textContent = '0';
+            const vecEl = document.getElementById('smartTelemetryVectors');
+            if (vecEl) vecEl.textContent = '0';
 
             updateSmartProgress(8, 'Connecting to institution server...');
             clearSmartTerminal();
@@ -150,34 +150,6 @@
                 case 'org_updated':
                     appendSmartTerminal('ENTITY', msg, '#38bdf8');
                     break;
-                case 'saving_departments':
-                    appendSmartTerminal('DEPT', msg, '#818cf8');
-                    break;
-                case 'dept_found':
-                    appendSmartTerminal('DEPT', msg, '#818cf8');
-                    if (payload.departments_count) {
-                        const dEl = document.getElementById('smartTelemetryDepts');
-                        if (dEl) dEl.textContent = payload.departments_count;
-                    }
-                    if (payload.name) {
-                        addSmartLiveChip('dept', payload.name, payload.icon || 'ðŸ«');
-                    }
-                    break;
-                case 'course_found':
-                    appendSmartTerminal('COURSE', msg, '#818cf8');
-                    if (payload.course_name) {
-                        addSmartLiveChip('dept', payload.course_name, 'ðŸ“–');
-                    }
-                    break;
-                case 'departments_written':
-                    appendSmartTerminal('DEPT', msg, '#10b981');
-                    const deptsCount = payload.departments_count || 0;
-                    const dEl = document.getElementById('smartTelemetryDepts');
-                    if (dEl) dEl.textContent = deptsCount;
-                    break;
-                case 'no_departments':
-                    appendSmartTerminal('NOTICE', msg, '#fbbf24');
-                    break;
                 case 'saving_programs':
                     appendSmartTerminal('ACADEMIC', msg, '#34d399');
                     break;
@@ -188,14 +160,19 @@
                         if (pEl) pEl.textContent = payload.programs_count;
                     }
                     if (payload.name) {
-                        addSmartLiveChip('program', payload.name, 'ðŸŽ“');
+                        addSmartLiveChip('program', payload.name, '🎓');
                     }
                     break;
                 case 'programs_written':
                     appendSmartTerminal('ACADEMIC', msg, '#10b981');
                     const progsCount = payload.programs_count || 0;
-                    const pEl = document.getElementById('smartTelemetryPrograms');
-                    if (pEl) pEl.textContent = progsCount;
+                    const pEl2 = document.getElementById('smartTelemetryPrograms');
+                    if (pEl2) pEl2.textContent = progsCount;
+                    // Update vectors queued counter
+                    if (payload.vectors_queued) {
+                        const vEl = document.getElementById('smartTelemetryVectors');
+                        if (vEl) vEl.textContent = payload.vectors_queued;
+                    }
                     break;
                 case 'no_programs':
                     appendSmartTerminal('NOTICE', msg, '#fbbf24');
@@ -210,7 +187,7 @@
                         if (kEl) kEl.textContent = payload.knowledge_count;
                     }
                     if (payload.title) {
-                        addSmartLiveChip('knowledge', payload.title, 'ðŸ“„');
+                        addSmartLiveChip('knowledge', payload.title, '📄');
                     }
                     break;
                 case 'knowledge_saved':
@@ -218,6 +195,11 @@
                     const ksCount = payload.knowledge_count || 0;
                     const kEl = document.getElementById('smartTelemetryKnowledge');
                     if (kEl) kEl.textContent = ksCount;
+                    // Update vectors queued counter
+                    if (payload.vectors_queued) {
+                        const vElKs = document.getElementById('smartTelemetryVectors');
+                        if (vElKs) vElKs.textContent = payload.vectors_queued;
+                    }
                     break;
                 case 'configuring_chatbot':
                     appendSmartTerminal('BOT', msg, '#6366f1');
@@ -225,7 +207,7 @@
                 case 'complete':
                 case 'already_complete':
                     appendSmartTerminal('READY', msg, '#10b981');
-                    updateSmartProgress(100, 'âœ¨ All verified colleges, degrees, and facts indexed successfully!');
+                    updateSmartProgress(100, '✨ All verified degrees, programs, and institutional facts indexed successfully!');
                     closeSmartEventSource();
                     setTimeout(() => {
                         showSmartCompletionScreen(payload, domain, false);
@@ -352,16 +334,16 @@
             }
 
             // Summary metrics
-            const dCount = summary.departments !== undefined ? summary.departments : (parseInt(document.getElementById('smartTelemetryDepts')?.textContent) || 0);
-            const pCount = summary.programs !== undefined ? summary.programs : (summary.courses !== undefined ? summary.courses : (parseInt(document.getElementById('smartTelemetryPrograms')?.textContent) || 0));
+            const pCount = summary.programs !== undefined ? summary.programs : (parseInt(document.getElementById('smartTelemetryPrograms')?.textContent) || 0);
             const kCount = summary.knowledge_sources !== undefined ? summary.knowledge_sources : (parseInt(document.getElementById('smartTelemetryKnowledge')?.textContent) || 0);
+            const vCount = summary.vectors_queued !== undefined ? summary.vectors_queued : (parseInt(document.getElementById('smartTelemetryVectors')?.textContent) || 0);
 
-            const sumDepts = document.getElementById('smartSummaryDepts');
             const sumPrograms = document.getElementById('smartSummaryPrograms');
             const sumKnowledge = document.getElementById('smartSummaryKnowledge');
-            if (sumDepts) sumDepts.textContent = dCount;
+            const sumVectors = document.getElementById('smartSummaryVectors');
             if (sumPrograms) sumPrograms.textContent = pCount;
             if (sumKnowledge) sumKnowledge.textContent = kCount;
+            if (sumVectors) sumVectors.textContent = vCount;
 
 
 

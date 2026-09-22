@@ -22,11 +22,11 @@ use Throwable;
  */
 class SmartOnboardingService
 {
-    private const MAX_CONTEXT_CHARS      = 32000;
-    private const MAX_PAGES_TO_FETCH     = 20;
-    private const MAX_PROGRAMS_TO_SAVE   = 100;
-    private const MAX_DEPTS_TO_SAVE      = 25;
-    private const LOGO_SAVE_DIR          = '/storage/uploads/logos/';
+    private const MAX_CONTEXT_CHARS        = 32000;
+    private const MAX_PAGES_TO_FETCH       = 20;
+    private const MAX_PROGRAMS_TO_SAVE     = 100;
+    private const MAX_KNOWLEDGE_CLUSTERS   = 25;
+    private const LOGO_SAVE_DIR            = '/storage/uploads/logos/';
 
     /**
      * Main entry point: streams Server-Sent Events for real-time onboarding progress.
@@ -108,9 +108,9 @@ class SmartOnboardingService
                         'bot_token'        => $botToken,
                         'institution_name' => $instName,
                         'summary'          => [
-                            'departments'       => 0,
                             'programs'          => 0,
                             'knowledge_sources' => 0,
+                            'vectors_queued'    => 0,
                             'needs_enrichment'  => true
                         ]
                     ]
@@ -308,48 +308,43 @@ class SmartOnboardingService
                 'state'            => $state
             ]);
 
-            // ── STEP 9: Save Offered Academic Programs ─────────────
-            $departments = $extracted['departments'] ?? [];
-            $programsList = $extracted['programs'] ?? [];
-            $courseCount = 0;
+            // ── STEP 9: Save Offered Academic Programs ─────────────────────────
+            // Programs are linked directly to organizations — no departments.
+            // Flat extraction from LLM programs array plus DOM candidate fallback.
+            $programsList     = $extracted['programs'] ?? [];
+            $courseCount      = 0;
             $savedCourseNames = [];
+            $embeddedProgIds  = []; // track IDs for embed_program job dispatch
 
             $insCourse = $db->prepare("
-                INSERT INTO programs 
-                    (organization_id, name, slug, program_type, duration, mode, is_admissions_open, created_at, updated_at)
-                VALUES 
-                    (:oid, :name, :slug, :type, :duration, :mode, 1, NOW(), NOW())
+                INSERT INTO programs
+                    (organization_id, course_name, program_type, duration, mode,
+                     eligibility, is_admissions_open, created_at, updated_at)
+                VALUES
+                    (:oid, :course_name, :type, :duration, :mode, :eligibility, 1, NOW(), NOW())
             ");
 
+            // ── Collect all extracted programs from LLM flat list ──
             $allExtractedProgs = [];
             if (!empty($programsList) && is_array($programsList)) {
                 foreach ($programsList as $p) {
                     $allExtractedProgs[] = $p;
                 }
             }
-            if (!empty($departments) && is_array($departments)) {
-                foreach ($departments as $dept) {
-                    $deptProgs = $dept['programs'] ?? $dept['courses'] ?? [];
-                    if (is_array($deptProgs)) {
-                        foreach ($deptProgs as $p) {
-                            $allExtractedProgs[] = $p;
-                        }
-                    }
-                }
-            }
 
             if (!empty($allExtractedProgs)) {
-                $emit('saving_departments', 'Structuring academic programs in database...', 67);
+                $emit('saving_programs', 'Structuring academic degree programs in database...', 67);
 
                 foreach ($allExtractedProgs as $progItem) {
                     if (is_array($progItem)) {
-                        $cn   = trim((string)($progItem['name'] ?? ''));
-                        $pt   = strtolower((string)($progItem['program_type'] ?? 'undergraduate'));
-                        $dur  = !empty($progItem['duration']) ? substr(trim($progItem['duration']), 0, 50) : null;
-                        $mode = strtolower((string)($progItem['mode'] ?? 'full_time'));
+                        $cn         = trim((string)($progItem['course_name'] ?? $progItem['name'] ?? ''));
+                        $pt         = strtolower((string)($progItem['program_type'] ?? 'undergraduate'));
+                        $dur        = !empty($progItem['duration']) ? substr(trim($progItem['duration']), 0, 50) : null;
+                        $mode       = strtolower((string)($progItem['mode'] ?? 'full_time'));
+                        $eligibility = !empty($progItem['eligibility']) ? substr(trim($progItem['eligibility']), 0, 500) : null;
                     } else {
-                        $cn   = trim((string)$progItem);
-                        $pt   = 'undergraduate';
+                        $cn = trim((string)$progItem);
+                        $pt = 'undergraduate';
                         if (preg_match('/\b(master|m\.?s|m\.?a|mba|m\.?tech|graduate|m\.?sc|m\.?com)\b/i', $cn)) {
                             $pt = 'postgraduate';
                         } elseif (preg_match('/\b(doctor|ph\.?d|doctorate)\b/i', $cn)) {
@@ -357,12 +352,13 @@ class SmartOnboardingService
                         } elseif (preg_match('/\b(diploma|certificate)\b/i', $cn)) {
                             $pt = 'certificate';
                         }
-                        $dur  = null;
-                        $mode = 'full_time';
+                        $dur         = null;
+                        $mode        = 'full_time';
+                        $eligibility = null;
                     }
 
                     if ($cn === '' || strlen($cn) < 3) continue;
-                    $normCn = strtolower($cn);
+                    $normCn = strtolower(trim($cn));
                     if (isset($savedCourseNames[$normCn])) continue;
                     $savedCourseNames[$normCn] = true;
 
@@ -376,29 +372,23 @@ class SmartOnboardingService
                     $validModes = ['full_time', 'part_time', 'online', 'hybrid', 'weekend'];
                     if (!in_array($mode, $validModes)) $mode = 'full_time';
 
-                    $slug = trim(preg_replace('/[^a-z0-9]+/', '-', strtolower($cn)), '-');
-                    if (empty($slug)) {
-                        $slug = 'prog-' . substr(bin2hex(random_bytes(3)), 0, 6);
-                    }
-                    $baseSlug = $slug;
-                    $suffix = 1;
-                    while (true) {
-                        $chk = $db->prepare("SELECT id FROM programs WHERE organization_id = :oid AND slug = :slug LIMIT 1");
-                        $chk->execute([':oid' => $orgId, ':slug' => $slug]);
-                        if (!$chk->fetch()) break;
-                        $slug = $baseSlug . '-' . (++$suffix);
-                    }
+                    // Prevent duplicates across existing programs
+                    $dupChk = $db->prepare("SELECT id FROM programs WHERE organization_id = :oid AND LOWER(TRIM(course_name)) = :cn LIMIT 1");
+                    $dupChk->execute([':oid' => $orgId, ':cn' => $normCn]);
+                    if ($dupChk->fetch()) continue;
 
                     try {
                         $insCourse->execute([
-                            ':oid'      => $orgId,
-                            ':name'     => $cn,
-                            ':slug'     => $slug,
-                            ':type'     => $pt,
-                            ':duration' => $dur,
-                            ':mode'     => $mode,
+                            ':oid'         => $orgId,
+                            ':course_name' => $cn,
+                            ':type'        => $pt,
+                            ':duration'    => $dur,
+                            ':mode'        => $mode,
+                            ':eligibility' => $eligibility,
                         ]);
+                        $newProgId    = (int)$db->lastInsertId();
                         $courseCount++;
+                        $embeddedProgIds[] = $newProgId;
 
                         if ($courseCount <= 30) {
                             usleep(30000);
@@ -409,85 +399,92 @@ class SmartOnboardingService
                             ]);
                         }
                     } catch (Throwable $ce) {
-                        // Skip duplicate
+                        // Skip duplicates / DB errors silently
                     }
                 }
             }
 
-            // Fallback: If candidate degrees discovered from DOM were missed by LLM, save them into programs
+            // ── Fallback: DOM-extracted candidate degrees not yet covered by LLM ──
             if (!empty($candidateDegrees)) {
-                $unassigned = [];
-                foreach ($candidateDegrees as $cd) {
-                    $normCd = strtolower($cd);
-                    if (!isset($savedCourseNames[$normCd])) {
-                        $unassigned[] = $cd;
+                foreach (array_slice($candidateDegrees, 0, self::MAX_PROGRAMS_TO_SAVE) as $cd) {
+                    $normCd = strtolower(trim($cd));
+                    if (isset($savedCourseNames[$normCd])) continue;
+                    $savedCourseNames[$normCd] = true;
+
+                    // Also check DB to avoid duplicating across sessions
+                    $dupChk = $db->prepare("SELECT id FROM programs WHERE organization_id = :oid AND LOWER(TRIM(course_name)) = :cn LIMIT 1");
+                    $dupChk->execute([':oid' => $orgId, ':cn' => $normCd]);
+                    if ($dupChk->fetch()) continue;
+
+                    $pt = 'undergraduate';
+                    if (preg_match('/\b(master|m\.?s|m\.?a|mba|m\.?tech|graduate|m\.?sc|m\.?com)\b/i', $cd)) {
+                        $pt = 'postgraduate';
+                    } elseif (preg_match('/\b(doctor|ph\.?d|doctorate)\b/i', $cd)) {
+                        $pt = 'doctoral';
+                    } elseif (preg_match('/\b(diploma|certificate)\b/i', $cd)) {
+                        $pt = 'certificate';
                     }
-                }
 
-                if (!empty($unassigned)) {
-                    foreach (array_slice($unassigned, 0, 50) as $cd) {
-                        $normCd = strtolower($cd);
-                        if (isset($savedCourseNames[$normCd])) continue;
-                        $savedCourseNames[$normCd] = true;
+                    try {
+                        $insCourse->execute([
+                            ':oid'         => $orgId,
+                            ':course_name' => $cd,
+                            ':type'        => $pt,
+                            ':duration'    => null,
+                            ':mode'        => 'full_time',
+                            ':eligibility' => null,
+                        ]);
+                        $newProgId = (int)$db->lastInsertId();
+                        $courseCount++;
+                        $embeddedProgIds[] = $newProgId;
 
-                        $pt = 'undergraduate';
-                        if (preg_match('/\b(master|m\.?s|m\.?a|mba|m\.?tech|graduate|m\.?sc|m\.?com)\b/i', $cd)) {
-                            $pt = 'postgraduate';
-                        } elseif (preg_match('/\b(doctor|ph\.?d|doctorate)\b/i', $cd)) {
-                            $pt = 'doctoral';
-                        } elseif (preg_match('/\b(diploma|certificate)\b/i', $cd)) {
-                            $pt = 'certificate';
-                        }
-
-                        $slug = trim(preg_replace('/[^a-z0-9]+/', '-', strtolower($cd)), '-');
-                        if (empty($slug)) {
-                            $slug = 'prog-' . substr(bin2hex(random_bytes(3)), 0, 6);
-                        }
-                        $baseSlug = $slug;
-                        $suffix = 1;
-                        while (true) {
-                            $chk = $db->prepare("SELECT id FROM programs WHERE organization_id = :oid AND slug = :slug LIMIT 1");
-                            $chk->execute([':oid' => $orgId, ':slug' => $slug]);
-                            if (!$chk->fetch()) break;
-                            $slug = $baseSlug . '-' . (++$suffix);
-                        }
-
-                        try {
-                            $insCourse->execute([
-                                ':oid'      => $orgId,
-                                ':name'     => $cd,
-                                ':slug'     => $slug,
-                                ':type'     => $pt,
-                                ':duration' => null,
-                                ':mode'     => 'full_time',
+                        if ($courseCount <= 30) {
+                            usleep(30000);
+                            $emit('program_found', "├── 🎓 {$cd} ({$pt})", 75, [
+                                'name'           => $cd,
+                                'type'           => $pt,
+                                'programs_count' => $courseCount
                             ]);
-                            $courseCount++;
-                            if ($courseCount <= 30) {
-                                usleep(30000);
-                                $emit('program_found', "├── 🎓 {$cd} ({$pt})", 75, [
-                                    'name'           => $cd,
-                                    'type'           => $pt,
-                                    'programs_count' => $courseCount
-                                ]);
-                            }
-                        } catch (Throwable $ue) {}
+                        }
+                    } catch (Throwable $ue) {}
+                }
+            }
+
+            // ── STEP 10: Dispatch embed_program knowledge-ingestion jobs ─────────
+            // Each newly inserted program generates self-contained sentences via
+            // ProgramTextGenerator and is embedded into knowledge_items by the worker.
+            $vectorsQueued = 0;
+            if (!empty($embeddedProgIds)) {
+                $stmtJob = $db->prepare("
+                    INSERT INTO jobs (type, payload, status, run_at, created_at)
+                    VALUES ('embed_program', :p, 'pending', NOW(), NOW())
+                ");
+                foreach ($embeddedProgIds as $progId) {
+                    try {
+                        $stmtJob->execute([':p' => json_encode([
+                            'program_id'      => $progId,
+                            'organization_id' => $orgId,
+                        ])]);
+                        $vectorsQueued++;
+                    } catch (Throwable $je) {
+                        // Non-fatal
                     }
                 }
             }
 
-            $emit('departments_written',
-                "Saved {$courseCount} verified academic degree program" . ($courseCount > 1 ? 's' : '') . ".",
+            $emit('programs_written',
+                "Saved {$courseCount} verified academic degree program" . ($courseCount > 1 ? 's' : '') . ". Dispatched {$vectorsQueued} embedding job" . ($vectorsQueued > 1 ? 's' : '') . " to knowledge pipeline.",
                 78,
-                ['departments_count' => 0, 'courses_count' => $courseCount, 'programs_count' => $courseCount]
+                ['programs_count' => $courseCount, 'vectors_queued' => $vectorsQueued]
             );
 
-            // ── STEP 11: Save Knowledge Sources ─────────────────────────────────
+            // ── STEP 11: Save Knowledge Sources (Filesystem-Backed) ─────────────
             $clusters = $extracted['knowledge_clusters'] ?? [];
             $ksCount  = 0;
 
             if (!empty($clusters) && is_array($clusters)) {
                 $emit('saving_knowledge', 'Ingesting Admissions & Tuition Policy facts into knowledge base...', 86);
-                foreach (array_slice($clusters, 0, self::MAX_DEPTS_TO_SAVE) as $cluster) {
+                foreach (array_slice($clusters, 0, self::MAX_KNOWLEDGE_CLUSTERS) as $cluster) {
                     $content = trim((string)($cluster['content'] ?? ''));
                     if (strlen($content) < 40) continue;
 
@@ -532,17 +529,18 @@ class SmartOnboardingService
                         'knowledge_count' => $ksCount
                     ]);
 
-                    // Dispatch async chunk_and_embed job
+                    // Dispatch async chunk_and_embed job for vector indexing
                     try {
                         $db->prepare("INSERT INTO jobs (type, payload, status, run_at, created_at) VALUES ('chunk_and_embed', :p, 'pending', NOW(), NOW())")
                            ->execute([':p' => json_encode(['source_id' => $ksId, 'organization_id' => $orgId])]);
+                        $vectorsQueued++;
                     } catch (Throwable $je) {
                         // Optional job dispatch
                     }
                 }
             }
 
-            // Fallback knowledge source if clustering produced zero records
+            // ── Fallback: If clustering produced zero records, save homepage overview ──
             if ($ksCount === 0 && !empty(trim($finalContext))) {
                 $compacted        = ContentCompactor::process($finalContext, "Website Overview — {$orgName}");
                 $processedContent = $compacted['processed_content'] ?? substr($finalContext, 0, 6000);
@@ -568,23 +566,29 @@ class SmartOnboardingService
                     ':sha'       => $saveMeta['checksum_sha256'],
                     ':id'        => $ksId
                 ]);
+                // Dispatch chunk_and_embed for fallback cluster too
+                try {
+                    $db->prepare("INSERT INTO jobs (type, payload, status, run_at, created_at) VALUES ('chunk_and_embed', :p, 'pending', NOW(), NOW())")
+                       ->execute([':p' => json_encode(['source_id' => $ksId, 'organization_id' => $orgId])]);
+                    $vectorsQueued++;
+                } catch (Throwable $je) {}
                 $ksCount = 1;
             }
 
             $emit('knowledge_saved',
-                "{$ksCount} knowledge cluster" . ($ksCount > 1 ? 's' : '') . " synthesized and indexed.",
+                "{$ksCount} knowledge cluster" . ($ksCount > 1 ? 's' : '') . " synthesized and indexed. {$vectorsQueued} vector embedding job" . ($vectorsQueued > 1 ? 's' : '') . " queued.",
                 92,
-                ['knowledge_count' => $ksCount]
+                ['knowledge_count' => $ksCount, 'vectors_queued' => $vectorsQueued]
             );
 
             // ── STEP 12: Configure Production Chatbot ────────────────────────────
             $emit('configuring_chatbot', 'Tuning AI student assistant prompt and interactive chips...', 95);
 
             $progRows = $db->prepare("
-                SELECT p.name 
-                FROM programs p 
-                WHERE p.organization_id = :oid 
-                ORDER BY p.id ASC 
+                SELECT p.course_name
+                FROM programs p
+                WHERE p.organization_id = :oid
+                ORDER BY p.id ASC
                 LIMIT 4
             ");
             $progRows->execute([':oid' => $orgId]);
@@ -636,20 +640,20 @@ class SmartOnboardingService
             $orgLogoRow->execute([':id' => $orgId]);
             $orgFinal = $orgLogoRow->fetch();
 
-            $needsEnrichment = ($deptCount === 0 || $courseCount === 0 || $ksCount === 0);
+            $needsEnrichment = ($courseCount === 0 || $ksCount === 0);
 
             $emit('complete', 'Your AI Student Assistant is primed and ready to test!', 100, [
                 'bot_token'        => $botToken,
                 'institution_name' => $orgFinal['name'] ?? $orgName,
                 'logo_url'         => $orgFinal['logo_url'] ?? null,
                 'summary' => [
-                    'departments'       => 0,
-                    'courses'           => $courseCount,
                     'programs'          => $courseCount,
                     'knowledge_sources' => $ksCount,
+                    'vectors_queued'    => $vectorsQueued,
                     'needs_enrichment'  => $needsEnrichment,
                 ],
             ]);
+
 
         } catch (Throwable $e) {
             error_log('[SmartOnboardingService] Fatal error: ' . $e->getMessage());
@@ -679,34 +683,29 @@ class SmartOnboardingService
     {
         $systemPrompt = <<<'SYSTEM'
 You are a strict, factual institutional data extraction engine for a college/university admissions SaaS.
-Your single mandate is to extract verified facts, departments, and degree programs that are EXPLICITLY listed in the provided scraped website text and candidate catalogs.
+Your single mandate is to extract verified facts and degree programs that are EXPLICITLY listed in the provided scraped website text and candidate catalogs.
 
 CARDINAL RULES:
 1. NEVER invent, fabricate, or hallucinate degree titles or majors not found in the source text.
-2. ALL DEGREE PROGRAMS AND COURSES MUST BE MAPPED UNDER A DEPARTMENT OR COLLEGE in the "departments" array.
-3. INFERRED ACADEMIC DEPARTMENTS: If the website lists degree programs centrally or without explicit department headers, you MUST INFER the logical academic department or college based on the field of study (e.g. 'BS in Biology' -> 'Department of Biological Sciences' or 'College of Science'; 'Master of Business Administration' -> 'College of Business'; 'B.A. in English' -> 'Department of Humanities & Arts'; 'BS in Mechanical Engineering' -> 'College of Engineering'; 'Master of Public Administration' -> 'Department of Public Administration & Urban Affairs'). If ambiguous, group under 'General Academics & Degree Programs'. Every single detected degree program MUST be placed inside a department.
-4. Extract as many authentic degree programs as explicitly found in the candidate lists and text.
-5. If fees, eligibility, or scholarships are not mentioned, do NOT make up numbers or policies.
-6. All knowledge_clusters MUST be factual summaries of real text provided in the prompt.
-7. Return ONLY a valid JSON object matching the schema below. No markdown backticks, no explanations, no text outside JSON.
+2. Extract ALL degree programs found in the text directly into the flat "programs" array. Do NOT group programs under departments.
+3. For each program, use ONLY data explicitly present in the source text. Leave fields null if not mentioned.
+4. If fees, eligibility, or scholarships are not mentioned, do NOT make up numbers or policies.
+5. All knowledge_clusters MUST be factual summaries of real text provided in the prompt.
+6. Return ONLY a valid JSON object matching the schema below. No markdown backticks, no explanations, no text outside JSON.
 
 OUTPUT JSON SCHEMA:
 {
   "city": "City name if clearly stated, or null",
   "state": "State/Province if clearly stated, or null",
   "institution_type": "university|college|institute|school|null",
-  "departments": [
+  "programs": [
     {
-      "name": "Department or College Name (e.g. College of Business, Department of Biological Sciences)",
-      "icon": "Relevant single emoji like 🔬, 💻, ⚖️, 💼, 🏥, 🏛️, 📚, 🎨",
-      "programs": [
-        {
-          "name": "Exact Program Title (e.g. BS in Biology, Master of Business Administration)",
-          "program_type": "undergraduate|postgraduate|doctoral|certificate|other",
-          "duration": "e.g. 4 Years, or null",
-          "mode": "full_time|part_time|online|hybrid"
-        }
-      ]
+      "course_name": "Exact Program Title (e.g. BS in Biology, Master of Business Administration)",
+      "program_type": "undergraduate|postgraduate|doctoral|certificate|other",
+      "duration": "e.g. 4 Years, or null",
+      "mode": "full_time|part_time|online|hybrid",
+      "eligibility": "Brief eligibility criteria if explicitly stated, or null",
+      "tuition_fee": "Fee string if explicitly stated, or null"
     }
   ],
   "knowledge_clusters": [
@@ -740,7 +739,7 @@ SYSTEM;
             if (!is_array($decoded)) return null;
 
             // Sanitize structure
-            $decoded['departments']        = is_array($decoded['departments'] ?? null)        ? $decoded['departments']        : [];
+            $decoded['programs']           = is_array($decoded['programs'] ?? null)           ? $decoded['programs']           : [];
             $decoded['knowledge_clusters'] = is_array($decoded['knowledge_clusters'] ?? null) ? $decoded['knowledge_clusters'] : [];
 
             // Filter out near-empty clusters
