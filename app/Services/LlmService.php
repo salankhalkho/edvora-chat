@@ -154,7 +154,7 @@ class LlmService
         $model = $providerConfig['model_name'];
         $apiKey = !empty($providerConfig['api_key_encrypted']) ? self::decryptKey($providerConfig['api_key_encrypted']) : Env::get(strtoupper($providerType) . '_API_KEY');
         $temperature = (float)($providerConfig['temperature'] ?? 0.30);
-        $maxTokens = min(400, (int)($providerConfig['max_tokens'] ?? 400));
+        $maxTokens = min(800, (int)($providerConfig['max_tokens'] ?? 800));
         $timeout = (int)($providerConfig['timeout_seconds'] ?? 20);
 
         if (empty($apiKey)) {
@@ -244,10 +244,11 @@ class LlmService
         $messages[] = ['role' => 'user', 'content' => $userMessage];
 
         $payload = [
-            'model' => $model,
-            'messages' => $messages,
-            'temperature' => $temperature,
-            'max_tokens' => $maxTokens
+            'model'           => $model,
+            'messages'        => $messages,
+            'temperature'     => $temperature,
+            'max_tokens'      => $maxTokens,
+            'response_format' => ['type' => 'json_object']
         ];
 
         $ch = curl_init($url);
@@ -315,10 +316,11 @@ class LlmService
         ];
 
         $payload = [
-            'contents' => $contents,
+            'contents'         => $contents,
             'generationConfig' => [
-                'temperature' => $temperature,
-                'maxOutputTokens' => $maxTokens
+                'temperature'     => $temperature,
+                'maxOutputTokens' => $maxTokens,
+                'responseMimeType' => 'application/json'
             ]
         ];
 
@@ -360,7 +362,7 @@ class LlmService
         $openAiKey = Env::get('OPENAI_API_KEY');
         if (!empty($openAiKey)) {
             $startTime = microtime(true);
-            $res = self::callOpenAiCompatible('https://api.openai.com/v1', $openAiKey, 'gpt-4o-mini', $systemPrompt, $userMessage, $history, 0.3, 400, 20);
+            $res = self::callOpenAiCompatible('https://api.openai.com/v1', $openAiKey, 'gpt-4o-mini', $systemPrompt, $userMessage, $history, 0.3, 800, 20);
             $latencyMs = (int)round((microtime(true) - $startTime) * 1000);
             LlmUsageLogger::log([
                 'organization_id' => $context['organization_id'] ?? null,
@@ -383,7 +385,7 @@ class LlmService
         $geminiKey = Env::get('GEMINI_API_KEY');
         if (!empty($geminiKey)) {
             $startTime = microtime(true);
-            $res = self::callGemini($geminiKey, 'gemini-1.5-flash', $systemPrompt, $userMessage, $history, 0.3, 400, 20);
+            $res = self::callGemini($geminiKey, 'gemini-1.5-flash', $systemPrompt, $userMessage, $history, 0.3, 800, 20);
             $latencyMs = (int)round((microtime(true) - $startTime) * 1000);
             LlmUsageLogger::log([
                 'organization_id' => $context['organization_id'] ?? null,

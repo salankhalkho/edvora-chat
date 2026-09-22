@@ -340,22 +340,67 @@ class ChatController
             $rawAiResponse = $llmResult['text'];
             $tokensUsed = $llmResult['tokens_used'];
 
-            // 10. Parse and strip structured [LEAD_TRIGGER:type] tag
+            // 10. Parse structured JSON response from LLM
+            // The LLM is instructed to always return a JSON object.
+            // Fail-safe: if JSON is malformed, treat raw text as the response with null analytics.
+            $parsed         = null;
+            $aiResponseText = '';
+            $followUpMessage = null;
+            $analytics = [
+                'sentiment'          => null,
+                'emotion'            => null,
+                'frustration'        => null,
+                'conversation_trend' => null,
+                'intent_label'       => null,
+                'conversation_stage' => null,
+                'lead_intent'        => null,
+                'needs_human'        => 0,
+            ];
+
+            // Strip markdown code fences if any (some LLMs wrap JSON in ```json ... ```)
+            $cleanedRaw = trim(preg_replace('/^```(?:json)?\s*/i', '', preg_replace('/\s*```\s*$/i', '', $rawAiResponse)));
+
+            $parsed = json_decode($cleanedRaw, true);
+
+            if (is_array($parsed)) {
+                // Successfully parsed — extract all fields
+                $aiResponseText  = trim($parsed['response'] ?? '');
+                $followUpMessage = !empty($parsed['follow_up']) ? trim($parsed['follow_up']) : null;
+
+                // Extract analytics fields with type-safe casting
+                $analytics['sentiment']          = in_array($parsed['sentiment'] ?? '', ['positive', 'neutral', 'negative']) ? $parsed['sentiment'] : null;
+                $analytics['emotion']            = !empty($parsed['emotion']) ? substr(trim($parsed['emotion']), 0, 50) : null;
+                $analytics['frustration']        = isset($parsed['frustration']) ? max(0.0, min(1.0, (float)$parsed['frustration'])) : null;
+                $analytics['conversation_trend'] = in_array($parsed['conversation_trend'] ?? '', ['improving', 'stable', 'declining']) ? $parsed['conversation_trend'] : null;
+                $analytics['intent_label']       = !empty($parsed['intent']) ? substr(trim($parsed['intent']), 0, 50) : null;
+                $analytics['conversation_stage'] = in_array($parsed['conversation_stage'] ?? '', ['discovery', 'consideration', 'decision', 'application']) ? $parsed['conversation_stage'] : null;
+                $analytics['lead_intent']        = in_array($parsed['lead_intent'] ?? '', ['low', 'medium', 'high']) ? $parsed['lead_intent'] : null;
+                $analytics['needs_human']        = !empty($parsed['needs_human']) ? 1 : 0;
+
+                // Normalise lead_trigger value ('scholarship_calculator' legacy → 'scholarship_eval')
+                $rawTriggerType = strtolower(trim($parsed['lead_trigger'] ?? ''));
+                if ($rawTriggerType === 'scholarship_calculator') {
+                    $rawTriggerType = 'scholarship_eval';
+                }
+            } else {
+                // Fail-safe: LLM returned non-JSON — use raw text as response, analytics stay null
+                error_log("[ChatController] LLM JSON parse failed. Raw: " . substr($rawAiResponse, 0, 300));
+                $aiResponseText = trim($rawAiResponse);
+                $rawTriggerType = '';
+            }
+
+            // 11. Resolve lead trigger payload
             $leadTriggerPayload = null;
-            $aiResponseText = $rawAiResponse;
 
-            if (preg_match('/\[LEAD_TRIGGER:([a-z_]+)\]\s*$/i', $aiResponseText, $matches)) {
-                $rawTriggerType = strtolower(trim($matches[1]));
-                // Strip tag from user-facing text
-                $aiResponseText = trim(preg_replace('/\[LEAD_TRIGGER:[a-z_]+\]\s*$/i', '', $aiResponseText));
-
-                // Only generate a trigger form if lead is NOT yet captured, program interest is known, and turn count >= minTurns
+            if (!empty($rawTriggerType) && in_array($rawTriggerType, ['asset_delivery', 'campus_tour', 'counselor_callback', 'scholarship_eval'])) {
+                // Only generate trigger form if lead not yet captured, program known, lead capture enabled, turn >= minTurns
                 if (!$leadCaptured && $hasProgramLeadInDb && $turnCount >= $minTurns && (bool)$bot['lead_capture_enabled']) {
                     $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, $rawTriggerType, $userMessage, $activeProgramData);
                 }
             }
 
-            // Fail-safe: If visitor replied affirmatively to an offer and LLM confirmed but forgot the explicit [LEAD_TRIGGER:*] tag
+            // Fail-safe: affirmative response with no lead_trigger set in JSON
+            // (LLM confirmed the offer in text but forgot to set the lead_trigger field)
             if (!$leadCaptured && empty($leadTriggerPayload) && (bool)$bot['lead_capture_enabled'] && IntentClassifier::isAffirmativeResponse($userMessage, $prevHistory)) {
                 $lastOfferText = '';
                 for ($hIdx = count($prevHistory) - 1; $hIdx >= 0; $hIdx--) {
@@ -370,85 +415,63 @@ class ChatController
                     $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, 'scholarship_eval', $userMessage, $activeProgramData);
                 } elseif (str_contains($lastOfferText, 'syllabus') || str_contains($lastOfferText, 'brochure') || str_contains($lastOfferText, 'fee structure')) {
                     $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, 'asset_delivery', $userMessage, $activeProgramData);
-                } elseif (str_contains($lastOfferText, 'call') || str_contains($lastOfferText, 'advisor') || str_contains($lastOfferText, 'counselor')) {
+                } elseif (str_contains($lastOfferText, 'call') || str_contains($lastOfferText, 'advisor') || str_contains($lastOfferText, 'counselor') || str_contains($lastOfferText, 'callback')) {
                     $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, 'counselor_callback', $userMessage, $activeProgramData);
                 }
             }
 
-            // 11. Parse and strip structured [FOLLOW_UP] tag
-            $followUpMessage = null;
-            if (preg_match('/\[FOLLOW_UP\]\s*(.*?)(?=\[LEAD_TRIGGER:|$)/is', $aiResponseText, $fuMatches)) {
-                $rawFollowUp = trim($fuMatches[1]);
-                // Strip [FOLLOW_UP] tag and question from main response text
-                $aiResponseText = trim(preg_replace('/\[FOLLOW_UP\]\s*(.*?)(?=\[LEAD_TRIGGER:|$)/is', '', $aiResponseText));
-
-                // Strict Cadence & Program Qualification Gate for Follow-Up message:
-                // Ensure the model did not output literal template placeholder text like "Would you like me to ...?"
-                if (!empty($rawFollowUp) 
-                    && $canMakeOffer
-                    && $hasProgramLeadInDb
-                    && $intentTier === IntentClassifier::TIER_KNOWLEDGE_QUERY 
-                    && empty($leadTriggerPayload)
-                    && !preg_match('/^Would you like me to \.\.\.\?/i', $rawFollowUp)
-                ) {
-                    $followUpMessage = $rawFollowUp;
-                }
-            }
-
-            // --- FAIL-SAFE SANITIZER FOR BUBBLE 1 (ZERO INLINE OFFERS) ---
-            $offerKeywords = 'campus tour|guided tour|visit our campus|visit the campus|detailed syllabus|fee structure|brochure|counselor callback|callback with|speak with an advisor|scholarship evaluation|calculate your scholarship';
-            
-            // 1. If an offer was permitted and leaked into Bubble 1, extract it into Bubble 2
-            if (empty($followUpMessage) && $canMakeOffer && preg_match('/(?:^|\n|\. |\! )([^\n\.\?!]*(?:' . $offerKeywords . ')[^\n\.\?!]*\?)\s*$/i', $aiResponseText, $leakedMatches)) {
-                $followUpMessage = trim($leakedMatches[1]);
-            }
-
-            // 2. Ironclad Removal of ANY offer question from Bubble 1
-            $aiResponseText = trim(preg_replace('/(?:\n|\. |\! )+[^\n\.\?!]*(?:' . $offerKeywords . ')[^\n\.\?!]*\?\s*$/i', '', $aiResponseText));
-            // If the whole response was an offer question, clean it
-            $aiResponseText = trim(preg_replace('/^[^\n\.\?!]*(?:' . $offerKeywords . ')[^\n\.\?!]*\?\s*$/i', '', $aiResponseText));
-
-            // Clean up any trailing broken clause or punctuation
-            $aiResponseText = preg_replace('/[,;:\s-]+$/', '.', $aiResponseText);
-
-            // Note: Natural conversational closers (e.g., "If you need more information about a specific program, feel free to ask")
-            // are explicitly preserved in Bubble 1 per user requirement as long as they don't contain any of the 4 offer actions.
-
-            // 4. If Bubble 2 exists, ensure Bubble 1 does not repeat it or end with any dangling question
-            if (!empty($followUpMessage)) {
-                $quotedFu = preg_quote($followUpMessage, '/');
-                $aiResponseText = trim(preg_replace('/' . $quotedFu . '\s*$/i', '', $aiResponseText));
-                $aiResponseText = trim(preg_replace('/\n+[^\n\.\!\?]+\?\s*$/i', '', $aiResponseText));
-            }
-
-            // If the main response was emptied (e.g. LLM generated ONLY the offer question),
-            // promote the offer question to the main response so we don't send an empty Bubble 1!
-            if (empty($aiResponseText) && !empty($followUpMessage)) {
-                $aiResponseText = $followUpMessage;
+            // Cadence gate for follow_up: apply same rules as before
+            // (Only show if canMakeOffer is true, program known, no lead trigger already firing)
+            if (!empty($followUpMessage) && (!$canMakeOffer || !$hasProgramLeadInDb || !empty($leadTriggerPayload) || $intentTier !== IntentClassifier::TIER_KNOWLEDGE_QUERY)) {
                 $followUpMessage = null;
             }
 
-            // 11. Update Cadence State if an offer was delivered on this turn
+            // Guard: ensure main response is never empty
+            if (empty($aiResponseText) && !empty($followUpMessage)) {
+                $aiResponseText  = $followUpMessage;
+                $followUpMessage = null;
+            }
+
+            // 12. Update cadence state if a follow-up offer was delivered this turn
             if (!empty($followUpMessage)) {
                 $db->exec("UPDATE conversations SET last_offer_turn = {$turnCount}, total_offers_count = total_offers_count + 1 WHERE id = {$convId}");
             }
 
             $sourceIdsUsed = array_map(fn($s) => $s['id'], $contextSources);
 
-            // 12. Save AI Response Message to DB
+            // 13. Save AI response to messages table (with analytics fields)
             $stmtAiMsg = $db->prepare("
-                INSERT INTO messages (conversation_id, organization_id, role, content, knowledge_sources_used, tokens_used, created_at)
-                VALUES (:conv_id, :org_id, 'assistant', :content, :sources, :tokens, NOW())
+                INSERT INTO messages (
+                    conversation_id, organization_id, role, content,
+                    knowledge_sources_used, tokens_used,
+                    sentiment, emotion, frustration, conversation_trend,
+                    intent_label, conversation_stage, lead_intent, needs_human,
+                    created_at
+                ) VALUES (
+                    :conv_id, :org_id, 'assistant', :content,
+                    :sources, :tokens,
+                    :sentiment, :emotion, :frustration, :conv_trend,
+                    :intent_label, :conv_stage, :lead_intent, :needs_human,
+                    NOW()
+                )
             ");
             $stmtAiMsg->execute([
-                ':conv_id' => $convId,
-                ':org_id' => $orgId,
-                ':content' => $aiResponseText,
-                ':sources' => json_encode($sourceIdsUsed),
-                ':tokens' => $tokensUsed
+                ':conv_id'     => $convId,
+                ':org_id'      => $orgId,
+                ':content'     => $aiResponseText,
+                ':sources'     => json_encode($sourceIdsUsed),
+                ':tokens'      => $tokensUsed,
+                ':sentiment'   => $analytics['sentiment'],
+                ':emotion'     => $analytics['emotion'],
+                ':frustration' => $analytics['frustration'],
+                ':conv_trend'  => $analytics['conversation_trend'],
+                ':intent_label'=> $analytics['intent_label'],
+                ':conv_stage'  => $analytics['conversation_stage'],
+                ':lead_intent' => $analytics['lead_intent'],
+                ':needs_human' => $analytics['needs_human'],
             ]);
 
-            // If follow-up message bubble is active, also store it so future turns have full conversational context
+            // Save follow-up bubble to DB for future context
             if (!empty($followUpMessage)) {
                 $stmtFuMsg = $db->prepare("
                     INSERT INTO messages (conversation_id, organization_id, role, content, knowledge_sources_used, tokens_used, created_at)
@@ -456,12 +479,29 @@ class ChatController
                 ");
                 $stmtFuMsg->execute([
                     ':conv_id' => $convId,
-                    ':org_id' => $orgId,
+                    ':org_id'  => $orgId,
                     ':content' => $followUpMessage
                 ]);
             }
 
-            // 12. Update Monthly Usage Logs (Skip test conversations)
+            // 14. Update conversation-level aggregated analytics state
+            $needsHumanInt = $analytics['needs_human'];
+            $latestSentimentSql  = $analytics['sentiment']          ? "'" . $analytics['sentiment'] . "'"          : 'NULL';
+            $latestFrustSql      = $analytics['frustration'] !== null ? (float)$analytics['frustration']            : 'NULL';
+            $latestLeadIntSql    = $analytics['lead_intent']         ? "'" . $analytics['lead_intent'] . "'"        : 'NULL';
+            $latestStageSql      = $analytics['conversation_stage']  ? "'" . $analytics['conversation_stage'] . "'" : 'NULL';
+
+            $db->exec("
+                UPDATE conversations SET
+                    latest_sentiment          = {$latestSentimentSql},
+                    latest_frustration        = {$latestFrustSql},
+                    latest_lead_intent        = {$latestLeadIntSql},
+                    latest_conversation_stage = {$latestStageSql},
+                    needs_human               = {$needsHumanInt}
+                WHERE id = {$convId}
+            ");
+
+            // 15. Update Monthly Usage Logs (Skip test conversations)
             if ($isTest === 0) {
                 $period = date('Y-m');
                 $db->exec("
@@ -473,25 +513,31 @@ class ChatController
                 ");
             }
 
-            // Build masked email for returning visitor if captured
+            // Build masked email for returning visitor
             $maskedEmail = null;
             if ($leadCaptured && $visitorEmail) {
                 $parts = explode('@', $visitorEmail);
-                $maskedUser = substr($parts[0], 0, 2) . str_repeat('*', max(3, strlen($parts[0]) - 2));
+                $maskedUser  = substr($parts[0], 0, 2) . str_repeat('*', max(3, strlen($parts[0]) - 2));
                 $maskedEmail = $maskedUser . '@' . ($parts[1] ?? 'email.com');
             }
 
             Response::success([
-                'conversation_id' => $convId,
-                'is_test' => $isTest,
-                'response' => $aiResponseText,
-                'follow_up_message' => $followUpMessage,
-                'sources_used' => array_map(fn($s) => ['id' => $s['id'], 'title' => $s['title']], $contextSources),
+                'conversation_id'      => $convId,
+                'is_test'              => $isTest,
+                'response'             => $aiResponseText,
+                'follow_up_message'    => $followUpMessage,
+                'sources_used'         => array_map(fn($s) => ['id' => $s['id'], 'title' => $s['title']], $contextSources),
                 'lead_capture_trigger' => $leadTriggerPayload,
-                'intent_tier' => $intentTier,
-                'turn_count' => $turnCount,
-                'lead_captured' => $leadCaptured,
-                'masked_email' => $maskedEmail
+                'intent_tier'          => $intentTier,
+                'turn_count'           => $turnCount,
+                'lead_captured'        => $leadCaptured,
+                'masked_email'         => $maskedEmail,
+                // Analytics fields for frontend awareness
+                'sentiment'            => $analytics['sentiment'],
+                'frustration'          => $analytics['frustration'],
+                'lead_intent'          => $analytics['lead_intent'],
+                'conversation_stage'   => $analytics['conversation_stage'],
+                'needs_human'          => (bool)$analytics['needs_human'],
             ]);
 
         } catch (Throwable $e) {

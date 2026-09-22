@@ -484,7 +484,7 @@
         return html;
     }
 
-    function appendMessage(role, text) {
+    function appendMessage(role, text, styleClass) {
         var cust = (config && config.customization) ? config.customization : {};
         var showBubbleAv = (role === 'assistant') && (cust.avatar_location === 'bubbles' || cust.avatar_location === 'both' || !cust.avatar_location);
         var avatarSrc = config._resolvedAvatarSrc || (apiBaseUrl + '/avatars/avatar1.png');
@@ -529,6 +529,12 @@
                 msgDiv.style.borderRadius = ur + 'px ' + ur + 'px 3px ' + ur + 'px';
             }
             if (cust.message_font_size) msgDiv.style.fontSize = cust.message_font_size + 'px';
+        }
+
+        // Apply needs-human escalation style (subtle amber border highlight)
+        if (styleClass === 'needs-human' && role === 'assistant') {
+            msgDiv.style.borderLeft = '3px solid #f59e0b';
+            msgDiv.style.paddingLeft = '10px';
         }
 
         rowDiv.appendChild(msgDiv);
@@ -616,11 +622,13 @@
 
                 // If follow-up provoking question is provided, display it as a separate bubble with natural typing delay
                 if (res.data.follow_up_message) {
+                    var isNeedsHuman = res.data.needs_human === true;
+                    var frustrationHigh = (res.data.frustration || 0) > 0.7;
                     setTimeout(function () {
                         showTypingIndicator();
                         setTimeout(function () {
                             removeTypingIndicator();
-                            appendMessage('assistant', res.data.follow_up_message);
+                            appendMessage('assistant', res.data.follow_up_message, isNeedsHuman && frustrationHigh ? 'needs-human' : null);
                         }, 900);
                     }, 800);
                 }

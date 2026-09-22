@@ -1579,6 +1579,40 @@ class Migrations
         } catch (Throwable $e) {
             // Index may already exist
         }
+
+        // ── Structured LLM Analytics Output ──────────────────────────────────
+        // New per-message analytics columns (from structured JSON LLM response)
+        try {
+            $checkSentiment = $this->db->query("SHOW COLUMNS FROM messages LIKE 'sentiment'");
+            if (!$checkSentiment->fetch()) {
+                $this->db->exec("ALTER TABLE messages
+                    ADD COLUMN sentiment ENUM('positive', 'neutral', 'negative') NULL AFTER tokens_used,
+                    ADD COLUMN emotion VARCHAR(50) NULL AFTER sentiment,
+                    ADD COLUMN frustration DECIMAL(3,2) NULL AFTER emotion,
+                    ADD COLUMN conversation_trend ENUM('improving', 'stable', 'declining') NULL AFTER frustration,
+                    ADD COLUMN intent_label VARCHAR(50) NULL AFTER conversation_trend,
+                    ADD COLUMN conversation_stage ENUM('discovery', 'consideration', 'decision', 'application') NULL AFTER intent_label,
+                    ADD COLUMN lead_intent ENUM('low', 'medium', 'high') NULL AFTER conversation_stage,
+                    ADD COLUMN needs_human TINYINT(1) DEFAULT 0 AFTER lead_intent;");
+            }
+        } catch (Throwable $e) {
+            error_log('[Migrations] messages analytics columns: ' . $e->getMessage());
+        }
+
+        // New session-level aggregated analytics columns on conversations
+        try {
+            $checkLatestSentiment = $this->db->query("SHOW COLUMNS FROM conversations LIKE 'latest_sentiment'");
+            if (!$checkLatestSentiment->fetch()) {
+                $this->db->exec("ALTER TABLE conversations
+                    ADD COLUMN latest_sentiment ENUM('positive', 'neutral', 'negative') NULL AFTER last_message_at,
+                    ADD COLUMN latest_frustration DECIMAL(3,2) NULL AFTER latest_sentiment,
+                    ADD COLUMN latest_lead_intent ENUM('low', 'medium', 'high') NULL AFTER latest_frustration,
+                    ADD COLUMN latest_conversation_stage ENUM('discovery', 'consideration', 'decision', 'application') NULL AFTER latest_lead_intent,
+                    ADD COLUMN needs_human TINYINT(1) DEFAULT 0 AFTER latest_conversation_stage;");
+            }
+        } catch (Throwable $e) {
+            error_log('[Migrations] conversations analytics columns: ' . $e->getMessage());
+        }
     }
 }
 
