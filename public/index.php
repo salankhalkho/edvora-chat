@@ -260,6 +260,7 @@ $router->post('/v1/knowledge/upload', [KnowledgeController::class, 'upload'], [A
 $router->post('/v1/knowledge/paste', [KnowledgeController::class, 'paste'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->post('/v1/knowledge/text', [KnowledgeController::class, 'paste'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->post('/v1/knowledge/url', [KnowledgeController::class, 'addUrl'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->post('/v1/knowledge/crawl', [KnowledgeController::class, 'addUrl'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->post('/v1/knowledge/search', [KnowledgeController::class, 'search'], [AuthMiddleware::class, TenantMiddleware::class]);
 
 $router->get('/v1/knowledge/{id}', [KnowledgeController::class, 'show'], [AuthMiddleware::class, TenantMiddleware::class]);
