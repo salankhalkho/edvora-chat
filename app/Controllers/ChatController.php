@@ -330,12 +330,13 @@ class ChatController
         // 9. Invoke LLM Service
         try {
             $llmResult = LlmService::complete($systemPrompt, $userMessage, $history, [
-                'organization_id' => $bot['organization_id'] ?? null,
-                'chatbot_id' => $bot['id'] ?? null,
-                'activity_type' => 'chat_completion',
-                'reference_type' => 'conversation',
-                'reference_id' => $conversationId,
-                'description' => "Chat conversation turn #{$turnCount} (Intent: {$intentTier})"
+                'organization_id'        => $bot['organization_id'] ?? null,
+                'chatbot_id'             => $bot['id'] ?? null,
+                'activity_type'          => 'chat_completion',
+                'reference_type'         => 'conversation',
+                'reference_id'           => $convId,
+                'description'            => "Chat conversation turn #{$turnCount} (Intent: {$intentTier})",
+                'response_format_override' => LlmService::getAdmissionsResponseSchema(),
             ]);
             $rawAiResponse = $llmResult['text'];
             $tokensUsed = $llmResult['tokens_used'];

@@ -221,6 +221,22 @@ GUIDELINES:
 5. Do NOT output any [LEAD_TRIGGER:*] tag.
 
 {$progBlock}
+
+=== MANDATORY JSON OUTPUT FORMAT ===
+You MUST respond ONLY with a single valid JSON object. No markdown code fences. No text outside the JSON.
+{
+  "response": "<your empathetic clarification message>",
+  "follow_up": null,
+  "lead_trigger": null,
+  "sentiment": "<positive | neutral | negative>",
+  "emotion": "<specific emotion label>",
+  "frustration": <0.0 to 1.0>,
+  "conversation_trend": "<improving | stable | declining>",
+  "intent": "general",
+  "conversation_stage": "discovery",
+  "lead_intent": "<low | medium | high>",
+  "needs_human": false
+}
 EOT;
         if (!empty($override)) {
             $prompt .= "\n" . trim($override);

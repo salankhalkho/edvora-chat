@@ -146,6 +146,43 @@ class LlmService
     }
 
     /**
+     * Returns the OpenAI json_schema structured output format for admissions chat responses.
+     * Pass via 'response_format_override' context key in LlmService::complete().
+     */
+    public static function getAdmissionsResponseSchema(): array
+    {
+        return [
+            'type' => 'json_schema',
+            'json_schema' => [
+                'name'   => 'admissions_response',
+                'strict' => true,
+                'schema' => [
+                    'type'                 => 'object',
+                    'additionalProperties' => false,
+                    'required'             => [
+                        'response', 'follow_up', 'lead_trigger', 'sentiment',
+                        'emotion', 'frustration', 'conversation_trend', 'intent',
+                        'conversation_stage', 'lead_intent', 'needs_human'
+                    ],
+                    'properties' => [
+                        'response'           => ['type' => 'string'],
+                        'follow_up'          => ['type' => ['string', 'null']],
+                        'lead_trigger'       => ['type' => ['string', 'null']],
+                        'sentiment'          => ['type' => 'string'],
+                        'emotion'            => ['type' => 'string'],
+                        'frustration'        => ['type' => 'number'],
+                        'conversation_trend' => ['type' => 'string'],
+                        'intent'             => ['type' => 'string'],
+                        'conversation_stage' => ['type' => 'string'],
+                        'lead_intent'        => ['type' => 'string'],
+                        'needs_human'        => ['type' => 'boolean'],
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
      * Dispatch completion call to provider API
      */
     private static function executeProvider(array $providerConfig, string $systemPrompt, string $userMessage, array $history, array $context = []): array
@@ -157,6 +194,10 @@ class LlmService
         $maxTokens = min(800, (int)($providerConfig['max_tokens'] ?? 800));
         $timeout = (int)($providerConfig['timeout_seconds'] ?? 20);
 
+        // Optional structured output format — only passed by callers that need JSON (e.g. ChatController).
+        // When null, no response_format is sent and the model returns plain text.
+        $responseFormat = $context['response_format_override'] ?? null;
+
         if (empty($apiKey)) {
             throw new Exception("API Key missing for provider {$providerType}");
         }
@@ -167,7 +208,11 @@ class LlmService
             switch ($providerType) {
                 case 'openai':
                 case 'groq':
-                    $res = self::callOpenAiCompatible($providerConfig['api_base_url'] ?? ($providerType === 'groq' ? 'https://api.groq.com/openai/v1' : 'https://api.openai.com/v1'), $apiKey, $model, $systemPrompt, $userMessage, $history, $temperature, $maxTokens, $timeout);
+                    $res = self::callOpenAiCompatible(
+                        $providerConfig['api_base_url'] ?? ($providerType === 'groq' ? 'https://api.groq.com/openai/v1' : 'https://api.openai.com/v1'),
+                        $apiKey, $model, $systemPrompt, $userMessage, $history,
+                        $temperature, $maxTokens, $timeout, $responseFormat
+                    );
                     break;
                 case 'gemini':
                     $res = self::callGemini($apiKey, $model, $systemPrompt, $userMessage, $history, $temperature, $maxTokens, $timeout);
@@ -229,8 +274,11 @@ class LlmService
 
     /**
      * Call OpenAI / Groq Compatible Chat API
+     *
+     * @param array|null $responseFormat Optional structured output format (json_schema or json_object).
+     *                                   When null, no response_format is sent — model returns plain text.
      */
-    private static function callOpenAiCompatible(string $baseUrl, string $apiKey, string $model, string $systemPrompt, string $userMessage, array $history, float $temperature, int $maxTokens, int $timeout): array
+    private static function callOpenAiCompatible(string $baseUrl, string $apiKey, string $model, string $systemPrompt, string $userMessage, array $history, float $temperature, int $maxTokens, int $timeout, ?array $responseFormat = null): array
     {
         $url = rtrim($baseUrl, '/') . '/chat/completions';
 
@@ -247,12 +295,17 @@ class LlmService
         $messages[] = ['role' => 'user', 'content' => $userMessage];
 
         $payload = [
-            'model'           => $model,
-            'messages'        => $messages,
-            'temperature'     => $temperature,
-            'max_tokens'      => $maxTokens,
-            'response_format' => ['type' => 'json_object']
+            'model'       => $model,
+            'messages'    => $messages,
+            'temperature' => $temperature,
+            'max_tokens'  => $maxTokens,
         ];
+
+        // Only attach response_format when the caller explicitly requests structured output.
+        // Omitting it entirely avoids the OpenAI HTTP 400 "messages must contain 'json'" error.
+        if ($responseFormat !== null) {
+            $payload['response_format'] = $responseFormat;
+        }
 
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
