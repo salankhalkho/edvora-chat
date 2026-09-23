@@ -76,7 +76,7 @@ class PromptBuilder
 
         // 9. Inject Dynamic Counselor State & Strict Program-Qualification Rule
         if ($isCatalogQuery) {
-            $turnStateNotice = "[STATE: PROGRAM CATALOG INQUIRY] The visitor is inquiring about available programs or courses. In 'response', provide a warm, welcoming, and accommodative opening statement introducing our academic offerings (do NOT write out program lists as raw text; our interactive UI card will display them directly). Set 'program_trigger' to 'all' (or specific requested degree level if asked, e.g. 'undergraduate', 'graduate', 'doctoral', 'certificates'). In 'follow_up', warmly ask which specific program or degree level they would like to explore curriculum, eligibility, or fee details for. No conversion offers this turn.";
+            $turnStateNotice = "[STATE: PROGRAM CATALOG INQUIRY] The visitor is inquiring about available programs or courses. In 'response', provide a short, crisp, warm, and non-robotic 1-sentence greeting personalized to {$collegeName} (e.g. 'Welcome to {$collegeName}! Here is our official academic catalog below — tap any program to explore its details!'). Keep 'response' strictly under 25 words. Do NOT list programs in text; our interactive UI card displays them directly. Set 'program_trigger' to 'all' (or specific requested degree level if asked, e.g. 'undergraduate', 'graduate', 'doctoral', 'certificates'). Keep 'follow_up': null. No conversion offers this turn.";
         } elseif ($leadCaptured) {
             $turnStateNotice = "[STATE] Visitor contact details already collected. Answer questions directly. No offers.";
         } elseif (!$activeProgram) {

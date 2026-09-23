@@ -717,7 +717,7 @@
 
             var tabsHtml = '';
             if (catalog.categories.length > 1) {
-                tabsHtml = '<div class="edvora-catalog-tabs" style="display:flex; gap:5px; margin-bottom:10px; overflow-x:auto; padding-bottom:4px; -webkit-overflow-scrolling:touch;">';
+                tabsHtml = '<div class="edvora-catalog-tabs" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;">';
                 var allActive = (activeFilter === 'all');
                 tabsHtml += '<button type="button" class="edvora-catalog-tab' + (allActive ? ' active' : '') + '" data-filter="all" style="padding:4px 10px; font-size:11px; font-weight:600; border-radius:14px; border:1px solid ' + (allActive ? '#2563EB' : '#CBD5E1') + '; background:' + (allActive ? '#2563EB' : '#F8FAFC') + '; color:' + (allActive ? '#FFFFFF' : '#475569') + '; cursor:pointer; white-space:nowrap; transition:all 0.15s;">All (' + totalCount + ')</button>';
 
@@ -729,8 +729,8 @@
                 tabsHtml += '</div>';
             }
 
-            // 3. Program List Container (Scrollable)
-            var listHtml = '<div class="edvora-catalog-list" style="display:flex; flex-direction:column; gap:6px; max-height:240px; overflow-y:auto; padding-right:2px;">';
+            // 3. Program List Container (Expands naturally to avoid double scrollbars)
+            var listHtml = '<div class="edvora-catalog-list" style="display:flex; flex-direction:column; gap:6px;">';
 
             for (var c = 0; c < catalog.categories.length; c++) {
                 var cat = catalog.categories[c];
