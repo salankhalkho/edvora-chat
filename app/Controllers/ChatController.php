@@ -339,7 +339,7 @@ class ChatController
             'response_format_override' => LlmService::getAdmissionsResponseSchema(),
         ];
         if ($isCatalogQuery) {
-            $llmContext['max_tokens_override'] = 2500;
+            $llmContext['max_tokens_override'] = 4000;
         }
 
         try {
@@ -389,11 +389,13 @@ class ChatController
                 if ($rawTriggerType === 'scholarship_calculator') {
                     $rawTriggerType = 'scholarship_eval';
                 }
+                $rawProgramTrigger = strtolower(trim($parsed['program_trigger'] ?? ''));
             } else {
                 // Fail-safe: LLM returned non-JSON — use raw text as response, analytics stay null
                 error_log("[ChatController] LLM JSON parse failed. Raw: " . substr($rawAiResponse, 0, 300));
                 $aiResponseText = trim($rawAiResponse);
                 $rawTriggerType = '';
+                $rawProgramTrigger = '';
             }
 
             // 11. Resolve lead trigger payload
@@ -425,6 +427,25 @@ class ChatController
                 } elseif (str_contains($lastOfferText, 'call') || str_contains($lastOfferText, 'advisor') || str_contains($lastOfferText, 'counselor') || str_contains($lastOfferText, 'callback')) {
                     $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, 'counselor_callback', $userMessage, $activeProgramData);
                 }
+            }
+
+            // 11b. Resolve program catalog payload for interactive widget UI (Hybrid: Keyword + LLM Trigger)
+            $programCatalogPayload = null;
+            $wantsCatalog = $isCatalogQuery || (!empty($rawProgramTrigger) && $rawProgramTrigger !== 'null');
+            if ($wantsCatalog) {
+                // Detect requested degree level filter
+                $catalogFilter = 'all';
+                $cleanUserMsg = strtolower($userMessage);
+                if (preg_match('/\b(undergrad|undergraduate|bachelor|bachelors|ug)\b/i', $cleanUserMsg) || $rawProgramTrigger === 'undergraduate') {
+                    $catalogFilter = 'undergraduate';
+                } elseif (preg_match('/\b(postgrad|postgraduate|graduate|master|masters|pg)\b/i', $cleanUserMsg) || in_array($rawProgramTrigger, ['graduate', 'postgraduate'], true)) {
+                    $catalogFilter = 'graduate';
+                } elseif (preg_match('/\b(phd|ph\.d|doctor|doctoral|doctorate)\b/i', $cleanUserMsg) || $rawProgramTrigger === 'doctoral') {
+                    $catalogFilter = 'doctoral';
+                } elseif (preg_match('/\b(certificate|diploma|executive)\b/i', $cleanUserMsg) || in_array($rawProgramTrigger, ['certificate', 'certificates', 'executive'], true)) {
+                    $catalogFilter = 'certificates';
+                }
+                $programCatalogPayload = self::resolveProgramCatalog($db, $orgId, $catalogFilter);
             }
 
             // Cadence gate for follow_up: apply same rules as before
@@ -543,6 +564,7 @@ class ChatController
                 'follow_up_message'    => $followUpMessage,
                 'sources_used'         => array_map(fn($s) => ['id' => $s['id'], 'title' => $s['title']], $contextSources),
                 'lead_capture_trigger' => $leadTriggerPayload,
+                'program_catalog'      => $programCatalogPayload,
                 'intent_tier'          => $intentTier,
                 'turn_count'           => $turnCount,
                 'lead_captured'        => $leadCaptured,
@@ -641,5 +663,97 @@ class ChatController
         }
 
         return null;
+    }
+
+    /**
+     * Resolve structured program catalog directory for interactive widget UI
+     */
+    private static function resolveProgramCatalog(PDO $db, int $orgId, string $filter = 'all'): ?array
+    {
+        $stmtProg = $db->prepare("
+            SELECT id, course_name, course_code, program_type, duration, tuition_fee, currency
+            FROM programs
+            WHERE organization_id = :org_id AND is_admissions_open = 1
+            ORDER BY sort_order ASC, course_name ASC
+        ");
+        $stmtProg->execute([':org_id' => $orgId]);
+        $programs = $stmtProg->fetchAll(PDO::FETCH_ASSOC);
+
+        if (empty($programs)) {
+            return null;
+        }
+
+        $categoriesMap = [
+            'undergraduate' => [
+                'key'         => 'undergraduate',
+                'label'       => "Undergraduate (Bachelor's)",
+                'short_label' => 'Undergraduate',
+                'programs'    => []
+            ],
+            'graduate' => [
+                'key'         => 'graduate',
+                'label'       => "Graduate / Postgraduate (Master's)",
+                'short_label' => 'Graduate',
+                'programs'    => []
+            ],
+            'doctoral' => [
+                'key'         => 'doctoral',
+                'label'       => "Doctoral (Ph.D.)",
+                'short_label' => 'Doctoral',
+                'programs'    => []
+            ],
+            'certificates' => [
+                'key'         => 'certificates',
+                'label'       => "Certificates & Executive",
+                'short_label' => 'Certificates',
+                'programs'    => []
+            ],
+            'other' => [
+                'key'         => 'other',
+                'label'       => "Other Academic Programs",
+                'short_label' => 'Other',
+                'programs'    => []
+            ]
+        ];
+
+        foreach ($programs as $p) {
+            $type = strtolower(trim($p['program_type'] ?? ''));
+            $item = [
+                'id'          => (int)$p['id'],
+                'course_name' => $p['course_name'],
+                'course_code' => $p['course_code'] ?? '',
+                'duration'    => !empty($p['duration']) ? trim($p['duration']) : null,
+            ];
+
+            if (in_array($type, ['undergraduate', 'bachelor', 'bachelors', 'ug'], true)) {
+                $categoriesMap['undergraduate']['programs'][] = $item;
+            } elseif (in_array($type, ['postgraduate', 'graduate', 'master', 'masters', 'pg'], true)) {
+                $categoriesMap['graduate']['programs'][] = $item;
+            } elseif (in_array($type, ['doctoral', 'phd', 'doctorate'], true)) {
+                $categoriesMap['doctoral']['programs'][] = $item;
+            } elseif (in_array($type, ['certificate', 'diploma', 'executive'], true)) {
+                $categoriesMap['certificates']['programs'][] = $item;
+            } else {
+                $categoriesMap['other']['programs'][] = $item;
+            }
+        }
+
+        $activeCategories = [];
+        foreach ($categoriesMap as $cat) {
+            if (!empty($cat['programs'])) {
+                $activeCategories[] = $cat;
+            }
+        }
+
+        if (empty($activeCategories)) {
+            return null;
+        }
+
+        return [
+            'headline'    => 'Academic Programs',
+            'filter'      => $filter,
+            'total_count' => count($programs),
+            'categories'  => $activeCategories
+        ];
     }
 }

@@ -583,8 +583,8 @@
     }
 
     // 9. Send Message Handler
-    function sendMessage() {
-        var text = inputField.value.trim();
+    function sendMessage(textOverride) {
+        var text = (typeof textOverride === 'string' && textOverride.trim()) ? textOverride.trim() : inputField.value.trim();
         if (!text) return;
 
         appendMessage('user', text);
@@ -614,6 +614,10 @@
                 }
                 if (res.data.response && res.data.response.trim() !== '') {
                     appendMessage('assistant', res.data.response);
+                }
+
+                if (res.data.program_catalog) {
+                    renderProgramCatalog(res.data.program_catalog);
                 }
 
                 if (res.data.lead_capture_trigger) {
@@ -675,6 +679,133 @@
             return payload;
         } catch (e) {
             return data;
+        }
+    }
+
+    // --- Interactive Program Catalog Directory Component ---
+    function renderProgramCatalog(catalog) {
+        if (!catalog || !catalog.categories || !catalog.categories.length) return;
+
+        try {
+            var card = document.createElement('div');
+            card.className = 'edvora-program-catalog-card';
+            card.style.cssText = 'background: #FFFFFF; border: 1.5px solid #CBD5E1; border-radius: 12px; padding: 12px; margin-top: 8px; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06); font-size: 12px; font-family: inherit; box-sizing: border-box; width: 100%;';
+
+            // 1. Header with title and count badge
+            var totalCount = catalog.total_count || 0;
+            var headline = catalog.headline || 'Academic Programs';
+            var headerHtml = '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">' +
+                '<div style="display:flex; align-items:center; gap:6px;">' +
+                    '<span style="font-size:16px;">🎓</span>' +
+                    '<strong style="color: #0F172A; font-size: 13px;">' + headline + '</strong>' +
+                '</div>' +
+                '<span style="background:#EFF6FF; color:#1D4ED8; font-size:11px; font-weight:700; padding:2px 8px; border-radius:12px; border:1px solid #BFDBFE;">' + totalCount + ' Available</span>' +
+            '</div>';
+
+            // 2. Filter Tabs (All + each active category)
+            var activeFilter = (catalog.filter && catalog.filter !== 'all') ? catalog.filter : 'all';
+            var hasFilterMatch = false;
+            if (activeFilter !== 'all') {
+                for (var i = 0; i < catalog.categories.length; i++) {
+                    if (catalog.categories[i].key === activeFilter) {
+                        hasFilterMatch = true;
+                        break;
+                    }
+                }
+            }
+            if (!hasFilterMatch) activeFilter = 'all';
+
+            var tabsHtml = '';
+            if (catalog.categories.length > 1) {
+                tabsHtml = '<div class="edvora-catalog-tabs" style="display:flex; gap:5px; margin-bottom:10px; overflow-x:auto; padding-bottom:4px; -webkit-overflow-scrolling:touch;">';
+                var allActive = (activeFilter === 'all');
+                tabsHtml += '<button type="button" class="edvora-catalog-tab' + (allActive ? ' active' : '') + '" data-filter="all" style="padding:4px 10px; font-size:11px; font-weight:600; border-radius:14px; border:1px solid ' + (allActive ? '#2563EB' : '#CBD5E1') + '; background:' + (allActive ? '#2563EB' : '#F8FAFC') + '; color:' + (allActive ? '#FFFFFF' : '#475569') + '; cursor:pointer; white-space:nowrap; transition:all 0.15s;">All (' + totalCount + ')</button>';
+
+                for (var c = 0; c < catalog.categories.length; c++) {
+                    var cat = catalog.categories[c];
+                    var isActive = (activeFilter === cat.key);
+                    tabsHtml += '<button type="button" class="edvora-catalog-tab' + (isActive ? ' active' : '') + '" data-filter="' + cat.key + '" style="padding:4px 10px; font-size:11px; font-weight:600; border-radius:14px; border:1px solid ' + (isActive ? '#2563EB' : '#CBD5E1') + '; background:' + (isActive ? '#2563EB' : '#F8FAFC') + '; color:' + (isActive ? '#FFFFFF' : '#475569') + '; cursor:pointer; white-space:nowrap; transition:all 0.15s;">' + (cat.short_label || cat.label) + ' (' + cat.programs.length + ')</button>';
+                }
+                tabsHtml += '</div>';
+            }
+
+            // 3. Program List Container (Scrollable)
+            var listHtml = '<div class="edvora-catalog-list" style="display:flex; flex-direction:column; gap:6px; max-height:240px; overflow-y:auto; padding-right:2px;">';
+
+            for (var c = 0; c < catalog.categories.length; c++) {
+                var cat = catalog.categories[c];
+                for (var p = 0; p < cat.programs.length; p++) {
+                    var prog = cat.programs[p];
+                    var isVisible = (activeFilter === 'all' || activeFilter === cat.key);
+                    var durationBadge = prog.duration ? '<span style="background:#F1F5F9; color:#475569; font-size:10px; font-weight:500; padding:2px 6px; border-radius:4px;">⏱ ' + prog.duration + '</span>' : '';
+                    
+                    listHtml += '<div class="edvora-catalog-item" data-category="' + cat.key + '" data-program-name="' + prog.course_name.replace(/"/g, '&quot;') + '" style="display:' + (isVisible ? 'flex' : 'none') + '; align-items:center; justify-content:space-between; gap:8px; padding:8px 10px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; cursor:pointer; transition:all 0.15s;">' +
+                        '<div style="display:flex; flex-direction:column; gap:3px; flex:1; min-width:0;">' +
+                            '<span style="font-size:12px; font-weight:600; color:#1E293B; line-height:1.3; word-break:break-word;">' + prog.course_name + '</span>' +
+                            (durationBadge ? '<div>' + durationBadge + '</div>' : '') +
+                        '</div>' +
+                        '<div style="display:flex; align-items:center; gap:3px; color:#2563EB; font-size:11px; font-weight:700; white-space:nowrap; flex-shrink:0;">' +
+                            '<span>Explore</span>' +
+                            '<span style="font-size:13px;">&rarr;</span>' +
+                        '</div>' +
+                    '</div>';
+                }
+            }
+            listHtml += '</div>';
+
+            card.innerHTML = headerHtml + tabsHtml + listHtml;
+
+            // Attach Tab Click Listeners
+            var tabs = card.querySelectorAll('.edvora-catalog-tab');
+            var items = card.querySelectorAll('.edvora-catalog-item');
+            for (var t = 0; t < tabs.length; t++) {
+                tabs[t].addEventListener('click', function () {
+                    var filter = this.getAttribute('data-filter');
+                    for (var ot = 0; ot < tabs.length; ot++) {
+                        var isSel = (tabs[ot] === this);
+                        tabs[ot].style.background = isSel ? '#2563EB' : '#F8FAFC';
+                        tabs[ot].style.color = isSel ? '#FFFFFF' : '#475569';
+                        tabs[ot].style.borderColor = isSel ? '#2563EB' : '#CBD5E1';
+                    }
+                    for (var i = 0; i < items.length; i++) {
+                        var itemCat = items[i].getAttribute('data-category');
+                        if (filter === 'all' || itemCat === filter) {
+                            items[i].style.display = 'flex';
+                        } else {
+                            items[i].style.display = 'none';
+                        }
+                    }
+                });
+            }
+
+            // Attach Program Item Click Listeners (Hover + Click to Send Query)
+            for (var i = 0; i < items.length; i++) {
+                items[i].addEventListener('mouseenter', function () {
+                    this.style.background = '#EFF6FF';
+                    this.style.borderColor = '#93C5FD';
+                });
+                items[i].addEventListener('mouseleave', function () {
+                    this.style.background = '#F8FAFC';
+                    this.style.borderColor = '#E2E8F0';
+                });
+                items[i].addEventListener('click', function () {
+                    var progName = this.getAttribute('data-program-name');
+                    if (progName) {
+                        removeTypingIndicator();
+                        sendMessage('Tell me more about ' + progName);
+                    }
+                });
+            }
+
+            // Append card below assistant message in messagesContainer
+            var row = document.createElement('div');
+            row.className = 'edvora-msg-row assistant';
+            row.style.cssText = 'margin-top:-4px; margin-bottom:8px;';
+            row.appendChild(card);
+            messagesContainer.appendChild(row);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        } catch (e) {
+            console.error('[Edvora] Program catalog render error:', e);
         }
     }
 

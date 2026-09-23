@@ -76,7 +76,7 @@ class PromptBuilder
 
         // 9. Inject Dynamic Counselor State & Strict Program-Qualification Rule
         if ($isCatalogQuery) {
-            $turnStateNotice = "[STATE] Visitor is inquiring about available programs. Group programs neatly by degree level (Undergraduate vs. Graduate) and ask which level they wish to pursue. List all applicable programs completely without cutting off. No conversion offers this turn.";
+            $turnStateNotice = "[STATE: PROGRAM CATALOG INQUIRY] The visitor is inquiring about available programs or courses. In 'response', provide a warm, welcoming, and accommodative opening statement introducing our academic offerings (do NOT write out program lists as raw text; our interactive UI card will display them directly). Set 'program_trigger' to 'all' (or specific requested degree level if asked, e.g. 'undergraduate', 'graduate', 'doctoral', 'certificates'). In 'follow_up', warmly ask which specific program or degree level they would like to explore curriculum, eligibility, or fee details for. No conversion offers this turn.";
         } elseif ($leadCaptured) {
             $turnStateNotice = "[STATE] Visitor contact details already collected. Answer questions directly. No offers.";
         } elseif (!$activeProgram) {
@@ -191,6 +191,7 @@ Respond ONLY with a valid JSON object. No markdown. No text outside JSON.
   "response": "<warm greeting>",
   "follow_up": null,
   "lead_trigger": null,
+  "program_trigger": null,
   "sentiment": "<positive | neutral | negative>",
   "emotion": "<specific emotion>",
   "frustration": 0.0,
@@ -234,6 +235,7 @@ You MUST respond ONLY with a single valid JSON object. No markdown code fences. 
   "response": "<your empathetic clarification message>",
   "follow_up": null,
   "lead_trigger": null,
+  "program_trigger": null,
   "sentiment": "<positive | neutral | negative>",
   "emotion": "<specific emotion label>",
   "frustration": <0.0 to 1.0>,
@@ -538,6 +540,7 @@ RESPONSE FORMAT RULES:
 - "response": Your direct answer. Typically concise (max ~80 words or 4 bullet points), EXCEPT when the visitor asks for available courses/programs, in which case list all applicable programs completely without cutting off. Plain text only, no markdown. Never include conversion offers or CTAs in this field.
 - "follow_up": ONE natural next-step offer or question. When making any of the 4 offers, you MUST follow the MANDATORY OFFER PAIRING RULE above. Null when [STATE] says no offer, or if no genuinely useful next step applies. This is where you move the visitor forward in their journey.
 - "lead_trigger": MUST BE null unless the user has explicitly agreed to an offer made in the previous assistant message (or directly asked for it). Never set a trigger when proposing an offer.
+- "program_trigger": Set to "all" (or "undergraduate", "graduate", "doctoral", "certificates") when the visitor is asking to see available courses/programs. Otherwise null.
 - Always match the visitor's language in "response" and "follow_up". All other JSON fields stay in English.
 
 {{KNOWLEDGE_CONTEXT}}
@@ -549,6 +552,7 @@ Respond ONLY with a single valid JSON object. No markdown code fences. No text o
   "response": "<your direct answer — plain text>",
   "follow_up": "<one natural next step, or null>",
   "lead_trigger": "<campus_tour | counselor_callback | asset_delivery | scholarship_eval | null>",
+  "program_trigger": "<all | undergraduate | graduate | doctoral | certificates | null>",
   "sentiment": "<positive | neutral | negative>",
   "emotion": "<curious | anxious | excited | confused | frustrated | satisfied | other>",
   "frustration": <0.0 to 1.0>,

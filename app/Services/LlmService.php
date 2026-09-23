@@ -160,7 +160,7 @@ class LlmService
                     'type'                 => 'object',
                     'additionalProperties' => false,
                     'required'             => [
-                        'response', 'follow_up', 'lead_trigger', 'sentiment',
+                        'response', 'follow_up', 'lead_trigger', 'program_trigger', 'sentiment',
                         'emotion', 'frustration', 'conversation_trend', 'intent',
                         'conversation_stage', 'lead_intent', 'needs_human'
                     ],
@@ -168,6 +168,7 @@ class LlmService
                         'response'           => ['type' => 'string'],
                         'follow_up'          => ['type' => ['string', 'null']],
                         'lead_trigger'       => ['type' => ['string', 'null']],
+                        'program_trigger'    => ['type' => ['string', 'null']],
                         'sentiment'          => ['type' => 'string'],
                         'emotion'            => ['type' => 'string'],
                         'frustration'        => ['type' => 'number'],
