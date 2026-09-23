@@ -327,17 +327,22 @@ class ChatController
             $isFeeQuery
         );
 
-        // 9. Invoke LLM Service
+        // 9. Invoke LLM Service (Give catalog queries higher output token runway)
+        $llmContext = [
+            'organization_id'        => $bot['organization_id'] ?? null,
+            'chatbot_id'             => $bot['id'] ?? null,
+            'activity_type'          => 'chat_completion',
+            'reference_type'         => 'conversation',
+            'reference_id'           => $convId,
+            'description'            => "Chat conversation turn #{$turnCount} (Intent: {$intentTier})",
+            'response_format_override' => LlmService::getAdmissionsResponseSchema(),
+        ];
+        if ($isCatalogQuery) {
+            $llmContext['max_tokens_override'] = 2500;
+        }
+
         try {
-            $llmResult = LlmService::complete($systemPrompt, $userMessage, $history, [
-                'organization_id'        => $bot['organization_id'] ?? null,
-                'chatbot_id'             => $bot['id'] ?? null,
-                'activity_type'          => 'chat_completion',
-                'reference_type'         => 'conversation',
-                'reference_id'           => $convId,
-                'description'            => "Chat conversation turn #{$turnCount} (Intent: {$intentTier})",
-                'response_format_override' => LlmService::getAdmissionsResponseSchema(),
-            ]);
+            $llmResult = LlmService::complete($systemPrompt, $userMessage, $history, $llmContext);
             $rawAiResponse = $llmResult['text'];
             $tokensUsed = $llmResult['tokens_used'];
 

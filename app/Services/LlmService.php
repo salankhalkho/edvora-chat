@@ -191,7 +191,9 @@ class LlmService
         $model = $providerConfig['model_name'];
         $apiKey = !empty($providerConfig['api_key_encrypted']) ? self::decryptKey($providerConfig['api_key_encrypted']) : Env::get(strtoupper($providerType) . '_API_KEY');
         $temperature = (float)($providerConfig['temperature'] ?? 0.30);
-        $maxTokens = min(800, (int)($providerConfig['max_tokens'] ?? 800));
+        $maxTokens = !empty($context['max_tokens_override'])
+            ? (int)$context['max_tokens_override']
+            : min(800, (int)($providerConfig['max_tokens'] ?? 800));
         $timeout = (int)($providerConfig['timeout_seconds'] ?? 20);
 
         // Optional structured output format — only passed by callers that need JSON (e.g. ChatController).
@@ -415,10 +417,12 @@ class LlmService
      */
     private static function executeEnvFallback(string $systemPrompt, string $userMessage, array $history, array $context = []): array
     {
+        $maxTokens = !empty($context['max_tokens_override']) ? (int)$context['max_tokens_override'] : 800;
+
         $openAiKey = Env::get('OPENAI_API_KEY');
         if (!empty($openAiKey)) {
             $startTime = microtime(true);
-            $res = self::callOpenAiCompatible('https://api.openai.com/v1', $openAiKey, 'gpt-4o-mini', $systemPrompt, $userMessage, $history, 0.3, 800, 20);
+            $res = self::callOpenAiCompatible('https://api.openai.com/v1', $openAiKey, 'gpt-4o-mini', $systemPrompt, $userMessage, $history, 0.3, $maxTokens, 20);
             $latencyMs = (int)round((microtime(true) - $startTime) * 1000);
             LlmUsageLogger::log([
                 'organization_id' => $context['organization_id'] ?? null,
@@ -443,7 +447,7 @@ class LlmService
         $geminiKey = Env::get('GEMINI_API_KEY');
         if (!empty($geminiKey)) {
             $startTime = microtime(true);
-            $res = self::callGemini($geminiKey, 'gemini-1.5-flash', $systemPrompt, $userMessage, $history, 0.3, 800, 20);
+            $res = self::callGemini($geminiKey, 'gemini-1.5-flash', $systemPrompt, $userMessage, $history, 0.3, $maxTokens, 20);
             $latencyMs = (int)round((microtime(true) - $startTime) * 1000);
             LlmUsageLogger::log([
                 'organization_id' => $context['organization_id'] ?? null,

@@ -76,7 +76,7 @@ class PromptBuilder
 
         // 9. Inject Dynamic Counselor State & Strict Program-Qualification Rule
         if ($isCatalogQuery) {
-            $turnStateNotice = "[STATE] Visitor is in DISCOVERY stage. List all programs by degree level. No offers this turn.";
+            $turnStateNotice = "[STATE] Visitor is inquiring about available programs. Group programs neatly by degree level (Undergraduate vs. Graduate) and ask which level they wish to pursue. List all applicable programs completely without cutting off. No conversion offers this turn.";
         } elseif ($leadCaptured) {
             $turnStateNotice = "[STATE] Visitor contact details already collected. Answer questions directly. No offers.";
         } elseif (!$activeProgram) {
@@ -266,12 +266,18 @@ EOT;
         $activeProgs = $stmtProg->fetchAll(PDO::FETCH_ASSOC);
 
         if (!empty($activeProgs)) {
-            $progBlock .= "\n--- ACTIVE COLLEGE ACADEMIC PROGRAMS & DEGREES ---\n";
-            $progBlock .= "Guide visitors using these available academic programs (provide names and durations; state specific fees directly and accurately when the visitor asks for them):\n";
+            $grouped = [
+                'Undergraduate (Bachelor\'s)' => [],
+                'Graduate / Postgraduate (Master\'s)' => [],
+                'Doctoral (Ph.D.)' => [],
+                'Certificates & Executive' => [],
+                'Other Academic Programs' => []
+            ];
+
             foreach ($activeProgs as $p) {
+                $type = strtolower(trim($p['program_type'] ?? ''));
                 $pStr = $p['course_name'];
                 $details = [];
-                if (!empty($p['program_type'])) $details[] = ucfirst($p['program_type']);
                 if (!empty($p['duration'])) $details[] = $p['duration'];
                 if (!empty($p['tuition_fee'])) {
                     $curr = $p['currency'] ?? 'USD';
@@ -279,7 +285,27 @@ EOT;
                     $details[] = "Tuition Fee: {$feeFormatted} {$curr}";
                 }
                 $meta = !empty($details) ? " (" . implode(', ', $details) . ")" : "";
-                $progBlock .= "- {$pStr}{$meta}\n";
+                $itemStr = "- {$pStr}{$meta}";
+
+                if (in_array($type, ['undergraduate', 'bachelor', 'bachelors', 'ug'], true)) {
+                    $grouped['Undergraduate (Bachelor\'s)'][] = $itemStr;
+                } elseif (in_array($type, ['postgraduate', 'graduate', 'master', 'masters', 'pg'], true)) {
+                    $grouped['Graduate / Postgraduate (Master\'s)'][] = $itemStr;
+                } elseif (in_array($type, ['doctoral', 'phd', 'doctorate'], true)) {
+                    $grouped['Doctoral (Ph.D.)'][] = $itemStr;
+                } elseif (in_array($type, ['certificate', 'diploma', 'executive'], true)) {
+                    $grouped['Certificates & Executive'][] = $itemStr;
+                } else {
+                    $grouped['Other Academic Programs'][] = $itemStr;
+                }
+            }
+
+            $progBlock .= "\n--- ACTIVE COLLEGE ACADEMIC PROGRAMS & DEGREES ---\n";
+            $progBlock .= "Guide visitors using these verified programs grouped by degree level:\n";
+            foreach ($grouped as $category => $items) {
+                if (!empty($items)) {
+                    $progBlock .= "\n[{$category}]:\n" . implode("\n", $items) . "\n";
+                }
             }
             $progBlock .= "--- END ACTIVE COLLEGE ACADEMIC PROGRAMS & DEGREES ---\n";
         }
@@ -493,12 +519,15 @@ COUNSELOR MINDSET (apply every turn):
 4. BE HONEST ABOUT LIMITS: If the knowledge base does not clearly contain the answer, say: "I don't have that specific detail in my knowledge base right now — our admissions team can confirm it for you." Never guess fees, deadlines, or eligibility criteria.
 5. MATCH THE STUDENT: Mirror their language (Hindi, Hinglish, English, Tamil, etc.) and their depth — brief question = brief answer, detailed question = detailed answer.
 6. ONE OFFER, ONE TIME: Never repeat an offer. Never stack multiple offers. One natural next step in "follow_up" only, or null.
+7. DEGREE LEVEL GUIDANCE:
+   - When a visitor asks generally about available programs, courses, or graduation options without specifying a degree level, present the options clearly grouped by degree level (Undergraduate vs. Graduate) and ask which degree level they are looking to pursue.
+   - When a visitor specifies a degree level (e.g. undergraduate or master's), list only programs from that specific category. Never mix undergraduate and graduate programs when a specific level was asked.
 
 LEAD CAPTURE GOAL:
 Your ultimate goal is to capture the visitor's contact details (name, email, phone) through a genuinely useful offer — a brochure/syllabus, scholarship calculator, counselor callback, or campus tour. These offers are only valuable AFTER you understand their program interest. Move the conversation naturally toward these touchpoints. Never push or pitch — guide.
 
 RESPONSE FORMAT RULES:
-- "response": Your direct answer. Max ~80 words or 4 bullet points. Plain text only, no markdown. Never include conversion offers or CTAs in this field.
+- "response": Your direct answer. Typically concise (max ~80 words or 4 bullet points), EXCEPT when the visitor asks for available courses/programs, in which case list all applicable programs completely without cutting off. Plain text only, no markdown. Never include conversion offers or CTAs in this field.
 - "follow_up": ONE natural next-step offer or question. Null when [STATE] says no offer, or if no genuinely useful next step applies. This is where you move the visitor forward in their journey.
 - Always match the visitor's language in "response" and "follow_up". All other JSON fields stay in English.
 

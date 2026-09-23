@@ -31,7 +31,37 @@ class ProgramDetector
         'programs offered',
         'courses you have',
         'programs you have',
-        'degrees offered'
+        'degrees offered',
+        'degrees available',
+        'course list',
+        'program list',
+        'options for graduation',
+        'graduation options',
+        'graduation courses',
+        'graduation programs',
+        'what options do i have for graduation',
+        'what are my options for graduation',
+        'options for graduate',
+        'undergraduate courses',
+        'undergraduate programs',
+        'undergraduate degrees',
+        'undergraduate options',
+        'postgraduate courses',
+        'postgraduate programs',
+        'postgraduate degrees',
+        'postgraduate options',
+        'graduate courses',
+        'graduate programs',
+        'graduate degrees',
+        'graduate options',
+        'bachelors programs',
+        'bachelor programs',
+        'bachelor degrees',
+        'masters programs',
+        'master programs',
+        'master degrees',
+        'doctoral programs',
+        'phd programs'
     ];
 
     private static array $genericFeeKeywords = [
@@ -52,7 +82,7 @@ class ProgramDetector
         $clean = trim(mb_strtolower($query, 'UTF-8'));
         $clean = preg_replace('/[?!.,]/', '', $clean);
         foreach (self::$genericCatalogKeywords as $kw) {
-            if (str_contains($clean, $kw) && strlen($clean) <= strlen($kw) + 15) {
+            if (str_contains($clean, $kw)) {
                 return true;
             }
         }
