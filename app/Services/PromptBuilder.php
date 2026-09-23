@@ -145,7 +145,7 @@ class PromptBuilder
             $offersListStr = implode(", ", $availableOffers);
             $prohibitionsStr = !empty($prohibitions) ? (" STRICT PROHIBITIONS: " . implode("; ", $prohibitions) . ".") : "";
 
-            $turnStateNotice = "[STATE] Visitor is in CONSIDERATION/DECISION stage for {$progTitle}. Offer eligible. In \"follow_up\", place ONE offer from available: [{$offersListStr}]. MANDATORY PAIRING RULE: Whenever any offer is made, it MUST always be paired with an open invitation to explore curriculum, eligibility, fees, or placements right here in the chat (e.g. 'Would you like to connect with an admissions counselor for more details, or would you prefer to explore curriculum, eligibility, fees, or placements right here?').{$prohibitionsStr}";
+            $turnStateNotice = "[STATE] Visitor is in CONSIDERATION/DECISION stage for {$progTitle}. Offer eligible. In \"follow_up\", place ONE offer from available: [{$offersListStr}]. MANDATORY PAIRING RULE: Whenever any offer is made, it MUST always be paired with an open invitation to explore curriculum, eligibility, fees, or placements right here in the chat (e.g. 'Would you like to connect with an admissions counselor for more details, or would you prefer to explore curriculum, eligibility, fees, or placements right here?'). Keep \"lead_trigger\": null until the visitor explicitly agrees.{$prohibitionsStr}";
         }
 
         $knowledgeContext = $contextBlock . "\n" . $progBlock . "\n" . $campusBlock . (!empty($tourSlotsBlock) ? ("\n" . $tourSlotsBlock) : "");
@@ -537,6 +537,7 @@ Examples:
 RESPONSE FORMAT RULES:
 - "response": Your direct answer. Typically concise (max ~80 words or 4 bullet points), EXCEPT when the visitor asks for available courses/programs, in which case list all applicable programs completely without cutting off. Plain text only, no markdown. Never include conversion offers or CTAs in this field.
 - "follow_up": ONE natural next-step offer or question. When making any of the 4 offers, you MUST follow the MANDATORY OFFER PAIRING RULE above. Null when [STATE] says no offer, or if no genuinely useful next step applies. This is where you move the visitor forward in their journey.
+- "lead_trigger": MUST BE null unless the user has explicitly agreed to an offer made in the previous assistant message (or directly asked for it). Never set a trigger when proposing an offer.
 - Always match the visitor's language in "response" and "follow_up". All other JSON fields stay in English.
 
 {{KNOWLEDGE_CONTEXT}}
