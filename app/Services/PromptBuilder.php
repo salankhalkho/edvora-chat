@@ -145,7 +145,7 @@ class PromptBuilder
             $offersListStr = implode(", ", $availableOffers);
             $prohibitionsStr = !empty($prohibitions) ? (" STRICT PROHIBITIONS: " . implode("; ", $prohibitions) . ".") : "";
 
-            $turnStateNotice = "[STATE] Visitor is in CONSIDERATION/DECISION stage for {$progTitle}. Offer eligible. Place ONE natural next step offer in \"follow_up\" only. Available: [{$offersListStr}].{$prohibitionsStr}";
+            $turnStateNotice = "[STATE] Visitor is in CONSIDERATION/DECISION stage for {$progTitle}. Offer eligible. In \"follow_up\", place ONE offer from available: [{$offersListStr}]. MANDATORY PAIRING RULE: Whenever any offer is made, it MUST always be paired with an open invitation to explore curriculum, eligibility, fees, or placements right here in the chat (e.g. 'Would you like to connect with an admissions counselor for more details, or would you prefer to explore curriculum, eligibility, fees, or placements right here?').{$prohibitionsStr}";
         }
 
         $knowledgeContext = $contextBlock . "\n" . $progBlock . "\n" . $campusBlock . (!empty($tourSlotsBlock) ? ("\n" . $tourSlotsBlock) : "");
@@ -492,7 +492,7 @@ EOT;
 
         $block .= "\nINTELLIGENT TOUR RECOMMENDATION GUIDELINES:\n";
         $block .= "1. Because the visitor is interested in {$progName}, tailor your campus tour bridge directly to the upcoming slot:\n";
-        $block .= "   Suggestion Example: \"We have a specialized {$sampleTitle} this {$sampleDate} at {$sampleTime} at our {$sampleCampus}. Would you like me to reserve a spot for you?\"\n";
+        $block .= "   Suggestion Example: \"We have a specialized {$sampleTitle} this {$sampleDate} at {$sampleTime} at our {$sampleCampus}. Would you like me to reserve a spot for you, or would you prefer to explore curriculum, eligibility, fees, or placements right here?\"\n";
         $block .= "2. If the visitor accepts or says yes, warmly confirm in \"response\", set \"lead_trigger\": \"campus_tour\" in the JSON output.\n";
         $block .= "--- END UPCOMING RELEVANT CAMPUS TOUR SCHEDULES ---\n";
 
@@ -526,9 +526,17 @@ COUNSELOR MINDSET (apply every turn):
 LEAD CAPTURE GOAL:
 Your ultimate goal is to capture the visitor's contact details (name, email, phone) through a genuinely useful offer — a brochure/syllabus, scholarship calculator, counselor callback, or campus tour. These offers are only valuable AFTER you understand their program interest. Move the conversation naturally toward these touchpoints. Never push or pitch — guide.
 
+MANDATORY OFFER PAIRING RULE:
+Whenever any of the 4 offers (counselor callback, brochure/syllabus, campus tour, scholarship evaluation) is made in "follow_up", it MUST ALWAYS be paired with an open invitation to explore curriculum, eligibility, fees, or placements right here in the chat.
+Examples:
+- Admissions Counselor: "Would you like to connect with an admissions counselor for more details, or would you prefer to explore curriculum, eligibility, fees, or placements right here?"
+- Syllabus / Brochure: "Would you like me to share the official syllabus and brochure, or would you prefer to explore curriculum, eligibility, fees, or placements right here?"
+- Campus Tour: "Would you like to reserve a spot for an upcoming campus tour, or would you prefer to explore curriculum, eligibility, fees, or placements right here?"
+- Merit Scholarship: "Would you like to check your eligibility for a merit scholarship, or would you prefer to explore curriculum, eligibility, fees, or placements right here?"
+
 RESPONSE FORMAT RULES:
 - "response": Your direct answer. Typically concise (max ~80 words or 4 bullet points), EXCEPT when the visitor asks for available courses/programs, in which case list all applicable programs completely without cutting off. Plain text only, no markdown. Never include conversion offers or CTAs in this field.
-- "follow_up": ONE natural next-step offer or question. Null when [STATE] says no offer, or if no genuinely useful next step applies. This is where you move the visitor forward in their journey.
+- "follow_up": ONE natural next-step offer or question. When making any of the 4 offers, you MUST follow the MANDATORY OFFER PAIRING RULE above. Null when [STATE] says no offer, or if no genuinely useful next step applies. This is where you move the visitor forward in their journey.
 - Always match the visitor's language in "response" and "follow_up". All other JSON fields stay in English.
 
 {{KNOWLEDGE_CONTEXT}}
