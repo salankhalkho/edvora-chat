@@ -130,6 +130,8 @@ class Migrations
                 content TEXT NOT NULL,
                 knowledge_sources_used JSON NULL,
                 tokens_used INT DEFAULT 0,
+                is_fallback TINYINT(1) DEFAULT 0,
+                source VARCHAR(50) DEFAULT 'llm',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
                 FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE
@@ -1612,6 +1614,18 @@ class Migrations
             }
         } catch (Throwable $e) {
             error_log('[Migrations] conversations analytics columns: ' . $e->getMessage());
+        }
+
+        // New per-message fallback and source tracking columns
+        try {
+            $checkIsFallback = $this->db->query("SHOW COLUMNS FROM messages LIKE 'is_fallback'");
+            if (!$checkIsFallback->fetch()) {
+                $this->db->exec("ALTER TABLE messages
+                    ADD COLUMN is_fallback TINYINT(1) DEFAULT 0 AFTER needs_human,
+                    ADD COLUMN source VARCHAR(50) DEFAULT 'llm' AFTER is_fallback;");
+            }
+        } catch (Throwable $e) {
+            error_log('[Migrations] messages fallback columns: ' . $e->getMessage());
         }
     }
 }

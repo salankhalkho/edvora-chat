@@ -361,7 +361,7 @@ class LeadController
 
         if ($convId) {
             $stmtMsg = $db->prepare("
-                SELECT id, role, content, created_at
+                SELECT id, role, content, is_fallback, source, created_at
                 FROM messages
                 WHERE conversation_id = :conv_id AND organization_id = :org_id
                 ORDER BY id ASC

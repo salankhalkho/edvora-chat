@@ -200,6 +200,9 @@ class LlmService
                 'status' => !empty($context['is_fallback']) ? 'fallback' : 'success',
             ]);
 
+            $res['is_fallback'] = !empty($context['is_fallback']);
+            $res['source']      = !empty($context['is_fallback']) ? 'fallback_llm' : 'llm';
+
             return $res;
         } catch (Exception $e) {
             $latencyMs = (int)round((microtime(true) - $startTime) * 1000);
@@ -379,6 +382,8 @@ class LlmService
                 'latency_ms' => $latencyMs,
                 'status' => 'success',
             ]);
+            $res['is_fallback'] = true;
+            $res['source']      = 'env_fallback';
             return $res;
         }
 
@@ -402,6 +407,8 @@ class LlmService
                 'latency_ms' => $latencyMs,
                 'status' => 'success',
             ]);
+            $res['is_fallback'] = true;
+            $res['source']      = 'env_fallback';
             return $res;
         }
 
@@ -409,7 +416,9 @@ class LlmService
         return [
             'text' => "Hello! I am your AI Admissions Assistant. How can I help you with courses, admissions, or campus information today?",
             'tokens_used' => 20,
-            'model' => 'system_fallback'
+            'model' => 'system_fallback',
+            'is_fallback' => true,
+            'source' => 'system_fallback'
         ];
     }
 

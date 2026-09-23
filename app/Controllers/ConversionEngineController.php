@@ -383,7 +383,7 @@ class ConversionEngineController
                 $conversation = $stmtConv->fetch(PDO::FETCH_ASSOC);
 
                 if ($conversation) {
-                    $stmtMsgs = $this->db->prepare("SELECT role, content, created_at FROM messages WHERE conversation_id = ? ORDER BY id ASC LIMIT 50");
+                    $stmtMsgs = $this->db->prepare("SELECT role, content, is_fallback, source, created_at FROM messages WHERE conversation_id = ? ORDER BY id ASC LIMIT 50");
                     $stmtMsgs->execute([$convId]);
                     $conversation['messages'] = $stmtMsgs->fetchAll(PDO::FETCH_ASSOC);
                 }

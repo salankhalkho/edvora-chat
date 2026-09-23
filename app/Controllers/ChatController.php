@@ -199,8 +199,8 @@ class ChatController
 
         // 3. Save User Message to DB
         $stmtUserMsg = $db->prepare("
-            INSERT INTO messages (conversation_id, organization_id, role, content, created_at)
-            VALUES (:conv_id, :org_id, 'user', :content, NOW())
+            INSERT INTO messages (conversation_id, organization_id, role, content, is_fallback, source, created_at)
+            VALUES (:conv_id, :org_id, 'user', :content, 0, 'user', NOW())
         ");
         $stmtUserMsg->execute([
             ':conv_id' => $convId,
@@ -438,20 +438,24 @@ class ChatController
             }
 
             $sourceIdsUsed = array_map(fn($s) => $s['id'], $contextSources);
+            $isFallback    = !empty($llmResult['is_fallback']) ? 1 : 0;
+            $msgSource     = $llmResult['source'] ?? 'llm';
 
-            // 13. Save AI response to messages table (with analytics fields)
+            // 13. Save AI response to messages table (with analytics & fallback source tracking)
             $stmtAiMsg = $db->prepare("
                 INSERT INTO messages (
                     conversation_id, organization_id, role, content,
                     knowledge_sources_used, tokens_used,
                     sentiment, emotion, frustration, conversation_trend,
                     intent_label, conversation_stage, lead_intent, needs_human,
+                    is_fallback, source,
                     created_at
                 ) VALUES (
                     :conv_id, :org_id, 'assistant', :content,
                     :sources, :tokens,
                     :sentiment, :emotion, :frustration, :conv_trend,
                     :intent_label, :conv_stage, :lead_intent, :needs_human,
+                    :is_fallback, :source,
                     NOW()
                 )
             ");
@@ -469,18 +473,22 @@ class ChatController
                 ':conv_stage'  => $analytics['conversation_stage'],
                 ':lead_intent' => $analytics['lead_intent'],
                 ':needs_human' => $analytics['needs_human'],
+                ':is_fallback' => $isFallback,
+                ':source'      => $msgSource,
             ]);
 
             // Save follow-up bubble to DB for future context
             if (!empty($followUpMessage)) {
                 $stmtFuMsg = $db->prepare("
-                    INSERT INTO messages (conversation_id, organization_id, role, content, knowledge_sources_used, tokens_used, created_at)
-                    VALUES (:conv_id, :org_id, 'assistant', :content, '[]', 0, NOW())
+                    INSERT INTO messages (conversation_id, organization_id, role, content, knowledge_sources_used, tokens_used, is_fallback, source, created_at)
+                    VALUES (:conv_id, :org_id, 'assistant', :content, '[]', 0, :is_fallback, :source, NOW())
                 ");
                 $stmtFuMsg->execute([
-                    ':conv_id' => $convId,
-                    ':org_id'  => $orgId,
-                    ':content' => $followUpMessage
+                    ':conv_id'     => $convId,
+                    ':org_id'      => $orgId,
+                    ':content'     => $followUpMessage,
+                    ':is_fallback' => $isFallback,
+                    ':source'      => $msgSource,
                 ]);
             }
 
@@ -532,12 +540,14 @@ class ChatController
                 'turn_count'           => $turnCount,
                 'lead_captured'        => $leadCaptured,
                 'masked_email'         => $maskedEmail,
-                // Analytics fields for frontend awareness
+                // Analytics & fallback fields for frontend awareness
                 'sentiment'            => $analytics['sentiment'],
                 'frustration'          => $analytics['frustration'],
                 'lead_intent'          => $analytics['lead_intent'],
                 'conversation_stage'   => $analytics['conversation_stage'],
                 'needs_human'          => (bool)$analytics['needs_human'],
+                'is_fallback'          => (bool)$isFallback,
+                'source'               => $msgSource,
             ]);
 
         } catch (Throwable $e) {
