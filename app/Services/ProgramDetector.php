@@ -209,6 +209,7 @@ class ProgramDetector
             $programName = $program['course_name'];
             $programId = (int)$program['id'];
 
+            // Step 1: Update conversations table (same as before)
             $stmtConv = $db->prepare("
                 UPDATE conversations
                 SET lead_program_interest = :pname, program_id = :pid
@@ -216,82 +217,67 @@ class ProgramDetector
             ");
             $stmtConv->execute([
                 ':pname' => $programName,
-                ':pid' => $programId,
-                ':cid' => $convId,
-                ':oid' => $orgId
+                ':pid'   => $programId,
+                ':cid'   => $convId,
+                ':oid'   => $orgId
             ]);
 
-            $stmtLead = $db->prepare("
-                SELECT id, program_interest, program_id
-                FROM leads
-                WHERE conversation_id = :cid AND organization_id = :oid
-                ORDER BY id DESC LIMIT 1
+            // Step 2: Round-robin staff assignment (always computed upfront for INSERT path)
+            $assignedUserId = null;
+            $stmtRr = $db->prepare("
+                SELECT u.id
+                FROM users u
+                LEFT JOIN leads l ON l.assigned_user_id = u.id AND l.organization_id = :org_id_1
+                WHERE u.organization_id = :org_id_2 AND u.role IN ('counselor', 'agent', 'admin', 'owner')
+                GROUP BY u.id
+                ORDER BY COUNT(l.id) ASC, u.id ASC
+                LIMIT 1
             ");
-            $stmtLead->execute([':cid' => $convId, ':oid' => $orgId]);
-            $existingLead = $stmtLead->fetch(PDO::FETCH_ASSOC);
-
-            if ($existingLead) {
-                $oldProg = $existingLead['program_interest'] ?? '';
-                $appendNoteSql = "";
-                $params = [
-                    ':pname' => $programName,
-                    ':pid' => $programId,
-                    ':lid' => (int)$existingLead['id']
-                ];
-
-                if (!empty($oldProg) && strcasecmp($oldProg, $programName) !== 0) {
-                    $shiftNote = "\n[Shifted interest from " . $oldProg . " to " . $programName . " on " . date('Y-m-d H:i:s') . "]";
-                    $appendNoteSql = ", notes = CONCAT(COALESCE(notes, ''), :shift_note)";
-                    $params[':shift_note'] = $shiftNote;
-                }
-
-                $stmtUpdate = $db->prepare("
-                    UPDATE leads
-                    SET program_interest = :pname, program_id = :pid, updated_at = NOW() {$appendNoteSql}
-                    WHERE id = :lid
-                ");
-                $stmtUpdate->execute($params);
-            } else {
-                $assignedUserId = null;
-                $stmtRr = $db->prepare("
-                    SELECT u.id
-                    FROM users u
-                    LEFT JOIN leads l ON l.assigned_user_id = u.id AND l.organization_id = :org_id_1
-                    WHERE u.organization_id = :org_id_2 AND u.role IN ('counselor', 'agent', 'admin', 'owner')
-                    GROUP BY u.id
-                    ORDER BY COUNT(l.id) ASC, u.id ASC
-                    LIMIT 1
-                ");
-                $stmtRr->execute([':org_id_1' => $orgId, ':org_id_2' => $orgId]);
-                $rrStaff = $stmtRr->fetch();
-                if ($rrStaff) {
-                    $assignedUserId = (int)$rrStaff['id'];
-                }
-
-                $stmtInsert = $db->prepare("
-                    INSERT INTO leads (
-                        organization_id, chatbot_id, conversation_id, program_id, assigned_user_id,
-                        name, program_interest, lead_type, status, pipeline_stage,
-                        conversion_score, conversion_score_rationale, notes, created_at, updated_at
-                    ) VALUES (
-                        :oid, :bot_id, :cid, :pid, :assigned_uid,
-                        'Prospective Student', :pname, 'program_interest', 'new', 'qualified',
-                        50, 'Academic program interest identified', :notes, NOW(), NOW()
-                    )
-                ");
-                $stmtInsert->bindValue(':oid', $orgId, PDO::PARAM_INT);
-                $stmtInsert->bindValue(':bot_id', $botId, PDO::PARAM_INT);
-                $stmtInsert->bindValue(':cid', $convId, PDO::PARAM_INT);
-                $stmtInsert->bindValue(':pid', $programId, PDO::PARAM_INT);
-                if ($assignedUserId !== null) {
-                    $stmtInsert->bindValue(':assigned_uid', $assignedUserId, PDO::PARAM_INT);
-                } else {
-                    $stmtInsert->bindValue(':assigned_uid', null, PDO::PARAM_NULL);
-                }
-                $stmtInsert->bindValue(':pname', $programName, PDO::PARAM_STR);
-                $stmtInsert->bindValue(':notes', 'Identified interest in ' . $programName . ' during admissions counseling.', PDO::PARAM_STR);
-                $stmtInsert->execute();
+            $stmtRr->execute([':org_id_1' => $orgId, ':org_id_2' => $orgId]);
+            $rrStaff = $stmtRr->fetch();
+            if ($rrStaff) {
+                $assignedUserId = (int)$rrStaff['id'];
             }
+
+            // Step 3: Atomic UPSERT — INSERT on first detection, UPDATE on shift
+            // The unique key uq_leads_conv_type(conversation_id, lead_type) guarantees
+            // only one program_interest lead per conversation regardless of concurrency.
+            // On duplicate: update program info and append shift note only if program changed.
+            $shiftNote = "\n[Program interest updated to " . $programName . " on " . date('Y-m-d H:i:s') . "]";
+            $insertNotes = 'Identified interest in ' . $programName . ' during admissions counseling.';
+
+            $stmtUpsert = $db->prepare("
+                INSERT INTO leads (
+                    organization_id, chatbot_id, conversation_id, program_id, assigned_user_id,
+                    name, program_interest, lead_type, status, pipeline_stage,
+                    conversion_score, conversion_score_rationale, notes, created_at, updated_at
+                ) VALUES (
+                    :oid, :bot_id, :cid, :pid, :assigned_uid,
+                    'Prospective Student', :pname, 'program_interest', 'new', 'qualified',
+                    50, 'Academic program interest identified', :insert_notes, NOW(), NOW()
+                )
+                ON DUPLICATE KEY UPDATE
+                    program_id       = VALUES(program_id),
+                    notes            = IF(program_interest != VALUES(program_interest),
+                                         CONCAT(COALESCE(notes, ''), :shift_note),
+                                         notes),
+                    program_interest = VALUES(program_interest),
+                    updated_at       = NOW()
+            ");
+            $stmtUpsert->bindValue(':oid',          $orgId,       PDO::PARAM_INT);
+            $stmtUpsert->bindValue(':bot_id',        $botId,       PDO::PARAM_INT);
+            $stmtUpsert->bindValue(':cid',           $convId,      PDO::PARAM_INT);
+            $stmtUpsert->bindValue(':pid',           $programId,   PDO::PARAM_INT);
+            if ($assignedUserId !== null) {
+                $stmtUpsert->bindValue(':assigned_uid', $assignedUserId, PDO::PARAM_INT);
+            } else {
+                $stmtUpsert->bindValue(':assigned_uid', null, PDO::PARAM_NULL);
+            }
+            $stmtUpsert->bindValue(':pname',        $programName, PDO::PARAM_STR);
+            $stmtUpsert->bindValue(':insert_notes', $insertNotes, PDO::PARAM_STR);
+            $stmtUpsert->bindValue(':shift_note',   $shiftNote,   PDO::PARAM_STR);
+            $stmtUpsert->execute();
+
         } catch (Throwable $e) {
             error_log('[ProgramDetector] syncProgramLead error: ' . $e->getMessage());
         }

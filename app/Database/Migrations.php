@@ -1627,6 +1627,23 @@ class Migrations
         } catch (Throwable $e) {
             error_log('[Migrations] messages fallback columns: ' . $e->getMessage());
         }
+
+        // Unique constraint on (conversation_id, lead_type) in leads table
+        // Required by ProgramDetector::syncProgramLead() UPSERT to prevent race condition duplicates.
+        // NULL conversation_id values are excluded from unique enforcement by MariaDB automatically.
+        try {
+            $checkUqLeads = $this->db->query("
+                SELECT COUNT(*) FROM information_schema.statistics
+                WHERE table_schema = DATABASE()
+                  AND table_name = 'leads'
+                  AND index_name = 'uq_leads_conv_type'
+            ");
+            if ((int)$checkUqLeads->fetchColumn() === 0) {
+                $this->db->exec("ALTER TABLE leads ADD UNIQUE KEY uq_leads_conv_type (conversation_id, lead_type)");
+            }
+        } catch (Throwable $e) {
+            error_log('[Migrations] leads uq_leads_conv_type: ' . $e->getMessage());
+        }
     }
 }
 

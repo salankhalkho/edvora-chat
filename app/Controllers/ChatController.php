@@ -154,7 +154,8 @@ class ChatController
         // 2. Find or Create Conversation Session & check existing Lead Status
         $stmtConv = $db->prepare("
             SELECT id, is_test, lead_name_collected, lead_email_collected, lead_phone_collected,
-                   visitor_name, visitor_email, visitor_phone, lead_captured_at
+                   visitor_name, visitor_email, visitor_phone, lead_captured_at,
+                   lead_program_interest, program_id, last_offer_turn, total_offers_count
             FROM conversations
             WHERE organization_id = :org_id AND chatbot_id = :bot_id AND visitor_id = :visitor_id
             ORDER BY id DESC LIMIT 1
