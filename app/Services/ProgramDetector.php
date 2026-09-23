@@ -233,8 +233,16 @@ class ProgramDetector
             if ($existingLead) {
                 $oldProg = $existingLead['program_interest'] ?? '';
                 $appendNoteSql = "";
+                $params = [
+                    ':pname' => $programName,
+                    ':pid' => $programId,
+                    ':lid' => (int)$existingLead['id']
+                ];
+
                 if (!empty($oldProg) && strcasecmp($oldProg, $programName) !== 0) {
-                    $appendNoteSql = ", notes = CONCAT(COALESCE(notes, ''), '\n[Shifted interest from ', :old_pname, ' to ', :pname, ' on ', NOW(), ']')";
+                    $shiftNote = "\n[Shifted interest from " . $oldProg . " to " . $programName . " on " . date('Y-m-d H:i:s') . "]";
+                    $appendNoteSql = ", notes = CONCAT(COALESCE(notes, ''), :shift_note)";
+                    $params[':shift_note'] = $shiftNote;
                 }
 
                 $stmtUpdate = $db->prepare("
@@ -242,14 +250,6 @@ class ProgramDetector
                     SET program_interest = :pname, program_id = :pid, updated_at = NOW() {$appendNoteSql}
                     WHERE id = :lid
                 ");
-                $params = [
-                    ':pname' => $programName,
-                    ':pid' => $programId,
-                    ':lid' => (int)$existingLead['id']
-                ];
-                if (!empty($appendNoteSql)) {
-                    $params[':old_pname'] = $oldProg;
-                }
                 $stmtUpdate->execute($params);
             } else {
                 $assignedUserId = null;
