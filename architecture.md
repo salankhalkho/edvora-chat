@@ -2,7 +2,10 @@
 
 > **MANDATORY FOR ALL AI AGENTS & HUMAN DEVELOPERS:**
 > This is the canonical, authoritative technical architecture document for **edvora.chat**.
-> Read this in full before touching any code. Every module''s design decision, data flow, and constraint is documented here.
+> Read this in full before touching any code. Every module's design decision, data flow, and constraint is documented here.
+> 
+> 📖 **Deep-Dive Subsystem Guides:**
+> - [**Edvora Chatbot Technical Architecture (`architecture_chatbot.md`)**](file:///c:/xampp/htdocs/edvora.chat/architecture_chatbot.md) — Conversational AI lifecycle, Admissions Counselor State Machine, Anti-Fatigue Lead Cadence, Structured JSON Output Contract (`admissions_response`), Vector Search Engine, and `widget.js` client architecture.
 
 ---
 
@@ -21,7 +24,9 @@ The following sub-systems are **fully deprecated** and must **NOT** be reference
 ## 1. Product Summary
 
 **edvora.chat** is a **Multi-Tenant AI Chatbot SaaS** purpose-built for colleges and universities.
-Each tenant (organization) gets one or more embeddable chatbots that answer prospective student questions in real time using the institution''s own knowledge.
+Each tenant (organization) gets one or more embeddable chatbots that answer prospective student questions in real time using the institution's own knowledge.
+
+For full technical specifications of the admissions chatbot, turn processing lifecycle, vector retrieval engine, and widget interface, consult the companion guide: [**`architecture_chatbot.md`**](file:///c:/xampp/htdocs/edvora.chat/architecture_chatbot.md).
 
 ---
 
@@ -72,7 +77,8 @@ Each tenant (organization) gets one or more embeddable chatbots that answer pros
 │   ├── programs/               ← Auto-generated program TXT files ({org_id}/program_{id}.txt)
 │   ├── uploads/                ← Temporary / legacy uploaded files
 │   └── logs/                   ← Application logs
-├── architecture.md             ← THIS FILE
+├── architecture.md             ← Master technical & sub-system architecture index
+├── architecture_chatbot.md     ← Authoritative admissions chatbot architecture & onboarding guide
 ├── AGENTS.md                   ← Mandatory agent/developer rules
 ├── BRANDING_GUIDELINES.md      ← UI/typography rules
 ├── theme-branding.css          ← Global design system CSS
@@ -377,55 +383,78 @@ When an admin manually refreshes a URL source:
 
 ## 6. Query-Time Retrieval Pipeline (Chat Turn)
 
+> 📘 **Full Subsystem Specification:** For the complete sequence diagram, Admissions Counselor State Machine, Anti-Fatigue Cadence rules, and UI trigger contracts, see [**`architecture_chatbot.md`**](file:///c:/xampp/htdocs/edvora.chat/architecture_chatbot.md).
+
 ```
 Visitor message: "How long is the MBA program?"
       |
       v
-ChatController::handleMessage()
+ChatController::handleMessage()  [POST /v1/chat/completions]
       |
       v
-IntentClassifier::classify($message)
-  |-- TIER_GREETING        → return greeting template, skip retrieval
+IntentClassifier::classify($message, $history)
+  |-- TIER_CONVERSATIONAL  → return lean greeting prompt, skip retrieval
   |-- TIER_CLARIFICATION   → return clarification prompt, skip retrieval
-  `-- TIER_KNOWLEDGE       → proceed to vector retrieval
-      |
-      v
-EmbeddingService::embed($userMessage)  →  float[]  (question vector)
-      |
-      v
+  `-- TIER_KNOWLEDGE_QUERY → proceed to vector retrieval:
+        |
+        v
+QueryTranslator::translateToEnglish($query)  (for multilingual search)
+        |
+        v
+EmbeddingService::embed($englishQuery)  →  float[1536]  (question vector)
+        |
+        v
 VectorSearchEngine::findClosest(
     embedding  = $questionVector,
     org_id     = $organizationId,
-    program_id = $detectedProgramId ?? null,   ← optional scoping
+    program_id = $detectedProgramId ?? null,   ← program-scoped isolation
     limit      = 5
 )
-  |  Fetches embedding column from knowledge_items for org
-  |  Computes cosine similarity in PHP
+  |  Fetches embeddings from knowledge_items for org
+  |  Computes cosine similarity in PHP (min score: 0.30)
+  |  Fallback: FULLTEXT on knowledge_sources -> LIKE search
   |  Returns top-5 items sorted by similarity score
-      |
-      v
-Top-5 knowledge_items.content strings
-      |
-      v
+        |
+        v
+ProgramDetector::detect($db, $orgId, $userMessage, $contextSources)
+  |  Detects academic program interest & syncs early lead to DB
+        |
+        v
+Anti-Fatigue Cadence & Qualification Gate Check:
+  |  $canMakeOffer = (turn >= 2) && (program in DB) && (cooldown >= 2) && (offers < 3)
+        |
+        v
 PromptBuilder::build()
   |-- Master Prompt         (platform_config key: 'master_prompt')
-  |-- Bot Override Prompt   (chatbots.system_prompt_override)
-  |-- Knowledge Context Block:
-  |     "--- KNOWLEDGE BASE CONTEXT ---
-  |      MBA Program — Duration: 2 years.
-  |      MBA Program — Tuition: $32,000 USD.
-  |      MBA Program — Study mode: Full-time.
-  |      --- END KNOWLEDGE BASE CONTEXT ---"
-  |-- Lead Capture Instructions
-  `-- Campus Tour Recommendation Engine
-      |
-      v
-LlmService::complete($systemPrompt, $conversationHistory)
-  |-- Primary LLM provider
-  `-- Fallback LLM provider on failure
-      |
-      v
-Response → visitor browser  +  logged in messages table
+  |-- College Profile & Knowledge Base Context Blocks
+  |-- Active Programs & Campus Tour Slots Context
+  `-- Dynamic State Notice  ({{TURN_STATE}} Counselor Directive)
+        |
+        v
+LlmService::complete($systemPrompt, $userMessage, $history, [
+    'response_format_override' => LlmService::getAdmissionsResponseSchema()
+])
+  |-- Primary LLM provider (OpenAI / Groq / Gemini)
+  `-- Fallback LLM provider on timeout/error
+        |
+        v
+Structured JSON Output Parsing & UI Trigger Resolution:
+  |-- response              → Primary answer bubble
+  |-- follow_up             → Secondary consultative bubble (800ms delayed)
+  |-- program_trigger       → Interactive course catalog card (with degree filters)
+  |-- lead_trigger          → Inline modal form (Asset / Tour / Callback / Scholarship)
+  `-- Conversational Telemetry:
+        sentiment, emotion, frustration (0.0-1.0), conversation_trend,
+        intent_label, conversation_stage, lead_intent, needs_human
+        |
+        v
+Persistence:
+  |-- messages table        (content, tokens, analytics, is_fallback, source)
+  |-- conversations table   (latest analytics summary, cadence counters)
+  `-- usage_logs table      (messages count & token consumption)
+        |
+        v
+Response JSON → Client Browser (widget.js)
 ```
 
 ---
@@ -494,13 +523,27 @@ Supervisor runs `workers/job_runner.php` as a persistent process.
 
 ## 12. Lead Capture Engine
 
-Triggered during chat by conversational events:
-- Prospectus download request
-- Campus tour booking
-- Counselor callback request
-- Scholarship eligibility check
+> 📘 **Deep Dive:** For full qualification logic, modal schemas, and anti-fatigue state diagrams, refer to [**`architecture_chatbot.md` § 6**](file:///c:/xampp/htdocs/edvora.chat/architecture_chatbot.md#6-lead-conversion-engine--anti-fatigue-cadence).
 
-On trigger: chatbot collects name, email, phone from visitor → saved to `leads` table.
+The Edvora Lead Capture Engine operates on a **consultative admissions counseling model** governed by 5 strict anti-fatigue rules:
+
+1. **Strict Program Qualification Gate:** Proactive offers are strictly forbidden until the visitor's academic program of interest is identified and persisted in the database (`hasProgramLeadInDb === true`).
+2. **Zero Turn 1 Offers:** Turn 1 is strictly reserved for greeting, rapport, and intent discovery (`$turnCount >= 2`).
+3. **Anti-Fatigue Cooldown:** Enforces a minimum 2-turn cooldown between proactive offers (`($turnCount - $lastOfferTurn) >= 2`).
+4. **Session Cap:** Hard ceiling of 3 proactive offers maximum per conversation session.
+5. **Mandatory Pairing Rule:** Every proactive offer in `follow_up` must be paired with an open alternative to continue exploring curriculum, eligibility, fees, or placements right in chat.
+6. **Data-Backed Offer Availability:** The AI only offers assets that actually exist in the database for that specific program (e.g. active syllabus in `knowledge_sources`, tour slots in `campus_tour_slots`, active rules in `scholarship_rules`).
+
+### The 4 Conversational Lead Modalities (`lead_trigger`):
+
+| Modality Key | Visitor Intent | Triggered UI / Action |
+|---|---|---|
+| `asset_delivery` | Prospectus / syllabus / fee breakdown | Inline modal with Full Name, Email, WhatsApp $\rightarrow$ Emails PDF via `EmailService`. |
+| `campus_tour` | Campus visit request | Interactive campus selector and date/slot booking modal. |
+| `counselor_callback` | Admissions advisor request | Preferred time slot and contact modal for human counselor callback. |
+| `scholarship_eval` | Fee discount / merit aid inquiry | Marks / test score input calculator calculating estimated waiver. |
+
+*Returning Visitor Optimization:* If a visitor already submitted their contact details during a previous session (`localStorage.edvora_lead_captured_{botToken}`), document assets are dispatched instantly via 1-click without redisplaying the lead capture form. Leads are stored in the `leads` table and linked to `conversations.id`.
 
 ---
 
@@ -526,23 +569,30 @@ Steps:
 
 ## 14. Key Service File Map
 
+> 📘 **Chatbot Architecture:** For comprehensive details on each chat service, consult [**`architecture_chatbot.md` § 12**](file:///c:/xampp/htdocs/edvora.chat/architecture_chatbot.md#12-developer--ai-coding-assistant-quickstart-guide).
+
 | File | Responsibility |
 |---|---|
-| [`app/Services/EmbeddingService.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/EmbeddingService.php) | Calls embedding API, returns float[] vector — TO BE CREATED |
-| [`app/Services/VectorSearchEngine.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/VectorSearchEngine.php) | Cosine similarity search against `knowledge_items` — TO BE CREATED |
-| [`app/Services/KnowledgeChunker.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/KnowledgeChunker.php) | Splits text into self-contained sentence chunks — TO BE CREATED |
-| [`app/Services/ProgramTextGenerator.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/ProgramTextGenerator.php) | Converts `programs` row to embedding-friendly text — TO BE CREATED |
-| [`app/Services/ContentEngine.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/ContentEngine.php) | FULLTEXT search (current fallback during migration window) |
-| [`app/Services/ContentCompactor.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/ContentCompactor.php) | Cleans raw text, extracts keywords |
-| [`app/Services/LlmService.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/LlmService.php) | Multi-provider LLM completion with primary/fallback |
-| [`app/Services/PromptBuilder.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/PromptBuilder.php) | Assembles system prompt from master prompt + knowledge context |
-| [`app/Services/IntentClassifier.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/IntentClassifier.php) | Classifies user message tier (greeting/clarification/knowledge) |
-| [`app/Services/ProgramDetector.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/ProgramDetector.php) | Detects which program a visitor is asking about |
-| [`app/Controllers/KnowledgeController.php`](file:///c:/xampp/htdocs/edvora.chat/app/Controllers/KnowledgeController.php) | REST API for knowledge source CRUD and ingestion |
-| [`app/Controllers/ProgramController.php`](file:///c:/xampp/htdocs/edvora.chat/app/Controllers/ProgramController.php) | REST API for programs — triggers auto-embedding on save |
-| [`app/Controllers/ChatController.php`](file:///c:/xampp/htdocs/edvora.chat/app/Controllers/ChatController.php) | Chat turns: embedding → retrieval → prompt → LLM → response |
-| [`app/Database/Migrations.php`](file:///c:/xampp/htdocs/edvora.chat/app/Database/Migrations.php) | Idempotent schema creation and ALTER TABLE migrations |
-| [`workers/job_runner.php`](file:///c:/xampp/htdocs/edvora.chat/workers/job_runner.php) | Supervisor background worker — handles all job types |
+| [`app/Services/EmbeddingService.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/EmbeddingService.php) | Active. Generates 1536-dim embeddings via OpenAI `text-embedding-3-small`. Computes cosine similarity. |
+| [`app/Services/VectorSearchEngine.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/VectorSearchEngine.php) | Active. Cosine similarity vector search over `knowledge_items` with program-scoped isolation. |
+| [`app/Services/KnowledgeChunker.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/KnowledgeChunker.php) | Active. Splits text into self-contained, entity-prepended sentence chunks. |
+| [`app/Services/ProgramTextGenerator.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/ProgramTextGenerator.php) | Active. Converts `programs` rows into self-contained embedding-friendly facts for auto-ingestion. |
+| [`app/Services/ContentEngine.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/ContentEngine.php) | Retrieval cascade orchestrator: Tier 1 (Vector) $\rightarrow$ Tier 2 (FULLTEXT fallback) $\rightarrow$ Tier 3 (LIKE). |
+| [`app/Services/ContentCompactor.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/ContentCompactor.php) | Normalizes raw extracted text and extracts keywords for clean UTF-8 disk storage. |
+| [`app/Services/KnowledgeFileStorage.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/KnowledgeFileStorage.php) | Deterministic filesystem storage for clean source text and original binaries. |
+| [`app/Services/LlmService.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/LlmService.php) | Multi-provider LLM gateway with structured JSON schema (`admissions_response`) and failover. |
+| [`app/Services/LlmUsageLogger.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/LlmUsageLogger.php) | Token, latency, and cost telemetry logger (`llm_usage_logs` table). |
+| [`app/Services/PromptBuilder.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/PromptBuilder.php) | Assembles Master Prompt + Knowledge Base + College Directory + Dynamic Counselor State Notices. |
+| [`app/Services/IntentClassifier.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/IntentClassifier.php) | Classifies user message tier (greeting/clarification/knowledge) and reconstructs affirmative context. |
+| [`app/Services/ProgramDetector.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/ProgramDetector.php) | Detects academic program mentions, catalog queries, and syncs early leads to DB. |
+| [`app/Services/QueryTranslator.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/QueryTranslator.php) | Translates non-English visitor queries to English for precise vector search matching. |
+| [`app/Services/EmailService.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/EmailService.php) | Dispatches lead asset brochures/syllabi and notification emails via SMTP. |
+| [`app/Controllers/KnowledgeController.php`](file:///c:/xampp/htdocs/edvora.chat/app/Controllers/KnowledgeController.php) | REST API for knowledge source CRUD and ingestion. |
+| [`app/Controllers/ProgramController.php`](file:///c:/xampp/htdocs/edvora.chat/app/Controllers/ProgramController.php) | REST API for programs — triggers auto-embedding background jobs on save. |
+| [`app/Controllers/ChatController.php`](file:///c:/xampp/htdocs/edvora.chat/app/Controllers/ChatController.php) | Chat turn orchestrator: embedding $\rightarrow$ retrieval $\rightarrow$ prompt $\rightarrow$ LLM $\rightarrow$ analytics $\rightarrow$ response. |
+| [`public/widget.js`](file:///c:/xampp/htdocs/edvora.chat/public/widget.js) | Embeddable front-end client rendering bubbles, triggers, catalog cards, and modals. |
+| [`app/Database/Migrations.php`](file:///c:/xampp/htdocs/edvora.chat/app/Database/Migrations.php) | Idempotent schema creation and ALTER TABLE migrations. |
+| [`workers/job_runner.php`](file:///c:/xampp/htdocs/edvora.chat/workers/job_runner.php) | Supervisor background worker — handles background chunking, embedding, and URL crawling. |
 
 ---
 

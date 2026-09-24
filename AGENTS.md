@@ -52,7 +52,7 @@ powershell -ExecutionPolicy Bypass -File .\deploy.ps1 -Message "feat/fix: descri
 If executing manually, you MUST use `sudo` for `tar` extraction so existing files owned by `www-data` are cleanly overwritten:
 1. **Package:**
    ```powershell
-   tar.exe -czvf deploy_package.tar.gz app public workers BRANDING_GUIDELINES.md theme-branding.css AGENTS.md architecture.md architecture_department_team_management.md migrate.php deploy.ps1
+   tar.exe -czvf deploy_package.tar.gz app public workers BRANDING_GUIDELINES.md theme-branding.css AGENTS.md architecture.md architecture_chatbot.md architecture_department_team_management.md migrate.php deploy.ps1
    ```
 2. **Upload (MANDATORY: Always use `-O` and `-o BatchMode=yes`):**
    ```powershell
