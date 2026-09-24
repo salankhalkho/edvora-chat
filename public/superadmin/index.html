@@ -1050,7 +1050,7 @@
                         </p>
                         <form id="promptForm">
                             <div class="form-group" style="margin-bottom: 16px;">
-                                <textarea id="promptText" class="form-textarea" required placeholder="Enter system prompt..." style="overflow-y: hidden; resize: none; min-height: 200px; height: auto;"></textarea>
+                                <textarea id="promptText" class="form-textarea" required placeholder="Enter system prompt..." style="field-sizing: content; min-height: 500px; resize: vertical; overflow-y: visible;"></textarea>
                             </div>
                             <div style="display: flex; align-items: center; justify-content: space-between;">
                                 <div id="promptCharCount" style="color: var(--brand-text-muted); font-size: 11px;">0 characters</div>
@@ -2579,8 +2579,9 @@
         function autoResizePromptText() {
             const el = document.getElementById('promptText');
             if (el) {
-                el.style.height = 'auto';
-                el.style.height = (el.scrollHeight + 4) + 'px';
+                el.style.height = '0px';
+                const newHeight = Math.max(el.scrollHeight + 12, 500);
+                el.style.height = newHeight + 'px';
             }
         }
 
