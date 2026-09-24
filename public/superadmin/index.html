@@ -1050,7 +1050,7 @@
                         </p>
                         <form id="promptForm">
                             <div class="form-group" style="margin-bottom: 16px;">
-                                <textarea id="promptText" class="form-textarea" rows="18" required placeholder="Enter system prompt..."></textarea>
+                                <textarea id="promptText" class="form-textarea" required placeholder="Enter system prompt..." style="overflow-y: hidden; resize: none; min-height: 200px; height: auto;"></textarea>
                             </div>
                             <div style="display: flex; align-items: center; justify-content: space-between;">
                                 <div id="promptCharCount" style="color: var(--brand-text-muted); font-size: 11px;">0 characters</div>
@@ -2574,12 +2574,21 @@
         // MASTER PROMPT LOGIC
         // ==========================================
 
+        function autoResizePromptText() {
+            const el = document.getElementById('promptText');
+            if (el) {
+                el.style.height = 'auto';
+                el.style.height = (el.scrollHeight + 4) + 'px';
+            }
+        }
+
         async function loadMasterPrompt() {
             const data = await apiFetch('/v1/superadmin/prompt');
             if (data.status === 'success') {
                 const prompt = data.data.master_prompt || '';
                 document.getElementById('promptText').value = prompt;
                 updateCharCount(prompt);
+                autoResizePromptText();
             }
         }
 
@@ -2589,6 +2598,7 @@
 
         document.getElementById('promptText').addEventListener('input', (e) => {
             updateCharCount(e.target.value);
+            autoResizePromptText();
         });
 
         document.getElementById('promptForm').onsubmit = async (e) => {
