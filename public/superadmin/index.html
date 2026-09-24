@@ -2283,7 +2283,9 @@
                 document.getElementById('tab-' + tab).classList.add('active');
                 document.getElementById('viewHeaderTitle').innerHTML = item.innerHTML;
                 
-                if (tab === 'database') {
+                if (tab === 'prompt') {
+                    setTimeout(autoResizePromptText, 50);
+                } else if (tab === 'database') {
                     loadDbTables();
                 } else if (tab === 'plans') {
                     loadPlans();
@@ -2586,9 +2588,11 @@
             const data = await apiFetch('/v1/superadmin/prompt');
             if (data.status === 'success') {
                 const prompt = data.data.master_prompt || '';
-                document.getElementById('promptText').value = prompt;
+                const el = document.getElementById('promptText');
+                el.value = prompt;
                 updateCharCount(prompt);
                 autoResizePromptText();
+                setTimeout(autoResizePromptText, 100);
             }
         }
 
