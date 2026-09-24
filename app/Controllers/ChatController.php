@@ -431,7 +431,10 @@ class ChatController
 
             // 11b. Resolve program catalog payload for interactive widget UI (Hybrid: Keyword + LLM Trigger)
             $programCatalogPayload = null;
-            $wantsCatalog = $isCatalogQuery || (!empty($rawProgramTrigger) && $rawProgramTrigger !== 'null');
+            // Guard: broad catalog triggers only when no specific program inquiry was identified
+            $wantsCatalog = ($isCatalogQuery || (!empty($rawProgramTrigger) && $rawProgramTrigger !== 'null'))
+                && empty($detectedProgram);
+
             if ($wantsCatalog) {
                 // Detect requested degree level filter
                 $catalogFilter = 'all';
@@ -446,6 +449,10 @@ class ChatController
                     $catalogFilter = 'certificates';
                 }
                 $programCatalogPayload = self::resolveProgramCatalog($db, $orgId, $catalogFilter);
+
+                // Deterministic catalog starting message — LLM does not generate conversational filler or greetings
+                $aiResponseText = "Here is our official academic catalog below — tap any program to explore its details!";
+                $followUpMessage = null;
             }
 
             // Cadence gate for follow_up: apply same rules as before
@@ -458,6 +465,9 @@ class ChatController
             if (empty($aiResponseText) && !empty($followUpMessage)) {
                 $aiResponseText  = $followUpMessage;
                 $followUpMessage = null;
+            }
+            if (empty($aiResponseText)) {
+                $aiResponseText = "How can I assist you with our academic programs and admissions today?";
             }
 
             // 12. Update cadence state if a follow-up offer was delivered this turn

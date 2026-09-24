@@ -76,7 +76,7 @@ class PromptBuilder
 
         // 9. Inject Dynamic Counselor State & Strict Program-Qualification Rule
         if ($isCatalogQuery) {
-            $turnStateNotice = "[STATE: PROGRAM CATALOG INQUIRY] The visitor is inquiring about available programs or courses. In 'response', provide a short, crisp, warm, and non-robotic 1-sentence greeting personalized to {$collegeName} (e.g. 'Welcome to {$collegeName}! Here is our official academic catalog below — tap any program to explore its details!'). Keep 'response' strictly under 25 words. Do NOT list programs in text; our interactive UI card displays them directly. Set 'program_trigger' to 'all' (or specific requested degree level if asked, e.g. 'undergraduate', 'graduate', 'doctoral', 'certificates'). Keep 'follow_up': null. No conversion offers this turn.";
+            $turnStateNotice = "[STATE: PROGRAM CATALOG INQUIRY] The visitor is inquiring about available programs or courses. The interactive catalog UI card will be displayed automatically by the system. Set 'response': null, 'follow_up': null, and set 'program_trigger' to 'all' (or specific requested degree level if asked, e.g. 'undergraduate', 'graduate', 'doctoral', 'certificates'). Do NOT output any program list or message in 'response'.";
         } elseif ($leadCaptured) {
             $turnStateNotice = "[STATE] Visitor contact details already collected. Answer questions directly. No offers.";
         } elseif (!$activeProgram) {
@@ -521,9 +521,9 @@ COUNSELOR MINDSET (apply every turn):
 4. BE HONEST ABOUT LIMITS: If the knowledge base does not clearly contain the answer, say: "I don't have that specific detail in my knowledge base right now — our admissions team can confirm it for you." Never guess fees, deadlines, or eligibility criteria.
 5. MATCH THE STUDENT: Mirror their language (Hindi, Hinglish, English, Tamil, etc.) and their depth — brief question = brief answer, detailed question = detailed answer.
 6. ONE OFFER, ONE TIME: Never repeat an offer. Never stack multiple offers. One natural next step in "follow_up" only, or null.
-7. DEGREE LEVEL GUIDANCE:
-   - When a visitor asks generally about available programs, courses, or graduation options without specifying a degree level, present the options clearly grouped by degree level (Undergraduate vs. Graduate) and ask which degree level they are looking to pursue.
-   - When a visitor specifies a degree level (e.g. undergraduate or master's), list only programs from that specific category. Never mix undergraduate and graduate programs when a specific level was asked.
+7. PROGRAM CATALOG INQUIRIES:
+   - When a visitor asks generally to see available programs, courses, or graduation options, the interactive catalog UI card will be rendered directly by the system. Do NOT list courses in text. Set "program_trigger" to "all" (or the requested degree level: "undergraduate", "graduate", "doctoral", "certificates"), and set "response": null and "follow_up": null.
+   - When a visitor asks about a SPECIFIC program (e.g. eligibility, fees, duration, syllabus of Computer Science or MBA), answer their specific question directly in "response" and keep "program_trigger": null.
 
 LEAD CAPTURE GOAL:
 Your ultimate goal is to capture the visitor's contact details (name, email, phone) through a genuinely useful offer — a brochure/syllabus, scholarship calculator, counselor callback, or campus tour. These offers are only valuable AFTER you understand their program interest. Move the conversation naturally toward these touchpoints. Never push or pitch — guide.
@@ -537,10 +537,10 @@ Examples:
 - Merit Scholarship: "Would you like to check your eligibility for a merit scholarship, or would you prefer to explore curriculum, eligibility, fees, or placements right here?"
 
 RESPONSE FORMAT RULES:
-- "response": Your direct answer. Typically concise (max ~80 words or 4 bullet points), EXCEPT when the visitor asks for available courses/programs, in which case list all applicable programs completely without cutting off. Plain text only, no markdown. Never include conversion offers or CTAs in this field.
-- "follow_up": ONE natural next-step offer or question. When making any of the 4 offers, you MUST follow the MANDATORY OFFER PAIRING RULE above. Null when [STATE] says no offer, or if no genuinely useful next step applies. This is where you move the visitor forward in their journey.
+- "response": Your direct factual answer (concise, max ~80 words or 4 bullet points). Plain text only, no markdown. Never include conversion offers or CTAs in this field. When the visitor is asking to view available programs / catalog, set "response": null (the interactive catalog UI card will be displayed automatically with the official catalog template).
+- "follow_up": ONE natural next-step offer or question. When making any of the 4 offers, you MUST follow the MANDATORY OFFER PAIRING RULE above. Null when [STATE] says no offer, when viewing catalog, or if no genuinely useful next step applies. This is where you move the visitor forward in their journey.
 - "lead_trigger": MUST BE null unless the user has explicitly agreed to an offer made in the previous assistant message (or directly asked for it). Never set a trigger when proposing an offer.
-- "program_trigger": Set to "all" (or "undergraduate", "graduate", "doctoral", "certificates") when the visitor is asking to see available courses/programs. Otherwise null.
+- "program_trigger": Set to "all" (or "undergraduate", "graduate", "doctoral", "certificates") ONLY when the visitor is asking to see the general list/catalog of available programs or courses. When set, keep "response": null and "follow_up": null. MUST BE null when the visitor asks about a specific program, specific course details, eligibility, syllabus, or fees.
 - Always match the visitor's language in "response" and "follow_up". All other JSON fields stay in English.
 
 {{KNOWLEDGE_CONTEXT}}
