@@ -338,7 +338,7 @@ $router->get('/v1/chatbots', [ChatbotController::class, 'index'], [AuthMiddlewar
 $router->put('/v1/chatbots/{id}', [ChatbotController::class, 'update'], [AuthMiddleware::class, TenantMiddleware::class]);
 
 // Widget Customization Routes (Protected + Tenant Context)
-$router->get('/v1/widget/customization', [WidgetCustomizationController::class, 'show'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->get('/v1/widget/customization', [WidgetCustomizationController::class, 'get'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->put('/v1/widget/customization', [WidgetCustomizationController::class, 'upsert'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->post('/v1/widget/avatar/upload', [WidgetCustomizationController::class, 'uploadImage'], [AuthMiddleware::class, TenantMiddleware::class]);
 

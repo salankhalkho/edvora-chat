@@ -66,16 +66,26 @@ class WidgetCustomizationController
      * GET /v1/widget/customization?bot_id=X&scope=org|dept&dept_id=Y
      * Loads config for a given bot+scope. Falls back through cascade.
      */
+    public function show(Request $request, array $params = []): void
+    {
+        $this->get($request, $params);
+    }
+
     public function get(Request $request, array $params = []): void
     {
         $orgId   = $GLOBALS['organization_id'] ?? null;
         $botId   = (int)($request->get('bot_id') ?? 0);
+        $db      = Database::getConnection();
+
+        if (!$botId && $orgId) {
+            $stmtPrimary = $db->prepare("SELECT id FROM chatbots WHERE organization_id = :org AND is_active = 1 ORDER BY id ASC LIMIT 1");
+            $stmtPrimary->execute([':org' => $orgId]);
+            $botId = (int)$stmtPrimary->fetchColumn();
+        }
 
         if (!$botId) {
             Response::error('bot_id is required.', 400);
         }
-
-        $db = Database::getConnection();
 
         // Verify bot belongs to org
         $stmtBot = $db->prepare("SELECT id FROM chatbots WHERE id = :id AND organization_id = :org");
@@ -339,6 +349,7 @@ class WidgetCustomizationController
         if ($orgRowInfo) {
             if (!empty($orgRowInfo['name'])) {
                 $defaults['header_bot_name'] = $orgRowInfo['name'];
+                $defaults['welcome_message'] = "Hi there! 👋 Welcome to {$orgRowInfo['name']}. Ask me anything about degree programs, admissions, eligibility, fees, or campus life!";
             }
             if (!empty($orgRowInfo['primary_color'])) {
                 $pColor = $orgRowInfo['primary_color'];
@@ -348,6 +359,15 @@ class WidgetCustomizationController
                 $defaults['launcher_bg'] = $pColor;
                 $defaults['chip_border_color'] = $pColor;
                 $defaults['chip_text_color'] = $pColor;
+            }
+        }
+
+        if ($botId) {
+            $stmtBotRow = $db->prepare("SELECT welcome_message FROM chatbots WHERE id = :id");
+            $stmtBotRow->execute([':id' => $botId]);
+            $bMsg = $stmtBotRow->fetchColumn();
+            if (!empty($bMsg)) {
+                $defaults['welcome_message'] = $bMsg;
             }
         }
 
@@ -391,6 +411,15 @@ class WidgetCustomizationController
                 $defaults['launcher_bg'] = $pColor;
                 $defaults['chip_border_color'] = $pColor;
                 $defaults['chip_text_color'] = $pColor;
+            }
+        }
+
+        if ($botId) {
+            $stmtBotRow = $db->prepare("SELECT welcome_message FROM chatbots WHERE id = :id");
+            $stmtBotRow->execute([':id' => $botId]);
+            $bMsg = $stmtBotRow->fetchColumn();
+            if (!empty($bMsg)) {
+                $defaults['welcome_message'] = $bMsg;
             }
         }
 

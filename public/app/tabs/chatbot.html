@@ -541,12 +541,18 @@
     <script>
         (function() {
             // Immediate synchronous hydration from in-memory state to prevent any wrong default flash
-            const orgName = window.currentOrgName || '';
+            const orgName = window.currentOrgName || (window.currentOrgProfile && window.currentOrgProfile.name) || localStorage.getItem('edvora_org_name') || '';
             if (orgName) {
                 const nameInp = document.getElementById('wc_header_bot_name');
                 if (nameInp && !nameInp.value) nameInp.value = orgName;
                 const prevName = document.getElementById('wcPreviewBotName');
                 if (prevName) prevName.textContent = orgName;
+
+                const dynWelcome = "Hi there! 👋 Welcome to " + orgName + ". Ask me anything about degree programs, admissions, eligibility, fees, or campus life!";
+                const welInp = document.getElementById('wc_welcome_message');
+                if (welInp && !welInp.value) welInp.value = dynWelcome;
+                const prevWel = document.getElementById('wcPreviewWelcomeBubble');
+                if (prevWel) prevWel.innerHTML = dynWelcome.replace(/\n/g, '<br>');
             }
             const orgWeb = (window.currentOrgProfile && window.currentOrgProfile.website_url) || window.currentOrgWebsite || localStorage.getItem('edvora_org_website') || '';
             if (orgWeb) {

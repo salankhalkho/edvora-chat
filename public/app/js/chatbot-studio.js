@@ -915,8 +915,9 @@
                         lead_capture_enabled: false,
                         has_counselor_contact: false
                     };
-                    const orgName = window.currentOrgName || 'AI Admissions Assistant';
-                    if (!wcState.config.header_bot_name || wcState.config.header_bot_name === 'Edvora AI' || wcState.config.header_bot_name === 'Edvora Chat' || wcState.config.header_bot_name === 'Campus Assistant' || wcState.config.header_bot_name === 'LeadBot') {
+                    const orgName = window.currentOrgName || (window.currentOrgProfile && window.currentOrgProfile.name) || (localStorage.getItem('edvora_org_name') || 'our university');
+                    const dynDefaultWelcome = "Hi there! 👋 Welcome to " + orgName + ". Ask me anything about degree programs, admissions, eligibility, fees, or campus life!";
+                    if (!wcState.config.header_bot_name || wcState.config.header_bot_name === 'Edvora AI' || wcState.config.header_bot_name === 'Edvora Chat' || wcState.config.header_bot_name === 'Campus Assistant' || wcState.config.header_bot_name === 'LeadBot' || wcState.config.header_bot_name === 'AI Admissions Assistant') {
                         wcState.config.header_bot_name = orgName;
                     }
                     if (!wcState.config.welcome_message || 
@@ -925,8 +926,10 @@
                         wcState.config.welcome_message.includes('How can I assist you') || 
                         wcState.config.welcome_message.includes("I'm the AI Student Assistant") || 
                         wcState.config.welcome_message.includes('our admissions assistant') || 
-                        wcState.config.welcome_message.includes('our assistant console')) {
-                        wcState.config.welcome_message = "Hi there! 👋 Welcome to " + orgName + ". Ask me anything about degree programs, admissions, eligibility, fees, or campus life!";
+                        wcState.config.welcome_message.includes('our assistant console') ||
+                        wcState.config.welcome_message.includes('our university') ||
+                        wcState.config.welcome_message.includes('our institution')) {
+                        wcState.config.welcome_message = dynDefaultWelcome;
                     }
                     if (!wcState.config.launcher_icon || wcState.config.launcher_icon === 'chat') {
                         wcState.config.launcher_icon = 'modern_chat';
@@ -1025,8 +1028,8 @@
                 hdr.style.color = c.header_text_color || '#FFFFFF';
             }
             const bn = el('wcPreviewBotName');
-            const orgName = window.currentOrgName || 'AI Admissions Assistant';
-            const botName = (c.header_bot_name !== undefined && c.header_bot_name !== '') ? c.header_bot_name : orgName;
+            const orgName = window.currentOrgName || (window.currentOrgProfile && window.currentOrgProfile.name) || (localStorage.getItem('edvora_org_name') || 'AI Admissions Assistant');
+            const botName = (c.header_bot_name && c.header_bot_name !== 'AI Admissions Assistant' && c.header_bot_name !== 'Edvora AI' && c.header_bot_name !== 'Edvora Chat' && c.header_bot_name !== 'Campus Assistant' && c.header_bot_name !== 'LeadBot') ? c.header_bot_name : orgName;
             if (bn) {
                 bn.textContent = botName;
                 bn.style.color = c.header_text_color || '#FFFFFF';
@@ -1089,8 +1092,11 @@
             // 7. Welcome message content
             const wb = el('wcPreviewWelcomeBubble');
             if (wb) {
-                const defaultMsg = "Hi there! 👋 Welcome to " + (window.currentOrgName || "our institution") + ". Ask me anything about degree programs, admissions, eligibility, fees, or campus life!";
-                const rawMsg = c.welcome_message || defaultMsg;
+                const defaultMsg = "Hi there! 👋 Welcome to " + (window.currentOrgName || (window.currentOrgProfile && window.currentOrgProfile.name) || (localStorage.getItem('edvora_org_name') || "our university")) + ". Ask me anything about degree programs, admissions, eligibility, fees, or campus life!";
+                let rawMsg = c.welcome_message || defaultMsg;
+                if (rawMsg.includes('our university') || rawMsg.includes('our institution')) {
+                    rawMsg = defaultMsg;
+                }
                 wb.innerHTML = rawMsg.replace(/\n/g, '<br>');
             }
 
@@ -1250,10 +1256,15 @@
             wcSetSlider('wc_chip_radius', c.chip_border_radius !== undefined ? c.chip_border_radius : 20, 'wc_chip_radius_val', 'px');
 
             const sv = (id, v) => { const e = document.getElementById(id); if (e) e.value = v || ''; };
-            const orgName = window.currentOrgName || 'AI Admissions Assistant';
-            sv('wc_header_bot_name', c.header_bot_name || orgName); 
+            const orgName = window.currentOrgName || (window.currentOrgProfile && window.currentOrgProfile.name) || (localStorage.getItem('edvora_org_name') || 'AI Admissions Assistant');
+            sv('wc_header_bot_name', (c.header_bot_name && c.header_bot_name !== 'AI Admissions Assistant' && c.header_bot_name !== 'Edvora AI' && c.header_bot_name !== 'Edvora Chat' && c.header_bot_name !== 'Campus Assistant' && c.header_bot_name !== 'LeadBot') ? c.header_bot_name : orgName); 
             sv('wc_header_subtitle', c.header_subtitle || 'Online Now');
-            sv('wc_welcome_message', c.welcome_message || WC_DEFAULTS.welcome_message);
+            const defWelcome = "Hi there! 👋 Welcome to " + orgName + ". Ask me anything about degree programs, admissions, eligibility, fees, or campus life!";
+            let curWel = c.welcome_message || defWelcome;
+            if (curWel.includes('our university') || curWel.includes('our institution')) {
+                curWel = defWelcome;
+            }
+            sv('wc_welcome_message', curWel);
             sv('quickChipsInput', Array.isArray(c.quick_chips) ? c.quick_chips.join(', ') : (c.quick_chips || ''));
 
             const iconVal = c.launcher_icon || 'modern_chat';
