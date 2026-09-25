@@ -486,6 +486,8 @@ class ChatController
                     ':shown' => json_encode($leadFormsShown),
                     ':id' => $convId
                 ]);
+            }
+
             // Fail-safe: ensure chatbot never returns completely blank if no form or catalog is showing
             if (empty($aiResponseText) && empty($leadTriggerPayload) && empty($programCatalogPayload)) {
                 if (!empty($followUpMessage)) {
