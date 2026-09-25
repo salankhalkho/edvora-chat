@@ -1638,9 +1638,10 @@ class Migrations
                   AND table_name = 'leads'
                   AND index_name = 'uq_leads_conv_type'
             ");
-            if ((int)$checkUqLeads->fetchColumn() === 0) {
-                $this->db->exec("ALTER TABLE leads ADD UNIQUE KEY uq_leads_conv_type (conversation_id, lead_type)");
-            }
+        } catch (Throwable $e) {
+            error_log('[Migrations] leads uq_leads_conv_type: ' . $e->getMessage());
+        }
+
         try {
             $this->db->exec("
                 UPDATE chatbots c 
