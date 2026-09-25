@@ -20,7 +20,7 @@ Write-Host "
 if (Test-Path "deploy_package.tar.gz") {
     Remove-Item "deploy_package.tar.gz" -Force
 }
-tar.exe -czvf deploy_package.tar.gz app public workers BRANDING_GUIDELINES.md theme-branding.css AGENTS.md architecture.md architecture_chatbot.md architecture_department_team_management.md migrate.php deploy.ps1
+tar.exe -czvf deploy_package.tar.gz app public workers BRANDING_GUIDELINES.md theme-branding.css AGENTS.md architecture.md architecture_chatbot.md architecture_department_team_management.md migrate.php deploy.ps1 master_prompt.txt
 Write-Host "deploy_package.tar.gz created successfully." -ForegroundColor Green
 
 Write-Host "

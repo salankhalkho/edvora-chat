@@ -29,14 +29,18 @@ class Seeders
         // 2. Default Master Prompt
         $masterPrompt = \App\Services\PromptBuilder::getDefaultMasterPrompt();
 
-        $stmt = $this->db->prepare("SELECT id FROM platform_config WHERE key_name = 'master_prompt'");
+        $stmt = $this->db->prepare("SELECT id, value_text FROM platform_config WHERE key_name = 'master_prompt'");
         $stmt->execute();
-        if (!$stmt->fetch()) {
-            $stmtInsert = $this->db->prepare("INSERT INTO platform_config (key_name, value_text) VALUES ('master_prompt', :val)");
+        $existingPrompt = $stmt->fetch(\PDO::FETCH_ASSOC);
+        if (!$existingPrompt) {
+            $stmtInsert = $this->db->prepare("INSERT INTO platform_config (key_name, value_text, updated_at) VALUES ('master_prompt', :val, NOW())");
             $stmtInsert->execute([':val' => $masterPrompt]);
         } else {
-            $stmtUpdate = $this->db->prepare("UPDATE platform_config SET value_text = :val, updated_at = NOW() WHERE key_name = 'master_prompt'");
-            $stmtUpdate->execute([':val' => $masterPrompt]);
+            $val = trim($existingPrompt['value_text'] ?? '');
+            if ($val === '' || $val === 'You are the AI Admissions Counselor for our institution.') {
+                $stmtUpdate = $this->db->prepare("UPDATE platform_config SET value_text = :val, updated_at = NOW() WHERE key_name = 'master_prompt'");
+                $stmtUpdate->execute([':val' => $masterPrompt]);
+            }
         }
 
         // 3. Default Plans (Starter, Growth, Pro)
