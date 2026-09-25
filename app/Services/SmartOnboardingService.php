@@ -611,7 +611,7 @@ class SmartOnboardingService
                 ];
             }
 
-            $welcomeMsg = "Hello! 👋 I'm the AI Student Assistant for {$orgName}. Ask me anything about degree programs, admissions, eligibility, fees, or campus life!";
+            $welcomeMsg = "Hi there! 👋 Welcome to {$orgName}. Ask me anything about degree programs, admissions, eligibility, fees, or campus life!";
 
             $db->prepare("
                 UPDATE chatbots

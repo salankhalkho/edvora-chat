@@ -372,7 +372,7 @@
             if (subEl) subEl.value = currentWidgetBot.header_subtitle || 'Online Now';
 
             const welEl = document.getElementById('welcomeMsgInput');
-            if (welEl) welEl.value = currentWidgetBot.welcome_message || 'Hello! ðŸ‘‹ Welcome to our assistant console. How can I help you today?';
+            if (welEl) welEl.value = currentWidgetBot.welcome_message || ("Hi there! 👋 Welcome to " + (window.currentOrgName || "our institution") + ". Ask me anything about degree programs, admissions, eligibility, fees, or campus life!");
 
             const pIn = document.getElementById('primaryColorInput');
             if (pIn) pIn.value = currentWidgetBot.primary_color || '#063D3B';
@@ -919,7 +919,13 @@
                     if (!wcState.config.header_bot_name || wcState.config.header_bot_name === 'Edvora AI' || wcState.config.header_bot_name === 'Edvora Chat' || wcState.config.header_bot_name === 'Campus Assistant' || wcState.config.header_bot_name === 'LeadBot') {
                         wcState.config.header_bot_name = orgName;
                     }
-                    if (!wcState.config.welcome_message || wcState.config.welcome_message.includes('University Admissions Assistant') || wcState.config.welcome_message.includes('Tanya') || wcState.config.welcome_message.includes('How can I assist you with admissions')) {
+                    if (!wcState.config.welcome_message || 
+                        wcState.config.welcome_message.includes('University Admissions Assistant') || 
+                        wcState.config.welcome_message.includes('Tanya') || 
+                        wcState.config.welcome_message.includes('How can I assist you') || 
+                        wcState.config.welcome_message.includes("I'm the AI Student Assistant") || 
+                        wcState.config.welcome_message.includes('our admissions assistant') || 
+                        wcState.config.welcome_message.includes('our assistant console')) {
                         wcState.config.welcome_message = "Hi there! 👋 Welcome to " + orgName + ". Ask me anything about degree programs, admissions, eligibility, fees, or campus life!";
                     }
                     if (!wcState.config.launcher_icon || wcState.config.launcher_icon === 'chat') {
