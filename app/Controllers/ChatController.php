@@ -313,6 +313,7 @@ class ChatController
             $llmResult = LlmService::complete($systemPrompt, $userMessage, $prevHistory, $llmContext);
             $rawAiResponse = $llmResult['text'];
             $tokensUsed = $llmResult['tokens_used'];
+            error_log("[ChatCompletion Debug] Raw AI response: " . $rawAiResponse);
 
             // 10. Parse Structured JSON Response
             $parsed            = null;
