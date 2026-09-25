@@ -313,7 +313,6 @@ class ChatController
             $llmResult = LlmService::complete($systemPrompt, $userMessage, $prevHistory, $llmContext);
             $rawAiResponse = $llmResult['text'];
             $tokensUsed = $llmResult['tokens_used'];
-            error_log("[ChatCompletion Debug] Raw AI response: " . $rawAiResponse);
 
             // 10. Parse Structured JSON Response
             $parsed            = null;
@@ -371,23 +370,31 @@ class ChatController
 
             // [a] ACCEPTING_PREVIOUS_OFFER: Form opens with strictly zero conversational text
             $isAffirmative = IntentClassifier::isAffirmativeResponse($userMessage, $prevHistory);
-            if ($parsedIntent === 'a' || (!empty($rawTriggerType) && empty($followUpMessage) && $isAffirmative)) {
+            $lastOfferText = '';
+            for ($hIdx = count($prevHistory) - 1; $hIdx >= 0; $hIdx--) {
+                if (($prevHistory[$hIdx]['role'] ?? '') === 'assistant') {
+                    $lastOfferText = strtolower($prevHistory[$hIdx]['content'] ?? '');
+                    break;
+                }
+            }
+            $prevHadOffer = str_contains($lastOfferText, 'tour') || str_contains($lastOfferText, 'visit') ||
+                            str_contains($lastOfferText, 'scholarship') || str_contains($lastOfferText, 'waiver') ||
+                            str_contains($lastOfferText, 'syllabus') || str_contains($lastOfferText, 'brochure') ||
+                            str_contains($lastOfferText, 'prospectus') || str_contains($lastOfferText, 'curriculum') ||
+                            str_contains($lastOfferText, 'call') || str_contains($lastOfferText, 'callback') ||
+                            str_contains($lastOfferText, 'counselor') || str_contains($lastOfferText, 'staff');
+
+            if ($parsedIntent === 'a' || ($isAffirmative && $prevHadOffer)) {
+                $parsedIntent = 'a';
                 $aiResponseText = null;
                 $followUpMessage = null;
 
                 if (empty($rawTriggerType)) {
-                    $lastOfferText = '';
-                    for ($hIdx = count($prevHistory) - 1; $hIdx >= 0; $hIdx--) {
-                        if (($prevHistory[$hIdx]['role'] ?? '') === 'assistant') {
-                            $lastOfferText = strtolower($prevHistory[$hIdx]['content'] ?? '');
-                            break;
-                        }
-                    }
                     if (str_contains($lastOfferText, 'tour') || str_contains($lastOfferText, 'visit')) {
                         $rawTriggerType = 'campus_tour';
                     } elseif (str_contains($lastOfferText, 'scholarship') || str_contains($lastOfferText, 'waiver')) {
                         $rawTriggerType = 'scholarship_eval';
-                    } elseif (str_contains($lastOfferText, 'syllabus') || str_contains($lastOfferText, 'brochure') || str_contains($lastOfferText, 'prospectus')) {
+                    } elseif (str_contains($lastOfferText, 'syllabus') || str_contains($lastOfferText, 'brochure') || str_contains($lastOfferText, 'prospectus') || str_contains($lastOfferText, 'curriculum')) {
                         $rawTriggerType = 'brochure';
                     } elseif (str_contains($lastOfferText, 'call') || str_contains($lastOfferText, 'advisor') || str_contains($lastOfferText, 'counselor') || str_contains($lastOfferText, 'staff') || str_contains($lastOfferText, 'complaint')) {
                         $rawTriggerType = 'counselor_callback';

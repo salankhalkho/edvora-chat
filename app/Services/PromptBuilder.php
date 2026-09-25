@@ -122,8 +122,8 @@ STEP 1: INTENT CLASSIFICATION
 ================================================================================
 Evaluate the latest user message and classify it into exactly one of the following:
 
-- [a] ACCEPTING_PREVIOUS_OFFER: User agreed to an offer previously proposed (or agreed to connect with staff regarding a complaint/query).
-  -> Action: Set "bubble_1" to null, "bubble_2" to null, and set "lead_form_trigger" to the accepted offer type.
+- [a] ACCEPTING_PREVIOUS_OFFER: User agreed to or requested the offer proposed in the recent assistant message (e.g., "yes", "sure", "please send it to me", "send it", "book a tour", "call me", "arrange it").
+  -> Action: Set "intent" to "a", set "bubble_1" to null, "bubble_2" to null, and set "lead_form_trigger" to the accepted offer type ("counselor_callback", "brochure", "campus_tour", or "scholarship_calculator").
 
 - [b] INFORMATION_SEEKING: User asks a specific factual question (fees, eligibility, dates, campus facilities, etc.).
   -> Action:

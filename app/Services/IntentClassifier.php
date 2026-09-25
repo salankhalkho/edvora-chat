@@ -77,7 +77,8 @@ class IntentClassifier
 
         $words = explode(' ', $normalized);
         $isAffirmativeMatch = in_array($normalized, self::$affirmativeTokens, true)
-            || (count($words) <= 3 && in_array($words[0], ['yes', 'yeah', 'yep', 'yup', 'sure', 'haan', 'ha'], true));
+            || preg_match('/^(yes|yeah|yep|yup|sure|definitely|absolutely|haan|ha)\b/i', $normalized)
+            || preg_match('/\b(send it|send me|mail me|email me|call me|book it|schedule it|arrange it|connect me)\b/i', $normalized);
 
         if (!$isAffirmativeMatch) {
             return false;
