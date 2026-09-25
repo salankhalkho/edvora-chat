@@ -1065,7 +1065,7 @@
             // 4. Message bubble avatars
             const showBubbleAv = (c.avatar_location === 'bubbles' || c.avatar_location === 'both' || !c.avatar_location);
             const avBubbleSrc = (c.avatar_type === 'upload' && c.avatar_url) ? c.avatar_url : '/avatars/avatar' + (c.avatar_preset || 1) + '.png';
-            ['wcMsgAv1','wcMsgAv2'].forEach(avId => {
+            ['wcMsgAv1'].forEach(avId => {
                 const av = el(avId);
                 if (!av) return;
                 av.style.display = showBubbleAv ? 'flex' : 'none';
@@ -1078,7 +1078,7 @@
             if (msgs) msgs.style.background = c.message_area_bg || '#f9fafb';
 
             // 6. Bot bubbles
-            ['wcPreviewWelcomeBubble','wcPreviewBotReply'].forEach(id => {
+            ['wcPreviewWelcomeBubble'].forEach(id => {
                 const b = el(id);
                 if (b) {
                     b.style.background = c.bot_bubble_bg || '#f1f5f9';
@@ -1100,17 +1100,8 @@
                 wb.innerHTML = rawMsg.replace(/\n/g, '<br>');
             }
 
-            // 8. User bubbles & bot reply sample
-            const userBubbleEl = el('wcPreviewUserBubble');
-            if (userBubbleEl && (userBubbleEl.textContent.includes('Tell me about fees') || userBubbleEl.textContent.includes('tell me about fees'))) {
-                userBubbleEl.textContent = 'What programs and degrees are offered?';
-            }
-            const botReplyEl = el('wcPreviewBotReply');
-            if (botReplyEl && (botReplyEl.textContent.includes('B.Tech') || botReplyEl.textContent.includes('1.2L'))) {
-                botReplyEl.textContent = 'We offer undergraduate and graduate degree programs across multiple academic colleges. How can I help you explore? ðŸŽ“';
-            }
-
-            document.querySelectorAll('#wcPreviewMessages .wc-msg-row.user .wc-bubble, #wcPreviewUserBubble').forEach(b => {
+            // 8. User bubbles styling (for preview interactions)
+            document.querySelectorAll('#wcPreviewMessages .wc-msg-row.user .wc-bubble').forEach(b => {
                 b.style.background = c.user_bubble_bg || '#063D3B';
                 b.style.color = c.user_bubble_text || '#FFFFFF';
                 const rad = (c.user_bubble_radius !== undefined) ? c.user_bubble_radius : 14;
