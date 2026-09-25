@@ -832,7 +832,7 @@
             window_border_width: 1, window_border_radius: 16, window_width: 380, window_height: 550, window_shadow: 'soft',
             header_bg: '#063D3B', header_text_color: '#ffffff', header_logo_url: null,
             header_bot_name: 'AI Admissions Assistant', header_subtitle: 'Online Now',
-            welcome_message: "Hi there! ðŸ‘‹ Welcome to our admissions assistant. How can I assist you with admissions, programs, or campus life today?",
+            welcome_message: "Hi there! 👋 Welcome to " + (window.currentOrgName || "our institution") + ". Ask me anything about degree programs, admissions, eligibility, fees, or campus life!",
             avatar_type: 'preset', avatar_preset: 1, avatar_url: null, avatar_location: 'bubbles',
             bot_bubble_bg: '#f1f5f9', bot_bubble_text: '#1e293b', bot_bubble_radius: 14,
             user_bubble_bg: '#063D3B', user_bubble_text: '#ffffff', user_bubble_radius: 14,
@@ -919,8 +919,8 @@
                     if (!wcState.config.header_bot_name || wcState.config.header_bot_name === 'Edvora AI' || wcState.config.header_bot_name === 'Edvora Chat' || wcState.config.header_bot_name === 'Campus Assistant' || wcState.config.header_bot_name === 'LeadBot') {
                         wcState.config.header_bot_name = orgName;
                     }
-                    if (!wcState.config.welcome_message || wcState.config.welcome_message.includes('University Admissions Assistant') || wcState.config.welcome_message.includes('Tanya')) {
-                        wcState.config.welcome_message = "Hi there! 👋 Welcome to " + orgName + ". How can I assist you with admissions, programs, or campus life today?";
+                    if (!wcState.config.welcome_message || wcState.config.welcome_message.includes('University Admissions Assistant') || wcState.config.welcome_message.includes('Tanya') || wcState.config.welcome_message.includes('How can I assist you with admissions')) {
+                        wcState.config.welcome_message = "Hi there! 👋 Welcome to " + orgName + ". Ask me anything about degree programs, admissions, eligibility, fees, or campus life!";
                     }
                     if (!wcState.config.launcher_icon || wcState.config.launcher_icon === 'chat') {
                         wcState.config.launcher_icon = 'modern_chat';
@@ -1083,7 +1083,7 @@
             // 7. Welcome message content
             const wb = el('wcPreviewWelcomeBubble');
             if (wb) {
-                const defaultMsg = "Hi there! ðŸ‘‹ Welcome to " + (window.currentOrgName || "our admissions assistant") + ". How can I assist you with admissions, programs, or campus life today?";
+                const defaultMsg = "Hi there! 👋 Welcome to " + (window.currentOrgName || "our institution") + ". Ask me anything about degree programs, admissions, eligibility, fees, or campus life!";
                 const rawMsg = c.welcome_message || defaultMsg;
                 wb.innerHTML = rawMsg.replace(/\n/g, '<br>');
             }

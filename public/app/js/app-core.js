@@ -26,7 +26,7 @@
             launcher_icon: 'modern_chat',
             launcher_text: 'Ask AI',
             border_radius: 'curved',
-            welcome_message: 'Hi there! ðŸ‘‹ Welcome to our admissions assistant. How can I assist you with admissions, programs, or campus life today?',
+            welcome_message: 'Hi there! 👋 Welcome to our institution. Ask me anything about degree programs, admissions, eligibility, fees, or campus life!',
             quick_chips: []
         };
         let testChatState = {

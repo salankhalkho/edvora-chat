@@ -288,7 +288,7 @@
                 }
 
                 messagesContainer.innerHTML = '';
-                var defaultWelcome = "Hi there! 👋 Welcome to " + (config.organization_name || "our institution") + ". How can I assist you with admissions, programs, or campus life today?";
+                var defaultWelcome = "Hi there! 👋 Welcome to " + (config.organization_name || "our institution") + ". Ask me anything about degree programs, admissions, eligibility, fees, or campus life!";
                 var welcomeText = cust.welcome_message || config.welcome_message || config.welcomeMessage || defaultWelcome;
                 appendMessage('assistant', welcomeText);
 

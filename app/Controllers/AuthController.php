@@ -108,7 +108,7 @@ class AuthController
 
             // 3. Create Default Chatbot
             $botToken = bin2hex(random_bytes(16)); // 32 chars
-            $welcomeMsg = "Hi there! 👋 Welcome to {$collegeName}. How can I assist you with admissions, programs, or fees today?";
+            $welcomeMsg = "Hi there! 👋 Welcome to {$collegeName}. Ask me anything about degree programs, admissions, eligibility, fees, or campus life!";
 
             $stmtBot = $db->prepare("
                 INSERT INTO chatbots (organization_id, name, welcome_message, primary_color, bot_token, is_active, lead_capture_enabled)

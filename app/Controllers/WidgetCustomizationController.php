@@ -381,6 +381,7 @@ class WidgetCustomizationController
         if ($orgRow) {
             if (!empty($orgRow['name'])) {
                 $defaults['header_bot_name'] = $orgRow['name'];
+                $defaults['welcome_message'] = "Hi there! 👋 Welcome to {$orgRow['name']}. Ask me anything about degree programs, admissions, eligibility, fees, or campus life!";
             }
             if (!empty($orgRow['primary_color'])) {
                 $pColor = $orgRow['primary_color'];
