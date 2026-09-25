@@ -1036,10 +1036,12 @@
                 <!-- 2. MASTER PROMPT TAB -->
                 <div class="tab-view" id="tab-prompt">
                     <div class="brand-panel">
-                        <div class="brand-panel-header">
-                            <div class="panel-heading">
-                                <span>⚡</span> Global Master System Prompt Template
-                                <span style="font-size: 11px; font-weight: 400; color: var(--brand-text-muted); margin-left: 8px;">(Master prompt is saved in the Database: <code>platform_config</code> table)</span>
+                        <div class="brand-panel-header" style="height: auto; min-height: var(--brand-panel-header-h); padding: 8px 16px;">
+                            <div class="panel-heading" style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px;">
+                                <div><span>⚡</span> Global Master System Prompt Template</div>
+                                <div style="font-size: 11px; font-weight: 400; color: var(--brand-text-muted);">
+                                    Master prompt is saved in the Database (<code>platform_config</code> table)
+                                </div>
                             </div>
                             <button onclick="loadMasterPrompt()" class="brand-btn brand-btn-secondary brand-btn-sm">
                                 🔄 Reload
