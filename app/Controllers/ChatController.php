@@ -787,11 +787,16 @@ class ChatController
             return null;
         }
 
+        $stmtOrg = $db->prepare("SELECT name FROM organizations WHERE id = :org_id LIMIT 1");
+        $stmtOrg->execute([':org_id' => $orgId]);
+        $orgName = $stmtOrg->fetchColumn() ?: 'our institution';
+
         return [
-            'headline'    => 'Academic Programs',
-            'filter'      => $filter,
-            'total_count' => count($programs),
-            'categories'  => $activeCategories
+            'headline'          => 'Academic Programs',
+            'organization_name' => $orgName,
+            'filter'            => $filter,
+            'total_count'       => count($programs),
+            'categories'        => $activeCategories
         ];
     }
 }

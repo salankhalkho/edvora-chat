@@ -612,12 +612,13 @@
                 if (res.data.conversation_id) {
                     currentConversationId = res.data.conversation_id;
                 }
-                if (res.data.response && res.data.response.trim() !== '') {
-                    appendMessage('assistant', res.data.response);
-                }
-
                 if (res.data.program_catalog) {
+                    var orgName = (res.data.program_catalog.organization_name || config.organization_name || 'our institution').trim();
+                    var catalogIntro = 'At ' + orgName + ', we offer the following academic programs:';
+                    appendMessage('assistant', catalogIntro);
                     renderProgramCatalog(res.data.program_catalog);
+                } else if (res.data.response && res.data.response.trim() !== '') {
+                    appendMessage('assistant', res.data.response);
                 }
 
                 if (res.data.lead_capture_trigger) {
