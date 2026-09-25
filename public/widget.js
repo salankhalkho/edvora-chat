@@ -614,7 +614,7 @@
                 }
                 if (res.data.program_catalog) {
                     var orgName = (res.data.program_catalog.organization_name || config.organization_name || 'our institution').trim();
-                    var catalogIntro = 'At ' + orgName + ', we offer the following academic programs:';
+                    var catalogIntro = (res.data.response && res.data.response.trim() !== '') ? res.data.response.trim() : ('At ' + orgName + ', we offer the following academic programs:');
                     appendMessage('assistant', catalogIntro);
                     renderProgramCatalog(res.data.program_catalog);
                 } else if (res.data.response && res.data.response.trim() !== '') {
@@ -738,7 +738,8 @@
                 for (var p = 0; p < cat.programs.length; p++) {
                     var prog = cat.programs[p];
                     var isVisible = (activeFilter === 'all' || activeFilter === cat.key);
-                    var durationBadge = prog.duration ? '<span style="background:#F1F5F9; color:#475569; font-size:10px; font-weight:500; padding:2px 6px; border-radius:4px;">⏱ ' + prog.duration + '</span>' : '';
+                    var hasValidDuration = prog.duration && String(prog.duration).trim() !== '' && String(prog.duration).trim().toLowerCase() !== 'null';
+                    var durationBadge = hasValidDuration ? '<span style="background:#F1F5F9; color:#475569; font-size:10px; font-weight:500; padding:2px 6px; border-radius:4px;">⏱ ' + String(prog.duration).trim() + '</span>' : '';
                     
                     listHtml += '<div class="edvora-catalog-item" data-category="' + cat.key + '" data-program-name="' + prog.course_name.replace(/"/g, '&quot;') + '" style="display:' + (isVisible ? 'flex' : 'none') + '; align-items:center; justify-content:space-between; gap:8px; padding:8px 10px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; cursor:pointer; transition:all 0.15s;">' +
                         '<div style="display:flex; flex-direction:column; gap:3px; flex:1; min-width:0;">' +

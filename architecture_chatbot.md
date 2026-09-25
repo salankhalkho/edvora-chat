@@ -384,9 +384,9 @@ flowchart TD
 4. **Cardinal Rule 4: Post-Lead Capture Restriction:**
    - If `Lead Contact Already Captured` is `Yes`, all proactive marketing offers (Brochure, Scholarship Calculator, Counselor Callback) **STOP completely**.
    - The **ONLY** proactive offer permitted after lead capture is `campus_tour` (provided `user_message_count >= 3` and Campus Tour has not already been presented in the session).
-5. **Cardinal Rule 5: Zero Text on Form Display & Catalog Trigger:**
+5. **Cardinal Rule 5: Zero LLM Filler Text on Form Display & Standardized Catalog Presentation:**
    - When a lead collection form is triggered (Intent `[a]`), `bubble_1` and `bubble_2` must **BOTH be null**. The form displays with zero conversational text.
-   - When the academic catalog is triggered (Intent `[c]`), `bubble_1` and `bubble_2` must **BOTH be null**. The catalog UI displays directly without conversational filler.
+   - When the academic catalog is triggered (Intent `[c]`), the LLM returns `bubble_1` and `bubble_2` as `null` to avoid conversational text dumps. The backend standardizes a concise introductory bubble (`"At [Institution], we offer the following academic programs:"`) above the interactive catalog card, and records a transcript-enriched entry with program bullets in `messages` so staff and subsequent LLM turns retain full dialogue context.
 
 ---
 

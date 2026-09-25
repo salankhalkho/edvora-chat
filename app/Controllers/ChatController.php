@@ -317,6 +317,7 @@ class ChatController
             // 10. Parse Structured JSON Response
             $parsed            = null;
             $aiResponseText    = null;
+            $dbMessageContent  = null;
             $followUpMessage   = null;
             $parsedIntent      = 'b';
             $rawTriggerType    = null;
@@ -408,9 +409,9 @@ class ChatController
                 }
             }
 
-            // [c] SEEKING_CATALOGUE: Interactive catalog triggers with strictly zero conversational filler
+            // [c] SEEKING_CATALOGUE: Interactive catalog triggers with clean intro bubble and enriched transcript
             if ($parsedIntent === 'c' || (!empty($rawProgramTrigger) && $rawProgramTrigger !== 'null')) {
-                $aiResponseText = null;
+                $parsedIntent = 'c';
                 $followUpMessage = null;
 
                 $catalogFilter = 'all';
@@ -425,6 +426,38 @@ class ChatController
                     $catalogFilter = 'certificates';
                 }
                 $programCatalogPayload = self::resolveProgramCatalog($db, $orgId, $catalogFilter);
+
+                if (!empty($programCatalogPayload)) {
+                    $orgName = $programCatalogPayload['organization_name'] ?? ($bot['org_name'] ?? 'our institution');
+                    $aiResponseText = "At {$orgName}, we offer the following academic programs:";
+
+                    // Collect program names for transcript-enriched database logging
+                    $progNames = [];
+                    if (!empty($programCatalogPayload['categories'])) {
+                        foreach ($programCatalogPayload['categories'] as $cat) {
+                            if (!empty($cat['programs'])) {
+                                foreach ($cat['programs'] as $prg) {
+                                    if (!empty($prg['course_name'])) {
+                                        $progNames[] = $prg['course_name'];
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    $progNames = array_values(array_unique($progNames));
+                    $dbMessageContent = $aiResponseText;
+                    if (!empty($progNames)) {
+                        $dbMessageContent .= "\n• " . implode("\n• ", $progNames);
+                    }
+                } else {
+                    $aiResponseText = "How can I assist you with our academic programs and admissions today?";
+                    $dbMessageContent = $aiResponseText;
+                }
+
+                $analytics['intent_label'] = 'c';
+                if (empty($analytics['conversation_stage'])) {
+                    $analytics['conversation_stage'] = 'discovery';
+                }
             }
 
             // [g] COMPLAINT_OR_STATUS_CHECK: Politely ask to connect with appropriate staff
@@ -532,7 +565,7 @@ class ChatController
                 $stmtAiMsg->execute([
                     ':conv_id'     => $convId,
                     ':org_id'      => $orgId,
-                    ':content'     => $aiResponseText,
+                    ':content'     => !empty($dbMessageContent) ? $dbMessageContent : $aiResponseText,
                     ':sources'     => json_encode($sourceIdsUsed),
                     ':tokens'      => $tokensUsed,
                     ':sentiment'   => $analytics['sentiment'],
@@ -756,11 +789,13 @@ class ChatController
 
         foreach ($programs as $p) {
             $type = strtolower(trim($p['program_type'] ?? ''));
+            $durRaw = !empty($p['duration']) ? trim((string)$p['duration']) : null;
+            $duration = ($durRaw !== null && strtolower($durRaw) !== 'null' && $durRaw !== '') ? $durRaw : null;
             $item = [
                 'id'          => (int)$p['id'],
                 'course_name' => $p['course_name'],
                 'course_code' => $p['course_code'] ?? '',
-                'duration'    => !empty($p['duration']) ? trim($p['duration']) : null,
+                'duration'    => $duration,
             ];
 
             if (in_array($type, ['undergraduate', 'bachelor', 'bachelors', 'ug'], true)) {
