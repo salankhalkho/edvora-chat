@@ -1641,8 +1641,17 @@ class Migrations
             if ((int)$checkUqLeads->fetchColumn() === 0) {
                 $this->db->exec("ALTER TABLE leads ADD UNIQUE KEY uq_leads_conv_type (conversation_id, lead_type)");
             }
+        try {
+            $this->db->exec("
+                UPDATE chatbots c 
+                JOIN organizations o ON c.organization_id = o.id 
+                SET c.welcome_message = CONCAT('Hi there! 👋 Welcome to ', o.name, '. Ask me anything about degree programs, admissions, eligibility, fees, or campus life!') 
+                WHERE c.welcome_message LIKE '%How can I assist you%' 
+                   OR c.welcome_message LIKE '%our admissions assistant%'
+                   OR c.welcome_message IS NULL;
+            ");
         } catch (Throwable $e) {
-            error_log('[Migrations] leads uq_leads_conv_type: ' . $e->getMessage());
+            error_log('[Migrations] welcome_message update: ' . $e->getMessage());
         }
     }
 }
