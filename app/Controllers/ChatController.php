@@ -360,6 +360,8 @@ class ChatController
                 $analytics['conversation_stage'] = in_array($parsed['conversation_stage'] ?? '', ['discovery', 'consideration', 'decision', 'application']) ? $parsed['conversation_stage'] : null;
                 $analytics['lead_intent']        = in_array($parsed['lead_intent'] ?? '', ['low', 'medium', 'high']) ? $parsed['lead_intent'] : null;
                 $analytics['needs_human']        = !empty($parsed['needs_human']) ? 1 : 0;
+                $analytics['human_trigger']      = in_array($parsed['human_trigger'] ?? '', ['emotional_distress', 'wants_human']) ? $parsed['human_trigger'] : null;
+                $analytics['visitor_type']       = in_array($parsed['visitor_type'] ?? '', ['unknown', 'prospective', 'student']) ? $parsed['visitor_type'] : 'unknown';
             } else {
                 error_log("[ChatController] LLM JSON parse failed. Raw: " . substr($rawAiResponse, 0, 300));
                 $aiResponseText = trim($rawAiResponse);
@@ -597,11 +599,13 @@ class ChatController
             }
 
             // 13. Update conversation-level aggregated analytics state
-            $needsHumanInt = $analytics['needs_human'];
+            $needsHumanInt       = $analytics['needs_human'];
             $latestSentimentSql  = $analytics['sentiment']          ? "'" . $analytics['sentiment'] . "'"          : 'NULL';
             $latestFrustSql      = $analytics['frustration'] !== null ? (float)$analytics['frustration']            : 'NULL';
             $latestLeadIntSql    = $analytics['lead_intent']         ? "'" . $analytics['lead_intent'] . "'"        : 'NULL';
             $latestStageSql      = $analytics['conversation_stage']  ? "'" . $analytics['conversation_stage'] . "'" : 'NULL';
+            $humanTriggerSql     = $analytics['human_trigger']       ? "'" . $analytics['human_trigger'] . "'"      : 'NULL';
+            $visitorTypeSql      = "'" . ($analytics['visitor_type'] ?? 'unknown') . "'";
 
             $db->exec("
                 UPDATE conversations SET
@@ -609,7 +613,8 @@ class ChatController
                     latest_frustration        = {$latestFrustSql},
                     latest_lead_intent        = {$latestLeadIntSql},
                     latest_conversation_stage = {$latestStageSql},
-                    needs_human               = {$needsHumanInt}
+                    needs_human               = {$needsHumanInt},
+                    visitor_type              = {$visitorTypeSql}
                 WHERE id = {$convId}
             ");
 

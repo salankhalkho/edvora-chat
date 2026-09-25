@@ -1654,6 +1654,17 @@ class Migrations
         } catch (Throwable $e) {
             error_log('[Migrations] welcome_message update: ' . $e->getMessage());
         }
+
+        // Add visitor_type column to conversations (LLM-detected: prospective / student / unknown)
+        try {
+            $checkVisitorType = $this->db->query("SHOW COLUMNS FROM conversations LIKE 'visitor_type'");
+            if (!$checkVisitorType->fetch()) {
+                $this->db->exec("ALTER TABLE conversations
+                    ADD COLUMN visitor_type ENUM('unknown','prospective','student') DEFAULT 'unknown' AFTER needs_human;");
+            }
+        } catch (Throwable $e) {
+            error_log('[Migrations] conversations.visitor_type: ' . $e->getMessage());
+        }
     }
 }
 
