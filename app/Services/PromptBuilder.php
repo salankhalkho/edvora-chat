@@ -229,6 +229,7 @@ OUTPUT FORMAT (Strict JSON)
 Respond ONLY with a valid JSON object matching this exact schema:
 {
   "intent": "b",
+  "intent_explanation": "Short reason to choose the specific intent",
   "bubble_1": "Direct factual answer, or null if only triggering a form or catalog",
   "bubble_2": "Contextual offer question, or null",
   "lead_form_trigger": null | "counselor_callback" | "brochure" | "campus_tour" | "scholarship_calculator",

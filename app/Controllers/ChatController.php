@@ -320,6 +320,7 @@ class ChatController
             $dbMessageContent  = null;
             $followUpMessage   = null;
             $parsedIntent      = 'b';
+            $intentExplanation = null;
             $rawTriggerType    = null;
             $rawProgramTrigger = null;
 
@@ -340,6 +341,7 @@ class ChatController
 
             if (is_array($parsed)) {
                 $parsedIntent = strtolower(trim($parsed['intent'] ?? 'b'));
+                $intentExplanation = !empty($parsed['intent_explanation']) ? trim($parsed['intent_explanation']) : null;
                 $bubble1 = isset($parsed['bubble_1']) ? ($parsed['bubble_1'] !== null ? trim($parsed['bubble_1']) : null) : (isset($parsed['response']) && $parsed['response'] !== null ? trim($parsed['response']) : null);
                 $bubble2 = isset($parsed['bubble_2']) ? ($parsed['bubble_2'] !== null ? trim($parsed['bubble_2']) : null) : (isset($parsed['follow_up']) && $parsed['follow_up'] !== null ? trim($parsed['follow_up']) : null);
 
@@ -552,34 +554,35 @@ class ChatController
                         conversation_id, organization_id, role, content,
                         knowledge_sources_used, tokens_used,
                         sentiment, emotion, frustration, conversation_trend,
-                        intent_label, conversation_stage, lead_intent, needs_human,
+                        intent_label, intent_explanation, conversation_stage, lead_intent, needs_human,
                         is_fallback, source,
                         created_at
                     ) VALUES (
                         :conv_id, :org_id, 'assistant', :content,
                         :sources, :tokens,
                         :sentiment, :emotion, :frustration, :conv_trend,
-                        :intent_label, :conv_stage, :lead_intent, :needs_human,
+                        :intent_label, :intent_explanation, :conv_stage, :lead_intent, :needs_human,
                         :is_fallback, :source,
                         NOW()
                     )
                 ");
                 $stmtAiMsg->execute([
-                    ':conv_id'     => $convId,
-                    ':org_id'      => $orgId,
-                    ':content'     => !empty($dbMessageContent) ? $dbMessageContent : $aiResponseText,
-                    ':sources'     => json_encode($sourceIdsUsed),
-                    ':tokens'      => $tokensUsed,
-                    ':sentiment'   => $analytics['sentiment'],
-                    ':emotion'     => $analytics['emotion'],
-                    ':frustration' => $analytics['frustration'],
-                    ':conv_trend'  => $analytics['conversation_trend'],
-                    ':intent_label'=> $analytics['intent_label'],
-                    ':conv_stage'  => $analytics['conversation_stage'],
-                    ':lead_intent' => $analytics['lead_intent'],
-                    ':needs_human' => $analytics['needs_human'],
-                    ':is_fallback' => $isFallback,
-                    ':source'      => $msgSource,
+                    ':conv_id'            => $convId,
+                    ':org_id'             => $orgId,
+                    ':content'            => !empty($dbMessageContent) ? $dbMessageContent : $aiResponseText,
+                    ':sources'            => json_encode($sourceIdsUsed),
+                    ':tokens'             => $tokensUsed,
+                    ':sentiment'          => $analytics['sentiment'],
+                    ':emotion'            => $analytics['emotion'],
+                    ':frustration'        => $analytics['frustration'],
+                    ':conv_trend'         => $analytics['conversation_trend'],
+                    ':intent_label'       => $analytics['intent_label'],
+                    ':intent_explanation' => $intentExplanation,
+                    ':conv_stage'         => $analytics['conversation_stage'],
+                    ':lead_intent'        => $analytics['lead_intent'],
+                    ':needs_human'        => $analytics['needs_human'],
+                    ':is_fallback'        => $isFallback,
+                    ':source'             => $msgSource,
                 ]);
             }
 

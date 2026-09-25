@@ -1665,6 +1665,17 @@ class Migrations
         } catch (Throwable $e) {
             error_log('[Migrations] conversations.visitor_type: ' . $e->getMessage());
         }
+
+        // Add intent_explanation column to messages (LLM-generated explanation for classified intent)
+        try {
+            $checkIntentExpl = $this->db->query("SHOW COLUMNS FROM messages LIKE 'intent_explanation'");
+            if (!$checkIntentExpl->fetch()) {
+                $this->db->exec("ALTER TABLE messages
+                    ADD COLUMN intent_explanation TEXT NULL AFTER intent_label;");
+            }
+        } catch (Throwable $e) {
+            error_log('[Migrations] messages.intent_explanation: ' . $e->getMessage());
+        }
     }
 }
 

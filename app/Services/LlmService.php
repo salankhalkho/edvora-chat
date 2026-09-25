@@ -160,16 +160,19 @@ class LlmService
                     'type'                 => 'object',
                     'additionalProperties' => false,
                     'required'             => [
-                        'intent', 'bubble_1', 'bubble_2', 'lead_form_trigger', 'program_trigger',
-                        'sentiment', 'emotion', 'frustration', 'conversation_trend',
+                        'intent', 'intent_explanation', 'bubble_1', 'bubble_2', 'lead_form_trigger', 'human_trigger', 'program_trigger',
+                        'visitor_type', 'sentiment', 'emotion', 'frustration', 'conversation_trend',
                         'conversation_stage', 'lead_intent', 'needs_human'
                     ],
                     'properties' => [
                         'intent'             => ['type' => 'string'],
+                        'intent_explanation' => ['type' => ['string', 'null']],
                         'bubble_1'           => ['type' => ['string', 'null']],
                         'bubble_2'           => ['type' => ['string', 'null']],
                         'lead_form_trigger'  => ['type' => ['string', 'null']],
+                        'human_trigger'      => ['type' => ['string', 'null']],
                         'program_trigger'    => ['type' => ['string', 'null']],
+                        'visitor_type'       => ['type' => ['string', 'null']],
                         'sentiment'          => ['type' => 'string'],
                         'emotion'            => ['type' => 'string'],
                         'frustration'        => ['type' => 'number'],
