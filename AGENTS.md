@@ -154,17 +154,22 @@ To prevent command errors, quote parsing failures, or authentication issues when
   ssh -i "C:/Users/Salan Khalkho/.ssh/id_ed25519" -o StrictHostKeyChecking=no critical@166.1.2.112 "echo '<SQL QUERY>' | sudo mariadb edvora_chat"
   ```
 
-### 2. PowerShell Quoting & Nested Escaping
-* In PowerShell, nested double quotes (`"`) and `$` symbols are evaluated locally before being sent over SSH.
-* **Standard Pattern:** Wrap the outer SSH payload in double quotes and the inner SQL in single quotes:
+### 2. The Heredoc Pattern (MANDATORY for Complex or Multi-line Queries)
+* In Windows PowerShell, nested quotes (`"`, `'`, `\"`) and special characters (`$`, `\`) get stripped or misinterpreted before reaching SSH, resulting in unexpected EOF or syntax errors.
+* **Preferred Heredoc Pattern:** Pipe SQL using an unquoted/single-quoted remote Heredoc `cat << 'EOF' | sudo mariadb edvora_chat`:
   ```powershell
-  ssh -i "C:/Users/Salan Khalkho/.ssh/id_ed25519" -o StrictHostKeyChecking=no critical@166.1.2.112 "echo 'SELECT id, name, provider, model_name FROM llm_providers;' | sudo mariadb edvora_chat"
+  ssh -i "C:/Users/Salan Khalkho/.ssh/id_ed25519" -o BatchMode=yes -o StrictHostKeyChecking=no critical@166.1.2.112 "cat << 'EOF' | sudo mariadb edvora_chat
+  SELECT value_text FROM platform_config WHERE key_name = 'master_prompt';
+  EOF"
   ```
-* Avoid inline `-e "SELECT ... WHERE col = '...'"` patterns that mix multiple quote types in Windows PowerShell.
+* This completely isolates the SQL from PowerShell quote manipulation.
 
 ### 3. Verify Schema Columns First
-* Always run `DESCRIBE <table>` or check `app/Database/Migrations.php` before querying.
-* Example: `llm_providers` uses `model_name` (not `model`), `api_key_encrypted` (not `api_key`).
+* Always run `DESCRIBE <table>` or check `app/Database/Migrations.php` before querying to avoid column guessing.
+* Common non-standard column naming conventions in `edvora_chat`:
+  * `platform_config`: Uses `key_name` and `value_text` (NOT `key` / `value`, `config_key` / `config_value`).
+  * `llm_providers`: Uses `model_name` (not `model`), `api_key_encrypted` (not `api_key`).
+  * `messages`: Uses `role` (not `sender`), `content` (not `message`).
 
 ### 4. Tool Execution Timeout
 * Set `WaitMsBeforeAsync: 8000` on SSH commands to receive synchronous execution results and prevent unnecessary background task scheduling.
