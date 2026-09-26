@@ -389,10 +389,11 @@ class ChatController
                             str_contains($lastOfferText, 'call') || str_contains($lastOfferText, 'callback') ||
                             str_contains($lastOfferText, 'counselor') || str_contains($lastOfferText, 'staff');
 
-            if ($parsedIntent === 'a' || ($isAffirmative && $prevHadOffer)) {
-                $parsedIntent = 'a';
+            if ($parsedIntent === 'accepting_offer' || $parsedIntent === 'a' || ($isAffirmative && $prevHadOffer)) {
+                $parsedIntent = 'accepting_offer';
                 $aiResponseText = null;
                 $followUpMessage = null;
+                $analytics['intent_label'] = 'ACCEPTING_OFFER';
 
                 if (empty($rawTriggerType)) {
                     if (str_contains($lastOfferText, 'tour') || str_contains($lastOfferText, 'visit')) {
@@ -414,8 +415,8 @@ class ChatController
             }
 
             // [c] SEEKING_CATALOGUE: Interactive catalog triggers with clean intro bubble and enriched transcript
-            if ($parsedIntent === 'c' || (!empty($rawProgramTrigger) && $rawProgramTrigger !== 'null')) {
-                $parsedIntent = 'c';
+            if ($parsedIntent === 'seeking_catalogue' || $parsedIntent === 'c' || (!empty($rawProgramTrigger) && $rawProgramTrigger !== 'null')) {
+                $parsedIntent = 'seeking_catalogue';
                 $followUpMessage = null;
 
                 $catalogFilter = 'all';
@@ -458,27 +459,28 @@ class ChatController
                     $dbMessageContent = $aiResponseText;
                 }
 
-                $analytics['intent_label'] = 'c';
+                $analytics['intent_label'] = 'SEEKING_CATALOGUE';
                 if (empty($analytics['conversation_stage'])) {
                     $analytics['conversation_stage'] = 'discovery';
                 }
             }
 
             // [g] COMPLAINT_OR_STATUS_CHECK: Politely ask to connect with appropriate staff
-            if ($parsedIntent === 'g') {
+            if ($parsedIntent === 'complaint_or_status' || $parsedIntent === 'complaint_or_status_check' || $parsedIntent === 'g') {
                 $aiResponseText = "Do you want me to connect you to the appropriate staff to get you the correct information or pass along your suggestion/complaint?";
                 $followUpMessage = null;
                 $leadTriggerPayload = null;
+                $analytics['intent_label'] = 'COMPLAINT_OR_STATUS';
             }
 
             // [e] EMOTIONAL_DISTRESS & [f] WANTS_HUMAN: Escalate directly
-            if ($parsedIntent === 'e' || $parsedIntent === 'f') {
+            if ($parsedIntent === 'emotional_distress' || $parsedIntent === 'e' || $parsedIntent === 'wants_human' || $parsedIntent === 'f') {
                 $analytics['needs_human'] = 1;
                 $analytics['frustration'] = max($analytics['frustration'] ?? 0.85, 0.85);
             }
 
             // [h] OUT_OF_SCOPE & [i] SENSITIVE_OR_HIGH_RISK: No offers
-            if ($parsedIntent === 'h' || $parsedIntent === 'i') {
+            if ($parsedIntent === 'out_of_scope' || $parsedIntent === 'h' || $parsedIntent === 'sensitive_or_high_risk' || $parsedIntent === 'i') {
                 $followUpMessage = null;
                 $leadTriggerPayload = null;
             }
@@ -486,7 +488,7 @@ class ChatController
             // Cadence Gate & Cardinal Rules on bubble_2 (follow_up_message):
             if (!empty($followUpMessage)) {
                 $programKnown = !empty($activeProgramData['course_name']);
-                $isEscalation = ($parsedIntent === 'e' || $parsedIntent === 'f');
+                $isEscalation = in_array($parsedIntent, ['emotional_distress', 'wants_human', 'e', 'f'], true);
 
                 // Cardinal Rule 1: No proactive offers without program interest (except escalation e & f)
                 if (!$programKnown && !$isEscalation) {
