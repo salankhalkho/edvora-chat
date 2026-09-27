@@ -95,8 +95,8 @@ class LeadController
         $leadId = (int)$db->lastInsertId();
 
         // Update visitor session status to lead_converted (Conversion Engine)
-        $leadSessionId = trim((string)($body['session_id'] ?? ''));
-        $leadVisitorId = trim((string)($body['visitor_id'] ?? ''));
+        $leadSessionId = trim((string)($request->get('session_id') ?? ''));
+        $leadVisitorId = trim((string)($request->get('visitor_id') ?? ''));
         if (!empty($leadSessionId)) {
             try {
                 $db->prepare("UPDATE visitor_sessions SET conversion_status = 'lead_converted', converted_at = NOW() WHERE session_id = :sid")->execute([':sid' => $leadSessionId]);
