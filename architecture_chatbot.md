@@ -530,6 +530,19 @@ Upon loading, `widget.js`:
 - **Zero-Text Rendering Handler:** When `response` is `null` and an interactive payload (`lead_capture_trigger` or `program_catalog`) is present, the widget skips rendering an empty speech bubble and presents the interactive modal/card immediately.
 - **Action Badges in Header/Footer:** Badges for *"Download Syllabus"*, *"Book Campus Tour"*, and *"Request Callback"* are rendered dynamically only if the institution has active records in the database.
 
+### 9.3 Proactive Trigger Engine & Handshake Protocol (`initProactiveTriggerEngine`):
+The widget monitors prospective student on-page behavior and initiates high-relevance conversations autonomously:
+- **Trigger Modalities:**
+  - `high_intent` (Default): Fires after **90+ seconds** on page AND **40%+** scroll depth.
+  - `program_visitors`: Fires after **90+ seconds** on page without scroll requirement.
+  - `exit_intent`: Fires when the cursor approaches the browser top window chrome (`e.clientY <= 10`).
+- **Session Safeguard:** `sessionStorage.getItem('edvora_proactive_fired_' + botToken)` ensures at most **one proactive trigger** per browser session.
+- **Two-Step Handshake (`POST /v1/chat/proactive`):**
+  1. Widget sends only `{ bot_token, visitor_id, url, page_title, trigger_type }`.
+  2. If the URL has an existing summary in `visitor_pages`, the server immediately returns the consultative greeting.
+  3. If missing, server replies `{"status": "need_snippet"}`; widget strips non-content tags, takes the first 1,500 characters of clean DOM text, and re-posts.
+  4. Server summarizes the page, saves it to `visitor_pages`, generates the opening message, logs the session, and the widget automatically opens with the greeting.
+
 ---
 
 ## 10. Database Schema & Data Dictionary
@@ -541,6 +554,7 @@ erDiagram
     organizations ||--o{ knowledge_sources : maintains
     organizations ||--o{ conversations : logs
     organizations ||--o{ leads : captures
+    organizations ||--o{ visitor_pages : registers
 
     chatbots ||--o{ conversations : initiates
     conversations ||--o{ messages : contains
@@ -568,6 +582,16 @@ erDiagram
         boolean lead_capture_enabled
     }
 
+    visitor_pages {
+        int id PK
+        int organization_id FK
+        string url
+        string url_hash UK
+        string page_title
+        string page_type "program | fees | admissions | scholarship | campus | contact | generic"
+        text page_summary
+    }
+
     conversations {
         int id PK
         int organization_id FK
@@ -578,6 +602,9 @@ erDiagram
         int last_offer_turn
         int total_offers_count
         json lead_forms_shown "e.g. ['brochure', 'campus_tour']"
+        boolean proactive_trigger_fired
+        string proactive_page_type
+        string proactive_trigger_type "high_intent | program_visitors | exit_intent"
         string latest_sentiment
         float latest_frustration
         string latest_conversation_stage
@@ -661,7 +688,8 @@ Every turn is recorded in `llm_usage_logs` via [`LlmUsageLogger`](file:///c:/xam
 | [`app/Services/VectorSearchEngine.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/VectorSearchEngine.php) | Executes cosine similarity search over `knowledge_items` with program scoping. |
 | [`app/Services/EmbeddingService.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/EmbeddingService.php) | Generates 1536-dim embeddings via OpenAI API. |
 | [`app/Services/QueryTranslator.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/QueryTranslator.php) | Translates non-English queries to English for retrieval indexing. |
-| [`public/widget.js`](file:///c:/xampp/htdocs/edvora.chat/public/widget.js) | Embeddable front-end client rendering bubbles, triggers, catalog cards, and modals. |
+| [`app/Controllers/ProactiveTriggerController.php`](file:///c:/xampp/htdocs/edvora.chat/app/Controllers/ProactiveTriggerController.php) | Manages active page context registry (`visitor_pages`), 2-step handshake, and generates proactive consultative greetings. |
+| [`public/widget.js`](file:///c:/xampp/htdocs/edvora.chat/public/widget.js) | Embeddable front-end client rendering bubbles, triggers, catalog cards, modals, and proactive triggers engine. |
 
 ### 12.2 Rules for Developers & AI Assistants:
 1. **Never attempt local execution:** There is NO local PHP or MySQL on the development machine. All tests and migrations run on the remote VPS (`166.1.2.112`).

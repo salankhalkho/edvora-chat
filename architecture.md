@@ -229,7 +229,8 @@ Structured academic program records. Source of truth for program data. When crea
 
 | Table | Purpose |
 |---|---|
-| `conversations` | Per-visitor chat session with UTM and lead data |
+| `conversations` | Per-visitor chat session with UTM and lead data, including `proactive_trigger_fired`, `proactive_page_type`, `proactive_trigger_type` |
+| `visitor_pages` | Lightweight autonomous URL registry storing 2-sentence AI summaries and classified page types for proactive triggers |
 | `messages` | Per-turn message log with `knowledge_sources_used` JSON |
 | `leads` | Captured visitor contact details |
 | `jobs` | Background job queue (`type`, `payload`, `status`, `run_at`) |
@@ -241,7 +242,7 @@ Structured academic program records. Source of truth for program data. When crea
 | `subscriptions` | Per-org Razorpay subscription records |
 | `usage_logs` | Monthly per-org usage aggregation |
 | `audit_logs` | Full action audit trail |
-| `widget_customizations` | Fine-grained per-chatbot widget design JSON blob |
+| `widget_customizations` | Fine-grained per-chatbot widget design JSON blob (including `proactive_triggers` config) |
 
 ---
 
@@ -547,7 +548,31 @@ The Edvora Lead Capture Engine operates on a **consultative admissions counselin
 
 ---
 
-## 13. Deployment
+---
+
+## 13. Proactive Triggers & Autonomous Page Context Registry (`visitor_pages`)
+
+Edvora includes an autonomous page context engine and proactive conversational trigger subsystem designed to start high-relevance conversations based on active visitor engagement:
+
+### 13.1 Trigger Modalities (Configured via `widget_customizations.config.proactive_triggers`)
+* **High-Intent Visitors (Default):** Fires when a visitor remains on a webpage for **90+ seconds** AND scrolls down at least **40%** of the page depth.
+* **Program Page Visitors:** Fires when a visitor spends **90+ seconds** on a page regardless of scroll depth.
+* **Exit Intent:** Triggers when the visitor's cursor rapidly approaches the browser top chrome / tab strip (`e.clientY <= 10`).
+* **Session Safeguard:** Tracked in browser `sessionStorage` (`edvora_proactive_fired_{botToken}`) to guarantee the widget only triggers proactively **once per visitor session**.
+
+### 13.2 Two-Step Handshake Protocol (`POST /v1/chat/proactive`)
+To maximize speed and minimize network bandwidth, `widget.js` and `ProactiveTriggerController` execute an efficient handshake:
+1. **Initial Call (URL Only):** `widget.js` sends `{ bot_token, visitor_id, url, page_title, trigger_type }`.
+2. **Registry Lookup (`visitor_pages`):**
+   * If the URL has already been summarized in `visitor_pages`, the server immediately fetches the cached 2-sentence summary.
+   * If the URL is not found, the server responds with `{ "status": "need_snippet" }`.
+3. **Snippet Handshake:** The widget extracts the first 1,500 characters of clean visible text from the webpage DOM and re-sends. The server calls `LlmService` to generate a 2-sentence page summary, classifies the `page_type`, and persists it to `visitor_pages`.
+4. **Contextual Opening Generation:** The LLM generates a single warm, consultative admissions greeting (under 30 words) referencing the student's active page context.
+5. **Persistence:** Logs the session into `conversations` with `proactive_trigger_fired = 1`, `proactive_page_type`, and `proactive_trigger_type`.
+
+---
+
+## 14. Deployment
 
 All changes are deployed using the master script:
 
@@ -567,7 +592,7 @@ Steps:
 
 ---
 
-## 14. Key Service File Map
+## 15. Key Service File Map
 
 > 📘 **Chatbot Architecture:** For comprehensive details on each chat service, consult [**`architecture_chatbot.md` § 12**](file:///c:/xampp/htdocs/edvora.chat/architecture_chatbot.md#12-developer--ai-coding-assistant-quickstart-guide).
 
@@ -590,13 +615,14 @@ Steps:
 | [`app/Controllers/KnowledgeController.php`](file:///c:/xampp/htdocs/edvora.chat/app/Controllers/KnowledgeController.php) | REST API for knowledge source CRUD and ingestion. |
 | [`app/Controllers/ProgramController.php`](file:///c:/xampp/htdocs/edvora.chat/app/Controllers/ProgramController.php) | REST API for programs — triggers auto-embedding background jobs on save. |
 | [`app/Controllers/ChatController.php`](file:///c:/xampp/htdocs/edvora.chat/app/Controllers/ChatController.php) | Chat turn orchestrator: embedding $\rightarrow$ retrieval $\rightarrow$ prompt $\rightarrow$ LLM $\rightarrow$ analytics $\rightarrow$ response. |
-| [`public/widget.js`](file:///c:/xampp/htdocs/edvora.chat/public/widget.js) | Embeddable front-end client rendering bubbles, triggers, catalog cards, and modals. |
+| [`app/Controllers/ProactiveTriggerController.php`](file:///c:/xampp/htdocs/edvora.chat/app/Controllers/ProactiveTriggerController.php) | Active page context registry & proactive trigger greeting generator (`POST /v1/chat/proactive`). |
+| [`public/widget.js`](file:///c:/xampp/htdocs/edvora.chat/public/widget.js) | Embeddable front-end client rendering bubbles, triggers, catalog cards, modals, and proactive triggers engine. |
 | [`app/Database/Migrations.php`](file:///c:/xampp/htdocs/edvora.chat/app/Database/Migrations.php) | Idempotent schema creation and ALTER TABLE migrations. |
 | [`workers/job_runner.php`](file:///c:/xampp/htdocs/edvora.chat/workers/job_runner.php) | Supervisor background worker — handles background chunking, embedding, and URL crawling. |
 
 ---
 
-## 15. UI / Branding Rules
+## 16. UI / Branding Rules
 
 All UI must follow [`BRANDING_GUIDELINES.md`](file:///c:/xampp/htdocs/edvora.chat/BRANDING_GUIDELINES.md) and link [`theme-branding.css`](file:///c:/xampp/htdocs/edvora.chat/theme-branding.css):
 
