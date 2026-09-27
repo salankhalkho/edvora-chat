@@ -419,11 +419,11 @@
 
     <!-- SUBTAB 2: Embed Code -->
     <div id="subtabViewEmbed" style="display: none; width: 100%; box-sizing: border-box;">
-            <div style="width: 100%; margin: 0; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box;">
+            <div style="max-width: 1000px; width: 100%; margin: 0; display: flex; flex-direction: column; gap: 24px; box-sizing: border-box;">
                 
-                <!-- Main Script Snippet Card (Full Width) -->
-                <div class="brand-card" style="width: 100%; box-sizing: border-box; background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.04);">
-                    <div class="brand-panel-header" style="background: #F9FCFB; border-bottom: 1.5px solid #E6F0EC; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between;">
+                <!-- Section Header Row (Direct, without nested boundary) -->
+                <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <span style="font-size: 16px;">💻</span>
                             <div>
@@ -433,35 +433,32 @@
                         </div>
                         <span style="background: #E6F7D2; color: #063D3B; border: 1px solid #C8FF63; font-size: 10.5px; font-weight: 700; padding: 3px 10px; border-radius: 20px;">Async &amp; Lightweight (&lt;25KB)</span>
                     </div>
-                    <div style="padding: 24px; box-sizing: border-box; width: 100%;">
-                        <div style="max-width: 950px; width: 100%; margin: 0; box-sizing: border-box;">
 
-                        <p style="font-size: 13px; color: #4B635E; margin: 0 0 14px 0; line-height: 1.6;">
-                            Add your AI chatbot to any website by copying the code snippet below and pasting it just before the closing <code>&lt;/body&gt;</code> tag on your web pages:
-                        </p>
-                        <div style="position: relative; background: #063D3B; border-radius: 8px; padding: 18px 22px; color: #C8FF63; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; font-size: 12.5px; border: 1px solid #032827; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);">
-                            <button type="button" class="brand-btn-secondary" id="copyScriptBtn" onclick="copyEmbedScript()" style="position: absolute; top: 12px; right: 12px; height: 32px; padding: 0 14px; font-size: 11.5px; background: #FFFFFF; color: #063D3B; border: 1px solid #C8FF63; border-radius: 6px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.15); transition: all 0.15s ease;">
-                                <span>📋</span> <span>Copy Code</span>
-                            </button>
-                            <div id="embedCodeBox" style="word-break: break-all; line-height: 1.7; padding-right: 110px; user-select: all;">
-                                &lt;script src="https://edvora.chat/widget.js" data-bot-token="..." async&gt;&lt;/script&gt;
-                            </div>
+                    <p style="font-size: 13px; color: #4B635E; margin: 0 0 14px 0; line-height: 1.6;">
+                        Add your AI chatbot to any website by copying the code snippet below and pasting it just before the closing <code>&lt;/body&gt;</code> tag on your web pages:
+                    </p>
+                    <div style="position: relative; background: #063D3B; border-radius: 8px; padding: 18px 22px; color: #C8FF63; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; font-size: 12.5px; border: 1px solid #032827; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);">
+                        <button type="button" class="brand-btn-secondary" id="copyScriptBtn" onclick="copyEmbedScript()" style="position: absolute; top: 12px; right: 12px; height: 32px; padding: 0 14px; font-size: 11.5px; background: #FFFFFF; color: #063D3B; border: 1px solid #C8FF63; border-radius: 6px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.15); transition: all 0.15s ease;">
+                            <span>📋</span> <span>Copy Code</span>
+                        </button>
+                        <div id="embedCodeBox" style="word-break: break-all; line-height: 1.7; padding-right: 110px; user-select: all;">
+                            &lt;script src="https://edvora.chat/widget.js" data-bot-token="..." async&gt;&lt;/script&gt;
                         </div>
+                    </div>
 
-                        <!-- Quick Verification Toolbar -->
-                        <div style="margin-top: 18px; padding-top: 16px; border-top: 1px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
-                            <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #527570;">
-                                <span>🔑</span>
-                                <span>Your Bot Token: <strong id="embedBotTokenDisplay" style="font-family: monospace; color: #063D3B; background: #F4FAF7; padding: 2px 6px; border-radius: 4px; border: 1px solid #D1E5DE;">...</strong></span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <button type="button" onclick="openStandaloneTestChat()" class="brand-btn-secondary" style="height: 30px; padding: 0 12px; font-size: 11px; font-weight: 700; border-radius: 6px; background: #F4FAF7; border: 1.5px solid #D1E5DE; color: #063D3B; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
-                                    <span>🧪</span> Test Bot Live
-                                </button>
-                                <a href="#settings" onclick="switchNavTab('org-settings')" style="text-decoration: none; font-size: 11.5px; color: #047857; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
-                                    <span>🛡️ Whitelist Domains &rarr;</span>
-                                </a>
-                            </div>
+                    <!-- Quick Verification Toolbar -->
+                    <div style="margin-top: 18px; padding-top: 16px; border-top: 1px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                        <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #527570;">
+                            <span>🔑</span>
+                            <span>Your Bot Token: <strong id="embedBotTokenDisplay" style="font-family: monospace; color: #063D3B; background: #F4FAF7; padding: 2px 6px; border-radius: 4px; border: 1px solid #D1E5DE;">...</strong></span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <button type="button" onclick="openStandaloneTestChat()" class="brand-btn-secondary" style="height: 30px; padding: 0 12px; font-size: 11px; font-weight: 700; border-radius: 6px; background: #F4FAF7; border: 1.5px solid #D1E5DE; color: #063D3B; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                                <span>🧪</span> Test Bot Live
+                            </button>
+                            <a href="#settings" onclick="switchNavTab('org-settings')" style="text-decoration: none; font-size: 11.5px; color: #047857; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                                <span>🛡️ Whitelist Domains &rarr;</span>
+                            </a>
                         </div>
                     </div>
                 </div>
