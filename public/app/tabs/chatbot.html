@@ -694,35 +694,78 @@
                             </div>
                         </div>
 
-                        <!-- Toggle Switch -->
-                        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
-                            <label style="position: relative; display: inline-block; width: 50px; height: 26px; cursor: pointer;">
-                                <input type="checkbox" id="toggleExitIntent" checked onchange="onExitIntentToggle(this)" style="opacity: 0; width: 0; height: 0;">
-                                <span class="exit-intent-slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #CBD5E1; transition: .3s; border-radius: 34px;"></span>
+                        <!-- Toggle Switch with ON/OFF inside -->
+                        <div style="display: flex; align-items: center;">
+                            <label style="position: relative; display: inline-block; width: 68px; height: 30px; cursor: pointer; user-select: none;">
+                                <input type="checkbox" id="toggleExitIntent" checked onchange="onExitIntentToggle(this)" style="opacity: 0; width: 0; height: 0; position: absolute;">
+                                <span class="exit-intent-slider">
+                                    <span class="toggle-text-on">ON</span>
+                                    <span class="toggle-text-off">OFF</span>
+                                    <span class="toggle-knob"></span>
+                                </span>
                             </label>
-                            <span id="exitIntentStateText" style="font-size: 11px; font-weight: 700; color: #047857;">On</span>
                         </div>
                     </div>
                 </div>
 
                 <style>
-                    .exit-intent-slider:before {
+                    .exit-intent-slider {
                         position: absolute;
-                        content: "";
-                        height: 20px;
-                        width: 20px;
+                        cursor: pointer;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background-color: #EF4444; /* red when OFF */
+                        transition: .3s ease;
+                        border-radius: 30px;
+                        display: flex;
+                        align-items: center;
+                        overflow: hidden;
+                    }
+                    .toggle-knob {
+                        position: absolute;
+                        height: 24px;
+                        width: 24px;
                         left: 3px;
                         bottom: 3px;
-                        background-color: white;
-                        transition: .3s;
+                        background-color: #FFFFFF;
+                        transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1);
                         border-radius: 50%;
-                        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+                        box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+                        z-index: 2;
+                    }
+                    .toggle-text-on,
+                    .toggle-text-off {
+                        position: absolute;
+                        font-size: 11px;
+                        font-weight: 800;
+                        letter-spacing: 0.5px;
+                        color: #FFFFFF;
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                        line-height: 1;
+                        pointer-events: none;
+                        transition: opacity .2s ease;
+                    }
+                    .toggle-text-on {
+                        left: 10px;
+                        opacity: 0;
+                    }
+                    .toggle-text-off {
+                        right: 9px;
+                        opacity: 1;
                     }
                     input:checked + .exit-intent-slider {
-                        background-color: #10B981;
+                        background-color: #10B981; /* green when ON */
                     }
-                    input:checked + .exit-intent-slider:before {
-                        transform: translateX(24px);
+                    input:checked + .exit-intent-slider .toggle-knob {
+                        transform: translateX(38px);
+                    }
+                    input:checked + .exit-intent-slider .toggle-text-on {
+                        opacity: 1;
+                    }
+                    input:checked + .exit-intent-slider .toggle-text-off {
+                        opacity: 0;
                     }
                     .proactive-trigger-card:hover {
                         border-color: #063D3B !important;
@@ -732,7 +775,6 @@
                 <script>
                     function onExitIntentToggle(el) {
                         const badge = document.getElementById('exitIntentBadge');
-                        const txt = document.getElementById('exitIntentStateText');
                         if (el.checked) {
                             if (badge) {
                                 badge.textContent = 'Active';
@@ -740,20 +782,12 @@
                                 badge.style.color = '#063D3B';
                                 badge.style.borderColor = '#C8FF63';
                             }
-                            if (txt) {
-                                txt.textContent = 'On';
-                                txt.style.color = '#047857';
-                            }
                         } else {
                             if (badge) {
                                 badge.textContent = 'Disabled';
                                 badge.style.background = '#F1F5F9';
                                 badge.style.color = '#475569';
                                 badge.style.borderColor = '#E2E8F0';
-                            }
-                            if (txt) {
-                                txt.textContent = 'Off';
-                                txt.style.color = '#648781';
                             }
                         }
                     }
