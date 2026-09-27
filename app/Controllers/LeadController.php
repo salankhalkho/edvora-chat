@@ -94,6 +94,20 @@ class LeadController
         ]);
         $leadId = (int)$db->lastInsertId();
 
+        // Update visitor session status to lead_converted (Conversion Engine)
+        $leadSessionId = trim((string)($body['session_id'] ?? ''));
+        $leadVisitorId = trim((string)($body['visitor_id'] ?? ''));
+        if (!empty($leadSessionId)) {
+            try {
+                $db->prepare("UPDATE visitor_sessions SET conversion_status = 'lead_converted', converted_at = NOW() WHERE session_id = :sid")->execute([':sid' => $leadSessionId]);
+                $db->prepare("UPDATE leads SET session_id = :sid WHERE id = :lid")->execute([':sid' => $leadSessionId, ':lid' => $leadId]);
+            } catch (Throwable $e) {}
+        } elseif (!empty($leadVisitorId)) {
+            try {
+                $db->prepare("UPDATE visitor_sessions SET conversion_status = 'lead_converted', converted_at = NOW() WHERE visitor_id = :vid AND organization_id = :oid")->execute([':vid' => $leadVisitorId, ':oid' => $orgId]);
+            } catch (Throwable $e) {}
+        }
+
         // Update conversation visitor details if conversation_id provided
         if ($conversationId > 0) {
             $stmtUpdateConv = $db->prepare("

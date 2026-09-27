@@ -1,0 +1,629 @@
+<!-- Dedicated Visitor Session Journeys Command Frame (Matching Campus Tours Scheduling & Brand Guidelines) -->
+<div id="view-session-journeys" class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
+    
+    <!-- Top Control Bar (Inside Big Card) -->
+    <div class="ops-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 24px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important;">
+        <div class="ops-dash-title-group" style="display: flex !important; align-items: center !important; gap: 12px !important;">
+            <button type="button" onclick="switchNavTab('org-settings')" class="brand-btn-secondary" style="height: 32px; padding: 0 11px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; border-radius: 6px; background: #F4FAF7; border: 1.5px solid #D1E5DE; color: var(--e-teal, #063D3B);" title="Return to Control Panel">
+                &larr; Control Panel
+            </button>
+            <span class="ops-live-dot"></span>
+            <div>
+                <div class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important; letter-spacing: -0.01em !important; line-height: 1.25 !important;">
+                    Visitor Session Journeys &amp; Dwell Analytics
+                </div>
+                <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">
+                    Inspect individual student browsing paths, page-by-page dwell time, campaign attribution, and conversion drop-offs.
+                </div>
+            </div>
+        </div>
+
+        <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
+            <select id="journeyDaysRange" class="brand-input" style="height: 34px; font-size: 11.5px; font-weight: 600; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D1E5DE; color: #063D3B; background: #FFFFFF; cursor: pointer;" onchange="loadSessionJourneys(1)">
+                <option value="30" selected>Last 30 Days</option>
+                <option value="60">Last 60 Days</option>
+                <option value="90">Last 90 Days</option>
+            </select>
+            <button type="button" onclick="loadSessionJourneys(1)" class="brand-btn-secondary" style="height: 34px; padding: 0 13px; font-size: 11.5px; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border: 1.5px solid #D1E5DE; color: #063D3B;">
+                <span>🔄 Refresh</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Inside the Big Card: Content Area with Info Legend, KPIs, Top Aggregates, Table & Drawer -->
+    <div style="padding: 24px 28px 48px 28px; box-sizing: border-box; width: 100%;">
+        
+        <!-- Conversion Status Explanation & Meaning Legend Box (Prominent & Clear) -->
+        <div style="background: #F0FDF4; border: 1.5px solid #BBF7D0; border-radius: 12px; padding: 14px 18px; margin-bottom: 22px; display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <span style="font-size: 20px; line-height: 1; margin-top: 2px;">💡</span>
+                <div>
+                    <div style="font-size: 12px; font-weight: 800; color: #166534; text-transform: uppercase; letter-spacing: 0.5px;">
+                        Conversion &amp; Visitor Journey Legend
+                    </div>
+                    <div style="font-size: 11.5px; color: #15803D; margin-top: 4px; line-height: 1.5;">
+                        Understand visitor progression across your website and chatbot touchpoints:
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 16px; margin-top: 8px;">
+                        <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px;">
+                            <span style="background: #DCFCE7; color: #166534; border: 1px solid #86EFAC; padding: 2px 8px; border-radius: 12px; font-weight: 700; font-size: 10.5px;">🟢 Lead Converted</span>
+                            <span style="color: #374151;">— Submitted a high-intent inquiry (Prospectus download, Campus Tour booking, Counselor Callback, or Scholarship Evaluation).</span>
+                        </div>
+                        <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px;">
+                            <span style="background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; padding: 2px 8px; border-radius: 12px; font-weight: 700; font-size: 10.5px;">🔵 Chat Engaged</span>
+                            <span style="color: #374151;">— Interacted with the AI chatbot, but has not yet submitted a lead form.</span>
+                        </div>
+                        <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px;">
+                            <span style="background: #F3F4F6; color: #4B5563; border: 1px solid #E5E7EB; padding: 2px 8px; border-radius: 12px; font-weight: 700; font-size: 10.5px;">⚪ Browsing Only</span>
+                            <span style="color: #374151;">— Navigated institutional website pages without triggering a chat or form submission.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="font-size: 11px; color: #4B5563; background: #FFFFFF; border: 1px solid #D1E5DE; border-radius: 8px; padding: 6px 12px; align-self: center;">
+                ⏱️ <strong>Filter:</strong> Visits under 5s filtered out &bull; 60s incremental heartbeats
+            </div>
+        </div>
+
+        <!-- KPI Metrics Ribbon (Inside Big Card) -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+            
+            <div class="ckh-kpi-tile" style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 14px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470;">Total Sessions</div>
+                    <span style="font-size: 18px;">👥</span>
+                </div>
+                <div style="font-size: 24px; font-weight: 800; color: #063D3B;" id="kpiTotalSessions">0</div>
+                <div style="font-size: 11px; color: #648781; margin-top: 2px;" id="kpiSessionsSubtitle">Active visitor journeys</div>
+            </div>
+
+            <div class="ckh-kpi-tile" style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 14px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470;">Avg. Dwell Time</div>
+                    <span style="font-size: 18px;">⏱️</span>
+                </div>
+                <div style="font-size: 24px; font-weight: 800; color: #2563EB;" id="kpiAvgDwell">0s</div>
+                <div style="font-size: 11px; color: #648781; margin-top: 2px;">Time spent per session</div>
+            </div>
+
+            <div class="ckh-kpi-tile" style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 14px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470;">Pages Per Session</div>
+                    <span style="font-size: 18px;">📄</span>
+                </div>
+                <div style="font-size: 24px; font-weight: 800; color: #7C3AED;" id="kpiPagesPerSession">0.0</div>
+                <div style="font-size: 11px; color: #648781; margin-top: 2px;">Average depth of browsing</div>
+            </div>
+
+            <div class="ckh-kpi-tile" style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 14px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470;">Lead Conversion Rate</div>
+                    <span style="font-size: 18px;">🎯</span>
+                </div>
+                <div style="font-size: 24px; font-weight: 800; color: #059669;" id="kpiConversionRate">0%</div>
+                <div style="font-size: 11px; color: #059669; margin-top: 2px;" id="kpiConvertedCount">0 leads captured</div>
+            </div>
+
+        </div>
+
+        <!-- Top Aggregates Strip: Top Visited Pages & Top Exit Drop-offs -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 18px; margin-bottom: 24px;">
+            
+            <!-- Card: Top 5 Most Visited Pages -->
+            <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 16px 20px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <div style="font-size: 13px; font-weight: 700; color: #063D3B; display: flex; align-items: center; gap: 6px;">
+                        <span>🔥</span> Top Visited Pages &amp; Avg. Dwell
+                    </div>
+                    <span style="font-size: 10.5px; color: #648781;">By total visits</span>
+                </div>
+                <div id="topPagesList" style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="font-size: 11.5px; color: #9CA3AF; text-align: center; padding: 12px;">Loading top visited pages...</div>
+                </div>
+            </div>
+
+            <!-- Card: Top 5 Exit / Drop-off Pages -->
+            <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 16px 20px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <div style="font-size: 13px; font-weight: 700; color: #063D3B; display: flex; align-items: center; gap: 6px;">
+                        <span>🚪</span> Top Exit &amp; Drop-off Pages
+                    </div>
+                    <span style="font-size: 10.5px; color: #648781;">Where visitors leave</span>
+                </div>
+                <div id="topExitList" style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="font-size: 11.5px; color: #9CA3AF; text-align: center; padding: 12px;">Loading exit pages...</div>
+                </div>
+            </div>
+
+            <!-- Card: Top Campaign Attribution Sources (VVIP) -->
+            <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 16px 20px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <div style="font-size: 13px; font-weight: 700; color: #063D3B; display: flex; align-items: center; gap: 6px;">
+                        <span>📢</span> Campaign Sources (UTM / Referrer)
+                    </div>
+                    <span style="font-size: 10.5px; color: #648781;">Traffic origin</span>
+                </div>
+                <div id="topSourcesList" style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="font-size: 11.5px; color: #9CA3AF; text-align: center; padding: 12px;">Loading campaign sources...</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Filter & Search Bar for Session Table -->
+        <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 14px 18px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1;">
+                <input type="text" id="journeySearch" placeholder="Search by Session ID, Visitor ID, URL or UTM..." class="brand-input" style="height: 34px; font-size: 11.5px; width: 280px; max-width: 100%; border: 1.5px solid #D1E5DE; border-radius: 6px; padding: 0 12px;" onkeydown="if(event.key==='Enter') loadSessionJourneys(1)" />
+                
+                <select id="journeyStatusFilter" class="brand-input" style="height: 34px; font-size: 11.5px; font-weight: 600; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D1E5DE; color: #063D3B;" onchange="loadSessionJourneys(1)">
+                    <option value="all">All Conversion Statuses</option>
+                    <option value="lead_converted">🟢 Lead Converted Only</option>
+                    <option value="chat_engaged">🔵 Chat Engaged Only</option>
+                    <option value="browsing">⚪ Browsing Only</option>
+                </select>
+                
+                <button type="button" onclick="loadSessionJourneys(1)" class="brand-btn-primary" style="height: 34px; padding: 0 14px; font-size: 11.5px; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                    Filter
+                </button>
+            </div>
+
+            <div style="font-size: 11.5px; color: #648781;" id="journeyResultCount">
+                Showing recent sessions
+            </div>
+        </div>
+
+        <!-- Session List Table -->
+        <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+            <div style="overflow-x: auto; width: 100%;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 11.5px; text-align: left;">
+                    <thead>
+                        <tr style="background: #F8FAF9; border-bottom: 1.5px solid #E6F0EC; color: #4F7470; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;">
+                            <th style="padding: 12px 16px;">Visitor &amp; Session</th>
+                            <th style="padding: 12px 16px;">Started</th>
+                            <th style="padding: 12px 16px;">Total Dwell</th>
+                            <th style="padding: 12px 16px;">Pages</th>
+                            <th style="padding: 12px 16px;">Entry &rarr; Exit Page</th>
+                            <th style="padding: 12px 16px;">Traffic Source</th>
+                            <th style="padding: 12px 16px;">Status</th>
+                            <th style="padding: 12px 16px; text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="journeyTableBody">
+                        <tr>
+                            <td colspan="8" style="padding: 36px 16px; text-align: center; color: #9CA3AF;">
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                    <span style="font-size: 24px;">🧭</span>
+                                    <span>Loading session journeys...</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Bar -->
+            <div id="journeyPagination" style="padding: 12px 18px; border-top: 1.5px solid #E6F0EC; background: #FAFCFB; display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; color: #648781;">
+                <span id="journeyPaginationInfo">Page 1 of 1</span>
+                <div style="display: flex; gap: 8px;" id="journeyPaginationBtns"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Step-by-Step Chronological Journey Drawer / Modal -->
+    <div id="journeyDrawerBackdrop" style="display: none; position: fixed; inset: 0; background: rgba(6, 61, 59, 0.45); backdrop-filter: blur(2px); z-index: 99999; align-items: center; justify-content: flex-end;" onclick="if(event.target===this) closeJourneyDrawer()">
+        <div id="journeyDrawer" style="width: 540px; max-width: 95vw; height: 100vh; background: #FFFFFF; box-shadow: -10px 0 35px rgba(0,0,0,0.2); display: flex; flex-direction: column; box-sizing: border-box; overflow: hidden; animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1);">
+            
+            <!-- Drawer Header -->
+            <div style="padding: 18px 24px; border-bottom: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; background: #F8FAF9;">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 18px;">🧭</span>
+                        <h3 style="font-size: 15px; font-weight: 800; color: #063D3B; margin: 0;" id="drawerTitle">Visitor Journey</h3>
+                    </div>
+                    <div style="font-size: 11px; color: #648781; margin-top: 2px;" id="drawerSubtitle">Chronological step-by-step path</div>
+                </div>
+                <button type="button" onclick="closeJourneyDrawer()" style="background: none; border: none; font-size: 20px; line-height: 1; color: #648781; cursor: pointer; padding: 4px 8px; border-radius: 6px;">&times;</button>
+            </div>
+
+            <!-- Drawer Body -->
+            <div style="flex: 1; overflow-y: auto; padding: 22px 24px;" id="drawerContent">
+                <div style="text-align: center; color: #9CA3AF; padding: 32px 0;">Loading journey timeline...</div>
+            </div>
+
+            <!-- Drawer Footer -->
+            <div style="padding: 14px 24px; border-top: 1.5px solid #E6F0EC; background: #FAFCFB; display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 11px; color: #648781;">Full step audit &bull; High precision</span>
+                <button type="button" onclick="closeJourneyDrawer()" class="brand-btn-secondary" style="height: 32px; padding: 0 14px; font-size: 11px; font-weight: 700; border-radius: 6px; cursor: pointer; border: 1.5px solid #D1E5DE;">
+                    Close Inspector
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes slideInRight {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+.journey-step-node {
+    position: relative;
+    padding-left: 36px;
+    padding-bottom: 24px;
+}
+.journey-step-node:last-child {
+    padding-bottom: 0;
+}
+.journey-step-node::before {
+    content: '';
+    position: absolute;
+    left: 13px;
+    top: 24px;
+    bottom: 0;
+    width: 2px;
+    background: #E5E7EB;
+}
+.journey-step-node:last-child::before {
+    display: none;
+}
+.journey-step-badge {
+    position: absolute;
+    left: 0;
+    top: 2px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #F4FAF7;
+    border: 2px solid #10B981;
+    color: #063D3B;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+}
+.journey-step-card {
+    background: #FFFFFF;
+    border: 1.5px solid #E6F0EC;
+    border-radius: 10px;
+    padding: 12px 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+    transition: border-color 0.15s ease;
+}
+.journey-step-card:hover {
+    border-color: #A7F3D0;
+}
+</style>
+
+<script>
+(function() {
+    let currentJourneysPage = 1;
+
+    async function loadSessionJourneys(page = 1) {
+        currentJourneysPage = page;
+        const days = document.getElementById('journeyDaysRange')?.value || '30';
+        const status = document.getElementById('journeyStatusFilter')?.value || 'all';
+        const search = document.getElementById('journeySearch')?.value.trim() || '';
+        const tbody = document.getElementById('journeyTableBody');
+        const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token') || '';
+
+        if (!token) return;
+
+        try {
+            const url = `/v1/analytics/session-journeys?days=${days}&status=${encodeURIComponent(status)}&search=${encodeURIComponent(search)}&page=${page}&limit=25`;
+            const res = await fetch(url, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await res.json();
+
+            if (data.status !== 'success' || !data.data) {
+                if (tbody) tbody.innerHTML = `<tr><td colspan="8" style="padding: 24px; text-align: center; color: #EF4444;">Failed to load journeys: ${data.message || 'Unknown error'}</td></tr>`;
+                return;
+            }
+
+            const payload = data.data;
+            const summary = payload.summary || {};
+            const topPages = payload.top_pages || [];
+            const topExits = payload.top_exit_pages || [];
+            const topSources = payload.top_sources || [];
+            const sessions = payload.sessions || [];
+            const pagination = payload.pagination || {};
+
+            // 1. Update KPI tiles
+            document.getElementById('kpiTotalSessions').innerText = Number(summary.total_sessions || 0).toLocaleString();
+            document.getElementById('kpiSessionsSubtitle').innerText = `${summary.days || 30} days activity window`;
+            document.getElementById('kpiAvgDwell').innerText = summary.avg_dwell_formatted || '0s';
+            document.getElementById('kpiPagesPerSession').innerText = summary.avg_pages_per_session || '0.0';
+            document.getElementById('kpiConversionRate').innerText = (summary.conversion_rate || 0) + '%';
+            document.getElementById('kpiConvertedCount').innerText = `${summary.count_lead_converted || 0} leads converted`;
+
+            // 2. Render Top Visited Pages
+            const topPagesEl = document.getElementById('topPagesList');
+            if (topPagesEl) {
+                if (!topPages.length) {
+                    topPagesEl.innerHTML = '<div style="font-size: 11.5px; color: #9CA3AF; text-align: center; padding: 10px;">No page views recorded in this period.</div>';
+                } else {
+                    topPagesEl.innerHTML = topPages.map((p, idx) => `
+                        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; padding: 6px 0; border-bottom: 1px solid #F3F4F6;">
+                            <div style="min-width: 0; flex: 1; padding-right: 12px;">
+                                <div style="font-weight: 700; color: #063D3B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${p.page_title}">
+                                    ${idx + 1}. ${escapeHtml(p.page_title)}
+                                </div>
+                                <div style="font-size: 10.5px; color: #648781; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    ${escapeHtml(p.url)}
+                                </div>
+                            </div>
+                            <div style="text-align: right; flex-shrink: 0;">
+                                <span style="font-weight: 800; color: #2563EB;">${Number(p.visit_count).toLocaleString()} visits</span>
+                                <div style="font-size: 10px; color: #9CA3AF;">⏱️ ${p.avg_dwell_formatted}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            // 3. Render Top Exit Pages
+            const topExitEl = document.getElementById('topExitList');
+            if (topExitEl) {
+                if (!topExits.length) {
+                    topExitEl.innerHTML = '<div style="font-size: 11.5px; color: #9CA3AF; text-align: center; padding: 10px;">No exit pages recorded yet.</div>';
+                } else {
+                    topExitEl.innerHTML = topExits.map((p, idx) => `
+                        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; padding: 6px 0; border-bottom: 1px solid #F3F4F6;">
+                            <div style="min-width: 0; flex: 1; padding-right: 12px;">
+                                <div style="font-weight: 600; color: #063D3B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${p.url}">
+                                    ${idx + 1}. ${escapeHtml(p.url)}
+                                </div>
+                            </div>
+                            <div style="text-align: right; flex-shrink: 0;">
+                                <span style="font-weight: 800; color: #DC2626;">${Number(p.exit_count).toLocaleString()} drop-offs</span>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            // 4. Render Top Campaign Sources
+            const topSourcesEl = document.getElementById('topSourcesList');
+            if (topSourcesEl) {
+                if (!topSources.length) {
+                    topSourcesEl.innerHTML = '<div style="font-size: 11.5px; color: #9CA3AF; text-align: center; padding: 10px;">No campaign sources recorded yet.</div>';
+                } else {
+                    topSourcesEl.innerHTML = topSources.map((s, idx) => `
+                        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; padding: 6px 0; border-bottom: 1px solid #F3F4F6;">
+                            <div style="min-width: 0; flex: 1; padding-right: 12px;">
+                                <span style="font-weight: 700; color: #063D3B;">${idx + 1}. ${escapeHtml(s.source)}</span>
+                            </div>
+                            <div style="text-align: right; flex-shrink: 0; display: flex; align-items: center; gap: 8px;">
+                                <span style="font-weight: 700; color: #063D3B;">${Number(s.session_count).toLocaleString()}</span>
+                                <span style="background: #DCFCE7; color: #166534; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 8px;">${s.conversions || 0} cv</span>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            // 5. Render Sessions Table
+            if (tbody) {
+                if (!sessions.length) {
+                    tbody.innerHTML = `<tr><td colspan="8" style="padding: 36px; text-align: center; color: #648781;">No visitor sessions match your selected filter criteria.</td></tr>`;
+                } else {
+                    tbody.innerHTML = sessions.map(s => {
+                        let statusBadge = '<span style="background: #F3F4F6; color: #4B5563; border: 1px solid #E5E7EB; padding: 3px 8px; border-radius: 9999px; font-weight: 700; font-size: 10.5px;">⚪ Browsing</span>';
+                        if (s.conversion_status === 'lead_converted') {
+                            statusBadge = '<span style="background: #DCFCE7; color: #166534; border: 1px solid #86EFAC; padding: 3px 8px; border-radius: 9999px; font-weight: 700; font-size: 10.5px;">🟢 Lead Converted</span>';
+                        } else if (s.conversion_status === 'chat_engaged') {
+                            statusBadge = '<span style="background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; padding: 3px 8px; border-radius: 9999px; font-weight: 700; font-size: 10.5px;">🔵 Chat Engaged</span>';
+                        }
+
+                        const utmStr = s.utm_source ? `${escapeHtml(s.utm_source)}${s.utm_campaign ? ' / ' + escapeHtml(s.utm_campaign) : ''}` : (s.referrer ? 'Referral' : 'Direct');
+                        const entryShort = formatUrlShort(s.entry_page);
+                        const exitShort = formatUrlShort(s.exit_page);
+
+                        return `
+                            <tr style="border-bottom: 1px solid #F3F4F6; transition: background 0.15s ease;" onmouseover="this.style.background='#F9FBFA'" onmouseout="this.style.background='transparent'">
+                                <td style="padding: 12px 16px;">
+                                    <div style="font-weight: 700; color: #063D3B; font-family: monospace;">${escapeHtml(s.session_id.substring(0, 16))}...</div>
+                                    <div style="font-size: 10.5px; color: #648781;">Visitor: ${escapeHtml(s.visitor_id.substring(0, 14))}...</div>
+                                    ${s.has_lead ? `<div style="font-size: 10px; color: #059669; font-weight: 700; margin-top: 2px;">👤 ${escapeHtml(s.lead_name || s.lead_email || 'Lead')}</div>` : ''}
+                                </td>
+                                <td style="padding: 12px 16px; color: #4B5563; white-space: nowrap;">
+                                    ${formatDate(s.started_at)}
+                                </td>
+                                <td style="padding: 12px 16px;">
+                                    <span style="font-weight: 800; color: #2563EB;">${s.total_dwell_formatted}</span>
+                                </td>
+                                <td style="padding: 12px 16px;">
+                                    <span class="org-ref-chip org-ref-chip-blue" style="font-size: 11px;">${s.total_pages} page${s.total_pages > 1 ? 's' : ''}</span>
+                                </td>
+                                <td style="padding: 12px 16px; max-width: 240px;">
+                                    <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #063D3B;" title="${escapeHtml(s.entry_page || '')}">
+                                        <strong>In:</strong> ${entryShort}
+                                    </div>
+                                    <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #648781; margin-top: 2px;" title="${escapeHtml(s.exit_page || '')}">
+                                        <strong>Out:</strong> ${exitShort}
+                                    </div>
+                                </td>
+                                <td style="padding: 12px 16px; color: #4B5563;">
+                                    <span style="background: #F4FAF7; border: 1px solid #D1E5DE; padding: 2px 7px; border-radius: 6px; font-size: 10.5px;">${utmStr}</span>
+                                </td>
+                                <td style="padding: 12px 16px;">
+                                    ${statusBadge}
+                                </td>
+                                <td style="padding: 12px 16px; text-align: right;">
+                                    <button type="button" onclick="inspectSessionJourney('${escapeHtml(s.session_id)}')" class="brand-btn-secondary" style="height: 28px; padding: 0 10px; font-size: 11px; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #D1E5DE; cursor: pointer;">
+                                        <span>Inspect</span> &rarr;
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            }
+
+            // 6. Update Result count and pagination
+            document.getElementById('journeyResultCount').innerText = `Showing page ${pagination.page || 1} of ${pagination.total_pages || 1} (${pagination.total_records || 0} total sessions)`;
+            renderPagination(pagination);
+
+        } catch (e) {
+            console.error('[SessionJourneys] error loading:', e);
+            if (tbody) tbody.innerHTML = `<tr><td colspan="8" style="padding: 24px; text-align: center; color: #EF4444;">Exception while loading journeys.</td></tr>`;
+        }
+    }
+
+    function renderPagination(p) {
+        const info = document.getElementById('journeyPaginationInfo');
+        const container = document.getElementById('journeyPaginationBtns');
+        if (!container || !p) return;
+        
+        info.innerText = `Page ${p.page || 1} of ${p.total_pages || 1}`;
+        let html = '';
+        if (p.page > 1) {
+            html += `<button type="button" onclick="loadSessionJourneys(${p.page - 1})" class="brand-btn-secondary" style="height: 28px; padding: 0 10px; font-size: 11px; cursor: pointer;">&larr; Prev</button>`;
+        }
+        if (p.page < p.total_pages) {
+            html += `<button type="button" onclick="loadSessionJourneys(${p.page + 1})" class="brand-btn-secondary" style="height: 28px; padding: 0 10px; font-size: 11px; cursor: pointer;">Next &rarr;</button>`;
+        }
+        container.innerHTML = html;
+    }
+
+    async function inspectSessionJourney(sessionId) {
+        const backdrop = document.getElementById('journeyDrawerBackdrop');
+        const content = document.getElementById('drawerContent');
+        const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token') || '';
+
+        backdrop.style.display = 'flex';
+        content.innerHTML = '<div style="text-align: center; color: #9CA3AF; padding: 48px 0;"><span style="font-size:24px;">⏳</span><div style="margin-top:8px;">Fetching step-by-step path...</div></div>';
+
+        try {
+            const res = await fetch(`/v1/analytics/session-journeys/${encodeURIComponent(sessionId)}/steps`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await res.json();
+
+            if (data.status !== 'success' || !data.data) {
+                content.innerHTML = `<div style="color: #EF4444; padding: 24px; text-align: center;">Failed to load steps: ${data.message || 'Unknown error'}</div>`;
+                return;
+            }
+
+            const session = data.data.session || {};
+            const steps = data.data.steps || [];
+            const conversation = data.data.conversation;
+
+            let leadHtml = '';
+            if (session.lead_name || session.lead_email || session.lead_phone) {
+                leadHtml = `
+                    <div style="background: #F0FDF4; border: 1.5px solid #86EFAC; border-radius: 10px; padding: 12px 14px; margin-bottom: 20px;">
+                        <div style="font-size: 11px; font-weight: 800; color: #166534; text-transform: uppercase;">🎓 Captured Lead Details</div>
+                        <div style="font-size: 13px; font-weight: 800; color: #063D3B; margin-top: 4px;">${escapeHtml(session.lead_name || 'Anonymous Student')}</div>
+                        <div style="font-size: 11.5px; color: #15803D; margin-top: 2px;">
+                            ${session.lead_email ? `📧 ${escapeHtml(session.lead_email)} &bull; ` : ''}
+                            ${session.lead_phone ? `📞 ${escapeHtml(session.lead_phone)} &bull; ` : ''}
+                            ${session.lead_program ? `🎯 ${escapeHtml(session.lead_program)}` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            let stepsHtml = '';
+            if (!steps.length) {
+                stepsHtml = '<div style="text-align: center; color: #9CA3AF; padding: 24px 0;">No individual page steps recorded for this session.</div>';
+            } else {
+                stepsHtml = steps.map((st, idx) => {
+                    const isLast = (idx === steps.length - 1);
+                    return `
+                        <div class="journey-step-node">
+                            <div class="journey-step-badge">${idx + 1}</div>
+                            <div class="journey-step-card">
+                                <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;">
+                                    <div style="font-weight: 700; font-size: 12.5px; color: #063D3B; line-height: 1.3;">
+                                        ${escapeHtml(st.page_title || st.url)}
+                                    </div>
+                                    <span style="background: #EFF6FF; color: #2563EB; font-weight: 800; font-size: 11px; padding: 2px 7px; border-radius: 6px; flex-shrink: 0;">
+                                        ⏱️ ${st.dwell_formatted}
+                                    </span>
+                                </div>
+                                <div style="font-size: 11px; color: #648781; word-break: break-all; margin-top: 4px;">
+                                    <a href="${escapeHtml(st.url)}" target="_blank" rel="noopener noreferrer" style="color: #2563EB; text-decoration: none;">
+                                        ${escapeHtml(st.url)} &nearr;
+                                    </a>
+                                </div>
+                                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10.5px; color: #9CA3AF; margin-top: 8px;">
+                                    <span>Visited at ${formatDate(st.created_at)}</span>
+                                    ${isLast && session.conversion_status === 'lead_converted' ? '<span style="color: #166534; font-weight: 700;">🎯 Converted Here</span>' : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            content.innerHTML = `
+                <!-- Metadata Card -->
+                <div style="background: #F8FAF9; border: 1.5px solid #E6F0EC; border-radius: 10px; padding: 14px; margin-bottom: 20px; font-size: 11.5px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <div><strong style="color:#063D3B;">Session:</strong> <span style="font-family: monospace;">${escapeHtml(session.session_id)}</span></div>
+                        <div><strong style="color:#063D3B;">Total Dwell:</strong> <span style="color: #2563EB; font-weight: 800;">${session.total_dwell_formatted}</span></div>
+                        <div><strong style="color:#063D3B;">Total Pages:</strong> ${session.total_pages}</div>
+                        <div><strong style="color:#063D3B;">Started:</strong> ${formatDate(session.started_at)}</div>
+                        <div style="grid-column: span 2;"><strong style="color:#063D3B;">Traffic Source:</strong> ${session.utm_source ? `${escapeHtml(session.utm_source)} (${escapeHtml(session.utm_campaign || '')})` : (session.referrer ? escapeHtml(session.referrer) : 'Direct Navigation')}</div>
+                    </div>
+                </div>
+
+                ${leadHtml}
+
+                <div style="font-size: 12px; font-weight: 800; color: #063D3B; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 14px;">
+                    Step-by-Step Path (${steps.length} Steps)
+                </div>
+
+                <div style="position: relative;">
+                    ${stepsHtml}
+                </div>
+            `;
+
+        } catch (e) {
+            console.error('[SessionJourneys] error inspecting:', e);
+            content.innerHTML = '<div style="color: #EF4444; padding: 24px; text-align: center;">Error loading steps details.</div>';
+        }
+    }
+
+    function closeJourneyDrawer() {
+        const backdrop = document.getElementById('journeyDrawerBackdrop');
+        if (backdrop) backdrop.style.display = 'none';
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function formatUrlShort(url) {
+        if (!url) return '-';
+        try {
+            const parsed = new URL(url);
+            return parsed.pathname || '/';
+        } catch (e) {
+            return url.substring(0, 30);
+        }
+    }
+
+    function formatDate(dt) {
+        if (!dt) return '-';
+        try {
+            const d = new Date(dt.replace(' ', 'T') + 'Z');
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        } catch(e) {
+            return dt;
+        }
+    }
+
+    // Expose functions globally for event handlers
+    window.loadSessionJourneys = loadSessionJourneys;
+    window.inspectSessionJourney = inspectSessionJourney;
+    window.closeJourneyDrawer = closeJourneyDrawer;
+
+    // Auto-load initial journey dataset
+    loadSessionJourneys(1);
+})();
+</script>

@@ -122,6 +122,7 @@ class ChatController
     {
         $botToken = trim((string)($request->get('bot_token') ?? ''));
         $visitorId = trim((string)($request->get('visitor_id') ?? ''));
+        $sessionId = trim((string)($request->get('session_id') ?? ''));
         if (empty($visitorId)) {
             $visitorId = 'mob_' . substr(md5(uniqid((string)mt_rand(), true)), 0, 16);
         }
@@ -133,6 +134,13 @@ class ChatController
         }
 
         $db = Database::getConnection();
+
+        // Update visitor session status to chat_engaged if currently browsing
+        if (!empty($sessionId)) {
+            try {
+                $db->prepare("UPDATE visitor_sessions SET conversion_status = 'chat_engaged' WHERE session_id = :sid AND conversion_status = 'browsing'")->execute([':sid' => $sessionId]);
+            } catch (Throwable $e) {}
+        }
 
         // 1. Authenticate chatbot token & active status
         $stmtBot = $db->prepare("
@@ -176,13 +184,14 @@ class ChatController
 
         if (!$conv) {
             $stmtNewConv = $db->prepare("
-                INSERT INTO conversations (organization_id, chatbot_id, visitor_id, is_test, page_url, page_title, started_at, last_message_at)
-                VALUES (:org_id, :bot_id, :visitor_id, :is_test, :page_url, :page_title, NOW(), NOW())
+                INSERT INTO conversations (organization_id, chatbot_id, visitor_id, session_id, is_test, page_url, page_title, started_at, last_message_at)
+                VALUES (:org_id, :bot_id, :visitor_id, :session_id, :is_test, :page_url, :page_title, NOW(), NOW())
             ");
             $stmtNewConv->execute([
                 ':org_id' => $orgId,
                 ':bot_id' => $botId,
                 ':visitor_id' => $visitorId,
+                ':session_id' => !empty($sessionId) ? $sessionId : null,
                 ':is_test' => $isTest,
                 ':page_url' => $request->get('page_url'),
                 ':page_title' => $request->get('page_title')

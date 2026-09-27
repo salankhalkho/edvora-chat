@@ -42,8 +42,10 @@ use App\Controllers\OrganizationController;
 use App\Controllers\ProgramController;
 use App\Controllers\ProactiveTriggerController;
 use App\Controllers\ScholarshipController;
+use App\Controllers\SessionJourneyController;
 use App\Controllers\SmartOnboardingController;
 use App\Controllers\SuperAdminController;
+use App\Controllers\TrackingController;
 use App\Controllers\WidgetCustomizationController;
 use App\Core\Request;
 use App\Core\Response;
@@ -433,6 +435,25 @@ $router->get('/v1/superadmin/llm-usage/summary', [SuperAdminController::class, '
 $router->get('/v1/superadmin/llm-usage/logs', [SuperAdminController::class, 'getLlmUsageLogs'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
 $router->get('/v1/public/llm-usage/summary', [SuperAdminController::class, 'getLlmSpendingSummary']);
 $router->get('/v1/public/llm-usage/logs', [SuperAdminController::class, 'getLlmUsageLogs']);
+
+// Dedicated Standalone Visitor Session Journeys & Dwell Tracking (No Bloat in index.html)
+$router->get('/session-journeys', function (Request $req) {
+    require dirname(__DIR__) . '/public/superadmin/session-journeys.html';
+});
+$router->get('/superadmin/session-journeys', function (Request $req) {
+    require dirname(__DIR__) . '/public/superadmin/session-journeys.html';
+});
+$router->get('/v1/superadmin/session-journeys', [SessionJourneyController::class, 'listSuperAdminSessions'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->get('/v1/superadmin/session-journeys/{sessionId}/steps', [SessionJourneyController::class, 'getSuperAdminSessionSteps'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->get('/v1/public/session-journeys', [SessionJourneyController::class, 'listSuperAdminSessions']);
+$router->get('/v1/public/session-journeys/{sessionId}/steps', [SessionJourneyController::class, 'getSuperAdminSessionSteps']);
+
+// Visitor Session Journeys Analytics Routes (College Admins: Protected + Tenant Context)
+$router->get('/v1/analytics/session-journeys', [SessionJourneyController::class, 'listTenantSessions'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->get('/v1/analytics/session-journeys/{sessionId}/steps', [SessionJourneyController::class, 'getSessionSteps'], [AuthMiddleware::class, TenantMiddleware::class]);
+
+// High-Speed Visitor Tracking Beacon Route (Public Widget & SPA)
+$router->post('/v1/tracking/beacon', [TrackingController::class, 'handleBeacon']);
 
 // Department & Team Management Routes (Protected + Tenant Context)
 $router->get('/v1/departments', [DepartmentController::class, 'index'], [AuthMiddleware::class, TenantMiddleware::class]);

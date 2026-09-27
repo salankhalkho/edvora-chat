@@ -35,6 +35,139 @@
         visitorId = (isTest ? 'test_' : 'v_') + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
         localStorage.setItem(visitorKey, visitorId);
     }
+
+    // 2b. Generate or fetch session UUID (tab session persistence, no arbitrary timeout)
+    var sessionKey = 'edvora_session_' + botToken + (isTest ? '_test' : '');
+    var sessionId = sessionStorage.getItem(sessionKey);
+    if (!sessionId) {
+        sessionId = (isTest ? 'test_s_' : 's_') + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
+        sessionStorage.setItem(sessionKey, sessionId);
+    }
+
+    // 2c. VVIP Campaign & UTM Attribution capture (persists for this session)
+    function parseUtmParameters() {
+        var utmKey = 'edvora_utm_' + botToken;
+        var cached = null;
+        try {
+            var raw = sessionStorage.getItem(utmKey);
+            if (raw) cached = JSON.parse(raw);
+        } catch (e) {}
+        if (cached && (cached.utm_source || cached.referrer)) {
+            return cached;
+        }
+
+        var params = new URLSearchParams(window.location.search || '');
+        var utm = {
+            referrer: document.referrer || '',
+            utm_source: params.get('utm_source') || '',
+            utm_medium: params.get('utm_medium') || '',
+            utm_campaign: params.get('utm_campaign') || '',
+            utm_term: params.get('utm_term') || '',
+            utm_content: params.get('utm_content') || ''
+        };
+        try {
+            sessionStorage.setItem(utmKey, JSON.stringify(utm));
+        } catch (e) {}
+        return utm;
+    }
+    var sessionUtm = parseUtmParameters();
+
+    // 2d. Page Dwell & Session Journey Tracker (60s Heartbeat, 5s Minimum Dwell, SPA Route Detection)
+    (function initSessionJourneyTracker() {
+        var currentTrackedUrl = window.location.href;
+        var pageStartTime = Date.now();
+        var beaconEndpoint = apiBaseUrl + '/v1/tracking/beacon';
+        var minDwellSeconds = 5;
+
+        function sendDwellBeacon(isHeartbeat) {
+            var dwell = Math.round((Date.now() - pageStartTime) / 1000);
+            if (dwell < minDwellSeconds && !isHeartbeat) {
+                return;
+            }
+
+            var payload = {
+                bot_token: botToken,
+                session_id: sessionId,
+                visitor_id: visitorId,
+                url: currentTrackedUrl,
+                page_title: document.title || '',
+                dwell_seconds: dwell,
+                is_heartbeat: isHeartbeat ? 1 : 0,
+                referrer: sessionUtm.referrer || '',
+                utm_source: sessionUtm.utm_source || '',
+                utm_medium: sessionUtm.utm_medium || '',
+                utm_campaign: sessionUtm.utm_campaign || '',
+                utm_term: sessionUtm.utm_term || '',
+                utm_content: sessionUtm.utm_content || ''
+            };
+
+            var jsonStr = JSON.stringify(payload);
+
+            var sent = false;
+            if (navigator.sendBeacon) {
+                try {
+                    var blob = new Blob([jsonStr], { type: 'application/json' });
+                    sent = navigator.sendBeacon(beaconEndpoint, blob);
+                } catch (e) {
+                    sent = false;
+                }
+            }
+
+            if (!sent) {
+                try {
+                    fetch(beaconEndpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: jsonStr,
+                        keepalive: true
+                    }).catch(function() {});
+                } catch (e) {}
+            }
+        }
+
+        // Periodic incremental heartbeat every 60 seconds
+        setInterval(function() {
+            sendDwellBeacon(true);
+        }, 60000);
+
+        // Page exit / tab backgrounding events
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'hidden') {
+                sendDwellBeacon(false);
+            }
+        });
+        window.addEventListener('pagehide', function() {
+            sendDwellBeacon(false);
+        });
+
+        // Client-Side Single Page Application (SPA) Route Detection
+        function handleSpaRouteChange() {
+            var newUrl = window.location.href;
+            if (newUrl !== currentTrackedUrl) {
+                sendDwellBeacon(false);
+                currentTrackedUrl = newUrl;
+                pageStartTime = Date.now();
+            }
+        }
+
+        if (window.history && window.history.pushState) {
+            var origPushState = window.history.pushState;
+            window.history.pushState = function() {
+                var ret = origPushState.apply(this, arguments);
+                setTimeout(handleSpaRouteChange, 50);
+                return ret;
+            };
+            var origReplaceState = window.history.replaceState;
+            window.history.replaceState = function() {
+                var ret = origReplaceState.apply(this, arguments);
+                setTimeout(handleSpaRouteChange, 50);
+                return ret;
+            };
+        }
+        window.addEventListener('popstate', handleSpaRouteChange);
+        window.addEventListener('hashchange', handleSpaRouteChange);
+    })();
+
     var currentConversationId = null;
 
     var config = {
@@ -372,6 +505,7 @@
             var payload = {
                 bot_token: botToken,
                 visitor_id: visitorId,
+                session_id: sessionId,
                 url: pageUrl,
                 page_title: pageTitle,
                 trigger_type: triggerType
@@ -752,6 +886,7 @@
             body: JSON.stringify({
                 bot_token: botToken,
                 visitor_id: visitorId,
+                session_id: sessionId,
                 message: text,
                 is_test: isTest ? 1 : 0,
                 page_url: window.location.href,
@@ -1061,7 +1196,8 @@
                     lead_type: 'asset',
                     program_interest: trigger.program_name || trigger.headline,
                     conversation_id: currentConversationId,
-                    visitor_id: visitorId
+                    visitor_id: visitorId,
+                    session_id: sessionId
                 })
             })
             .then(function (res) { return res.json(); })
@@ -1159,7 +1295,8 @@
                         preferred_time_slot: slotSelect.value,
                         topic_or_query: 'Requested via Chatbot',
                         conversation_id: currentConversationId,
-                        visitor_id: visitorId
+                        visitor_id: visitorId,
+                        session_id: sessionId
                     })
                 })
                 .then(function (res) { return res.json(); })
@@ -1263,7 +1400,8 @@
                     student_phone: phone,
                     preferred_time_slot: timeSlot,
                     conversation_id: currentConversationId,
-                    visitor_id: visitorId
+                    visitor_id: visitorId,
+                    session_id: sessionId
                 })
             })
             .then(function (res) { return res.json(); })
@@ -1424,7 +1562,8 @@
                     preferred_date: prefDate || null,
                     preferred_time: prefTime,
                     conversation_id: currentConversationId,
-                    visitor_id: visitorId
+                    visitor_id: visitorId,
+                    session_id: sessionId
                 })
             })
             .then(function (res) { return res.json(); })
@@ -1721,6 +1860,7 @@
                     program_interest: evalData.course_name,
                     conversation_id: currentConversationId,
                     visitor_id: visitorId,
+                    session_id: sessionId,
                     lead_type: 'scholarship_eval',
                     academic_score: scoreStr,
                     scholarship_tier: tierStr,

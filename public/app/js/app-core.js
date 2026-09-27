@@ -297,14 +297,21 @@
         document.addEventListener('DOMContentLoaded', bindAuthToggleListeners);
         document.addEventListener('edvora:partials-ready', bindAuthToggleListeners);
 
-        const VALID_APP_TABS = ['overview', 'knowledge', 'knowledge-ingestion', 'academic-programs', 'academic-program-detail', 'course-staff-assignment', 'program-staff', 'program-lead-magnet', 'add-programs', 'edit-programs', 'departments', 'leads', 'callbacks', 'campus-tours', 'campus-tours-scheduling', 'create-tour-slot', 'edit-tour-slot', 'scholarships', 'scholarship-configuration', 'scholarship-configuration-edit', 'teams', 'assets', 'multilingual', 'conversion-engine', 'placeholder', 'analytics', 'knowledge-gaps', 'integrations', 'chatbot', 'test-chat', 'organization', 'org-settings', 'campuses', 'campus-editor', 'settings', 'knowledge-view', 'knowledge-editor', 'knowledge-edit', 'profile'];
+        const VALID_APP_TABS = ['overview', 'knowledge', 'knowledge-ingestion', 'academic-programs', 'academic-program-detail', 'course-staff-assignment', 'program-staff', 'program-lead-magnet', 'add-programs', 'edit-programs', 'departments', 'leads', 'callbacks', 'campus-tours', 'campus-tours-scheduling', 'create-tour-slot', 'edit-tour-slot', 'scholarships', 'scholarship-configuration', 'scholarship-configuration-edit', 'session-journeys', 'teams', 'assets', 'multilingual', 'conversion-engine', 'placeholder', 'analytics', 'knowledge-gaps', 'integrations', 'chatbot', 'test-chat', 'organization', 'org-settings', 'campuses', 'campus-editor', 'settings', 'knowledge-view', 'knowledge-editor', 'knowledge-edit', 'profile'];
 
         // Navigation Tabs Handling with Async Modular Loading
         const _tabLoadPromises = {};
         async function loadTabContent(tab) {
             if (!tab) tab = 'overview';
-            const pane = document.getElementById('tab-' + tab);
-            if (!pane) return;
+            let pane = document.getElementById('tab-' + tab);
+            if (!pane) {
+                const mainWrapper = document.getElementById('main-content') || document.querySelector('.main-content') || document.body;
+                pane = document.createElement('div');
+                pane.className = 'tab-content';
+                pane.id = 'tab-' + tab;
+                pane.dataset.loaded = 'false';
+                mainWrapper.appendChild(pane);
+            }
             if (pane.dataset.loaded === 'true') return;
             if (_tabLoadPromises[tab]) {
                 return await _tabLoadPromises[tab];

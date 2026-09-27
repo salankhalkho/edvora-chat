@@ -1705,6 +1705,79 @@ class Migrations
         } catch (Throwable $e) {
             error_log('[Migrations] conversations proactive columns: ' . $e->getMessage());
         }
+
+        // 18. VISITOR SESSIONS (Session Journeys, UTM Attribution & Conversion Engine)
+        try {
+            $this->db->exec("CREATE TABLE IF NOT EXISTS visitor_sessions (
+                id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                organization_id INT NOT NULL,
+                session_id VARCHAR(64) NOT NULL,
+                visitor_id VARCHAR(64) NOT NULL,
+                referrer VARCHAR(500) NULL,
+                utm_source VARCHAR(100) NULL,
+                utm_medium VARCHAR(100) NULL,
+                utm_campaign VARCHAR(100) NULL,
+                utm_term VARCHAR(100) NULL,
+                utm_content VARCHAR(100) NULL,
+                entry_page VARCHAR(500) NULL,
+                exit_page VARCHAR(500) NULL,
+                total_pages INT UNSIGNED DEFAULT 1,
+                total_dwell_seconds INT UNSIGNED DEFAULT 0,
+                conversion_status ENUM('browsing', 'chat_engaged', 'lead_converted') DEFAULT 'browsing',
+                converted_at TIMESTAMP NULL,
+                started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                last_active_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                UNIQUE KEY uk_session_id (session_id),
+                INDEX idx_vs_org_started (organization_id, started_at),
+                INDEX idx_vs_visitor (visitor_id),
+                INDEX idx_vs_org_status (organization_id, conversion_status),
+                FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+        } catch (Throwable $e) {
+            error_log('[Migrations] visitor_sessions table: ' . $e->getMessage());
+        }
+
+        // 19. VISITOR PAGE VIEWS (Step-by-step dwell time tracking)
+        try {
+            $this->db->exec("CREATE TABLE IF NOT EXISTS visitor_page_views (
+                id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                organization_id INT NOT NULL,
+                session_id VARCHAR(64) NOT NULL,
+                visitor_id VARCHAR(64) NOT NULL,
+                url VARCHAR(500) NOT NULL,
+                page_title VARCHAR(255) NULL,
+                time_spent_seconds INT UNSIGNED DEFAULT 0,
+                view_order INT UNSIGNED DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_vpv_session (session_id),
+                INDEX idx_vpv_org_created (organization_id, created_at),
+                INDEX idx_vpv_visitor (visitor_id),
+                FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+        } catch (Throwable $e) {
+            error_log('[Migrations] visitor_page_views table: ' . $e->getMessage());
+        }
+
+        // Add session_id column to conversations table if missing
+        try {
+            $checkConvSess = $this->db->query("SHOW COLUMNS FROM conversations LIKE 'session_id'");
+            if (!$checkConvSess->fetch()) {
+                $this->db->exec("ALTER TABLE conversations ADD COLUMN session_id VARCHAR(64) NULL AFTER visitor_id, ADD INDEX idx_conv_session (session_id);");
+            }
+        } catch (Throwable $e) {
+            error_log('[Migrations] conversations.session_id: ' . $e->getMessage());
+        }
+
+        // Add session_id column to leads table if missing
+        try {
+            $checkLeadSess = $this->db->query("SHOW COLUMNS FROM leads LIKE 'session_id'");
+            if (!$checkLeadSess->fetch()) {
+                $this->db->exec("ALTER TABLE leads ADD COLUMN session_id VARCHAR(64) NULL AFTER conversation_id, ADD INDEX idx_leads_session (session_id);");
+            }
+        } catch (Throwable $e) {
+            error_log('[Migrations] leads.session_id: ' . $e->getMessage());
+        }
     }
 }
 

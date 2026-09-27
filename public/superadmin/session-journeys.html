@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visitor Session Journeys &amp; Dwell Analytics — edvora.chat</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/theme-branding.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: #0b0f19;
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 12px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #topHeader {
+            height: 48px;
+            background: #111827;
+            border-bottom: 1px solid #1f2937;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-title {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn {
+            height: 30px;
+            padding: 0 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 11.5px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            border: 1px solid transparent;
+            transition: all 0.15s ease;
+        }
+        .btn-primary { background: #4f46e5; color: #fff; border-color: #6366f1; }
+        .btn-primary:hover { background: #4338ca; }
+        .btn-secondary { background: #1f2937; color: #d1d5db; border-color: #374151; }
+        .btn-secondary:hover { background: #374151; color: #fff; }
+
+        .main-container {
+            max-width: 1440px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 24px 20px 48px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Metrics grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 14px;
+        }
+        .metric-card {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: #6366f1;
+        }
+        .metric-card.green::before { background: #10b981; }
+        .metric-card.blue::before { background: #3b82f6; }
+        .metric-card.amber::before { background: #f59e0b; }
+
+        .metric-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .metric-val {
+            font-size: 22px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.02em;
+        }
+        .metric-sub {
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        /* Legend Card */
+        .legend-card {
+            background: #111827;
+            border: 1px solid #1e3a5f;
+            border-left: 4px solid #3b82f6;
+            border-radius: 8px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        /* Section Cards */
+        .section-card {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .section-header {
+            padding: 12px 18px;
+            border-bottom: 1px solid #1f2937;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(17, 24, 39, 0.7);
+        }
+        .section-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Filter Controls */
+        .filters-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 8px;
+            padding: 12px 18px;
+        }
+        .select-input, .text-input {
+            height: 32px;
+            background: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 6px;
+            color: #f3f4f6;
+            font-size: 11.5px;
+            padding: 0 10px;
+            outline: none;
+        }
+        .select-input:focus, .text-input:focus {
+            border-color: #6366f1;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 11.5px;
+        }
+        th {
+            background: #161f30;
+            color: #9ca3af;
+            font-weight: 600;
+            padding: 10px 14px;
+            border-bottom: 1px solid #1f2937;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #1a2234;
+            color: #d1d5db;
+        }
+        tr:hover td {
+            background: rgba(31, 41, 55, 0.5);
+        }
+        .mono { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+
+        /* Timeline in Drawer */
+        .drawer-step {
+            position: relative;
+            padding-left: 36px;
+            padding-bottom: 22px;
+        }
+        .drawer-step:last-child { padding-bottom: 0; }
+        .drawer-step::before {
+            content: '';
+            position: absolute;
+            left: 13px;
+            top: 24px;
+            bottom: 0;
+            width: 2px;
+            background: #374151;
+        }
+        .drawer-step:last-child::before { display: none; }
+        .drawer-step-badge {
+            position: absolute;
+            left: 0; top: 2px;
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            background: #1e293b;
+            border: 2px solid #6366f1;
+            color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 800;
+        }
+        .drawer-step-box {
+            background: #161f30;
+            border: 1px solid #1f2937;
+            border-radius: 8px;
+            padding: 12px 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Header -->
+    <header id="topHeader">
+        <div class="header-title">
+            <span style="font-size: 16px;">🧭</span>
+            <span>Visitor Session Journeys &amp; Dwell Intelligence</span>
+            <span class="badge" style="background: rgba(99, 102, 241, 0.2); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.4); padding: 2px 7px;">Super Admin</span>
+        </div>
+        <div class="header-actions">
+            <a href="/superadmin" class="btn btn-secondary">
+                &larr; Super Admin Console
+            </a>
+            <button class="btn btn-primary" onclick="loadAllJourneys(1)">
+                <span>🔄</span> Refresh Journeys
+            </button>
+        </div>
+    </header>
+
+    <div class="main-container">
+
+        <!-- Conversion Status Explanation & Meaning Legend Box -->
+        <div class="legend-card">
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <span style="font-size: 20px; line-height: 1;">💡</span>
+                <div>
+                    <div style="font-size: 12px; font-weight: 800; color: #93c5fd; text-transform: uppercase; letter-spacing: 0.5px;">
+                        Conversion &amp; Visitor Journey Legend
+                    </div>
+                    <div style="font-size: 11.5px; color: #cbd5e1; margin-top: 4px; line-height: 1.5;">
+                        Status progression across college website visits and AI counselor touchpoints:
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 16px; margin-top: 8px;">
+                        <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px;">
+                            <span style="background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); padding: 2px 8px; border-radius: 12px; font-weight: 700; font-size: 10px;">🟢 Lead Converted</span>
+                            <span style="color: #94a3b8;">— Submitted inquiry form (Prospectus, Campus Tour, Callback, Scholarship Eval).</span>
+                        </div>
+                        <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px;">
+                            <span style="background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.4); padding: 2px 8px; border-radius: 12px; font-weight: 700; font-size: 10px;">🔵 Chat Engaged</span>
+                            <span style="color: #94a3b8;">— Interacted with AI chatbot, but hasn't submitted a lead form yet.</span>
+                        </div>
+                        <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px;">
+                            <span style="background: rgba(156, 163, 175, 0.2); color: #cbd5e1; border: 1px solid rgba(156, 163, 175, 0.4); padding: 2px 8px; border-radius: 12px; font-weight: 700; font-size: 10px;">⚪ Browsing Only</span>
+                            <span style="color: #94a3b8;">— Browsed institutional web pages without engaging chatbot or forms.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="font-size: 11px; color: #94a3b8; background: #161f30; border: 1px solid #1f2937; border-radius: 6px; padding: 6px 12px; align-self: center;">
+                ⏱️ Minimum Dwell Filter: 5s &bull; Incremental Heartbeat: 60s
+            </div>
+        </div>
+
+        <!-- KPI Metrics Grid -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">Total Sessions</div>
+                <div class="metric-val" id="kpiTotalSessions">0</div>
+                <div class="metric-sub" id="kpiWindowSub">Selected window</div>
+            </div>
+            <div class="metric-card blue">
+                <div class="metric-label">Avg. Dwell Time</div>
+                <div class="metric-val" id="kpiAvgDwell" style="color: #60a5fa;">0s</div>
+                <div class="metric-sub">Average time spent per session</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Pages / Session</div>
+                <div class="metric-val" id="kpiPagesPerSession" style="color: #a78bfa;">0.0</div>
+                <div class="metric-sub">Average browsing depth</div>
+            </div>
+            <div class="metric-card green">
+                <div class="metric-label">Conversion Rate</div>
+                <div class="metric-val" id="kpiConversionRate" style="color: #34d399;">0%</div>
+                <div class="metric-sub" id="kpiConvertedSub">0 leads captured</div>
+            </div>
+        </div>
+
+        <!-- Filters Bar -->
+        <div class="filters-bar">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1;">
+                <!-- Institution Dropdown -->
+                <select id="orgFilterSelect" class="select-input" style="min-width: 200px;" onchange="loadAllJourneys(1)">
+                    <option value="all">🏢 All Institutions (Global)</option>
+                </select>
+
+                <!-- Time Range -->
+                <select id="rangeSelect" class="select-input" onchange="loadAllJourneys(1)">
+                    <option value="30" selected>Last 30 Days</option>
+                    <option value="60">Last 60 Days</option>
+                    <option value="90">Last 90 Days</option>
+                </select>
+
+                <!-- Status Filter -->
+                <select id="statusFilter" class="select-input" onchange="loadAllJourneys(1)">
+                    <option value="all">All Conversion Statuses</option>
+                    <option value="lead_converted">🟢 Lead Converted Only</option>
+                    <option value="chat_engaged">🔵 Chat Engaged Only</option>
+                    <option value="browsing">⚪ Browsing Only</option>
+                </select>
+
+                <!-- Search -->
+                <input type="text" id="searchInput" class="text-input" placeholder="Search session, visitor, URL, UTM..." style="width: 240px;" onkeydown="if(event.key==='Enter') loadAllJourneys(1)" />
+
+                <button class="btn btn-secondary" onclick="loadAllJourneys(1)">Filter</button>
+            </div>
+
+            <div style="font-size: 11.5px; color: #9ca3af;" id="resultsInfo">
+                Showing sessions
+            </div>
+        </div>
+
+        <!-- Top Aggregates Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
+            <!-- Top Visited Pages -->
+            <div class="section-card">
+                <div class="section-header">
+                    <span class="section-title">🔥 Top Visited Pages</span>
+                    <span style="font-size: 10.5px; color: #9ca3af;">By visits</span>
+                </div>
+                <div id="topPagesList" style="padding: 12px 16px; display: flex; flex-direction: column; gap: 8px;">
+                    <div style="color: #6b7280; text-align: center; padding: 12px;">Loading top pages...</div>
+                </div>
+            </div>
+
+            <!-- Top Exit Drop-offs -->
+            <div class="section-card">
+                <div class="section-header">
+                    <span class="section-title">🚪 Top Drop-off Pages</span>
+                    <span style="font-size: 10.5px; color: #9ca3af;">Where visitors leave</span>
+                </div>
+                <div id="topExitList" style="padding: 12px 16px; display: flex; flex-direction: column; gap: 8px;">
+                    <div style="color: #6b7280; text-align: center; padding: 12px;">Loading exit pages...</div>
+                </div>
+            </div>
+
+            <!-- Top Campaign Sources -->
+            <div class="section-card">
+                <div class="section-header">
+                    <span class="section-title">📢 Campaign Sources</span>
+                    <span style="font-size: 10.5px; color: #9ca3af;">UTM / Referrer</span>
+                </div>
+                <div id="topSourcesList" style="padding: 12px 16px; display: flex; flex-direction: column; gap: 8px;">
+                    <div style="color: #6b7280; text-align: center; padding: 12px;">Loading campaign sources...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sessions List Table -->
+        <div class="section-card">
+            <div class="section-header">
+                <span class="section-title">📋 Session Journeys Log</span>
+                <span style="font-size: 11px; color: #9ca3af;" id="tableSubInfo">Recent sessions</span>
+            </div>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Institution</th>
+                            <th>Visitor &amp; Session</th>
+                            <th>Started</th>
+                            <th>Dwell</th>
+                            <th>Pages</th>
+                            <th>Entry &rarr; Exit</th>
+                            <th>Traffic Source</th>
+                            <th>Status</th>
+                            <th style="text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sessionsTbody">
+                        <tr>
+                            <td colspan="9" style="text-align: center; padding: 32px; color: #6b7280;">Loading session journeys...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Bar -->
+            <div style="padding: 12px 18px; border-top: 1px solid #1f2937; background: #161f30; display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; color: #9ca3af;">
+                <span id="paginationInfo">Page 1 of 1</span>
+                <div style="display: flex; gap: 8px;" id="paginationBtns"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Step-by-Step Chronological Journey Drawer -->
+    <div id="journeyDrawerBackdrop" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 99999; align-items: center; justify-content: flex-end;" onclick="if(event.target===this) closeDrawer()">
+        <div style="width: 560px; max-width: 95vw; height: 100vh; background: #111827; border-left: 1px solid #1f2937; box-shadow: -15px 0 40px rgba(0,0,0,0.5); display: flex; flex-direction: column; box-sizing: border-box; overflow: hidden;">
+            
+            <!-- Drawer Header -->
+            <div style="padding: 18px 24px; border-bottom: 1px solid #1f2937; display: flex; align-items: center; justify-content: space-between; background: #161f30;">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 18px;">🧭</span>
+                        <h3 style="font-size: 15px; font-weight: 800; color: #fff; margin: 0;">Step-by-Step Session Journey</h3>
+                    </div>
+                    <div style="font-size: 11px; color: #9ca3af; margin-top: 2px;" id="drawerSub">Full audit of pages visited &amp; dwell times</div>
+                </div>
+                <button type="button" onclick="closeDrawer()" style="background: none; border: none; font-size: 22px; line-height: 1; color: #9ca3af; cursor: pointer; padding: 4px 8px;">&times;</button>
+            </div>
+
+            <!-- Drawer Content -->
+            <div style="flex: 1; overflow-y: auto; padding: 22px 24px;" id="drawerContent">
+                <div style="text-align: center; color: #6b7280; padding: 32px 0;">Loading journey timeline...</div>
+            </div>
+
+            <!-- Drawer Footer -->
+            <div style="padding: 14px 24px; border-top: 1px solid #1f2937; background: #161f30; display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 11px; color: #6b7280;">High-precision dwell timestamps</span>
+                <button type="button" onclick="closeDrawer()" class="btn btn-secondary">
+                    Close Inspector
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentJourneysPage = 1;
+
+        async function loadOrganizations() {
+            try {
+                const res = await fetch('/v1/superadmin/organizations', { credentials: 'same-origin' });
+                const json = await res.json();
+                if (json.status === 'success' && Array.isArray(json.data)) {
+                    const sel = document.getElementById('orgFilterSelect');
+                    json.data.forEach(org => {
+                        const opt = document.createElement('option');
+                        opt.value = org.id;
+                        opt.textContent = org.name + (org.slug ? ` (${org.slug})` : '');
+                        sel.appendChild(opt);
+                    });
+                }
+            } catch(e) {
+                console.warn('Could not load organizations list:', e);
+            }
+        }
+
+        async function loadAllJourneys(page = 1) {
+            currentJourneysPage = page;
+            const days = document.getElementById('rangeSelect').value || '30';
+            const org = document.getElementById('orgFilterSelect').value || 'all';
+            const status = document.getElementById('statusFilter').value || 'all';
+            const search = document.getElementById('searchInput').value.trim();
+            const tbody = document.getElementById('sessionsTbody');
+
+            let url = `/v1/superadmin/session-journeys?days=${days}&status=${encodeURIComponent(status)}&search=${encodeURIComponent(search)}&page=${page}&limit=25`;
+            if (org !== 'all') {
+                url += `&organization_id=${org}`;
+            }
+
+            try {
+                let res = await fetch(url, { credentials: 'same-origin' });
+                if (res.status === 401 || res.status === 403) {
+                    // Public fallback for standalone inspection if accessed directly
+                    url = url.replace('/v1/superadmin/', '/v1/public/');
+                    res = await fetch(url);
+                }
+
+                const json = await res.json();
+                if (json.status !== 'success' || !json.data) {
+                    tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: #ef4444; padding: 24px;">Failed to load journeys: ${json.message || 'Error'}</td></tr>`;
+                    return;
+                }
+
+                const data = json.data;
+                const summary = data.summary || {};
+                const topPages = data.top_pages || [];
+                const topExits = data.top_exit_pages || [];
+                const topSources = data.top_sources || [];
+                const sessions = data.sessions || [];
+                const pagination = data.pagination || {};
+
+                // Update KPIs
+                document.getElementById('kpiTotalSessions').innerText = Number(summary.total_sessions || 0).toLocaleString();
+                document.getElementById('kpiWindowSub').innerText = `${summary.days || 30} days window`;
+                document.getElementById('kpiAvgDwell').innerText = summary.avg_dwell_formatted || '0s';
+                document.getElementById('kpiPagesPerSession').innerText = summary.avg_pages_per_session || '0.0';
+                document.getElementById('kpiConversionRate').innerText = (summary.conversion_rate || 0) + '%';
+                document.getElementById('kpiConvertedSub').innerText = `${summary.count_lead_converted || 0} leads captured`;
+
+                // Top Visited Pages
+                const topPagesEl = document.getElementById('topPagesList');
+                if (!topPages.length) {
+                    topPagesEl.innerHTML = '<div style="color: #6b7280; text-align: center; padding: 8px;">No page views recorded in this period.</div>';
+                } else {
+                    topPagesEl.innerHTML = topPages.map((p, idx) => `
+                        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; padding: 5px 0; border-bottom: 1px solid #1f2937;">
+                            <div style="min-width: 0; flex: 1; padding-right: 10px;">
+                                <div style="font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${p.page_title}">
+                                    ${idx + 1}. ${escapeHtml(p.page_title)}
+                                </div>
+                                <div style="font-size: 10.5px; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    ${escapeHtml(p.url)}
+                                </div>
+                            </div>
+                            <div style="text-align: right; flex-shrink: 0;">
+                                <span style="font-weight: 700; color: #60a5fa;">${Number(p.visit_count).toLocaleString()}</span>
+                                <div style="font-size: 10px; color: #6b7280;">⏱️ ${p.avg_dwell_formatted}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+
+                // Top Exit Pages
+                const topExitEl = document.getElementById('topExitList');
+                if (!topExits.length) {
+                    topExitEl.innerHTML = '<div style="color: #6b7280; text-align: center; padding: 8px;">No exit drop-offs recorded.</div>';
+                } else {
+                    topExitEl.innerHTML = topExits.map((p, idx) => `
+                        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; padding: 5px 0; border-bottom: 1px solid #1f2937;">
+                            <div style="min-width: 0; flex: 1; padding-right: 10px;">
+                                <div style="font-weight: 500; color: #e5e7eb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    ${idx + 1}. ${escapeHtml(p.url)}
+                                </div>
+                            </div>
+                            <div style="text-align: right; flex-shrink: 0;">
+                                <span style="font-weight: 700; color: #f87171;">${Number(p.exit_count).toLocaleString()}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+
+                // Top Sources
+                const topSourcesEl = document.getElementById('topSourcesList');
+                if (!topSources.length) {
+                    topSourcesEl.innerHTML = '<div style="color: #6b7280; text-align: center; padding: 8px;">No campaign sources recorded.</div>';
+                } else {
+                    topSourcesEl.innerHTML = topSources.map((s, idx) => `
+                        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; padding: 5px 0; border-bottom: 1px solid #1f2937;">
+                            <span style="font-weight: 600; color: #fff;">${idx + 1}. ${escapeHtml(s.source)}</span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="color: #d1d5db;">${Number(s.session_count).toLocaleString()}</span>
+                                <span style="background: rgba(16, 185, 129, 0.2); color: #6ee7b7; font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 4px;">${s.conversions || 0} cv</span>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+
+                // Table
+                if (!sessions.length) {
+                    tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 32px; color: #6b7280;">No visitor sessions found for selected filters.</td></tr>`;
+                } else {
+                    tbody.innerHTML = sessions.map(s => {
+                        let statusBadge = '<span style="background: rgba(156, 163, 175, 0.15); color: #9ca3af; border: 1px solid rgba(156, 163, 175, 0.3); padding: 2px 7px; border-radius: 9999px; font-weight: 700; font-size: 10px;">⚪ Browsing</span>';
+                        if (s.conversion_status === 'lead_converted') {
+                            statusBadge = '<span style="background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); padding: 2px 7px; border-radius: 9999px; font-weight: 700; font-size: 10px;">🟢 Converted</span>';
+                        } else if (s.conversion_status === 'chat_engaged') {
+                            statusBadge = '<span style="background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.4); padding: 2px 7px; border-radius: 9999px; font-weight: 700; font-size: 10px;">🔵 Chat Engaged</span>';
+                        }
+
+                        const utmStr = s.utm_source ? `${escapeHtml(s.utm_source)}` : (s.referrer ? 'Referral' : 'Direct');
+
+                        return `
+                            <tr>
+                                <td>
+                                    <strong style="color: #fff;">${escapeHtml(s.org_name || 'Organization #' + s.organization_id)}</strong>
+                                </td>
+                                <td>
+                                    <div class="mono" style="color: #a5b4fc;">${escapeHtml(s.session_id.substring(0, 16))}...</div>
+                                    <div style="font-size: 10.5px; color: #6b7280;">${escapeHtml(s.visitor_id.substring(0, 14))}...</div>
+                                    ${s.has_lead ? `<div style="font-size: 10px; color: #34d399; font-weight: 700; margin-top: 2px;">👤 ${escapeHtml(s.lead_name || s.lead_email)}</div>` : ''}
+                                </td>
+                                <td style="white-space: nowrap; color: #9ca3af;">${formatDate(s.started_at)}</td>
+                                <td style="font-weight: 700; color: #60a5fa;">${s.total_dwell_formatted}</td>
+                                <td><span style="background: #1f2937; padding: 2px 6px; border-radius: 4px; font-size: 10.5px;">${s.total_pages} pg</span></td>
+                                <td style="max-width: 220px;">
+                                    <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #e5e7eb;" title="${escapeHtml(s.entry_page || '')}">In: ${formatUrlShort(s.entry_page)}</div>
+                                    <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #6b7280;" title="${escapeHtml(s.exit_page || '')}">Out: ${formatUrlShort(s.exit_page)}</div>
+                                </td>
+                                <td><span style="background: #161f30; border: 1px solid #1f2937; padding: 2px 6px; border-radius: 4px; font-size: 10.5px;">${utmStr}</span></td>
+                                <td>${statusBadge}</td>
+                                <td style="text-align: right;">
+                                    <button class="btn btn-secondary" style="height: 26px; padding: 0 8px; font-size: 10.5px;" onclick="inspectSession('${escapeHtml(s.session_id)}')">
+                                        Inspect &rarr;
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+
+                document.getElementById('resultsInfo').innerText = `Page ${pagination.page || 1} of ${pagination.total_pages || 1} (${pagination.total_records || 0} sessions)`;
+                renderPagination(pagination);
+
+            } catch (err) {
+                console.error('Error loading superadmin journeys:', err);
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: #ef4444; padding: 24px;">Exception while loading journeys.</td></tr>`;
+            }
+        }
+
+        function renderPagination(p) {
+            const info = document.getElementById('paginationInfo');
+            const container = document.getElementById('paginationBtns');
+            if (!container || !p) return;
+            info.innerText = `Page ${p.page || 1} of ${p.total_pages || 1}`;
+            let html = '';
+            if (p.page > 1) {
+                html += `<button class="btn btn-secondary" style="height: 26px; padding: 0 8px; font-size: 10.5px;" onclick="loadAllJourneys(${p.page - 1})">&larr; Prev</button>`;
+            }
+            if (p.page < p.total_pages) {
+                html += `<button class="btn btn-secondary" style="height: 26px; padding: 0 8px; font-size: 10.5px;" onclick="loadAllJourneys(${p.page + 1})">Next &rarr;</button>`;
+            }
+            container.innerHTML = html;
+        }
+
+        async function inspectSession(sessionId) {
+            const backdrop = document.getElementById('journeyDrawerBackdrop');
+            const content = document.getElementById('drawerContent');
+            backdrop.style.display = 'flex';
+            content.innerHTML = '<div style="text-align: center; color: #6b7280; padding: 48px 0;">Loading journey path...</div>';
+
+            try {
+                let url = `/v1/superadmin/session-journeys/${encodeURIComponent(sessionId)}/steps`;
+                let res = await fetch(url, { credentials: 'same-origin' });
+                if (res.status === 401 || res.status === 403) {
+                    res = await fetch(`/v1/public/session-journeys/${encodeURIComponent(sessionId)}/steps`);
+                }
+                const json = await res.json();
+                if (json.status !== 'success' || !json.data) {
+                    content.innerHTML = `<div style="color: #ef4444; padding: 24px; text-align: center;">Error: ${json.message || 'Failed to load steps'}</div>`;
+                    return;
+                }
+
+                const session = json.data.session || {};
+                const steps = json.data.steps || [];
+
+                let stepsHtml = steps.map((st, idx) => `
+                    <div class="drawer-step">
+                        <div class="drawer-step-badge">${idx + 1}</div>
+                        <div class="drawer-step-box">
+                            <div style="display: flex; justify-content: space-between; gap: 8px;">
+                                <div style="font-weight: 700; color: #fff; font-size: 12px; line-height: 1.3;">${escapeHtml(st.page_title || st.url)}</div>
+                                <span style="background: rgba(99, 102, 241, 0.2); color: #a5b4fc; font-weight: 700; font-size: 10.5px; padding: 2px 6px; border-radius: 4px; flex-shrink: 0;">⏱️ ${st.dwell_formatted}</span>
+                            </div>
+                            <div style="font-size: 10.5px; color: #60a5fa; word-break: break-all; margin-top: 4px;">
+                                <a href="${escapeHtml(st.url)}" target="_blank" rel="noopener noreferrer" style="color: #60a5fa; text-decoration: none;">${escapeHtml(st.url)} &nearr;</a>
+                            </div>
+                            <div style="font-size: 10px; color: #6b7280; margin-top: 6px;">Visited at ${formatDate(st.created_at)}</div>
+                        </div>
+                    </div>
+                `).join('');
+
+                content.innerHTML = `
+                    <div style="background: #161f30; border: 1px solid #1f2937; border-radius: 8px; padding: 14px; margin-bottom: 20px; font-size: 11px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <div><strong style="color:#9ca3af;">Institution:</strong> <span style="color:#fff;">${escapeHtml(session.org_name || 'ID ' + session.organization_id)}</span></div>
+                            <div><strong style="color:#9ca3af;">Total Dwell:</strong> <span style="color:#60a5fa; font-weight:700;">${session.total_dwell_formatted}</span></div>
+                            <div style="grid-column: span 2;"><strong style="color:#9ca3af;">Session ID:</strong> <span class="mono">${escapeHtml(session.session_id)}</span></div>
+                            <div style="grid-column: span 2;"><strong style="color:#9ca3af;">Traffic Source:</strong> ${session.utm_source ? `${escapeHtml(session.utm_source)} (${escapeHtml(session.utm_campaign || '')})` : (session.referrer ? escapeHtml(session.referrer) : 'Direct')}</div>
+                        </div>
+                    </div>
+                    ${session.lead_name ? `
+                        <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 8px; padding: 12px; margin-bottom: 20px;">
+                            <div style="font-weight: 700; color: #6ee7b7; font-size: 11px; text-transform: uppercase;">🎓 Captured Lead</div>
+                            <div style="color: #fff; font-weight: 700; margin-top: 2px;">${escapeHtml(session.lead_name)}</div>
+                            <div style="color: #a7f3d0; font-size: 10.5px;">${escapeHtml(session.lead_email || '')} &bull; ${escapeHtml(session.lead_phone || '')}</div>
+                        </div>
+                    ` : ''}
+                    <div style="font-weight: 700; text-transform: uppercase; font-size: 11px; color: #9ca3af; letter-spacing: 0.5px; margin-bottom: 12px;">Step Timeline</div>
+                    <div>${stepsHtml || '<div style="color:#6b7280; text-align:center;">No steps recorded.</div>'}</div>
+                `;
+
+            } catch (err) {
+                content.innerHTML = `<div style="color: #ef4444; padding: 24px; text-align: center;">Failed to load step details.</div>`;
+            }
+        }
+
+        function closeDrawer() {
+            document.getElementById('journeyDrawerBackdrop').style.display = 'none';
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function formatUrlShort(url) {
+            if (!url) return '-';
+            try {
+                const parsed = new URL(url);
+                return parsed.pathname || '/';
+            } catch(e) {
+                return url.substring(0, 24);
+            }
+        }
+
+        function formatDate(dt) {
+            if (!dt) return '-';
+            try {
+                const d = new Date(dt.replace(' ', 'T') + 'Z');
+                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            } catch(e) {
+                return dt;
+            }
+        }
+
+        // Initialize on load
+        loadOrganizations();
+        loadAllJourneys(1);
+    </script>
+</body>
+</html>
