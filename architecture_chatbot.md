@@ -45,14 +45,16 @@ The following diagram illustrates the complete architectural topology of the Edv
 ```mermaid
 flowchart TD
     subgraph ClientLayer["Client & Embedding Layer"]
-        Widget["Client Browser / widget.js<br/>(Embeddable Script)"]
+        Widget["Client Browser / widget.js<br/>(Embeddable Script: Chat, Beacons, Dwell, UTM)"]
         PreviewUI["Admin Preview / Standalone Chat<br/>(/public/app/, /test_chat.html)"]
     end
 
-    subgraph EntryPoint["Entry Point & Security"]
+    subgraph EntryPoint["Entry Point & Ingestion Gateways"]
         NginxApache["Apache 2.4.58 + PHP-FPM 8.2<br/>(VirtualHost: edvora.chat)"]
         Router["App\\Core\\Router<br/>(public/index.php)"]
         DomainCheck["Domain Whitelist Validation<br/>(chatbots.allowed_domains)"]
+        TrackingCtrl["App\\Controllers\\TrackingController<br/>(POST /v1/tracking/beacon)"]
+        JourneyCtrl["App\\Controllers\\SessionJourneyController<br/>(GET /v1/analytics/session-journeys)"]
     end
 
     subgraph ChatEngine["Core Chatbot Orchestrator"]
@@ -80,23 +82,33 @@ flowchart TD
 
     subgraph DataLayer["Persistence & Storage (MariaDB / Redis / Filesystem)"]
         DB_Chatbots[("chatbots & widget_customizations")]
-        DB_Convs[("conversations<br/>(lead_forms_shown, last_offer_turn, stage)")]
+        DB_Sessions[("visitor_sessions & visitor_page_views<br/>(Dwell, UTM, sequential steps, status)")]
+        DB_Convs[("conversations<br/>(session_id, lead_forms_shown, last_offer_turn, stage)")]
         DB_Msgs[("messages<br/>(Dual-bubble tracking, sentiment, frustration, sources)")]
-        DB_Leads[("leads<br/>(Contact info, program, lead type)")]
+        DB_Leads[("leads<br/>(session_id, contact info, program, lead type)")]
         DB_Knowledge[("knowledge_items & knowledge_sources")]
         DB_Programs[("programs, campuses, tour_slots, scholarships")]
         DB_Usage[("usage_logs & llm_usage_logs")]
     end
 
     Widget -->|POST /v1/chat/completions| NginxApache
+    Widget -->|POST /v1/tracking/beacon (60s heartbeats, dwell)| NginxApache
     PreviewUI -->|POST /v1/chat/completions| NginxApache
     NginxApache --> Router
     Router --> DomainCheck
     DomainCheck --> ChatCtrl
+    Router --> TrackingCtrl
+    Router --> JourneyCtrl
+
+    TrackingCtrl --> DB_Sessions
+    JourneyCtrl --> DB_Sessions
+    JourneyCtrl --> DB_Convs
+    JourneyCtrl --> DB_Leads
 
     ChatCtrl --> DB_Chatbots
     ChatCtrl --> DB_Convs
     ChatCtrl --> DB_Msgs
+    ChatCtrl --> DB_Sessions
 
     ChatCtrl --> IntentClass
     ChatCtrl --> QueryTrans
@@ -543,6 +555,23 @@ The widget monitors prospective student on-page behavior and initiates high-rele
   3. If missing, server replies `{"status": "need_snippet"}`; widget strips non-content tags, takes the first 1,500 characters of clean DOM text, and re-posts.
   4. Server summarizes the page, saves it to `visitor_pages`, generates the opening message, logs the session, and the widget automatically opens with the greeting.
 
+### 9.4 Session Journey, Dwell Tracking & Attribution Subsystem (`initSessionTracking`):
+Alongside the conversational chatbot, `widget.js` runs a zero-overhead, privacy-first telemetry engine:
+- **Session ID Generation & Persistence:**
+  Generates `s_` + random alphanumeric + timestamp on first initialization and caches it in `sessionStorage` (`edvora_session_{botToken}`). Per design, there is no artificial inactivity timeout—sessions track the entire continuous visit until the tab/window closes.
+- **First-Touch Marketing Attribution (`edvora_utm_{botToken}`):**
+  Extracts `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`, and `document.referrer` on the landing page, persisting them in `sessionStorage` so all downstream pages and conversion events retain full attribution.
+- **Incremental 60-Second Heartbeats:**
+  Increments elapsed dwell time locally each second and dispatches a background ping (`is_heartbeat: true`) to `POST /v1/tracking/beacon` every 60 seconds.
+- **Single Page Application (SPA) Client Routing:**
+  Hooks `window.history.pushState` and `window.addEventListener('popstate')`. Whenever client routing changes URLs without a page reload, the accumulated dwell time for the prior URL is flushed immediately via beacon, and timer counters reset for the new view.
+- **Unload & Visibility Change Flush:**
+  Listens to `visibilitychange` (state: `hidden`) and `window.pagehide`, firing a fire-and-forget payload via `navigator.sendBeacon` (fallback: `fetch` with `keepalive: true`).
+- **5-Second Dwell Filter:**
+  Beacons with dwell time under 5 seconds that are not ongoing heartbeats are dropped to eliminate bounce noise and keep the analytics database clean.
+- **Session ID Injection:**
+  The `session_id` is automatically attached to all chat turn payloads (`POST /v1/chat/completions`) and lead capture submissions (`POST /v1/leads`), cleanly connecting web journeys with conversational outcomes.
+
 ---
 
 ## 10. Database Schema & Data Dictionary
@@ -552,9 +581,14 @@ erDiagram
     organizations ||--o{ chatbots : owns
     organizations ||--o{ programs : offers
     organizations ||--o{ knowledge_sources : maintains
+    organizations ||--o{ visitor_sessions : logs
     organizations ||--o{ conversations : logs
     organizations ||--o{ leads : captures
     organizations ||--o{ visitor_pages : registers
+
+    visitor_sessions ||--o{ visitor_page_views : tracks
+    visitor_sessions ||--o{ conversations : associates
+    visitor_sessions ||--o{ leads : converts
 
     chatbots ||--o{ conversations : initiates
     conversations ||--o{ messages : contains
@@ -582,6 +616,38 @@ erDiagram
         boolean lead_capture_enabled
     }
 
+    visitor_sessions {
+        int id PK
+        int organization_id FK
+        string session_id UK
+        string visitor_id
+        string referrer
+        string utm_source
+        string utm_medium
+        string utm_campaign
+        string utm_term
+        string utm_content
+        string entry_page
+        string exit_page
+        int total_pages
+        int total_dwell_seconds
+        string conversion_status "browsing | chat_engaged | lead_converted"
+        timestamp started_at
+        timestamp last_active_at
+    }
+
+    visitor_page_views {
+        int id PK
+        int organization_id FK
+        string session_id FK
+        string visitor_id
+        string url
+        string page_title
+        int time_spent_seconds
+        int view_order
+        timestamp created_at
+    }
+
     visitor_pages {
         int id PK
         int organization_id FK
@@ -596,6 +662,7 @@ erDiagram
         int id PK
         int organization_id FK
         int chatbot_id FK
+        string session_id FK
         string visitor_id
         int program_id FK
         string lead_program_interest
@@ -633,6 +700,7 @@ erDiagram
     leads {
         int id PK
         int organization_id FK
+        string session_id FK
         int conversation_id FK
         int program_id FK
         string name
@@ -654,18 +722,96 @@ erDiagram
 
 ---
 
-## 11. Multi-Provider LLM Gateway & Observability
+## 11. Visitor Session Telemetry, Dwell Tracking & Attribution
+
+The Edvora Chatbot does not operate in isolation from the university website. Prospective students browse multiple program, tuition, campus, and scholarship pages before, during, or after interacting with the chatbot. The **Visitor Session Journeys & Dwell Tracking Subsystem** bridges the gap between web navigation telemetry and conversational admissions outcomes.
+
+### 11.1 Telemetry Data Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Visitor as Prospective Student (Browser)
+    participant Widget as widget.js (Tracking Engine)
+    participant TC as TrackingController (handleBeacon)
+    participant DB as MariaDB (visitor_sessions, visitor_page_views)
+    participant CC as ChatController (complete)
+    participant LC as LeadController (store)
+
+    Visitor->>Widget: Loads university page (e.g. /programs/mba?utm_source=google)
+    Note over Widget: 1. Generate/reuse session_id in sessionStorage<br/>2. Extract & cache UTM params + referrer
+    
+    loop Every 60 Seconds
+        Widget->>TC: POST /v1/tracking/beacon (incremental heartbeat ping)
+        TC->>DB: Upsert visitor_sessions (dwell, exit_page) & visitor_page_views
+    end
+
+    alt Visitor Navigates to Another Page (SPA or Multi-Page)
+        Widget->>TC: Flush accumulated dwell for previous page via sendBeacon
+        Note over Widget: Reset dwell timer & increment view_order for new page
+    end
+
+    opt Visitor Engages in AI Chat
+        Visitor->>Widget: Types question in chatbot widget
+        Widget->>CC: POST /v1/chat/completions {session_id, visitor_id, message...}
+        CC->>DB: Save conversation & upgrade visitor_sessions.conversion_status -> 'chat_engaged'
+    end
+
+    opt Visitor Converts (Lead Captured)
+        Visitor->>Widget: Submits Prospectus / Tour / Callback / Scholarship Form
+        Widget->>LC: POST /v1/leads {session_id, name, email, phone...}
+        LC->>DB: Insert lead & promote visitor_sessions.conversion_status -> 'lead_converted'
+    end
+
+    Visitor->>Widget: Closes tab or navigates away (pagehide / visibilitychange)
+    Widget->>TC: sendBeacon(dwell_seconds) (flushes final dwell if >= 5s)
+```
+
+### 11.2 Progressive Conversion Lifecycle
+Every session is classified into one of three progressive states in `visitor_sessions.conversion_status`:
+
+1. **`browsing` (⚪ Browsing Only):**
+   * The baseline state for visitors reading university webpages without opening the chat widget or converting.
+   * Useful for measuring website content engagement, dwell times per program, and drop-off points.
+2. **`chat_engaged` (🔵 Chat Engaged):**
+   * Automatically triggered when the visitor sends their first message to the AI admissions counselor.
+   * Linked via `conversations.session_id`. Signals active exploration and advisory interest.
+3. **`lead_converted` (🟢 Lead Converted):**
+   * Promoted when the student completes any high-intent admissions conversion event:
+     - Syllabus or prospectus asset download (`lead_type = 'asset'`)
+     - Campus tour scheduling (`lead_type = 'tour'`)
+     - Human counselor callback request (`lead_type = 'callback'`)
+     - Merit aid / scholarship evaluation (`lead_type = 'scholarship'`)
+   * Linked via `leads.session_id`. Enables end-to-end attribution from initial UTM campaign click through sequential page views to verified lead generation.
+
+### 11.3 Analytics Endpoints & Administration Interfaces
+
+| Endpoint | Auth Gate | Description |
+|---|---|---|
+| `POST /v1/tracking/beacon` | Public (bot token) | Lightweight, high-throughput beacon ingestion with 5-second minimum dwell filter. |
+| `GET /v1/analytics/session-journeys` | College Admin (JWT) | Paginated list of sessions for the tenant with KPI aggregates (total sessions, avg dwell, pages/session, conversion rate). |
+| `GET /v1/analytics/session-journeys/{sessionId}/steps` | College Admin (JWT) | Chronological step-by-step page view journey for a specific session. |
+| `GET /v1/superadmin/session-journeys` | Super Admin (JWT) | Cross-tenant global session explorer with institution dropdown filtering. |
+| `GET /v1/superadmin/session-journeys/{sessionId}/steps` | Super Admin (JWT) | Step-by-step journey inspector across all institutions. |
+
+**Frontend Views:**
+* **College Admin:** Embedded within Organization Settings (`https://edvora.chat/app/#org-settings`) as Card 7, rendering tab `#session-journeys` (`public/app/tabs/session-journeys.html`).
+* **Super Admin:** Dedicated standalone page at `/superadmin/session-journeys` (`public/superadmin/session-journeys.html`) accessible from the Super Admin sidebar.
+
+---
+
+## 12. Multi-Provider LLM Gateway & Observability
 
 All LLM operations pass through [`App\Services\LlmService`](file:///c:/xampp/htdocs/edvora.chat/app/Services/LlmService.php).
 
-### 11.1 Super Admin Multi-Provider Failover:
+### 12.1 Super Admin Multi-Provider Failover:
 1. Queries `llm_providers` for `role = 'primary'` and `is_active = 1`.
 2. Dispatches completion using AES-256 decrypted API keys.
 3. If primary fails (timeout, rate limit, HTTP 5xx), automatically falls back to `role = 'fallback'`.
 4. If fallback fails, falls back to environment variables (`OPENAI_API_KEY`, `GEMINI_API_KEY`).
 5. Tracks which provider serviced the turn in `messages.is_fallback` and `messages.source`.
 
-### 11.2 Telemetry & Token Accounting:
+### 12.2 Telemetry & Token Accounting:
 Every turn is recorded in `llm_usage_logs` via [`LlmUsageLogger`](file:///c:/xampp/htdocs/edvora.chat/app/Services/LlmUsageLogger.php):
 - Prompt tokens, completion tokens, total tokens
 - Latency in milliseconds
@@ -674,13 +820,15 @@ Every turn is recorded in `llm_usage_logs` via [`LlmUsageLogger`](file:///c:/xam
 
 ---
 
-## 12. Developer & AI Coding Assistant Quickstart Guide
+## 13. Developer & AI Coding Assistant Quickstart Guide
 
-### 12.1 Key Service File Reference:
+### 13.1 Key Service File Reference:
 
 | File Path | Role & Key Responsibilities |
 |---|---|
 | [`app/Controllers/ChatController.php`](file:///c:/xampp/htdocs/edvora.chat/app/Controllers/ChatController.php) | Orchestrates turn lifecycle, cadence counters, 9-intent execution, trigger resolution, and message persistence. |
+| [`app/Controllers/TrackingController.php`](file:///c:/xampp/htdocs/edvora.chat/app/Controllers/TrackingController.php) | High-speed beacon ingestion for dwell time, heartbeats, and multi-step page views (`POST /v1/tracking/beacon`). |
+| [`app/Controllers/SessionJourneyController.php`](file:///c:/xampp/htdocs/edvora.chat/app/Controllers/SessionJourneyController.php) | Session journeys analytics controller for College Admin and Super Admin dashboards. |
 | [`app/Services/PromptBuilder.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/PromptBuilder.php) | Injects 5 session inputs, 5 Cardinal Rules, 9-intent rules, knowledge blocks, and admissions persona. |
 | [`app/Services/LlmService.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/LlmService.php) | Manages LLM connections, JSON schema enforcement, key decryption, and failovers. |
 | [`app/Services/IntentClassifier.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/IntentClassifier.php) | Detects affirmative responses (`isAffirmativeResponse`) and context lookback triggers. |
@@ -689,13 +837,15 @@ Every turn is recorded in `llm_usage_logs` via [`LlmUsageLogger`](file:///c:/xam
 | [`app/Services/EmbeddingService.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/EmbeddingService.php) | Generates 1536-dim embeddings via OpenAI API. |
 | [`app/Services/QueryTranslator.php`](file:///c:/xampp/htdocs/edvora.chat/app/Services/QueryTranslator.php) | Translates non-English queries to English for retrieval indexing. |
 | [`app/Controllers/ProactiveTriggerController.php`](file:///c:/xampp/htdocs/edvora.chat/app/Controllers/ProactiveTriggerController.php) | Manages active page context registry (`visitor_pages`), 2-step handshake, and generates proactive consultative greetings. |
-| [`public/widget.js`](file:///c:/xampp/htdocs/edvora.chat/public/widget.js) | Embeddable front-end client rendering bubbles, triggers, catalog cards, modals, and proactive triggers engine. |
+| [`public/widget.js`](file:///c:/xampp/htdocs/edvora.chat/public/widget.js) | Embeddable front-end client rendering bubbles, triggers, catalog cards, modals, proactive triggers engine, and session tracking beacon. |
+| [`public/app/tabs/session-journeys.html`](file:///c:/xampp/htdocs/edvora.chat/public/app/tabs/session-journeys.html) | College Admin session journeys ops console, KPI ribbon, path visualization drawer, and campaign breakdown. |
+| [`public/superadmin/session-journeys.html`](file:///c:/xampp/htdocs/edvora.chat/public/superadmin/session-journeys.html) | Superadmin standalone cross-tenant session journeys console with institution filtering. |
 
-### 12.2 Rules for Developers & AI Assistants:
+### 13.2 Rules for Developers & AI Assistants:
 1. **Never attempt local execution:** There is NO local PHP or MySQL on the development machine. All tests and migrations run on the remote VPS (`166.1.2.112`).
 2. **Deploy atomically:** Always run `powershell -ExecutionPolicy Bypass -File .\deploy.ps1 -Message "..."` after changes.
 3. **Preserve JSON Schema integrity:** If you modify `LlmService::getAdmissionsResponseSchema()`, you MUST update `ChatController.php` decoding, `messages` column mappings, and `widget.js` rendering simultaneously.
-4. **Respect multi-tenancy:** Never query `conversations`, `messages`, `leads`, or `knowledge_items` without `WHERE organization_id = :org_id`.
+4. **Respect multi-tenancy:** Never query `conversations`, `messages`, `leads`, `knowledge_items`, or `visitor_sessions` without `WHERE organization_id = :org_id`.
 5. **Honor the 5 Cardinal Rules & Cadence:** Never remove the program qualification check, post-lead capture restrictions, or the `user_message_count >= 3` gate from `ChatController.php` or `PromptBuilder.php`.
 
 ---

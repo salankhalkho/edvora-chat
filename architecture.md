@@ -229,10 +229,12 @@ Structured academic program records. Source of truth for program data. When crea
 
 | Table | Purpose |
 |---|---|
-| `conversations` | Per-visitor chat session with UTM and lead data, including `proactive_trigger_fired`, `proactive_page_type`, `proactive_trigger_type` |
+| `visitor_sessions` | Persistent visitor sessions tracking UTM parameters, entry/exit pages, total dwell seconds, and conversion lifecycle (`browsing`, `chat_engaged`, `lead_converted`) |
+| `visitor_page_views` | Chronological page views per session tracking visited URLs, page titles, and individual dwell times |
+| `conversations` | Per-visitor chat session linked to `session_id` with UTM and lead data, including `proactive_trigger_fired`, `proactive_page_type`, `proactive_trigger_type` |
 | `visitor_pages` | Lightweight autonomous URL registry storing 2-sentence AI summaries and classified page types for proactive triggers |
 | `messages` | Per-turn message log with `knowledge_sources_used` JSON |
-| `leads` | Captured visitor contact details |
+| `leads` | Captured visitor contact details linked to `session_id` and `conversation_id` |
 | `jobs` | Background job queue (`type`, `payload`, `status`, `run_at`) |
 | `llm_providers` | Multi-provider LLM config with AES-256 encrypted API keys |
 | `platform_config` | Global key-value store (master prompt, encryption keys, etc.) |
@@ -572,7 +574,92 @@ To maximize speed and minimize network bandwidth, `widget.js` and `ProactiveTrig
 
 ---
 
-## 14. Deployment
+## 14. Visitor Session Journeys, Dwell Tracking & Campaign Attribution Engine
+
+Edvora includes an autonomous, privacy-friendly visitor journey tracking and attribution engine. It captures prospective students' multi-page browsing paths, page-level dwell times, inbound marketing attribution (UTM parameters and referrers), and tracks progressive conversion lifecycle states without external trackers or cookies.
+
+### 14.1 Architectural Role & Telemetry Pipeline
+
+```mermaid
+flowchart LR
+    subgraph Browser["Visitor Browser (widget.js)"]
+        SessGen["Session Storage<br/>edvora_session_{botToken}<br/>(s_random_timestamp)"]
+        UTMCache["Attribution Cache<br/>edvora_utm_{botToken}<br/>(utm_source, referrer, etc.)"]
+        Ticker["60s Heartbeat Ticker<br/>+ visibilitychange / pagehide"]
+        SPAMonitor["SPA Router Hooks<br/>(pushState / popstate)"]
+    end
+
+    subgraph API["Ingestion & Analytics Gateway"]
+        BeaconEndpoint["POST /v1/tracking/beacon<br/>(TrackingController::handleBeacon)"]
+        MinDwellFilter["5s Minimum Dwell Filter<br/>(Discards bounces < 5s)"]
+        AnalyticsCtrl["SessionJourneyController<br/>(/v1/analytics/session-journeys)"]
+    end
+
+    subgraph DB["MariaDB (edvora_chat)"]
+        TblSessions[("visitor_sessions<br/>(entry, exit, dwell, UTM, status)")]
+        TblViews[("visitor_page_views<br/>(url, title, dwell, view_order)")]
+        TblConvs[("conversations<br/>(session_id FK)")]
+        TblLeads[("leads<br/>(session_id FK)")]
+    end
+
+    SessGen --> BeaconEndpoint
+    UTMCache --> BeaconEndpoint
+    Ticker --> BeaconEndpoint
+    SPAMonitor --> BeaconEndpoint
+
+    BeaconEndpoint --> MinDwellFilter
+    MinDwellFilter --> TblSessions
+    MinDwellFilter --> TblViews
+
+    AnalyticsCtrl --> TblSessions
+    AnalyticsCtrl --> TblViews
+    AnalyticsCtrl --> TblConvs
+    AnalyticsCtrl --> TblLeads
+```
+
+### 14.2 Client Telemetry Pipeline (`widget.js`)
+* **Session Identifier Persistence:**
+  Upon widget initialization, `widget.js` checks `sessionStorage` for `edvora_session_{botToken}`. If missing, it generates a cryptographically unique session ID (`s_` + alphanumeric hash + timestamp).
+  * *No Inactivity Timeout:* Unlike session tokens that expire after 30 minutes of idle time, `session_id` remains tied to the browser tab lifecycle for the complete continuous visit.
+* **Campaign & Referrer Attribution (VVIP):**
+  On the visitor's first landing page, `widget.js` inspects query parameters for `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content` and extracts `document.referrer`.
+  * Attribution parameters are stored in `sessionStorage` (`edvora_utm_{botToken}`) on the first page view and persisted across all subsequent sub-page navigations within the session.
+* **Incremental 60-Second Heartbeats:**
+  A lightweight interval timer increments local dwell seconds every second and dispatches a background heartbeat ping (`is_heartbeat: true`) to `POST /v1/tracking/beacon` every 60 seconds.
+* **Single Page Application (SPA) Client Routing Support:**
+  `widget.js` hooks into `window.history.pushState` and `window.addEventListener('popstate', ...)` to automatically detect client-side framework route changes (React, Vue, Next.js, Nuxt, Angular). When a route change occurs:
+  1. Accumulated dwell time for the previous URL is flushed immediately via beacon.
+  2. The page tracker resets timers, updates the active URL, and starts tracking the new page as the next step in the chronological path.
+* **Page Lifecycle & Unload Dispatch:**
+  When a visitor switches tabs or closes the browser window, `visibilitychange` (state: `hidden`) and `pagehide` listeners flush the final dwell seconds immediately using `navigator.sendBeacon` (falling back to fetch with `keepalive: true`).
+* **Minimum Dwell Filter (5 Seconds):**
+  To prevent noisy database accumulation from accidental clicks, instant bounces, or bot probes, `TrackingController` enforces a **5-second dwell threshold**:
+  * Unload beacons with `dwell_seconds < 5` that are not heartbeats are rejected with HTTP 200 `{"status": "ignored", "reason": "dwell_time_below_threshold"}`.
+  * Pages with $\ge 5$ seconds of engaged dwell time are committed to `visitor_sessions` and `visitor_page_views`.
+
+### 14.3 Conversion Progression & Event Linking
+The subsystem establishes a 3-tier progressive conversion lifecycle stored in `visitor_sessions.conversion_status`:
+
+| Status Badge | Database Value | Triggering Condition |
+|---|---|---|
+| ⚪ **Browsing Only** | `browsing` | Default state. Visitor navigates institutional pages without opening chat or submitting inquiries. |
+| 🔵 **Chat Engaged** | `chat_engaged` | Visitor opens the widget and exchanges at least one message with the AI admissions counselor (`POST /v1/chat/completions` records `session_id` and upgrades status). |
+| 🟢 **Lead Converted** | `lead_converted` | Visitor completes any high-intent admissions conversion event: Prospectus/Syllabus request, Campus Tour booking, Counselor Callback request, or Scholarship Evaluation (`LeadController::store` records `session_id` and promotes status). |
+
+### 14.4 Dashboards & Visualization Interfaces
+1. **College Admin Operations Dashboard (`public/app/tabs/session-journeys.html`):**
+   * Accessible via **Card 7 ("Visitor Session Journeys")** in Organization Settings (`https://edvora.chat/app/#org-settings`) and direct hash navigation (`#session-journeys`).
+   * **Key Metrics Ribbon:** Total Tracked Sessions, Average Dwell Time, Pages per Session, and Lead Conversion Rate.
+   * **Performance Cards:** Top Visited Pages (with dwell breakdown), Top Exit Pages (identifying bounce/drop-off points), and Top Campaign Sources (UTM breakdown).
+   * **Filterable Session Explorer:** Filter by date preset (Last 7, 30, 60, 90 Days), conversion status (`All`, `Lead Converted`, `Chat Engaged`, `Browsing Only`), or free-text search (session ID, visitor ID, UTM campaign, landing page).
+   * **Chronological Journey Drawer:** Interactive modal detailing the exact sequential path taken by the visitor, showing each visited URL, page title, dwell duration (seconds/minutes), and step number.
+2. **Superadmin Global Journeys Dashboard (`public/superadmin/session-journeys.html`):**
+   * Accessible via the Superadmin sidebar navigation link (**"Visitor Journeys"**).
+   * Features a cross-tenant **Institution Filter** dropdown to inspect journeys tenant-by-tenant or across all partner universities globally.
+
+---
+
+## 15. Deployment
 
 All changes are deployed using the master script:
 
@@ -592,7 +679,7 @@ Steps:
 
 ---
 
-## 15. Key Service File Map
+## 16. Key Service File Map
 
 > 📘 **Chatbot Architecture:** For comprehensive details on each chat service, consult [**`architecture_chatbot.md` § 12**](file:///c:/xampp/htdocs/edvora.chat/architecture_chatbot.md#12-developer--ai-coding-assistant-quickstart-guide).
 
@@ -615,14 +702,18 @@ Steps:
 | [`app/Controllers/KnowledgeController.php`](file:///c:/xampp/htdocs/edvora.chat/app/Controllers/KnowledgeController.php) | REST API for knowledge source CRUD and ingestion. |
 | [`app/Controllers/ProgramController.php`](file:///c:/xampp/htdocs/edvora.chat/app/Controllers/ProgramController.php) | REST API for programs — triggers auto-embedding background jobs on save. |
 | [`app/Controllers/ChatController.php`](file:///c:/xampp/htdocs/edvora.chat/app/Controllers/ChatController.php) | Chat turn orchestrator: embedding $\rightarrow$ retrieval $\rightarrow$ prompt $\rightarrow$ LLM $\rightarrow$ analytics $\rightarrow$ response. |
+| [`app/Controllers/TrackingController.php`](file:///c:/xampp/htdocs/edvora.chat/app/Controllers/TrackingController.php) | High-speed beacon ingestion endpoint for visitor page dwell times and session flow (`POST /v1/tracking/beacon`). |
+| [`app/Controllers/SessionJourneyController.php`](file:///c:/xampp/htdocs/edvora.chat/app/Controllers/SessionJourneyController.php) | Analytics endpoint for tenant and cross-tenant visitor session journeys, metrics, and sequential path drill-down. |
 | [`app/Controllers/ProactiveTriggerController.php`](file:///c:/xampp/htdocs/edvora.chat/app/Controllers/ProactiveTriggerController.php) | Active page context registry & proactive trigger greeting generator (`POST /v1/chat/proactive`). |
-| [`public/widget.js`](file:///c:/xampp/htdocs/edvora.chat/public/widget.js) | Embeddable front-end client rendering bubbles, triggers, catalog cards, modals, and proactive triggers engine. |
+| [`public/widget.js`](file:///c:/xampp/htdocs/edvora.chat/public/widget.js) | Embeddable front-end client rendering bubbles, triggers, catalog cards, modals, proactive triggers engine, and session tracking beacon. |
+| [`public/app/tabs/session-journeys.html`](file:///c:/xampp/htdocs/edvora.chat/public/app/tabs/session-journeys.html) | College Admin session journeys ops console, KPI ribbon, path visualization drawer, and campaign breakdown. |
+| [`public/superadmin/session-journeys.html`](file:///c:/xampp/htdocs/edvora.chat/public/superadmin/session-journeys.html) | Superadmin standalone cross-tenant session journeys console with institution filtering. |
 | [`app/Database/Migrations.php`](file:///c:/xampp/htdocs/edvora.chat/app/Database/Migrations.php) | Idempotent schema creation and ALTER TABLE migrations. |
 | [`workers/job_runner.php`](file:///c:/xampp/htdocs/edvora.chat/workers/job_runner.php) | Supervisor background worker — handles background chunking, embedding, and URL crawling. |
 
 ---
 
-## 16. UI / Branding Rules
+## 17. UI / Branding Rules
 
 All UI must follow [`BRANDING_GUIDELINES.md`](file:///c:/xampp/htdocs/edvora.chat/BRANDING_GUIDELINES.md) and link [`theme-branding.css`](file:///c:/xampp/htdocs/edvora.chat/theme-branding.css):
 
