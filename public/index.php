@@ -40,6 +40,7 @@ use App\Controllers\LeadController;
 use App\Controllers\OnboardingController;
 use App\Controllers\OrganizationController;
 use App\Controllers\ProgramController;
+use App\Controllers\ProactiveTriggerController;
 use App\Controllers\ScholarshipController;
 use App\Controllers\SmartOnboardingController;
 use App\Controllers\SuperAdminController;
@@ -482,6 +483,7 @@ $router->get('/v1/public/dashboard/departments/{bot_token}', [DepartmentControll
 $router->get('/v1/widget/scholarship/courses/{bot_token}', [ScholarshipController::class, 'publicCourses']);
 $router->post('/v1/widget/scholarship/evaluate', [ScholarshipController::class, 'evaluate']);
 $router->post('/v1/chat/completions', [ChatController::class, 'complete']);
+$router->post('/v1/chat/proactive', [ProactiveTriggerController::class, 'handle']);
 $router->post('/v1/chat/message', [ChatController::class, 'complete']);
 $router->post('/api/chat/message', [ChatController::class, 'complete']);
 $router->post('/api/chat/completions', [ChatController::class, 'complete']);

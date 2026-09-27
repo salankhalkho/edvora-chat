@@ -284,6 +284,22 @@ class Migrations
                 metadata JSON NULL,
                 ip_address VARCHAR(45) NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
+
+            // 17. VISITOR PAGES (Lightweight page context registry for Proactive Triggers)
+            "CREATE TABLE IF NOT EXISTS visitor_pages (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                organization_id INT NOT NULL,
+                url VARCHAR(500) NOT NULL,
+                url_hash CHAR(64) NOT NULL,
+                page_title VARCHAR(255) NULL,
+                page_type VARCHAR(50) NOT NULL DEFAULT 'generic',
+                page_summary TEXT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                UNIQUE KEY uk_org_url_hash (organization_id, url_hash),
+                INDEX idx_org_page_type (organization_id, page_type),
+                FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
         ];
 
@@ -1675,6 +1691,19 @@ class Migrations
             }
         } catch (Throwable $e) {
             error_log('[Migrations] messages.intent_explanation: ' . $e->getMessage());
+        }
+
+        // Add proactive trigger columns to conversations (Proactive Triggers Engine)
+        try {
+            $checkProactive = $this->db->query("SHOW COLUMNS FROM conversations LIKE 'proactive_trigger_fired'");
+            if (!$checkProactive->fetch()) {
+                $this->db->exec("ALTER TABLE conversations
+                    ADD COLUMN proactive_trigger_fired TINYINT(1) DEFAULT 0 AFTER is_test,
+                    ADD COLUMN proactive_page_type VARCHAR(50) NULL AFTER proactive_trigger_fired,
+                    ADD COLUMN proactive_trigger_type VARCHAR(50) NULL AFTER proactive_page_type;");
+            }
+        } catch (Throwable $e) {
+            error_log('[Migrations] conversations proactive columns: ' . $e->getMessage());
         }
     }
 }

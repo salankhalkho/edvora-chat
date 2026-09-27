@@ -22,6 +22,9 @@
             <button type="button" class="brand-btn-primary" id="saveWidgetConfigBtn" style="height: 38px; padding: 0 20px; font-size: 12px; font-weight: 700; background: #063D3B; color: #C8FF63; border: 1.5px solid #063D3B; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;" onclick="saveWidgetCustomization()">
                 💾 Save &amp; Apply Customization
             </button>
+            <button type="button" class="brand-btn-primary" id="saveProactiveTriggersBtn" style="height: 38px; padding: 0 20px; font-size: 12px; font-weight: 700; background: #063D3B; color: #C8FF63; border: 1.5px solid #063D3B; border-radius: 8px; cursor: pointer; display: none; align-items: center; gap: 6px;" onclick="saveProactiveTriggerConfig()">
+                💾 Save Trigger Settings
+            </button>
         </div>
     </div>
 
@@ -791,6 +794,109 @@
                             }
                         }
                     }
+
+                    function initProactiveCards() {
+                        const radios = document.querySelectorAll('input[name="proactive_trigger_mode"]');
+                        radios.forEach(function(r) {
+                            r.addEventListener('change', function() {
+                                document.querySelectorAll('.proactive-trigger-card').forEach(function(card) {
+                                    card.style.border = '1.5px solid #E6F0EC';
+                                });
+                                const activeCard = this.closest('.proactive-trigger-card');
+                                if (activeCard) {
+                                    activeCard.style.border = '2px solid #063D3B';
+                                }
+                            });
+                        });
+                    }
+
+                    window.loadProactiveTriggerConfig = function() {
+                        const config = (window.wcState && window.wcState.config) ? window.wcState.config : {};
+                        const triggers = config.proactive_triggers || {};
+                        const mode = triggers.mode || 'high_intent';
+                        const exitIntent = (triggers.exit_intent_enabled !== false);
+
+                        const radios = document.querySelectorAll('input[name="proactive_trigger_mode"]');
+                        radios.forEach(function(r) {
+                            r.checked = (r.value === mode);
+                            const card = r.closest('.proactive-trigger-card');
+                            if (card) {
+                                card.style.border = (r.value === mode) ? '2px solid #063D3B' : '1.5px solid #E6F0EC';
+                            }
+                        });
+
+                        const exitToggle = document.getElementById('toggleExitIntent');
+                        if (exitToggle) {
+                            exitToggle.checked = exitIntent;
+                            onExitIntentToggle(exitToggle);
+                        }
+                    };
+
+                    window.saveProactiveTriggerConfig = async function() {
+                        const btn = document.getElementById('saveProactiveTriggersBtn');
+                        const statusEl = document.getElementById('studioSaveStatus');
+                        if (btn) {
+                            btn.textContent = 'Saving...';
+                            btn.disabled = true;
+                        }
+
+                        const selectedRadio = document.querySelector('input[name="proactive_trigger_mode"]:checked');
+                        const mode = selectedRadio ? selectedRadio.value : 'high_intent';
+                        const exitToggle = document.getElementById('toggleExitIntent');
+                        const exitIntentEnabled = exitToggle ? exitToggle.checked : true;
+
+                        if (!window.wcState) window.wcState = { config: {} };
+                        if (!window.wcState.config) window.wcState.config = {};
+
+                        window.wcState.config.proactive_triggers = {
+                            mode: mode,
+                            exit_intent_enabled: exitIntentEnabled,
+                            time_threshold_seconds: 90,
+                            scroll_threshold_pct: 40
+                        };
+
+                        const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token') || (typeof getAuthToken === 'function' ? getAuthToken() : '');
+                        const botId = window.wcState.botId || (window.currentWidgetBot && window.currentWidgetBot.id);
+
+                        try {
+                            const res = await fetch('/v1/widget/customization', {
+                                method: 'PUT',
+                                headers: {
+                                    'Authorization': 'Bearer ' + token,
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    bot_id: botId,
+                                    scope: 'org',
+                                    dept_id: null,
+                                    config: window.wcState.config
+                                })
+                            });
+                            const data = await res.json();
+                            if (data.status === 'success') {
+                                if (statusEl) {
+                                    statusEl.textContent = '✓ Trigger Settings Saved!';
+                                    statusEl.style.display = 'inline';
+                                    setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
+                                }
+                                if (typeof showToast === 'function') {
+                                    showToast('Proactive Trigger settings saved! ✓', 'success');
+                                }
+                            } else {
+                                alert(data.message || 'Failed to save trigger settings.');
+                            }
+                        } catch(err) {
+                            console.error('Error saving proactive triggers:', err);
+                            alert('Network error while saving trigger settings.');
+                        } finally {
+                            if (btn) {
+                                btn.textContent = '💾 Save Trigger Settings';
+                                btn.disabled = false;
+                            }
+                        }
+                    };
+
+                    initProactiveCards();
                 </script>
 
             </div>
@@ -832,6 +938,9 @@
             } else if (tabName === 'resources') {
                 if (linkResources) linkResources.classList.add('active');
                 if (viewResources) viewResources.style.display = 'block';
+                if (typeof loadProactiveTriggerConfig === 'function') {
+                    loadProactiveTriggerConfig();
+                }
             } else {
                 if (linkWidget) linkWidget.classList.add('active');
                 if (viewWidget) viewWidget.style.display = 'block';
@@ -839,8 +948,12 @@
 
             // Adjust header button visibility
             const saveBtn = document.getElementById('saveWidgetConfigBtn') || document.getElementById('wcSaveBtn');
+            const saveProactiveBtn = document.getElementById('saveProactiveTriggersBtn');
             if (saveBtn) {
                 saveBtn.style.display = (tabName === 'widget') ? 'inline-flex' : 'none';
+            }
+            if (saveProactiveBtn) {
+                saveProactiveBtn.style.display = (tabName === 'resources') ? 'inline-flex' : 'none';
             }
 
             if (saveStorage) {

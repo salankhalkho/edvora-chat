@@ -298,11 +298,165 @@
                     renderPromptChips(chipsList, cust);
                 }
 
+                // Initialize Proactive Triggers Engine
+                initProactiveTriggerEngine(cust.proactive_triggers || {});
 
             }
         }).catch(function () {
             appendMessage('assistant', 'Welcome! How can I help you today?');
         });
+
+    function initProactiveTriggerEngine(triggerConfig) {
+        if (!triggerConfig) triggerConfig = {};
+        var mode = triggerConfig.mode || 'high_intent';
+        if (mode === 'disabled') return;
+
+        var exitIntentEnabled = (triggerConfig.exit_intent_enabled !== false);
+        var timeThreshold = (parseInt(triggerConfig.time_threshold_seconds, 10) || 90);
+        var scrollThreshold = (parseInt(triggerConfig.scroll_threshold_pct, 10) || 40);
+
+        var sessionKey = 'edvora_proactive_fired_' + botToken;
+        if (sessionStorage.getItem(sessionKey)) return;
+
+        var startTime = Date.now();
+        var maxScroll = 0;
+        var fired = false;
+
+        function updateScroll() {
+            var docElem = document.documentElement;
+            var body = document.body;
+            var totalHeight = Math.max(
+                body.scrollHeight, docElem.scrollHeight,
+                body.offsetHeight, docElem.offsetHeight,
+                body.clientHeight, docElem.clientHeight
+            );
+            var viewHeight = window.innerHeight || docElem.clientHeight || 800;
+            var maxScrollable = totalHeight - viewHeight;
+            if (maxScrollable > 0) {
+                var currentScroll = window.pageYOffset || docElem.scrollTop || body.scrollTop || 0;
+                var pct = Math.round((currentScroll / maxScrollable) * 100);
+                if (pct > maxScroll) maxScroll = pct;
+            }
+        }
+
+        window.addEventListener('scroll', updateScroll, { passive: true });
+        updateScroll();
+
+        function getCleanPageSnippet() {
+            try {
+                var clone = document.body.cloneNode(true);
+                var ignore = clone.querySelectorAll('script, style, noscript, nav, footer, header, .edvora-chat-widget');
+                for (var i = 0; i < ignore.length; i++) {
+                    if (ignore[i] && ignore[i].parentNode) {
+                        ignore[i].parentNode.removeChild(ignore[i]);
+                    }
+                }
+                var text = (clone.innerText || clone.textContent || '').replace(/\s+/g, ' ').trim();
+                return text.substring(0, 1500);
+            } catch (e) {
+                return '';
+            }
+        }
+
+        function executeTrigger(triggerType) {
+            if (fired) return;
+            if (chatWindow && chatWindow.classList.contains('open')) return;
+
+            fired = true;
+            sessionStorage.setItem(sessionKey, '1');
+            window.removeEventListener('scroll', updateScroll);
+
+            var pageUrl = window.location.href;
+            var pageTitle = document.title || '';
+
+            var payload = {
+                bot_token: botToken,
+                visitor_id: visitorId,
+                url: pageUrl,
+                page_title: pageTitle,
+                trigger_type: triggerType
+            };
+
+            function postProactive(dataPayload) {
+                return fetch(apiBaseUrl + '/v1/chat/proactive', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dataPayload)
+                }).then(function(res) { return res.json(); });
+            }
+
+            // Step 1: Send ONLY the URL & basic trigger info (handshake)
+            postProactive(payload)
+                .then(function(res) {
+                    if (res && res.status === 'need_snippet') {
+                        // Step 2: Server doesn't have 2-sentence summary for this URL yet -> grab clean DOM text snippet
+                        var snippet = getCleanPageSnippet();
+                        payload.snippet = snippet;
+                        return postProactive(payload);
+                    }
+                    return res;
+                })
+                .then(function(finalRes) {
+                    if (finalRes && finalRes.status === 'success' && finalRes.data && finalRes.data.opening_message) {
+                        if (finalRes.data.conversation_id) {
+                            currentConversationId = finalRes.data.conversation_id;
+                        }
+                        // Open the chat window with a smooth appearance
+                        if (chatWindow && !chatWindow.classList.contains('open')) {
+                            chatWindow.classList.add('open');
+                        }
+                        // Append the proactive counselor greeting
+                        appendMessage('assistant', finalRes.data.opening_message);
+                    }
+                })
+                .catch(function(err) {
+                    console.warn('[Edvora Proactive] Trigger dispatch failed:', err);
+                });
+        }
+
+        // Periodic timer check (every 3 seconds)
+        var timerInterval = setInterval(function() {
+            if (fired) {
+                clearInterval(timerInterval);
+                return;
+            }
+            if (chatWindow && chatWindow.classList.contains('open')) {
+                clearInterval(timerInterval);
+                return;
+            }
+
+            var elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+
+            if (mode === 'high_intent') {
+                if (elapsedSeconds >= timeThreshold && maxScroll >= scrollThreshold) {
+                    clearInterval(timerInterval);
+                    executeTrigger('high_intent');
+                }
+            } else if (mode === 'program_visitors') {
+                if (elapsedSeconds >= timeThreshold) {
+                    clearInterval(timerInterval);
+                    executeTrigger('program_visitors');
+                }
+            }
+        }, 3000);
+
+        // Exit intent detection
+        if (exitIntentEnabled) {
+            var handleMouseLeave = function(e) {
+                if (fired) {
+                    document.removeEventListener('mouseleave', handleMouseLeave);
+                    return;
+                }
+                // Cursor moves to top of browser window (e.clientY <= 10)
+                if (e.clientY <= 10) {
+                    document.removeEventListener('mouseleave', handleMouseLeave);
+                    if (timerInterval) clearInterval(timerInterval);
+                    executeTrigger('exit_intent');
+                }
+            };
+            document.addEventListener('mouseleave', handleMouseLeave);
+        }
+    }
 
     function renderPromptChips(chips, cust) {
         var div = document.createElement('div');
