@@ -84,13 +84,14 @@ class TrackingController
                 // Check if this visitor already converted in another context (or chat/lead exists)
                 $convCheck = $db->prepare("
                     SELECT 
-                        (SELECT COUNT(*) FROM leads WHERE visitor_id = :vid AND organization_id = :oid) as lead_count,
-                        (SELECT COUNT(*) FROM conversations WHERE visitor_id = :vid2 AND organization_id = :oid2) as chat_count
+                        (SELECT COUNT(*) FROM leads WHERE session_id = :sid AND organization_id = :oid) as lead_count,
+                        (SELECT COUNT(*) FROM conversations WHERE (session_id = :sid2 OR visitor_id = :vid) AND organization_id = :oid2) as chat_count
                 ");
                 $convCheck->execute([
-                    ':vid' => $visitorId,
+                    ':sid' => $sessionId,
                     ':oid' => $orgId,
-                    ':vid2' => $visitorId,
+                    ':sid2' => $sessionId,
+                    ':vid' => $visitorId,
                     ':oid2' => $orgId
                 ]);
                 $counts = $convCheck->fetch(PDO::FETCH_ASSOC);

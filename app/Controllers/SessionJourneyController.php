@@ -226,7 +226,7 @@ class SessionJourneyController
             // Left join with leads to bring forward contact details if converted
             $selectFields .= ", l.name as lead_name, l.email as lead_email, l.phone as lead_phone, l.program_interest as lead_program";
 
-            $joinSql = "LEFT JOIN leads l ON (l.session_id = vs.session_id OR (l.visitor_id = vs.visitor_id AND l.organization_id = vs.organization_id))";
+            $joinSql = "LEFT JOIN leads l ON (l.session_id = vs.session_id)";
             if ($isSuperAdmin) {
                 $joinSql .= " LEFT JOIN organizations o ON vs.organization_id = o.id";
             }
@@ -292,7 +292,7 @@ class SessionJourneyController
                        l.name as lead_name, l.email as lead_email, l.phone as lead_phone, l.program_interest as lead_program
                 FROM visitor_sessions vs
                 LEFT JOIN organizations o ON vs.organization_id = o.id
-                LEFT JOIN leads l ON (l.session_id = vs.session_id OR (l.visitor_id = vs.visitor_id AND l.organization_id = vs.organization_id))
+                LEFT JOIN leads l ON (l.session_id = vs.session_id)
                 WHERE vs.session_id = :sid
             ";
             if ($orgId !== null && !$isSuperAdmin) {
