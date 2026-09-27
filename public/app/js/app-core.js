@@ -1084,7 +1084,7 @@
             // If subtab specified or saved for chatbot tab
             if (tab === 'chatbot') {
                 let savedSubtab = subtab || localStorage.getItem('edvora_studio_subtab') || 'widget';
-                if (savedSubtab !== 'embed') {
+                if (savedSubtab !== 'embed' && savedSubtab !== 'resources') {
                     savedSubtab = 'widget';
                 }
                 if (typeof switchStudioSubtab === 'function') {

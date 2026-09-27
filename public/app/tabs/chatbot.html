@@ -551,6 +551,61 @@
     </div>
 
     <script>
+        // Explicitly define window.switchStudioSubtab to ensure all 3 subtabs work seamlessly
+        window.switchStudioSubtab = function(tabName, saveStorage = true) {
+            if (tabName !== 'embed' && tabName !== 'resources') tabName = 'widget';
+
+            const linkWidget = document.getElementById('subtabLinkWidget');
+            const linkEmbed = document.getElementById('subtabLinkEmbed');
+            const linkResources = document.getElementById('subtabLinkResources');
+            const viewWidget = document.getElementById('subtabViewWidget');
+            const viewEmbed = document.getElementById('subtabViewEmbed');
+            const viewResources = document.getElementById('subtabViewResources');
+
+            // Reset all subnav links
+            if (linkWidget) linkWidget.classList.remove('active');
+            if (linkEmbed) linkEmbed.classList.remove('active');
+            if (linkResources) linkResources.classList.remove('active');
+
+            // Reset all subnav views
+            if (viewWidget) viewWidget.style.display = 'none';
+            if (viewEmbed) viewEmbed.style.display = 'none';
+            if (viewResources) viewResources.style.display = 'none';
+
+            if (tabName === 'embed') {
+                if (linkEmbed) linkEmbed.classList.add('active');
+                if (viewEmbed) viewEmbed.style.display = 'block';
+                if (typeof wcState !== 'undefined' && wcState.scope === 'dept' && wcState.dept_id) {
+                    currentEmbedTarget = String(wcState.dept_id);
+                }
+                if (typeof populateEmbedCode === 'function') {
+                    populateEmbedCode();
+                }
+            } else if (tabName === 'resources') {
+                if (linkResources) linkResources.classList.add('active');
+                if (viewResources) viewResources.style.display = 'block';
+            } else {
+                if (linkWidget) linkWidget.classList.add('active');
+                if (viewWidget) viewWidget.style.display = 'block';
+            }
+
+            // Adjust header button visibility
+            const saveBtn = document.getElementById('saveWidgetConfigBtn') || document.getElementById('wcSaveBtn');
+            if (saveBtn) {
+                saveBtn.style.display = (tabName === 'widget') ? 'inline-flex' : 'none';
+            }
+
+            if (saveStorage) {
+                localStorage.setItem('edvora_studio_subtab', tabName);
+            }
+
+            if (tabName === 'widget') {
+                if (typeof loadWidgetCustomization === 'function') {
+                    loadWidgetCustomization();
+                }
+            }
+        };
+
         (function() {
             // Immediate synchronous hydration from in-memory state to prevent any wrong default flash
             const orgName = window.currentOrgName || (window.currentOrgProfile && window.currentOrgProfile.name) || localStorage.getItem('edvora_org_name') || '';
