@@ -604,6 +604,9 @@
                                 <div style="font-size: 11px; color: #047857; font-weight: 600; background: #F0FDF4; padding: 4px 8px; border-radius: 6px; border: 1px solid #BBF7D0; display: inline-flex; align-items: center; gap: 4px;">
                                     <span>💡</span> <strong>Best for:</strong> Visitors showing clear engagement with a program.
                                 </div>
+                                <div style="font-size: 10.5px; color: #B45309; background: #FFFBEB; border: 1px dashed #FDE68A; padding: 4px 8px; border-radius: 5px; display: inline-flex; align-items: center; gap: 4px; font-weight: 600; margin-top: 2px;">
+                                    <span>🔒</span> <strong>Internal Note:</strong> Should be selected by default.
+                                </div>
                             </div>
                         </label>
 
@@ -676,7 +679,7 @@
                             <div>
                                 <div style="display: flex; align-items: center; gap: 8px;">
                                     <span style="font-size: 14px; font-weight: 800; color: #063D3B;">Exit Intent</span>
-                                    <span id="exitIntentBadge" style="font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0;">Disabled</span>
+                                    <span id="exitIntentBadge" style="font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: #E6F7D2; color: #063D3B; border: 1px solid #C8FF63;">Active</span>
                                 </div>
                                 <p style="font-size: 12.5px; color: #4B635E; margin: 4px 0 10px 0; line-height: 1.5;">
                                     Give visitors one last opportunity to get help before they leave your website.
@@ -685,16 +688,19 @@
                                     <strong>When enabled:</strong> When a visitor is about to leave, the chatbot automatically opens if it hasn't already been opened.<br>
                                     <span style="color: #648781; font-size: 11px; margin-top: 3px; display: inline-block;">ℹ️ Edvora detects exit intent (cursor moving toward browser top bar or tab switch) and offers friendly assistance before the visitor leaves.</span>
                                 </div>
+                                <div style="font-size: 10.5px; color: #B45309; background: #FFFBEB; border: 1px dashed #FDE68A; padding: 4px 8px; border-radius: 5px; display: inline-flex; align-items: center; gap: 4px; font-weight: 600; margin-top: 10px;">
+                                    <span>🔒</span> <strong>Internal Note:</strong> Should be on by default.
+                                </div>
                             </div>
                         </div>
 
                         <!-- Toggle Switch -->
                         <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
                             <label style="position: relative; display: inline-block; width: 50px; height: 26px; cursor: pointer;">
-                                <input type="checkbox" id="toggleExitIntent" onchange="onExitIntentToggle(this)" style="opacity: 0; width: 0; height: 0;">
+                                <input type="checkbox" id="toggleExitIntent" checked onchange="onExitIntentToggle(this)" style="opacity: 0; width: 0; height: 0;">
                                 <span class="exit-intent-slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #CBD5E1; transition: .3s; border-radius: 34px;"></span>
                             </label>
-                            <span id="exitIntentStateText" style="font-size: 11px; font-weight: 700; color: #648781;">Off</span>
+                            <span id="exitIntentStateText" style="font-size: 11px; font-weight: 700; color: #047857;">On</span>
                         </div>
                     </div>
                 </div>
