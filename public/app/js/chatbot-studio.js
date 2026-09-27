@@ -18,17 +18,27 @@
 // LOADED BY: index.html via <script src="js/chatbot-studio.js">
 // ═══════════════════════════════════════════════════════════════════
         function switchStudioSubtab(tabName, saveStorage = true) {
-            if (tabName !== 'embed') tabName = 'widget';
+            if (tabName !== 'embed' && tabName !== 'resources') tabName = 'widget';
 
             const linkWidget = document.getElementById('subtabLinkWidget');
             const linkEmbed = document.getElementById('subtabLinkEmbed');
+            const linkResources = document.getElementById('subtabLinkResources');
             const viewWidget = document.getElementById('subtabViewWidget');
             const viewEmbed = document.getElementById('subtabViewEmbed');
+            const viewResources = document.getElementById('subtabViewResources');
+
+            // Reset all subnav links
+            if (linkWidget) linkWidget.classList.remove('active');
+            if (linkEmbed) linkEmbed.classList.remove('active');
+            if (linkResources) linkResources.classList.remove('active');
+
+            // Reset all subnav views
+            if (viewWidget) viewWidget.style.display = 'none';
+            if (viewEmbed) viewEmbed.style.display = 'none';
+            if (viewResources) viewResources.style.display = 'none';
 
             if (tabName === 'embed') {
-                if (linkWidget) linkWidget.classList.remove('active');
                 if (linkEmbed) linkEmbed.classList.add('active');
-                if (viewWidget) viewWidget.style.display = 'none';
                 if (viewEmbed) viewEmbed.style.display = 'block';
                 if (typeof wcState !== 'undefined' && wcState.scope === 'dept' && wcState.dept_id) {
                     currentEmbedTarget = String(wcState.dept_id);
@@ -36,17 +46,18 @@
                 if (typeof populateEmbedCode === 'function') {
                     populateEmbedCode();
                 }
+            } else if (tabName === 'resources') {
+                if (linkResources) linkResources.classList.add('active');
+                if (viewResources) viewResources.style.display = 'block';
             } else {
                 if (linkWidget) linkWidget.classList.add('active');
-                if (linkEmbed) linkEmbed.classList.remove('active');
                 if (viewWidget) viewWidget.style.display = 'block';
-                if (viewEmbed) viewEmbed.style.display = 'none';
             }
 
             // Adjust header button visibility
             const saveBtn = document.getElementById('saveWidgetConfigBtn') || document.getElementById('wcSaveBtn');
             if (saveBtn) {
-                saveBtn.style.display = (tabName === 'embed') ? 'none' : 'inline-flex';
+                saveBtn.style.display = (tabName === 'widget') ? 'inline-flex' : 'none';
             }
 
             if (saveStorage) {

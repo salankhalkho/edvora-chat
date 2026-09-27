@@ -40,6 +40,9 @@
             <a href="#settings" onclick="switchNavTab('org-settings')" class="dept-filter-pill studio-subnav-link" id="subtabLinkWhitelist" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; font-size: 12px; font-weight: 600; border-radius: 20px; cursor: pointer;" title="Configure Whitelisted Domains in Organization Settings">
                 <span>🛡️</span> Whitelist Domains
             </a>
+            <a href="javascript:void(0)" class="dept-filter-pill studio-subnav-link" id="subtabLinkResources" onclick="switchStudioSubtab('resources')" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; font-size: 12px; font-weight: 600; border-radius: 20px; cursor: pointer;" title="Resource Hub">
+                <span>📦</span> Dummy Button
+            </a>
         </div>
         <div class="dept-kpi-ribbon" style="display: flex; align-items: center; gap: 8px;">
             <div class="dept-kpi-chip" style="font-size: 11px; padding: 4px 10px; background: #E6F7D2; border: 1px solid #C8FF63; border-radius: 12px; color: #063D3B; font-weight: 600;">
@@ -520,6 +523,31 @@
             </div>
         </div>
 
+        <!-- SUBTAB 3: Resource Page (Dummy Button) -->
+        <div id="subtabViewResources" style="display: none; width: 100%; box-sizing: border-box;">
+            <div style="max-width: 1000px; width: 100%; margin: 0; display: flex; flex-direction: column; gap: 24px; box-sizing: border-box;">
+                
+                <!-- Section Header Row -->
+                <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 16px;">📦</span>
+                            <div>
+                                <span style="font-weight: 700; color: #063D3B; font-size: 14px;">Resource Center &amp; Asset Library</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p style="font-size: 13px; color: #4B635E; margin: 0; line-height: 1.6;">
+                        Explore external resources, downloadable guidelines, integrations, and institution asset toolkits for your AI chatbot.
+                    </p>
+                </div>
+
+                <!-- Rest of the page left blank as requested -->
+
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -552,6 +580,8 @@
             const savedSubtab = localStorage.getItem('edvora_studio_subtab');
             if (savedSubtab === 'embed' && typeof switchStudioSubtab === 'function') {
                 switchStudioSubtab('embed', false);
+            } else if (savedSubtab === 'resources' && typeof switchStudioSubtab === 'function') {
+                switchStudioSubtab('resources', false);
             } else if (typeof loadWidgetCustomization === 'function') {
                 loadWidgetCustomization();
             } else if (typeof applyWcToPreview === 'function' && typeof wcState !== 'undefined') {
