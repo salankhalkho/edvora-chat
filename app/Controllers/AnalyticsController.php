@@ -38,13 +38,17 @@ class AnalyticsController
         $totalLeads = (int)$stmtLeads->fetchColumn();
 
         // 4. Knowledge Sources Breakdown (Active, Expiring Soon, Expired)
-        $stmtSourcesActive = $db->prepare("SELECT COUNT(*) FROM knowledge_sources WHERE organization_id = :org_id AND status = 'active'");
+        // ⚠️ CRITICAL ARCHITECTURAL RULE — DO NOT REMOVE `type != 'program_txt'`:
+        // 'program_txt' sources are system-internal representations of Academic Programs created for AI vector embedding.
+        // They MUST NEVER be displayed or counted in tenant-facing dashboards, quotas, or knowledge counts.
+        $stmtSourcesActive = $db->prepare("SELECT COUNT(*) FROM knowledge_sources WHERE organization_id = :org_id AND status = 'active' AND type != 'program_txt'");
         $stmtSourcesActive->execute([':org_id' => $orgId]);
         $activeKnowledgeSources = (int)$stmtSourcesActive->fetchColumn();
 
         $stmtSourcesExpiring = $db->prepare("
             SELECT COUNT(*) FROM knowledge_sources 
             WHERE organization_id = :org_id 
+            AND type != 'program_txt'
             AND (status = 'expiring_soon' OR (expires_on IS NOT NULL AND expires_on >= CURDATE() AND expires_on <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)))
         ");
         $stmtSourcesExpiring->execute([':org_id' => $orgId]);
@@ -53,6 +57,7 @@ class AnalyticsController
         $stmtSourcesExpired = $db->prepare("
             SELECT COUNT(*) FROM knowledge_sources 
             WHERE organization_id = :org_id 
+            AND type != 'program_txt'
             AND (status = 'expired' OR (expires_on IS NOT NULL AND expires_on < CURDATE()))
         ");
         $stmtSourcesExpired->execute([':org_id' => $orgId]);

@@ -50,8 +50,8 @@ class OnboardingController
         $stmtBot->execute([':org_id' => $orgId]);
         $chatbot = $stmtBot->fetch() ?: null;
 
-        // 4. Fetch Knowledge Sources Count
-        $stmtKs = $db->prepare("SELECT COUNT(*) as cnt FROM knowledge_sources WHERE organization_id = :org_id");
+        // 4. Fetch Knowledge Sources Count (Exclude internal program_txt)
+        $stmtKs = $db->prepare("SELECT COUNT(*) as cnt FROM knowledge_sources WHERE organization_id = :org_id AND type != 'program_txt'");
         $stmtKs->execute([':org_id' => $orgId]);
         $ksCount = (int)($stmtKs->fetch()['cnt'] ?? 0);
 
@@ -493,7 +493,7 @@ class OnboardingController
             $stmtProg->execute([':org_id' => $orgId]);
             $updatedPrograms = $stmtProg->fetchAll();
 
-            $stmtKs = $db->prepare("SELECT COUNT(*) as cnt FROM knowledge_sources WHERE organization_id = :org_id");
+            $stmtKs = $db->prepare("SELECT COUNT(*) as cnt FROM knowledge_sources WHERE organization_id = :org_id AND type != 'program_txt'");
             $stmtKs->execute([':org_id' => $orgId]);
             $ksCount = (int)($stmtKs->fetch()['cnt'] ?? 0);
 
