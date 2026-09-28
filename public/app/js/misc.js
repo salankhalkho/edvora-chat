@@ -2162,11 +2162,8 @@ echo $response['reply'];
                             currentDepartments = [];
                             availableOrgStaff = [];
                             availableOrgKs = [];
-                            if (data.data.onboarding_required) {
-                                startOnboardingWizard(1);
-                            } else {
-                                initDashboard();
-                            }
+                            // Onboarding paused: land directly on dashboard
+                            initDashboard();
                         } else {
                             showAuthError('loginError', data.message || 'Invalid email address or password.');
                         }
@@ -2189,10 +2186,10 @@ echo $response['reply'];
                     e.preventDefault();
                     clearAuthError('signupError');
                     const btn = document.getElementById('signupSubmitBtn') || e.target.querySelector('button[type="submit"]');
-                    const originalBtnHtml = btn ? btn.innerHTML : '<span>⚡</span> <span>Analyze Website &amp; Launch Bot</span>';
+                    const originalBtnHtml = btn ? btn.innerHTML : '<span>⚡</span> <span>Create College Account</span>';
                     if (btn) {
                         btn.disabled = true;
-                        btn.innerHTML = '<span style="display:inline-flex; align-items:center; gap:8px;"><span class="brand-spinner" style="width:14px; height:14px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:smartPulse 0.8s infinite;"></span> Initializing Spider...</span>';
+                        btn.innerHTML = '<span style="display:inline-flex; align-items:center; gap:8px;"><span class="brand-spinner" style="width:14px; height:14px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:smartPulse 0.8s infinite;"></span> Creating Account...</span>';
                     }
 
                     const websiteVal = (document.getElementById('signupWebsite')?.value || '').trim();
@@ -2222,10 +2219,16 @@ echo $response['reply'];
                             availableOrgStaff = [];
                             availableOrgKs = [];
 
-                            const effectiveWebsite = data.data.organization?.website_url || websiteVal;
-                            const botToken = data.data.chatbot?.bot_token || '';
+                            if (data.data.organization) {
+                                updateAppIdentityUI(data.data.organization, data.data.user);
+                            }
 
-                            launchSmartOnboardingEngine(token, botToken, effectiveWebsite);
+                            // Onboarding paused: land directly on dashboard
+                            document.documentElement.classList.remove('auth-mode-signup', 'in-smart-onboarding', 'in-onboarding');
+                            history.replaceState(null, '', '#overview');
+
+                            showToast('Account created successfully! Welcome to your dashboard.', 'success');
+                            initDashboard();
                         } else {
                             showAuthError('signupError', data.message || 'Signup failed. Please verify your details.');
                         }

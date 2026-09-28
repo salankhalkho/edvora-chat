@@ -79,10 +79,10 @@ class AuthController
         try {
             $db->beginTransaction();
 
-            // 1. Create Organization with website_url
+            // 1. Create Organization with website_url (onboarding paused, mark completed)
             $stmtOrg = $db->prepare("
-                INSERT INTO organizations (name, slug, website_url, primary_color, plan_id, subscription_status)
-                VALUES (:name, :slug, :website_url, '#2563EB', :plan_id, 'active')
+                INSERT INTO organizations (name, slug, website_url, primary_color, plan_id, subscription_status, onboarding_completed, onboarding_step)
+                VALUES (:name, :slug, :website_url, '#2563EB', :plan_id, 'active', 1, 1)
             ");
             $stmtOrg->execute([
                 ':name' => $collegeName,
@@ -183,7 +183,7 @@ class AuthController
                     'name' => $collegeName,
                     'slug' => $slug,
                     'website_url' => $normalizedWebsite,
-                    'onboarding_completed' => 0,
+                    'onboarding_completed' => 1,
                     'onboarding_step' => 1
                 ],
                 'chatbot' => [
@@ -191,8 +191,8 @@ class AuthController
                     'name' => 'AI Admissions Assistant',
                     'bot_token' => $botToken
                 ],
-                'onboarding_required' => true,
-                'onboarding_mode' => 'smart_scrape'
+                'onboarding_required' => false,
+                'onboarding_mode' => 'disabled'
             ], 'Account created successfully', 201);
 
         } catch (Throwable $e) {
@@ -279,7 +279,8 @@ class AuthController
         $GLOBALS['auth_user'] = $accessTokenPayload;
         AuditLogger::log('login_success', 'user', (int)$user['id']);
 
-        $onboardingRequired = ($user['role'] !== 'superadmin' && $user['organization_id'] && (int)$user['onboarding_completed'] === 0);
+        // Onboarding paused: always false so users land directly on dashboard
+        $onboardingRequired = false;
 
         // Departments deprecated - return empty list
         $userDepartments = [];
@@ -374,7 +375,8 @@ class AuthController
         // Departments deprecated - return empty list
         $userDepartments = [];
 
-        $onboardingRequired = empty($user['onboarding_completed']);
+        // Onboarding paused: always false so users remain on dashboard
+        $onboardingRequired = false;
 
         Response::success([
             'user' => [
