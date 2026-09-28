@@ -837,13 +837,6 @@
                     const footerStaffCountText = document.getElementById('footerStaffCountText');
                     if (footerStaffCountText) footerStaffCountText.innerText = `${teamUsed} Staff`;
 
-                    // Department Quota strip in Teams Card
-                    const deptUsed = qDepts.used !== undefined ? qDepts.used : 4;
-                    const deptLim = (qDepts.limit !== undefined && qDepts.limit > 0) ? qDepts.limit : 5;
-                    const deptRem = qDepts.remaining !== undefined ? qDepts.remaining : Math.max(0, deptLim - deptUsed);
-                    const qDeptsLine = document.getElementById('quotaDeptsLine');
-                    if (qDeptsLine) qDeptsLine.innerText = `${deptUsed} Campus Departments`;
-
                     // Render Staff Roster Preview
                     const rosterStaffList = document.getElementById('rosterStaffList');
                     if (rosterStaffList && stats.staff_preview && stats.staff_preview.length > 0) {
@@ -2568,47 +2561,35 @@
             const org = statusData.organization || {};
             const programs = statusData.programs || [];
             const ksCount = statusData.stats?.knowledge_sources_count || 0;
-            const deptCount = Array.isArray(statusData.departments) ? statusData.departments.length : 0;
 
             const gaps = [];
 
             // 1. Check Programs
             if (programs.length === 0) {
                 gaps.push({
-                    icon: 'ðŸŽ“',
+                    icon: '🎓',
                     title: 'Degree Programs Missing',
                     desc: 'No specific degrees or courses were indexed. The bot cannot answer program-specific inquiries.',
                     ctaText: 'Add Programs',
-                    action: () => { hideKnowledgeGapsModal(); switchNavTab('knowledge'); }
+                    action: () => { hideKnowledgeGapsModal(); switchNavTab('academic-programs'); }
                 });
             }
 
             // 2. Check Knowledge Ingestion / Brochure
             if (ksCount === 0) {
                 gaps.push({
-                    icon: 'ðŸ“„',
+                    icon: '📄',
                     title: 'Admissions Brochure / Catalog Missing',
                     desc: 'No documents, policy text, or admission FAQs are in the knowledge base.',
                     ctaText: 'Upload Documents',
-                    action: () => { hideKnowledgeGapsModal(); switchNavTab('knowledge-ingestion'); }
+                    action: () => { hideKnowledgeGapsModal(); switchNavTab('knowledge'); }
                 });
             }
 
-            // 3. Check Departments
-            if (deptCount === 0) {
-                gaps.push({
-                    icon: 'ðŸ“š',
-                    title: 'Academic Departments Not Configured',
-                    desc: 'Departmental routing and lead assignment are currently running on default settings.',
-                    ctaText: 'Configure Departments',
-                    action: () => { hideKnowledgeGapsModal(); switchNavTab('departments'); }
-                });
-            }
-
-            // 4. Check Profile (city / state)
+            // 3. Check Profile (city / state)
             if (!org.city || !org.state) {
                 gaps.push({
-                    icon: 'ðŸ›ï¸',
+                    icon: '🏛️',
                     title: 'Campus Location Incomplete',
                     desc: 'City and state are unverified. Adding these helps prospective students locate your campus.',
                     ctaText: 'Edit Profile',
@@ -2640,26 +2621,26 @@
 
             if (currentKnowledgeGapsState.gapsList.length === 0) {
                 listEl.innerHTML = `
-                    <div style="background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.3); border-radius:10px; padding:18px; text-align:center;">
-                        <span style="font-size:28px;">âœ“</span>
-                        <div style="font-size:14px; font-weight:700; color:#34d399; margin-top:6px;">All Knowledge Systems Fully Primed!</div>
-                        <div style="font-size:12px; color:#94a3b8; margin-top:4px;">Your AI assistant has verified departments, programs, and knowledge sources.</div>
+                    <div style="background: #ECFDF5; border: 1.5px solid #A7F3D0; border-radius: 12px; padding: 24px 20px; text-align: center;">
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: #D1FAE5; color: #047857; font-size: 22px; font-weight: 800; margin: 0 auto 10px auto;">✓</span>
+                        <div style="font-size: 14px; font-weight: 800; color: #065F46;">All Knowledge Systems Fully Primed!</div>
+                        <div style="font-size: 12px; color: #047857; margin-top: 4px;">Your AI assistant has verified academic programs and institutional knowledge sources.</div>
                     </div>
                 `;
             } else {
                 currentKnowledgeGapsState.gapsList.forEach(gap => {
                     const item = document.createElement('div');
-                    item.style.cssText = 'background:#111827; border:1px solid #1f2937; border-radius:10px; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:14px;';
+                    item.style.cssText = 'background: #FAFCFB; border: 1.5px solid #DCE9E5; border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px; box-shadow: 0 1px 3px rgba(6, 61, 59, 0.03); transition: all 0.15s ease;';
                     item.innerHTML = `
-                        <div style="display:flex; align-items:flex-start; gap:12px;">
-                            <span style="font-size:22px; line-height:1;">${gap.icon}</span>
-                            <div>
-                                <div style="font-size:13px; font-weight:700; color:#f1f5f9;">${escapeHtml(gap.title)}</div>
-                                <div style="font-size:11.5px; color:#94a3b8; margin-top:2px; line-height:1.4;">${escapeHtml(gap.desc)}</div>
+                        <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+                            <div style="width: 38px; height: 38px; border-radius: 8px; background: #F1F7F4; border: 1px solid #DDE9E3; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;">${gap.icon}</div>
+                            <div style="min-width: 0;">
+                                <div style="font-size: 13px; font-weight: 700; color: #063D3B;">${escapeHtml(gap.title)}</div>
+                                <div style="font-size: 11.5px; color: #4F7470; margin-top: 2px; line-height: 1.45;">${escapeHtml(gap.desc)}</div>
                             </div>
                         </div>
-                        <button type="button" class="brand-btn-primary brand-btn-sm" style="flex-shrink:0; height:30px; font-size:11.5px; padding:0 14px; font-weight:600;">
-                            ${escapeHtml(gap.ctaText)} â†’
+                        <button type="button" class="brand-btn-primary brand-btn-sm" style="flex-shrink: 0; height: 32px; font-size: 11.5px; padding: 0 14px; font-weight: 700; background: #063D3B; color: #C8FF63; border: 1px solid #063D3B; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s ease;">
+                            ${escapeHtml(gap.ctaText)} →
                         </button>
                     `;
                     const btn = item.querySelector('button');
