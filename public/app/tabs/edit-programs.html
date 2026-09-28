@@ -50,15 +50,15 @@
                     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px;">
                         <div>
                             <label for="edit_prog_name" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
-                                Program / Degree Name <span style="color: #EF4444;">*</span>
+                                Degree / Program Name <span style="color: #EF4444;">*</span>
                             </label>
-                            <input type="text" id="edit_prog_name" required placeholder="e.g. B.S. in Computer Science & Artificial Intelligence" class="brand-input" oninput="const h = document.getElementById('editProgHeaderTitle'); if(h) { h.textContent = this.value || 'Edit Academic Program'; h.title = this.value || ''; }" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                            <input type="text" id="edit_prog_name" required placeholder="e.g. B.S. in Computer Science or B.B.A. in Accounting" class="brand-input" oninput="const h = document.getElementById('editProgHeaderTitle'); if(h) { h.textContent = this.value || 'Edit Academic Program'; h.title = this.value || ''; }" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
                         </div>
                         <div>
                             <label for="edit_prog_code" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
-                                Program Code
+                                Program / CIP Code
                             </label>
-                            <input type="text" id="edit_prog_code" placeholder="e.g. CS-BS-101" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                            <input type="text" id="edit_prog_code" placeholder="e.g. CS-BS or CIP 11.0701" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
                         </div>
                     </div>
 
@@ -68,12 +68,12 @@
                                 Program Level <span style="color: #EF4444;">*</span>
                             </label>
                             <select id="edit_prog_type" required class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF; color: #063D3B; font-weight: 600;">
-                                <option value="undergraduate">Undergraduate (Bachelor's / Associate)</option>
-                                <option value="postgraduate">Postgraduate (Master's / MBA)</option>
-                                <option value="doctoral">Doctoral (Ph.D. / Fellowship)</option>
+                                <option value="undergraduate">Undergraduate (Bachelor's / Associate Degree)</option>
+                                <option value="postgraduate">Graduate (Master's / MBA / M.S. / M.A.)</option>
+                                <option value="doctoral">Doctoral (Ph.D. / Ed.D. / Terminal Degree)</option>
+                                <option value="certificate">Certificate / Continuing Education</option>
                                 <option value="executive">Executive Education</option>
-                                <option value="certificate">Certificate / Diploma</option>
-                                <option value="other">Other Academic Course</option>
+                                <option value="other">Other Academic Program</option>
                             </select>
                         </div>
                     </div>
@@ -88,20 +88,20 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px;">
                         <div>
                             <label for="edit_prog_duration" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
-                                Duration
+                                Program Duration / Credits
                             </label>
-                            <input type="text" id="edit_prog_duration" placeholder="e.g. 4 Years (8 Semesters)" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                            <input type="text" id="edit_prog_duration" placeholder="e.g. 4 Years (120 Credit Hours) or 2 Years (36 Credits)" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
                         </div>
                         <div>
                             <label for="edit_prog_mode" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
-                                Delivery Mode
+                                Delivery Format
                             </label>
                             <select id="edit_prog_mode" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; background: #FFFFFF; color: #063D3B; font-weight: 600;">
-                                <option value="full_time">Full Time (On-Campus)</option>
-                                <option value="part_time">Part Time</option>
-                                <option value="online">100% Online</option>
+                                <option value="full_time">Full-Time (On-Campus)</option>
+                                <option value="part_time">Part-Time</option>
+                                <option value="online">100% Online / Asynchronous</option>
                                 <option value="hybrid">Hybrid / Blended</option>
-                                <option value="weekend">Weekend / Evening</option>
+                                <option value="weekend">Evening &amp; Executive</option>
                             </select>
                         </div>
                         <div>
@@ -119,84 +119,100 @@
                 <!-- SECTION 3: Detailed Fee Breakdown & Financials -->
                 <div style="margin-bottom: 28px;">
                     <div style="font-size: 14px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
-                        <span>💰</span> Fee Breakdown &amp; Financials
+                        <span>💰</span> Tuition Breakdown &amp; Financials
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 80px 1fr 1fr 1fr 1fr; gap: 12px; align-items: start;">
+                    <div style="display: grid; grid-template-columns: 110px 1fr 1fr 1fr 1.15fr; gap: 12px; align-items: start;">
                         <div>
                             <label for="edit_prog_currency" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
                                 Currency
                             </label>
-                            <input type="text" id="edit_prog_currency" value="INR" placeholder="INR" class="brand-input" style="width: 100%; height: 38px; font-size: 12px; font-weight: 700; text-transform: uppercase; text-align: center; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 6px;" />
+                            <select id="edit_prog_currency" class="brand-input" style="width: 100%; height: 38px; font-size: 12px; font-weight: 700; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 6px; background: #FFFFFF; color: #063D3B; cursor: pointer;">
+                                <option value="USD" selected>USD ($)</option>
+                                <option value="CAD">CAD (C$)</option>
+                                <option value="EUR">EUR (€)</option>
+                                <option value="GBP">GBP (£)</option>
+                                <option value="INR">INR (₹)</option>
+                            </select>
                         </div>
                         <div>
                             <label for="edit_prog_tuition_fee" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
-                                Tuition Fee
+                                Tuition (Annual / Term)
                             </label>
-                            <input type="number" step="0.01" id="edit_prog_tuition_fee" placeholder="e.g. 45000" class="brand-input edit-fee-calc-trigger" style="width: 100%; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                            <input type="number" step="0.01" id="edit_prog_tuition_fee" placeholder="e.g. 18500" class="brand-input edit-fee-calc-trigger" style="width: 100%; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
                         </div>
                         <div>
                             <label for="edit_prog_registration_fee" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
-                                Registration Fee
+                                Mandatory Student Fees
                             </label>
-                            <input type="number" step="0.01" id="edit_prog_registration_fee" placeholder="e.g. 2000" class="brand-input edit-fee-calc-trigger" style="width: 100%; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                            <input type="number" step="0.01" id="edit_prog_registration_fee" placeholder="e.g. 1200" class="brand-input edit-fee-calc-trigger" style="width: 100%; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
                         </div>
                         <div>
                             <label for="edit_prog_other_fees" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
-                                Other Fees
+                                Books &amp; Supplies / Other
                             </label>
-                            <input type="number" step="0.01" id="edit_prog_other_fees" placeholder="e.g. 5000" class="brand-input edit-fee-calc-trigger" style="width: 100%; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                            <input type="number" step="0.01" id="edit_prog_other_fees" placeholder="e.g. 1500" class="brand-input edit-fee-calc-trigger" style="width: 100%; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
                         </div>
                         <div>
                             <label for="edit_prog_fee" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #047857; margin-bottom: 6px;">
-                                Total Program Fee
+                                Estimated Total Cost
                             </label>
-                            <input type="number" step="0.01" id="edit_prog_fee" placeholder="e.g. 52000" class="brand-input" style="width: 100%; height: 38px; font-size: 12.5px; border: 1.5px solid #A7F3D0; background: #F0FDF4; border-radius: 6px; padding: 0 12px; font-weight: 700; color: #063D3B;" />
+                            <input type="number" step="0.01" id="edit_prog_fee" placeholder="e.g. 21200" class="brand-input" style="width: 100%; height: 38px; font-size: 12.5px; border: 1.5px solid #A7F3D0; background: #F0FDF4; border-radius: 6px; padding: 0 12px; font-weight: 700; color: #063D3B;" />
                         </div>
                     </div>
-                    <span style="font-size: 10.5px; color: #648781; margin-top: 6px; display: block;">Total fee auto-sums Tuition + Registration + Other Fees, or can be manually entered.</span>
+                    <span style="font-size: 10.5px; color: #648781; margin-top: 6px; display: block;">Total fee auto-sums Tuition + Mandatory Fees + Other Fees, or can be manually entered.</span>
                 </div>
 
                 <!-- SECTION 4: Eligibility Criteria & Requirements -->
                 <div style="margin-bottom: 28px;">
                     <div style="font-size: 14px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
-                        <span>📋</span> Eligibility Criteria &amp; Admission Requirements
+                        <span>📋</span> Admission Requirements &amp; Academic Prerequisites
                     </div>
                     <div>
                         <label for="edit_prog_eligibility" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
-                            Eligibility Details (Prerequisites, Minimum Marks, Entrance Exams)
+                            Prerequisites, GPA &amp; Standardized Testing Criteria
                         </label>
-                        <textarea id="edit_prog_eligibility" rows="3" placeholder="e.g. 10+2 with minimum 60% aggregate in Physics, Chemistry, and Mathematics (PCM). Qualified rank in JEE Main or University Entrance Exam." class="brand-input" style="width: 100%; box-sizing: border-box; font-size: 12px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 10px 12px; font-family: inherit; line-height: 1.4;"></textarea>
+                        <textarea id="edit_prog_eligibility" rows="3" placeholder="e.g. High school diploma or GED with minimum 3.0 cumulative GPA. SAT/ACT test-optional. Recommended college-prep: 4 years English, 3 years math (Algebra II+), 3 years lab science. International applicants: TOEFL 80+ or IELTS 6.5." class="brand-input" style="width: 100%; box-sizing: border-box; font-size: 12px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 10px 12px; font-family: inherit; line-height: 1.4;"></textarea>
                     </div>
                 </div>
 
                 <!-- SECTION 5: Online Application Links & Deadlines -->
                 <div style="margin-bottom: 28px;">
                     <div style="font-size: 14px; font-weight: 800; color: #092F2E; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
-                        <span>🔗</span> Application Links, Fee &amp; Deadline
+                        <span>🔗</span> Application Deadline, Fees &amp; Portal Links
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                    <div style="display: grid; grid-template-columns: 1.35fr 1fr; gap: 16px; margin-bottom: 16px;">
                         <div>
                             <label for="edit_prog_deadline" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
                                 Application Deadline
                             </label>
-                            <input type="text" id="edit_prog_deadline" placeholder="e.g. Fall Intake: August 15, 2026" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <input type="date" id="edit_prog_deadline_date" onchange="window.syncDeadlineDate && window.syncDeadlineDate('edit_prog')" class="brand-input" style="width: 140px; box-sizing: border-box; height: 38px; font-size: 12px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 8px; background: #FFFFFF; color: #063D3B; cursor: pointer;" title="Select deadline date from calendar" />
+                                <input type="text" id="edit_prog_deadline" placeholder="e.g. Fall Regular: January 15, 2027" class="brand-input" style="flex: 1; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; align-items: center;">
+                                <span style="font-size: 10px; font-weight: 700; color: #648781; text-transform: uppercase;">Presets:</span>
+                                <button type="button" onclick="window.setDeadlinePreset && window.setDeadlinePreset('edit_prog', 'rolling')" style="font-size: 10.5px; font-weight: 600; padding: 2px 8px; background: #F1F5F9; border: 1px solid #CBD5E1; border-radius: 4px; color: #334155; cursor: pointer;">Rolling</button>
+                                <button type="button" onclick="window.setDeadlinePreset && window.setDeadlinePreset('edit_prog', 'fall_early')" style="font-size: 10.5px; font-weight: 600; padding: 2px 8px; background: #FEF3C7; border: 1px solid #FDE68A; border-radius: 4px; color: #92400E; cursor: pointer;">Early Action (Nov 1)</button>
+                                <button type="button" onclick="window.setDeadlinePreset && window.setDeadlinePreset('edit_prog', 'fall_regular')" style="font-size: 10.5px; font-weight: 600; padding: 2px 8px; background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 4px; color: #065F46; cursor: pointer;">Fall Regular (Jan 15)</button>
+                                <button type="button" onclick="window.setDeadlinePreset && window.setDeadlinePreset('edit_prog', 'spring_regular')" style="font-size: 10.5px; font-weight: 600; padding: 2px 8px; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 4px; color: #1E40AF; cursor: pointer;">Spring (Oct 15)</button>
+                            </div>
                         </div>
                         <div>
                             <label for="edit_prog_application_fee" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
-                                Application / Prospectus Fee
+                                Application Fee
                             </label>
-                            <input type="text" id="edit_prog_application_fee" placeholder="e.g. ₹1,000 / $50" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                            <input type="text" id="edit_prog_application_fee" placeholder="e.g. $50 - $75 USD" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
                         </div>
                     </div>
 
                     <div>
                         <label for="edit_prog_url" style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
-                            Official Program or Application URL (Optional)
+                            Official Program or Admissions Page URL (Optional)
                         </label>
-                        <input type="url" id="edit_prog_url" placeholder="https://university.edu/admissions/degrees/cs" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
-                        <span style="font-size: 10.5px; color: #648781; margin-top: 4px; display: block;">When students inquire in the chatbot, direct links to this brochure/application page will be recommended.</span>
+                        <input type="url" id="edit_prog_url" placeholder="https://university.edu/admissions/programs/cs" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
+                        <span style="font-size: 10.5px; color: #648781; margin-top: 4px; display: block;">When prospective students inquire in the chatbot, direct links to this admissions page will be shared.</span>
                     </div>
                 </div>
 
@@ -238,6 +254,43 @@
 
 <script>
 (function() {
+    window.syncDeadlineDate = window.syncDeadlineDate || function(prefix) {
+        const dateInput = document.getElementById(prefix + '_deadline_date');
+        const textInput = document.getElementById(prefix + '_deadline');
+        if (!dateInput || !textInput || !dateInput.value) return;
+        
+        const parts = dateInput.value.split('-');
+        if (parts.length === 3) {
+            const year = parseInt(parts[0], 10);
+            const monthIdx = parseInt(parts[1], 10) - 1;
+            const day = parseInt(parts[2], 10);
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            textInput.value = `${months[monthIdx]} ${day}, ${year}`;
+        }
+    };
+
+    window.setDeadlinePreset = window.setDeadlinePreset || function(prefix, presetType) {
+        const textInput = document.getElementById(prefix + '_deadline');
+        const dateInput = document.getElementById(prefix + '_deadline_date');
+        const now = new Date();
+        const curYear = now.getFullYear();
+        const nextYear = curYear + 1;
+        
+        if (presetType === 'rolling') {
+            if (textInput) textInput.value = 'Rolling Admissions';
+            if (dateInput) dateInput.value = '';
+        } else if (presetType === 'fall_early') {
+            if (textInput) textInput.value = `Early Action: November 1, ${curYear}`;
+            if (dateInput) dateInput.value = `${curYear}-11-01`;
+        } else if (presetType === 'fall_regular') {
+            if (textInput) textInput.value = `Fall Regular: January 15, ${nextYear}`;
+            if (dateInput) dateInput.value = `${nextYear}-01-15`;
+        } else if (presetType === 'spring_regular') {
+            if (textInput) textInput.value = `Spring Regular: October 15, ${curYear}`;
+            if (dateInput) dateInput.value = `${curYear}-10-15`;
+        }
+    };
+
     function setupEditFeeAutoSum() {
         const triggers = document.querySelectorAll('#editProgramForm .edit-fee-calc-trigger');
         const totalFeeInput = document.getElementById('edit_prog_fee');
@@ -304,13 +357,54 @@
             document.getElementById('edit_prog_duration').value = c.duration || '';
             document.getElementById('edit_prog_mode').value = c.mode || 'full_time';
             document.getElementById('edit_prog_admissions').value = String(c.is_admissions_open ?? '1');
-            document.getElementById('edit_prog_currency').value = c.currency || 'INR';
+
+            // Populate currency dropdown
+            const currEl = document.getElementById('edit_prog_currency');
+            const currVal = c.currency || 'USD';
+            if (currEl) {
+                let found = false;
+                for (let opt of currEl.options) {
+                    if (opt.value === currVal) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found && currVal) {
+                    const newOpt = document.createElement('option');
+                    newOpt.value = currVal;
+                    newOpt.textContent = currVal;
+                    currEl.appendChild(newOpt);
+                }
+                currEl.value = currVal;
+            }
+
             document.getElementById('edit_prog_tuition_fee').value = c.tuition_fee ? String(c.tuition_fee) : '';
             document.getElementById('edit_prog_registration_fee').value = c.registration_fee ? String(c.registration_fee) : '';
             document.getElementById('edit_prog_other_fees').value = c.other_fees ? String(c.other_fees) : '';
             document.getElementById('edit_prog_fee').value = c.total_fee ? String(c.total_fee) : '';
             document.getElementById('edit_prog_eligibility').value = c.eligibility || '';
-            document.getElementById('edit_prog_deadline').value = c.application_deadline || '';
+
+            // Populate deadline & date picker
+            const dl = c.application_deadline || '';
+            document.getElementById('edit_prog_deadline').value = dl;
+            const dateInput = document.getElementById('edit_prog_deadline_date');
+            if (dateInput) {
+                if (/^\d{4}-\d{2}-\d{2}$/.test(dl)) {
+                    dateInput.value = dl;
+                } else {
+                    const parsed = Date.parse(dl);
+                    if (!isNaN(parsed)) {
+                        const d = new Date(parsed);
+                        const yyyy = d.getFullYear();
+                        const mm = String(d.getMonth() + 1).padStart(2, '0');
+                        const dd = String(d.getDate()).padStart(2, '0');
+                        dateInput.value = `${yyyy}-${mm}-${dd}`;
+                    } else {
+                        dateInput.value = '';
+                    }
+                }
+            }
+
             document.getElementById('edit_prog_application_fee').value = c.application_fee || '';
             document.getElementById('edit_prog_url').value = c.application_url || '';
 
@@ -350,7 +444,7 @@
 
         const name = document.getElementById('edit_prog_name')?.value.trim();
         if (!name) {
-            alert('Please enter a program name.');
+            alert('Please enter a degree program name.');
             return;
         }
 
@@ -359,7 +453,7 @@
         const duration = document.getElementById('edit_prog_duration')?.value.trim();
         const mode = document.getElementById('edit_prog_mode')?.value || 'full_time';
         const admissions = parseInt(document.getElementById('edit_prog_admissions')?.value || '1', 10);
-        const currency = document.getElementById('edit_prog_currency')?.value.trim() || 'INR';
+        const currency = document.getElementById('edit_prog_currency')?.value.trim() || 'USD';
         const tuitionFee = document.getElementById('edit_prog_tuition_fee')?.value.trim();
         const regFee = document.getElementById('edit_prog_registration_fee')?.value.trim();
         const otherFees = document.getElementById('edit_prog_other_fees')?.value.trim();

@@ -15,9 +15,9 @@
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
         <span id="programsActivePillCount">Catalog: 0 Programs</span>
       </div>
-      <button id="programsAddBtn" onclick="switchNavTab('add-programs')" class="ckh-btn-ingest" title="Add Academic Program" style="background: #063D3B !important; color: #C8FF63 !important; border: none !important; border-radius: 8px !important; padding: 6px 14px !important; font-size: 11.5px !important; font-weight: 700 !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; gap: 6px !important;">
+      <button id="programsAddBtn" onclick="switchNavTab('add-programs')" class="ckh-btn-ingest" title="Add Academic Degree Program" style="background: #063D3B !important; color: #C8FF63 !important; border: none !important; border-radius: 8px !important; padding: 6px 14px !important; font-size: 11.5px !important; font-weight: 700 !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; gap: 6px !important;">
         <span style="font-size: 14px; line-height: 1; font-weight: 800;">+</span>
-        <span>Add Program / Course</span>
+        <span>Add Degree Program</span>
       </button>
     </div>
   </div>
@@ -48,7 +48,7 @@
       </div>
       <div class="ckh-kpi-val"><span class="cnum-ckh" id="statUGPrograms">0</span></div>
       <div class="ckh-kpi-lbl">Undergraduate</div>
-      <div class="ckh-kpi-sub">B.S., B.A., B.Tech &amp; Diplomas</div>
+      <div class="ckh-kpi-sub">B.S., B.A., B.B.A. &amp; Associate</div>
     </div>
 
     <!-- 3. Postgraduate Programs -->
@@ -57,10 +57,10 @@
         <div class="ckh-kpi-icon" style="background:#F5F3FF; color:#7C3AED;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         </div>
-        <span class="ckh-kpi-badge" style="background:#F5F3FF; color:#7C3AED;">Master's / PG</span>
+        <span class="ckh-kpi-badge" style="background:#F5F3FF; color:#7C3AED;">Master's / Grad</span>
       </div>
       <div class="ckh-kpi-val"><span class="cnum-ckh" id="statPGPrograms">0</span></div>
-      <div class="ckh-kpi-lbl">Postgraduate</div>
+      <div class="ckh-kpi-lbl">Graduate Degrees</div>
       <div class="ckh-kpi-sub">M.S., M.A., MBA &amp; Master's</div>
     </div>
 
@@ -373,7 +373,7 @@
         : '';
 
       const feeHtml = c.total_fee 
-        ? `<div style="font-size:10.5px; color:#063D3B; font-weight:700; margin-top:3px;">💰 ${escapeHtml(c.currency || 'INR')} ${Number(c.total_fee).toLocaleString()}</div>`
+        ? `<div style="font-size:10.5px; color:#063D3B; font-weight:700; margin-top:3px;">💰 ${escapeHtml(c.currency || 'USD')} ${Number(c.total_fee).toLocaleString()}</div>`
         : '';
 
       return `

@@ -276,7 +276,7 @@ class ProgramController
                     p.registration_fee,
                     p.other_fees,
                     p.total_fee,
-                    COALESCE(p.currency, 'INR') AS currency,
+                    COALESCE(p.currency, 'USD') AS currency,
                     p.eligibility,
                     p.application_deadline,
                     p.application_fee,
@@ -360,7 +360,7 @@ class ProgramController
         $regFee = isset($body['registration_fee']) && $body['registration_fee'] !== '' ? (float)$body['registration_fee'] : null;
         $otherFees = isset($body['other_fees']) && $body['other_fees'] !== '' ? (float)$body['other_fees'] : null;
         $totalFee = isset($body['total_fee']) && $body['total_fee'] !== '' ? (float)$body['total_fee'] : null;
-        $currency = trim($body['currency'] ?? 'INR') ?: 'INR';
+        $currency = trim($body['currency'] ?? 'USD') ?: 'USD';
         $eligibility = trim($body['eligibility'] ?? '') ?: null;
         $appDeadline = trim($body['application_deadline'] ?? '') ?: null;
         $appFee = trim($body['application_fee'] ?? '') ?: null;
@@ -471,7 +471,7 @@ class ProgramController
         $regFee = isset($body['registration_fee']) && $body['registration_fee'] !== '' ? (float)$body['registration_fee'] : null;
         $otherFees = isset($body['other_fees']) && $body['other_fees'] !== '' ? (float)$body['other_fees'] : null;
         $totalFee = isset($body['total_fee']) && $body['total_fee'] !== '' ? (float)$body['total_fee'] : null;
-        $currency = trim($body['currency'] ?? 'INR') ?: 'INR';
+        $currency = trim($body['currency'] ?? 'USD') ?: 'USD';
         $eligibility = trim($body['eligibility'] ?? '') ?: null;
         $appDeadline = trim($body['application_deadline'] ?? '') ?: null;
         $appFee = trim($body['application_fee'] ?? '') ?: null;

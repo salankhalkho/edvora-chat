@@ -677,7 +677,7 @@
     const elFee = document.getElementById('progSpecFee');
     if (elFee) {
       if (p.total_fee) {
-        elFee.textContent = `${p.currency || 'INR'} ${Number(p.total_fee).toLocaleString()}`;
+        elFee.textContent = `${p.currency || 'USD'} ${Number(p.total_fee).toLocaleString()}`;
       } else {
         elFee.textContent = 'Free / Contact Office';
       }

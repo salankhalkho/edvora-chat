@@ -860,7 +860,7 @@ class Migrations
                 registration_fee DECIMAL(12,2) NULL,
                 other_fees DECIMAL(12,2) NULL,
                 total_fee DECIMAL(12,2) NULL,
-                currency VARCHAR(10) DEFAULT 'INR',
+                currency VARCHAR(10) DEFAULT 'USD',
                 eligibility TEXT NULL,
                 application_deadline VARCHAR(100) NULL,
                 application_fee VARCHAR(50) NULL,
@@ -1804,6 +1804,13 @@ class Migrations
             ");
         } catch (Throwable $e) {
             error_log('[Migrations] backfill chatbots.allowed_domains: ' . $e->getMessage());
+        }
+
+        // Set default currency for programs table to USD
+        try {
+            $this->db->exec("ALTER TABLE programs ALTER COLUMN currency SET DEFAULT 'USD';");
+        } catch (Throwable $e) {
+            error_log('[Migrations] programs.currency default: ' . $e->getMessage());
         }
     }
 }
