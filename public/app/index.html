@@ -4046,13 +4046,13 @@
     </div>
 
     <div class="brand-top-actions">
-      <button type="button" id="headerKnowledgeGapBadge" onclick="showKnowledgeGapsModal()" class="brand-knowledge-gap-badge" style="display: none;">
-        <span class="sonar-beacon" aria-hidden="true">
+      <button type="button" id="headerKnowledgeGapBadge" onclick="showKnowledgeGapsModal()" class="brand-knowledge-gap-badge" style="display: none;" title="Chatbot Launch Readiness">
+        <span class="sonar-beacon" id="headerSonarBeacon" aria-hidden="true">
           <span class="sonar-wave"></span>
           <span class="sonar-wave sonar-delay"></span>
           <span class="sonar-core"></span>
         </span>
-        <span id="headerKnowledgeGapText">Missing Knowledge</span>
+        <span id="headerKnowledgeGapText">Critical Issues</span>
       </button>
       <div class="brand-plan-pill" id="planBadge">Starter Plan</div>
       <a href="javascript:void(0)" id="logoutBtn" onclick="handleLogout()" class="brand-logout-btn">
@@ -4189,30 +4189,41 @@
             <!-- Tab: Visitor Session Journeys -->
             <div class="tab-content" id="tab-session-journeys" data-loaded="false"></div>
 
-            <!-- ── KNOWLEDGE GAP AUDIT & MISSING INFORMATION MODAL (LIGHT LUXURY) ── -->
+            <!-- ── CHATBOT LAUNCH READINESS & CRITICAL ISSUES MODAL (LIGHT LUXURY) ── -->
             <div id="knowledgeGapsModal" style="display: none; position: fixed; inset: 0; background: rgba(6, 61, 59, 0.45); backdrop-filter: blur(6px); z-index: 999999; align-items: center; justify-content: center; padding: 20px;">
-                <div style="background: #FFFFFF; border: 1.5px solid #DCE9E5; border-radius: 16px; max-width: 580px; width: 100%; box-shadow: 0 20px 50px -10px rgba(6, 61, 59, 0.18), 0 4px 16px rgba(6, 61, 59, 0.05); overflow: hidden;">
+                <div style="background: #FFFFFF; border: 1.5px solid #DCE9E5; border-radius: 16px; max-width: 600px; width: 100%; box-shadow: 0 20px 50px -10px rgba(6, 61, 59, 0.18), 0 4px 16px rgba(6, 61, 59, 0.05); overflow: hidden;">
                     <!-- Header -->
                     <div style="padding: 18px 24px; border-bottom: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; background: #F8FBFA;">
                         <div style="display: flex; align-items: center; gap: 12px;">
-                            <span style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: #FEF3C7; border: 1px solid #FDE68A; font-size: 16px; flex-shrink: 0;">⚠️</span>
+                            <span style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: #FEF3C7; border: 1px solid #FDE68A; font-size: 16px; flex-shrink: 0;" id="readinessModalIcon">⚠️</span>
                             <div>
-                                <div style="font-family: var(--brand-font-display); font-size: 16px; font-weight: 800; color: #063D3B;">Institutional Knowledge Gaps</div>
-                                <div style="font-size: 12px; color: #648781; margin-top: 1px;">Missing items needed for accurate admissions answering</div>
+                                <div style="font-family: var(--brand-font-display); font-size: 16px; font-weight: 800; color: #063D3B;" id="readinessModalTitle">Chatbot Launch Readiness</div>
+                                <div style="font-size: 12px; color: #648781; margin-top: 1px;" id="readinessModalSubtitle">Pre-flight verification for live student inquiries</div>
                             </div>
                         </div>
                         <button type="button" onclick="hideKnowledgeGapsModal()" style="background: #F1F7F4; border: 1px solid #DDE9E3; color: #648781; font-size: 15px; cursor: pointer; width: 28px; height: 28px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; line-height: 1; transition: all 0.15s ease;" onmouseover="this.style.background='#E2EFEA'; this.style.color='#063D3B'" onmouseout="this.style.background='#F1F7F4'; this.style.color='#648781'">✕</button>
                     </div>
 
+                    <!-- Warning Alert Banner -->
+                    <div id="readinessWarningBanner" style="display: none; margin: 18px 24px 0 24px; padding: 13px 16px; background: #FEF2F2; border: 1.5px solid #FECDD3; border-radius: 10px;">
+                        <div style="display: flex; align-items: flex-start; gap: 10px;">
+                            <span style="font-size: 16px; line-height: 1.2;">⚠️</span>
+                            <div>
+                                <div style="font-size: 12.5px; font-weight: 800; color: #991B1B;">Chatbot Functionality Degraded</div>
+                                <div style="font-size: 11.5px; color: #7F1D1D; margin-top: 2px; line-height: 1.45;">Your admissions chatbot cannot converse with prospective students properly until the issues below are fixed. Incomplete data forces the AI into generic apologies or fallback responses.</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Checklist -->
-                    <div style="padding: 22px 24px; display: flex; flex-direction: column; gap: 12px; background: #FFFFFF;" id="knowledgeGapsChecklist">
+                    <div style="padding: 18px 24px; display: flex; flex-direction: column; gap: 12px; background: #FFFFFF;" id="knowledgeGapsChecklist">
                         <!-- Populated by JS -->
                     </div>
 
                     <!-- Footer -->
                     <div style="padding: 14px 24px; border-top: 1.5px solid #E6F0EC; background: #F8FBFA; display: flex; align-items: center; justify-content: space-between;">
                         <span style="font-size: 11px; font-weight: 600; color: #648781; display: inline-flex; align-items: center; gap: 5px;"><span style="color: #047857; font-size: 12px;">🔒</span> Cardinal Rule: The AI never invents missing facts.</span>
-                        <button type="button" onclick="hideKnowledgeGapsModal()" class="brand-btn-secondary" style="height: 32px; padding: 0 16px; font-size: 12px; font-weight: 700; background: #FFFFFF; color: #063D3B; border: 1.5px solid #DDE9E3; border-radius: 8px; cursor: pointer; transition: all 0.15s ease;">Close Audit</button>
+                        <button type="button" onclick="hideKnowledgeGapsModal()" class="brand-btn-secondary" style="height: 32px; padding: 0 16px; font-size: 12px; font-weight: 700; background: #FFFFFF; color: #063D3B; border: 1.5px solid #DDE9E3; border-radius: 8px; cursor: pointer; transition: all 0.15s ease;">Close</button>
                     </div>
                 </div>
             </div>
@@ -11078,7 +11089,7 @@ echo $response['reply'];
         }
 
         // ═══════════════════════════════════════════════════════════════════
-        // KNOWLEDGE GAPS AUDIT & NOTIFICATION BADGE CONTROLLER
+        // CHATBOT LAUNCH READINESS & CRITICAL ISSUES CONTROLLER
         // ═══════════════════════════════════════════════════════════════════
         let currentKnowledgeGapsState = {
             hasGaps: false,
@@ -11097,8 +11108,11 @@ echo $response['reply'];
             if (programs.length === 0) {
                 gaps.push({
                     icon: '🎓',
+                    severity: 'Critical Blocker',
+                    severityBg: '#FEE2E2',
+                    severityColor: '#DC2626',
                     title: 'Degree Programs Missing',
-                    desc: 'No specific degrees or courses were indexed. The bot cannot answer program-specific inquiries.',
+                    desc: 'Why it matters: Prospective students asking "What degrees do you offer?", tuition fees, or admission deadlines cannot be answered.',
                     ctaText: 'Add Programs',
                     action: () => { hideKnowledgeGapsModal(); switchNavTab('academic-programs'); }
                 });
@@ -11108,8 +11122,11 @@ echo $response['reply'];
             if (ksCount === 0) {
                 gaps.push({
                     icon: '📄',
-                    title: 'Admissions Brochure / Catalog Missing',
-                    desc: 'No documents, policy text, or admission FAQs are in the knowledge base.',
+                    severity: 'Critical Blocker',
+                    severityBg: '#FEE2E2',
+                    severityColor: '#DC2626',
+                    title: 'Admissions Catalog / Documents Missing',
+                    desc: 'Why it matters: The AI has no official prospectus, policy text, or admission FAQs to reference.',
                     ctaText: 'Upload Documents',
                     action: () => { hideKnowledgeGapsModal(); switchNavTab('knowledge'); }
                 });
@@ -11119,8 +11136,11 @@ echo $response['reply'];
             if (!org.city || !org.state) {
                 gaps.push({
                     icon: '🏛️',
+                    severity: 'Required Detail',
+                    severityBg: '#FEF3C7',
+                    severityColor: '#B45309',
                     title: 'Campus Location Incomplete',
-                    desc: 'City and state are unverified. Adding these helps prospective students locate your campus.',
+                    desc: 'Why it matters: The AI cannot verify campus city/state for out-of-state students or coordinate physical campus tours.',
                     ctaText: 'Edit Profile',
                     action: () => { hideKnowledgeGapsModal(); switchNavTab('settings'); }
                 });
@@ -11131,12 +11151,19 @@ echo $response['reply'];
 
             const badge = document.getElementById('headerKnowledgeGapBadge');
             const badgeText = document.getElementById('headerKnowledgeGapText');
+            const beacon = document.getElementById('headerSonarBeacon');
             if (badge) {
+                badge.style.display = 'inline-flex';
                 if (currentKnowledgeGapsState.hasGaps) {
-                    badge.style.display = 'inline-flex';
-                    if (badgeText) badgeText.textContent = `${gaps.length} Knowledge Gap${gaps.length > 1 ? 's' : ''}`;
+                    badge.className = 'brand-knowledge-gap-badge';
+                    if (beacon) beacon.style.display = 'inline-flex';
+                    if (badgeText) badgeText.textContent = `${gaps.length} Critical Issue${gaps.length > 1 ? 's' : ''}`;
+                    badge.title = `Chatbot Launch Readiness: ${gaps.length} critical issue(s) need attention`;
                 } else {
-                    badge.style.display = 'none';
+                    badge.className = 'brand-chatbot-primed-badge';
+                    if (beacon) beacon.style.display = 'none';
+                    if (badgeText) badgeText.innerHTML = `<span style="font-weight: 800; margin-right: 4px;">✓</span> Chatbot Primed`;
+                    badge.title = `Chatbot Launch Readiness: 100% verified and ready for students`;
                 }
             }
         }
@@ -11144,19 +11171,46 @@ echo $response['reply'];
         function showKnowledgeGapsModal() {
             const modal = document.getElementById('knowledgeGapsModal');
             const listEl = document.getElementById('knowledgeGapsChecklist');
+            const warnBanner = document.getElementById('readinessWarningBanner');
+            const modalIcon = document.getElementById('readinessModalIcon');
+            const modalTitle = document.getElementById('readinessModalTitle');
+            const modalSubtitle = document.getElementById('readinessModalSubtitle');
             if (!modal || !listEl) return;
 
             listEl.innerHTML = '';
 
             if (currentKnowledgeGapsState.gapsList.length === 0) {
+                if (warnBanner) warnBanner.style.display = 'none';
+                if (modalIcon) {
+                    modalIcon.innerText = '✓';
+                    modalIcon.style.background = '#D1FAE5';
+                    modalIcon.style.borderColor = '#A7F3D0';
+                }
+                if (modalTitle) modalTitle.innerText = 'Chatbot Launch Readiness';
+                if (modalSubtitle) modalSubtitle.innerText = 'Pre-flight verification passed — 100% ready for students';
+
                 listEl.innerHTML = `
-                    <div style="background: #ECFDF5; border: 1.5px solid #A7F3D0; border-radius: 12px; padding: 24px 20px; text-align: center;">
-                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: #D1FAE5; color: #047857; font-size: 22px; font-weight: 800; margin: 0 auto 10px auto;">✓</span>
-                        <div style="font-size: 14px; font-weight: 800; color: #065F46;">All Knowledge Systems Fully Primed!</div>
-                        <div style="font-size: 12px; color: #047857; margin-top: 4px;">Your AI assistant has verified academic programs and institutional knowledge sources.</div>
+                    <div style="background: #ECFDF5; border: 1.5px solid #A7F3D0; border-radius: 12px; padding: 26px 20px; text-align: center;">
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 50%; background: #D1FAE5; color: #047857; font-size: 24px; font-weight: 800; margin: 0 auto 12px auto;">✓</span>
+                        <div style="font-size: 15px; font-weight: 800; color: #065F46;">Chatbot is 100% Primed & Ready to Launch!</div>
+                        <div style="font-size: 12px; color: #047857; margin-top: 4px; max-width: 440px; margin-left: auto; margin-right: auto; line-height: 1.5;">All core institutional knowledge, degree programs, and campus details are verified. Your AI admissions counselor is ready to engage prospective students.</div>
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 18px;">
+                            <button type="button" onclick="hideKnowledgeGapsModal(); switchNavTab('overview');" class="brand-btn-primary" style="height: 34px; padding: 0 16px; font-size: 12px; font-weight: 700; background: #063D3B; color: #C8FF63; border: 1px solid #063D3B; border-radius: 8px; cursor: pointer;">
+                                View Embed Code →
+                            </button>
+                        </div>
                     </div>
                 `;
             } else {
+                if (warnBanner) warnBanner.style.display = 'block';
+                if (modalIcon) {
+                    modalIcon.innerText = '⚠️';
+                    modalIcon.style.background = '#FEF3C7';
+                    modalIcon.style.borderColor = '#FDE68A';
+                }
+                if (modalTitle) modalTitle.innerText = 'Chatbot Launch Readiness';
+                if (modalSubtitle) modalSubtitle.innerText = `${currentKnowledgeGapsState.gapsList.length} critical issue${currentKnowledgeGapsState.gapsList.length > 1 ? 's' : ''} must be resolved before live deployment`;
+
                 currentKnowledgeGapsState.gapsList.forEach(gap => {
                     const item = document.createElement('div');
                     item.style.cssText = 'background: #FAFCFB; border: 1.5px solid #DCE9E5; border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px; box-shadow: 0 1px 3px rgba(6, 61, 59, 0.03); transition: all 0.15s ease;';
@@ -11164,8 +11218,11 @@ echo $response['reply'];
                         <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
                             <div style="width: 38px; height: 38px; border-radius: 8px; background: #F1F7F4; border: 1px solid #DDE9E3; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;">${gap.icon}</div>
                             <div style="min-width: 0;">
-                                <div style="font-size: 13px; font-weight: 700; color: #063D3B;">${escapeHtml(gap.title)}</div>
-                                <div style="font-size: 11.5px; color: #4F7470; margin-top: 2px; line-height: 1.45;">${escapeHtml(gap.desc)}</div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div style="font-size: 13px; font-weight: 700; color: #063D3B;">${escapeHtml(gap.title)}</div>
+                                    <span style="font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; background: ${gap.severityBg || '#FEE2E2'}; color: ${gap.severityColor || '#DC2626'}; padding: 1.5px 6px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.06);">${escapeHtml(gap.severity || 'Critical')}</span>
+                                </div>
+                                <div style="font-size: 11.5px; color: #4F7470; margin-top: 3px; line-height: 1.45;">${escapeHtml(gap.desc)}</div>
                             </div>
                         </div>
                         <button type="button" class="brand-btn-primary brand-btn-sm" style="flex-shrink: 0; height: 32px; font-size: 11.5px; padding: 0 14px; font-weight: 700; background: #063D3B; color: #C8FF63; border: 1px solid #063D3B; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s ease;">
