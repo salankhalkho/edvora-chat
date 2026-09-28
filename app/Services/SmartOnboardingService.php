@@ -22,7 +22,7 @@ use Throwable;
  */
 class SmartOnboardingService
 {
-    private const MAX_CONTEXT_CHARS        = 32000;
+    private const MAX_CONTEXT_CHARS        = 48000;
     private const MAX_PAGES_TO_FETCH       = 20;
     private const MAX_PROGRAMS_TO_SAVE     = 100;
     private const MAX_KNOWLEDGE_CLUSTERS   = 25;
@@ -81,6 +81,11 @@ class SmartOnboardingService
             $normalizedUrl = DemoPreviewService::normalizeUrl($websiteUrl);
             $domain        = DemoPreviewService::extractDomain($normalizedUrl);
             $host          = parse_url($normalizedUrl, PHP_URL_HOST) ?: $domain;
+
+            $orgRow = $db->prepare("SELECT name FROM organizations WHERE id = :id");
+            $orgRow->execute([':id' => $orgId]);
+            $instName = $orgRow->fetchColumn() ?: 'Your Institution';
+
             $emit('connecting', "Connecting to {$host}...", 5, ['domain' => $host]);
 
             // ── STEP 2: Fetch Homepage (Hop 0) ──────────────────────────────────
@@ -150,10 +155,25 @@ class SmartOnboardingService
             // ── STEP 5: Multi-Page Discovery Spider (Up to 20 Pages) ─────────────
             $crawledUrls = [$normalizedUrl => true];
             $candidateDegrees = self::extractCandidateDegrees($rootHtml, $normalizedUrl);
+
+            // Pre-compact homepage content
+            $rootClean = self::htmlToText($rootHtml);
+            $rootComp = ContentCompactor::process($rootClean, "Official Website Overview — {$instName}");
+            $rootProcessed = $rootComp['processed_content'] ?? substr($rootClean, 0, 8000);
+
+            $crawledPagesData = [];
+            $crawledPagesData[] = [
+                'url'      => $normalizedUrl,
+                'title'    => "Official Website Overview — {$instName}",
+                'category' => 'General',
+                'content'  => $rootProcessed,
+                'is_root'  => true
+            ];
+
             $combinedSections = [];
             $combinedSections[] = [
                 'label' => 'HOMEPAGE',
-                'text'  => substr(self::htmlToText($rootHtml), 0, 3000)
+                'text'  => substr($rootProcessed, 0, 3500)
             ];
 
             // Build prioritized queue of URLs to crawl
@@ -168,10 +188,9 @@ class SmartOnboardingService
             foreach (array_slice($linkBuckets['admissions_hubs'], 0, 2) as $u) {
                 if (!in_array($u, $crawlQueue) && !isset($crawledUrls[$u])) $crawlQueue[] = $u;
             }
-            // Tuition / Fees / Aid hub (top 1)
-            if (!empty($linkBuckets['fee_hubs'])) {
-                $fUrl = $linkBuckets['fee_hubs'][0];
-                if (!in_array($fUrl, $crawlQueue) && !isset($crawledUrls[$fUrl])) $crawlQueue[] = $fUrl;
+            // Tuition / Fees / Aid hub (top 2)
+            foreach (array_slice($linkBuckets['fee_hubs'], 0, 2) as $u) {
+                if (!in_array($u, $crawlQueue) && !isset($crawledUrls[$u])) $crawlQueue[] = $u;
             }
             // About hub (top 1)
             if (!empty($linkBuckets['about_hubs'])) {
@@ -201,12 +220,51 @@ class SmartOnboardingService
                 $pageDegreesCount = 0;
 
                 if ($subFetch['success'] && !empty($subFetch['html'])) {
-                    $subText = self::htmlToText($subFetch['html']);
+                    $subClean = self::htmlToText($subFetch['html']);
                     $cleanPath = trim(parse_url($targetUrl, PHP_URL_PATH) ?? '', '/');
-                    $combinedSections[] = [
-                        'label' => strtoupper($cleanPath) ?: 'PAGE_' . $subpageCount,
-                        'text'  => substr($subText, 0, 2000)
-                    ];
+                    $subComp = ContentCompactor::process($subClean, strtoupper($cleanPath) ?: 'PAGE_' . $subpageCount);
+                    $subProcessed = $subComp['processed_content'] ?? substr($subClean, 0, 4000);
+
+                    if (strlen($subProcessed) > 50) {
+                        $combinedSections[] = [
+                            'label' => strtoupper($cleanPath) ?: 'PAGE_' . $subpageCount,
+                            'text'  => substr($subProcessed, 0, 3500)
+                        ];
+                    }
+
+                    // Preserve high-value crawled page for knowledge source persistence
+                    if (strlen($subProcessed) >= 120) {
+                        $pageCategory = 'General';
+                        $pageTitle = 'Institutional Overview';
+
+                        if (preg_match('/<title[^>]*>(.*?)<\/title>/is', $subFetch['html'], $tMatch)) {
+                            $rawT = trim(html_entity_decode($tMatch[1], ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+                            $rawT = preg_replace('/(\s*[\-\|]\s*' . preg_quote($instName, '/') . '.*)$/i', '', $rawT);
+                            if (strlen($rawT) >= 3 && strlen($rawT) <= 120) {
+                                $pageTitle = $rawT;
+                            }
+                        }
+
+                        $lowUrl = strtolower($targetUrl);
+                        if (preg_match('/\b(tuition|fees?|cost|financial-aid|scholarships?|paying)\b/i', $lowUrl)) {
+                            $pageCategory = 'Fees';
+                            if ($pageTitle === 'Institutional Overview') $pageTitle = 'Tuition, Fees & Financial Aid';
+                        } elseif (preg_match('/\b(admissions?|apply|application|enroll|eligibility)\b/i', $lowUrl)) {
+                            $pageCategory = 'Admissions';
+                            if ($pageTitle === 'Institutional Overview') $pageTitle = 'Admissions Requirements & Application';
+                        } elseif (preg_match('/\b(academics?|programs?|courses?|degrees?|majors?|catalog)\b/i', $lowUrl)) {
+                            $pageCategory = 'Academic Programs';
+                            if ($pageTitle === 'Institutional Overview') $pageTitle = 'Academic Programs & Catalogs';
+                        }
+
+                        $crawledPagesData[] = [
+                            'url'      => $targetUrl,
+                            'title'    => $pageTitle,
+                            'category' => $pageCategory,
+                            'content'  => $subProcessed,
+                            'is_root'  => false
+                        ];
+                    }
 
                     // Extract candidate degrees from this page
                     $pageDegrees = self::extractCandidateDegrees($subFetch['html'], $targetUrl);
@@ -217,12 +275,22 @@ class SmartOnboardingService
                         }
                     }
 
-                    // Discover Tier 2 sub-pages (individual colleges, departments, majors, degree catalogs)
+                    // Discover Tier 2 sub-pages (individual colleges, departments, majors, degree catalogs, fee hubs)
                     if (count($crawlQueue) < (self::MAX_PAGES_TO_FETCH + 10)) {
                         $subLinks = self::extractAndScoreLinks($subFetch['html'], $targetUrl);
                         foreach ($subLinks['academic_hubs'] as $sh) {
                             if (!isset($crawledUrls[$sh]) && !in_array($sh, $crawlQueue)) {
                                 $crawlQueue[] = $sh;
+                            }
+                        }
+                        foreach ($subLinks['fee_hubs'] as $sf) {
+                            if (!isset($crawledUrls[$sf]) && !in_array($sf, $crawlQueue)) {
+                                $crawlQueue[] = $sf;
+                            }
+                        }
+                        foreach ($subLinks['admissions_hubs'] as $sa) {
+                            if (!isset($crawledUrls[$sa]) && !in_array($sa, $crawlQueue)) {
+                                $crawlQueue[] = $sa;
                             }
                         }
                     }
@@ -254,7 +322,9 @@ class SmartOnboardingService
                 $contextParts[] = "=== EXTRACTED DEGREE & PROGRAM DIRECTORY CANDIDATES ===\n" . implode("\n", array_slice($candidateDegrees, 0, 50));
             }
             foreach ($combinedSections as $sec) {
-                $contextParts[] = "=== SECTION: {$sec['label']} ===\n" . $sec['text'];
+                if (strlen(trim($sec['text'])) > 50) {
+                    $contextParts[] = "=== SECTION: {$sec['label']} ===\n" . $sec['text'];
+                }
             }
 
             $finalContext = substr(implode("\n\n", $contextParts), 0, self::MAX_CONTEXT_CHARS);
@@ -337,11 +407,12 @@ class SmartOnboardingService
 
                 foreach ($allExtractedProgs as $progItem) {
                     if (is_array($progItem)) {
-                        $cn         = trim((string)($progItem['course_name'] ?? $progItem['name'] ?? ''));
-                        $pt         = strtolower((string)($progItem['program_type'] ?? 'undergraduate'));
-                        $dur        = !empty($progItem['duration']) ? substr(trim($progItem['duration']), 0, 50) : null;
-                        $mode       = strtolower((string)($progItem['mode'] ?? 'full_time'));
-                        $eligibility = !empty($progItem['eligibility']) ? substr(trim($progItem['eligibility']), 0, 500) : null;
+                        $cn          = trim((string)($progItem['course_name'] ?? $progItem['name'] ?? ''));
+                        $pt          = strtolower((string)($progItem['program_type'] ?? 'undergraduate'));
+                        $dur         = !empty($progItem['duration']) && $progItem['duration'] !== 'null' ? substr(trim($progItem['duration']), 0, 50) : null;
+                        $mode        = strtolower((string)($progItem['mode'] ?? 'full_time'));
+                        if ($mode === 'null') $mode = 'full_time';
+                        $eligibility = !empty($progItem['eligibility']) && $progItem['eligibility'] !== 'null' ? substr(trim($progItem['eligibility']), 0, 500) : null;
                     } else {
                         $cn = trim((string)$progItem);
                         $pt = 'undergraduate';
@@ -357,8 +428,13 @@ class SmartOnboardingService
                         $eligibility = null;
                     }
 
-                    if ($cn === '' || strlen($cn) < 3) continue;
-                    $normCn = strtolower(trim($cn));
+                    $cn = html_entity_decode($cn, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                    $cn = trim(preg_replace('/\s+/', ' ', $cn));
+                    if ($cn === '' || strlen($cn) < 3 || strlen($cn) > 100) continue;
+                    if (preg_match('/[\.\?\!]$/', $cn)) continue;
+                    if (preg_match('/(?:do not need|need to|must be|submitted|how to|contact us|transcripts?)/i', $cn)) continue;
+
+                    $normCn = strtolower($cn);
                     if (isset($savedCourseNames[$normCn])) continue;
                     $savedCourseNames[$normCn] = true;
 
@@ -407,7 +483,13 @@ class SmartOnboardingService
             // ── Fallback: DOM-extracted candidate degrees not yet covered by LLM ──
             if (!empty($candidateDegrees)) {
                 foreach (array_slice($candidateDegrees, 0, self::MAX_PROGRAMS_TO_SAVE) as $cd) {
-                    $normCd = strtolower(trim($cd));
+                    $cd = html_entity_decode(trim($cd), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                    $cd = trim(preg_replace('/\s+/', ' ', $cd));
+                    if ($cd === '' || strlen($cd) < 3 || strlen($cd) > 100) continue;
+                    if (preg_match('/[\.\?\!]$/', $cd)) continue;
+                    if (preg_match('/(?:do not need|need to|must be|submitted|how to|contact us|transcripts?)/i', $cd)) continue;
+
+                    $normCd = strtolower($cd);
                     if (isset($savedCourseNames[$normCd])) continue;
                     $savedCourseNames[$normCd] = true;
 
@@ -451,8 +533,6 @@ class SmartOnboardingService
             }
 
             // ── STEP 10: Dispatch embed_program knowledge-ingestion jobs ─────────
-            // Each newly inserted program generates self-contained sentences via
-            // ProgramTextGenerator and is embedded into knowledge_items by the worker.
             $vectorsQueued = 0;
             if (!empty($embeddedProgIds)) {
                 $stmtJob = $db->prepare("
@@ -479,17 +559,90 @@ class SmartOnboardingService
             );
 
             // ── STEP 11: Save Knowledge Sources (Filesystem-Backed) ─────────────
-            $clusters = $extracted['knowledge_clusters'] ?? [];
-            $ksCount  = 0;
+            $emit('saving_knowledge', 'Ingesting verified website pages & institutional facts into knowledge base...', 86);
+            $ksCount = 0;
+            $savedUrls = [];
 
+            // 11A. Save Authoritative Crawled Webpages (Homepage, Academics, Admissions, Fees)
+            $selectedPages = [];
+            $catCount = [];
+
+            foreach ($crawledPagesData as $pData) {
+                $pUrl = $pData['url'];
+                if (isset($savedUrls[$pUrl])) continue;
+                $pCat = $pData['category'];
+
+                // Always take root homepage overview
+                if (!empty($pData['is_root'])) {
+                    $selectedPages[] = $pData;
+                    $savedUrls[$pUrl] = true;
+                    continue;
+                }
+
+                // Up to 2 pages per category, max 6 pages total
+                $catCount[$pCat] = ($catCount[$pCat] ?? 0) + 1;
+                if ($catCount[$pCat] <= 2 && count($selectedPages) < 6) {
+                    $selectedPages[] = $pData;
+                    $savedUrls[$pUrl] = true;
+                }
+            }
+
+            foreach ($selectedPages as $p) {
+                $pContent = trim($p['content']);
+                if (strlen($pContent) < 80) continue;
+
+                $insKs = $db->prepare("
+                    INSERT INTO knowledge_sources
+                        (organization_id, type, title, category, source_url, status, created_at, updated_at)
+                    VALUES (:org_id, 'url', :title, :cat, :src, 'active', NOW(), NOW())
+                ");
+                $insKs->execute([
+                    ':org_id' => $orgId,
+                    ':title'  => substr($p['title'], 0, 255),
+                    ':cat'    => substr($p['category'], 0, 100),
+                    ':src'    => $p['url'],
+                ]);
+                $ksId = (int)$db->lastInsertId();
+
+                $saveMeta = \App\Services\KnowledgeFileStorage::saveText($orgId, $ksId, $pContent);
+                $db->prepare("
+                    UPDATE knowledge_sources
+                    SET file_path = :file_path, file_size_bytes = :size, token_count = :tokens, checksum_sha256 = :sha
+                    WHERE id = :id
+                ")->execute([
+                    ':file_path' => $saveMeta['file_path'],
+                    ':size'      => $saveMeta['file_size_bytes'],
+                    ':tokens'    => $saveMeta['token_count'],
+                    ':sha'       => $saveMeta['checksum_sha256'],
+                    ':id'        => $ksId
+                ]);
+
+                $ksCount++;
+                usleep(40000);
+                $emit('cluster_found', "Indexed Webpage: {$p['title']}", 88, [
+                    'title'           => $p['title'],
+                    'category'        => $p['category'],
+                    'knowledge_count' => $ksCount
+                ]);
+
+                // Dispatch async chunk_and_embed job for vector indexing
+                try {
+                    $db->prepare("INSERT INTO jobs (type, payload, status, run_at, created_at) VALUES ('chunk_and_embed', :p, 'pending', NOW(), NOW())")
+                       ->execute([':p' => json_encode(['source_id' => $ksId, 'organization_id' => $orgId])]);
+                    $vectorsQueued++;
+                } catch (Throwable $je) {}
+            }
+
+            // 11B. Save Specific AI Synthesized Policy Clusters (if any returned by LLM)
+            $clusters = $extracted['knowledge_clusters'] ?? [];
             if (!empty($clusters) && is_array($clusters)) {
-                $emit('saving_knowledge', 'Ingesting Admissions & Tuition Policy facts into knowledge base...', 86);
                 foreach (array_slice($clusters, 0, self::MAX_KNOWLEDGE_CLUSTERS) as $cluster) {
                     $content = trim((string)($cluster['content'] ?? ''));
-                    if (strlen($content) < 40) continue;
+                    // Only save distinct factual policy clusters that have substantive length
+                    if (strlen($content) < 80) continue;
 
-                    $title    = trim((string)($cluster['title'] ?? 'Institutional Information'));
-                    $category = trim((string)($cluster['category'] ?? 'Admissions'));
+                    $title    = trim((string)($cluster['title'] ?? 'Institutional Policy'));
+                    $category = trim((string)($cluster['category'] ?? 'General'));
 
                     $compacted        = ContentCompactor::process($content, $title);
                     $processedContent = $compacted['processed_content'] ?? substr($content, 0, 6000);
@@ -521,40 +674,35 @@ class SmartOnboardingService
                     ]);
 
                     $ksCount++;
-
-                    usleep(70000);
-                    $emit('cluster_found', "Synthesized Knowledge: {$title}", 88, [
+                    usleep(40000);
+                    $emit('cluster_found', "Synthesized Policy: {$title}", 90, [
                         'title'           => $title,
                         'category'        => $category,
                         'knowledge_count' => $ksCount
                     ]);
 
-                    // Dispatch async chunk_and_embed job for vector indexing
                     try {
                         $db->prepare("INSERT INTO jobs (type, payload, status, run_at, created_at) VALUES ('chunk_and_embed', :p, 'pending', NOW(), NOW())")
                            ->execute([':p' => json_encode(['source_id' => $ksId, 'organization_id' => $orgId])]);
                         $vectorsQueued++;
-                    } catch (Throwable $je) {
-                        // Optional job dispatch
-                    }
+                    } catch (Throwable $je) {}
                 }
             }
 
-            // ── Fallback: If clustering produced zero records, save homepage overview ──
-            if ($ksCount === 0 && !empty(trim($finalContext))) {
-                $compacted        = ContentCompactor::process($finalContext, "Website Overview — {$orgName}");
-                $processedContent = $compacted['processed_content'] ?? substr($finalContext, 0, 6000);
-                $db->prepare("
+            // 11C. Absolute Fallback: If nothing was saved, save homepage overview
+            if ($ksCount === 0 && !empty(trim($rootProcessed))) {
+                $insKs = $db->prepare("
                     INSERT INTO knowledge_sources
                         (organization_id, type, title, category, source_url, status, created_at, updated_at)
                     VALUES (:org_id, 'url', :title, 'General', :src, 'active', NOW(), NOW())
-                ")->execute([
+                ");
+                $insKs->execute([
                     ':org_id' => $orgId,
                     ':title'  => "Website Overview — {$orgName}",
                     ':src'    => $normalizedUrl,
                 ]);
                 $ksId = (int)$db->lastInsertId();
-                $saveMeta = \App\Services\KnowledgeFileStorage::saveText($orgId, $ksId, $processedContent);
+                $saveMeta = \App\Services\KnowledgeFileStorage::saveText($orgId, $ksId, $rootProcessed);
                 $db->prepare("
                     UPDATE knowledge_sources
                     SET file_path = :file_path, file_size_bytes = :size, token_count = :tokens, checksum_sha256 = :sha
@@ -566,7 +714,6 @@ class SmartOnboardingService
                     ':sha'       => $saveMeta['checksum_sha256'],
                     ':id'        => $ksId
                 ]);
-                // Dispatch chunk_and_embed for fallback cluster too
                 try {
                     $db->prepare("INSERT INTO jobs (type, payload, status, run_at, created_at) VALUES ('chunk_and_embed', :p, 'pending', NOW(), NOW())")
                        ->execute([':p' => json_encode(['source_id' => $ksId, 'organization_id' => $orgId])]);
@@ -690,7 +837,7 @@ CARDINAL RULES:
 2. Extract ALL degree programs found in the text directly into the flat "programs" array. Do NOT group programs under departments.
 3. For each program, use ONLY data explicitly present in the source text. Leave fields null if not mentioned.
 4. If fees, eligibility, or scholarships are not mentioned, do NOT make up numbers or policies.
-5. All knowledge_clusters MUST be factual summaries of real text provided in the prompt.
+5. All knowledge_clusters MUST be comprehensive, factual summaries (2-4 dense informative sentences covering application deadlines, fees, eligibility criteria, or academic policies) based directly on the provided text.
 6. Return ONLY a valid JSON object matching the schema below. No markdown backticks, no explanations, no text outside JSON.
 
 OUTPUT JSON SCHEMA:
@@ -712,7 +859,7 @@ OUTPUT JSON SCHEMA:
     {
       "title": "Clear Topic Title (e.g. Admissions Criteria, Tuition & Fees, Financial Aid)",
       "category": "Admissions|Fees|Scholarships|Campus|Placements|General",
-      "content": "Dense factual information extracted directly from the website text"
+      "content": "Dense factual information extracted directly from the website text (at least 2-4 informative sentences)"
     }
   ]
 }
@@ -791,13 +938,14 @@ SYSTEM;
     }
 
     /**
-     * Universal Semantic Link Scoring & Discovery (Structure-Agnostic)
+     * Universal Semantic Link Scoring & Discovery (Structure-Agnostic, Subdomain-Aware)
      */
     public static function extractAndScoreLinks(string $html, string $baseUrl): array
     {
-        $parsed   = parse_url($baseUrl);
-        $baseHost = strtolower($parsed['host'] ?? '');
-        $scheme   = $parsed['scheme'] ?? 'https';
+        $parsed     = parse_url($baseUrl);
+        $baseHost   = strtolower($parsed['host'] ?? '');
+        $baseDomain = DemoPreviewService::extractDomain($baseUrl);
+        $scheme     = $parsed['scheme'] ?? 'https';
 
         $buckets = [
             'all'             => [],
@@ -843,7 +991,11 @@ SYSTEM;
             }
 
             $linkHost = strtolower(parse_url($full, PHP_URL_HOST) ?? '');
-            if (!$linkHost || (strpos($linkHost, $baseHost) === false && strpos($baseHost, $linkHost) === false)) continue;
+            if (!$linkHost) continue;
+
+            // Recognize root domain and all institution subdomains (e.g. catalog.ua.edu, admissions.ua.edu)
+            $isInternal = ($linkHost === $baseHost || $linkHost === $baseDomain || str_ends_with($linkHost, '.' . $baseDomain));
+            if (!$isInternal) continue;
 
             // Remove query params & trailing slashes for clean canonical URL
             $pathOnly = parse_url($full, PHP_URL_PATH) ?? '/';
@@ -856,11 +1008,11 @@ SYSTEM;
 
             $buckets['all'][] = $canonical;
 
-            // Score Academic
+            // Score Academic (Catalog, Programs, Majors, Colleges)
             $acadScore = 0;
             if (preg_match('/\b(academics?|programs?|courses?|degrees?|majors?|undergraduate|postgraduate|graduate|curriculum|facult(y|ies)|schools?|departments?|colleges?|studies|catalogue|catalog)\b/i', $haystack)) {
                 $acadScore += 5;
-                if (preg_match('/\b(degrees?|majors?|programs?|undergraduate-studies|graduate-studies)\b/i', $haystack)) $acadScore += 4;
+                if (preg_match('/\b(degrees?|majors?|programs?|undergraduate-studies|graduate-studies|catalog)\b/i', $haystack)) $acadScore += 4;
                 $scored['academic'][$canonical] = $acadScore;
             }
 
@@ -871,9 +1023,9 @@ SYSTEM;
                 $scored['admissions'][$canonical] = $admScore;
             }
 
-            // Score Fees / Tuition / Scholarships (strict word boundaries to avoid matching feedback or coffee)
+            // Score Fees / Tuition / Scholarships
             $feeScore = 0;
-            if (preg_match('/\b(tuition|fees?|cost-of-attendance|financial-aid|scholarships?)\b/i', $haystack)) {
+            if (preg_match('/\b(tuition|fees?|cost-of-attendance|financial-aid|scholarships?|paying)\b/i', $haystack)) {
                 $feeScore += 6;
                 $scored['fee'][$canonical] = $feeScore;
             }
@@ -901,23 +1053,26 @@ SYSTEM;
 
     /**
      * Direct Candidate Degree / Program Extraction
-     * Discovers actual degree titles from lists, anchors, and sub-navigation
+     * Discovers actual degree titles from lists, anchors, and sub-navigation with strict sanity filtering
      */
     public static function extractCandidateDegrees(string $html, string $sourceUrl): array
     {
         $candidates = [];
 
-        // 1. Extract from <a> and <li> tags matching degree patterns
+        // 1. Extract from <a>, <li>, <h3>-<h5>, <td> tags matching degree patterns
         if (preg_match_all('/<(?:a|li|h[3-5]|td)[^>]*>(.*?)<\/(?:a|li|h[3-5]|td)>/is', $html, $matches)) {
-            $degreePattern = '/\b(Bachelor|Master|Doctor|Associate|B\.?S\.?|B\.?A\.?|B\.?Tech|B\.?E\.?|B\.?Sc|B\.?Com|B\.?Ed|BBA|BCA|M\.?S\.?|M\.?A\.?|M\.?Tech|M\.?E\.?|M\.?Sc|M\.?Com|MBA|MCA|Ph\.?D|Diploma|Certificate)\b/i';
-            $exclusionPattern = '/(login|cookie|privacy|terms|apply now|click here|read more|contact us|sign in|office 365|master calendar|promissory|on the market|male initiative|student affairs)/i';
+            $wordPattern = '/\b(Bachelor|Master|Doctor|Associate|Doctorate|Diploma|Certificate|B\.S\.|B\.A\.|B\.Tech|B\.E\.|B\.Sc|B\.Com|B\.Ed|M\.S\.|M\.A\.|M\.Tech|M\.E\.|M\.Sc|M\.Com|Ph\.D)\b/i';
+            $acronymPattern = '/\b(BS|BA|BTech|BE|BSc|BCom|BEd|BBA|BCA|MS|MA|MTech|ME|MSc|MCom|MBA|MCA|PhD|MD|JD|LLM|LLB)\b/';
+            $exclusionPattern = '/(login|cookie|privacy|terms|apply now|click here|read more|contact us|sign in|office 365|master calendar|promissory|on the market|male initiative|student affairs|need to|must be|submitted|transcripts?|how to apply|find your|prerequisites)/i';
 
             foreach ($matches[1] as $rawItem) {
-                $text = trim(preg_replace('/\s+/', ' ', strip_tags($rawItem)));
+                $text = html_entity_decode(strip_tags($rawItem), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                $text = trim(preg_replace('/\s+/', ' ', $text));
                 if (strlen($text) < 4 || strlen($text) > 80) continue;
+                if (preg_match('/[\.\?\!]$/', $text)) continue; // Reject full sentences ending in punctuation
                 if (preg_match($exclusionPattern, $text)) continue;
 
-                if (preg_match($degreePattern, $text)) {
+                if (preg_match($wordPattern, $text) || preg_match($acronymPattern, $text)) {
                     $cleaned = preg_replace('/^(explore|view|browse|about|our)\s+/i', '', $text);
                     if (strlen($cleaned) >= 5 && !in_array($cleaned, $candidates)) {
                         $candidates[] = $cleaned;
@@ -931,28 +1086,31 @@ SYSTEM;
 
     /**
      * Universal HTML to Text cleaner
-     * Preserves internal section navigation and catalog tables while stripping outer shell noise
+     * Aggressively strips header, navigation, and footer noise while preserving core article and catalog content
      */
     public static function htmlToText(string $html): string
     {
-        // 1. Remove non-content structural code
+        // 1. Remove non-content structural code, navigation bars, headers, footers, and modal shells
         $clean = preg_replace([
             '/<script\b[^>]*>.*?<\/script>/is',
             '/<style\b[^>]*>.*?<\/style>/is',
             '/<svg\b[^>]*>.*?<\/svg>/is',
             '/<noscript\b[^>]*>.*?<\/noscript>/is',
             '/<iframe\b[^>]*>.*?<\/iframe>/is',
+            '/<header\b[^>]*>.*?<\/header>/is',
+            '/<nav\b[^>]*>.*?<\/nav>/is',
+            '/<footer\b[^>]*>.*?<\/footer>/is',
+            '/<aside\b[^>]*>.*?<\/aside>/is',
+            '/<form\b[^>]*>.*?<\/form>/is',
+            '/<dialog\b[^>]*>.*?<\/dialog>/is',
+            '/<(?:div|section)\b[^>]*(?:class|id)=[\'"][^\'"]*(?:main-navigation|site-nav|primary-nav|nav-menu|header-menu|mobile-menu|drawer-menu|cookie-banner|search-modal)[^\'"]*[\'"][^>]*>.*?<\/(?:div|section)>/is',
             '/<!--.*?-->/s',
         ], ' ', $html);
 
-        // 2. Remove ONLY outer global footer and utility bars, while preserving inner section catalogs
-        $clean = preg_replace('/<footer\b[^>]*>.*?<\/footer>/is', ' ', $clean);
-        $clean = preg_replace('/<nav\b[^>]*class=[\'"][^\'"]*(?:utility|footer|top-bar|social|policy)[^\'"]*[\'"][^>]*>.*?<\/nav>/is', ' ', $clean);
-
-        // 3. Format block elements to newlines
+        // 2. Format block elements to newlines
         $clean = preg_replace('/<(p|br|div|h[1-6]|li|tr|section|article)[^>]*>/i', "\n", $clean);
 
-        // 4. Strip tags & decode
+        // 3. Strip tags & decode entities
         $text  = strip_tags($clean);
         $text  = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $text  = preg_replace('/[ \t]+/', ' ', $text);
