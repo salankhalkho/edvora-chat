@@ -834,7 +834,7 @@ class OnboardingController
             $stmtUpd = $db->prepare("
                 UPDATE knowledge_sources 
                 SET file_path = :file_path, file_size_bytes = :size, token_count = :tokens, checksum_sha256 = :sha,
-                    keywords = :kw, status = 'active', updated_at = NOW()
+                    status = 'active', updated_at = NOW()
                 WHERE id = :id
             ");
             $stmtUpd->execute([
@@ -842,21 +842,19 @@ class OnboardingController
                 ':size'      => $saveMeta['file_size_bytes'],
                 ':tokens'    => $saveMeta['token_count'],
                 ':sha'       => $saveMeta['checksum_sha256'],
-                ':kw'        => $keywords,
                 ':id'        => $ksId
             ]);
         } else {
             $stmtIns = $db->prepare("
                 INSERT INTO knowledge_sources (
-                    organization_id, type, title, keywords, status, created_at, updated_at
+                    organization_id, type, title, status, created_at, updated_at
                 ) VALUES (
-                    :org_id, 'text_paste', :title, :kw, 'active', NOW(), NOW()
+                    :org_id, 'text_paste', :title, 'active', NOW(), NOW()
                 )
             ");
             $stmtIns->execute([
                 ':org_id' => $orgId,
-                ':title'  => $title,
-                ':kw'     => $keywords
+                ':title'  => $title
             ]);
             $ksId = (int)$db->lastInsertId();
             $saveMeta = \App\Services\KnowledgeFileStorage::saveText($orgId, $ksId, $processed);

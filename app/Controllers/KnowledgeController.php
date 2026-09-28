@@ -1135,7 +1135,6 @@ class KnowledgeController
                     file_size_bytes = :size_bytes,
                     token_count = :tokens,
                     checksum_sha256 = :sha256,
-                    keywords = :keywords,
                     content_hash = :hash,
                     status = 'pending',
                     last_fetched_at = NOW(),
@@ -1148,7 +1147,6 @@ class KnowledgeController
                 ':size_bytes' => $saveMeta['file_size_bytes'],
                 ':tokens'     => $saveMeta['token_count'],
                 ':sha256'     => $saveMeta['checksum_sha256'],
-                ':keywords'   => $compacted['keywords'],
                 ':hash'       => $scraped['content_hash'],
                 ':id'         => $id
             ]);
