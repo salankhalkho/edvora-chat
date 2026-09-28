@@ -6,6 +6,7 @@
 > 
 > 📖 **Deep-Dive Subsystem Guides:**
 > - [**Edvora Chatbot Technical Architecture (`architecture_chatbot.md`)**](file:///c:/xampp/htdocs/edvora.chat/architecture_chatbot.md) — Conversational AI lifecycle, Admissions Counselor State Machine, Anti-Fatigue Lead Cadence, Structured JSON Output Contract (`admissions_response`), Vector Search Engine, and `widget.js` client architecture.
+> - [**Domain Whitelisting & Embed Origin Security (`architecture_domain_whitelisting.md`)**](file:///c:/xampp/htdocs/edvora.chat/architecture_domain_whitelisting.md) — Multi-tenant domain whitelisting, registration auto-whitelist, 4-domain quota management, runtime Origin/Referer matching, and embed abuse prevention.
 
 ---
 
@@ -79,6 +80,7 @@ For full technical specifications of the admissions chatbot, turn processing lif
 │   └── logs/                   ← Application logs
 ├── architecture.md             ← Master technical & sub-system architecture index
 ├── architecture_chatbot.md     ← Authoritative admissions chatbot architecture & onboarding guide
+├── architecture_domain_whitelisting.md ← Authoritative domain whitelisting & origin embed security guide
 ├── AGENTS.md                   ← Mandatory agent/developer rules
 ├── BRANDING_GUIDELINES.md      ← UI/typography rules
 ├── theme-branding.css          ← Global design system CSS
@@ -512,7 +514,7 @@ Supervisor runs `workers/job_runner.php` as a persistent process.
 - Every SQL query includes `WHERE organization_id = :org_id`.
 - `TenantMiddleware` validates JWT and injects `organization_id` into every API request context.
 - Widget requests authenticate via `bot_token` only.
-- `chatbots.allowed_domains` JSON array prevents widget loading on unauthorized domains.
+- `chatbots.allowed_domains` JSON array prevents widget loading on unauthorized domains. For complete specifications, see [**`architecture_domain_whitelisting.md`**](file:///c:/xampp/htdocs/edvora.chat/architecture_domain_whitelisting.md).
 
 ---
 
