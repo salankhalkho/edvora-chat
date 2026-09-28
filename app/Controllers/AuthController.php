@@ -106,18 +106,20 @@ class AuthController
             ]);
             $userId = (int)$db->lastInsertId();
 
-            // 3. Create Default Chatbot
+            // 3. Create Default Chatbot with Auto-Whitelisted Registration Domain
             $botToken = bin2hex(random_bytes(16)); // 32 chars
             $welcomeMsg = "Hi there! 👋 Welcome to {$collegeName}. Ask me anything about degree programs, admissions, eligibility, fees, or campus life!";
+            $initialAllowedDomains = !empty($domain) ? json_encode([$domain]) : null;
 
             $stmtBot = $db->prepare("
-                INSERT INTO chatbots (organization_id, name, welcome_message, primary_color, bot_token, is_active, lead_capture_enabled)
-                VALUES (:org_id, 'AI Admissions Assistant', :welcome_msg, '#2563EB', :token, 1, 1)
+                INSERT INTO chatbots (organization_id, name, welcome_message, primary_color, bot_token, allowed_domains, is_active, lead_capture_enabled)
+                VALUES (:org_id, 'AI Admissions Assistant', :welcome_msg, '#2563EB', :token, :allowed_domains, 1, 1)
             ");
             $stmtBot->execute([
                 ':org_id' => $orgId,
                 ':welcome_msg' => $welcomeMsg,
-                ':token' => $botToken
+                ':token' => $botToken,
+                ':allowed_domains' => $initialAllowedDomains
             ]);
             $chatbotId = (int)$db->lastInsertId();
 

@@ -40,6 +40,10 @@ class ChatController
             Response::error('Chatbot not found or inactive.', 404);
         }
 
+        if (!self::isOriginAllowed($bot['allowed_domains'] ?? null)) {
+            Response::error('This domain is not authorized to embed this chatbot.', 403);
+        }
+
         // Load widget customization with cascade: org → defaults
         $customization = \App\Controllers\WidgetCustomizationController::cascadeLookup(
             $db,
@@ -154,6 +158,10 @@ class ChatController
 
         if (!$bot) {
             Response::error('Invalid or inactive chatbot token.', 403);
+        }
+
+        if (!self::isOriginAllowed($bot['allowed_domains'] ?? null)) {
+            Response::error('This domain is not authorized to interact with this chatbot.', 403);
         }
 
         $orgId = (int)$bot['organization_id'];
@@ -852,5 +860,80 @@ class ChatController
             'total_count'       => count($programs),
             'categories'        => $activeCategories
         ];
+    }
+
+    /**
+     * Validate request Origin or Referer against chatbot's allowed_domains
+     */
+    public static function isOriginAllowed(?string $allowedDomainsJson): bool
+    {
+        if (empty($allowedDomainsJson)) {
+            return true;
+        }
+
+        $allowed = json_decode($allowedDomainsJson, true);
+        if (empty($allowed) || !is_array($allowed)) {
+            return true;
+        }
+
+        // Filter and clean configured domains
+        $cleanAllowed = [];
+        foreach ($allowed as $d) {
+            $d = strtolower(trim((string)$d));
+            if ($d === '') continue;
+            $d = preg_replace('#^https?://#i', '', $d);
+            $d = preg_replace('#/.*$#', '', $d);
+            $d = preg_replace('#:[0-9]+$#', '', $d);
+            $d = preg_replace('/^www\./i', '', $d);
+            if (!empty($d)) {
+                $cleanAllowed[] = $d;
+            }
+        }
+
+        if (empty($cleanAllowed)) {
+            return true;
+        }
+
+        $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+        $referer = $_SERVER['HTTP_REFERER'] ?? '';
+
+        $targetHost = '';
+        if (!empty($origin)) {
+            $parsed = parse_url($origin);
+            $targetHost = strtolower($parsed['host'] ?? '');
+        } elseif (!empty($referer)) {
+            $parsed = parse_url($referer);
+            $targetHost = strtolower($parsed['host'] ?? '');
+        }
+
+        // Direct API calls (no Origin and no Referer, e.g. curl/server-side test) are permitted
+        if (empty($targetHost)) {
+            return true;
+        }
+
+        // Always allow edvora.chat (app / live preview / test chat) and local development
+        if ($targetHost === 'edvora.chat' || str_ends_with($targetHost, '.edvora.chat') || $targetHost === 'localhost' || $targetHost === '127.0.0.1') {
+            return true;
+        }
+
+        $targetHostClean = preg_replace('/^www\./', '', $targetHost);
+
+        foreach ($cleanAllowed as $d) {
+            // Exact match
+            if ($targetHostClean === $d) {
+                return true;
+            }
+            // Subdomain match (e.g. admissions.apex.edu matches apex.edu or *.apex.edu)
+            if (str_starts_with($d, '*.')) {
+                $root = substr($d, 2);
+                if ($targetHostClean === $root || str_ends_with($targetHostClean, '.' . $root)) {
+                    return true;
+                }
+            } elseif (str_ends_with($targetHostClean, '.' . $d)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

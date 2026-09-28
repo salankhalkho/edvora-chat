@@ -1,0 +1,304 @@
+<!-- Dedicated Domain Whitelisting Command Frame (Full width unified card matching settings.html) -->
+<div id="view-domain-whitelist" class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
+    
+    <!-- Top Control Bar (Inside the Big Card) -->
+    <div class="ops-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 24px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important;">
+        <div class="ops-dash-title-group" style="display: flex !important; align-items: center !important; gap: 12px !important;">
+            <button type="button" onclick="switchNavTab('org-settings')" class="brand-btn-secondary" style="height: 32px; padding: 0 11px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; border-radius: 6px; background: #F4FAF7; border: 1.5px solid #D1E5DE; color: var(--e-teal, #063D3B);" title="Return to Control Panel">
+                &larr; Control Panel
+            </button>
+            <span class="ops-live-dot"></span>
+            <div>
+                <div class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important; letter-spacing: -0.01em !important; line-height: 1.25 !important;">
+                    Domain Whitelisting
+                </div>
+                <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">
+                    Manage authorized websites &amp; portals permitted to embed and interact with your AI chatbot
+                </div>
+            </div>
+        </div>
+
+        <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
+            <div id="dwCountPill" class="ckh-ctrl-pill" style="font-size: 11px !important; font-weight: 700 !important; color: var(--e-teal, #063D3B) !important; background: #F4FAF7 !important; border: 1px solid #D1E5DE !important; border-radius: 8px !important; padding: 5px 11px !important; display: inline-flex !important; align-items: center !important; gap: 6px !important;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                <span id="dwCounterText">1 / 4 Domains Configured</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inside the Big Card: Content Area with left-aligned form bounded to max 850px -->
+    <div style="padding: 28px 32px 48px 32px; box-sizing: border-box; width: 100%;">
+        <div style="max-width: 850px; width: 100%; margin: 0; box-sizing: border-box;">
+            
+            <!-- Security Info Banner -->
+            <div style="background: #F0FDF4; border: 1.5px solid #BBF7D0; border-radius: 10px; padding: 14px 18px; margin-bottom: 24px; display: flex; align-items: flex-start; gap: 12px;">
+                <span style="font-size: 20px; line-height: 1;">🛡️</span>
+                <div style="font-size: 12px; color: #166534; line-height: 1.55;">
+                    <div style="font-weight: 700; margin-bottom: 2px;">Embed Origin Protection Active</div>
+                    Only websites listed below are permitted to load your chatbot widget and query the AI assistant. Any unauthorized website attempting to use your chatbot token will be blocked automatically, protecting your LLM quota and proprietary data.
+                </div>
+            </div>
+
+            <form id="domainWhitelistForm" onsubmit="handleDomainWhitelistSubmit(event)">
+                
+                <div style="margin-bottom: 24px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                        <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470;">
+                            <span>🌐</span> Whitelisted Domains <span style="color: #648781; font-weight: 500; text-transform: none;">(Maximum 4)</span>
+                        </label>
+                        <span id="dwRemainingHint" style="font-size: 11px; color: #648781; font-weight: 600;"></span>
+                    </div>
+
+                    <!-- Dynamic Domain Rows Container -->
+                    <div id="dwDomainsContainer" style="display: flex; flex-direction: column; gap: 10px;">
+                        <!-- Rows dynamically rendered here by JavaScript -->
+                    </div>
+
+                    <!-- Add More Domain Button -->
+                    <div style="margin-top: 14px;">
+                        <button type="button" id="dwBtnAddDomain" onclick="addDomainRow()" class="brand-btn-secondary" style="height: 36px; padding: 0 16px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; border-radius: 6px; border: 1.5px dashed #79A739; color: #063D3B; background: #F8FCFA; cursor: pointer;">
+                            <span style="font-size: 16px; font-weight: 800; line-height: 1;">+</span>
+                            <span>Add Another Domain</span>
+                        </button>
+                    </div>
+
+                    <div style="margin-top: 10px; font-size: 11px; color: #648781; line-height: 1.5;">
+                        💡 <strong>Format:</strong> Enter the website domain without <code>http://</code> or <code>https://</code> (e.g. <code>university.edu</code> or <code>admissions.university.edu</code>). Subdomains and <code>www.</code> are automatically matched.
+                    </div>
+                </div>
+
+                <!-- Action Bar -->
+                <div style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 16px 0; border-top: 1.5px solid #E6F0EC;">
+                    <button type="submit" id="dwBtnSave" class="brand-btn-primary" style="height: 38px; padding: 0 24px; font-size: 12.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                        <span>💾</span> Save Whitelisted Domains
+                    </button>
+                    <button type="button" onclick="loadDomainWhitelistData()" class="brand-btn-secondary" style="height: 38px; padding: 0 16px; font-size: 12px; cursor: pointer;">
+                        Reset Changes
+                    </button>
+                    <span id="dwStatusMsg" style="font-size: 12px; font-weight: 600; display: none;"></span>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const MAX_DOMAINS = 4;
+    let _loadedDomains = [];
+    let _defaultDomain = '';
+
+    async function loadDomainWhitelistData() {
+        const container = document.getElementById('dwDomainsContainer');
+        if (!container) return;
+        
+        container.innerHTML = '<div style="font-size: 12px; color: #648781; padding: 12px 0;">Loading configured domains...</div>';
+
+        try {
+            const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+            const res = await fetch('/v1/organization/whitelisted-domains', {
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                }
+            });
+            const result = await res.json();
+            
+            if (result.status === 'success' && result.data) {
+                _loadedDomains = result.data.domains || [];
+                _defaultDomain = result.data.default_domain || '';
+                
+                // If no domains yet, ensure default domain is the initial entry
+                if (_loadedDomains.length === 0 && _defaultDomain) {
+                    _loadedDomains = [_defaultDomain];
+                }
+                
+                renderDomainRows(_loadedDomains);
+            } else {
+                container.innerHTML = '<div style="font-size: 12px; color: #EF4444; padding: 10px 0;">Failed to load whitelisted domains.</div>';
+            }
+        } catch(err) {
+            console.error('[Edvora] Error loading domains:', err);
+            container.innerHTML = '<div style="font-size: 12px; color: #EF4444; padding: 10px 0;">Network error loading domains.</div>';
+        }
+    }
+
+    function renderDomainRows(domains) {
+        const container = document.getElementById('dwDomainsContainer');
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (!domains || domains.length === 0) {
+            domains = [''];
+        }
+
+        domains.forEach((dom, idx) => {
+            container.appendChild(createRowElement(dom, idx));
+        });
+
+        updateDomainState();
+    }
+
+    function createRowElement(val, index) {
+        const row = document.createElement('div');
+        row.className = 'dw-domain-row';
+        row.style.cssText = 'display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box;';
+
+        const isFirst = (index === 0);
+        
+        row.innerHTML = `
+            <div style="flex: 1; position: relative;">
+                <input type="text" class="brand-input dw-input-field" value="${escapeHtml(val || '')}" placeholder="e.g. university.edu or portal.university.edu" required style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px; font-family: monospace;" oninput="updateDomainState()" />
+            </div>
+            ${isFirst ? `
+                <span style="font-size: 11px; font-weight: 700; color: #063D3B; background: #E6F3EE; border: 1px solid #C4E2D5; padding: 6px 12px; border-radius: 6px; white-space: nowrap; flex-shrink: 0;" title="Initial website registered with your account">
+                    Primary
+                </span>
+            ` : `
+                <button type="button" onclick="removeDomainRow(this)" style="height: 38px; width: 38px; border-radius: 6px; border: 1.5px solid #FEE2E2; background: #FFF5F5; color: #EF4444; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;" title="Remove this domain">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+            `}
+        `;
+
+        return row;
+    }
+
+    function addDomainRow(initialValue = '') {
+        const container = document.getElementById('dwDomainsContainer');
+        if (!container) return;
+
+        const currentRows = container.querySelectorAll('.dw-domain-row');
+        if (currentRows.length >= MAX_DOMAINS) {
+            alert('You can whitelist a maximum of ' + MAX_DOMAINS + ' domains.');
+            return;
+        }
+
+        const newRow = createRowElement(initialValue, currentRows.length);
+        container.appendChild(newRow);
+        
+        const input = newRow.querySelector('input');
+        if (input) input.focus();
+
+        updateDomainState();
+    }
+
+    function removeDomainRow(btn) {
+        const row = btn.closest('.dw-domain-row');
+        if (row) {
+            row.remove();
+            updateDomainState();
+        }
+    }
+
+    function updateDomainState() {
+        const container = document.getElementById('dwDomainsContainer');
+        if (!container) return;
+
+        const rows = container.querySelectorAll('.dw-domain-row');
+        const count = rows.length;
+        
+        const counterText = document.getElementById('dwCounterText');
+        if (counterText) {
+            counterText.innerText = `${count} / ${MAX_DOMAINS} Domains Configured`;
+        }
+
+        const btnAdd = document.getElementById('dwBtnAddDomain');
+        if (btnAdd) {
+            if (count >= MAX_DOMAINS) {
+                btnAdd.style.display = 'none';
+            } else {
+                btnAdd.style.display = 'inline-flex';
+            }
+        }
+
+        const hintEl = document.getElementById('dwRemainingHint');
+        if (hintEl) {
+            const remaining = MAX_DOMAINS - count;
+            hintEl.innerText = remaining > 0 ? `${remaining} remaining slot${remaining > 1 ? 's' : ''}` : 'Maximum limit reached';
+        }
+    }
+
+    async function handleDomainWhitelistSubmit(e) {
+        e.preventDefault();
+        
+        const container = document.getElementById('dwDomainsContainer');
+        if (!container) return;
+
+        const inputs = container.querySelectorAll('.dw-input-field');
+        const domains = [];
+        
+        inputs.forEach(inp => {
+            let val = inp.value.trim();
+            if (val) {
+                // Quick clean
+                val = val.replace(/^https?:\/\//i, '').replace(/\/.*$/, '').replace(/^[wW]{3}\./, '').trim().toLowerCase();
+                if (val && !domains.includes(val)) {
+                    domains.push(val);
+                }
+            }
+        });
+
+        if (domains.length === 0) {
+            alert('Please specify at least one valid domain.');
+            return;
+        }
+
+        const btnSave = document.getElementById('dwBtnSave');
+        const statusMsg = document.getElementById('dwStatusMsg');
+        
+        if (btnSave) {
+            btnSave.disabled = true;
+            btnSave.innerHTML = '<span>⏳</span> Saving...';
+        }
+
+        try {
+            const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+            const res = await fetch('/v1/organization/whitelisted-domains', {
+                method: 'PUT',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ domains: domains })
+            });
+
+            const result = await res.json();
+            if (result.status === 'success') {
+                if (statusMsg) {
+                    statusMsg.style.display = 'inline-block';
+                    statusMsg.style.color = '#10B981';
+                    statusMsg.innerText = '✓ Whitelisted domains updated successfully!';
+                    setTimeout(() => { statusMsg.style.display = 'none'; }, 4000);
+                }
+                _loadedDomains = result.data.domains || domains;
+                renderDomainRows(_loadedDomains);
+            } else {
+                alert(result.message || 'Failed to update domains.');
+            }
+        } catch(err) {
+            console.error('[Edvora] Error saving domains:', err);
+            alert('Network error while saving domains.');
+        } finally {
+            if (btnSave) {
+                btnSave.disabled = false;
+                btnSave.innerHTML = '<span>💾</span> Save Whitelisted Domains';
+            }
+        }
+    }
+
+    function escapeHtml(str) {
+        return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // Expose functions globally for app router
+    window.loadDomainWhitelistData = loadDomainWhitelistData;
+    window.addDomainRow = addDomainRow;
+    window.removeDomainRow = removeDomainRow;
+    window.handleDomainWhitelistSubmit = handleDomainWhitelistSubmit;
+
+    // Auto-load on inject
+    loadDomainWhitelistData();
+})();
+</script>

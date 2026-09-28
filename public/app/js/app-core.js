@@ -297,7 +297,7 @@
         document.addEventListener('DOMContentLoaded', bindAuthToggleListeners);
         document.addEventListener('edvora:partials-ready', bindAuthToggleListeners);
 
-        const VALID_APP_TABS = ['overview', 'knowledge', 'knowledge-ingestion', 'academic-programs', 'academic-program-detail', 'course-staff-assignment', 'program-staff', 'program-lead-magnet', 'add-programs', 'edit-programs', 'departments', 'leads', 'callbacks', 'campus-tours', 'campus-tours-scheduling', 'create-tour-slot', 'edit-tour-slot', 'scholarships', 'scholarship-configuration', 'scholarship-configuration-edit', 'session-journeys', 'teams', 'assets', 'multilingual', 'conversion-engine', 'placeholder', 'analytics', 'knowledge-gaps', 'integrations', 'chatbot', 'test-chat', 'organization', 'org-settings', 'campuses', 'campus-editor', 'settings', 'knowledge-view', 'knowledge-editor', 'knowledge-edit', 'profile'];
+        const VALID_APP_TABS = ['overview', 'knowledge', 'knowledge-ingestion', 'academic-programs', 'academic-program-detail', 'course-staff-assignment', 'program-staff', 'program-lead-magnet', 'add-programs', 'edit-programs', 'departments', 'leads', 'callbacks', 'campus-tours', 'campus-tours-scheduling', 'create-tour-slot', 'edit-tour-slot', 'scholarships', 'scholarship-configuration', 'scholarship-configuration-edit', 'session-journeys', 'teams', 'assets', 'multilingual', 'conversion-engine', 'placeholder', 'analytics', 'knowledge-gaps', 'integrations', 'chatbot', 'test-chat', 'organization', 'org-settings', 'campuses', 'campus-editor', 'settings', 'domain-whitelist', 'knowledge-view', 'knowledge-editor', 'knowledge-edit', 'profile'];
 
         // Navigation Tabs Handling with Async Modular Loading
         const _tabLoadPromises = {};
@@ -1072,6 +1072,8 @@
                 cleanTitle = 'Campus Editor';
             } else if (tab === 'settings') {
                 cleanTitle = 'Institution Profile';
+            } else if (tab === 'domain-whitelist') {
+                cleanTitle = 'Domain Whitelisting';
             } else if (tab === 'chatbot') {
                 cleanTitle = 'ChatBot Settings';
             } else if (tab === 'profile') {
@@ -1177,6 +1179,8 @@
                     if (typeof openKnowledgeEditor === 'function') openKnowledgeEditor();
                 } else if (tab === 'settings') {
                     if (typeof loadSettingsData === 'function') loadSettingsData();
+                } else if (tab === 'domain-whitelist') {
+                    if (typeof loadDomainWhitelistData === 'function') loadDomainWhitelistData();
                 } else if (tab === 'profile') {
                     if (typeof loadProfileData === 'function') loadProfileData();
                 }

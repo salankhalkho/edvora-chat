@@ -246,6 +246,8 @@ $router->post('/v1/organization/staff', [OrganizationController::class, 'createS
 $router->put('/v1/organization/staff/{id}', [OrganizationController::class, 'updateStaff'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->delete('/v1/organization/staff/{id}', [OrganizationController::class, 'deleteStaff'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->put('/v1/organization/staff/{id}/password', [OrganizationController::class, 'updateStaffPassword'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->get('/v1/organization/whitelisted-domains', [OrganizationController::class, 'getWhitelistedDomains'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->put('/v1/organization/whitelisted-domains', [OrganizationController::class, 'updateWhitelistedDomains'], [AuthMiddleware::class, TenantMiddleware::class]);
 
 // Campuses Management Routes (Protected + Tenant Context)
 $router->get('/v1/campuses', [CampusController::class, 'index'], [AuthMiddleware::class, TenantMiddleware::class]);

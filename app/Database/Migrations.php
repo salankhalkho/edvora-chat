@@ -1778,6 +1778,33 @@ class Migrations
         } catch (Throwable $e) {
             error_log('[Migrations] leads.session_id: ' . $e->getMessage());
         }
+
+        // Auto-backfill chatbots.allowed_domains with organization website_url if currently NULL/empty
+        try {
+            $this->db->exec("
+                UPDATE chatbots c
+                JOIN organizations o ON c.organization_id = o.id
+                SET c.allowed_domains = JSON_ARRAY(
+                    LOWER(
+                        REPLACE(
+                            SUBSTRING_INDEX(
+                                SUBSTRING_INDEX(
+                                    REPLACE(REPLACE(o.website_url, 'https://', ''), 'http://', ''),
+                                    '/', 1
+                                ),
+                                ':', 1
+                            ),
+                            'www.', ''
+                        )
+                    )
+                )
+                WHERE (c.allowed_domains IS NULL OR c.allowed_domains = '[]' OR c.allowed_domains = '' OR c.allowed_domains = 'null')
+                  AND o.website_url IS NOT NULL 
+                  AND TRIM(o.website_url) != '';
+            ");
+        } catch (Throwable $e) {
+            error_log('[Migrations] backfill chatbots.allowed_domains: ' . $e->getMessage());
+        }
     }
 }
 

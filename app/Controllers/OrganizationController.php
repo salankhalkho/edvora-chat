@@ -726,4 +726,114 @@ class OrganizationController
 
         $this->getEscalationRules($request, $params);
     }
+
+    /**
+     * GET /v1/organization/whitelisted-domains
+     */
+    public function getWhitelistedDomains(Request $request, array $params = []): void
+    {
+        $orgId = $GLOBALS['organization_id'] ?? null;
+        if (!$orgId) {
+            Response::error('Tenant context missing.', 403);
+        }
+
+        $db = Database::getConnection();
+
+        // Fetch organization website_url and primary chatbot's allowed_domains
+        $stmtOrg = $db->prepare("SELECT website_url FROM organizations WHERE id = :id");
+        $stmtOrg->execute([':id' => $orgId]);
+        $websiteUrl = (string)($stmtOrg->fetchColumn() ?? '');
+
+        // Extract clean default domain from website_url
+        $defaultDomain = '';
+        if (!empty($websiteUrl)) {
+            $parsed = parse_url(preg_match('#^https?://#i', $websiteUrl) ? $websiteUrl : 'https://' . $websiteUrl);
+            $defaultDomain = strtolower($parsed['host'] ?? '');
+            $defaultDomain = preg_replace('/^www\./', '', $defaultDomain);
+        }
+
+        $stmtBot = $db->prepare("SELECT id, allowed_domains FROM chatbots WHERE organization_id = :org_id AND is_active = 1 ORDER BY id ASC LIMIT 1");
+        $stmtBot->execute([':org_id' => $orgId]);
+        $bot = $stmtBot->fetch();
+
+        $domains = [];
+        if ($bot && !empty($bot['allowed_domains'])) {
+            $decoded = json_decode($bot['allowed_domains'], true);
+            if (is_array($decoded)) {
+                $domains = array_values(array_filter(array_map('trim', $decoded)));
+            }
+        }
+
+        // If no domains yet, fall back to defaultDomain
+        if (empty($domains) && !empty($defaultDomain)) {
+            $domains = [$defaultDomain];
+        }
+
+        Response::success([
+            'domains' => $domains,
+            'default_domain' => $defaultDomain,
+            'max_allowed' => 4,
+            'bot_id' => $bot ? (int)$bot['id'] : null
+        ]);
+    }
+
+    /**
+     * PUT /v1/organization/whitelisted-domains
+     */
+    public function updateWhitelistedDomains(Request $request, array $params = []): void
+    {
+        $orgId = $GLOBALS['organization_id'] ?? null;
+        if (!$orgId) {
+            Response::error('Tenant context missing.', 403);
+        }
+
+        $rawDomains = $request->get('domains');
+        if (!is_array($rawDomains)) {
+            $rawDomains = [];
+        }
+
+        $cleanedDomains = [];
+        foreach ($rawDomains as $d) {
+            if (!is_string($d)) continue;
+            $d = trim($d);
+            if ($d === '') continue;
+
+            // Normalize: remove protocol, www., paths, whitespace
+            $d = preg_replace('#^https?://#i', '', $d);
+            $d = preg_replace('#/.*$#', '', $d); // strip path
+            $d = preg_replace('#:[0-9]+$#', '', $d); // strip port
+            $d = preg_replace('/^www\./i', '', $d);
+            $d = strtolower(trim($d));
+
+            // Basic domain format validation or localhost
+            if (!empty($d) && (preg_match('/^[a-z0-9.-]+\.[a-z]{2,}$/i', $d) || $d === 'localhost')) {
+                if (!in_array($d, $cleanedDomains, true)) {
+                    $cleanedDomains[] = $d;
+                }
+            }
+        }
+
+        // Strictly enforce max 4 domains
+        if (count($cleanedDomains) > 4) {
+            Response::error('You can whitelist a maximum of 4 domains.', 422);
+        }
+
+        $db = Database::getConnection();
+        $json = json_encode(array_values($cleanedDomains));
+
+        $stmt = $db->prepare("UPDATE chatbots SET allowed_domains = :domains, updated_at = NOW() WHERE organization_id = :org_id");
+        $stmt->execute([
+            ':domains' => $json,
+            ':org_id' => $orgId
+        ]);
+
+        AuditLogger::log('whitelisted_domains_updated', 'organization', $orgId, [
+            'domains' => $cleanedDomains
+        ]);
+
+        Response::success([
+            'domains' => $cleanedDomains,
+            'max_allowed' => 4
+        ], 'Whitelisted domains saved successfully.');
+    }
 }
