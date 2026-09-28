@@ -822,6 +822,28 @@ foreach ($plans as &$plan) {
                             <?php endforeach; ?>
                         </tr>
 
+                        <!-- Row: Domain White Listing -->
+                        <tr>
+                            <td class="font-semibold text-e-teal">Domain White Listing</td>
+                            <?php foreach ($plans as $p): ?>
+                                <?php 
+                                    $val = $p['quota_map']['domain_whitelisting'] ?? ($p['quota_map']['max_domains'] ?? null);
+                                    if ($val === null) {
+                                        if (stripos($p['name'], 'Starter') !== false) $val = 2;
+                                        elseif (stripos($p['name'], 'Growth') !== false) $val = 4;
+                                        elseif (stripos($p['name'], 'Pro') !== false) $val = -1;
+                                        else $val = 2;
+                                    }
+                                    $isHighlight = (!empty($p['badge_text']) || stripos($p['name'], 'Growth') !== false);
+                                    $display = ($val == -1 || $val === 'Unlimited') ? 'Unlimited' : ($val . ' Domain' . ($val == 1 ? '' : 's'));
+                                    $colorClass = ($val == -1 || $val === 'Unlimited') ? 'font-bold text-emerald-700' : ($isHighlight ? 'font-bold text-e-teal' : '');
+                                ?>
+                                <td class="text-center <?= $isHighlight ? 'highlight-col' : '' ?> <?= $colorClass ?>">
+                                    <?= $display ?>
+                                </td>
+                            <?php endforeach; ?>
+                        </tr>
+
                         <!-- Section: Conversational Admissions Details -->
                         <tr><td colspan="<?= count($plans) + 1 ?>" class="cat-header">Admissions Engine Details</td></tr>
                         <?php 
