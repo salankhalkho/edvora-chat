@@ -288,6 +288,13 @@ UPDATE knowledge_sources  SET status='active'
 
 **Incremental Update Rule:** When a `programs` row is updated, ONLY the chunks that changed are re-embedded. Changed `knowledge_items` rows are deleted and re-inserted. Unchanged facts are untouched.
 
+> ⚠️ **CRITICAL ARCHITECTURAL INVARIANT — `type = 'program_txt'` UI EXCLUSION:**
+> `program_txt` sources in `knowledge_sources` are system-internal, auto-generated representations of Academic Programs.
+> They are strictly for AI vector embedding and grounding (populated into `knowledge_items`).
+> They MUST NEVER be displayed, listed, or counted in the tenant-facing Knowledge Hub dashboard (`#knowledge`),
+> nor counted towards tenant document quota limits (`max_knowledge_sources`).
+> The `type != 'program_txt'` filter in `KnowledgeController` and Knowledge Hub UI is mandatory and must never be removed.
+
 ---
 
 ### 5.2 Document / PDF / URL / Text Paste Ingestion (Filesystem-Backed)

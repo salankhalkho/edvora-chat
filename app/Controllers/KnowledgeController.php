@@ -25,6 +25,12 @@ class KnowledgeController
         $db = Database::getConnection();
         $filter = $request->get('health_filter') ?? $request->get('status') ?? 'all';
 
+        // ⚠️ CRITICAL ARCHITECTURAL RULE — DO NOT REMOVE `ks.type != 'program_txt'`:
+        // 'program_txt' sources are system-internal, auto-generated representations of Academic Programs
+        // created during program creation by ProgramTextGenerator & workers/job_runner.php for vector embedding.
+        // They MUST remain active in the database and in `knowledge_items` for the AI chatbot to function,
+        // but MUST NEVER be displayed or exposed in the tenant-facing Knowledge Hub UI (#knowledge).
+        // This filter is 100% INTENTIONAL and NOT A BUG. Do not remove or 'fix' this exclusion.
         $stmt = $db->prepare("
             SELECT ks.id, ks.organization_id, ks.chatbot_id, ks.program_id, p.course_name as program_name,
                    ks.type, ks.title, ks.category, ks.academic_version,
@@ -35,6 +41,7 @@ class KnowledgeController
             FROM knowledge_sources ks
             LEFT JOIN programs p ON ks.program_id = p.id
             WHERE ks.organization_id = :org_id
+              AND ks.type != 'program_txt'
             ORDER BY ks.id DESC
         ");
         $stmt->execute([':org_id' => $orgId]);
@@ -129,10 +136,12 @@ class KnowledgeController
         $orgId = $GLOBALS['organization_id'] ?? null;
         $db = Database::getConnection();
 
+        // ⚠️ ARCHITECTURAL GUARD: Exclude system-internal 'program_txt' from Knowledge Hub health KPI counters
         $stmt = $db->prepare("
             SELECT id, status, expires_on, last_reviewed_at, created_at, review_frequency_days
             FROM knowledge_sources
             WHERE organization_id = :org_id
+              AND type != 'program_txt'
         ");
         $stmt->execute([':org_id' => $orgId]);
         $all = $stmt->fetchAll();
@@ -656,10 +665,11 @@ class KnowledgeController
         }
 
         // 3. Enforce Tenant's Knowledge Source Count Limit (max_knowledge_sources)
+        // ⚠️ ARCHITECTURAL GUARD: Exclude system-internal 'program_txt' from tenant document quota counts
         $maxSources = (int)($planData['quotas']['max_knowledge_sources'] ?? 20);
         if ($maxSources !== -1) {
             $db = Database::getConnection();
-            $stmtCount = $db->prepare("SELECT COUNT(*) FROM knowledge_sources WHERE organization_id = :org_id AND status != 'archived'");
+            $stmtCount = $db->prepare("SELECT COUNT(*) FROM knowledge_sources WHERE organization_id = :org_id AND status != 'archived' AND type != 'program_txt'");
             $stmtCount->execute([':org_id' => $orgId]);
             $currentSources = (int)$stmtCount->fetchColumn();
             if ($currentSources >= $maxSources) {

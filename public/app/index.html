@@ -12710,6 +12710,11 @@ echo $response['reply'];
 
             // 1. Filter by Academic Program, Category, Search Query (Current Active Scope)
             let scopeDocs = allKnowledgeSources.filter(item => {
+                // ⚠️ CRITICAL ARCHITECTURAL GUARD — DO NOT REMOVE:
+                // 'program_txt' sources are system-internal, auto-generated representations of Academic Programs.
+                // They are strictly for AI vector embedding and MUST NEVER be displayed in the Knowledge Hub UI.
+                if (item.type === 'program_txt') return false;
+
                 // Search query match
                 if (query) {
                     const matchTitle = (item.title || '').toLowerCase().includes(query);
