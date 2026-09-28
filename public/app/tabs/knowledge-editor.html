@@ -28,6 +28,9 @@
         </div>
 
         <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
+            <button type="button" id="btnResyncUrlTop" onclick="docEditorResyncContent()" class="brand-btn-primary" style="display: none; height: 36px; padding: 0 16px; font-size: 12px; font-weight: 700; align-items: center; gap: 6px; background: #063D3B; color: #C8FF63; border: none; border-radius: 6px; cursor: pointer;">
+                <span>🔄</span> <span id="btnResyncUrlTopText">Re-sync Web Content</span>
+            </button>
             <button type="button" id="btnDocEditorDownload" onclick="docEditorDownloadOriginal()" class="brand-btn-secondary" style="height: 36px; padding: 0 14px; font-size: 12px; font-weight: 700; color: #063D3B; border-color: #063D3B; background: #FFFFFF; display: inline-flex; align-items: center; gap: 6px;">
                 <span>📥</span> Download File
             </button>
@@ -172,9 +175,6 @@
                             <span id="docEditorWordCountBadge" class="badge" style="font-size: 11px; font-weight: 600; padding: 3px 8px; background: #FFFFFF; color: #475569; border: 1px solid #CFE6BA;">
                                 0 words
                             </span>
-                            <button type="button" id="btnResyncUrl" onclick="docEditorResyncContent()" class="brand-btn-secondary" style="display: none; height: 28px; padding: 0 10px; font-size: 11px; font-weight: 700; background: #FFFFFF;">
-                                🔄 Re-Sync Live URL
-                            </button>
                         </div>
                     </div>
 
@@ -212,11 +212,23 @@
                     </div>
 
                     <!-- URL Quick Link (if type === 'url') -->
-                    <div id="docEditorUrlRowDisplay" style="display: none; margin-bottom: 14px; padding: 10px 14px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px;">
-                        <div style="font-size: 11px; font-weight: 700; color: #4F7470; margin-bottom: 4px; text-transform: uppercase;">Source Web Page</div>
-                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-                            <a id="btnDocEditorOpenUrlDisplay" href="#" target="_blank" style="font-size: 12.5px; color: #0284C7; text-decoration: underline; word-break: break-all;">—</a>
-                            <span style="font-size: 11px; color: #64748B; white-space: nowrap;">Live Link ↗</span>
+                    <div id="docEditorUrlRowDisplay" style="display: none; margin-bottom: 16px; padding: 12px 16px; background: #F0FDF4; border: 1.5px solid #BBF7D0; border-radius: 8px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px;">
+                            <div style="font-size: 11px; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 0.3px; display: flex; align-items: center; gap: 6px;">
+                                <span>🌐</span> Source Web Page (Live URL)
+                            </div>
+                            <span style="font-size: 11px; color: #15803D; font-weight: 600;">Web Content Source</span>
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                            <a id="btnDocEditorOpenUrlDisplay" href="#" target="_blank" style="font-size: 12.5px; font-weight: 600; color: #0284C7; text-decoration: underline; word-break: break-all; flex: 1; min-width: 220px;">—</a>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <a id="btnDocEditorOpenUrlLink" href="#" target="_blank" class="brand-btn-secondary" style="height: 32px; padding: 0 12px; font-size: 11.5px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; background: #FFFFFF; border: 1.5px solid #CBD5E1; color: #334155; border-radius: 6px;">
+                                    ↗ Visit URL
+                                </a>
+                                <button type="button" id="btnResyncUrl" onclick="docEditorResyncContent()" class="brand-btn-primary" style="height: 32px; padding: 0 14px; font-size: 11.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; background: #063D3B; color: #C8FF63; border: none; border-radius: 6px; cursor: pointer;">
+                                    <span>🔄</span> <span id="btnResyncUrlText">Re-sync Web Content</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
