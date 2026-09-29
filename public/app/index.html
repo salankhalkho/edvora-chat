@@ -15116,6 +15116,7 @@ echo $response['reply'];
                         if (el) el.value = val || '';
                     };
 
+                    setVal('settings_institute_id', org.institute_id || '');
                     setVal('settings_name', org.name);
                     setVal('settings_short_name', org.short_name);
                     setVal('settings_website_url', org.website_url);
@@ -15140,6 +15141,36 @@ echo $response['reply'];
             }
         }
         window.loadSettingsData = loadSettingsData;
+
+        function copyInstituteId() {
+            const el = document.getElementById('settings_institute_id');
+            if (!el || !el.value) return;
+            const textToCopy = el.value.trim();
+            const doVisualFeedback = () => {
+                const textEl = document.getElementById('copyInstituteIdText');
+                const iconEl = document.getElementById('copyInstituteIdIcon');
+                if (textEl) textEl.textContent = 'Copied!';
+                if (iconEl) iconEl.textContent = '✓';
+                if (typeof showToast === 'function') showToast('Institute ID copied to clipboard!', 'info');
+                setTimeout(() => {
+                    if (textEl) textEl.textContent = 'Copy';
+                    if (iconEl) iconEl.textContent = '📋';
+                }, 2000);
+            };
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(textToCopy).then(doVisualFeedback).catch(() => {
+                    el.select();
+                    document.execCommand('copy');
+                    doVisualFeedback();
+                });
+            } else {
+                el.select();
+                document.execCommand('copy');
+                doVisualFeedback();
+            }
+        }
+        window.copyInstituteId = copyInstituteId;
 
         async function handleInstitutionSettingsSubmit(e) {
             if (e) e.preventDefault();

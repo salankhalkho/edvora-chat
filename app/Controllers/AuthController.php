@@ -91,6 +91,12 @@ class AuthController
                 ':plan_id' => $planId
             ]);
             $orgId = (int)$db->lastInsertId();
+            $instituteId = md5((string)$orgId);
+            $stmtUpdateInstId = $db->prepare("UPDATE organizations SET institute_id = :institute_id WHERE id = :id");
+            $stmtUpdateInstId->execute([
+                ':institute_id' => $instituteId,
+                ':id' => $orgId
+            ]);
 
             // 2. Create User (Owner)
             $passwordHash = password_hash($data['password'], PASSWORD_BCRYPT, ['cost' => 12]);
@@ -180,6 +186,7 @@ class AuthController
                 ],
                 'organization' => [
                     'id' => $orgId,
+                    'institute_id' => $instituteId,
                     'name' => $collegeName,
                     'slug' => $slug,
                     'website_url' => $normalizedWebsite,
@@ -231,7 +238,7 @@ class AuthController
         $db = Database::getConnection();
 
         $stmt = $db->prepare("
-            SELECT u.*, o.name as org_name, o.slug as org_slug, o.subscription_status,
+            SELECT u.*, o.institute_id, o.name as org_name, o.slug as org_slug, o.subscription_status,
                    COALESCE(o.onboarding_completed, 0) as onboarding_completed,
                    COALESCE(o.onboarding_step, 1) as onboarding_step
             FROM users u
@@ -300,6 +307,7 @@ class AuthController
             ],
             'organization' => $user['organization_id'] ? [
                 'id' => (int)$user['organization_id'],
+                'institute_id' => $user['institute_id'] ?? md5((string)$user['organization_id']),
                 'name' => $user['org_name'],
                 'slug' => $user['org_slug'],
                 'onboarding_completed' => (int)$user['onboarding_completed'],
@@ -323,7 +331,7 @@ class AuthController
         $db = Database::getConnection();
         $stmt = $db->prepare("
             SELECT u.id, u.name, u.email, u.role, COALESCE(u.can_manage_structure, 1) as can_manage_structure, u.email_verified_at, u.created_at, u.organization_id,
-                   o.name as org_name, o.slug as org_slug, o.logo_url, o.website_url, o.primary_color, o.subscription_status,
+                   o.institute_id, o.name as org_name, o.slug as org_slug, o.logo_url, o.website_url, o.primary_color, o.subscription_status,
                    COALESCE(o.onboarding_completed, 0) as onboarding_completed,
                    COALESCE(o.onboarding_step, 1) as onboarding_step,
                    p.name as plan_name
@@ -391,6 +399,7 @@ class AuthController
             ],
             'organization' => $user['organization_id'] ? [
                 'id' => (int)$user['organization_id'],
+                'institute_id' => $user['institute_id'] ?? md5((string)$user['organization_id']),
                 'name' => $user['org_name'],
                 'slug' => $user['org_slug'],
                 'logo_url' => $user['logo_url'],

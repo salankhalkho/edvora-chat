@@ -20,6 +20,7 @@ class Migrations
             // 1. ORGANIZATIONS
             "CREATE TABLE IF NOT EXISTS organizations (
                 id INT AUTO_INCREMENT PRIMARY KEY,
+                institute_id VARCHAR(32) NULL UNIQUE,
                 name VARCHAR(255) NOT NULL,
                 slug VARCHAR(255) NOT NULL UNIQUE,
                 logo_url VARCHAR(500) NULL,
@@ -1811,6 +1812,18 @@ class Migrations
             $this->db->exec("ALTER TABLE programs ALTER COLUMN currency SET DEFAULT 'USD';");
         } catch (Throwable $e) {
             error_log('[Migrations] programs.currency default: ' . $e->getMessage());
+        }
+
+        // Add institute_id column to organizations table if missing and backfill with MD5(id)
+        try {
+            $checkInstId = $this->db->query("SHOW COLUMNS FROM organizations LIKE 'institute_id'");
+            if (!$checkInstId->fetch()) {
+                $this->db->exec("ALTER TABLE organizations ADD COLUMN institute_id VARCHAR(32) NULL AFTER id, ADD UNIQUE INDEX idx_organizations_institute_id (institute_id);");
+            }
+            // Backfill all existing organizations where institute_id is NULL or empty
+            $this->db->exec("UPDATE organizations SET institute_id = MD5(CAST(id AS CHAR)) WHERE institute_id IS NULL OR institute_id = '';");
+        } catch (Throwable $e) {
+            error_log('[Migrations] organizations.institute_id: ' . $e->getMessage());
         }
     }
 }

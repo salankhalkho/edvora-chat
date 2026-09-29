@@ -34,6 +34,14 @@ class OrganizationController
             Response::error('Organization not found.', 404);
         }
 
+        if (empty($org['institute_id']) && !empty($org['id'])) {
+            $org['institute_id'] = md5((string)$org['id']);
+            try {
+                $upd = $db->prepare("UPDATE organizations SET institute_id = :iid WHERE id = :id");
+                $upd->execute([':iid' => $org['institute_id'], ':id' => $org['id']]);
+            } catch (\Throwable $e) {}
+        }
+
         Response::success($org);
     }
 
