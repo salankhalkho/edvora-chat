@@ -533,7 +533,8 @@
                         }
                     };
 
-                    setVal('settings_institute_id', org.institute_id || '');
+                    const instituteDisplay = (org.institute_id && org.id) ? `${org.institute_id}x${org.id}` : (org.institute_id || '');
+                    setVal('settings_institute_id', instituteDisplay);
                     setVal('settings_name', org.name);
                     setVal('settings_short_name', org.short_name);
                     setVal('settings_website_url', org.website_url);
