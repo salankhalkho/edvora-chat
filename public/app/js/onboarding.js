@@ -1491,20 +1491,19 @@
                                 <div style="font-weight: 700; color: #063D3B; line-height: 1.35; font-size: 12.5px;">${lead.name}</div>
                                 <div style="color: #648781; font-size: 11px; margin-top: 2px; font-family: var(--brand-font-mono);">${lead.email || 'â€”'}</div>
                             </td>
-                            <td style="color: #092F2E; font-size: 12px; white-space: nowrap; min-width: 135px; font-family: var(--brand-font-mono); vertical-align: middle;">${lead.phone || 'â€”'}</td>
-                            <td style="vertical-align: middle;">${deptBadge}</td>
+                            <td style="color: #092F2E; font-size: 12px; white-space: nowrap; min-width: 135px; font-family: var(--brand-font-mono); vertical-align: middle;">${lead.phone || '—'}</td>
                             <td style="vertical-align: middle;">${assignedBadge}</td>
-                            <td style="font-size: 12px; vertical-align: middle;">${lead.program_interest || 'â€”'}</td>
+                            <td style="font-size: 12px; vertical-align: middle;">${lead.program_interest || '—'}</td>
                             <td style="vertical-align: middle;">${typeBadge}</td>
                             <td style="vertical-align: middle;">${statusBadge}</td>
                             <td style="font-size: 11px; color: #648781; white-space: nowrap; font-family: var(--brand-font-mono); vertical-align: middle;">${dateStr}</td>
                             <td style="text-align: right; white-space: nowrap; vertical-align: middle;">
                                 <div style="display: inline-flex; gap: 6px;">
                                     <button class="brand-btn-secondary brand-btn-sm" style="font-size: 11px; height: 28px; padding: 0 10px;" onclick="openLeadModal(${lead.id})">
-                                        ðŸ” Details
+                                        🔍 Details
                                     </button>
                                     <button class="brand-btn-secondary brand-btn-sm" style="font-size: 11px; height: 28px; padding: 0 8px; color: #f87171; border-color: rgba(248, 113, 113, 0.3);" onclick="deleteLead(${lead.id})" title="Permanent Erasure Request">
-                                        ðŸ—‘ï¸
+                                        🗑️
                                     </button>
                                 </div>
                             </td>
@@ -1518,8 +1517,8 @@
                                    (document.getElementById('leadsTypeFilter')?.value || 'all') !== 'all';
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="9" style="text-align: center; color: #648781; padding: 36px 24px;">
-                            <div style="font-size: 28px; margin-bottom: 8px;">${isFiltered ? 'ðŸ”' : 'ðŸŽ“'}</div>
+                        <td colspan="8" style="text-align: center; color: #648781; padding: 36px 24px;">
+                            <div style="font-size: 28px; margin-bottom: 8px;">${isFiltered ? '🔍' : '🎓'}</div>
                             <strong style="font-size: 13px; color: #092F2E; display: block;">${isFiltered ? 'No matching leads found' : 'No student leads captured yet'}</strong>
                             <span style="font-size: 12px; color: #648781;">${isFiltered ? 'Try clearing your search query or loosening the status/department filters.' : 'Prospective student inquiries and contact info captured across all chatbot departments will appear here.'}</span>
                             ${isFiltered ? `<div style="margin-top: 12px;"><button type="button" onclick="resetLeadsFilters()" class="dept-btn-secondary" style="height: 28px; padding: 0 12px; font-size: 11px; font-weight: 700; border-radius: 6px; cursor: pointer;">Clear All Filters</button></div>` : ''}
@@ -1565,7 +1564,7 @@
                 if (tbody && (!currentLeadsList || currentLeadsList.length === 0)) {
                     tbody.innerHTML = `
                         <tr>
-                            <td colspan="9" style="text-align: center; color: #648781; padding: 48px 24px;">
+                            <td colspan="8" style="text-align: center; color: #648781; padding: 48px 24px;">
                                 <div style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: #F4FAF7; border: 1.5px solid #D1E5DE; margin-bottom: 12px;">
                                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#063D3B" stroke-width="2.5" class="brand-spin" style="animation: spin 0.9s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
                                 </div>
