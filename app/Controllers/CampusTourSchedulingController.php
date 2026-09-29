@@ -22,7 +22,6 @@ class CampusTourSchedulingController
         $botToken = trim((string)($request->get('bot_token') ?: $request->getBotToken()));
         $campusId = $request->get('campus_id') ? (int)$request->get('campus_id') : null;
         $programId = $request->get('program_id') ? (int)$request->get('program_id') : null;
-        $instituteId = trim((string)($request->get('institute_id') ?: $request->getHeader('X-Institute-Id')));
         $reqOrgId = (int)($request->get('organization_id') ?: $request->get('org_id'));
 
         // 1. If Bearer JWT token provided (admin dashboard), decode it
@@ -47,17 +46,7 @@ class CampusTourSchedulingController
             }
         }
 
-        // 2. Resolve from institute_id (e.g. 9a1158154dfa42caddbd0694a4e9bdc8)
-        if (!$orgId && !empty($instituteId)) {
-            $stmtInst = $db->prepare("SELECT id FROM organizations WHERE institute_id = :iid1 OR id = :iid2 LIMIT 1");
-            $stmtInst->execute([':iid1' => $instituteId, ':iid2' => $instituteId]);
-            $inst = $stmtInst->fetch();
-            if ($inst) {
-                $orgId = (int)$inst['id'];
-            }
-        }
-
-        // 3. Resolve from explicit organization_id parameter
+        // 2. Resolve from explicit organization_id parameter
         if (!$orgId && $reqOrgId > 0) {
             $stmtOrg = $db->prepare("SELECT id FROM organizations WHERE id = :id LIMIT 1");
             $stmtOrg->execute([':id' => $reqOrgId]);
@@ -66,7 +55,7 @@ class CampusTourSchedulingController
             }
         }
 
-        // 4. Resolve from campus_id if provided
+        // 3. Resolve from campus_id if provided
         if (!$orgId && $campusId) {
             $stmtCamp = $db->prepare("SELECT organization_id FROM campuses WHERE id = :cid LIMIT 1");
             $stmtCamp->execute([':cid' => $campusId]);
@@ -76,7 +65,7 @@ class CampusTourSchedulingController
             }
         }
 
-        // 5. If called from public chatbot widget, resolve orgId from bot_token
+        // 4. If called from public chatbot widget, resolve orgId from bot_token
         if (!$orgId && !empty($botToken)) {
             $stmtBot = $db->prepare("SELECT organization_id FROM chatbots WHERE bot_token = :token AND is_active = 1 LIMIT 1");
             $stmtBot->execute([':token' => $botToken]);
@@ -86,7 +75,7 @@ class CampusTourSchedulingController
             }
         }
 
-        // 6. Superadmin fallback if authenticated as superadmin and no org specified
+        // 5. Superadmin fallback if authenticated as superadmin and no org specified
         if (!$orgId && isset($payload['role']) && ($payload['role'] === 'superadmin' || $payload['role'] === 'super_admin')) {
             $firstOrg = $db->query("SELECT id FROM organizations ORDER BY id ASC LIMIT 1")->fetch();
             if ($firstOrg) {

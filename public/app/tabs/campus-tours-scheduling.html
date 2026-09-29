@@ -231,16 +231,7 @@
 (function() {
     window.loadTourSlots = function() {
         var campusId = document.getElementById('filterSlotCampus') ? document.getElementById('filterSlotCampus').value : '';
-        var params = new URLSearchParams();
-        if (campusId) params.append('campus_id', campusId);
-
-        var instId = (window.currentOrgProfile && (window.currentOrgProfile.institute_id || window.currentOrgProfile.id)) ||
-                     (window.currentUser && (window.currentUser.institute_id || window.currentUser.organization_id)) ||
-                     localStorage.getItem('edvora_institute_id') ||
-                     localStorage.getItem('edvora_org_id') || '';
-        if (instId) params.append('institute_id', instId);
-
-        var qs = params.toString() ? '?' + params.toString() : '';
+        var qs = campusId ? '?campus_id=' + encodeURIComponent(campusId) : '';
 
         fetch('/v1/campus-tours/slots' + qs)
             .then(function(res) { return res.json(); })

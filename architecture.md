@@ -93,13 +93,16 @@ For full technical specifications of the admissions chatbot, turn processing lif
 ## 4. Core Database Schema
 
 > **Multi-Tenancy Rule:** Every table with tenant data MUST include `organization_id INT NOT NULL` and every query MUST include `WHERE organization_id = :org_id`.
+>
+> ⚠️ **`organizations.institute_id` Rule (Strictly Human-Facing):** The `institute_id` column in `organizations` exists solely for human administrators and support engineers to identify, reference, and debug tenant issues. It MUST NEVER be used in application business logic, middleware, tenant resolution, API routing, queries, request parameters, or new feature development. All application code, multi-tenant isolation, and database queries MUST exclusively rely on the primary key `organization_id` (`organizations.id`).
 
 ### 4.1 `organizations`
 Tenant root record. One row per college/university.
 
 | Column | Type | Notes |
 |---|---|---|
-| `id` | INT PK | |
+| `id` | INT PK | Canonical tenant identifier (`organization_id`) used throughout the codebase |
+| `institute_id` | VARCHAR(32) UNIQUE | **Human-reference / support ID ONLY**. Strictly prohibited in code logic. |
 | `name` | VARCHAR(255) | College/university name |
 | `slug` | VARCHAR(255) UNIQUE | URL-safe identifier |
 | `logo_url` | VARCHAR(500) | |

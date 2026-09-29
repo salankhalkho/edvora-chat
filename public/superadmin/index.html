@@ -1077,7 +1077,7 @@
                                 <span id="orgCountBadge" class="badge badge-primary" style="margin-left: 8px;">0 Colleges</span>
                             </div>
                             <div style="display: flex; gap: 8px; align-items: center; flex: 1; max-width: 420px; justify-content: flex-end;">
-                                <input type="text" id="orgSearchInput" class="form-input" placeholder="🔍 Search college name or slug..." oninput="filterOrganizations()" style="height: 30px; font-size: 11px; max-width: 260px;" />
+                                <input type="text" id="orgSearchInput" class="form-input" placeholder="🔍 Search college name, ID, or institute ID..." oninput="filterOrganizations()" style="height: 30px; font-size: 11px; max-width: 260px;" />
                                 <button onclick="loadOrganizations()" class="brand-btn brand-btn-secondary brand-btn-sm" style="white-space: nowrap;">
                                     🔄 Refresh
                                 </button>
@@ -1087,8 +1087,9 @@
                             <table class="brand-table">
                                 <thead>
                                     <tr>
+                                        <th style="width: 60px;">ID</th>
                                         <th>College Name</th>
-                                        <th>Slug</th>
+                                        <th>Institute ID</th>
                                         <th>Plan</th>
                                         <th>Status</th>
                                         <th>Users</th>
@@ -1099,7 +1100,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="orgsTableBody">
-                                    <tr><td colspan="9" style="text-align: center; color: var(--brand-text-muted);">Loading organizations...</td></tr>
+                                    <tr><td colspan="10" style="text-align: center; color: var(--brand-text-muted);">Loading organizations...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -2651,9 +2652,10 @@
             const filtered = cachedOrgs.filter(o => {
                 if (!query) return true;
                 const name = (o.name || '').toLowerCase();
-                const slug = (o.slug || '').toLowerCase();
+                const idStr = String(o.id || '');
+                const instId = (o.institute_id || '').toLowerCase();
                 const plan = (o.plan_name || '').toLowerCase();
-                return name.includes(query) || slug.includes(query) || plan.includes(query);
+                return name.includes(query) || idStr.includes(query) || instId.includes(query) || plan.includes(query);
             });
 
             renderOrganizations(filtered);
@@ -2667,7 +2669,7 @@
             }
 
             if (!orgs.length) {
-                tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--brand-text-muted); padding: 24px;">No matching college organizations found.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--brand-text-muted); padding: 24px;">No matching college organizations found.</td></tr>';
                 return;
             }
 
@@ -2675,8 +2677,9 @@
                 const isAct = o.subscription_status === 'active';
                 return `
                 <tr>
+                    <td><span class="badge" style="background: rgba(15,23,42,0.06); color: #0F172A; font-weight: 700; font-size: 11px;">#${o.id}</span></td>
                     <td><strong>${escapeHtml(o.name)}</strong></td>
-                    <td><code>${escapeHtml(o.slug)}</code></td>
+                    <td><code style="font-size: 11px; background: #F1F5F9; color: #334155; padding: 2px 6px; border-radius: 4px; user-select: all;" title="Human reference Institute ID">${escapeHtml(o.institute_id || '—')}</code></td>
                     <td><span class="badge badge-primary">${escapeHtml(o.plan_name || 'Starter')}</span></td>
                     <td><span class="badge badge-${isAct ? 'success' : 'warning'}">${escapeHtml(o.subscription_status)}</span></td>
                     <td>${o.total_users}</td>

@@ -27,19 +27,8 @@ class TenantMiddleware
             }
         }
 
-        // Fallback 2: Check institute_id parameter or X-Institute-Id header
-        $instId = trim((string)($request->get('institute_id') ?: $request->getHeader('X-Institute-Id')));
-        if (!$orgId && !empty($instId)) {
-            $db = \App\Config\Database::getConnection();
-            $stmtInst = $db->prepare("SELECT id FROM organizations WHERE institute_id = :iid1 OR id = :iid2 LIMIT 1");
-            $stmtInst->execute([':iid1' => $instId, ':iid2' => $instId]);
-            $inst = $stmtInst->fetch();
-            if ($inst) {
-                $orgId = (int)$inst['id'];
-            }
-        }
 
-        // Fallback 3: Check explicit organization_id / org_id parameter
+        // Fallback 2: Check explicit organization_id / org_id parameter
         $reqOrgId = (int)($request->get('organization_id') ?: $request->get('org_id'));
         if (!$orgId && $reqOrgId > 0) {
             $db = \App\Config\Database::getConnection();
@@ -50,7 +39,7 @@ class TenantMiddleware
             }
         }
 
-        // Fallback 4: If superadmin, allow fallback to first active organization
+        // Fallback 3: If superadmin, allow fallback to first active organization
         if (!$orgId && !empty($user['role']) && ($user['role'] === 'superadmin' || $user['role'] === 'super_admin')) {
             $db = \App\Config\Database::getConnection();
             $firstOrg = $db->query("SELECT id FROM organizations ORDER BY id ASC LIMIT 1")->fetch();
