@@ -368,9 +368,9 @@
                     });
                 }
 
-                // 4. CHECK: Campus Locations
+                // 4. CHECK: Campus Locations (Zero Campuses is a Critical Blocker)
                 const activeCampuses = campuses.filter(c => c.status !== 'inactive');
-                if (activeCampuses.length === 0 && (!org.city || !org.state)) {
+                if (activeCampuses.length === 0) {
                     items.push({
                         type: 'blocker',
                         icon: '🏫',
@@ -378,22 +378,9 @@
                         badgeBg: '#FEE2E2',
                         badgeColor: '#DC2626',
                         badgeBorder: '#FECACA',
-                        title: 'No Operational Campus Locations Configured',
-                        desc: 'Zero campus sites or physical location coordinates configured. Physical campus tour bookings and address inquiries cannot be resolved.',
-                        ctaText: 'Configure Campuses',
-                        actionTab: 'campuses'
-                    });
-                } else if (activeCampuses.length === 0) {
-                    items.push({
-                        type: 'warning',
-                        icon: '🏫',
-                        badgeText: 'RECOMMENDED',
-                        badgeBg: '#FEF3C7',
-                        badgeColor: '#B45309',
-                        badgeBorder: '#FDE68A',
-                        title: 'Dedicated Campus Sites Not Configured',
-                        desc: `Using default city/state (${escapeHtml(org.city || '')}, ${escapeHtml(org.state || '')}). Adding dedicated campus sites enables residential hostel details, tour slots, and campus acreage.`,
-                        ctaText: 'Add Campus Site',
+                        title: 'Campus Locations Missing (Zero Campuses Configured)',
+                        desc: 'Zero operational campus locations configured. The AI chatbot proactively recommends and coordinates campus tours for prospective students, but campus tour booking slots cannot be scheduled without at least one active campus.',
+                        ctaText: 'Add Campus',
                         actionTab: 'campuses'
                     });
                 } else {
@@ -404,7 +391,7 @@
                         badgeBg: '#ECFDF5',
                         badgeColor: '#047857',
                         badgeBorder: '#A7F3D0',
-                        title: 'Campus Locations & Facilities Operational',
+                        title: 'Campus Locations Operational',
                         desc: `Verified: ${activeCampuses.length} active campus site(s) configured. Campus tour booking slots, facility descriptions, and contact coordinates active.`,
                         ctaText: 'View Campuses',
                         actionTab: 'campuses'

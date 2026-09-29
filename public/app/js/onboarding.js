@@ -2613,17 +2613,21 @@
                 });
             }
 
-            // 4. Check Campus Location
-            if (!org.city || !org.state) {
+            // 4. Check Campus Locations (Zero Campuses is a Critical Blocker)
+            const campusesCount = (statusData.stats && typeof statusData.stats.campuses_count !== 'undefined')
+                ? Number(statusData.stats.campuses_count)
+                : null;
+
+            if (campusesCount === 0 || (campusesCount === null && (!org.city || !org.state))) {
                 gaps.push({
-                    icon: '📍',
-                    severity: 'Required Detail',
-                    severityBg: '#FEF3C7',
-                    severityColor: '#B45309',
-                    title: 'Campus Location Incomplete',
-                    desc: 'Why it matters: The AI cannot verify campus city/state for out-of-state students or coordinate physical campus tours.',
-                    ctaText: 'Configure Campus',
-                    action: () => { hideKnowledgeGapsModal(); switchNavTab('campuses'); }
+                    icon: '🏫',
+                    severity: 'Critical Blocker',
+                    severityBg: '#FEE2E2',
+                    severityColor: '#DC2626',
+                    title: 'Campus Locations Missing',
+                    desc: 'Why it matters: The AI chatbot proactively recommends and coordinates campus tours for prospective students. Campus tour booking slots cannot be scheduled without at least one active campus.',
+                    ctaText: 'Add Campus',
+                    action: () => { switchNavTab('campuses'); }
                 });
             }
 

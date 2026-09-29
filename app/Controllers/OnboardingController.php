@@ -60,6 +60,11 @@ class OnboardingController
         $stmtStaff->execute([':org_id' => $orgId]);
         $staffCount = (int)($stmtStaff->fetch()['cnt'] ?? 0);
 
+        // 6. Fetch Active Campuses Count
+        $stmtCampuses = $db->prepare("SELECT COUNT(*) as cnt FROM campuses WHERE organization_id = :org_id AND status != 'inactive'");
+        $stmtCampuses->execute([':org_id' => $orgId]);
+        $campusesCount = (int)($stmtCampuses->fetch()['cnt'] ?? 0);
+
         // Calculate Readiness & Category Status
         $readiness = $this->calculateReadiness($org, $programs, $ksCount, $chatbot, $staffCount);
 
@@ -117,7 +122,8 @@ class OnboardingController
             'stats' => [
                 'knowledge_sources_count' => $ksCount,
                 'staff_count' => $staffCount,
-                'programs_count' => count($programs)
+                'programs_count' => count($programs),
+                'campuses_count' => $campusesCount
             ]
         ]);
     }
