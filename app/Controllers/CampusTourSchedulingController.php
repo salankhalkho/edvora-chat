@@ -49,8 +49,8 @@ class CampusTourSchedulingController
 
         // 2. Resolve from institute_id (e.g. 9a1158154dfa42caddbd0694a4e9bdc8)
         if (!$orgId && !empty($instituteId)) {
-            $stmtInst = $db->prepare("SELECT id FROM organizations WHERE institute_id = :iid OR id = :iid LIMIT 1");
-            $stmtInst->execute([':iid' => $instituteId]);
+            $stmtInst = $db->prepare("SELECT id FROM organizations WHERE institute_id = :iid1 OR id = :iid2 LIMIT 1");
+            $stmtInst->execute([':iid1' => $instituteId, ':iid2' => $instituteId]);
             $inst = $stmtInst->fetch();
             if ($inst) {
                 $orgId = (int)$inst['id'];
@@ -133,8 +133,9 @@ class CampusTourSchedulingController
 
         if ($programId) {
             // When filtered by program_id, return slots mapped to that program OR general slots
-            $query .= " AND (s.is_general = 1 OR s.id IN (SELECT slot_id FROM campus_tour_slot_programs WHERE program_id = :filter_prog_id AND organization_id = :org_id))";
+            $query .= " AND (s.is_general = 1 OR s.id IN (SELECT slot_id FROM campus_tour_slot_programs WHERE program_id = :filter_prog_id AND organization_id = :filter_sub_org_id))";
             $paramsMap[':filter_prog_id'] = $programId;
+            $paramsMap[':filter_sub_org_id'] = $orgId;
         }
 
         $query .= " ORDER BY s.tour_date ASC, s.start_time ASC";

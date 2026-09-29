@@ -31,8 +31,8 @@ class TenantMiddleware
         $instId = trim((string)($request->get('institute_id') ?: $request->getHeader('X-Institute-Id')));
         if (!$orgId && !empty($instId)) {
             $db = \App\Config\Database::getConnection();
-            $stmtInst = $db->prepare("SELECT id FROM organizations WHERE institute_id = :iid OR id = :iid LIMIT 1");
-            $stmtInst->execute([':iid' => $instId]);
+            $stmtInst = $db->prepare("SELECT id FROM organizations WHERE institute_id = :iid1 OR id = :iid2 LIMIT 1");
+            $stmtInst->execute([':iid1' => $instId, ':iid2' => $instId]);
             $inst = $stmtInst->fetch();
             if ($inst) {
                 $orgId = (int)$inst['id'];
