@@ -231,7 +231,18 @@
 (function() {
     window.loadTourSlots = function() {
         var campusId = document.getElementById('filterSlotCampus') ? document.getElementById('filterSlotCampus').value : '';
-        fetch('/v1/campus-tours/slots' + (campusId ? '?campus_id=' + campusId : ''))
+        var params = new URLSearchParams();
+        if (campusId) params.append('campus_id', campusId);
+
+        var instId = (window.currentOrgProfile && (window.currentOrgProfile.institute_id || window.currentOrgProfile.id)) ||
+                     (window.currentUser && (window.currentUser.institute_id || window.currentUser.organization_id)) ||
+                     localStorage.getItem('edvora_institute_id') ||
+                     localStorage.getItem('edvora_org_id') || '';
+        if (instId) params.append('institute_id', instId);
+
+        var qs = params.toString() ? '?' + params.toString() : '';
+
+        fetch('/v1/campus-tours/slots' + qs)
             .then(function(res) { return res.json(); })
             .then(function(res) {
                 if (res.status === 'success' && res.data) {
@@ -272,15 +283,19 @@
                     });
                     tbody.innerHTML = html;
                 } else {
+                    if (res.message && (res.message.includes('token') || res.message.includes('Unauthorized') || res.message.includes('Authentication'))) {
+                        setTimeout(function() { if (typeof window.loadTourSlots === 'function') window.loadTourSlots(); }, 600);
+                        return;
+                    }
                     var tbody = document.getElementById('tourSlotsTableBody');
                     if (tbody) {
-                        tbody.innerHTML = '<tr><td colspan="7" style="padding:30px; text-align:center; color:#EF4444;">' + (res.message || 'Failed to load tour slots') + '</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="7" style="padding:30px; text-align:center; color:#EF4444;">' + (res.message || 'Failed to load tour slots') + '<br><button type="button" class="brand-btn-secondary" style="margin-top:10px; height:28px; padding:0 12px; font-size:11px;" onclick="loadTourSlots()">↻ Try Again</button></td></tr>';
                     }
                 }
             }).catch(function(err) {
                 var tbody = document.getElementById('tourSlotsTableBody');
                 if (tbody) {
-                    tbody.innerHTML = '<tr><td colspan="7" style="padding:30px; text-align:center; color:#EF4444;">Unable to connect to server.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" style="padding:30px; text-align:center; color:#EF4444;">Unable to connect to server.<br><button type="button" class="brand-btn-secondary" style="margin-top:10px; height:28px; padding:0 12px; font-size:11px;" onclick="loadTourSlots()">↻ Try Again</button></td></tr>';
                 }
             });
     };

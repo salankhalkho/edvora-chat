@@ -153,6 +153,21 @@
                 }
             }
 
+            // Also attach X-Institute-Id header if available for reliable multi-tenant resolution
+            const curInstId = (window.currentOrgProfile && (window.currentOrgProfile.institute_id || window.currentOrgProfile.id)) ||
+                              (window.currentUser && (window.currentUser.institute_id || window.currentUser.organization_id)) ||
+                              localStorage.getItem('edvora_institute_id') || '';
+            if (url.startsWith('/v1/') && !isAuthRoute && curInstId) {
+                init.headers = init.headers || {};
+                if (init.headers instanceof Headers) {
+                    if (!init.headers.has('X-Institute-Id')) init.headers.set('X-Institute-Id', String(curInstId));
+                } else if (!Array.isArray(init.headers)) {
+                    if (!init.headers['X-Institute-Id'] && !init.headers['x-institute-id']) {
+                        init.headers['X-Institute-Id'] = String(curInstId);
+                    }
+                }
+            }
+
             let response;
             try {
                 response = await _nativeFetch(resource, init);
@@ -369,6 +384,17 @@
 
             const role = (user && user.role) ? user.role : '';
             const isOwnerOrAdmin = role === 'owner' || role === 'org_admin' || role === 'admin' || role === 'superadmin' || role === 'super_admin';
+
+            if (org && org.institute_id) {
+                localStorage.setItem('edvora_institute_id', org.institute_id);
+            } else if (user && user.institute_id) {
+                localStorage.setItem('edvora_institute_id', user.institute_id);
+            }
+            if (org && org.id) {
+                localStorage.setItem('edvora_org_id', org.id);
+            } else if (user && user.organization_id) {
+                localStorage.setItem('edvora_org_id', user.organization_id);
+            }
 
             if (rawName && rawName.toLowerCase() !== 'unnamed institution' && rawName.toLowerCase() !== 'widget preview' && rawName.toLowerCase() !== 'landing page') {
                 window.currentOrgName = rawName;

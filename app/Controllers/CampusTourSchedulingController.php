@@ -19,28 +19,78 @@ class CampusTourSchedulingController
     {
         $db = Database::getConnection();
         $orgId = $GLOBALS['organization_id'] ?? null;
-        $botToken = trim((string)$request->get('bot_token'));
+        $botToken = trim((string)($request->get('bot_token') ?: $request->getBotToken()));
         $campusId = $request->get('campus_id') ? (int)$request->get('campus_id') : null;
         $programId = $request->get('program_id') ? (int)$request->get('program_id') : null;
+        $instituteId = trim((string)($request->get('institute_id') ?: $request->getHeader('X-Institute-Id')));
+        $reqOrgId = (int)($request->get('organization_id') ?: $request->get('org_id'));
 
-        // If not set by middleware, extract organization_id from Bearer JWT token (admin dashboard)
-        if (!$orgId) {
-            $token = $request->getBearerToken();
-            if ($token) {
-                $payload = Jwt::decode($token);
-                if ($payload && !empty($payload['organization_id'])) {
-                    $orgId = (int)$payload['organization_id'];
+        // 1. If Bearer JWT token provided (admin dashboard), decode it
+        $token = $request->getBearerToken();
+        $payload = null;
+        if (!$orgId && $token) {
+            $payload = Jwt::decode($token);
+            if (!$payload) {
+                // If caller attempted Bearer auth, but token is invalid or expired, return 401
+                // so the client-side Fetch Interceptor refreshes token and retries automatically!
+                Response::error('Invalid or expired authentication token.', 401);
+            }
+            if (!empty($payload['organization_id'])) {
+                $orgId = (int)$payload['organization_id'];
+            } elseif (!empty($payload['user_id'])) {
+                $stmtU = $db->prepare("SELECT organization_id, role FROM users WHERE id = :uid LIMIT 1");
+                $stmtU->execute([':uid' => (int)$payload['user_id']]);
+                $u = $stmtU->fetch();
+                if ($u && !empty($u['organization_id'])) {
+                    $orgId = (int)$u['organization_id'];
                 }
             }
         }
 
-        // If called from public chatbot widget, resolve orgId from bot_token
+        // 2. Resolve from institute_id (e.g. 9a1158154dfa42caddbd0694a4e9bdc8)
+        if (!$orgId && !empty($instituteId)) {
+            $stmtInst = $db->prepare("SELECT id FROM organizations WHERE institute_id = :iid OR id = :iid LIMIT 1");
+            $stmtInst->execute([':iid' => $instituteId]);
+            $inst = $stmtInst->fetch();
+            if ($inst) {
+                $orgId = (int)$inst['id'];
+            }
+        }
+
+        // 3. Resolve from explicit organization_id parameter
+        if (!$orgId && $reqOrgId > 0) {
+            $stmtOrg = $db->prepare("SELECT id FROM organizations WHERE id = :id LIMIT 1");
+            $stmtOrg->execute([':id' => $reqOrgId]);
+            if ($stmtOrg->fetch()) {
+                $orgId = $reqOrgId;
+            }
+        }
+
+        // 4. Resolve from campus_id if provided
+        if (!$orgId && $campusId) {
+            $stmtCamp = $db->prepare("SELECT organization_id FROM campuses WHERE id = :cid LIMIT 1");
+            $stmtCamp->execute([':cid' => $campusId]);
+            $camp = $stmtCamp->fetch();
+            if ($camp && !empty($camp['organization_id'])) {
+                $orgId = (int)$camp['organization_id'];
+            }
+        }
+
+        // 5. If called from public chatbot widget, resolve orgId from bot_token
         if (!$orgId && !empty($botToken)) {
-            $stmtBot = $db->prepare("SELECT organization_id FROM chatbots WHERE bot_token = :token AND is_active = 1");
+            $stmtBot = $db->prepare("SELECT organization_id FROM chatbots WHERE bot_token = :token AND is_active = 1 LIMIT 1");
             $stmtBot->execute([':token' => $botToken]);
             $bot = $stmtBot->fetch();
             if ($bot) {
                 $orgId = (int)$bot['organization_id'];
+            }
+        }
+
+        // 6. Superadmin fallback if authenticated as superadmin and no org specified
+        if (!$orgId && isset($payload['role']) && ($payload['role'] === 'superadmin' || $payload['role'] === 'super_admin')) {
+            $firstOrg = $db->query("SELECT id FROM organizations ORDER BY id ASC LIMIT 1")->fetch();
+            if ($firstOrg) {
+                $orgId = (int)$firstOrg['id'];
             }
         }
 
