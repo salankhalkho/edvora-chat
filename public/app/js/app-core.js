@@ -1083,6 +1083,8 @@
                 cleanTitle = 'Domain Whitelisting';
             } else if (tab === 'chatbot') {
                 cleanTitle = 'ChatBot Settings';
+            } else if (tab === 'session-journeys') {
+                cleanTitle = 'Visitor Session Journeys & Dwell Analytics';
             } else if (tab === 'profile') {
                 cleanTitle = 'My Profile & Security';
             }
@@ -1188,6 +1190,8 @@
                     if (typeof loadSettingsData === 'function') loadSettingsData();
                 } else if (tab === 'domain-whitelist') {
                     if (typeof loadDomainWhitelistData === 'function') loadDomainWhitelistData();
+                } else if (tab === 'session-journeys') {
+                    if (typeof loadSessionJourneys === 'function') loadSessionJourneys(1);
                 } else if (tab === 'profile') {
                     if (typeof loadProfileData === 'function') loadProfileData();
                 }
