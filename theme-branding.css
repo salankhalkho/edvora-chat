@@ -2536,6 +2536,42 @@ select.brand-input option {
       border: 1px solid #B9D7C7;
     }
 
+    /* Lead Student Profile Avatar & Cell */
+    .lead-avatar-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .lead-profile-avatar {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      border-radius: 50%;
+      background: #E8F4F0;
+      color: #063D3B;
+      border: 1.5px solid #D1E5DE;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 1px 3px rgba(6, 61, 59, 0.08);
+      transition: all 0.15s ease;
+    }
+
+    .lead-profile-avatar:hover {
+      background: #D5EBE3;
+      border-color: #B2D8CB;
+      transform: scale(1.05);
+    }
+
+    .lead-profile-avatar svg {
+      width: 15px;
+      height: 15px;
+      stroke: #063D3B;
+      stroke-width: 2.2;
+    }
+
     .dept-staff-name {
       font-size: 11.5px;
       font-weight: 700;

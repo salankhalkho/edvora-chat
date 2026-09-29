@@ -511,8 +511,15 @@
                     return `
                         <tr>
                             <td style="vertical-align: middle;">
-                                <div style="font-weight: 700; color: #063D3B; line-height: 1.35; font-size: 12.5px;">${lead.name}</div>
-                                <div style="color: #648781; font-size: 11px; margin-top: 2px; font-family: var(--brand-font-mono);">${lead.email || 'â€”'}</div>
+                                <div class="lead-avatar-cell">
+                                    <div class="lead-profile-avatar" title="${lead.name || 'Student Lead'}">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                    </div>
+                                    <div>
+                                        <div style="font-weight: 700; color: #063D3B; line-height: 1.35; font-size: 12.5px;">${lead.name}</div>
+                                        <div style="color: #648781; font-size: 11px; margin-top: 2px; font-family: var(--brand-font-mono);">${lead.email || '—'}</div>
+                                    </div>
+                                </div>
                             </td>
                             <td style="color: #092F2E; font-size: 12px; white-space: nowrap; min-width: 135px; font-family: var(--brand-font-mono); vertical-align: middle;">${lead.phone || '—'}</td>
                             <td style="vertical-align: middle;">${assignedBadge}</td>
