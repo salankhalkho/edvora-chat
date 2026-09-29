@@ -882,12 +882,21 @@ class OnboardingController
         $earnedWeight = 0;
 
         // 1. Institution Profile (Weight: 15)
-        $hasProfile = !empty($org['name']) && !empty($org['institution_type']) && !empty($org['city']);
+        $missingFields = [];
+        if (empty(trim((string)($org['name'] ?? '')))) $missingFields[] = 'Name';
+        if (empty(trim((string)($org['institution_type'] ?? '')))) $missingFields[] = 'Type';
+        if (empty(trim((string)($org['institution_category'] ?? '')))) $missingFields[] = 'Category';
+        if (empty(trim((string)($org['website_url'] ?? '')))) $missingFields[] = 'Website';
+        if (empty(trim((string)($org['academic_year'] ?? '')))) $missingFields[] = 'Admissions Cycle';
+
+        $hasProfile = empty($missingFields);
         $breakdown['institution_profile'] = [
-            'label' => 'Institution Profile & Location',
+            'label' => 'Institution Profile & Identity',
             'complete' => $hasProfile,
             'weight' => 15,
-            'details' => $hasProfile ? ($org['city'] . ', ' . ($org['state'] ?? 'India')) : 'Missing city or institution type'
+            'details' => $hasProfile 
+                ? (($org['institution_type'] ?? 'Institution') . ' • ' . ($org['institution_category'] ?? 'Multi-Disciplinary')) 
+                : ('Missing: ' . implode(', ', $missingFields))
         ];
         $totalWeight += 15;
         if ($hasProfile) $earnedWeight += 15;

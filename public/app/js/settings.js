@@ -1,4 +1,4 @@
-﻿// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 // SETTINGS.JS - Org settings, campus management, team/staff management
 // BUG AREAS:
 //   Lead-magnet assets    -> loadAssets() / renderAssetsTable() / handleAssetFormSubmit()
@@ -515,16 +515,32 @@
 
                     const setVal = (id, val) => {
                         const el = document.getElementById(id);
-                        if (el) el.value = val || '';
+                        if (!el) return;
+                        if (el.tagName === 'SELECT') {
+                            el.value = val || '';
+                            if (val && !el.value) {
+                                const target = String(val).toLowerCase().trim();
+                                for (let i = 0; i < el.options.length; i++) {
+                                    const opt = el.options[i];
+                                    if (opt.value.toLowerCase().trim() === target || opt.text.toLowerCase().trim() === target) {
+                                        el.selectedIndex = i;
+                                        break;
+                                    }
+                                }
+                            }
+                        } else {
+                            el.value = val || '';
+                        }
                     };
 
+                    setVal('settings_institute_id', org.institute_id || '');
                     setVal('settings_name', org.name);
                     setVal('settings_short_name', org.short_name);
                     setVal('settings_website_url', org.website_url);
                     setVal('settings_founded_year', org.founded_year);
                     setVal('settings_institution_type', org.institution_type);
                     setVal('settings_institution_category', org.institution_category);
-                    setVal('settings_academic_year', org.academic_year || 'Fall 2026');
+                    setVal('settings_academic_year', org.academic_year || '');
                     setVal('settings_address_line', org.address_line);
                     setVal('settings_city', org.city);
                     setVal('settings_state', org.state);
@@ -611,6 +627,17 @@
 
                     if (typeof showToast === 'function') showToast('Institution settings saved successfully! âœ“', 'success');
                     else alert('Institution settings saved successfully!');
+
+                    // Refresh onboarding status & readiness audit live
+                    try {
+                        const onbRes = await fetch('/v1/onboarding/status', {
+                            headers: { 'Authorization': 'Bearer ' + token }
+                        });
+                        const onbData = await onbRes.json();
+                        if (onbData.status === 'success' && typeof checkKnowledgeGapsAudit === 'function') {
+                            checkKnowledgeGapsAudit(onbData.data);
+                        }
+                    } catch(e) {}
                 } else {
                     if (typeof showToast === 'function') showToast(data.message || 'Failed to save settings.', 'error');
                     else alert(data.message || 'Failed to save settings.');

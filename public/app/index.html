@@ -11131,17 +11131,38 @@ echo $response['reply'];
                 });
             }
 
-            // 3. Check Profile (city / state)
-            if (!org.city || !org.state) {
+            // 3. Check Institution Profile (https://edvora.chat/app/#settings)
+            const missingProfileFields = [];
+            if (!org.name || !String(org.name).trim()) missingProfileFields.push('Institution Name');
+            if (!org.institution_type || !String(org.institution_type).trim()) missingProfileFields.push('Institution Type');
+            if (!org.institution_category || !String(org.institution_category).trim()) missingProfileFields.push('Institution Category');
+            if (!org.website_url || !String(org.website_url).trim()) missingProfileFields.push('Official Website URL');
+            if (!org.academic_year || !String(org.academic_year).trim()) missingProfileFields.push('Admissions Cycle');
+
+            if (missingProfileFields.length > 0) {
                 gaps.push({
                     icon: '🏛️',
+                    severity: 'Critical Blocker',
+                    severityBg: '#FEE2E2',
+                    severityColor: '#DC2626',
+                    title: 'Institution Profile Incomplete',
+                    desc: `Why it matters: Missing required institutional details (${missingProfileFields.join(', ')}). The AI needs these to accurately identify your institution, classify programs, and route applicants to official portals.`,
+                    ctaText: 'Complete Profile',
+                    action: () => { hideKnowledgeGapsModal(); switchNavTab('settings'); }
+                });
+            }
+
+            // 4. Check Campus Location
+            if (!org.city || !org.state) {
+                gaps.push({
+                    icon: '📍',
                     severity: 'Required Detail',
                     severityBg: '#FEF3C7',
                     severityColor: '#B45309',
                     title: 'Campus Location Incomplete',
                     desc: 'Why it matters: The AI cannot verify campus city/state for out-of-state students or coordinate physical campus tours.',
-                    ctaText: 'Edit Profile',
-                    action: () => { hideKnowledgeGapsModal(); switchNavTab('settings'); }
+                    ctaText: 'Configure Campus',
+                    action: () => { hideKnowledgeGapsModal(); switchNavTab('campuses'); }
                 });
             }
 
@@ -15113,7 +15134,22 @@ echo $response['reply'];
 
                     const setVal = (id, val) => {
                         const el = document.getElementById(id);
-                        if (el) el.value = val || '';
+                        if (!el) return;
+                        if (el.tagName === 'SELECT') {
+                            el.value = val || '';
+                            if (val && !el.value) {
+                                const target = String(val).toLowerCase().trim();
+                                for (let i = 0; i < el.options.length; i++) {
+                                    const opt = el.options[i];
+                                    if (opt.value.toLowerCase().trim() === target || opt.text.toLowerCase().trim() === target) {
+                                        el.selectedIndex = i;
+                                        break;
+                                    }
+                                }
+                            }
+                        } else {
+                            el.value = val || '';
+                        }
                     };
 
                     setVal('settings_institute_id', org.institute_id || '');
@@ -15123,7 +15159,7 @@ echo $response['reply'];
                     setVal('settings_founded_year', org.founded_year);
                     setVal('settings_institution_type', org.institution_type);
                     setVal('settings_institution_category', org.institution_category);
-                    setVal('settings_academic_year', org.academic_year || 'Fall 2026');
+                    setVal('settings_academic_year', org.academic_year || '');
                     setVal('settings_address_line', org.address_line);
                     setVal('settings_city', org.city);
                     setVal('settings_state', org.state);
@@ -15240,6 +15276,17 @@ echo $response['reply'];
 
                     if (typeof showToast === 'function') showToast('Institution settings saved successfully! ✓', 'success');
                     else alert('Institution settings saved successfully!');
+
+                    // Refresh onboarding status & readiness audit live
+                    try {
+                        const onbRes = await fetch('/v1/onboarding/status', {
+                            headers: { 'Authorization': 'Bearer ' + token }
+                        });
+                        const onbData = await onbRes.json();
+                        if (onbData.status === 'success' && typeof checkKnowledgeGapsAudit === 'function') {
+                            checkKnowledgeGapsAudit(onbData.data);
+                        }
+                    } catch(e) {}
                 } else {
                     if (typeof showToast === 'function') showToast(data.message || 'Failed to save settings.', 'error');
                     else alert(data.message || 'Failed to save settings.');

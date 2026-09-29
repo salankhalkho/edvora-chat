@@ -2592,17 +2592,38 @@
                 });
             }
 
-            // 3. Check Profile (city / state)
-            if (!org.city || !org.state) {
+            // 3. Check Institution Profile (https://edvora.chat/app/#settings)
+            const missingProfileFields = [];
+            if (!org.name || !String(org.name).trim()) missingProfileFields.push('Institution Name');
+            if (!org.institution_type || !String(org.institution_type).trim()) missingProfileFields.push('Institution Type');
+            if (!org.institution_category || !String(org.institution_category).trim()) missingProfileFields.push('Institution Category');
+            if (!org.website_url || !String(org.website_url).trim()) missingProfileFields.push('Official Website URL');
+            if (!org.academic_year || !String(org.academic_year).trim()) missingProfileFields.push('Admissions Cycle');
+
+            if (missingProfileFields.length > 0) {
                 gaps.push({
                     icon: '🏛️',
+                    severity: 'Critical Blocker',
+                    severityBg: '#FEE2E2',
+                    severityColor: '#DC2626',
+                    title: 'Institution Profile Incomplete',
+                    desc: `Why it matters: Missing required institutional details (${missingProfileFields.join(', ')}). The AI needs these to accurately identify your institution, classify programs, and route applicants to official portals.`,
+                    ctaText: 'Complete Profile',
+                    action: () => { hideKnowledgeGapsModal(); switchNavTab('settings'); }
+                });
+            }
+
+            // 4. Check Campus Location
+            if (!org.city || !org.state) {
+                gaps.push({
+                    icon: '📍',
                     severity: 'Required Detail',
                     severityBg: '#FEF3C7',
                     severityColor: '#B45309',
                     title: 'Campus Location Incomplete',
                     desc: 'Why it matters: The AI cannot verify campus city/state for out-of-state students or coordinate physical campus tours.',
-                    ctaText: 'Edit Profile',
-                    action: () => { hideKnowledgeGapsModal(); switchNavTab('settings'); }
+                    ctaText: 'Configure Campus',
+                    action: () => { hideKnowledgeGapsModal(); switchNavTab('campuses'); }
                 });
             }
 
