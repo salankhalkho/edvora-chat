@@ -311,7 +311,11 @@
         if (!token) return;
 
         try {
-            const url = `/v1/analytics/session-journeys?days=${days}&status=${encodeURIComponent(status)}&search=${encodeURIComponent(search)}&page=${page}&limit=25`;
+            const orgId = localStorage.getItem('edvora_org_id') || sessionStorage.getItem('edvora_org_id') || '';
+            let url = `/v1/analytics/session-journeys?days=${days}&status=${encodeURIComponent(status)}&search=${encodeURIComponent(search)}&page=${page}&limit=25`;
+            if (orgId) {
+                url += `&organization_id=${encodeURIComponent(orgId)}`;
+            }
             const res = await fetch(url, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
@@ -497,7 +501,12 @@
         content.innerHTML = '<div style="text-align: center; color: #9CA3AF; padding: 48px 0;"><span style="font-size:24px;">⏳</span><div style="margin-top:8px;">Fetching step-by-step path...</div></div>';
 
         try {
-            const res = await fetch(`/v1/analytics/session-journeys/${encodeURIComponent(sessionId)}/steps`, {
+            const orgId = localStorage.getItem('edvora_org_id') || sessionStorage.getItem('edvora_org_id') || '';
+            let url = `/v1/analytics/session-journeys/${encodeURIComponent(sessionId)}/steps`;
+            if (orgId) {
+                url += `?organization_id=${encodeURIComponent(orgId)}`;
+            }
+            const res = await fetch(url, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
             const data = await res.json();

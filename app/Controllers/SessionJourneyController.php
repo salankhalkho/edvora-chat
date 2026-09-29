@@ -16,7 +16,23 @@ class SessionJourneyController
      */
     public function listTenantSessions(Request $request): void
     {
-        $orgId = (int)($request->get('tenant_id') ?? $request->get('auth_user')['organization_id'] ?? 0);
+        $orgId = (int)(
+            $GLOBALS['organization_id']
+            ?? $GLOBALS['auth_user']['organization_id']
+            ?? $request->get('organization_id')
+            ?? $request->get('tenant_id')
+            ?? $request->get('org_id')
+            ?? 0
+        );
+
+        $user = $GLOBALS['auth_user'] ?? null;
+        if (!empty($user['role']) && ($user['role'] === 'superadmin' || $user['role'] === 'super_admin')) {
+            $reqOrg = (int)($request->get('organization_id') ?: $request->get('tenant_id') ?: $request->get('org_id'));
+            if ($reqOrg > 0) {
+                $orgId = $reqOrg;
+            }
+        }
+
         if ($orgId <= 0) {
             Response::error('Unauthorized organization context.', 403);
             return;
@@ -31,7 +47,23 @@ class SessionJourneyController
      */
     public function getSessionSteps(Request $request, array $params): void
     {
-        $orgId = (int)($request->get('tenant_id') ?? $request->get('auth_user')['organization_id'] ?? 0);
+        $orgId = (int)(
+            $GLOBALS['organization_id']
+            ?? $GLOBALS['auth_user']['organization_id']
+            ?? $request->get('organization_id')
+            ?? $request->get('tenant_id')
+            ?? $request->get('org_id')
+            ?? 0
+        );
+
+        $user = $GLOBALS['auth_user'] ?? null;
+        if (!empty($user['role']) && ($user['role'] === 'superadmin' || $user['role'] === 'super_admin')) {
+            $reqOrg = (int)($request->get('organization_id') ?: $request->get('tenant_id') ?: $request->get('org_id'));
+            if ($reqOrg > 0) {
+                $orgId = $reqOrg;
+            }
+        }
+
         if ($orgId <= 0) {
             Response::error('Unauthorized organization context.', 403);
             return;
@@ -120,9 +152,9 @@ class SessionJourneyController
                     COUNT(*) as total_sessions,
                     COALESCE(AVG(total_dwell_seconds), 0) as avg_dwell_seconds,
                     COALESCE(AVG(total_pages), 0) as avg_pages_per_session,
-                    SUM(CASE WHEN conversion_status = 'lead_converted' THEN 1 ELSE 0 END) as count_converted,
-                    SUM(CASE WHEN conversion_status = 'chat_engaged' THEN 1 ELSE 0 END) as count_chat_engaged,
-                    SUM(CASE WHEN conversion_status = 'browsing' THEN 1 ELSE 0 END) as count_browsing
+                    COALESCE(SUM(CASE WHEN conversion_status = 'lead_converted' THEN 1 ELSE 0 END), 0) as count_converted,
+                    COALESCE(SUM(CASE WHEN conversion_status = 'chat_engaged' THEN 1 ELSE 0 END), 0) as count_chat_engaged,
+                    COALESCE(SUM(CASE WHEN conversion_status = 'browsing' THEN 1 ELSE 0 END), 0) as count_browsing
                 FROM visitor_sessions vs
                 WHERE {$whereSql}
             ");
@@ -201,7 +233,7 @@ class SessionJourneyController
                 SELECT 
                     COALESCE(NULLIF(vs.utm_source, ''), 'Direct / Organic') as source,
                     COUNT(*) as session_count,
-                    SUM(CASE WHEN vs.conversion_status = 'lead_converted' THEN 1 ELSE 0 END) as conversions
+                    COALESCE(SUM(CASE WHEN vs.conversion_status = 'lead_converted' THEN 1 ELSE 0 END), 0) as conversions
                 FROM visitor_sessions vs
                 WHERE {$whereSql}
                 GROUP BY source

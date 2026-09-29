@@ -28,9 +28,9 @@ class TenantMiddleware
         }
 
 
-        // Fallback 2: Check explicit organization_id / org_id parameter
-        $reqOrgId = (int)($request->get('organization_id') ?: $request->get('org_id'));
-        if (!$orgId && $reqOrgId > 0) {
+        // Fallback 2: Check explicit organization_id / org_id / tenant_id parameter
+        $reqOrgId = (int)($request->get('organization_id') ?: $request->get('org_id') ?: $request->get('tenant_id'));
+        if ((!$orgId || (!empty($user['role']) && in_array($user['role'], ['superadmin', 'super_admin']))) && $reqOrgId > 0) {
             $db = \App\Config\Database::getConnection();
             $stmtOrg = $db->prepare("SELECT id FROM organizations WHERE id = :id LIMIT 1");
             $stmtOrg->execute([':id' => $reqOrgId]);
