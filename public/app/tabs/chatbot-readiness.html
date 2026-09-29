@@ -1,0 +1,19 @@
+<!-- Alias tab for chatbot_readiness.html -->
+<script>
+    (async () => {
+        const pane = document.getElementById('tab-chatbot-readiness') || document.getElementById('tab-chatbot_readiness');
+        if (pane) {
+            const res = await fetch('/app/tabs/chatbot_readiness.html?v=' + Date.now());
+            if (res.ok) {
+                pane.innerHTML = await res.text();
+                pane.dataset.loaded = 'true';
+                pane.querySelectorAll('script').forEach(s => {
+                    const ns = document.createElement('script');
+                    Array.from(s.attributes).forEach(a => ns.setAttribute(a.name, a.value));
+                    ns.appendChild(document.createTextNode(s.innerHTML));
+                    s.parentNode.replaceChild(ns, s);
+                });
+            }
+        }
+    })();
+</script>

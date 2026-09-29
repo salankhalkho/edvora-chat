@@ -2650,75 +2650,9 @@
         }
 
         function showKnowledgeGapsModal() {
-            const modal = document.getElementById('knowledgeGapsModal');
-            const listEl = document.getElementById('knowledgeGapsChecklist');
-            const warnBanner = document.getElementById('readinessWarningBanner');
-            const modalIcon = document.getElementById('readinessModalIcon');
-            const modalTitle = document.getElementById('readinessModalTitle');
-            const modalSubtitle = document.getElementById('readinessModalSubtitle');
-            if (!modal || !listEl) return;
-
-            listEl.innerHTML = '';
-
-            if (currentKnowledgeGapsState.gapsList.length === 0) {
-                if (warnBanner) warnBanner.style.display = 'none';
-                if (modalIcon) {
-                    modalIcon.innerText = '✓';
-                    modalIcon.style.background = '#D1FAE5';
-                    modalIcon.style.borderColor = '#A7F3D0';
-                }
-                if (modalTitle) modalTitle.innerText = 'Chatbot Launch Readiness';
-                if (modalSubtitle) modalSubtitle.innerText = 'Pre-flight verification passed — 100% ready for students';
-
-                listEl.innerHTML = `
-                    <div style="background: #ECFDF5; border: 1.5px solid #A7F3D0; border-radius: 12px; padding: 26px 20px; text-align: center;">
-                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 50%; background: #D1FAE5; color: #047857; font-size: 24px; font-weight: 800; margin: 0 auto 12px auto;">✓</span>
-                        <div style="font-size: 15px; font-weight: 800; color: #065F46;">Chatbot is 100% Primed & Ready to Launch!</div>
-                        <div style="font-size: 12px; color: #047857; margin-top: 4px; max-width: 440px; margin-left: auto; margin-right: auto; line-height: 1.5;">All core institutional knowledge, degree programs, and campus details are verified. Your AI admissions counselor is ready to engage prospective students.</div>
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 18px;">
-                            <button type="button" onclick="hideKnowledgeGapsModal(); switchNavTab('overview');" class="brand-btn-primary" style="height: 34px; padding: 0 16px; font-size: 12px; font-weight: 700; background: #063D3B; color: #C8FF63; border: 1px solid #063D3B; border-radius: 8px; cursor: pointer;">
-                                View Embed Code →
-                            </button>
-                        </div>
-                    </div>
-                `;
-            } else {
-                if (warnBanner) warnBanner.style.display = 'block';
-                if (modalIcon) {
-                    modalIcon.innerText = '⚠️';
-                    modalIcon.style.background = '#FEF3C7';
-                    modalIcon.style.borderColor = '#FDE68A';
-                }
-                if (modalTitle) modalTitle.innerText = 'Chatbot Launch Readiness';
-                if (modalSubtitle) modalSubtitle.innerText = `${currentKnowledgeGapsState.gapsList.length} critical issue${currentKnowledgeGapsState.gapsList.length > 1 ? 's' : ''} must be resolved before live deployment`;
-
-                currentKnowledgeGapsState.gapsList.forEach(gap => {
-                    const item = document.createElement('div');
-                    item.style.cssText = 'background: #FAFCFB; border: 1.5px solid #DCE9E5; border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px; box-shadow: 0 1px 3px rgba(6, 61, 59, 0.03); transition: all 0.15s ease;';
-                    item.innerHTML = `
-                        <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
-                            <div style="width: 38px; height: 38px; border-radius: 8px; background: #F1F7F4; border: 1px solid #DDE9E3; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;">${gap.icon}</div>
-                            <div style="min-width: 0;">
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <div style="font-size: 13px; font-weight: 700; color: #063D3B;">${escapeHtml(gap.title)}</div>
-                                    <span style="font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; background: ${gap.severityBg || '#FEE2E2'}; color: ${gap.severityColor || '#DC2626'}; padding: 1.5px 6px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.06);">${escapeHtml(gap.severity || 'Critical')}</span>
-                                </div>
-                                <div style="font-size: 11.5px; color: #4F7470; margin-top: 3px; line-height: 1.45;">${escapeHtml(gap.desc)}</div>
-                            </div>
-                        </div>
-                        <button type="button" class="brand-btn-primary brand-btn-sm" style="flex-shrink: 0; height: 32px; font-size: 11.5px; padding: 0 14px; font-weight: 700; background: #063D3B; color: #C8FF63; border: 1px solid #063D3B; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s ease;">
-                            ${escapeHtml(gap.ctaText)} →
-                        </button>
-                    `;
-                    const btn = item.querySelector('button');
-                    if (btn && typeof gap.action === 'function') {
-                        btn.onclick = gap.action;
-                    }
-                    listEl.appendChild(item);
-                });
+            if (typeof switchNavTab === 'function') {
+                switchNavTab('chatbot_readiness');
             }
-
-            modal.style.display = 'flex';
         }
 
         function hideKnowledgeGapsModal() {
