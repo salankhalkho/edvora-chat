@@ -14,7 +14,10 @@ class SessionJourneyController
      * GET /v1/analytics/session-journeys
      * College-Admin endpoint for session journeys, dwell analytics, and conversion tracking.
      */
-    public function listTenantSessions(Request $request): void
+    /**
+     * Resolve and validate tenant organization ID.
+     */
+    private function resolveOrgId(Request $request): int
     {
         $orgId = (int)(
             $GLOBALS['organization_id']
@@ -33,6 +36,30 @@ class SessionJourneyController
             }
         }
 
+        return $orgId;
+    }
+
+    /**
+     * GET /v1/analytics/session-journeys
+     * College-Admin endpoint for session journeys, dwell analytics, and conversion tracking.
+     */
+    public function listTenantSessions(Request $request): void
+    {
+        $report = $request->get('report');
+        if ($report === 'top_visited_pages') {
+            $this->getTopVisitedPagesReport($request);
+            return;
+        }
+        if ($report === 'top_exit_pages') {
+            $this->getTopExitPagesReport($request);
+            return;
+        }
+        if ($report === 'campaign_sources') {
+            $this->getCampaignSourcesReport($request);
+            return;
+        }
+
+        $orgId = $this->resolveOrgId($request);
         if ($orgId <= 0) {
             Response::error('Unauthorized organization context.', 403);
             return;
@@ -389,6 +416,497 @@ class SessionJourneyController
         } catch (Throwable $e) {
             error_log('[SessionJourneyController] processStepsQuery error: ' . $e->getMessage());
             Response::error('Failed to load session steps.', 500);
+        }
+    }
+
+    /**
+     * GET /v1/analytics/session-journeys/top-visited-pages
+     * Full paginated report of top visited pages with average dwell times.
+     */
+    public function getTopVisitedPagesReport(Request $request): void
+    {
+        $orgId = $this->resolveOrgId($request);
+        if ($orgId <= 0) {
+            Response::error('Unauthorized organization context.', 403);
+            return;
+        }
+
+        try {
+            $db = Database::getConnection();
+
+            $daysParam = (int)($request->get('days') ?? 30);
+            if (!in_array($daysParam, [7, 30, 60, 90, 180, 365])) {
+                $daysParam = 30;
+            }
+
+            $search = trim($request->get('search') ?? '');
+            $sortBy = trim($request->get('sort_by') ?? 'visits');
+            $sortDir = strtolower(trim($request->get('sort_dir') ?? 'desc')) === 'asc' ? 'ASC' : 'DESC';
+            $page = max(1, (int)($request->get('page') ?? 1));
+            $limit = min(100, max(10, (int)($request->get('limit') ?? 25)));
+            $offset = ($page - 1) * $limit;
+
+            $where = [
+                "vpv.organization_id = :org_id",
+                "vpv.created_at >= DATE_SUB(NOW(), INTERVAL :days DAY)"
+            ];
+            $params = [
+                ':org_id' => $orgId,
+                ':days' => $daysParam
+            ];
+
+            if (!empty($search)) {
+                $where[] = "(vpv.url LIKE :search OR vpv.page_title LIKE :search)";
+                $params[':search'] = '%' . $search . '%';
+            }
+
+            $whereSql = implode(' AND ', $where);
+
+            // Total count of distinct pages matching filter
+            $countStmt = $db->prepare("
+                SELECT COUNT(DISTINCT vpv.url) as total_distinct
+                FROM visitor_page_views vpv
+                WHERE {$whereSql}
+            ");
+            $countStmt->execute($params);
+            $totalRecords = (int)($countStmt->fetch(PDO::FETCH_ASSOC)['total_distinct'] ?? 0);
+
+            // Overall KPI summary for this timeframe
+            $summaryStmt = $db->prepare("
+                SELECT 
+                    COUNT(*) as total_page_views,
+                    COUNT(DISTINCT vpv.url) as unique_pages,
+                    COUNT(DISTINCT vpv.visitor_id) as total_unique_visitors,
+                    COALESCE(AVG(vpv.time_spent_seconds), 0) as avg_dwell_seconds,
+                    COALESCE(SUM(vpv.time_spent_seconds), 0) as total_dwell_seconds
+                FROM visitor_page_views vpv
+                WHERE vpv.organization_id = :org_id 
+                  AND vpv.created_at >= DATE_SUB(NOW(), INTERVAL :days DAY)
+            ");
+            $summaryStmt->execute([':org_id' => $orgId, ':days' => $daysParam]);
+            $sumRaw = $summaryStmt->fetch(PDO::FETCH_ASSOC);
+
+            $totalPageViewsOverall = (int)($sumRaw['total_page_views'] ?? 0);
+
+            $summary = [
+                'total_page_views' => $totalPageViewsOverall,
+                'unique_pages' => (int)($sumRaw['unique_pages'] ?? 0),
+                'total_unique_visitors' => (int)($sumRaw['total_unique_visitors'] ?? 0),
+                'avg_dwell_seconds' => round((float)($sumRaw['avg_dwell_seconds'] ?? 0)),
+                'avg_dwell_formatted' => $this->formatDuration((int)($sumRaw['avg_dwell_seconds'] ?? 0)),
+                'total_dwell_formatted' => $this->formatDuration((int)($sumRaw['total_dwell_seconds'] ?? 0)),
+                'days' => $daysParam
+            ];
+
+            // Order clause
+            $orderBy = 'visit_count DESC';
+            if ($sortBy === 'dwell') {
+                $orderBy = "avg_dwell_seconds {$sortDir}, visit_count DESC";
+            } elseif ($sortBy === 'unique_visitors') {
+                $orderBy = "unique_visitors {$sortDir}, visit_count DESC";
+            } else {
+                $orderBy = "visit_count {$sortDir}, avg_dwell_seconds DESC";
+            }
+
+            // Paginated dataset
+            $dataStmt = $db->prepare("
+                SELECT 
+                    vpv.url,
+                    MAX(vpv.page_title) as page_title,
+                    COUNT(*) as visit_count,
+                    COUNT(DISTINCT vpv.visitor_id) as unique_visitors,
+                    COUNT(DISTINCT vpv.session_id) as unique_sessions,
+                    COALESCE(AVG(vpv.time_spent_seconds), 0) as avg_dwell_seconds,
+                    COALESCE(SUM(vpv.time_spent_seconds), 0) as total_dwell_seconds,
+                    MIN(vpv.created_at) as first_seen,
+                    MAX(vpv.created_at) as last_seen
+                FROM visitor_page_views vpv
+                WHERE {$whereSql}
+                GROUP BY vpv.url
+                ORDER BY {$orderBy}
+                LIMIT :limit OFFSET :offset
+            ");
+            foreach ($params as $k => $v) {
+                $dataStmt->bindValue($k, $v);
+            }
+            $dataStmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $dataStmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $dataStmt->execute();
+            $rows = $dataStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $pages = array_map(function($row) use ($totalPageViewsOverall) {
+                $visits = (int)$row['visit_count'];
+                $trafficShare = $totalPageViewsOverall > 0 ? round(($visits / $totalPageViewsOverall) * 100, 1) : 0;
+                return [
+                    'url' => $row['url'],
+                    'page_title' => $row['page_title'] ?: $row['url'],
+                    'visit_count' => $visits,
+                    'unique_visitors' => (int)$row['unique_visitors'],
+                    'unique_sessions' => (int)$row['unique_sessions'],
+                    'avg_dwell_seconds' => round((float)$row['avg_dwell_seconds']),
+                    'avg_dwell_formatted' => $this->formatDuration((int)$row['avg_dwell_seconds']),
+                    'total_dwell_seconds' => (int)$row['total_dwell_seconds'],
+                    'total_dwell_formatted' => $this->formatDuration((int)$row['total_dwell_seconds']),
+                    'traffic_share_percent' => $trafficShare,
+                    'first_seen' => $row['first_seen'],
+                    'last_seen' => $row['last_seen']
+                ];
+            }, $rows);
+
+            Response::json([
+                'status' => 'success',
+                'data' => [
+                    'summary' => $summary,
+                    'pages' => $pages,
+                    'pagination' => [
+                        'page' => $page,
+                        'limit' => $limit,
+                        'total_records' => $totalRecords,
+                        'total_pages' => (int)ceil($totalRecords / $limit)
+                    ]
+                ]
+            ]);
+        } catch (Throwable $e) {
+            error_log('[SessionJourneyController] getTopVisitedPagesReport error: ' . $e->getMessage());
+            Response::error('Failed to load visited pages report.', 500);
+        }
+    }
+
+    /**
+     * GET /v1/analytics/session-journeys/top-exit-pages
+     * Full paginated report of top drop-off / exit pages.
+     */
+    public function getTopExitPagesReport(Request $request): void
+    {
+        $orgId = $this->resolveOrgId($request);
+        if ($orgId <= 0) {
+            Response::error('Unauthorized organization context.', 403);
+            return;
+        }
+
+        try {
+            $db = Database::getConnection();
+
+            $daysParam = (int)($request->get('days') ?? 30);
+            if (!in_array($daysParam, [7, 30, 60, 90, 180, 365])) {
+                $daysParam = 30;
+            }
+
+            $search = trim($request->get('search') ?? '');
+            $status = trim($request->get('status') ?? 'all');
+            $sortBy = trim($request->get('sort_by') ?? 'exits');
+            $sortDir = strtolower(trim($request->get('sort_dir') ?? 'desc')) === 'asc' ? 'ASC' : 'DESC';
+            $page = max(1, (int)($request->get('page') ?? 1));
+            $limit = min(100, max(10, (int)($request->get('limit') ?? 25)));
+            $offset = ($page - 1) * $limit;
+
+            $where = [
+                "vs.organization_id = :org_id",
+                "vs.started_at >= DATE_SUB(NOW(), INTERVAL :days DAY)",
+                "vs.exit_page IS NOT NULL",
+                "vs.exit_page != ''"
+            ];
+            $params = [
+                ':org_id' => $orgId,
+                ':days' => $daysParam
+            ];
+
+            if ($status !== 'all' && in_array($status, ['browsing', 'chat_engaged', 'lead_converted'])) {
+                $where[] = "vs.conversion_status = :status";
+                $params[':status'] = $status;
+            }
+
+            if (!empty($search)) {
+                $where[] = "vs.exit_page LIKE :search";
+                $params[':search'] = '%' . $search . '%';
+            }
+
+            $whereSql = implode(' AND ', $where);
+
+            // Total count of distinct exit pages
+            $countStmt = $db->prepare("
+                SELECT COUNT(DISTINCT vs.exit_page) as total_distinct
+                FROM visitor_sessions vs
+                WHERE {$whereSql}
+            ");
+            $countStmt->execute($params);
+            $totalRecords = (int)($countStmt->fetch(PDO::FETCH_ASSOC)['total_distinct'] ?? 0);
+
+            // KPI summary
+            $summaryStmt = $db->prepare("
+                SELECT 
+                    COUNT(*) as total_dropoffs,
+                    COUNT(DISTINCT vs.exit_page) as unique_exit_pages,
+                    COUNT(DISTINCT vs.visitor_id) as unique_exit_visitors,
+                    COALESCE(SUM(CASE WHEN vs.conversion_status = 'lead_converted' THEN 1 ELSE 0 END), 0) as count_converted,
+                    COALESCE(AVG(vs.total_dwell_seconds), 0) as avg_dwell_seconds
+                FROM visitor_sessions vs
+                WHERE vs.organization_id = :org_id 
+                  AND vs.started_at >= DATE_SUB(NOW(), INTERVAL :days DAY)
+                  AND vs.exit_page IS NOT NULL AND vs.exit_page != ''
+            ");
+            $summaryStmt->execute([':org_id' => $orgId, ':days' => $daysParam]);
+            $sumRaw = $summaryStmt->fetch(PDO::FETCH_ASSOC);
+
+            $totalDropoffsOverall = (int)($sumRaw['total_dropoffs'] ?? 0);
+
+            $summary = [
+                'total_dropoffs' => $totalDropoffsOverall,
+                'unique_exit_pages' => (int)($sumRaw['unique_exit_pages'] ?? 0),
+                'unique_exit_visitors' => (int)($sumRaw['unique_exit_visitors'] ?? 0),
+                'converted_exits' => (int)($sumRaw['count_converted'] ?? 0),
+                'avg_dwell_formatted' => $this->formatDuration((int)($sumRaw['avg_dwell_seconds'] ?? 0)),
+                'days' => $daysParam
+            ];
+
+            // Order clause
+            $orderBy = 'exit_count DESC';
+            if ($sortBy === 'dwell') {
+                $orderBy = "avg_dwell_seconds {$sortDir}, exit_count DESC";
+            } elseif ($sortBy === 'conversions') {
+                $orderBy = "count_converted {$sortDir}, exit_count DESC";
+            } else {
+                $orderBy = "exit_count {$sortDir}";
+            }
+
+            // Paginated dataset
+            $dataStmt = $db->prepare("
+                SELECT 
+                    vs.exit_page as url,
+                    COUNT(*) as exit_count,
+                    COUNT(DISTINCT vs.visitor_id) as unique_visitors,
+                    COALESCE(AVG(vs.total_dwell_seconds), 0) as avg_dwell_seconds,
+                    COALESCE(AVG(vs.total_pages), 0) as avg_pages,
+                    COALESCE(SUM(CASE WHEN vs.conversion_status = 'lead_converted' THEN 1 ELSE 0 END), 0) as count_converted,
+                    COALESCE(SUM(CASE WHEN vs.conversion_status = 'chat_engaged' THEN 1 ELSE 0 END), 0) as count_chat_engaged,
+                    COALESCE(SUM(CASE WHEN vs.conversion_status = 'browsing' THEN 1 ELSE 0 END), 0) as count_browsing,
+                    MAX(vs.started_at) as last_exit_at
+                FROM visitor_sessions vs
+                WHERE {$whereSql}
+                GROUP BY vs.exit_page
+                ORDER BY {$orderBy}
+                LIMIT :limit OFFSET :offset
+            ");
+            foreach ($params as $k => $v) {
+                $dataStmt->bindValue($k, $v);
+            }
+            $dataStmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $dataStmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $dataStmt->execute();
+            $rows = $dataStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $exits = array_map(function($row) use ($totalDropoffsOverall) {
+                $exitsCount = (int)$row['exit_count'];
+                $dropoffShare = $totalDropoffsOverall > 0 ? round(($exitsCount / $totalDropoffsOverall) * 100, 1) : 0;
+                return [
+                    'url' => $row['url'],
+                    'exit_count' => $exitsCount,
+                    'unique_visitors' => (int)$row['unique_visitors'],
+                    'avg_dwell_seconds' => round((float)$row['avg_dwell_seconds']),
+                    'avg_dwell_formatted' => $this->formatDuration((int)$row['avg_dwell_seconds']),
+                    'avg_pages' => round((float)$row['avg_pages'], 1),
+                    'count_converted' => (int)$row['count_converted'],
+                    'count_chat_engaged' => (int)$row['count_chat_engaged'],
+                    'count_browsing' => (int)$row['count_browsing'],
+                    'dropoff_share_percent' => $dropoffShare,
+                    'last_exit_at' => $row['last_exit_at']
+                ];
+            }, $rows);
+
+            Response::json([
+                'status' => 'success',
+                'data' => [
+                    'summary' => $summary,
+                    'exit_pages' => $exits,
+                    'pagination' => [
+                        'page' => $page,
+                        'limit' => $limit,
+                        'total_records' => $totalRecords,
+                        'total_pages' => (int)ceil($totalRecords / $limit)
+                    ]
+                ]
+            ]);
+        } catch (Throwable $e) {
+            error_log('[SessionJourneyController] getTopExitPagesReport error: ' . $e->getMessage());
+            Response::error('Failed to load exit pages report.', 500);
+        }
+    }
+
+    /**
+     * GET /v1/analytics/session-journeys/campaign-sources
+     * Full paginated report of UTM and referrer traffic sources.
+     */
+    public function getCampaignSourcesReport(Request $request): void
+    {
+        $orgId = $this->resolveOrgId($request);
+        if ($orgId <= 0) {
+            Response::error('Unauthorized organization context.', 403);
+            return;
+        }
+
+        try {
+            $db = Database::getConnection();
+
+            $daysParam = (int)($request->get('days') ?? 30);
+            if (!in_array($daysParam, [7, 30, 60, 90, 180, 365])) {
+                $daysParam = 30;
+            }
+
+            $search = trim($request->get('search') ?? '');
+            $channel = trim($request->get('channel') ?? 'all');
+            $status = trim($request->get('status') ?? 'all');
+            $sortBy = trim($request->get('sort_by') ?? 'sessions');
+            $sortDir = strtolower(trim($request->get('sort_dir') ?? 'desc')) === 'asc' ? 'ASC' : 'DESC';
+            $page = max(1, (int)($request->get('page') ?? 1));
+            $limit = min(100, max(10, (int)($request->get('limit') ?? 25)));
+            $offset = ($page - 1) * $limit;
+
+            $where = [
+                "vs.organization_id = :org_id",
+                "vs.started_at >= DATE_SUB(NOW(), INTERVAL :days DAY)"
+            ];
+            $params = [
+                ':org_id' => $orgId,
+                ':days' => $daysParam
+            ];
+
+            if ($status !== 'all' && in_array($status, ['browsing', 'chat_engaged', 'lead_converted'])) {
+                $where[] = "vs.conversion_status = :status";
+                $params[':status'] = $status;
+            }
+
+            if ($channel === 'direct') {
+                $where[] = "(vs.utm_source IS NULL OR vs.utm_source = '') AND (vs.referrer IS NULL OR vs.referrer = '')";
+            } elseif ($channel === 'referral') {
+                $where[] = "(vs.utm_source IS NULL OR vs.utm_source = '') AND (vs.referrer IS NOT NULL AND vs.referrer != '')";
+            } elseif ($channel === 'paid') {
+                $where[] = "(vs.utm_medium IN ('cpc', 'ppc', 'paid', 'ad', 'ads') OR vs.utm_source LIKE '%google%' OR vs.utm_source LIKE '%facebook%' OR vs.utm_source LIKE '%instagram%' OR vs.utm_source LIKE '%linkedin%')";
+            } elseif ($channel === 'organic') {
+                $where[] = "(vs.utm_medium = 'organic' OR (vs.referrer LIKE '%google%' AND (vs.utm_medium IS NULL OR vs.utm_medium = '')))";
+            }
+
+            if (!empty($search)) {
+                $where[] = "(vs.utm_source LIKE :search OR vs.utm_medium LIKE :search OR vs.utm_campaign LIKE :search OR vs.referrer LIKE :search)";
+                $params[':search'] = '%' . $search . '%';
+            }
+
+            $whereSql = implode(' AND ', $where);
+
+            // Total count of distinct source/medium/campaign combos
+            $countStmt = $db->prepare("
+                SELECT COUNT(*) as total_distinct FROM (
+                    SELECT 1
+                    FROM visitor_sessions vs
+                    WHERE {$whereSql}
+                    GROUP BY 
+                        COALESCE(NULLIF(vs.utm_source, ''), CASE WHEN vs.referrer IS NOT NULL AND vs.referrer != '' THEN 'Referral' ELSE 'Direct / Organic' END),
+                        COALESCE(NULLIF(vs.utm_medium, ''), '-'),
+                        COALESCE(NULLIF(vs.utm_campaign, ''), '-')
+                ) as subq
+            ");
+            $countStmt->execute($params);
+            $totalRecords = (int)($countStmt->fetch(PDO::FETCH_ASSOC)['total_distinct'] ?? 0);
+
+            // KPI summary
+            $summaryStmt = $db->prepare("
+                SELECT 
+                    COUNT(*) as total_sessions,
+                    COUNT(DISTINCT vs.visitor_id) as total_unique_visitors,
+                    COALESCE(SUM(CASE WHEN vs.conversion_status = 'lead_converted' THEN 1 ELSE 0 END), 0) as total_conversions,
+                    COALESCE(AVG(vs.total_dwell_seconds), 0) as avg_dwell_seconds
+                FROM visitor_sessions vs
+                WHERE vs.organization_id = :org_id 
+                  AND vs.started_at >= DATE_SUB(NOW(), INTERVAL :days DAY)
+            ");
+            $summaryStmt->execute([':org_id' => $orgId, ':days' => $daysParam]);
+            $sumRaw = $summaryStmt->fetch(PDO::FETCH_ASSOC);
+
+            $totalSessOverall = (int)($sumRaw['total_sessions'] ?? 0);
+            $totalConvOverall = (int)($sumRaw['total_conversions'] ?? 0);
+            $convRateOverall = $totalSessOverall > 0 ? round(($totalConvOverall / $totalSessOverall) * 100, 1) : 0;
+
+            $summary = [
+                'total_sessions' => $totalSessOverall,
+                'total_unique_visitors' => (int)($sumRaw['total_unique_visitors'] ?? 0),
+                'total_conversions' => $totalConvOverall,
+                'overall_conversion_rate' => $convRateOverall,
+                'avg_dwell_formatted' => $this->formatDuration((int)($sumRaw['avg_dwell_seconds'] ?? 0)),
+                'days' => $daysParam
+            ];
+
+            // Order clause
+            $orderBy = 'session_count DESC';
+            if ($sortBy === 'conversions') {
+                $orderBy = "conversions {$sortDir}, session_count DESC";
+            } elseif ($sortBy === 'dwell') {
+                $orderBy = "avg_dwell_seconds {$sortDir}, session_count DESC";
+            } else {
+                $orderBy = "session_count {$sortDir}";
+            }
+
+            // Paginated dataset
+            $dataStmt = $db->prepare("
+                SELECT 
+                    COALESCE(NULLIF(vs.utm_source, ''), CASE WHEN vs.referrer IS NOT NULL AND vs.referrer != '' THEN 'Referral' ELSE 'Direct / Organic' END) as source,
+                    COALESCE(NULLIF(vs.utm_medium, ''), '-') as medium,
+                    COALESCE(NULLIF(vs.utm_campaign, ''), '-') as campaign,
+                    COUNT(*) as session_count,
+                    COUNT(DISTINCT vs.visitor_id) as unique_visitors,
+                    COALESCE(AVG(vs.total_dwell_seconds), 0) as avg_dwell_seconds,
+                    COALESCE(AVG(vs.total_pages), 0) as avg_pages_per_session,
+                    COALESCE(SUM(CASE WHEN vs.conversion_status = 'lead_converted' THEN 1 ELSE 0 END), 0) as conversions,
+                    COALESCE(SUM(CASE WHEN vs.conversion_status = 'chat_engaged' THEN 1 ELSE 0 END), 0) as chat_engaged,
+                    MAX(vs.started_at) as last_session_at
+                FROM visitor_sessions vs
+                WHERE {$whereSql}
+                GROUP BY source, medium, campaign
+                ORDER BY {$orderBy}
+                LIMIT :limit OFFSET :offset
+            ");
+            foreach ($params as $k => $v) {
+                $dataStmt->bindValue($k, $v);
+            }
+            $dataStmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $dataStmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $dataStmt->execute();
+            $rows = $dataStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $sources = array_map(function($row) {
+                $sess = (int)$row['session_count'];
+                $conv = (int)$row['conversions'];
+                $rate = $sess > 0 ? round(($conv / $sess) * 100, 1) : 0;
+                return [
+                    'source' => $row['source'],
+                    'medium' => $row['medium'],
+                    'campaign' => $row['campaign'],
+                    'session_count' => $sess,
+                    'unique_visitors' => (int)$row['unique_visitors'],
+                    'avg_dwell_seconds' => round((float)$row['avg_dwell_seconds']),
+                    'avg_dwell_formatted' => $this->formatDuration((int)$row['avg_dwell_seconds']),
+                    'avg_pages_per_session' => round((float)$row['avg_pages_per_session'], 1),
+                    'conversions' => $conv,
+                    'chat_engaged' => (int)$row['chat_engaged'],
+                    'conversion_rate' => $rate,
+                    'last_session_at' => $row['last_session_at']
+                ];
+            }, $rows);
+
+            Response::json([
+                'status' => 'success',
+                'data' => [
+                    'summary' => $summary,
+                    'sources' => $sources,
+                    'pagination' => [
+                        'page' => $page,
+                        'limit' => $limit,
+                        'total_records' => $totalRecords,
+                        'total_pages' => (int)ceil($totalRecords / $limit)
+                    ]
+                ]
+            ]);
+        } catch (Throwable $e) {
+            error_log('[SessionJourneyController] getCampaignSourcesReport error: ' . $e->getMessage());
+            Response::error('Failed to load campaign sources report.', 500);
         }
     }
 

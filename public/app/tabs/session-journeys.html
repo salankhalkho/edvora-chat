@@ -110,41 +110,62 @@
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 18px; margin-bottom: 24px;">
             
             <!-- Card: Top 5 Most Visited Pages -->
-            <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 16px 20px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                    <div style="font-size: 13px; font-weight: 700; color: #063D3B; display: flex; align-items: center; gap: 6px;">
-                        <span>🔥</span> Top Visited Pages &amp; Avg. Dwell
+            <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 16px 20px; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                        <div style="font-size: 13px; font-weight: 700; color: #063D3B; display: flex; align-items: center; gap: 6px;">
+                            <span>🔥</span> Top Visited Pages &amp; Avg. Dwell
+                        </div>
+                        <span style="font-size: 10.5px; color: #648781;">By total visits</span>
                     </div>
-                    <span style="font-size: 10.5px; color: #648781;">By total visits</span>
+                    <div id="topPagesList" style="display: flex; flex-direction: column; gap: 8px;">
+                        <div style="font-size: 11.5px; color: #9CA3AF; text-align: center; padding: 12px;">Loading top visited pages...</div>
+                    </div>
                 </div>
-                <div id="topPagesList" style="display: flex; flex-direction: column; gap: 8px;">
-                    <div style="font-size: 11.5px; color: #9CA3AF; text-align: center; padding: 12px;">Loading top visited pages...</div>
+                <div style="margin-top: 14px; padding-top: 10px; border-top: 1.5px solid #F3F4F6;">
+                    <button type="button" onclick="switchNavTab('top_visited_pages')" class="brand-btn-secondary" style="height: 30px; width: 100%; font-size: 11px; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; border: 1.5px solid #D1E5DE; color: #063D3B; background: #F8FAF9;" onmouseover="this.style.background='#EAF4F0'" onmouseout="this.style.background='#F8FAF9'">
+                        <span>View Full Report</span> &rarr;
+                    </button>
                 </div>
             </div>
 
             <!-- Card: Top 5 Exit / Drop-off Pages -->
-            <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 16px 20px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                    <div style="font-size: 13px; font-weight: 700; color: #063D3B; display: flex; align-items: center; gap: 6px;">
-                        <span>🚪</span> Top Exit &amp; Drop-off Pages
+            <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 16px 20px; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                        <div style="font-size: 13px; font-weight: 700; color: #063D3B; display: flex; align-items: center; gap: 6px;">
+                            <span>🚪</span> Top Exit &amp; Drop-off Pages
+                        </div>
+                        <span style="font-size: 10.5px; color: #648781;">Where visitors leave</span>
                     </div>
-                    <span style="font-size: 10.5px; color: #648781;">Where visitors leave</span>
+                    <div id="topExitList" style="display: flex; flex-direction: column; gap: 8px;">
+                        <div style="font-size: 11.5px; color: #9CA3AF; text-align: center; padding: 12px;">Loading exit pages...</div>
+                    </div>
                 </div>
-                <div id="topExitList" style="display: flex; flex-direction: column; gap: 8px;">
-                    <div style="font-size: 11.5px; color: #9CA3AF; text-align: center; padding: 12px;">Loading exit pages...</div>
+                <div style="margin-top: 14px; padding-top: 10px; border-top: 1.5px solid #F3F4F6;">
+                    <button type="button" onclick="switchNavTab('top_exit_pages')" class="brand-btn-secondary" style="height: 30px; width: 100%; font-size: 11px; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; border: 1.5px solid #D1E5DE; color: #063D3B; background: #F8FAF9;" onmouseover="this.style.background='#EAF4F0'" onmouseout="this.style.background='#F8FAF9'">
+                        <span>View Full Report</span> &rarr;
+                    </button>
                 </div>
             </div>
 
             <!-- Card: Top Campaign Attribution Sources (VVIP) -->
-            <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 16px 20px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                    <div style="font-size: 13px; font-weight: 700; color: #063D3B; display: flex; align-items: center; gap: 6px;">
-                        <span>📢</span> Campaign Sources (UTM / Referrer)
+            <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 16px 20px; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                        <div style="font-size: 13px; font-weight: 700; color: #063D3B; display: flex; align-items: center; gap: 6px;">
+                            <span>📢</span> Campaign Sources (UTM / Referrer)
+                        </div>
+                        <span style="font-size: 10.5px; color: #648781;">Traffic origin</span>
                     </div>
-                    <span style="font-size: 10.5px; color: #648781;">Traffic origin</span>
+                    <div id="topSourcesList" style="display: flex; flex-direction: column; gap: 8px;">
+                        <div style="font-size: 11.5px; color: #9CA3AF; text-align: center; padding: 12px;">Loading campaign sources...</div>
+                    </div>
                 </div>
-                <div id="topSourcesList" style="display: flex; flex-direction: column; gap: 8px;">
-                    <div style="font-size: 11.5px; color: #9CA3AF; text-align: center; padding: 12px;">Loading campaign sources...</div>
+                <div style="margin-top: 14px; padding-top: 10px; border-top: 1.5px solid #F3F4F6;">
+                    <button type="button" onclick="switchNavTab('campaign_sources')" class="brand-btn-secondary" style="height: 30px; width: 100%; font-size: 11px; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; border: 1.5px solid #D1E5DE; color: #063D3B; background: #F8FAF9;" onmouseover="this.style.background='#EAF4F0'" onmouseout="this.style.background='#F8FAF9'">
+                        <span>View Full Report</span> &rarr;
+                    </button>
                 </div>
             </div>
 

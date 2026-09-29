@@ -4164,11 +4164,9 @@
             <!-- Tab 1: Overview Dashboard -->
             <!-- Tab 1: Overview Dashboard (Loaded modularly) -->
             <div class="tab-content" id="tab-overview" data-loaded="false"></div>
-
             <!-- Tab 2: Central Knowledge Hub -->
             <div class="tab-content" id="tab-knowledge" data-loaded="false"></div>
             <div class="tab-content" id="tab-knowledge-ingestion" data-loaded="false"></div>
-
             <!-- Tab: Academic Programs & Degrees -->
             <div class="tab-content" id="tab-academic-programs" data-loaded="false"></div>
             <div class="tab-content" id="tab-academic-program-detail" data-loaded="false"></div>
@@ -4176,19 +4174,17 @@
             <div class="tab-content" id="tab-program-lead-magnet" data-loaded="false"></div>
             <div class="tab-content" id="tab-add-programs" data-loaded="false"></div>
             <div class="tab-content" id="tab-edit-programs" data-loaded="false"></div>
-
             <!-- Tab: Lead-Magnet Assets & Document Repository -->
             <div class="tab-content" id="tab-assets" data-loaded="false"></div>
-
             <!-- Tab: Multilingual Support -->
             <div class="tab-content" id="tab-multilingual" data-loaded="false"></div>
-
             <!-- Tab: Conversion Engine -->
             <div class="tab-content" id="tab-conversion-engine" data-loaded="false"></div>
-
-            <!-- Tab: Visitor Session Journeys -->
+            <!-- Tab: Visitor Session Journeys & Reports -->
             <div class="tab-content" id="tab-session-journeys" data-loaded="false"></div>
-
+            <div class="tab-content" id="tab-top_visited_pages" data-loaded="false"></div>
+            <div class="tab-content" id="tab-top_exit_pages" data-loaded="false"></div>
+            <div class="tab-content" id="tab-campaign_sources" data-loaded="false"></div>
             <!-- ── CHATBOT LAUNCH READINESS & CRITICAL ISSUES MODAL (LIGHT LUXURY) ── -->
             <div id="knowledgeGapsModal" style="display: none; position: fixed; inset: 0; background: rgba(6, 61, 59, 0.45); backdrop-filter: blur(6px); z-index: 999999; align-items: center; justify-content: center; padding: 20px;">
                 <div style="background: #FFFFFF; border: 1.5px solid #DCE9E5; border-radius: 16px; max-width: 600px; width: 100%; box-shadow: 0 20px 50px -10px rgba(6, 61, 59, 0.18), 0 4px 16px rgba(6, 61, 59, 0.05); overflow: hidden;">
@@ -5424,7 +5420,7 @@
             };
         }
 
-        const VALID_APP_TABS = ['overview', 'knowledge', 'knowledge-ingestion', 'academic-programs', 'academic-program-detail', 'course-staff-assignment', 'program-staff', 'program-lead-magnet', 'add-programs', 'edit-programs', 'leads', 'callbacks', 'campus-tours', 'campus-tours-scheduling', 'create-tour-slot', 'edit-tour-slot', 'scholarships', 'scholarship-configuration', 'scholarship-configuration-edit', 'session-journeys', 'teams', 'assets', 'multilingual', 'conversion-engine', 'placeholder', 'analytics', 'knowledge-gaps', 'integrations', 'chatbot', 'test-chat', 'organization', 'org-settings', 'campuses', 'campus-editor', 'settings', 'chatbot_readiness', 'chatbot-readiness', 'domain-whitelist', 'knowledge-view', 'knowledge-editor', 'knowledge-edit', 'profile'];
+        const VALID_APP_TABS = ['overview', 'knowledge', 'knowledge-ingestion', 'academic-programs', 'academic-program-detail', 'course-staff-assignment', 'program-staff', 'program-lead-magnet', 'add-programs', 'edit-programs', 'leads', 'callbacks', 'campus-tours', 'campus-tours-scheduling', 'create-tour-slot', 'edit-tour-slot', 'scholarships', 'scholarship-configuration', 'scholarship-configuration-edit', 'session-journeys', 'top_visited_pages', 'top_exit_pages', 'campaign_sources', 'teams', 'assets', 'multilingual', 'conversion-engine', 'placeholder', 'analytics', 'knowledge-gaps', 'integrations', 'chatbot', 'test-chat', 'organization', 'org-settings', 'campuses', 'campus-editor', 'settings', 'chatbot_readiness', 'chatbot-readiness', 'domain-whitelist', 'knowledge-view', 'knowledge-editor', 'knowledge-edit', 'profile'];
 
         // Navigation Tabs Handling with Async Modular Loading
         const _tabLoadPromises = {};
@@ -6036,7 +6032,7 @@
             } else if (tab === 'knowledge-gaps') {
                 const anItem = document.querySelector(`.nav-item[data-tab="analytics"]`);
                 if (anItem) anItem.classList.add('active');
-            } else if (tab === 'chatbot' || tab === 'settings' || tab === 'chatbot_readiness' || tab === 'chatbot-readiness' || tab === 'scholarships' || tab === 'scholarship-configuration' || tab === 'scholarship-configuration-edit') {
+            } else if (tab === 'chatbot' || tab === 'settings' || tab === 'chatbot_readiness' || tab === 'chatbot-readiness' || tab === 'scholarships' || tab === 'scholarship-configuration' || tab === 'scholarship-configuration-edit' || tab === 'session-journeys' || tab === 'top_visited_pages' || tab === 'top_exit_pages' || tab === 'campaign_sources') {
                 const orgItem = document.querySelector(`.nav-item[data-tab="org-settings"]`);
                 if (orgItem) orgItem.classList.add('active');
             } else if (tab === 'add-programs' || tab === 'edit-programs' || tab === 'academic-program-detail' || tab === 'course-staff-assignment' || tab === 'program-staff' || tab === 'program-lead-magnet') {
@@ -6150,8 +6146,10 @@
                 cleanTitle = 'ChatBot Settings';
             } else if (tab === 'chatbot_readiness' || tab === 'chatbot-readiness') {
                 cleanTitle = 'Chatbot Pre-Flight Readiness';
-            } else if (tab === 'session-journeys') {
-                cleanTitle = 'Visitor Session Journeys & Dwell Analytics';
+            } else if (tab === 'session-journeys') { cleanTitle = 'Visitor Session Journeys & Dwell Analytics';
+            } else if (tab === 'top_visited_pages') { cleanTitle = 'Top Visited Pages & Dwell Time Report';
+            } else if (tab === 'top_exit_pages') { cleanTitle = 'Top Exit & Drop-off Pages Report';
+            } else if (tab === 'campaign_sources') { cleanTitle = 'Campaign Sources & Attribution Report';
             } else if (tab === 'profile') {
                 cleanTitle = 'My Profile & Security';
             }
@@ -6256,8 +6254,10 @@
                     if (typeof loadChatbotReadinessPage === 'function') loadChatbotReadinessPage();
                 } else if (tab === 'domain-whitelist') {
                     if (typeof loadDomainWhitelistData === 'function') loadDomainWhitelistData();
-                } else if (tab === 'session-journeys') {
-                    if (typeof loadSessionJourneys === 'function') loadSessionJourneys(1);
+                } else if (tab === 'session-journeys') { if (typeof loadSessionJourneys === 'function') loadSessionJourneys(1);
+                } else if (tab === 'top_visited_pages') { if (typeof loadTopVisitedPages === 'function') loadTopVisitedPages(1);
+                } else if (tab === 'top_exit_pages') { if (typeof loadTopExitPages === 'function') loadTopExitPages(1);
+                } else if (tab === 'campaign_sources') { if (typeof loadCampaignSources === 'function') loadCampaignSources(1);
                 } else if (tab === 'profile') {
                     if (typeof loadProfileData === 'function') loadProfileData();
                 }

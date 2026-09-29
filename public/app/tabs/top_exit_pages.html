@@ -1,0 +1,306 @@
+<!-- Dedicated Top Exit & Drop-off Pages Analytics Report Frame -->
+<div id="view-top-exit-pages" class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
+    
+    <!-- Top Control Bar -->
+    <div class="ops-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 24px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important;">
+        <div class="ops-dash-title-group" style="display: flex !important; align-items: center !important; gap: 12px !important;">
+            <button type="button" onclick="switchNavTab('session-journeys')" class="brand-btn-secondary" style="height: 32px; padding: 0 11px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; border-radius: 6px; background: #F4FAF7; border: 1.5px solid #D1E5DE; color: var(--e-teal, #063D3B);" title="Return to Visitor Journeys">
+                &larr; Visitor Journeys
+            </button>
+            <span class="ops-live-dot"></span>
+            <div>
+                <div class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important; letter-spacing: -0.01em !important; line-height: 1.25 !important;">
+                    Top Exit &amp; Drop-off Pages Report
+                </div>
+                <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">
+                    Analyze where student visitors conclude their browsing sessions and identify potential conversion friction points.
+                </div>
+            </div>
+        </div>
+
+        <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
+            <select id="tepDaysRange" class="brand-input" style="height: 34px; font-size: 11.5px; font-weight: 600; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D1E5DE; color: #063D3B; background: #FFFFFF; cursor: pointer;" onchange="loadTopExitPages(1)">
+                <option value="7">Last 7 Days</option>
+                <option value="30" selected>Last 30 Days</option>
+                <option value="60">Last 60 Days</option>
+                <option value="90">Last 90 Days</option>
+                <option value="180">Last 180 Days</option>
+                <option value="365">Last 365 Days</option>
+            </select>
+            <button type="button" onclick="loadTopExitPages(1)" class="brand-btn-secondary" style="height: 34px; padding: 0 13px; font-size: 11.5px; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border: 1.5px solid #D1E5DE; color: #063D3B;">
+                <span>🔄 Refresh</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div style="padding: 24px 28px 48px 28px; box-sizing: border-box; width: 100%;">
+
+        <!-- KPI Metrics Ribbon -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+            <div class="ckh-kpi-tile" style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 14px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470;">Total Drop-offs</div>
+                    <span style="font-size: 18px;">🚪</span>
+                </div>
+                <div style="font-size: 24px; font-weight: 800; color: #DC2626;" id="tepKpiTotalExits">0</div>
+                <div style="font-size: 11px; color: #648781; margin-top: 2px;" id="tepKpiDaysSubtitle">Last 30 days window</div>
+            </div>
+
+            <div class="ckh-kpi-tile" style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 14px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470;">Unique Exit URLs</div>
+                    <span style="font-size: 18px;">🌐</span>
+                </div>
+                <div style="font-size: 24px; font-weight: 800; color: #7C3AED;" id="tepKpiUniquePages">0</div>
+                <div style="font-size: 11px; color: #648781; margin-top: 2px;">Distinct exit locations</div>
+            </div>
+
+            <div class="ckh-kpi-tile" style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 14px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470;">Visitors Exited</div>
+                    <span style="font-size: 18px;">👥</span>
+                </div>
+                <div style="font-size: 24px; font-weight: 800; color: #063D3B;" id="tepKpiUniqueVisitors">0</div>
+                <div style="font-size: 11px; color: #648781; margin-top: 2px;">Individual visitors departed</div>
+            </div>
+
+            <div class="ckh-kpi-tile" style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 14px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470;">Converted at/before Exit</div>
+                    <span style="font-size: 18px;">🎯</span>
+                </div>
+                <div style="font-size: 24px; font-weight: 800; color: #059669;" id="tepKpiConvertedExits">0</div>
+                <div style="font-size: 11px; color: #059669; margin-top: 2px;">Leads captured successfully</div>
+            </div>
+        </div>
+
+        <!-- Filter & Search Bar -->
+        <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 14px 18px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1;">
+                <input type="text" id="tepSearchInput" placeholder="Search by exit page URL path..." class="brand-input" style="height: 34px; font-size: 11.5px; width: 300px; max-width: 100%; border: 1.5px solid #D1E5DE; border-radius: 6px; padding: 0 12px;" onkeydown="if(event.key==='Enter') loadTopExitPages(1)" />
+                
+                <select id="tepStatusSelect" class="brand-input" style="height: 34px; font-size: 11.5px; font-weight: 600; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D1E5DE; color: #063D3B;" onchange="loadTopExitPages(1)">
+                    <option value="all">All Conversion Statuses</option>
+                    <option value="lead_converted">🟢 Lead Converted Only</option>
+                    <option value="chat_engaged">🔵 Chat Engaged Only</option>
+                    <option value="browsing">⚪ Browsing Only</option>
+                </select>
+
+                <select id="tepSortSelect" class="brand-input" style="height: 34px; font-size: 11.5px; font-weight: 600; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D1E5DE; color: #063D3B;" onchange="loadTopExitPages(1)">
+                    <option value="exits_desc" selected>Drop-offs: High to Low</option>
+                    <option value="exits_asc">Drop-offs: Low to High</option>
+                    <option value="dwell_desc">Session Dwell: Longest First</option>
+                    <option value="conversions_desc">Converted Leads: High to Low</option>
+                </select>
+
+                <button type="button" onclick="loadTopExitPages(1)" class="brand-btn-primary" style="height: 34px; padding: 0 14px; font-size: 11.5px; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                    Filter Drop-offs
+                </button>
+            </div>
+
+            <div style="font-size: 11.5px; color: #648781;" id="tepResultCount">
+                Showing all exit pages
+            </div>
+        </div>
+
+        <!-- Exit Pages Data Table -->
+        <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+            <div style="overflow-x: auto; width: 100%;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 11.5px; text-align: left;">
+                    <thead>
+                        <tr style="background: #F8FAF9; border-bottom: 1.5px solid #E6F0EC; color: #4F7470; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;">
+                            <th style="padding: 12px 16px; width: 48px; text-align: center;">#</th>
+                            <th style="padding: 12px 16px;">Exit Page URL</th>
+                            <th style="padding: 12px 16px; text-align: right;">Drop-offs</th>
+                            <th style="padding: 12px 16px; width: 140px;">Drop-off Share</th>
+                            <th style="padding: 12px 16px; text-align: right;">Unique Visitors</th>
+                            <th style="padding: 12px 16px; text-align: right;">Avg. Session Dwell</th>
+                            <th style="padding: 12px 16px; text-align: right;">Avg. Depth</th>
+                            <th style="padding: 12px 16px;">Conversion Breakdown</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tepTableBody">
+                        <tr>
+                            <td colspan="8" style="padding: 36px 16px; text-align: center; color: #9CA3AF;">
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                    <span style="font-size: 24px;">🚪</span>
+                                    <span>Loading exit pages report...</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Bar -->
+            <div id="tepPagination" style="padding: 12px 18px; border-top: 1.5px solid #E6F0EC; background: #FAFCFB; display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; color: #648781;">
+                <span id="tepPaginationInfo">Page 1 of 1</span>
+                <div style="display: flex; gap: 8px;" id="tepPaginationBtns"></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+(function() {
+    let currentPage = 1;
+
+    async function loadTopExitPages(page = 1) {
+        currentPage = page;
+        const days = document.getElementById('tepDaysRange')?.value || '30';
+        const search = document.getElementById('tepSearchInput')?.value.trim() || '';
+        const status = document.getElementById('tepStatusSelect')?.value || 'all';
+        const sortVal = document.getElementById('tepSortSelect')?.value || 'exits_desc';
+        const tbody = document.getElementById('tepTableBody');
+        const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token') || '';
+
+        if (!token) return;
+
+        let sortBy = 'exits';
+        let sortDir = 'desc';
+        if (sortVal === 'exits_asc') {
+            sortBy = 'exits'; sortDir = 'asc';
+        } else if (sortVal === 'dwell_desc') {
+            sortBy = 'dwell'; sortDir = 'desc';
+        } else if (sortVal === 'conversions_desc') {
+            sortBy = 'conversions'; sortDir = 'desc';
+        }
+
+        try {
+            const orgId = localStorage.getItem('edvora_org_id') || sessionStorage.getItem('edvora_org_id') || '';
+            let url = `/v1/analytics/session-journeys/top-exit-pages?days=${days}&search=${encodeURIComponent(search)}&status=${encodeURIComponent(status)}&sort_by=${sortBy}&sort_dir=${sortDir}&page=${page}&limit=25`;
+            if (orgId) {
+                url += `&organization_id=${encodeURIComponent(orgId)}`;
+            }
+
+            const res = await fetch(url, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await res.json();
+
+            if (data.status !== 'success' || !data.data) {
+                if (tbody) tbody.innerHTML = `<tr><td colspan="8" style="padding: 24px; text-align: center; color: #EF4444;">Failed to load report: ${data.message || 'Unknown error'}</td></tr>`;
+                return;
+            }
+
+            const payload = data.data;
+            const summary = payload.summary || {};
+            const exitPages = payload.exit_pages || [];
+            const pagination = payload.pagination || {};
+
+            // 1. Update KPI tiles
+            const totalExits = Number(summary.total_dropoffs || 0);
+            document.getElementById('tepKpiTotalExits').innerText = totalExits.toLocaleString();
+            document.getElementById('tepKpiDaysSubtitle').innerText = `Last ${summary.days || 30} days window`;
+            document.getElementById('tepKpiUniquePages').innerText = Number(summary.unique_exit_pages || 0).toLocaleString();
+            document.getElementById('tepKpiUniqueVisitors').innerText = Number(summary.unique_exit_visitors || 0).toLocaleString();
+            document.getElementById('tepKpiConvertedExits').innerText = Number(summary.converted_exits || 0).toLocaleString();
+
+            // 2. Render Table Rows
+            if (tbody) {
+                if (!exitPages.length) {
+                    tbody.innerHTML = `<tr><td colspan="8" style="padding: 36px; text-align: center; color: #648781;">No exit pages match your selected filter criteria.</td></tr>`;
+                } else {
+                    const startRank = (page - 1) * (pagination.limit || 25);
+                    tbody.innerHTML = exitPages.map((ep, idx) => {
+                        const rank = startRank + idx + 1;
+                        const share = Math.min(100, Math.max(0, ep.dropoff_share_percent || 0));
+                        return `
+                            <tr style="border-bottom: 1px solid #F3F4F6; transition: background 0.15s ease;" onmouseover="this.style.background='#F9FBFA'" onmouseout="this.style.background='transparent'">
+                                <td style="padding: 12px 16px; text-align: center; font-weight: 700; color: #648781;">
+                                    ${rank}
+                                </td>
+                                <td style="padding: 12px 16px; max-width: 360px;">
+                                    <div style="font-weight: 700; color: #063D3B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(ep.url)}">
+                                        <a href="${escapeHtml(ep.url)}" target="_blank" rel="noopener noreferrer" style="color: #063D3B; text-decoration: none;">
+                                            ${escapeHtml(ep.url)} &nearr;
+                                        </a>
+                                    </div>
+                                    <div style="font-size: 10px; color: #9CA3AF; margin-top: 3px;">
+                                        Last drop-off: ${formatDate(ep.last_exit_at)}
+                                    </div>
+                                </td>
+                                <td style="padding: 12px 16px; text-align: right; font-weight: 800; color: #DC2626;">
+                                    ${Number(ep.exit_count).toLocaleString()}
+                                </td>
+                                <td style="padding: 12px 16px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div style="flex: 1; height: 6px; background: #E5E7EB; border-radius: 9999px; overflow: hidden;">
+                                            <div style="height: 100%; width: ${share}%; background: #DC2626; border-radius: 9999px;"></div>
+                                        </div>
+                                        <span style="font-size: 10.5px; font-weight: 700; color: #4B5563; min-width: 34px; text-align: right;">${share}%</span>
+                                    </div>
+                                </td>
+                                <td style="padding: 12px 16px; text-align: right; color: #4B5563;">
+                                    ${Number(ep.unique_visitors).toLocaleString()}
+                                </td>
+                                <td style="padding: 12px 16px; text-align: right;">
+                                    <span style="background: #EFF6FF; color: #1D4ED8; font-weight: 800; font-size: 11px; padding: 2px 7px; border-radius: 6px; display: inline-block;">
+                                        ⏱️ ${ep.avg_dwell_formatted}
+                                    </span>
+                                </td>
+                                <td style="padding: 12px 16px; text-align: right; color: #4B5563; font-weight: 600;">
+                                    ${ep.avg_pages} pgs
+                                </td>
+                                <td style="padding: 12px 16px;">
+                                    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                        ${ep.count_converted > 0 ? `<span style="background: #DCFCE7; color: #166534; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 8px;">${ep.count_converted} Converted</span>` : ''}
+                                        ${ep.count_chat_engaged > 0 ? `<span style="background: #EFF6FF; color: #1D4ED8; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 8px;">${ep.count_chat_engaged} Engaged</span>` : ''}
+                                        ${ep.count_browsing > 0 ? `<span style="background: #F3F4F6; color: #4B5563; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 8px;">${ep.count_browsing} Browsed</span>` : ''}
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            }
+
+            // 3. Update Result count and pagination
+            document.getElementById('tepResultCount').innerText = `Showing page ${pagination.page || 1} of ${pagination.total_pages || 1} (${pagination.total_records || 0} unique exit URLs)`;
+            renderPagination(pagination);
+
+        } catch (e) {
+            console.error('[TopExitPages] load error:', e);
+            if (tbody) tbody.innerHTML = `<tr><td colspan="8" style="padding: 24px; text-align: center; color: #EF4444;">Exception loading exit pages report.</td></tr>`;
+        }
+    }
+
+    function renderPagination(p) {
+        const info = document.getElementById('tepPaginationInfo');
+        const container = document.getElementById('tepPaginationBtns');
+        if (!container || !p) return;
+        
+        info.innerText = `Page ${p.page || 1} of ${p.total_pages || 1}`;
+        let html = '';
+        if (p.page > 1) {
+            html += `<button type="button" onclick="loadTopExitPages(${p.page - 1})" class="brand-btn-secondary" style="height: 28px; padding: 0 10px; font-size: 11px; cursor: pointer;">&larr; Prev</button>`;
+        }
+        if (p.page < p.total_pages) {
+            html += `<button type="button" onclick="loadTopExitPages(${p.page + 1})" class="brand-btn-secondary" style="height: 28px; padding: 0 10px; font-size: 11px; cursor: pointer;">Next &rarr;</button>`;
+        }
+        container.innerHTML = html;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function formatDate(dt) {
+        if (!dt) return '-';
+        try {
+            const d = new Date(dt.replace(' ', 'T') + 'Z');
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        } catch(e) {
+            return dt;
+        }
+    }
+
+    window.loadTopExitPages = loadTopExitPages;
+
+    // Auto-load on initialize
+    loadTopExitPages(1);
+})();
+</script>

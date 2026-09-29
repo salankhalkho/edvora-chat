@@ -1,0 +1,283 @@
+<!-- Dedicated Top Visited Pages & Dwell Time Analytics Report Frame -->
+<div id="view-top-visited-pages" class="ops-dashboard-frame" style="width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important;">
+    
+    <!-- Top Control Bar -->
+    <div class="ops-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 24px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important;">
+        <div class="ops-dash-title-group" style="display: flex !important; align-items: center !important; gap: 12px !important;">
+            <button type="button" onclick="switchNavTab('session-journeys')" class="brand-btn-secondary" style="height: 32px; padding: 0 11px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; border-radius: 6px; background: #F4FAF7; border: 1.5px solid #D1E5DE; color: var(--e-teal, #063D3B);" title="Return to Visitor Journeys">
+                &larr; Visitor Journeys
+            </button>
+            <span class="ops-live-dot"></span>
+            <div>
+                <div class="ops-dash-main-title" style="font-size: 15px !important; font-weight: 800 !important; color: var(--e-teal, #063D3B) !important; letter-spacing: -0.01em !important; line-height: 1.25 !important;">
+                    Top Visited Pages &amp; Avg. Dwell Report
+                </div>
+                <div class="ops-dash-sub-title" style="font-size: 11px !important; color: #648781 !important; font-weight: 500 !important; margin-top: 2px !important;">
+                    In-depth breakdown of institutional website pages, audience volume, and reading engagement durations.
+                </div>
+            </div>
+        </div>
+
+        <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
+            <select id="tvpDaysRange" class="brand-input" style="height: 34px; font-size: 11.5px; font-weight: 600; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D1E5DE; color: #063D3B; background: #FFFFFF; cursor: pointer;" onchange="loadTopVisitedPages(1)">
+                <option value="7">Last 7 Days</option>
+                <option value="30" selected>Last 30 Days</option>
+                <option value="60">Last 60 Days</option>
+                <option value="90">Last 90 Days</option>
+                <option value="180">Last 180 Days</option>
+                <option value="365">Last 365 Days</option>
+            </select>
+            <button type="button" onclick="loadTopVisitedPages(1)" class="brand-btn-secondary" style="height: 34px; padding: 0 13px; font-size: 11.5px; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border: 1.5px solid #D1E5DE; color: #063D3B;">
+                <span>🔄 Refresh</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div style="padding: 24px 28px 48px 28px; box-sizing: border-box; width: 100%;">
+
+        <!-- KPI Metrics Ribbon -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+            <div class="ckh-kpi-tile" style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 14px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470;">Total Page Views</div>
+                    <span style="font-size: 18px;">📄</span>
+                </div>
+                <div style="font-size: 24px; font-weight: 800; color: #063D3B;" id="tvpKpiTotalViews">0</div>
+                <div style="font-size: 11px; color: #648781; margin-top: 2px;" id="tvpKpiDaysSubtitle">Last 30 days window</div>
+            </div>
+
+            <div class="ckh-kpi-tile" style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 14px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470;">Unique URLs</div>
+                    <span style="font-size: 18px;">🌐</span>
+                </div>
+                <div style="font-size: 24px; font-weight: 800; color: #7C3AED;" id="tvpKpiUniquePages">0</div>
+                <div style="font-size: 11px; color: #648781; margin-top: 2px;">Cataloged site pages</div>
+            </div>
+
+            <div class="ckh-kpi-tile" style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 14px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470;">Unique Visitors</div>
+                    <span style="font-size: 18px;">👥</span>
+                </div>
+                <div style="font-size: 24px; font-weight: 800; color: #059669;" id="tvpKpiUniqueVisitors">0</div>
+                <div style="font-size: 11px; color: #648781; margin-top: 2px;">Distinct individual readers</div>
+            </div>
+
+            <div class="ckh-kpi-tile" style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 14px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470;">Avg. Dwell Time</div>
+                    <span style="font-size: 18px;">⏱️</span>
+                </div>
+                <div style="font-size: 24px; font-weight: 800; color: #2563EB;" id="tvpKpiAvgDwell">0s</div>
+                <div style="font-size: 11px; color: #648781; margin-top: 2px;">Across all visited pages</div>
+            </div>
+        </div>
+
+        <!-- Filter & Search Bar -->
+        <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 14px 18px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1;">
+                <input type="text" id="tvpSearchInput" placeholder="Search by URL path or page title..." class="brand-input" style="height: 34px; font-size: 11.5px; width: 300px; max-width: 100%; border: 1.5px solid #D1E5DE; border-radius: 6px; padding: 0 12px;" onkeydown="if(event.key==='Enter') loadTopVisitedPages(1)" />
+                
+                <select id="tvpSortSelect" class="brand-input" style="height: 34px; font-size: 11.5px; font-weight: 600; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D1E5DE; color: #063D3B;" onchange="loadTopVisitedPages(1)">
+                    <option value="visits_desc" selected>Views: High to Low</option>
+                    <option value="visits_asc">Views: Low to High</option>
+                    <option value="dwell_desc">Avg Dwell: Longest First</option>
+                    <option value="dwell_asc">Avg Dwell: Shortest First</option>
+                    <option value="unique_desc">Unique Visitors: High to Low</option>
+                </select>
+
+                <button type="button" onclick="loadTopVisitedPages(1)" class="brand-btn-primary" style="height: 34px; padding: 0 14px; font-size: 11.5px; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                    Filter Pages
+                </button>
+            </div>
+
+            <div style="font-size: 11.5px; color: #648781;" id="tvpResultCount">
+                Showing all pages
+            </div>
+        </div>
+
+        <!-- Visited Pages Data Table -->
+        <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+            <div style="overflow-x: auto; width: 100%;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 11.5px; text-align: left;">
+                    <thead>
+                        <tr style="background: #F8FAF9; border-bottom: 1.5px solid #E6F0EC; color: #4F7470; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;">
+                            <th style="padding: 12px 16px; width: 48px; text-align: center;">#</th>
+                            <th style="padding: 12px 16px;">Page Title &amp; URL</th>
+                            <th style="padding: 12px 16px; text-align: right;">Total Views</th>
+                            <th style="padding: 12px 16px; width: 140px;">Traffic Share</th>
+                            <th style="padding: 12px 16px; text-align: right;">Unique Visitors</th>
+                            <th style="padding: 12px 16px; text-align: right;">Avg. Dwell</th>
+                            <th style="padding: 12px 16px; text-align: right;">Total Dwell</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tvpTableBody">
+                        <tr>
+                            <td colspan="7" style="padding: 36px 16px; text-align: center; color: #9CA3AF;">
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                    <span style="font-size: 24px;">📄</span>
+                                    <span>Loading visited pages report...</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Bar -->
+            <div id="tvpPagination" style="padding: 12px 18px; border-top: 1.5px solid #E6F0EC; background: #FAFCFB; display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; color: #648781;">
+                <span id="tvpPaginationInfo">Page 1 of 1</span>
+                <div style="display: flex; gap: 8px;" id="tvpPaginationBtns"></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+(function() {
+    let currentPage = 1;
+
+    async function loadTopVisitedPages(page = 1) {
+        currentPage = page;
+        const days = document.getElementById('tvpDaysRange')?.value || '30';
+        const search = document.getElementById('tvpSearchInput')?.value.trim() || '';
+        const sortVal = document.getElementById('tvpSortSelect')?.value || 'visits_desc';
+        const tbody = document.getElementById('tvpTableBody');
+        const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token') || '';
+
+        if (!token) return;
+
+        let sortBy = 'visits';
+        let sortDir = 'desc';
+        if (sortVal === 'visits_asc') {
+            sortBy = 'visits'; sortDir = 'asc';
+        } else if (sortVal === 'dwell_desc') {
+            sortBy = 'dwell'; sortDir = 'desc';
+        } else if (sortVal === 'dwell_asc') {
+            sortBy = 'dwell'; sortDir = 'asc';
+        } else if (sortVal === 'unique_desc') {
+            sortBy = 'unique_visitors'; sortDir = 'desc';
+        }
+
+        try {
+            const orgId = localStorage.getItem('edvora_org_id') || sessionStorage.getItem('edvora_org_id') || '';
+            let url = `/v1/analytics/session-journeys/top-visited-pages?days=${days}&search=${encodeURIComponent(search)}&sort_by=${sortBy}&sort_dir=${sortDir}&page=${page}&limit=25`;
+            if (orgId) {
+                url += `&organization_id=${encodeURIComponent(orgId)}`;
+            }
+
+            const res = await fetch(url, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await res.json();
+
+            if (data.status !== 'success' || !data.data) {
+                if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="padding: 24px; text-align: center; color: #EF4444;">Failed to load report: ${data.message || 'Unknown error'}</td></tr>`;
+                return;
+            }
+
+            const payload = data.data;
+            const summary = payload.summary || {};
+            const pages = payload.pages || [];
+            const pagination = payload.pagination || {};
+
+            // 1. Update KPI tiles
+            const totalViews = Number(summary.total_page_views || 0);
+            document.getElementById('tvpKpiTotalViews').innerText = totalViews.toLocaleString();
+            document.getElementById('tvpKpiDaysSubtitle').innerText = `Last ${summary.days || 30} days window`;
+            document.getElementById('tvpKpiUniquePages').innerText = Number(summary.unique_pages || 0).toLocaleString();
+            document.getElementById('tvpKpiUniqueVisitors').innerText = Number(summary.total_unique_visitors || 0).toLocaleString();
+            document.getElementById('tvpKpiAvgDwell').innerText = summary.avg_dwell_formatted || '0s';
+
+            // 2. Render Table Rows
+            if (tbody) {
+                if (!pages.length) {
+                    tbody.innerHTML = `<tr><td colspan="7" style="padding: 36px; text-align: center; color: #648781;">No page views match your selected search or filter criteria.</td></tr>`;
+                } else {
+                    const startRank = (page - 1) * (pagination.limit || 25);
+                    tbody.innerHTML = pages.map((p, idx) => {
+                        const rank = startRank + idx + 1;
+                        const share = Math.min(100, Math.max(0, p.traffic_share_percent || 0));
+                        return `
+                            <tr style="border-bottom: 1px solid #F3F4F6; transition: background 0.15s ease;" onmouseover="this.style.background='#F9FBFA'" onmouseout="this.style.background='transparent'">
+                                <td style="padding: 12px 16px; text-align: center; font-weight: 700; color: #648781;">
+                                    ${rank}
+                                </td>
+                                <td style="padding: 12px 16px; max-width: 380px;">
+                                    <div style="font-weight: 700; color: #063D3B; line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(p.page_title)}">
+                                        ${escapeHtml(p.page_title)}
+                                    </div>
+                                    <div style="font-size: 10.5px; color: #2563EB; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        <a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="color: #2563EB; text-decoration: none;">
+                                            ${escapeHtml(p.url)} &nearr;
+                                        </a>
+                                    </div>
+                                </td>
+                                <td style="padding: 12px 16px; text-align: right; font-weight: 800; color: #063D3B;">
+                                    ${Number(p.visit_count).toLocaleString()}
+                                </td>
+                                <td style="padding: 12px 16px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div style="flex: 1; height: 6px; background: #E5E7EB; border-radius: 9999px; overflow: hidden;">
+                                            <div style="height: 100%; width: ${share}%; background: #2563EB; border-radius: 9999px;"></div>
+                                        </div>
+                                        <span style="font-size: 10.5px; font-weight: 700; color: #4B5563; min-width: 34px; text-align: right;">${share}%</span>
+                                    </div>
+                                </td>
+                                <td style="padding: 12px 16px; text-align: right; color: #4B5563;">
+                                    ${Number(p.unique_visitors).toLocaleString()}
+                                </td>
+                                <td style="padding: 12px 16px; text-align: right;">
+                                    <span style="background: #EFF6FF; color: #1D4ED8; font-weight: 800; font-size: 11px; padding: 2px 7px; border-radius: 6px; display: inline-block;">
+                                        ⏱️ ${p.avg_dwell_formatted}
+                                    </span>
+                                </td>
+                                <td style="padding: 12px 16px; text-align: right; color: #4B5563; font-weight: 600;">
+                                    ${p.total_dwell_formatted}
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            }
+
+            // 3. Update Result count and pagination
+            document.getElementById('tvpResultCount').innerText = `Showing page ${pagination.page || 1} of ${pagination.total_pages || 1} (${pagination.total_records || 0} unique URLs)`;
+            renderPagination(pagination);
+
+        } catch (e) {
+            console.error('[TopVisitedPages] load error:', e);
+            if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="padding: 24px; text-align: center; color: #EF4444;">Exception loading visited pages report.</td></tr>`;
+        }
+    }
+
+    function renderPagination(p) {
+        const info = document.getElementById('tvpPaginationInfo');
+        const container = document.getElementById('tvpPaginationBtns');
+        if (!container || !p) return;
+        
+        info.innerText = `Page ${p.page || 1} of ${p.total_pages || 1}`;
+        let html = '';
+        if (p.page > 1) {
+            html += `<button type="button" onclick="loadTopVisitedPages(${p.page - 1})" class="brand-btn-secondary" style="height: 28px; padding: 0 10px; font-size: 11px; cursor: pointer;">&larr; Prev</button>`;
+        }
+        if (p.page < p.total_pages) {
+            html += `<button type="button" onclick="loadTopVisitedPages(${p.page + 1})" class="brand-btn-secondary" style="height: 28px; padding: 0 10px; font-size: 11px; cursor: pointer;">Next &rarr;</button>`;
+        }
+        container.innerHTML = html;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    window.loadTopVisitedPages = loadTopVisitedPages;
+
+    // Auto-load on initialize
+    loadTopVisitedPages(1);
+})();
+</script>

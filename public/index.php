@@ -452,6 +452,9 @@ $router->get('/v1/public/session-journeys/{sessionId}/steps', [SessionJourneyCon
 
 // Visitor Session Journeys Analytics Routes (College Admins: Protected + Tenant Context)
 $router->get('/v1/analytics/session-journeys', [SessionJourneyController::class, 'listTenantSessions'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->get('/v1/analytics/session-journeys/top-visited-pages', [SessionJourneyController::class, 'getTopVisitedPagesReport'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->get('/v1/analytics/session-journeys/top-exit-pages', [SessionJourneyController::class, 'getTopExitPagesReport'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->get('/v1/analytics/session-journeys/campaign-sources', [SessionJourneyController::class, 'getCampaignSourcesReport'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->get('/v1/analytics/session-journeys/{sessionId}/steps', [SessionJourneyController::class, 'getSessionSteps'], [AuthMiddleware::class, TenantMiddleware::class]);
 
 // High-Speed Visitor Tracking Beacon Route (Public Widget & SPA)
