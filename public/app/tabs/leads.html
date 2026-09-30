@@ -576,12 +576,17 @@
         window._activeLeadDrawerId = leadId;
         window.activeEditingLeadId = leadId;
         try {
+            const authToken = window.token || (typeof token !== 'undefined' ? token : '') || localStorage.getItem('token') || '';
             const res = await fetch('/v1/leads/' + leadId, {
-                headers: { 'Authorization': 'Bearer ' + token }
+                headers: { 'Authorization': 'Bearer ' + authToken }
             });
-            const data = await res.json();
+            const data = await res.json().catch(err => {
+                console.error('JSON parse error loading lead:', err);
+                return { status: 'error', message: 'Invalid response from server' };
+            });
             if (data.status !== 'success' || !data.data) {
-                alert('Could not load lead details.');
+                console.error('Could not load lead details from API:', data);
+                alert(data.message || 'Could not load lead details.');
                 return;
             }
 

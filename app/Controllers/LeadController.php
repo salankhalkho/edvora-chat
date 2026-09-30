@@ -101,11 +101,11 @@ class LeadController
             try {
                 $db->prepare("UPDATE visitor_sessions SET conversion_status = 'lead_converted', converted_at = NOW() WHERE session_id = :sid")->execute([':sid' => $leadSessionId]);
                 $db->prepare("UPDATE leads SET session_id = :sid WHERE id = :lid")->execute([':sid' => $leadSessionId, ':lid' => $leadId]);
-            } catch (Throwable $e) {}
+            } catch (\Throwable $e) {}
         } elseif (!empty($leadVisitorId)) {
             try {
                 $db->prepare("UPDATE visitor_sessions SET conversion_status = 'lead_converted', converted_at = NOW() WHERE visitor_id = :vid AND organization_id = :oid")->execute([':vid' => $leadVisitorId, ':oid' => $orgId]);
-            } catch (Throwable $e) {}
+            } catch (\Throwable $e) {}
         }
 
         // Update conversation visitor details if conversation_id provided
@@ -389,51 +389,71 @@ class LeadController
         // Fetch linked campus tour booking if available
         $tour = null;
         try {
-            $stmtTour = $db->prepare("
-                SELECT id, preferred_date, preferred_time, group_size, status as tour_status,
-                       notes as tour_notes, counselor_notes as tour_counselor_notes, program_interest as tour_program
-                FROM campus_tour_bookings
-                WHERE organization_id = :org_id
-                  AND (
-                      (:conv_id > 0 AND conversation_id = :conv_id)
-                      OR (:email != '' AND student_email = :email)
-                      OR (:phone != '' AND student_phone = :phone)
-                  )
-                ORDER BY id DESC LIMIT 1
-            ");
-            $stmtTour->execute([
-                ':org_id' => $orgId,
-                ':conv_id' => $convId ?: (!empty($lead['conversation_id']) ? (int)$lead['conversation_id'] : 0),
-                ':email' => !empty($lead['email']) ? trim($lead['email']) : '',
-                ':phone' => !empty($lead['phone']) ? trim($lead['phone']) : ''
-            ]);
-            $tour = $stmtTour->fetch();
-        } catch (Throwable $e) {}
+            $whereParts = [];
+            $tourParams = [':org_id' => $orgId];
+            if (!empty($lead['conversation_id']) || $convId) {
+                $whereParts[] = "conversation_id = :conv_id";
+                $tourParams[':conv_id'] = $convId ?: (int)$lead['conversation_id'];
+            }
+            if (!empty($lead['email'])) {
+                $whereParts[] = "student_email = :email";
+                $tourParams[':email'] = trim($lead['email']);
+            }
+            if (!empty($lead['phone'])) {
+                $whereParts[] = "student_phone = :phone";
+                $tourParams[':phone'] = trim($lead['phone']);
+            }
+
+            if (!empty($whereParts)) {
+                $sqlTour = "
+                    SELECT id, preferred_date, preferred_time, group_size, status as tour_status,
+                           notes as tour_notes, counselor_notes as tour_counselor_notes, program_interest as tour_program
+                    FROM campus_tour_bookings
+                    WHERE organization_id = :org_id AND (" . implode(' OR ', $whereParts) . ")
+                    ORDER BY id DESC LIMIT 1
+                ";
+                $stmtTour = $db->prepare($sqlTour);
+                $stmtTour->execute($tourParams);
+                $tour = $stmtTour->fetch();
+            }
+        } catch (\Throwable $e) {
+            error_log('[LeadController::show] tour query error: ' . $e->getMessage());
+        }
         $lead['tour_booking'] = $tour ?: null;
 
         // Fetch linked counselor callback if available
         $callback = null;
         try {
-            $stmtCb = $db->prepare("
-                SELECT id, preferred_time_slot, topic_or_query, status as callback_status,
-                       call_attempts, counselor_notes as callback_counselor_notes
-                FROM counselor_callbacks
-                WHERE organization_id = :org_id
-                  AND (
-                      (:conv_id > 0 AND conversation_id = :conv_id)
-                      OR (:email != '' AND student_email = :email)
-                      OR (:phone != '' AND student_phone = :phone)
-                  )
-                ORDER BY id DESC LIMIT 1
-            ");
-            $stmtCb->execute([
-                ':org_id' => $orgId,
-                ':conv_id' => $convId ?: (!empty($lead['conversation_id']) ? (int)$lead['conversation_id'] : 0),
-                ':email' => !empty($lead['email']) ? trim($lead['email']) : '',
-                ':phone' => !empty($lead['phone']) ? trim($lead['phone']) : ''
-            ]);
-            $callback = $stmtCb->fetch();
-        } catch (Throwable $e) {}
+            $wherePartsCb = [];
+            $cbParams = [':org_id' => $orgId];
+            if (!empty($lead['conversation_id']) || $convId) {
+                $wherePartsCb[] = "conversation_id = :conv_id";
+                $cbParams[':conv_id'] = $convId ?: (int)$lead['conversation_id'];
+            }
+            if (!empty($lead['email'])) {
+                $wherePartsCb[] = "student_email = :email";
+                $cbParams[':email'] = trim($lead['email']);
+            }
+            if (!empty($lead['phone'])) {
+                $wherePartsCb[] = "student_phone = :phone";
+                $cbParams[':phone'] = trim($lead['phone']);
+            }
+
+            if (!empty($wherePartsCb)) {
+                $sqlCb = "
+                    SELECT id, preferred_time_slot, topic_or_query, status as callback_status,
+                           call_attempts, counselor_notes as callback_counselor_notes
+                    FROM counselor_callbacks
+                    WHERE organization_id = :org_id AND (" . implode(' OR ', $wherePartsCb) . ")
+                    ORDER BY id DESC LIMIT 1
+                ";
+                $stmtCb = $db->prepare($sqlCb);
+                $stmtCb->execute($cbParams);
+                $callback = $stmtCb->fetch();
+            }
+        } catch (\Throwable $e) {
+            error_log('[LeadController::show] callback query error: ' . $e->getMessage());
+        }
         $lead['callback_booking'] = $callback ?: null;
 
         Response::success($lead);
