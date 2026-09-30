@@ -1506,7 +1506,7 @@
                             <td style="font-size: 11px; color: #648781; white-space: nowrap; font-family: var(--brand-font-mono); vertical-align: middle;">${dateStr}</td>
                             <td style="text-align: right; white-space: nowrap; vertical-align: middle;">
                                 <div style="display: inline-flex; gap: 6px;">
-                                    <button class="brand-btn-secondary brand-btn-sm" style="font-size: 11px; height: 28px; padding: 0 10px;" onclick="openLeadModal(${lead.id})">
+                                    <button class="brand-btn-secondary brand-btn-sm" style="font-size: 11px; height: 28px; padding: 0 10px;" onclick="openLeadDrawer(${lead.id})">
                                         🔍 Details
                                     </button>
                                     <button class="brand-btn-secondary brand-btn-sm" style="font-size: 11px; height: 28px; padding: 0 8px; color: #f87171; border-color: rgba(248, 113, 113, 0.3);" onclick="deleteLead(${lead.id})" title="Permanent Erasure Request">
@@ -1618,138 +1618,18 @@
             }
         }
 
-        async function openLeadModal(leadId) {
-            activeEditingLeadId = leadId;
-            try {
-                const res = await fetch('/v1/leads/' + leadId, {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                const data = await res.json();
-                if (data.status !== 'success' || !data.data) {
-                    alert('Could not load lead details.');
-                    return;
-                }
-
-                const lead = data.data;
-
-                document.getElementById('leadModalName').innerText = lead.name || 'Lead Details';
-                document.getElementById('leadModalEmail').innerText = lead.email || 'â€”';
-                document.getElementById('leadModalPhone').innerText = lead.phone || 'â€”';
-                document.getElementById('leadModalProgram').innerText = lead.program_interest || 'â€”';
-                document.getElementById('leadModalCapturedAt').innerText = formatToIST(lead.created_at);
-                document.getElementById('leadModalNotes').value = lead.notes || '';
-                document.getElementById('leadModalStatusSelect').value = lead.status || 'new';
-
-                // Scholarship Evaluation Box
-                const schBox = document.getElementById('leadModalScholarshipBox');
-                if (schBox) {
-                    if (lead.lead_type === 'scholarship_eval' || lead.scholarship_tier || lead.academic_score) {
-                        schBox.style.display = 'block';
-                        document.getElementById('leadModalAcademicScore').innerText = lead.academic_score || 'Not Specified';
-                        document.getElementById('leadModalSchTier').innerText = lead.scholarship_tier || 'Standard Tier';
-                        document.getElementById('leadModalWaiverAmount').innerText = lead.estimated_waiver_amount ? ('â‚¹ ' + Number(lead.estimated_waiver_amount).toLocaleString() + ' / yr') : 'Calculated in Consultation';
-                    } else {
-                        schBox.style.display = 'none';
-                    }
-                }
-
-                const statusBadgeEl = document.getElementById('leadModalStatusBadge');
-                if (statusBadgeEl) {
-                    statusBadgeEl.innerText = lead.status ? lead.status.toUpperCase() : 'NEW';
-                    statusBadgeEl.style.cssText = lead.status === 'converted'
-                        ? 'background: rgba(52, 211, 153, 0.12); color: var(--brand-emerald-400); border: 1px solid rgba(52, 211, 153, 0.3); font-size: 10px;'
-                        : (lead.status === 'contacted'
-                            ? 'background: rgba(251, 191, 36, 0.12); color: var(--brand-amber-400); border: 1px solid rgba(251, 191, 36, 0.3); font-size: 10px;'
-                            : 'background: rgba(99, 102, 241, 0.12); color: var(--brand-indigo-400); border: 1px solid rgba(99, 102, 241, 0.3); font-size: 10px;');
-                }
-
-                // Populate Department dropdown
-                const deptSelect = document.getElementById('leadModalDeptSelect');
-                deptSelect.innerHTML = `<option value="">ðŸ›ï¸ General (No Department)</option>` + 
-                    currentDepartments.map(d => `<option value="${d.id}" ${lead.department_id == d.id ? 'selected' : ''}>${d.icon || 'ðŸ¢'} ${d.name}</option>`).join('');
-
-                // Populate Staff dropdown
-                const staffSelect = document.getElementById('leadModalStaffSelect');
-                staffSelect.innerHTML = `<option value="">ðŸ‘¤ Unassigned</option>` +
-                    availableOrgStaff.map(s => `<option value="${s.id}" ${lead.assigned_user_id == s.id ? 'selected' : ''}>ðŸ‘¤ ${s.name} (${s.role})</option>`).join('');
-
-                // Render Chatbot Conversation Transcript
-                const transcriptSection = document.getElementById('leadModalTranscriptSection');
-                const transcriptBox = document.getElementById('leadModalTranscriptBox');
-                const transcriptBadge = document.getElementById('leadModalTranscriptBadge');
-
-                if (transcriptSection && transcriptBox) {
-                    transcriptSection.style.display = 'block';
-
-                    if (lead.transcript && lead.transcript.length > 0) {
-                        if (transcriptBadge) {
-                            transcriptBadge.style.display = 'inline-block';
-                            transcriptBadge.innerText = `${lead.transcript.length} ${lead.transcript.length === 1 ? 'message' : 'messages'}`;
-                        }
-                        transcriptBox.innerHTML = lead.transcript.map(msg => {
-                            const isUser = msg.role === 'user';
-                            const msgTime = formatToIST(msg.created_at);
-                            return `
-                                <div style="align-self: ${isUser ? 'flex-end' : 'flex-start'}; max-width: 85%; padding: 8px 12px; border-radius: 8px; background: ${isUser ? 'var(--brand-indigo-600)' : 'var(--brand-surface-200)'}; color: ${isUser ? '#ffffff' : 'var(--brand-text-primary)'}; box-shadow: 0 1px 2px rgba(0,0,0,0.15);">
-                                    <div style="font-size: 10px; opacity: 0.8; margin-bottom: 3px; font-weight: 600;">${isUser ? 'ðŸ‘¤ Prospective Student' : 'ðŸ¤– Admissions AI Assistant'} â€¢ ${msgTime}</div>
-                                    <div style="line-height: 1.45; word-break: break-word;">${msg.content}</div>
-                                </div>
-                            `;
-                        }).join('');
-                    } else {
-                        if (transcriptBadge) {
-                            transcriptBadge.style.display = 'none';
-                        }
-                        transcriptBox.innerHTML = `
-                            <div style="text-align: center; color: #648781; padding: 18px 14px; font-size: 12px;">
-                                <div style="font-size: 18px; margin-bottom: 4px;">ðŸ’¬</div>
-                                <span style="font-weight: 600; color: #4F7470; display: block; margin-bottom: 2px;">No chatbot conversation transcript recorded</span>
-                                <span style="font-size: 11px; opacity: 0.85;">This lead was created via direct offline submission, manual counselor entry, or external sync.</span>
-                            </div>
-                        `;
-                    }
-                }
-
-                document.getElementById('leadDetailModal').style.display = 'flex';
-            } catch (err) {
-                console.error('Error fetching lead modal details:', err);
-                alert('Connection error loading lead.');
+        function openLeadDrawer(leadId) {
+            if (typeof window.openLeadDrawer === 'function' && window.openLeadDrawer !== openLeadDrawer) {
+                return window.openLeadDrawer(leadId);
             }
         }
-
-        function closeLeadModal() {
-            document.getElementById('leadDetailModal').style.display = 'none';
+        function closeLeadDrawer() {
+            const drawer = document.getElementById('leadDetailDrawer');
+            if (drawer) drawer.style.display = 'none';
             activeEditingLeadId = null;
         }
-
-        async function saveLeadModalChanges() {
-            if (!activeEditingLeadId) return;
-
-            const status = document.getElementById('leadModalStatusSelect').value;
-            const deptVal = document.getElementById('leadModalDeptSelect').value;
-            const staffVal = document.getElementById('leadModalStaffSelect').value;
-            const department_id = deptVal ? parseInt(deptVal) : null;
-            const assigned_user_id = staffVal ? parseInt(staffVal) : null;
-            const notes = document.getElementById('leadModalNotes').value.trim();
-
-            try {
-                const res = await fetch('/v1/leads/' + activeEditingLeadId, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ status, department_id, assigned_user_id, notes })
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    closeLeadModal();
-                    await loadLeads();
-                } else {
-                    alert(data.message || 'Failed to save lead updates.');
-                }
-            } catch (err) {
-                console.error('Error updating lead:', err);
-                alert('Connection error saving lead.');
-            }
-        }
+        const openLeadModal = openLeadDrawer;
+        const closeLeadModal = closeLeadDrawer;
 
         async function deleteLead(leadId, studentName = null) {
             if (!token || !leadId) return;

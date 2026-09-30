@@ -4395,105 +4395,7 @@
 
         </main>
 
-        <!-- ── LEAD DETAILS & REASSIGNMENT MODAL ───────────────────────────── -->
-        <div id="leadDetailModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
-            <div style="background: #FFFFFF; border: 1px solid var(--brand-border-strong); border-radius: var(--brand-radius-md); max-width: 680px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--brand-shadow-modal);">
-                <div style="padding: 18px 24px; border-bottom: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="font-size: 24px;">🎓</span>
-                        <div>
-                            <h3 id="leadModalName" style="font-family: var(--brand-font-display); font-size: 17px; font-weight: 700; color: #092F2E; margin: 0;">
-                                Lead Details
-                            </h3>
-                            <div style="margin-top: 4px; display: flex; align-items: center; gap: 8px;">
-                                <span id="leadModalStatusBadge" class="badge" style="font-size: 10px;">NEW</span>
-                                <span id="leadModalCapturedAt" style="font-size: 11px; color: #648781; font-family: var(--brand-font-mono);">—</span>
-                            </div>
-                        </div>
-                    </div>
-                    <button class="brand-btn-secondary brand-btn-sm" onclick="closeLeadModal()" style="font-size: 13px;">✕ Close</button>
-                </div>
 
-                <div style="padding: 20px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px;">
-                    <!-- Student Contact Info Card -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; background: #F1F7F4; padding: 14px; border-radius: var(--brand-radius-sm); border: 1px solid #DDE9E3;">
-                        <div>
-                            <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #648781;">Email Address</div>
-                            <div id="leadModalEmail" style="font-size: 13px; font-weight: 600; color: #092F2E; margin-top: 2px;">—</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #648781;">Phone Number</div>
-                            <div id="leadModalPhone" style="font-size: 13px; font-weight: 600; color: #092F2E; margin-top: 2px;">—</div>
-                        </div>
-                        <div style="grid-column: 1 / -1;">
-                            <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #648781;">Program / Inquiry Topic</div>
-                            <div id="leadModalProgram" style="font-size: 13px; font-weight: 600; color: var(--brand-indigo-400); margin-top: 2px;">—</div>
-                        </div>
-                    </div>
-
-                    <!-- Enriched Scholarship Evaluation Profile Card -->
-                    <div id="leadModalScholarshipBox" style="display: none; background: rgba(52, 211, 153, 0.08); border: 1.5px solid rgba(52, 211, 153, 0.3); border-radius: var(--brand-radius-sm); padding: 12px 14px;">
-                        <div style="font-size: 11px; font-weight: 700; color: var(--brand-emerald-400); text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
-                            <span>🎓</span> Scholarship Evaluation Profile
-                        </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; font-size: 12px;">
-                            <div><span style="color: #648781;">Academic Score:</span> <strong id="leadModalAcademicScore" style="color: #092F2E;">—</strong></div>
-                            <div><span style="color: #648781;">Qualified Tier:</span> <strong id="leadModalSchTier" style="color: var(--brand-emerald-400);">—</strong></div>
-                            <div><span style="color: #648781;">Est. Tuition Waiver:</span> <strong id="leadModalWaiverAmount" style="color: var(--brand-cyan-400);">—</strong></div>
-                        </div>
-                    </div>
-
-                    <!-- Assigned Staff Assignment Row -->
-                    <div>
-                        <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
-                            Assigned Counselor / Staff
-                        </label>
-                        <select id="leadModalStaffSelect" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
-                            <option value="">👤 Unassigned</option>
-                        </select>
-                        <select id="leadModalDeptSelect" style="display: none;"><option value=""></option></select>
-                    </div>
-
-                    <!-- Status & Counselor Notes -->
-                    <div>
-                        <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
-                            Lead Status
-                        </label>
-                        <select id="leadModalStatusSelect" class="brand-input" style="height: 38px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">
-                            <option value="new">🔵 New (Needs Contact)</option>
-                            <option value="contacted">🟡 Contacted / In Follow-up</option>
-                            <option value="converted">🟢 Converted / Admitted</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
-                            Counselor Notes & Follow-up History
-                        </label>
-                        <textarea id="leadModalNotes" class="brand-textarea" rows="3" placeholder="Add follow-up notes, call summary, or admission remarks..."></textarea>
-                    </div>
-
-                    <!-- Chat Transcript (if captured from bot session) -->
-                    <div id="leadModalTranscriptSection" style="display: block;">
-                        <label style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4F7470; margin-bottom: 6px;">
-                            <span>💬 Chatbot Conversation Transcript <span id="leadModalTranscriptBadge" style="display: none; font-size: 10px; font-weight: 700; background: rgba(99, 102, 241, 0.2); color: var(--brand-indigo-400); border: 1px solid rgba(99, 102, 241, 0.3); padding: 1px 7px; border-radius: 10px; margin-left: 6px; text-transform: none;"></span></span>
-                        </label>
-                        <div id="leadModalTranscriptBox" style="background: #F1F7F4; border: 1px solid #DDE9E3; border-radius: var(--brand-radius-sm); padding: 14px; max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 12px;">
-                        </div>
-                    </div>
-                </div>
-
-                <div style="padding: 16px 24px; border-top: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
-                    <button type="button" class="brand-btn-secondary" onclick="deleteActiveLeadRecord()" style="height: 38px; padding: 0 16px; color: #f87171; border-color: rgba(248, 113, 113, 0.3);" title="Right to Erasure (FERPA / GDPR / PIPEDA compliance)">
-                        🗑️ Delete Lead (Erasure Request)
-                    </button>
-                    <div style="display: flex; gap: 10px;">
-                        <button type="button" class="brand-btn-secondary" onclick="closeLeadModal()" style="height: 38px; padding: 0 18px;">Cancel</button>
-                        <button type="button" class="brand-btn-primary" onclick="saveLeadModalChanges()" style="height: 38px; padding: 0 22px;">Save Lead Details</button>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- ── COUNSELOR CALLBACK DETAILS & RESOLUTION MODAL ────────────────── -->
         <div id="callbackDetailModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
@@ -10052,7 +9954,7 @@ echo $response['reply'];
                             <td style="font-size: 11px; color: #648781; white-space: nowrap; font-family: var(--brand-font-mono); vertical-align: middle;">${dateStr}</td>
                             <td style="text-align: right; white-space: nowrap; vertical-align: middle;">
                                 <div style="display: inline-flex; gap: 6px;">
-                                    <button class="brand-btn-secondary brand-btn-sm" style="font-size: 11px; height: 28px; padding: 0 10px;" onclick="openLeadModal(${lead.id})">
+                                    <button class="brand-btn-secondary brand-btn-sm" style="font-size: 11px; height: 28px; padding: 0 10px;" onclick="openLeadDrawer(${lead.id})">
                                         🔍 Details
                                     </button>
                                     <button class="brand-btn-secondary brand-btn-sm" style="font-size: 11px; height: 28px; padding: 0 8px; color: #f87171; border-color: rgba(248, 113, 113, 0.3);" onclick="deleteLead(${lead.id})" title="Permanent Erasure Request">
@@ -10164,138 +10066,18 @@ echo $response['reply'];
             }
         }
 
-        async function openLeadModal(leadId) {
-            activeEditingLeadId = leadId;
-            try {
-                const res = await fetch('/v1/leads/' + leadId, {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                const data = await res.json();
-                if (data.status !== 'success' || !data.data) {
-                    alert('Could not load lead details.');
-                    return;
-                }
-
-                const lead = data.data;
-
-                document.getElementById('leadModalName').innerText = lead.name || 'Lead Details';
-                document.getElementById('leadModalEmail').innerText = lead.email || '—';
-                document.getElementById('leadModalPhone').innerText = lead.phone || '—';
-                document.getElementById('leadModalProgram').innerText = lead.program_interest || '—';
-                document.getElementById('leadModalCapturedAt').innerText = formatToIST(lead.created_at);
-                document.getElementById('leadModalNotes').value = lead.notes || '';
-                document.getElementById('leadModalStatusSelect').value = lead.status || 'new';
-
-                // Scholarship Evaluation Box
-                const schBox = document.getElementById('leadModalScholarshipBox');
-                if (schBox) {
-                    if (lead.lead_type === 'scholarship_eval' || lead.scholarship_tier || lead.academic_score) {
-                        schBox.style.display = 'block';
-                        document.getElementById('leadModalAcademicScore').innerText = lead.academic_score || 'Not Specified';
-                        document.getElementById('leadModalSchTier').innerText = lead.scholarship_tier || 'Standard Tier';
-                        document.getElementById('leadModalWaiverAmount').innerText = lead.estimated_waiver_amount ? ('₹ ' + Number(lead.estimated_waiver_amount).toLocaleString() + ' / yr') : 'Calculated in Consultation';
-                    } else {
-                        schBox.style.display = 'none';
-                    }
-                }
-
-                const statusBadgeEl = document.getElementById('leadModalStatusBadge');
-                if (statusBadgeEl) {
-                    statusBadgeEl.innerText = lead.status ? lead.status.toUpperCase() : 'NEW';
-                    statusBadgeEl.style.cssText = lead.status === 'converted'
-                        ? 'background: rgba(52, 211, 153, 0.12); color: var(--brand-emerald-400); border: 1px solid rgba(52, 211, 153, 0.3); font-size: 10px;'
-                        : (lead.status === 'contacted'
-                            ? 'background: rgba(251, 191, 36, 0.12); color: var(--brand-amber-400); border: 1px solid rgba(251, 191, 36, 0.3); font-size: 10px;'
-                            : 'background: rgba(99, 102, 241, 0.12); color: var(--brand-indigo-400); border: 1px solid rgba(99, 102, 241, 0.3); font-size: 10px;');
-                }
-
-                // Populate Department dropdown
-                const deptSelect = document.getElementById('leadModalDeptSelect');
-                deptSelect.innerHTML = `<option value="">🏛️ General (No Department)</option>` + 
-                    currentDepartments.map(d => `<option value="${d.id}" ${lead.department_id == d.id ? 'selected' : ''}>${d.icon || '🏢'} ${d.name}</option>`).join('');
-
-                // Populate Staff dropdown
-                const staffSelect = document.getElementById('leadModalStaffSelect');
-                staffSelect.innerHTML = `<option value="">👤 Unassigned</option>` +
-                    availableOrgStaff.map(s => `<option value="${s.id}" ${lead.assigned_user_id == s.id ? 'selected' : ''}>👤 ${s.name} (${s.role})</option>`).join('');
-
-                // Render Chatbot Conversation Transcript
-                const transcriptSection = document.getElementById('leadModalTranscriptSection');
-                const transcriptBox = document.getElementById('leadModalTranscriptBox');
-                const transcriptBadge = document.getElementById('leadModalTranscriptBadge');
-
-                if (transcriptSection && transcriptBox) {
-                    transcriptSection.style.display = 'block';
-
-                    if (lead.transcript && lead.transcript.length > 0) {
-                        if (transcriptBadge) {
-                            transcriptBadge.style.display = 'inline-block';
-                            transcriptBadge.innerText = `${lead.transcript.length} ${lead.transcript.length === 1 ? 'message' : 'messages'}`;
-                        }
-                        transcriptBox.innerHTML = lead.transcript.map(msg => {
-                            const isUser = msg.role === 'user';
-                            const msgTime = formatToIST(msg.created_at);
-                            return `
-                                <div style="align-self: ${isUser ? 'flex-end' : 'flex-start'}; max-width: 85%; padding: 8px 12px; border-radius: 8px; background: ${isUser ? 'var(--brand-indigo-600)' : 'var(--brand-surface-200)'}; color: ${isUser ? '#ffffff' : 'var(--brand-text-primary)'}; box-shadow: 0 1px 2px rgba(0,0,0,0.15);">
-                                    <div style="font-size: 10px; opacity: 0.8; margin-bottom: 3px; font-weight: 600;">${isUser ? '👤 Prospective Student' : '🤖 Admissions AI Assistant'} • ${msgTime}</div>
-                                    <div style="line-height: 1.45; word-break: break-word;">${msg.content}</div>
-                                </div>
-                            `;
-                        }).join('');
-                    } else {
-                        if (transcriptBadge) {
-                            transcriptBadge.style.display = 'none';
-                        }
-                        transcriptBox.innerHTML = `
-                            <div style="text-align: center; color: #648781; padding: 18px 14px; font-size: 12px;">
-                                <div style="font-size: 18px; margin-bottom: 4px;">💬</div>
-                                <span style="font-weight: 600; color: #4F7470; display: block; margin-bottom: 2px;">No chatbot conversation transcript recorded</span>
-                                <span style="font-size: 11px; opacity: 0.85;">This lead was created via direct offline submission, manual counselor entry, or external sync.</span>
-                            </div>
-                        `;
-                    }
-                }
-
-                document.getElementById('leadDetailModal').style.display = 'flex';
-            } catch (err) {
-                console.error('Error fetching lead modal details:', err);
-                alert('Connection error loading lead.');
+        function openLeadDrawer(leadId) {
+            if (typeof window.openLeadDrawer === 'function' && window.openLeadDrawer !== openLeadDrawer) {
+                return window.openLeadDrawer(leadId);
             }
         }
-
-        function closeLeadModal() {
-            document.getElementById('leadDetailModal').style.display = 'none';
+        function closeLeadDrawer() {
+            const drawer = document.getElementById('leadDetailDrawer');
+            if (drawer) drawer.style.display = 'none';
             activeEditingLeadId = null;
         }
-
-        async function saveLeadModalChanges() {
-            if (!activeEditingLeadId) return;
-
-            const status = document.getElementById('leadModalStatusSelect').value;
-            const deptVal = document.getElementById('leadModalDeptSelect').value;
-            const staffVal = document.getElementById('leadModalStaffSelect').value;
-            const department_id = deptVal ? parseInt(deptVal) : null;
-            const assigned_user_id = staffVal ? parseInt(staffVal) : null;
-            const notes = document.getElementById('leadModalNotes').value.trim();
-
-            try {
-                const res = await fetch('/v1/leads/' + activeEditingLeadId, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ status, department_id, assigned_user_id, notes })
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    closeLeadModal();
-                    await loadLeads();
-                } else {
-                    alert(data.message || 'Failed to save lead updates.');
-                }
-            } catch (err) {
-                console.error('Error updating lead:', err);
-                alert('Connection error saving lead.');
-            }
-        }
+        const openLeadModal = openLeadDrawer;
+        const closeLeadModal = closeLeadDrawer;
 
         async function deleteLead(leadId, studentName = null) {
             if (!token || !leadId) return;

@@ -324,7 +324,306 @@
     </div>
 </div>
 
+    <!-- ── STUDENT LEAD DETAILS SLIDE-OVER DRAWER ─────────────────────── -->
+    <div id="leadDetailDrawer" style="display: none; position: fixed; inset: 0; background: rgba(6, 61, 59, 0.45); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); z-index: 99999; align-items: center; justify-content: flex-end;" onclick="if(event.target===this) closeLeadDrawer()">
+        <div style="width: 580px; max-width: 95vw; height: 100vh; background: #FFFFFF; box-shadow: -10px 0 40px rgba(6, 61, 59, 0.25); display: flex; flex-direction: column; box-sizing: border-box; overflow: hidden; animation: slideInRightLead 0.25s cubic-bezier(0.16, 1, 0.3, 1); border-left: 1.5px solid #DDE9E3;">
+
+            <!-- Drawer Header -->
+            <div style="padding: 16px 22px; border-bottom: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; background: #F8FBFA;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 38px; height: 38px; border-radius: 50%; background: #E8F4F0; color: #063D3B; border: 1.5px solid #D1E5DE; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;">
+                        🎓
+                    </div>
+                    <div>
+                        <h3 id="leadDrawerName" style="font-family: var(--brand-font-display); font-size: 16px; font-weight: 800; color: #063D3B; margin: 0; line-height: 1.25;">
+                            Lead Details
+                        </h3>
+                        <div style="margin-top: 4px; display: flex; align-items: center; gap: 8px;">
+                            <span id="leadDrawerStatusBadge" class="badge" style="font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 12px; background: rgba(99, 102, 241, 0.12); color: #4F46E5; border: 1px solid rgba(99, 102, 241, 0.3);">NEW</span>
+                            <span id="leadDrawerCapturedAt" style="font-size: 11px; color: #648781; font-family: var(--brand-font-mono);">—</span>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" onclick="closeLeadDrawer()" style="background: none; border: none; font-size: 22px; line-height: 1; color: #648781; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: color 0.15s ease;" title="Close drawer (Esc)">&times;</button>
+            </div>
+
+            <!-- Drawer Body (Scrollable) -->
+            <div style="flex: 1; overflow-y: auto; padding: 20px 22px; display: flex; flex-direction: column; gap: 16px;">
+                <!-- Student Contact Info Card -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: #F1F7F4; padding: 14px; border-radius: var(--brand-radius-sm); border: 1px solid #DDE9E3;">
+                    <div>
+                        <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #648781; letter-spacing: 0.5px;">Email Address</div>
+                        <div id="leadDrawerEmail" style="font-size: 12.5px; font-weight: 600; color: #092F2E; margin-top: 3px; word-break: break-all; font-family: var(--brand-font-mono);">—</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #648781; letter-spacing: 0.5px;">Phone Number</div>
+                        <div id="leadDrawerPhone" style="font-size: 12.5px; font-weight: 600; color: #092F2E; margin-top: 3px; font-family: var(--brand-font-mono);">—</div>
+                    </div>
+                    <div style="grid-column: 1 / -1;">
+                        <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #648781; letter-spacing: 0.5px;">Program / Inquiry Topic</div>
+                        <div id="leadDrawerProgram" style="font-size: 13px; font-weight: 700; color: var(--brand-indigo-600, #4F46E5); margin-top: 3px;">—</div>
+                    </div>
+                </div>
+
+                <!-- Scholarship Evaluation Box (if available) -->
+                <div id="leadDrawerScholarshipBox" style="display: none; background: rgba(52, 211, 153, 0.08); border: 1.5px solid rgba(52, 211, 153, 0.3); border-radius: var(--brand-radius-sm); padding: 12px 14px;">
+                    <div style="font-size: 11px; font-weight: 700; color: #059669; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+                        <span>🎓</span> Scholarship Evaluation Profile
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; font-size: 12px;">
+                        <div><span style="color: #648781;">Academic Score:</span> <strong id="leadDrawerAcademicScore" style="color: #092F2E;">—</strong></div>
+                        <div><span style="color: #648781;">Qualified Tier:</span> <strong id="leadDrawerSchTier" style="color: #059669;">—</strong></div>
+                        <div><span style="color: #648781;">Est. Tuition Waiver:</span> <strong id="leadDrawerWaiverAmount" style="color: #0284C7;">—</strong></div>
+                    </div>
+                </div>
+
+                <!-- Assigned Staff Assignment -->
+                <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #4F7470; margin-bottom: 6px; letter-spacing: 0.4px;">
+                        Assigned Counselor / Staff
+                    </label>
+                    <select id="leadDrawerStaffSelect" class="brand-input" style="height: 36px; width: 100%; background-color: #FFFFFF; color: #063D3B; border: 1.5px solid #D1E5DE; border-radius: 7px; padding: 0 10px; font-size: 12px; font-weight: 600;">
+                        <option value="">👤 Unassigned</option>
+                    </select>
+                    <select id="leadDrawerDeptSelect" style="display: none;"><option value=""></option></select>
+                </div>
+
+                <!-- Status Selector -->
+                <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #4F7470; margin-bottom: 6px; letter-spacing: 0.4px;">
+                        Lead Status
+                    </label>
+                    <select id="leadDrawerStatusSelect" class="brand-input" style="height: 36px; width: 100%; background-color: #FFFFFF; color: #063D3B; border: 1.5px solid #D1E5DE; border-radius: 7px; padding: 0 10px; font-size: 12px; font-weight: 600;">
+                        <option value="new">🔵 New (Needs Contact)</option>
+                        <option value="contacted">🟡 Contacted / In Follow-up</option>
+                        <option value="converted">🟢 Converted / Admitted</option>
+                    </select>
+                </div>
+
+                <!-- Notes -->
+                <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #4F7470; margin-bottom: 6px; letter-spacing: 0.4px;">
+                        Counselor Notes & Follow-up History
+                    </label>
+                    <textarea id="leadDrawerNotes" class="brand-textarea" rows="3" placeholder="Add follow-up notes, call summary, or admission remarks..." style="width: 100%; box-sizing: border-box; font-size: 12px; border: 1.5px solid #D1E5DE; border-radius: 7px; padding: 8px 10px;"></textarea>
+                </div>
+
+                <!-- Chat Transcript -->
+                <div id="leadDrawerTranscriptSection" style="display: block;">
+                    <label style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #4F7470; margin-bottom: 6px; letter-spacing: 0.4px;">
+                        <span>💬 Chatbot Conversation Transcript <span id="leadDrawerTranscriptBadge" style="display: none; font-size: 10px; font-weight: 700; background: rgba(99, 102, 241, 0.12); color: #4F46E5; border: 1px solid rgba(99, 102, 241, 0.25); padding: 1px 7px; border-radius: 10px; margin-left: 6px; text-transform: none;"></span></span>
+                    </label>
+                    <div id="leadDrawerTranscriptBox" style="background: #F8FBFA; border: 1.5px solid #DDE9E3; border-radius: 8px; padding: 12px; max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 11.5px;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Drawer Footer -->
+            <div style="padding: 14px 22px; border-top: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #FAFDFB;">
+                <button type="button" class="brand-btn-secondary" onclick="deleteActiveLeadDrawerRecord()" style="height: 34px; padding: 0 12px; font-size: 11.5px; font-weight: 600; color: #dc2626; border-color: rgba(220, 38, 38, 0.3); border-radius: 6px;" title="Right to Erasure (FERPA / GDPR / PIPEDA compliance)">
+                    🗑️ Delete Lead
+                </button>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="dept-btn-secondary" onclick="closeLeadDrawer()" style="height: 34px; padding: 0 14px; font-size: 11.5px; font-weight: 700; border-radius: 6px; cursor: pointer;">Cancel</button>
+                    <button type="button" class="dept-btn-primary" onclick="saveLeadDrawerChanges()" style="height: 34px; padding: 0 18px; font-size: 11.5px; font-weight: 700; border-radius: 6px; cursor: pointer; background: #063D3B; color: #FFFFFF; border: none;">Save Changes</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes slideInRightLead {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+</style>
+
 <script>
+    window._activeLeadDrawerId = null;
+
+    window.openLeadDrawer = window.openLeadModal = async function(leadId) {
+        window._activeLeadDrawerId = leadId;
+        window.activeEditingLeadId = leadId;
+        try {
+            const res = await fetch('/v1/leads/' + leadId, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await res.json();
+            if (data.status !== 'success' || !data.data) {
+                alert('Could not load lead details.');
+                return;
+            }
+
+            const lead = data.data;
+
+            const nameEl = document.getElementById('leadDrawerName');
+            if (nameEl) nameEl.innerText = lead.name || 'Lead Details';
+            
+            const emailEl = document.getElementById('leadDrawerEmail');
+            if (emailEl) emailEl.innerText = lead.email || '—';
+
+            const phoneEl = document.getElementById('leadDrawerPhone');
+            if (phoneEl) phoneEl.innerText = lead.phone || '—';
+
+            const progEl = document.getElementById('leadDrawerProgram');
+            if (progEl) progEl.innerText = lead.program_interest || '—';
+
+            const captEl = document.getElementById('leadDrawerCapturedAt');
+            if (captEl) {
+                captEl.innerText = typeof formatToIST === 'function' ? formatToIST(lead.created_at) : (lead.created_at || '—');
+            }
+
+            const notesEl = document.getElementById('leadDrawerNotes');
+            if (notesEl) notesEl.value = lead.notes || '';
+
+            const statusSelect = document.getElementById('leadDrawerStatusSelect');
+            if (statusSelect) statusSelect.value = lead.status || 'new';
+
+            // Scholarship Evaluation Box
+            const schBox = document.getElementById('leadDrawerScholarshipBox');
+            if (schBox) {
+                if (lead.lead_type === 'scholarship_eval' || lead.scholarship_tier || lead.academic_score) {
+                    schBox.style.display = 'block';
+                    const scoreEl = document.getElementById('leadDrawerAcademicScore');
+                    if (scoreEl) scoreEl.innerText = lead.academic_score || 'Not Specified';
+                    const tierEl = document.getElementById('leadDrawerSchTier');
+                    if (tierEl) tierEl.innerText = lead.scholarship_tier || 'Standard Tier';
+                    const waiverEl = document.getElementById('leadDrawerWaiverAmount');
+                    if (waiverEl) waiverEl.innerText = lead.estimated_waiver_amount ? ('₹ ' + Number(lead.estimated_waiver_amount).toLocaleString() + ' / yr') : 'Calculated in Consultation';
+                } else {
+                    schBox.style.display = 'none';
+                }
+            }
+
+            const statusBadgeEl = document.getElementById('leadDrawerStatusBadge');
+            if (statusBadgeEl) {
+                statusBadgeEl.innerText = lead.status ? lead.status.toUpperCase() : 'NEW';
+                statusBadgeEl.style.cssText = lead.status === 'converted'
+                    ? 'background: rgba(16, 185, 129, 0.12); color: #047857; border: 1px solid rgba(16, 185, 129, 0.3); font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 12px;'
+                    : (lead.status === 'contacted'
+                        ? 'background: rgba(245, 158, 11, 0.12); color: #B45309; border: 1px solid rgba(245, 158, 11, 0.3); font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 12px;'
+                        : 'background: rgba(99, 102, 241, 0.12); color: #4F46E5; border: 1px solid rgba(99, 102, 241, 0.3); font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 12px;');
+            }
+
+            // Populate Staff dropdown
+            const staffSelect = document.getElementById('leadDrawerStaffSelect');
+            if (staffSelect) {
+                const staffList = window.availableOrgStaff || [];
+                staffSelect.innerHTML = `<option value="">👤 Unassigned</option>` +
+                    staffList.map(s => `<option value="${s.id}" ${lead.assigned_user_id == s.id ? 'selected' : ''}>👤 ${s.name} (${s.role || 'Staff'})</option>`).join('');
+            }
+
+            // Render Chatbot Conversation Transcript
+            const transcriptSection = document.getElementById('leadDrawerTranscriptSection');
+            const transcriptBox = document.getElementById('leadDrawerTranscriptBox');
+            const transcriptBadge = document.getElementById('leadDrawerTranscriptBadge');
+
+            if (transcriptSection && transcriptBox) {
+                transcriptSection.style.display = 'block';
+
+                if (lead.transcript && lead.transcript.length > 0) {
+                    if (transcriptBadge) {
+                        transcriptBadge.style.display = 'inline-block';
+                        transcriptBadge.innerText = `${lead.transcript.length} ${lead.transcript.length === 1 ? 'message' : 'messages'}`;
+                    }
+                    transcriptBox.innerHTML = lead.transcript.map(msg => {
+                        const isUser = msg.role === 'user';
+                        const msgTime = typeof formatToIST === 'function' ? formatToIST(msg.created_at) : (msg.created_at || '');
+                        return `
+                            <div style="align-self: ${isUser ? 'flex-end' : 'flex-start'}; max-width: 85%; padding: 8px 12px; border-radius: 8px; background: ${isUser ? '#063D3B' : '#E8F4F0'}; color: ${isUser ? '#ffffff' : '#063D3B'}; box-shadow: 0 1px 2px rgba(6,61,59,0.08); border: 1px solid ${isUser ? '#063D3B' : '#D1E5DE'};">
+                                <div style="font-size: 9.5px; opacity: 0.85; margin-bottom: 3px; font-weight: 700; color: ${isUser ? '#A7F3D0' : '#4F7470'};">${isUser ? '👤 Prospective Student' : '🤖 Admissions AI'} • ${msgTime}</div>
+                                <div style="line-height: 1.45; word-break: break-word; font-size: 12px;">${msg.content}</div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    if (transcriptBadge) {
+                        transcriptBadge.style.display = 'none';
+                    }
+                    transcriptBox.innerHTML = `
+                        <div style="text-align: center; color: #648781; padding: 18px 14px; font-size: 11.5px;">
+                            <div style="font-size: 20px; margin-bottom: 4px;">💬</div>
+                            <span style="font-weight: 700; color: #063D3B; display: block; margin-bottom: 2px;">No chatbot conversation transcript recorded</span>
+                            <span style="font-size: 11px; opacity: 0.85;">This lead was created via direct offline submission, manual counselor entry, or external sync.</span>
+                        </div>
+                    `;
+                }
+            }
+
+            const drawerEl = document.getElementById('leadDetailDrawer');
+            if (drawerEl) {
+                drawerEl.style.display = 'flex';
+            }
+        } catch (err) {
+            console.error('Error fetching lead drawer details:', err);
+            alert('Connection error loading lead.');
+        }
+    };
+
+    window.closeLeadDrawer = window.closeLeadModal = function() {
+        const drawerEl = document.getElementById('leadDetailDrawer');
+        if (drawerEl) {
+            drawerEl.style.display = 'none';
+        }
+        window._activeLeadDrawerId = null;
+        window.activeEditingLeadId = null;
+    };
+
+    window.saveLeadDrawerChanges = async function() {
+        const leadId = window._activeLeadDrawerId || window.activeEditingLeadId;
+        if (!leadId || !token) return;
+
+        const status = document.getElementById('leadDrawerStatusSelect')?.value || 'new';
+        const staffVal = document.getElementById('leadDrawerStaffSelect')?.value;
+        const assigned_user_id = staffVal ? parseInt(staffVal) : null;
+        const notes = (document.getElementById('leadDrawerNotes')?.value || '').trim();
+
+        try {
+            const res = await fetch('/v1/leads/' + leadId, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ status, assigned_user_id, notes })
+            });
+            const data = await res.json();
+            if (data.status === 'success') {
+                closeLeadDrawer();
+                if (typeof loadLeads === 'function') {
+                    await loadLeads();
+                }
+                if (typeof showToast === 'function') {
+                    showToast('Lead details updated successfully.', 'success');
+                }
+            } else {
+                alert(data.message || 'Failed to save lead updates.');
+            }
+        } catch (err) {
+            console.error('Error updating lead:', err);
+            alert('Connection error saving lead.');
+        }
+    };
+
+    window.deleteActiveLeadDrawerRecord = function() {
+        const leadId = window._activeLeadDrawerId || window.activeEditingLeadId;
+        if (leadId) {
+            const name = document.getElementById('leadDrawerName')?.innerText || 'Student';
+            if (typeof deleteLead === 'function') {
+                deleteLead(leadId, name);
+            }
+        }
+    };
+
+    // Close on Escape key
+    if (!window._leadDrawerEscAttached) {
+        window._leadDrawerEscAttached = true;
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeLeadDrawer();
+            }
+        });
+    }
+
     if (typeof loadLeads === 'function' && typeof token !== 'undefined' && token) {
         loadLeads();
     }
