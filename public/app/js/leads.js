@@ -511,9 +511,9 @@
                     return `
                         <tr>
                             <td style="vertical-align: middle;">
-                                <div class="lead-avatar-cell">
-                                    <div class="lead-profile-avatar" title="${lead.name || 'Student Lead'}">
-                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                <div class="lead-avatar-cell" style="display: flex; align-items: center; gap: 12px;">
+                                    <div class="lead-profile-avatar" style="width: 36px; height: 36px; min-width: 36px; max-width: 36px; border-radius: 50%; background: #E8F4F0; color: #063D3B; border: 1.5px solid #D1E5DE; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;" title="${lead.name || 'Student Lead'}">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                                     </div>
                                     <div>
                                         <div style="font-weight: 700; color: #063D3B; line-height: 1.35; font-size: 12.5px;">${lead.name}</div>

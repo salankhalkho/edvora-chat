@@ -2538,23 +2538,25 @@ select.brand-input option {
 
     /* Lead Student Profile Avatar & Cell */
     .lead-avatar-cell {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      gap: 12px !important;
     }
 
     .lead-profile-avatar {
-      width: 32px;
-      height: 32px;
-      min-width: 32px;
-      border-radius: 50%;
+      width: 36px !important;
+      height: 36px !important;
+      min-width: 36px !important;
+      max-width: 36px !important;
+      border-radius: 50% !important;
       background: #E8F4F0;
       color: #063D3B;
       border: 1.5px solid #D1E5DE;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      flex-shrink: 0 !important;
       box-shadow: 0 1px 3px rgba(6, 61, 59, 0.08);
       transition: all 0.15s ease;
     }
@@ -2566,8 +2568,8 @@ select.brand-input option {
     }
 
     .lead-profile-avatar svg {
-      width: 15px;
-      height: 15px;
+      width: 16px;
+      height: 16px;
       stroke: #063D3B;
       stroke-width: 2.2;
     }
