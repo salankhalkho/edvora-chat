@@ -328,40 +328,101 @@
     <div id="leadDetailDrawer" style="display: none; position: fixed; inset: 0; background: rgba(6, 61, 59, 0.45); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); z-index: 99999; align-items: center; justify-content: flex-end;" onclick="if(event.target===this) closeLeadDrawer()">
         <div style="width: 580px; max-width: 95vw; height: 100vh; background: #FFFFFF; box-shadow: -10px 0 40px rgba(6, 61, 59, 0.25); display: flex; flex-direction: column; box-sizing: border-box; overflow: hidden; animation: slideInRightLead 0.25s cubic-bezier(0.16, 1, 0.3, 1); border-left: 1.5px solid #DDE9E3;">
 
-            <!-- Drawer Header -->
-            <div style="padding: 16px 22px; border-bottom: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; background: #F8FBFA;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <div style="width: 38px; height: 38px; border-radius: 50%; background: #E8F4F0; color: #063D3B; border: 1.5px solid #D1E5DE; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;">
-                        🎓
-                    </div>
-                    <div>
-                        <h3 id="leadDrawerName" style="font-family: var(--brand-font-display); font-size: 16px; font-weight: 800; color: #063D3B; margin: 0; line-height: 1.25;">
-                            Lead Details
-                        </h3>
-                        <div style="margin-top: 4px; display: flex; align-items: center; gap: 8px;">
-                            <span id="leadDrawerStatusBadge" class="badge" style="font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 12px; background: rgba(99, 102, 241, 0.12); color: #4F46E5; border: 1px solid rgba(99, 102, 241, 0.3);">NEW</span>
-                            <span id="leadDrawerCapturedAt" style="font-size: 11px; color: #648781; font-family: var(--brand-font-mono);">—</span>
-                        </div>
-                    </div>
+            <!-- Drawer Header Bar -->
+            <div style="padding: 12px 22px; border-bottom: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; background: #F8FBFA; flex-shrink: 0;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 26px; height: 26px; border-radius: 6px; background: #E8F4F0; border: 1px solid #D1E5DE; display: flex; align-items: center; justify-content: center; font-size: 13px;">🎓</div>
+                    <span style="font-family: var(--brand-font-display); font-size: 13px; font-weight: 800; color: #063D3B; text-transform: uppercase; letter-spacing: 0.5px;">Lead Inquiry Details</span>
                 </div>
-                <button type="button" onclick="closeLeadDrawer()" style="background: none; border: none; font-size: 22px; line-height: 1; color: #648781; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: color 0.15s ease;" title="Close drawer (Esc)">&times;</button>
+                <button type="button" onclick="closeLeadDrawer()" style="background: none; border: none; font-size: 22px; line-height: 1; color: #648781; cursor: pointer; padding: 2px 8px; border-radius: 6px; transition: color 0.15s ease;" title="Close drawer (Esc)">&times;</button>
             </div>
 
             <!-- Drawer Body (Scrollable) -->
-            <div style="flex: 1; overflow-y: auto; padding: 20px 22px; display: flex; flex-direction: column; gap: 16px;">
-                <!-- Student Contact Info Card -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: #F1F7F4; padding: 14px; border-radius: var(--brand-radius-sm); border: 1px solid #DDE9E3;">
-                    <div>
-                        <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #648781; letter-spacing: 0.5px;">Email Address</div>
-                        <div id="leadDrawerEmail" style="font-size: 12.5px; font-weight: 600; color: #092F2E; margin-top: 3px; word-break: break-all; font-family: var(--brand-font-mono);">—</div>
+            <div style="flex: 1; overflow-y: auto; padding: 18px 22px; display: flex; flex-direction: column; gap: 14px;">
+                
+                <!-- ── DESIGN 5 TICKET CARD (Consolidated Candidate & Inquiry Passport) ── -->
+                <div style="background: #FFFFFF; border: 1.5px solid #D1E5DE; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.06); flex-shrink: 0;">
+                    <!-- Top Strip: Captured Date/Time on left, Status Badge on right -->
+                    <div style="background: #063D3B; padding: 8px 16px; display: flex; align-items: center; justify-content: space-between;">
+                        <span id="leadDrawerCapturedAt" style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #A7F3D0; font-family: var(--brand-font-mono);">📅 —</span>
+                        <span id="leadDrawerStatusBadge" class="badge" style="font-size: 9.5px; font-weight: 700; padding: 2px 9px; border-radius: 20px; background: #022c22; color: #34D399; border: 1px solid #065f46;">NEW</span>
                     </div>
-                    <div>
-                        <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #648781; letter-spacing: 0.5px;">Phone Number</div>
-                        <div id="leadDrawerPhone" style="font-size: 12.5px; font-weight: 600; color: #092F2E; margin-top: 3px; font-family: var(--brand-font-mono);">—</div>
+
+                    <!-- Ticket Body -->
+                    <div style="display: flex; min-height: 92px; background: #FFFFFF;">
+                        <!-- Left Stub: Candidate Details with Perforation Line -->
+                        <div style="flex: 1; padding: 12px 16px; border-right: 2px dashed #B8D5CC; position: relative;">
+                            <div style="position: absolute; top: -8px; right: -9px; width: 14px; height: 14px; border-radius: 50%; background: #F8FBFA; border: 1.5px solid #D1E5DE;"></div>
+                            <div style="position: absolute; bottom: -8px; right: -9px; width: 14px; height: 14px; border-radius: 50%; background: #F8FBFA; border: 1.5px solid #D1E5DE;"></div>
+                            
+                            <div style="font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: #648781; margin-bottom: 2px;">
+                                Prospective Candidate
+                            </div>
+                            <h3 id="leadDrawerName" style="font-family: var(--brand-font-display); font-size: 15px; font-weight: 800; color: #063D3B; margin: 0 0 6px 0; line-height: 1.2;">
+                                —
+                            </h3>
+                            
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <span style="font-size: 11px;">✉️</span>
+                                    <span id="leadDrawerEmail" style="font-size: 11px; font-weight: 600; color: #063D3B; font-family: var(--brand-font-mono); word-break: break-all;">—</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <span style="font-size: 11px;">📞</span>
+                                    <span id="leadDrawerPhone" style="font-size: 11px; font-weight: 600; color: #063D3B; font-family: var(--brand-font-mono);">—</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Stub: Program & Level -->
+                        <div style="width: 175px; flex-shrink: 0; padding: 12px 14px; display: flex; flex-direction: column; justify-content: space-between; background: #FAFDFB;">
+                            <div>
+                                <div style="font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: #648781; margin-bottom: 3px;">
+                                    Program Interest
+                                </div>
+                                <div id="leadDrawerProgram" style="font-size: 11.5px; font-weight: 700; color: #4338CA; line-height: 1.35;">
+                                    —
+                                </div>
+                            </div>
+                            <div style="margin-top: 6px;">
+                                <div style="font-size: 7.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #648781; margin-bottom: 2px;">Level</div>
+                                <span id="leadDrawerLevel" style="display: inline-block; font-size: 9px; font-weight: 700; color: #047857; background: #DCFCE7; border: 1px solid #86EFAC; padding: 1px 7px; border-radius: 10px;">Postgrad</span>
+                            </div>
+                        </div>
                     </div>
-                    <div style="grid-column: 1 / -1;">
-                        <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #648781; letter-spacing: 0.5px;">Program / Inquiry Topic</div>
-                        <div id="leadDrawerProgram" style="font-size: 13px; font-weight: 700; color: var(--brand-indigo-600, #4F46E5); margin-top: 3px;">—</div>
+
+                    <!-- Barcode Strip with Lead ID -->
+                    <div style="background: #F8FBFA; border-top: 1px solid #E6F0EC; padding: 5px 16px; display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: flex-end; gap: 1.5px; height: 12px;">
+                            <div style="height:7px;width:2px;background:#063D3B;opacity:0.8;border-radius:1px;"></div>
+                            <div style="height:12px;width:2px;background:#063D3B;opacity:0.7;border-radius:1px;"></div>
+                            <div style="height:9px;width:2px;background:#063D3B;opacity:0.9;border-radius:1px;"></div>
+                            <div style="height:5px;width:2px;background:#063D3B;opacity:0.6;border-radius:1px;"></div>
+                            <div style="height:11px;width:2px;background:#063D3B;opacity:0.8;border-radius:1px;"></div>
+                            <div style="height:7px;width:2px;background:#063D3B;opacity:0.7;border-radius:1px;"></div>
+                            <div style="height:12px;width:2px;background:#063D3B;opacity:0.9;border-radius:1px;"></div>
+                            <div style="height:9px;width:2px;background:#063D3B;opacity:0.6;border-radius:1px;"></div>
+                            <div style="height:5px;width:2px;background:#063D3B;opacity:0.8;border-radius:1px;"></div>
+                            <div style="height:11px;width:2px;background:#063D3B;opacity:0.7;border-radius:1px;"></div>
+                            <div style="height:7px;width:2px;background:#063D3B;opacity:0.5;border-radius:1px;"></div>
+                            <div style="height:12px;width:2px;background:#063D3B;opacity:0.8;border-radius:1px;"></div>
+                            <div style="height:9px;width:2px;background:#063D3B;opacity:0.9;border-radius:1px;"></div>
+                            <div style="height:5px;width:2px;background:#063D3B;opacity:0.7;border-radius:1px;"></div>
+                            <div style="height:11px;width:2px;background:#063D3B;opacity:0.6;border-radius:1px;"></div>
+                            <div style="height:7px;width:2px;background:#063D3B;opacity:0.8;border-radius:1px;"></div>
+                            <div style="height:12px;width:2px;background:#063D3B;opacity:0.7;border-radius:1px;"></div>
+                            <div style="height:9px;width:2px;background:#063D3B;opacity:0.9;border-radius:1px;"></div>
+                            <div style="height:5px;width:2px;background:#063D3B;opacity:0.6;border-radius:1px;"></div>
+                            <div style="height:11px;width:2px;background:#063D3B;opacity:0.8;border-radius:1px;"></div>
+                            <div style="height:7px;width:2px;background:#063D3B;opacity:0.7;border-radius:1px;"></div>
+                            <div style="height:12px;width:2px;background:#063D3B;opacity:0.5;border-radius:1px;"></div>
+                            <div style="height:9px;width:2px;background:#063D3B;opacity:0.8;border-radius:1px;"></div>
+                            <div style="height:5px;width:2px;background:#063D3B;opacity:0.7;border-radius:1px;"></div>
+                            <div style="height:11px;width:2px;background:#063D3B;opacity:0.9;border-radius:1px;"></div>
+                            <div style="height:7px;width:2px;background:#063D3B;opacity:0.6;border-radius:1px;"></div>
+                            <div style="height:12px;width:2px;background:#063D3B;opacity:0.8;border-radius:1px;"></div>
+                        </div>
+                        <span id="leadDrawerLeadCode" style="font-family: var(--brand-font-mono); font-size: 9px; font-weight: 700; color: #648781;">LEAD-PROFILE</span>
                     </div>
                 </div>
 
@@ -473,7 +534,18 @@
 
             const captEl = document.getElementById('leadDrawerCapturedAt');
             if (captEl) {
-                captEl.innerText = typeof formatToIST === 'function' ? formatToIST(lead.created_at) : (lead.created_at || '—');
+                const formattedDate = typeof formatToIST === 'function' ? formatToIST(lead.created_at) : (lead.created_at || '—');
+                captEl.innerText = '📅 ' + formattedDate;
+            }
+
+            const codeEl = document.getElementById('leadDrawerLeadCode');
+            if (codeEl) {
+                codeEl.innerText = 'LEAD-' + (lead.id || '2026');
+            }
+
+            const levelEl = document.getElementById('leadDrawerLevel');
+            if (levelEl) {
+                levelEl.innerText = lead.lead_type === 'scholarship_eval' ? 'Scholarship' : (lead.program_level || 'Postgrad');
             }
 
             const notesEl = document.getElementById('leadDrawerNotes');
@@ -500,12 +572,13 @@
 
             const statusBadgeEl = document.getElementById('leadDrawerStatusBadge');
             if (statusBadgeEl) {
-                statusBadgeEl.innerText = lead.status ? lead.status.toUpperCase() : 'NEW';
+                const st = lead.status ? lead.status.toUpperCase() : 'NEW';
+                statusBadgeEl.innerText = st + ' ✓';
                 statusBadgeEl.style.cssText = lead.status === 'converted'
-                    ? 'background: rgba(16, 185, 129, 0.12); color: #047857; border: 1px solid rgba(16, 185, 129, 0.3); font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 12px;'
+                    ? 'background: #022c22; color: #34D399; border: 1px solid #065f46; font-size: 9.5px; font-weight: 700; padding: 2px 9px; border-radius: 20px;'
                     : (lead.status === 'contacted'
-                        ? 'background: rgba(245, 158, 11, 0.12); color: #B45309; border: 1px solid rgba(245, 158, 11, 0.3); font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 12px;'
-                        : 'background: rgba(99, 102, 241, 0.12); color: #4F46E5; border: 1px solid rgba(99, 102, 241, 0.3); font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 12px;');
+                        ? 'background: #451a03; color: #fbbf24; border: 1px solid #78350f; font-size: 9.5px; font-weight: 700; padding: 2px 9px; border-radius: 20px;'
+                        : 'background: #1e1b4b; color: #818cf8; border: 1px solid #312e81; font-size: 9.5px; font-weight: 700; padding: 2px 9px; border-radius: 20px;');
             }
 
             // Populate Staff dropdown
