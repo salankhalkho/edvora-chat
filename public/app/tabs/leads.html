@@ -391,36 +391,14 @@
                         </div>
                     </div>
 
-                    <!-- Barcode Strip with Lead ID -->
-                    <div style="background: #F8FBFA; border-top: 1px solid #E6F0EC; padding: 5px 16px; display: flex; align-items: center; justify-content: space-between;">
-                        <div style="display: flex; align-items: flex-end; gap: 1.5px; height: 12px;">
-                            <div style="height:7px;width:2px;background:#063D3B;opacity:0.8;border-radius:1px;"></div>
-                            <div style="height:12px;width:2px;background:#063D3B;opacity:0.7;border-radius:1px;"></div>
-                            <div style="height:9px;width:2px;background:#063D3B;opacity:0.9;border-radius:1px;"></div>
-                            <div style="height:5px;width:2px;background:#063D3B;opacity:0.6;border-radius:1px;"></div>
-                            <div style="height:11px;width:2px;background:#063D3B;opacity:0.8;border-radius:1px;"></div>
-                            <div style="height:7px;width:2px;background:#063D3B;opacity:0.7;border-radius:1px;"></div>
-                            <div style="height:12px;width:2px;background:#063D3B;opacity:0.9;border-radius:1px;"></div>
-                            <div style="height:9px;width:2px;background:#063D3B;opacity:0.6;border-radius:1px;"></div>
-                            <div style="height:5px;width:2px;background:#063D3B;opacity:0.8;border-radius:1px;"></div>
-                            <div style="height:11px;width:2px;background:#063D3B;opacity:0.7;border-radius:1px;"></div>
-                            <div style="height:7px;width:2px;background:#063D3B;opacity:0.5;border-radius:1px;"></div>
-                            <div style="height:12px;width:2px;background:#063D3B;opacity:0.8;border-radius:1px;"></div>
-                            <div style="height:9px;width:2px;background:#063D3B;opacity:0.9;border-radius:1px;"></div>
-                            <div style="height:5px;width:2px;background:#063D3B;opacity:0.7;border-radius:1px;"></div>
-                            <div style="height:11px;width:2px;background:#063D3B;opacity:0.6;border-radius:1px;"></div>
-                            <div style="height:7px;width:2px;background:#063D3B;opacity:0.8;border-radius:1px;"></div>
-                            <div style="height:12px;width:2px;background:#063D3B;opacity:0.7;border-radius:1px;"></div>
-                            <div style="height:9px;width:2px;background:#063D3B;opacity:0.9;border-radius:1px;"></div>
-                            <div style="height:5px;width:2px;background:#063D3B;opacity:0.6;border-radius:1px;"></div>
-                            <div style="height:11px;width:2px;background:#063D3B;opacity:0.8;border-radius:1px;"></div>
-                            <div style="height:7px;width:2px;background:#063D3B;opacity:0.7;border-radius:1px;"></div>
-                            <div style="height:12px;width:2px;background:#063D3B;opacity:0.5;border-radius:1px;"></div>
-                            <div style="height:9px;width:2px;background:#063D3B;opacity:0.8;border-radius:1px;"></div>
-                            <div style="height:5px;width:2px;background:#063D3B;opacity:0.7;border-radius:1px;"></div>
-                            <div style="height:11px;width:2px;background:#063D3B;opacity:0.9;border-radius:1px;"></div>
-                            <div style="height:7px;width:2px;background:#063D3B;opacity:0.6;border-radius:1px;"></div>
-                            <div style="height:12px;width:2px;background:#063D3B;opacity:0.8;border-radius:1px;"></div>
+                    <!-- Footer Strip: Lead Type on left, Lead ID on right -->
+                    <div style="background: #F8FBFA; border-top: 1px solid #E6F0EC; padding: 6px 16px; display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: #648781;">Lead Type</span>
+                            <span id="leadDrawerTypeBadge" style="display: inline-flex; align-items: center; gap: 4px; font-size: 9.5px; font-weight: 700; padding: 1.5px 8px; border-radius: 6px; background: #E8F4F0; color: #063D3B; border: 1px solid #D1E5DE; text-transform: uppercase; letter-spacing: 0.3px;">
+                                <span>💬</span>
+                                <span>General Inquiry</span>
+                            </span>
                         </div>
                         <span id="leadDrawerLeadCode" style="font-family: var(--brand-font-mono); font-size: 9px; font-weight: 700; color: #648781;">LEAD-PROFILE</span>
                     </div>
@@ -541,6 +519,56 @@
             const codeEl = document.getElementById('leadDrawerLeadCode');
             if (codeEl) {
                 codeEl.innerText = 'LEAD-' + (lead.id || '2026');
+            }
+
+            // Lead Type Badge
+            const typeBadgeEl = document.getElementById('leadDrawerTypeBadge');
+            if (typeBadgeEl) {
+                const lt = (lead.lead_type || '').toLowerCase();
+                let icon = '💬';
+                let label = 'General Inquiry';
+                let bg = '#E8F4F0';
+                let color = '#063D3B';
+                let border = '#D1E5DE';
+
+                if (lt.includes('tour')) {
+                    icon = '🏛️';
+                    label = 'Campus Tour';
+                    bg = '#F3E8FF';
+                    color = '#6B21A8';
+                    border = '#D8B4FE';
+                } else if (lt.includes('scholarship')) {
+                    icon = '🎓';
+                    label = lead.scholarship_tier ? `Scholarship (${lead.scholarship_tier})` : 'Scholarship Eval';
+                    bg = '#DCFCE7';
+                    color = '#065F46';
+                    border = '#86EFAC';
+                } else if (lt.includes('callback')) {
+                    icon = '📞';
+                    label = 'Counselor Callback';
+                    bg = '#FEE2E2';
+                    color = '#991B1B';
+                    border = '#FECACA';
+                } else if (lt.includes('asset') || lt.includes('prospectus') || lt.includes('brochure')) {
+                    icon = '📥';
+                    label = 'Prospectus Request';
+                    bg = '#E0F2FE';
+                    color = '#075985';
+                    border = '#BAE6FD';
+                } else if (lt.includes('application')) {
+                    icon = '📝';
+                    label = 'Application Lead';
+                    bg = '#FEF3C7';
+                    color = '#92400E';
+                    border = '#FDE68A';
+                } else if (lead.lead_type && lead.lead_type !== 'general') {
+                    label = lead.lead_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                }
+
+                typeBadgeEl.style.background = bg;
+                typeBadgeEl.style.color = color;
+                typeBadgeEl.style.border = '1px solid ' + border;
+                typeBadgeEl.innerHTML = `<span>${icon}</span> <span>${label}</span>`;
             }
 
             const levelEl = document.getElementById('leadDrawerLevel');
