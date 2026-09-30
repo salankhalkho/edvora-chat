@@ -712,7 +712,22 @@
                         const msgTime = typeof formatToIST === 'function' ? formatToIST(msg.created_at) : (msg.created_at || '');
                         return `
                             <div style="align-self: ${isUser ? 'flex-end' : 'flex-start'}; max-width: 85%; padding: 8px 12px; border-radius: 8px; background: ${isUser ? '#063D3B' : '#E8F4F0'}; color: ${isUser ? '#ffffff' : '#063D3B'}; box-shadow: 0 1px 2px rgba(6,61,59,0.08); border: 1px solid ${isUser ? '#063D3B' : '#D1E5DE'};">
-                                <div style="font-size: 9.5px; opacity: 0.85; margin-bottom: 3px; font-weight: 700; color: ${isUser ? '#A7F3D0' : '#4F7470'};">${isUser ? '👤 Prospective Student' : '🤖 Admissions AI'} • ${msgTime}</div>
+                                <div style="font-size: 9.5px; opacity: 0.9; margin-bottom: 3px; font-weight: 700; color: ${isUser ? '#A7F3D0' : '#4F7470'}; display: flex; align-items: center; gap: 4px;">
+                                    ${isUser ? `
+                                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 13px; height: 13px; border-radius: 50%; background: rgba(200, 255, 99, 0.2); border: 1px solid rgba(200, 255, 99, 0.6); flex-shrink: 0;">
+                                            <svg viewBox="0 0 24 24" width="8.5" height="8.5" fill="#C8FF63"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                                        </span>
+                                        <span>Prospective Student</span>
+                                    ` : `
+                                        <svg viewBox="0 0 40 40" width="13" height="13" style="border-radius: 3px; display: inline-block; vertical-align: middle; flex-shrink: 0;" xmlns="http://www.w3.org/2000/svg">
+                                            <rect width="40" height="40" rx="11" fill="#063D3B"/>
+                                            <path d="M20 6C20 13.732 13.732 20 6 20C13.732 20 20 26.268 20 34C20 26.268 26.268 20 34 20C26.268 20 20 13.732 20 6Z" fill="#C8FF63"/>
+                                        </svg>
+                                        <span>Admissions AI</span>
+                                    `}
+                                    <span style="opacity: 0.5;">•</span>
+                                    <span>${msgTime}</span>
+                                </div>
                                 <div style="line-height: 1.45; word-break: break-word; font-size: 12px;">${msg.content}</div>
                             </div>
                         `;
