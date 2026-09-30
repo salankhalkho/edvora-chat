@@ -585,6 +585,9 @@
 
         async function loadLeads() {
             if (!token) return;
+            if ((!window.availableOrgStaff || window.availableOrgStaff.length === 0) && typeof loadOrgStaff === 'function') {
+                loadOrgStaff();
+            }
             try {
                 let tbody = document.getElementById('leadsTableBody');
                 if (!tbody) {
@@ -739,11 +742,16 @@
                 filterDeptEl.value = currentVal;
             }
 
+            if ((!window.availableOrgStaff || window.availableOrgStaff.length === 0) && typeof loadOrgStaff === 'function') {
+                await loadOrgStaff();
+            }
+
             const filterStaffEl = document.getElementById('filterCallbackStaff');
-            if (filterStaffEl && filterStaffEl.options.length <= 1 && availableOrgStaff.length > 0) {
+            const staffList = window.availableOrgStaff || availableOrgStaff || [];
+            if (filterStaffEl && filterStaffEl.options.length <= 1 && staffList.length > 0) {
                 const currentVal = filterStaffEl.value;
                 filterStaffEl.innerHTML = `<option value="">Counselor: All</option>` +
-                    availableOrgStaff.map(s => `<option value="${s.id}">ðŸ‘¤ ${s.name}</option>`).join('');
+                    staffList.map(s => `<option value="${s.id}">👤 ${s.name}</option>`).join('');
                 filterStaffEl.value = currentVal;
             }
 
@@ -1076,6 +1084,9 @@
                 if (!tbody) return;
 
                 if (data.status === 'success' && data.data) {
+                    if ((!window.availableOrgStaff || window.availableOrgStaff.length === 0) && typeof loadOrgStaff === 'function') {
+                        await loadOrgStaff();
+                    }
                     let tours = data.data.tours || [];
                     const stats = data.data.stats || {};
                     currentCampusToursList = tours;
@@ -1132,8 +1143,8 @@
                                 <span style="font-size: 10px; color: #A78BFA; background: rgba(124, 58, 237, 0.1); border: 1px solid rgba(124, 58, 237, 0.25); padding: 1px 6px; border-radius: 8px; display: inline-block; width: fit-content;">${t.preferred_time || 'Morning'}</span>
                             </div>`;
 
-                            const guideOptions = `<option value="">ðŸ‘¤ Unassigned</option>` +
-                                (availableOrgStaff || []).map(s => `<option value="${s.id}" ${t.assigned_user_id == s.id ? 'selected' : ''}>${s.name}</option>`).join('');
+                            const guideOptions = `<option value="">👤 Unassigned</option>` +
+                                (window.availableOrgStaff || availableOrgStaff || []).map(s => `<option value="${s.id}" ${t.assigned_user_id == s.id ? 'selected' : ''}>${s.name}</option>`).join('');
 
                             const guideSelect = `
                                 <select class="brand-input" onchange="assignTourGuide(${t.id}, this.value)" style="height: 28px; font-size: 11px; padding: 0 6px; width: 130px; background-color: #FFFFFF; color: #063D3B; border: 1px solid #D1E5DE;">

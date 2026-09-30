@@ -6112,10 +6112,13 @@
                 } else if (tab === 'conversion-engine' || tab === 'placeholder') {
                     if (typeof loadConversionEngine === 'function') loadConversionEngine();
                 } else if (tab === 'leads') {
+                    if (typeof loadOrgStaff === 'function') loadOrgStaff();
                     if (typeof loadLeads === 'function') loadLeads();
                 } else if (tab === 'callbacks') {
+                    if (typeof loadOrgStaff === 'function') loadOrgStaff();
                     if (typeof loadCallbacks === 'function') loadCallbacks();
                 } else if (tab === 'campus-tours') {
+                    if (typeof loadOrgStaff === 'function') loadOrgStaff();
                     if (typeof loadCampusTours === 'function') loadCampusTours();
                 } else if (tab === 'campus-tours-scheduling') {
                     if (typeof loadTourSlots === 'function') loadTourSlots();
@@ -10010,6 +10013,9 @@ echo $response['reply'];
 
         async function loadLeads() {
             if (!token) return;
+            if ((!availableOrgStaff || availableOrgStaff.length === 0) && typeof loadOrgStaff === 'function') {
+                loadOrgStaff();
+            }
             try {
                 let tbody = document.getElementById('leadsTableBody');
                 if (!tbody) {
@@ -10162,6 +10168,10 @@ echo $response['reply'];
                 filterDeptEl.innerHTML = `<option value="">Department: All</option>` +
                     currentDepartments.map(d => `<option value="${d.id}">${d.icon || '🏢'} ${d.name}</option>`).join('');
                 filterDeptEl.value = currentVal;
+            }
+
+            if ((!availableOrgStaff || availableOrgStaff.length === 0) && typeof loadOrgStaff === 'function') {
+                await loadOrgStaff();
             }
 
             const filterStaffEl = document.getElementById('filterCallbackStaff');
@@ -10501,6 +10511,9 @@ echo $response['reply'];
                 if (!tbody) return;
 
                 if (data.status === 'success' && data.data) {
+                    if ((!availableOrgStaff || availableOrgStaff.length === 0) && typeof loadOrgStaff === 'function') {
+                        await loadOrgStaff();
+                    }
                     let tours = data.data.tours || [];
                     const stats = data.data.stats || {};
                     currentCampusToursList = tours;
@@ -10816,6 +10829,11 @@ echo $response['reply'];
 
                 await switchNavTab(initialTab, null, false);
                 if (initialTab === 'overview') { loadAnalytics(); }
+
+                // Preload organization staff/counselors for leads, callbacks, tours, and routing
+                if (typeof loadOrgStaff === 'function') {
+                    loadOrgStaff();
+                }
 
                 // Fetch initial callbacks summary for sidebar notification badge
                 try {
@@ -12168,12 +12186,32 @@ echo $response['reply'];
         // ── DEPARTMENT MANAGEMENT JS LOGIC (DEPRECATED - SAFE EMPTY STUBS) ──
         let currentDepartments = [];
         let availableOrgStaff = [];
+        window.availableOrgStaff = availableOrgStaff;
         let availableOrgKs = [];
         let availableOrgCampuses = [];
         async function loadDepartments() { currentDepartments = []; }
         window.loadDepartments = loadDepartments;
         function updateDeptStats() {}
         function renderDepartmentsGrid() {}
+
+        async function loadOrgStaff() {
+            if (!token) return [];
+            try {
+                const res = await fetch('/v1/organization/staff', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                if (data.status === 'success' && Array.isArray(data.data)) {
+                    availableOrgStaff = data.data;
+                    window.availableOrgStaff = data.data;
+                    return data.data;
+                }
+            } catch (err) {
+                console.error('Failed to load organization staff:', err);
+            }
+            return window.availableOrgStaff || [];
+        }
+        window.loadOrgStaff = loadOrgStaff;
         // ── MAIN KNOWLEDGE BASE & VALIDITY LIFECYCLE ENGINE ───────────────────
         let allKnowledgeSources = [];
         let filteredKnowledgeSources = [];

@@ -483,6 +483,33 @@
 <script>
     window._activeLeadDrawerId = null;
 
+    if (typeof window.loadOrgStaff !== 'function') {
+        window.loadOrgStaff = async function() {
+            const authToken = window.token || (typeof token !== 'undefined' ? token : localStorage.getItem('edvora_token'));
+            if (!authToken) return [];
+            try {
+                const res = await fetch('/v1/organization/staff', {
+                    headers: { 'Authorization': 'Bearer ' + authToken }
+                });
+                const data = await res.json();
+                if (data.status === 'success' && Array.isArray(data.data)) {
+                    window.availableOrgStaff = data.data;
+                    if (typeof availableOrgStaff !== 'undefined') {
+                        availableOrgStaff = data.data;
+                    }
+                    return data.data;
+                }
+            } catch (err) {
+                console.error('Failed to load organization staff:', err);
+            }
+            return window.availableOrgStaff || [];
+        };
+    }
+
+    if (typeof window.loadOrgStaff === 'function') {
+        window.loadOrgStaff();
+    }
+
     window.openLeadDrawer = window.openLeadModal = async function(leadId) {
         window._activeLeadDrawerId = leadId;
         window.activeEditingLeadId = leadId;
@@ -612,9 +639,59 @@
             // Populate Staff dropdown
             const staffSelect = document.getElementById('leadDrawerStaffSelect');
             if (staffSelect) {
+                if (!window.availableOrgStaff || window.availableOrgStaff.length === 0) {
+                    if (typeof window.loadOrgStaff === 'function') {
+                        await window.loadOrgStaff();
+                    } else {
+                        try {
+                            const resStaff = await fetch('/v1/organization/staff', {
+                                headers: { 'Authorization': 'Bearer ' + (window.token || token) }
+                            });
+                            const dataStaff = await resStaff.json();
+                            if (dataStaff.status === 'success' && Array.isArray(dataStaff.data)) {
+                                window.availableOrgStaff = dataStaff.data;
+                                if (typeof availableOrgStaff !== 'undefined') {
+                                    availableOrgStaff = dataStaff.data;
+                                }
+                            }
+                        } catch (errStaff) {
+                            console.error('Failed to fetch org staff for lead drawer:', errStaff);
+                        }
+                    }
+                }
+
                 const staffList = window.availableOrgStaff || [];
-                staffSelect.innerHTML = `<option value="">👤 Unassigned</option>` +
-                    staffList.map(s => `<option value="${s.id}" ${lead.assigned_user_id == s.id ? 'selected' : ''}>👤 ${s.name} (${s.role || 'Staff'})</option>`).join('');
+                const roleFormatter = (r) => {
+                    if (!r) return 'Staff';
+                    if (r === 'owner') return 'Owner';
+                    if (r === 'admin' || r === 'org_admin') return 'Admin';
+                    if (r === 'superadmin' || r === 'super_admin') return 'Super Admin';
+                    return r.charAt(0).toUpperCase() + r.slice(1);
+                };
+
+                let optionsHtml = `<option value="">👤 Unassigned</option>`;
+                let matchedAssigned = false;
+
+                if (staffList.length > 0) {
+                    optionsHtml += staffList.map(s => {
+                        const isMatch = String(lead.assigned_user_id) === String(s.id);
+                        if (isMatch) matchedAssigned = true;
+                        return `<option value="${s.id}" ${isMatch ? 'selected' : ''}>👤 ${s.name} (${roleFormatter(s.role)})</option>`;
+                    }).join('');
+                }
+
+                // If lead has an assigned counselor not present in active list, preserve their entry
+                if (lead.assigned_user_id && !matchedAssigned) {
+                    const fallbackName = lead.assigned_user_name || ('Counselor #' + lead.assigned_user_id);
+                    optionsHtml += `<option value="${lead.assigned_user_id}" selected>👤 ${fallbackName} (Assigned)</option>`;
+                }
+
+                staffSelect.innerHTML = optionsHtml;
+                if (lead.assigned_user_id) {
+                    staffSelect.value = String(lead.assigned_user_id);
+                } else {
+                    staffSelect.value = '';
+                }
             }
 
             // Render Chatbot Conversation Transcript
