@@ -377,27 +377,28 @@
                     </div>
                 </div>
 
-                <!-- Assigned Staff Assignment -->
-                <div>
-                    <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #4F7470; margin-bottom: 6px; letter-spacing: 0.4px;">
-                        Assigned Counselor / Staff
-                    </label>
-                    <select id="leadDrawerStaffSelect" class="brand-input" style="height: 36px; width: 100%; background-color: #FFFFFF; color: #063D3B; border: 1.5px solid #D1E5DE; border-radius: 7px; padding: 0 10px; font-size: 12px; font-weight: 600;">
-                        <option value="">👤 Unassigned</option>
-                    </select>
-                    <select id="leadDrawerDeptSelect" style="display: none;"><option value=""></option></select>
-                </div>
+                <!-- Side-by-Side: Assigned Staff & Lead Status -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #4F7470; margin-bottom: 6px; letter-spacing: 0.4px;">
+                            Assigned Counselor / Staff
+                        </label>
+                        <select id="leadDrawerStaffSelect" class="brand-input" style="height: 36px; width: 100%; background-color: #FFFFFF; color: #063D3B; border: 1.5px solid #D1E5DE; border-radius: 7px; padding: 0 10px; font-size: 12px; font-weight: 600;">
+                            <option value="">👤 Unassigned</option>
+                        </select>
+                        <select id="leadDrawerDeptSelect" style="display: none;"><option value=""></option></select>
+                    </div>
 
-                <!-- Status Selector -->
-                <div>
-                    <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #4F7470; margin-bottom: 6px; letter-spacing: 0.4px;">
-                        Lead Status
-                    </label>
-                    <select id="leadDrawerStatusSelect" class="brand-input" style="height: 36px; width: 100%; background-color: #FFFFFF; color: #063D3B; border: 1.5px solid #D1E5DE; border-radius: 7px; padding: 0 10px; font-size: 12px; font-weight: 600;">
-                        <option value="new">🔵 New (Needs Contact)</option>
-                        <option value="contacted">🟡 Contacted / In Follow-up</option>
-                        <option value="converted">🟢 Converted / Admitted</option>
-                    </select>
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #4F7470; margin-bottom: 6px; letter-spacing: 0.4px;">
+                            Lead Status
+                        </label>
+                        <select id="leadDrawerStatusSelect" class="brand-input" style="height: 36px; width: 100%; background-color: #FFFFFF; color: #063D3B; border: 1.5px solid #D1E5DE; border-radius: 7px; padding: 0 10px; font-size: 12px; font-weight: 600;">
+                            <option value="new">🔵 New (Needs Contact)</option>
+                            <option value="contacted">🟡 Contacted / In Follow-up</option>
+                            <option value="converted">🟢 Converted / Admitted</option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Notes -->
@@ -405,7 +406,7 @@
                     <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #4F7470; margin-bottom: 6px; letter-spacing: 0.4px;">
                         Counselor Notes & Follow-up History
                     </label>
-                    <textarea id="leadDrawerNotes" class="brand-textarea" rows="3" placeholder="Add follow-up notes, call summary, or admission remarks..." style="width: 100%; box-sizing: border-box; font-size: 12px; border: 1.5px solid #D1E5DE; border-radius: 7px; padding: 8px 10px;"></textarea>
+                    <textarea id="leadDrawerNotes" class="brand-textarea" rows="2" placeholder="Add follow-up notes, call summary, or admission remarks..." style="width: 100%; box-sizing: border-box; font-size: 12px; border: 1.5px solid #D1E5DE; border-radius: 7px; padding: 8px 10px;"></textarea>
                 </div>
 
                 <!-- Chat Transcript -->
@@ -413,7 +414,7 @@
                     <label style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #4F7470; margin-bottom: 6px; letter-spacing: 0.4px;">
                         <span>💬 Chatbot Conversation Transcript <span id="leadDrawerTranscriptBadge" style="display: none; font-size: 10px; font-weight: 700; background: rgba(99, 102, 241, 0.12); color: #4F46E5; border: 1px solid rgba(99, 102, 241, 0.25); padding: 1px 7px; border-radius: 10px; margin-left: 6px; text-transform: none;"></span></span>
                     </label>
-                    <div id="leadDrawerTranscriptBox" style="background: #F8FBFA; border: 1.5px solid #DDE9E3; border-radius: 8px; padding: 12px; max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 11.5px;">
+                    <div id="leadDrawerTranscriptBox" style="background: #F8FBFA; border: 1.5px solid #DDE9E3; border-radius: 8px; padding: 12px; max-height: 340px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 11.5px;">
                     </div>
                 </div>
             </div>
