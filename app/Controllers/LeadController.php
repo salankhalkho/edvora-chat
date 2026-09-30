@@ -386,6 +386,56 @@ class LeadController
 
         $lead['transcript'] = $messages;
 
+        // Fetch linked campus tour booking if available
+        $tour = null;
+        try {
+            $stmtTour = $db->prepare("
+                SELECT id, preferred_date, preferred_time, group_size, status as tour_status,
+                       notes as tour_notes, counselor_notes as tour_counselor_notes, program_interest as tour_program
+                FROM campus_tour_bookings
+                WHERE organization_id = :org_id
+                  AND (
+                      (:conv_id > 0 AND conversation_id = :conv_id)
+                      OR (:email != '' AND student_email = :email)
+                      OR (:phone != '' AND student_phone = :phone)
+                  )
+                ORDER BY id DESC LIMIT 1
+            ");
+            $stmtTour->execute([
+                ':org_id' => $orgId,
+                ':conv_id' => $convId ?: (!empty($lead['conversation_id']) ? (int)$lead['conversation_id'] : 0),
+                ':email' => !empty($lead['email']) ? trim($lead['email']) : '',
+                ':phone' => !empty($lead['phone']) ? trim($lead['phone']) : ''
+            ]);
+            $tour = $stmtTour->fetch();
+        } catch (Throwable $e) {}
+        $lead['tour_booking'] = $tour ?: null;
+
+        // Fetch linked counselor callback if available
+        $callback = null;
+        try {
+            $stmtCb = $db->prepare("
+                SELECT id, preferred_time_slot, topic_or_query, status as callback_status,
+                       call_attempts, counselor_notes as callback_counselor_notes
+                FROM counselor_callbacks
+                WHERE organization_id = :org_id
+                  AND (
+                      (:conv_id > 0 AND conversation_id = :conv_id)
+                      OR (:email != '' AND student_email = :email)
+                      OR (:phone != '' AND student_phone = :phone)
+                  )
+                ORDER BY id DESC LIMIT 1
+            ");
+            $stmtCb->execute([
+                ':org_id' => $orgId,
+                ':conv_id' => $convId ?: (!empty($lead['conversation_id']) ? (int)$lead['conversation_id'] : 0),
+                ':email' => !empty($lead['email']) ? trim($lead['email']) : '',
+                ':phone' => !empty($lead['phone']) ? trim($lead['phone']) : ''
+            ]);
+            $callback = $stmtCb->fetch();
+        } catch (Throwable $e) {}
+        $lead['callback_booking'] = $callback ?: null;
+
         Response::success($lead);
     }
 

@@ -335,72 +335,71 @@
                 <div style="background: #FFFFFF; border: 1.5px solid #D1E5DE; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.06); flex-shrink: 0;">
                     <!-- Top Strip: Captured Date/Time on left, Prominent Close Button on right -->
                     <div style="background: #063D3B; padding: 6px 14px; display: flex; align-items: center; justify-content: space-between; min-height: 40px; box-sizing: border-box;">
-                        <span id="leadDrawerCapturedAt" style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #A7F3D0; font-family: var(--brand-font-mono);">📅 —</span>
+                        <span id="leadDrawerCapturedAt" style="font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #A7F3D0; font-family: var(--brand-font-mono);">📅 —</span>
                         <button type="button" onclick="closeLeadDrawer()" style="width: 28px; height: 28px; border-radius: 50%; background: #FFFFFF; border: 1.5px solid #CBD5E1; color: #063D3B; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.22); transition: all 0.15s ease; padding: 0; line-height: 1;" onmouseover="this.style.background='#F0FDF4'; this.style.borderColor='#34D399'; this.style.transform='scale(1.05)';" onmouseout="this.style.background='#FFFFFF'; this.style.borderColor='#CBD5E1'; this.style.transform='none';" title="Close drawer (Esc)">
                             ✕
                         </button>
                     </div>
 
-                    <!-- Ticket Body -->
-                    <div style="display: flex; min-height: 92px; background: #FFFFFF;">
-                        <!-- Left Stub: Candidate Details with Perforation Line -->
-                        <div style="flex: 1; padding: 12px 16px; border-right: 2px dashed #B8D5CC; position: relative;">
-                            <div style="position: absolute; top: -8px; right: -9px; width: 14px; height: 14px; border-radius: 50%; background: #F8FBFA; border: 1.5px solid #D1E5DE;"></div>
-                            <div style="position: absolute; bottom: -8px; right: -9px; width: 14px; height: 14px; border-radius: 50%; background: #F8FBFA; border: 1.5px solid #D1E5DE;"></div>
+                    <!-- Ticket Body: 50/50 Split with Centered Perforation Divider -->
+                    <div style="display: flex; min-height: 104px; background: #FFFFFF; position: relative;">
+                        <!-- Left Stub: Program Interest, Candidate Name, Email & Phone -->
+                        <div style="flex: 1 1 50%; min-width: 0; padding: 12px 16px; border-right: 2px dashed #B8D5CC; position: relative; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center;">
+                            <!-- Perforation Cutout Circles -->
+                            <div style="position: absolute; top: -8px; right: -9px; width: 15px; height: 15px; border-radius: 50%; background: #F8FBFA; border: 1.5px solid #D1E5DE; z-index: 2;"></div>
+                            <div style="position: absolute; bottom: -8px; right: -9px; width: 15px; height: 15px; border-radius: 50%; background: #F8FBFA; border: 1.5px solid #D1E5DE; z-index: 2;"></div>
                             
-                            <div style="font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: #648781; margin-bottom: 2px;">
-                                Prospective Candidate
+                            <!-- Program Interest at top of candidate info -->
+                            <div id="leadDrawerProgram" style="font-size: 13px; font-weight: 700; color: #4338CA; line-height: 1.25; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="Program Interest">
+                                —
                             </div>
-                            <h3 id="leadDrawerName" style="font-family: var(--brand-font-display); font-size: 15px; font-weight: 800; color: #063D3B; margin: 0 0 6px 0; line-height: 1.2;">
+
+                            <!-- Student Name -->
+                            <h3 id="leadDrawerName" style="font-family: var(--brand-font-display); font-size: 16px; font-weight: 800; color: #063D3B; margin: 0 0 6px 0; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                 —
                             </h3>
                             
-                            <div style="display: flex; flex-direction: column; gap: 4px;">
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <span style="font-size: 11px;">✉️</span>
-                                    <span id="leadDrawerEmail" style="font-size: 11px; font-weight: 600; color: #063D3B; font-family: var(--brand-font-mono); word-break: break-all;">—</span>
+                            <!-- Email & Phone Contact -->
+                            <div style="display: flex; flex-direction: column; gap: 3.5px;">
+                                <div style="display: flex; align-items: center; gap: 6px; overflow: hidden;">
+                                    <span style="font-size: 11px; flex-shrink: 0;">✉️</span>
+                                    <span id="leadDrawerEmail" style="font-size: 11px; font-weight: 600; color: #063D3B; font-family: var(--brand-font-mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">—</span>
                                 </div>
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <span style="font-size: 11px;">📞</span>
-                                    <span id="leadDrawerPhone" style="font-size: 11px; font-weight: 600; color: #063D3B; font-family: var(--brand-font-mono);">—</span>
+                                <div style="display: flex; align-items: center; gap: 6px; overflow: hidden;">
+                                    <span style="font-size: 11px; flex-shrink: 0;">📞</span>
+                                    <span id="leadDrawerPhone" style="font-size: 11px; font-weight: 600; color: #063D3B; font-family: var(--brand-font-mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">—</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Right Stub: Program & Level -->
-                        <div style="width: 175px; flex-shrink: 0; padding: 12px 14px; display: flex; flex-direction: column; justify-content: space-between; background: #FAFDFB;">
-                            <div>
-                                <div style="font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: #648781; margin-bottom: 3px;">
-                                    Program Interest
-                                </div>
-                                <div id="leadDrawerProgram" style="font-size: 11.5px; font-weight: 700; color: #4338CA; line-height: 1.35;">
-                                    —
-                                </div>
+                        <!-- Right Stub: Action Details (Campus Tour / Callback / Scholarship / Asset) -->
+                        <div style="flex: 1 1 50%; min-width: 0; padding: 12px 16px; display: flex; flex-direction: column; justify-content: flex-start; gap: 6px; background: #FAFDFB; box-sizing: border-box;">
+                            <!-- Action / Lead Type Badge -->
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <span id="leadDrawerTypeBadge" style="display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 2.5px 9px; border-radius: 6px; background: #F3E8FF; color: #6B21A8; border: 1px solid #D8B4FE;">
+                                    <span>🏛️</span>
+                                    <span>Campus Tour</span>
+                                </span>
+                                <span id="leadDrawerLevel" style="display: none; font-size: 9px; font-weight: 700; color: #047857; background: #DCFCE7; border: 1px solid #86EFAC; padding: 1px 7px; border-radius: 10px;">Postgrad</span>
                             </div>
-                            <div style="margin-top: 6px;">
-                                <div style="font-size: 7.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #648781; margin-bottom: 2px;">Level</div>
-                                <span id="leadDrawerLevel" style="display: inline-block; font-size: 9px; font-weight: 700; color: #047857; background: #DCFCE7; border: 1px solid #86EFAC; padding: 1px 7px; border-radius: 10px;">Postgrad</span>
+
+                            <!-- Dynamic Action Details Container -->
+                            <div id="leadDrawerActionDetails" style="display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: #334155; line-height: 1.35; flex: 1;">
+                                <!-- Populated dynamically by populateLeadActionDetails(lead) -->
                             </div>
                         </div>
                     </div>
 
-                    <!-- Footer Strip: Lead Type & Status on left, Lead ID on right -->
-                    <div style="background: #F8FBFA; border-top: 1px solid #E6F0EC; padding: 7px 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                            <div style="display: flex; align-items: center; gap: 5px;">
-                                <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: #648781;">Lead Type</span>
-                                <span id="leadDrawerTypeBadge" style="display: inline-flex; align-items: center; gap: 4px; font-size: 9.5px; font-weight: 700; padding: 1.5px 8px; border-radius: 6px; background: #E8F4F0; color: #063D3B; border: 1px solid #D1E5DE; text-transform: uppercase; letter-spacing: 0.3px;">
-                                    <span>💬</span>
-                                    <span>General Inquiry</span>
-                                </span>
-                            </div>
-                            <span style="color: #CBD5E1; font-size: 10px;">•</span>
-                            <div style="display: flex; align-items: center; gap: 4px;">
-                                <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: #648781;">Status</span>
-                                <span id="leadDrawerStatusBadge" class="badge" style="font-size: 9.5px; font-weight: 700; padding: 1.5px 8px; border-radius: 20px; background: #022c22; color: #34D399; border: 1px solid #065f46;">NEW</span>
-                            </div>
+                    <!-- Footer Strip: Status on left, subtle dot in middle, Lead Code on right -->
+                    <div style="background: #F8FBFA; border-top: 1px solid #E6F0EC; padding: 7px 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 8.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: #648781;">STATUS</span>
+                            <span id="leadDrawerStatusBadge" class="badge" style="font-size: 9.5px; font-weight: 700; padding: 2px 9px; border-radius: 20px; background: #1e1b4b; color: #818cf8; border: 1px solid #312e81;">NEW ✓</span>
                         </div>
-                        <span id="leadDrawerLeadCode" style="font-family: var(--brand-font-mono); font-size: 9px; font-weight: 700; color: #648781;">LEAD-PROFILE</span>
+                        <div style="display: flex; align-items: center;">
+                            <span style="width: 4px; height: 4px; border-radius: 50%; background: #CBD5E1;"></span>
+                        </div>
+                        <span id="leadDrawerLeadCode" style="font-family: var(--brand-font-mono); font-size: 9.5px; font-weight: 700; color: #648781;">LEAD-PROFILE</span>
                     </div>
                 </div>
 
@@ -588,17 +587,30 @@
 
             const lead = data.data;
 
+            const progEl = document.getElementById('leadDrawerProgram');
+            if (progEl) {
+                const pTitle = lead.program_interest || (lead.lead_type === 'general' ? 'General Admission Inquiry' : (lead.lead_type ? lead.lead_type.replace(/_/g, ' ').toUpperCase() : 'General Admission Inquiry'));
+                progEl.innerText = pTitle;
+                progEl.title = pTitle;
+            }
+
             const nameEl = document.getElementById('leadDrawerName');
-            if (nameEl) nameEl.innerText = lead.name || 'Lead Details';
+            if (nameEl) {
+                nameEl.innerText = lead.name || 'Prospective Candidate';
+                nameEl.title = lead.name || '';
+            }
             
             const emailEl = document.getElementById('leadDrawerEmail');
-            if (emailEl) emailEl.innerText = lead.email || '—';
+            if (emailEl) {
+                emailEl.innerText = lead.email || '—';
+                emailEl.title = lead.email || '';
+            }
 
             const phoneEl = document.getElementById('leadDrawerPhone');
-            if (phoneEl) phoneEl.innerText = lead.phone || '—';
-
-            const progEl = document.getElementById('leadDrawerProgram');
-            if (progEl) progEl.innerText = lead.program_interest || '—';
+            if (phoneEl) {
+                phoneEl.innerText = lead.phone || '—';
+                phoneEl.title = lead.phone || '';
+            }
 
             const captEl = document.getElementById('leadDrawerCapturedAt');
             if (captEl) {
@@ -613,52 +625,221 @@
 
             // Lead Type Badge
             const typeBadgeEl = document.getElementById('leadDrawerTypeBadge');
+            const lt = (lead.lead_type || '').toLowerCase();
+            let icon = '💬';
+            let label = 'General Inquiry';
+            let bg = '#E8F4F0';
+            let color = '#063D3B';
+            let border = '#D1E5DE';
+
+            if (lt.includes('tour')) {
+                icon = '🏛️';
+                label = 'Campus Tour';
+                bg = '#F3E8FF';
+                color = '#6B21A8';
+                border = '#D8B4FE';
+            } else if (lt.includes('scholarship')) {
+                icon = '🎓';
+                label = lead.scholarship_tier ? `Scholarship (${lead.scholarship_tier})` : 'Scholarship Eval';
+                bg = '#DCFCE7';
+                color = '#065F46';
+                border = '#86EFAC';
+            } else if (lt.includes('callback')) {
+                icon = '📞';
+                label = 'Counselor Callback';
+                bg = '#FEE2E2';
+                color = '#991B1B';
+                border = '#FECACA';
+            } else if (lt.includes('asset') || lt.includes('prospectus') || lt.includes('brochure')) {
+                icon = '📥';
+                label = 'Prospectus Request';
+                bg = '#E0F2FE';
+                color = '#075985';
+                border = '#BAE6FD';
+            } else if (lt.includes('application')) {
+                icon = '📝';
+                label = 'Application Lead';
+                bg = '#FEF3C7';
+                color = '#92400E';
+                border = '#FDE68A';
+            } else if (lead.lead_type && lead.lead_type !== 'general') {
+                label = lead.lead_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            }
+
             if (typeBadgeEl) {
-                const lt = (lead.lead_type || '').toLowerCase();
-                let icon = '💬';
-                let label = 'General Inquiry';
-                let bg = '#E8F4F0';
-                let color = '#063D3B';
-                let border = '#D1E5DE';
-
-                if (lt.includes('tour')) {
-                    icon = '🏛️';
-                    label = 'Campus Tour';
-                    bg = '#F3E8FF';
-                    color = '#6B21A8';
-                    border = '#D8B4FE';
-                } else if (lt.includes('scholarship')) {
-                    icon = '🎓';
-                    label = lead.scholarship_tier ? `Scholarship (${lead.scholarship_tier})` : 'Scholarship Eval';
-                    bg = '#DCFCE7';
-                    color = '#065F46';
-                    border = '#86EFAC';
-                } else if (lt.includes('callback')) {
-                    icon = '📞';
-                    label = 'Counselor Callback';
-                    bg = '#FEE2E2';
-                    color = '#991B1B';
-                    border = '#FECACA';
-                } else if (lt.includes('asset') || lt.includes('prospectus') || lt.includes('brochure')) {
-                    icon = '📥';
-                    label = 'Prospectus Request';
-                    bg = '#E0F2FE';
-                    color = '#075985';
-                    border = '#BAE6FD';
-                } else if (lt.includes('application')) {
-                    icon = '📝';
-                    label = 'Application Lead';
-                    bg = '#FEF3C7';
-                    color = '#92400E';
-                    border = '#FDE68A';
-                } else if (lead.lead_type && lead.lead_type !== 'general') {
-                    label = lead.lead_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                }
-
                 typeBadgeEl.style.background = bg;
                 typeBadgeEl.style.color = color;
                 typeBadgeEl.style.border = '1px solid ' + border;
                 typeBadgeEl.innerHTML = `<span>${icon}</span> <span>${label}</span>`;
+            }
+
+            // Populate Action Details in Right Stub
+            const actionContainer = document.getElementById('leadDrawerActionDetails');
+            if (actionContainer) {
+                const formatActionDate = function(dateStr) {
+                    if (!dateStr) return '—';
+                    try {
+                        const clean = String(dateStr).trim();
+                        const parts = clean.split('-');
+                        if (parts.length === 3) {
+                            const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                            const y = parts[0];
+                            const m = parseInt(parts[1], 10) - 1;
+                            const d = parseInt(parts[2], 10);
+                            if (months[m]) return `${d} ${months[m]} ${y}`;
+                        }
+                        const dObj = new Date(clean);
+                        if (!isNaN(dObj.getTime())) {
+                            return dObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                        }
+                    } catch(e) {}
+                    return dateStr;
+                };
+
+                let actionHtml = '';
+
+                if (lt.includes('tour')) {
+                    const tour = lead.tour_booking || {};
+                    let prefDate = tour.preferred_date || '';
+                    let prefTime = tour.preferred_time || '';
+                    let partySize = tour.group_size || '';
+                    let tourStatus = tour.tour_status || '';
+
+                    // Fallback to parsing notes if direct tour_booking record not populated
+                    const notes = lead.notes || '';
+                    if (!prefDate) {
+                        const mDate = notes.match(/(?:Visit Date|Tour on|Date):\s*([0-9]{4}-[0-9]{2}-[0-9]{2})/i);
+                        if (mDate) prefDate = mDate[1];
+                    }
+                    if (!prefTime) {
+                        const mTime = notes.match(/\((Morning[^\)]*|Afternoon[^\)]*|Evening[^\)]*|[0-9]{1,2}:[0-9]{2}\s*(?:AM|PM)[^\)]*)\)/i) || notes.match(/(?:Time|Slot):\s*([^\.,;\n]+)/i);
+                        if (mTime) prefTime = mTime[1];
+                    }
+                    if (!partySize) {
+                        const mParty = notes.match(/(?:Party|Group Size|Size):\s*([0-9]+)/i);
+                        if (mParty) partySize = mParty[1];
+                    }
+
+                    const displayDate = prefDate ? formatActionDate(prefDate) : 'Flexible / TBD';
+                    const displayTime = prefTime || 'Morning Slot';
+                    const displayParty = partySize ? (partySize + (parseInt(partySize, 10) === 1 ? ' Person' : ' Persons')) : '1 Person';
+                    const statusText = tourStatus ? tourStatus.toUpperCase() : (lead.status === 'converted' ? 'CONFIRMED' : 'PENDING');
+                    const isConfirmed = statusText === 'CONFIRMED' || lead.status === 'converted';
+
+                    actionHtml = `
+                        <div style="display: flex; align-items: baseline; gap: 6px;">
+                            <span style="color: #648781; font-weight: 600; font-size: 10.5px; width: 62px; flex-shrink: 0;">Visit Date:</span>
+                            <span style="font-weight: 700; color: #063D3B; font-size: 11px;">📅 ${displayDate}</span>
+                        </div>
+                        <div style="display: flex; align-items: baseline; gap: 6px;">
+                            <span style="color: #648781; font-weight: 600; font-size: 10.5px; width: 62px; flex-shrink: 0;">Time Slot:</span>
+                            <span style="font-weight: 700; color: #063D3B; font-size: 11px;">⏰ ${displayTime}</span>
+                        </div>
+                        <div style="display: flex; align-items: baseline; gap: 6px;">
+                            <span style="color: #648781; font-weight: 600; font-size: 10.5px; width: 62px; flex-shrink: 0;">Party Size:</span>
+                            <span style="font-weight: 700; color: #063D3B; font-size: 11px;">👥 ${displayParty}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px; margin-top: 1px;">
+                            <span style="color: #648781; font-weight: 600; font-size: 10.5px; width: 62px; flex-shrink: 0;">Tour Status:</span>
+                            <span class="badge" style="font-size: 9px; font-weight: 700; padding: 1.5px 7px; border-radius: 4px; ${isConfirmed ? 'background: #DCFCE7; color: #166534; border: 1px solid #BBF7D0;' : 'background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A;'}">${statusText}</span>
+                        </div>
+                    `;
+                } else if (lt.includes('callback')) {
+                    const cb = lead.callback_booking || {};
+                    let slot = cb.preferred_time_slot || '';
+                    let query = cb.topic_or_query || '';
+                    let cbStatus = cb.callback_status || '';
+
+                    const notes = lead.notes || '';
+                    if (!slot) {
+                        const mSlot = notes.match(/(?:Preferred Slot|time slot):\s*([^.\n]+)/i);
+                        if (mSlot) slot = mSlot[1].trim();
+                    }
+                    if (!query) {
+                        const mQuery = notes.match(/(?:Query|Student query):\s*([^.\n]+)/i);
+                        if (mQuery) query = mQuery[1].trim();
+                    }
+
+                    const displaySlot = slot || 'Immediate (ASAP)';
+                    const displayQuery = query || (lead.notes && !lead.notes.includes('time slot') ? lead.notes : 'General Admissions Consultation');
+                    const statusText = cbStatus ? cbStatus.toUpperCase() : (lead.status === 'converted' ? 'COMPLETED' : 'PENDING');
+                    const isDone = statusText === 'COMPLETED' || lead.status === 'converted';
+
+                    actionHtml = `
+                        <div style="display: flex; align-items: baseline; gap: 6px;">
+                            <span style="color: #648781; font-weight: 600; font-size: 10.5px; width: 62px; flex-shrink: 0;">Time Slot:</span>
+                            <span style="font-weight: 700; color: #063D3B; font-size: 11px;">⏰ ${displaySlot}</span>
+                        </div>
+                        <div style="display: flex; align-items: baseline; gap: 6px; overflow: hidden;">
+                            <span style="color: #648781; font-weight: 600; font-size: 10.5px; width: 62px; flex-shrink: 0;">Topic / Query:</span>
+                            <span style="font-weight: 600; color: #063D3B; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${displayQuery}">${displayQuery}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px; margin-top: 1px;">
+                            <span style="color: #648781; font-weight: 600; font-size: 10.5px; width: 62px; flex-shrink: 0;">Call Status:</span>
+                            <span class="badge" style="font-size: 9px; font-weight: 700; padding: 1.5px 7px; border-radius: 4px; ${isDone ? 'background: #DCFCE7; color: #166534; border: 1px solid #BBF7D0;' : 'background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A;'}">${statusText}</span>
+                        </div>
+                    `;
+                } else if (lt.includes('scholarship')) {
+                    const score = lead.academic_score || 'Not Specified';
+                    const tier = lead.scholarship_tier || 'Merit Evaluation';
+                    const waiver = lead.estimated_waiver_amount ? ('₹ ' + Number(lead.estimated_waiver_amount).toLocaleString() + ' / yr') : 'Calculated in Consultation';
+
+                    actionHtml = `
+                        <div style="display: flex; align-items: baseline; gap: 6px;">
+                            <span style="color: #648781; font-weight: 600; font-size: 10.5px; width: 62px; flex-shrink: 0;">Score / Test:</span>
+                            <span style="font-weight: 700; color: #063D3B; font-size: 11px;">🎯 ${score}</span>
+                        </div>
+                        <div style="display: flex; align-items: baseline; gap: 6px; overflow: hidden;">
+                            <span style="color: #648781; font-weight: 600; font-size: 10.5px; width: 62px; flex-shrink: 0;">Award Tier:</span>
+                            <span style="font-weight: 700; color: #059669; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${tier}">🏆 ${tier}</span>
+                        </div>
+                        <div style="display: flex; align-items: baseline; gap: 6px;">
+                            <span style="color: #648781; font-weight: 600; font-size: 10.5px; width: 62px; flex-shrink: 0;">Est. Waiver:</span>
+                            <span style="font-weight: 700; color: #0284C7; font-size: 11px;">💰 ${waiver}</span>
+                        </div>
+                    `;
+                } else if (lt.includes('asset') || lt.includes('prospectus') || lt.includes('brochure')) {
+                    const assetName = lead.program_interest || 'Campus Prospectus & Course Guide';
+                    actionHtml = `
+                        <div style="display: flex; align-items: baseline; gap: 6px; overflow: hidden;">
+                            <span style="color: #648781; font-weight: 600; font-size: 10.5px; width: 62px; flex-shrink: 0;">Asset:</span>
+                            <span style="font-weight: 700; color: #063D3B; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${assetName}">📄 ${assetName}</span>
+                        </div>
+                        <div style="display: flex; align-items: baseline; gap: 6px;">
+                            <span style="color: #648781; font-weight: 600; font-size: 10.5px; width: 62px; flex-shrink: 0;">Channel:</span>
+                            <span style="font-weight: 700; color: #075985; font-size: 11px;">📥 Email &amp; Download</span>
+                        </div>
+                        <div style="display: flex; align-items: baseline; gap: 6px; margin-top: 1px;">
+                            <span style="color: #648781; font-weight: 600; font-size: 10.5px; width: 62px; flex-shrink: 0;">Delivery:</span>
+                            <span class="badge" style="font-size: 9px; font-weight: 700; padding: 1.5px 7px; border-radius: 4px; background: #DCFCE7; color: #166534; border: 1px solid #BBF7D0;">DISPATCHED ✓</span>
+                        </div>
+                    `;
+                } else {
+                    const level = lead.program_level || 'Postgrad';
+                    const source = lead.acquisition_source || 'Website AI Chatbot';
+                    const score = lead.conversion_score ? `${lead.conversion_score}/100` : null;
+                    actionHtml = `
+                        <div style="display: flex; align-items: baseline; gap: 6px;">
+                            <span style="color: #648781; font-weight: 600; font-size: 10.5px; width: 62px; flex-shrink: 0;">Level:</span>
+                            <span style="font-weight: 700; color: #063D3B; font-size: 11px;">🎓 ${level}</span>
+                        </div>
+                        <div style="display: flex; align-items: baseline; gap: 6px; overflow: hidden;">
+                            <span style="color: #648781; font-weight: 600; font-size: 10.5px; width: 62px; flex-shrink: 0;">Source:</span>
+                            <span style="font-weight: 600; color: #063D3B; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${source}">🌐 ${source}</span>
+                        </div>
+                        ${score ? `
+                        <div style="display: flex; align-items: baseline; gap: 6px;">
+                            <span style="color: #648781; font-weight: 600; font-size: 10.5px; width: 62px; flex-shrink: 0;">Intent:</span>
+                            <span style="font-weight: 700; color: #059669; font-size: 11px;">⚡ Score ${score}</span>
+                        </div>` : `
+                        <div style="display: flex; align-items: baseline; gap: 6px;">
+                            <span style="color: #648781; font-weight: 600; font-size: 10.5px; width: 62px; flex-shrink: 0;">Pipeline:</span>
+                            <span style="font-weight: 700; color: #063D3B; font-size: 11px;">Active Candidate</span>
+                        </div>`}
+                    `;
+                }
+
+                actionContainer.innerHTML = actionHtml;
             }
 
             const levelEl = document.getElementById('leadDrawerLevel');
