@@ -674,8 +674,8 @@
                 const data = await res.json();
                 if (data.status === 'success') {
                     showToast('Lead record permanently erased (Right to Erasure compliance).', 'success');
-                    if (activeEditingLeadId === leadId) {
-                        closeLeadModal();
+                    if (typeof closeLeadDrawer === 'function') {
+                        closeLeadDrawer();
                     }
                     await loadLeads();
                 } else {
