@@ -3276,6 +3276,12 @@ select.brand-input option {
     #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="scholarships"]:not(.active):hover {
       background: rgba(20, 184, 166, 0.08) !important;
     }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="lead_magnets"]:not(.active):hover {
+      background: rgba(168, 85, 247, 0.08) !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="general_inquiries"]:not(.active):hover {
+      background: rgba(14, 165, 233, 0.08) !important;
+    }
     #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="all"].active {
       background: #EBF4F0 !important;
       color: #063D3B !important;
@@ -3355,6 +3361,26 @@ select.brand-input option {
     #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="scholarships"].active .ckh-tab-count {
       background: rgba(13, 148, 136, 0.18) !important;
       color: #0F766E !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="lead_magnets"].active {
+      background: #FAF5FF !important;
+      color: #7E22CE !important;
+      border-color: #E9D5FF !important;
+      font-weight: 700 !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="lead_magnets"].active .ckh-tab-count {
+      background: rgba(168, 85, 247, 0.18) !important;
+      color: #7E22CE !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="general_inquiries"].active {
+      background: #F0F9FF !important;
+      color: #0369A1 !important;
+      border-color: #BAE6FD !important;
+      font-weight: 700 !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="general_inquiries"].active .ckh-tab-count {
+      background: rgba(14, 165, 233, 0.18) !important;
+      color: #0369A1 !important;
     }
 
     .ckh-search-box {

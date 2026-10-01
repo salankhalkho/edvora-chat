@@ -351,6 +351,10 @@
                     return lType.includes('tour');
                 } else if (filterKey === 'scholarships') {
                     return lType.includes('scholarship') || (lead.scholarship_tier && lead.scholarship_tier.trim() !== '');
+                } else if (filterKey === 'lead_magnets') {
+                    return lType.includes('asset') || lType.includes('prospectus') || lType.includes('brochure');
+                } else if (filterKey === 'general_inquiries') {
+                    return !(lType === 'scholarship_eval' || lType.includes('scholarship') || lType.includes('callback') || lType.includes('tour') || lType.includes('asset') || lType.includes('prospectus') || lType.includes('brochure') || (lead.scholarship_tier && lead.scholarship_tier.trim() !== ''));
                 }
 
                 return true; // 'all'
@@ -370,6 +374,14 @@
             const countCallbacks = leadsScope.filter(l => (l.lead_type || '').toLowerCase().includes('callback')).length;
             const countTours = leadsScope.filter(l => (l.lead_type || '').toLowerCase().includes('tour')).length;
             const countSch = leadsScope.filter(l => (l.lead_type || '').toLowerCase().includes('scholarship') || (l.scholarship_tier && l.scholarship_tier.trim() !== '')).length;
+            const countMagnets = leadsScope.filter(l => {
+                const lt = (l.lead_type || '').toLowerCase();
+                return lt.includes('asset') || lt.includes('prospectus') || lt.includes('brochure');
+            }).length;
+            const countGeneral = leadsScope.filter(l => {
+                const lt = (l.lead_type || '').toLowerCase();
+                return !(lt === 'scholarship_eval' || lt.includes('scholarship') || lt.includes('callback') || lt.includes('tour') || lt.includes('asset') || lt.includes('prospectus') || lt.includes('brochure') || (l.scholarship_tier && l.scholarship_tier.trim() !== ''));
+            }).length;
 
             const elAll = document.getElementById('leadsTabCountAll');
             if (elAll) elAll.innerText = countAll;
@@ -387,6 +399,10 @@
             if (elTour) elTour.innerText = countTours;
             const elSch = document.getElementById('leadsTabCountScholarships');
             if (elSch) elSch.innerText = countSch;
+            const elMagnets = document.getElementById('leadsTabCountLeadMagnets');
+            if (elMagnets) elMagnets.innerText = countMagnets;
+            const elGeneral = document.getElementById('leadsTabCountGeneralInquiries');
+            if (elGeneral) elGeneral.innerText = countGeneral;
         }
 
         function setLeadsStatusFilter(filterKey, el) {

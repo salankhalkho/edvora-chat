@@ -9780,6 +9780,8 @@ echo $response['reply'];
                 if (filterKey === 'callbacks') return lType.includes('callback');
                 if (filterKey === 'campus_tours') return lType.includes('tour');
                 if (filterKey === 'scholarships') return lType.includes('scholarship') || (lead.scholarship_tier && lead.scholarship_tier.trim() !== '');
+                if (filterKey === 'lead_magnets') return lType.includes('asset') || lType.includes('prospectus') || lType.includes('brochure');
+                if (filterKey === 'general_inquiries') return !(lType === 'scholarship_eval' || lType.includes('scholarship') || lType.includes('callback') || lType.includes('tour') || lType.includes('asset') || lType.includes('prospectus') || lType.includes('brochure') || (lead.scholarship_tier && lead.scholarship_tier.trim() !== ''));
 
                 return true; // 'all'
             });
@@ -9798,6 +9800,14 @@ echo $response['reply'];
             const countCallbacks = leadsScope.filter(l => (l.lead_type || '').toLowerCase().includes('callback')).length;
             const countTours = leadsScope.filter(l => (l.lead_type || '').toLowerCase().includes('tour')).length;
             const countSch = leadsScope.filter(l => (l.lead_type || '').toLowerCase().includes('scholarship') || (l.scholarship_tier && l.scholarship_tier.trim() !== '')).length;
+            const countMagnets = leadsScope.filter(l => {
+                const lt = (l.lead_type || '').toLowerCase();
+                return lt.includes('asset') || lt.includes('prospectus') || lt.includes('brochure');
+            }).length;
+            const countGeneral = leadsScope.filter(l => {
+                const lt = (l.lead_type || '').toLowerCase();
+                return !(lt === 'scholarship_eval' || lt.includes('scholarship') || lt.includes('callback') || lt.includes('tour') || lt.includes('asset') || lt.includes('prospectus') || lt.includes('brochure') || (l.scholarship_tier && l.scholarship_tier.trim() !== ''));
+            }).length;
 
             const setCount = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
             setCount('leadsTabCountAll', countAll);
@@ -9808,6 +9818,8 @@ echo $response['reply'];
             setCount('leadsTabCountCallbacks', countCallbacks);
             setCount('leadsTabCountTours', countTours);
             setCount('leadsTabCountScholarships', countSch);
+            setCount('leadsTabCountLeadMagnets', countMagnets);
+            setCount('leadsTabCountGeneralInquiries', countGeneral);
         }
 
         function setLeadsStatusFilter(filterKey, el) {

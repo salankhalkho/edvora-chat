@@ -190,8 +190,8 @@
             </div>
 
             <!-- FILTER & SEARCH TOOLBAR -->
-            <div class="ckh-toolbar">
-                <div class="ckh-tabs-group" id="leadsStatusTabsContainer">
+            <div class="ckh-toolbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 12px !important; padding: 12px 20px !important;">
+                <div class="ckh-tabs-group" id="leadsStatusTabsContainer" style="display: flex !important; align-items: center !important; gap: 4px !important; flex-wrap: wrap !important; flex: 1 1 auto !important; min-width: 0 !important;">
                     <button class="ckh-tab-btn active" data-leads-filter="all" onclick="setLeadsStatusFilter('all', this)">
                         <span>All Leads</span>
                         <span class="ckh-tab-count" id="leadsTabCountAll">0</span>
@@ -231,31 +231,28 @@
                         <span>Scholarships</span>
                         <span class="ckh-tab-count" id="leadsTabCountScholarships" style="background: rgba(20, 184, 166, 0.12); color: #0F766E;">0</span>
                     </button>
+                    <button class="ckh-tab-btn" data-leads-filter="lead_magnets" onclick="setLeadsStatusFilter('lead_magnets', this)" style="color: #9333EA;">
+                        <span style="width:6px; height:6px; border-radius:50%; background:#A855F7; display:inline-block;"></span>
+                        <span>Lead Magnets</span>
+                        <span class="ckh-tab-count" id="leadsTabCountLeadMagnets" style="background: rgba(168, 85, 247, 0.12); color: #7E22CE;">0</span>
+                    </button>
+                    <button class="ckh-tab-btn" data-leads-filter="general_inquiries" onclick="setLeadsStatusFilter('general_inquiries', this)" style="color: #0284C7;">
+                        <span style="width:6px; height:6px; border-radius:50%; background:#0EA5E9; display:inline-block;"></span>
+                        <span>General Inquiries</span>
+                        <span class="ckh-tab-count" id="leadsTabCountGeneralInquiries" style="background: rgba(14, 165, 233, 0.12); color: #0369A1;">0</span>
+                    </button>
                 </div>
 
-                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                    <!-- Department Filter Dropdown (Deprecated / Hidden) -->
-                    <select id="leadsDeptFilter" style="display: none;" onchange="filterLeadsTable()">
-                        <option value="all">All Departments</option>
-                    </select>
-
-                    <!-- Type / Intent Filter Dropdown -->
-                    <select id="leadsTypeFilter" onchange="filterLeadsTable()" style="font-size: 11.5px; font-weight: 600; color: #063D3B; background: #ffffff; border: 1.5px solid #D1E5DE; border-radius: 8px; padding: 6px 12px; outline: none; cursor: pointer;">
-                        <option value="all">All Lead Types</option>
-                        <option value="general">General Inquiries</option>
-                        <option value="callback">Counselor Callbacks</option>
-                        <option value="tour">Campus Tours</option>
-                        <option value="scholarship">Scholarship Inquiries</option>
-                        <option value="asset">Lead Magnets / Documents</option>
-                    </select>
-
-                    <!-- Search Input -->
-                    <div class="ckh-search-box" style="flex: 1; min-width: 260px;">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#648781" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                        <input type="text" id="leadsSearchInput" class="ckh-search-input" placeholder="Search student name, email, phone, program, notes..." oninput="filterLeadsTable()" style="width: 100%;">
-                        <span style="font-size: 9.5px; font-family: 'JetBrains Mono', monospace; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: #F1F7F4; color: #648781; border: 1px solid #DCE9E5;">⌘K</span>
-                    </div>
+                <!-- Search Input Box (Consolidated in top row) -->
+                <div class="ckh-search-box" style="flex: 0 0 280px; min-width: 240px; max-width: 320px; margin-left: auto;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#648781" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" id="leadsSearchInput" class="ckh-search-input" placeholder="Search student name, email, phone, program, notes..." oninput="filterLeadsTable()" style="width: 100%;">
+                    <span style="font-size: 9.5px; font-family: 'JetBrains Mono', monospace; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: #F1F7F4; color: #648781; border: 1px solid #DCE9E5;">⌘K</span>
                 </div>
+
+                <!-- Hidden Filter Fallbacks for script compatibility -->
+                <select id="leadsDeptFilter" style="display: none;" onchange="filterLeadsTable()"><option value="all">All Departments</option></select>
+                <select id="leadsTypeFilter" style="display: none;" onchange="filterLeadsTable()"><option value="all">All Lead Types</option></select>
             </div>
 
             <!-- Table Container -->
