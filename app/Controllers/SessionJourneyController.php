@@ -263,7 +263,7 @@ class SessionJourneyController
                     COALESCE(SUM(CASE WHEN vs.conversion_status = 'lead_converted' THEN 1 ELSE 0 END), 0) as conversions
                 FROM visitor_sessions vs
                 WHERE {$whereSql}
-                GROUP BY source
+                GROUP BY COALESCE(NULLIF(vs.utm_source, ''), 'Direct / Organic')
                 ORDER BY session_count DESC
                 LIMIT 5
             ");
@@ -275,27 +275,23 @@ class SessionJourneyController
                 vs.id, vs.organization_id, vs.session_id, vs.visitor_id,
                 vs.referrer, vs.utm_source, vs.utm_medium, vs.utm_campaign,
                 vs.entry_page, vs.exit_page, vs.total_pages, vs.total_dwell_seconds,
-                vs.conversion_status, vs.converted_at, vs.started_at, vs.last_active_at
+                vs.conversion_status, vs.converted_at, vs.started_at, vs.last_active_at,
+                (SELECT l.name FROM leads l WHERE l.session_id = vs.session_id ORDER BY l.id DESC LIMIT 1) as lead_name,
+                (SELECT l.email FROM leads l WHERE l.session_id = vs.session_id ORDER BY l.id DESC LIMIT 1) as lead_email,
+                (SELECT l.phone FROM leads l WHERE l.session_id = vs.session_id ORDER BY l.id DESC LIMIT 1) as lead_phone,
+                (SELECT l.program_interest FROM leads l WHERE l.session_id = vs.session_id ORDER BY l.id DESC LIMIT 1) as lead_program
             ";
 
             if ($isSuperAdmin) {
-                $selectFields .= ", o.name as org_name, o.slug as org_slug";
-            }
-
-            // Left join with leads to bring forward contact details if converted
-            $selectFields .= ", l.name as lead_name, l.email as lead_email, l.phone as lead_phone, l.program_interest as lead_program";
-
-            $joinSql = "LEFT JOIN leads l ON (l.session_id = vs.session_id)";
-            if ($isSuperAdmin) {
-                $joinSql .= " LEFT JOIN organizations o ON vs.organization_id = o.id";
+                $selectFields .= ",
+                    (SELECT o.name FROM organizations o WHERE o.id = vs.organization_id LIMIT 1) as org_name,
+                    (SELECT o.slug FROM organizations o WHERE o.id = vs.organization_id LIMIT 1) as org_slug";
             }
 
             $sessionsSql = "
                 SELECT {$selectFields}
                 FROM visitor_sessions vs
-                {$joinSql}
                 WHERE {$whereSql}
-                GROUP BY vs.id
                 ORDER BY vs.started_at DESC
                 LIMIT :limit OFFSET :offset
             ";
@@ -348,10 +344,12 @@ class SessionJourneyController
             // 1. Fetch Session Record
             $sessSql = "
                 SELECT vs.*, o.name as org_name,
-                       l.name as lead_name, l.email as lead_email, l.phone as lead_phone, l.program_interest as lead_program
+                       (SELECT l.name FROM leads l WHERE l.session_id = vs.session_id ORDER BY l.id DESC LIMIT 1) as lead_name,
+                       (SELECT l.email FROM leads l WHERE l.session_id = vs.session_id ORDER BY l.id DESC LIMIT 1) as lead_email,
+                       (SELECT l.phone FROM leads l WHERE l.session_id = vs.session_id ORDER BY l.id DESC LIMIT 1) as lead_phone,
+                       (SELECT l.program_interest FROM leads l WHERE l.session_id = vs.session_id ORDER BY l.id DESC LIMIT 1) as lead_program
                 FROM visitor_sessions vs
                 LEFT JOIN organizations o ON vs.organization_id = o.id
-                LEFT JOIN leads l ON (l.session_id = vs.session_id)
                 WHERE vs.session_id = :sid
             ";
             if ($orgId !== null && !$isSuperAdmin) {
@@ -859,7 +857,10 @@ class SessionJourneyController
                     MAX(vs.started_at) as last_session_at
                 FROM visitor_sessions vs
                 WHERE {$whereSql}
-                GROUP BY source, medium, campaign
+                GROUP BY 
+                    COALESCE(NULLIF(vs.utm_source, ''), CASE WHEN vs.referrer IS NOT NULL AND vs.referrer != '' THEN 'Referral' ELSE 'Direct / Organic' END),
+                    COALESCE(NULLIF(vs.utm_medium, ''), '-'),
+                    COALESCE(NULLIF(vs.utm_campaign, ''), '-')
                 ORDER BY {$orderBy}
                 LIMIT :limit OFFSET :offset
             ");

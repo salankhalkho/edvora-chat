@@ -343,7 +343,13 @@
             const data = await res.json();
 
             if (data.status !== 'success' || !data.data) {
-                if (tbody) tbody.innerHTML = `<tr><td colspan="8" style="padding: 24px; text-align: center; color: #EF4444;">Failed to load journeys: ${data.message || 'Unknown error'}</td></tr>`;
+                if (tbody) tbody.innerHTML = `<tr><td colspan="8" style="padding: 24px; text-align: center; color: #EF4444;">Failed to load journeys: ${escapeHtml(data.message || 'Unknown error')}</td></tr>`;
+                const topPagesEl = document.getElementById('topPagesList');
+                if (topPagesEl) topPagesEl.innerHTML = '<div style="font-size: 11.5px; color: #9CA3AF; text-align: center; padding: 10px;">No page data available.</div>';
+                const topExitEl = document.getElementById('topExitList');
+                if (topExitEl) topExitEl.innerHTML = '<div style="font-size: 11.5px; color: #9CA3AF; text-align: center; padding: 10px;">No exit data available.</div>';
+                const topSourcesEl = document.getElementById('topSourcesList');
+                if (topSourcesEl) topSourcesEl.innerHTML = '<div style="font-size: 11.5px; color: #9CA3AF; text-align: center; padding: 10px;">No source data available.</div>';
                 return;
             }
 
@@ -494,6 +500,12 @@
         } catch (e) {
             console.error('[SessionJourneys] error loading:', e);
             if (tbody) tbody.innerHTML = `<tr><td colspan="8" style="padding: 24px; text-align: center; color: #EF4444;">Exception while loading journeys.</td></tr>`;
+            const topPagesEl = document.getElementById('topPagesList');
+            if (topPagesEl) topPagesEl.innerHTML = '<div style="font-size: 11.5px; color: #9CA3AF; text-align: center; padding: 10px;">Unable to load data.</div>';
+            const topExitEl = document.getElementById('topExitList');
+            if (topExitEl) topExitEl.innerHTML = '<div style="font-size: 11.5px; color: #9CA3AF; text-align: center; padding: 10px;">Unable to load data.</div>';
+            const topSourcesEl = document.getElementById('topSourcesList');
+            if (topSourcesEl) topSourcesEl.innerHTML = '<div style="font-size: 11.5px; color: #9CA3AF; text-align: center; padding: 10px;">Unable to load data.</div>';
         }
     }
 

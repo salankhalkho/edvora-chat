@@ -485,4 +485,18 @@ class AssetController
             'email_masked' => $maskedEmail
         ], 'Asset delivery initiated.');
     }
+
+    /**
+     * Format bytes to human readable string (e.g. 2.4 MB, 500 KB).
+     */
+    private function formatBytes(int $bytes): string
+    {
+        if ($bytes >= 1048576) {
+            return number_format($bytes / 1048576, 2) . ' MB';
+        }
+        if ($bytes >= 1024) {
+            return number_format($bytes / 1024, 1) . ' KB';
+        }
+        return $bytes . ' B';
+    }
 }
