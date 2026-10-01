@@ -149,7 +149,7 @@ class Migrations
                 phone VARCHAR(50) NULL,
                 program_interest VARCHAR(255) NULL,
                 notes TEXT NULL,
-                status ENUM('new', 'contacted', 'converted') DEFAULT 'new',
+                status ENUM('new', 'contacted', 'converted', 'lost') DEFAULT 'new',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE
@@ -1824,6 +1824,13 @@ class Migrations
             $this->db->exec("UPDATE organizations SET institute_id = MD5(CAST(id AS CHAR)) WHERE institute_id IS NULL OR institute_id = '';");
         } catch (Throwable $e) {
             error_log('[Migrations] organizations.institute_id: ' . $e->getMessage());
+        }
+
+        // Expand leads.status ENUM to include 'lost'
+        try {
+            $this->db->exec("ALTER TABLE leads MODIFY COLUMN status ENUM('new', 'contacted', 'converted', 'lost') DEFAULT 'new';");
+        } catch (Throwable $e) {
+            error_log('[Migrations] leads.status enum expand: ' . $e->getMessage());
         }
     }
 }

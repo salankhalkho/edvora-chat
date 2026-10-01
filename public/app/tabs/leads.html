@@ -211,6 +211,11 @@
                         <span>Converted</span>
                         <span class="ckh-tab-count" id="leadsTabCountConverted" style="background: rgba(16, 185, 129, 0.12); color: #047857;">0</span>
                     </button>
+                    <button class="ckh-tab-btn" data-leads-filter="lost" onclick="setLeadsStatusFilter('lost', this)" style="color: #64748B;">
+                        <span style="width:6px; height:6px; border-radius:50%; background:#94A3B8; display:inline-block;"></span>
+                        <span>Lost</span>
+                        <span class="ckh-tab-count" id="leadsTabCountLost" style="background: rgba(148, 163, 184, 0.15); color: #64748B;">0</span>
+                    </button>
                     <button class="ckh-tab-btn" data-leads-filter="callbacks" onclick="setLeadsStatusFilter('callbacks', this)" style="color: #E11D48;">
                         <span style="width:6px; height:6px; border-radius:50%; background:#F43F5E; display:inline-block;"></span>
                         <span>Callbacks</span>
@@ -435,6 +440,7 @@
                             <option value="new">🔵 New (Needs Contact)</option>
                             <option value="contacted">🟡 Contacted / In Follow-up</option>
                             <option value="converted">🟢 Converted / Admitted</option>
+                            <option value="lost">⚪ Lost (Closed / Unconverted)</option>
                         </select>
                     </div>
                 </div>
@@ -882,7 +888,9 @@
                     ? 'background: #022c22; color: #34D399; border: 1px solid #065f46; font-size: 9.5px; font-weight: 700; padding: 2px 9px; border-radius: 20px;'
                     : (lead.status === 'contacted'
                         ? 'background: #451a03; color: #fbbf24; border: 1px solid #78350f; font-size: 9.5px; font-weight: 700; padding: 2px 9px; border-radius: 20px;'
-                        : 'background: #1e1b4b; color: #818cf8; border: 1px solid #312e81; font-size: 9.5px; font-weight: 700; padding: 2px 9px; border-radius: 20px;');
+                        : (lead.status === 'lost'
+                            ? 'background: #1e293b; color: #94a3b8; border: 1px solid #334155; font-size: 9.5px; font-weight: 700; padding: 2px 9px; border-radius: 20px;'
+                            : 'background: #1e1b4b; color: #818cf8; border: 1px solid #312e81; font-size: 9.5px; font-weight: 700; padding: 2px 9px; border-radius: 20px;'));
             }
 
             // Populate Staff dropdown

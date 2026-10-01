@@ -343,6 +343,8 @@
                     return status === 'contacted';
                 } else if (filterKey === 'converted') {
                     return status === 'converted';
+                } else if (filterKey === 'lost') {
+                    return status === 'lost';
                 } else if (filterKey === 'callbacks') {
                     return lType.includes('callback');
                 } else if (filterKey === 'campus_tours') {
@@ -364,6 +366,7 @@
             const countNew = leadsScope.filter(l => (l.status || 'new').toLowerCase() === 'new').length;
             const countContacted = leadsScope.filter(l => (l.status || '').toLowerCase() === 'contacted').length;
             const countConverted = leadsScope.filter(l => (l.status || '').toLowerCase() === 'converted').length;
+            const countLost = leadsScope.filter(l => (l.status || '').toLowerCase() === 'lost').length;
             const countCallbacks = leadsScope.filter(l => (l.lead_type || '').toLowerCase().includes('callback')).length;
             const countTours = leadsScope.filter(l => (l.lead_type || '').toLowerCase().includes('tour')).length;
             const countSch = leadsScope.filter(l => (l.lead_type || '').toLowerCase().includes('scholarship') || (l.scholarship_tier && l.scholarship_tier.trim() !== '')).length;
@@ -376,6 +379,8 @@
             if (elCont) elCont.innerText = countContacted;
             const elConv = document.getElementById('leadsTabCountConverted');
             if (elConv) elConv.innerText = countConverted;
+            const elLost = document.getElementById('leadsTabCountLost');
+            if (elLost) elLost.innerText = countLost;
             const elCb = document.getElementById('leadsTabCountCallbacks');
             if (elCb) elCb.innerText = countCallbacks;
             const elTour = document.getElementById('leadsTabCountTours');
@@ -480,10 +485,12 @@
                 tbody.innerHTML = pageData.map(lead => {
                     const dateStr = formatToIST(lead.created_at);
                     const statusBadge = lead.status === 'converted'
-                        ? '<span class="badge" style="background: rgba(52, 211, 153, 0.12); color: var(--brand-emerald-400); border: 1px solid rgba(52, 211, 153, 0.25); white-space: nowrap;">â— Converted</span>'
+                        ? '<span class="badge" style="background: rgba(52, 211, 153, 0.12); color: var(--brand-emerald-400); border: 1px solid rgba(52, 211, 153, 0.25); white-space: nowrap;">● Converted</span>'
                         : (lead.status === 'contacted'
-                            ? '<span class="badge" style="background: rgba(251, 191, 36, 0.12); color: var(--brand-amber-400); border: 1px solid rgba(251, 191, 36, 0.25); white-space: nowrap;">â— Contacted</span>'
-                            : '<span class="badge" style="background: rgba(99, 102, 241, 0.12); color: var(--brand-indigo-400); border: 1px solid rgba(99, 102, 241, 0.25); white-space: nowrap;">â— New</span>');
+                            ? '<span class="badge" style="background: rgba(251, 191, 36, 0.12); color: var(--brand-amber-400); border: 1px solid rgba(251, 191, 36, 0.25); white-space: nowrap;">● Contacted</span>'
+                            : (lead.status === 'lost'
+                                ? '<span class="badge" style="background: rgba(148, 163, 184, 0.12); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.25); white-space: nowrap;">● Lost</span>'
+                                : '<span class="badge" style="background: rgba(99, 102, 241, 0.12); color: var(--brand-indigo-400); border: 1px solid rgba(99, 102, 241, 0.25); white-space: nowrap;">● New</span>'));
 
                     const deptBadge = lead.department_name
                         ? `<span style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--brand-cyan-400); background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); padding: 2px 8px; border-radius: 12px; white-space: nowrap;">

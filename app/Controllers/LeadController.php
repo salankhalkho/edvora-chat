@@ -475,7 +475,7 @@ class LeadController
             Response::error('Lead not found.', 404);
         }
 
-        $status = in_array($data['status'] ?? '', ['new', 'contacted', 'converted']) ? $data['status'] : 'new';
+        $status = in_array($data['status'] ?? '', ['new', 'contacted', 'converted', 'lost']) ? $data['status'] : 'new';
         $notes = $data['notes'] ?? null;
         $assignedUserId = isset($data['assigned_user_id']) ? ($data['assigned_user_id'] ? (int)$data['assigned_user_id'] : null) : null;
 
