@@ -32,10 +32,24 @@ class Request
     private function extractHeaders(): array
     {
         $headers = [];
+        if (function_exists('getallheaders')) {
+            $all = getallheaders();
+            if (is_array($all)) {
+                foreach ($all as $k => $v) {
+                    $headerName = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', $k))));
+                    $headers[$headerName] = $v;
+                }
+            }
+        }
         foreach ($_SERVER as $key => $value) {
             if (str_starts_with($key, 'HTTP_')) {
                 $headerName = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($key, 5)))));
                 $headers[$headerName] = $value;
+            } elseif (str_starts_with($key, 'REDIRECT_HTTP_')) {
+                $headerName = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($key, 14)))));
+                if (!isset($headers[$headerName])) {
+                    $headers[$headerName] = $value;
+                }
             }
         }
         if (isset($_SERVER['CONTENT_TYPE'])) {
@@ -43,6 +57,11 @@ class Request
         }
         if (isset($_SERVER['CONTENT_LENGTH'])) {
             $headers['Content-Length'] = $_SERVER['CONTENT_LENGTH'];
+        }
+        if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+            $headers['Authorization'] = $_SERVER['HTTP_AUTHORIZATION'];
+        } elseif (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+            $headers['Authorization'] = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
         }
         return $headers;
     }
@@ -70,6 +89,12 @@ class Request
     public function getBearerToken(): ?string
     {
         $authHeader = $this->getHeader('Authorization');
+        if (!$authHeader && isset($_SERVER['HTTP_AUTHORIZATION'])) {
+            $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
+        }
+        if (!$authHeader && isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+            $authHeader = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+        }
         if ($authHeader && preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
             return trim($matches[1]);
         }

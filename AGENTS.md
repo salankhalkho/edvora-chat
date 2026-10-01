@@ -11,14 +11,14 @@
 ### 1. ⚠️ LOCAL ENVIRONMENT: NO LOCAL PHP / NO LOCAL MYSQL
 * **There is NO local PHP installation.** The `php` command does NOT exist in the local Windows shell. Never attempt to run local `php` CLI commands or PHP dev servers.
 * **There is NO local MySQL database.** Local XAMPP MySQL is obsolete and must never be started or connected to.
-* All PHP execution, unit testing, migrations, and database operations run **exclusively on the remote production VPS** (`166.1.2.112`).
+* All PHP execution, unit testing, migrations, and database operations run **exclusively on the remote production VPS** (`62.171.145.160`).
 
 ### 2. 🚀 MANDATORY PRODUCTION DEPLOYMENT & GITHUB SYNC
 * **Automated Unified Deployment Script:** Always deploy using the master script:
   ```powershell
   powershell -ExecutionPolicy Bypass -File .\deploy.ps1 -Message "your commit message"
   ```
-  This script atomically packages the project, deploys with `sudo tar` to the VPS (`166.1.2.112`), runs migrations, sets file ownership (`critical:www-data`), reloads Apache, verifies live HTTP response, and pushes to GitHub (`origin/main`).
+  This script atomically packages the project, deploys to the VPS (`62.171.145.160`), runs migrations, sets file ownership (`projects:www-data`), reloads Apache, verifies live HTTP response, and pushes to GitHub (`origin/main`).
 * **Never separate VPS deployment and GitHub sync:** They must always occur together.
 * **Never declare a task or fix complete until it is deployed to the live production server and verified.**
 * Make all edits locally in `c:\xampp\htdocs\edvora.chat\`, then **immediately deploy** using `deploy.ps1`.
@@ -28,11 +28,11 @@
 * **DO NOT** prompt or ask the user for permission to run standard deployment, testing, or editing commands. Proceed autonomously.
 * *Only* ask for permission for destructive, irreversible data loss actions (e.g. dropping entire production tables).
 
-### 4. 🔒 SHARED VPS SAFETY & ISOLATION (`166.1.2.112`)
-The production VPS hosts multiple other live domains (`agenticactivity.com`, `kidhealthcenter.com`, `legalcomplianceindia.com`, etc.).
+### 4. 🔒 SHARED VPS SAFETY & ISOLATION (`62.171.145.160`)
+The production VPS hosts multiple other live domains (`criticalbuzzer.com`, `kidhealthcenter.com`, `legalcomplianceindia.com`, `greencorners.in`, etc.).
 * **Strict Path Scope:** You may ONLY create, read, edit, or delete files inside `/var/www/edvora.chat/`. Never touch anything outside this folder.
 * **Database Isolation:** Connect ONLY to database `edvora_chat`. Never touch or query any other database.
-* **Web Server:** Production uses **Apache 2.4** with PHP-FPM 8.2 (`unix:/run/php/php8.2-fpm.sock`). Always use `sudo systemctl reload apache2` (never restart unless necessary).
+* **Web Server:** Production uses **Apache 2.4** with PHP-FPM 8.3 (`unix:/run/php/php8.3-fpm.sock`). Always use `systemctl reload apache2` (never restart unless necessary).
 
 ### 5. 📐 ARCHITECTURE & DESIGN COMPLIANCE
 * **Architecture Rules:** Always consult [`architecture.md`](file:///c:/xampp/htdocs/edvora.chat/architecture.md) before refactoring, fixing bugs, or implementing sub-system features.
@@ -49,19 +49,18 @@ powershell -ExecutionPolicy Bypass -File .\deploy.ps1 -Message "feat/fix: descri
 ```
 
 ### Manual Fallback (If Running Step-by-Step):
-If executing manually, you MUST use `sudo` for `tar` extraction so existing files owned by `www-data` are cleanly overwritten:
 1. **Package:**
    ```powershell
-   tar.exe -czvf deploy_package.tar.gz app public workers BRANDING_GUIDELINES.md theme-branding.css AGENTS.md architecture.md architecture_chatbot.md architecture_department_team_management.md migrate.php deploy.ps1
+   tar.exe -czvf deploy_package.tar.gz app public workers BRANDING_GUIDELINES.md theme-branding.css AGENTS.md architecture.md architecture_chatbot.md architecture_domain_whitelisting.md architecture_department_team_management.md migrate.php deploy.ps1
    ```
 2. **Upload (MANDATORY: Always use `-O` and `-o BatchMode=yes`):**
    ```powershell
-   scp -O -i "C:/Users/Salan Khalkho/.ssh/id_ed25519" -o BatchMode=yes -o StrictHostKeyChecking=no deploy_package.tar.gz critical@166.1.2.112:/tmp/deploy_package.tar.gz
+   scp -O -i "C:/Users/Salan Khalkho/.ssh/id_ed25519" -o BatchMode=yes -o StrictHostKeyChecking=no deploy_package.tar.gz root@62.171.145.160:/tmp/deploy_package.tar.gz
    ```
    > ⚠️ **CRITICAL OPENSSH / SCP RULE (NEVER OMIT `-O`):** OpenSSH 9.0+ defaults to SFTP mode. In headless Windows background execution, SFTP buffering stalls and hangs for 30+ minutes. The `-O` flag forces the legacy SCP protocol, which uploads the 3 MB package in under 3 seconds!
-3. **Root Extract, Migrate, Chown, Supervisor Worker Restart & Reload:**
+3. **Extract, Migrate, Chown, Supervisor Worker Restart & Reload:**
    ```powershell
-   ssh -i "C:/Users/Salan Khalkho/.ssh/id_ed25519" -o BatchMode=yes -o StrictHostKeyChecking=no critical@166.1.2.112 "echo 'dYt2295ZBM_EgUb' | sudo -S tar -xzf /tmp/deploy_package.tar.gz -C /var/www/edvora.chat/ && php /var/www/edvora.chat/migrate.php && echo 'dYt2295ZBM_EgUb' | sudo -S chown -R critical:www-data /var/www/edvora.chat && echo 'dYt2295ZBM_EgUb' | sudo -S supervisorctl restart edvora-worker:* && echo 'dYt2295ZBM_EgUb' | sudo -S systemctl reload apache2"
+   ssh -i "C:/Users/Salan Khalkho/.ssh/id_ed25519" -o BatchMode=yes -o StrictHostKeyChecking=no root@62.171.145.160 "tar -xzf /tmp/deploy_package.tar.gz -C /var/www/edvora.chat/ && php /var/www/edvora.chat/migrate.php && chown -R projects:www-data /var/www/edvora.chat && chmod -R 775 /var/www/edvora.chat/storage && supervisorctl restart edvora-worker:* && systemctl reload apache2"
    ```
 4. **Git Sync (Mandatory):**
    ```powershell
@@ -74,14 +73,14 @@ If executing manually, you MUST use `sudo` for `tar` extraction so existing file
 
 | Property | Production Specification |
 |---|---|
-| **Host IP** | `166.1.2.112` |
-| **SSH User** | `critical` (SSH Key: `C:/Users/Salan Khalkho/.ssh/id_ed25519`) |
+| **Host IP** | `62.171.145.160` |
+| **SSH User** | `root` (SSH Key: `C:/Users/Salan Khalkho/.ssh/id_ed25519` or `criticalbuzzer_vps`) |
 | **OS** | Ubuntu 24.04 LTS (Noble) |
 | **Web Root** | `/var/www/edvora.chat/public` |
 | **App Root** | `/var/www/edvora.chat` |
 | **Web Server** | Apache 2.4.58 (VirtualHost: `/etc/apache2/sites-available/edvora.chat.conf`) |
-| **PHP Version** | PHP 8.2.31 (cli/fpm) via socket `unix:/run/php/php8.2-fpm.sock` |
-| **Database** | MariaDB 10.11.14 (Database: `edvora_chat`, User: `edvora`) |
+| **PHP Version** | PHP 8.3 (cli/fpm) via socket `unix:/run/php/php8.3-fpm.sock` |
+| **Database** | MySQL 8.0 (Database: `edvora_chat`, User: `edvora`) |
 | **Cache & Queue** | Redis 7 (`127.0.0.1:6379`) |
 | **Process Manager** | Supervisor (`/etc/supervisor/conf.d/edvora-worker.conf`) |
 | **SSL / Certs** | Certbot HTTPS enabled |

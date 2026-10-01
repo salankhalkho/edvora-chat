@@ -35,13 +35,13 @@ For full technical specifications of the admissions chatbot, turn processing lif
 
 | Property | Value |
 |---|---|
-| **VPS** | Ubuntu 24.04 LTS — `166.1.2.112` |
-| **Web Server** | Apache 2.4.58 with PHP-FPM 8.2 |
+| **VPS** | Ubuntu 24.04 LTS — `62.171.145.160` |
+| **Web Server** | Apache 2.4.58 with PHP-FPM 8.3 |
 | **App Root** | `/var/www/edvora.chat/` |
 | **Web Root** | `/var/www/edvora.chat/public/` |
-| **PHP** | 8.2 via `unix:/run/php/php8.2-fpm.sock` (CLI/FPM) |
-| **PHP-FPM Upload Envelope** | `upload_max_filesize = 60M`, `post_max_size = 65M` (in `/etc/php/8.2/fpm/php.ini`) |
-| **Database** | MariaDB 10.11.14 — database `edvora_chat` |
+| **PHP** | 8.3 via `unix:/run/php/php8.3-fpm.sock` (CLI/FPM) |
+| **PHP-FPM Upload Envelope** | `upload_max_filesize = 60M`, `post_max_size = 65M` (in `/etc/php/8.3/fpm/php.ini`) |
+| **Database** | MySQL 8.0 — database `edvora_chat` |
 | **Cache / Queue** | Redis 7 (`127.0.0.1:6379`) |
 | **Process Manager** | Supervisor — `workers/job_runner.php` |
 | **SSL** | Certbot HTTPS |
