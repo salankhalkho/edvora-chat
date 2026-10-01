@@ -1409,6 +1409,157 @@
             }
         }
 
+        function getCallbackTargetUtc(lead) {
+            if (!lead) return 0;
+            if (lead.scheduled_at) {
+                let s = lead.scheduled_at;
+                if (typeof s === 'string' && !s.endsWith('Z') && !s.includes('T')) {
+                    s = s.replace(/-/g, '/') + ' UTC';
+                }
+                const d = new Date(s);
+                if (!isNaN(d.getTime())) return d.getTime();
+            }
+
+            let rawCreated = lead.created_at;
+            let createdUtcMs = Date.now();
+            if (rawCreated) {
+                if (typeof rawCreated === 'string' && !rawCreated.endsWith('Z') && !rawCreated.includes('T')) {
+                    createdUtcMs = new Date(rawCreated.replace(/-/g, '/') + ' UTC').getTime();
+                } else {
+                    createdUtcMs = new Date(rawCreated).getTime();
+                }
+            }
+            if (isNaN(createdUtcMs)) createdUtcMs = Date.now();
+
+            let slot = (lead.preferred_time_slot || '').trim();
+            if (!slot && lead.notes) {
+                const m = lead.notes.match(/(?:Preferred Slot|time slot):\s*([^.\n]+)/i);
+                if (m) slot = m[1].trim();
+            }
+            const slotLower = slot.toLowerCase();
+
+            // IST is UTC + 5h30m (19,800,000 ms)
+            const istMs = createdUtcMs + 19800000;
+            const istDate = new Date(istMs);
+            const istYear = istDate.getUTCFullYear();
+            const istMonth = istDate.getUTCMonth();
+            const istDay = istDate.getUTCDate();
+            const istHour = istDate.getUTCHours();
+            const istMinute = istDate.getUTCMinutes();
+
+            let targetIstDay = istDay;
+            let targetIstHour = 12;
+            let targetIstMinute = 0;
+
+            if (slotLower.includes('asap') || slotLower.includes('immediate')) {
+                return createdUtcMs + (30 * 60 * 1000);
+            } else if (slotLower.includes('morning')) {
+                targetIstHour = 12;
+                targetIstMinute = 0;
+                if (istHour >= 12 || slotLower.includes('tomorrow')) {
+                    targetIstDay += 1;
+                }
+            } else if (slotLower.includes('afternoon')) {
+                targetIstHour = slotLower.includes('3 pm') ? 15 : 16;
+                targetIstMinute = 0;
+                if (istHour >= targetIstHour || slotLower.includes('tomorrow')) {
+                    targetIstDay += 1;
+                }
+            } else if (slotLower.includes('evening')) {
+                targetIstHour = slotLower.includes('6 pm') ? 18 : 19;
+                targetIstMinute = 0;
+                if (istHour >= targetIstHour || slotLower.includes('tomorrow')) {
+                    targetIstDay += 1;
+                }
+            } else {
+                const timeMatch = slot.match(/([0-9]{1,2})(?::([0-9]{2}))?\s*(am|pm)/i);
+                if (timeMatch) {
+                    let th = parseInt(timeMatch[1], 10);
+                    const tm = timeMatch[2] ? parseInt(timeMatch[2], 10) : 0;
+                    const ampm = timeMatch[3].toLowerCase();
+                    if (ampm === 'pm' && th < 12) th += 12;
+                    if (ampm === 'am' && th === 12) th = 0;
+                    targetIstHour = th;
+                    targetIstMinute = tm;
+                    if (istHour > th || (istHour === th && istMinute >= tm)) {
+                        targetIstDay += 1;
+                    }
+                } else {
+                    return createdUtcMs + (2 * 3600 * 1000);
+                }
+            }
+
+            return Date.UTC(istYear, istMonth, targetIstDay, targetIstHour, targetIstMinute) - 19800000;
+        }
+
+        function getCallbackSlaBadge(lead) {
+            if (!lead) return '';
+
+            // STRICT RULE: No time comment where status = 'lost'
+            const status = (lead.status || '').toLowerCase();
+            if (status === 'lost') return '';
+
+            // STRICT RULE: When counselors update a lead's status to contacted or converted, timer badge disappears completely
+            if (status === 'contacted' || status === 'converted') return '';
+
+            // Check if lead is a callback lead
+            const leadType = (lead.lead_type || '').toLowerCase();
+            const notes = lead.notes || '';
+            const hasSlot = !!lead.preferred_time_slot || /(?:preferred slot|time slot|callback)/i.test(notes);
+            const isCallback = leadType.includes('callback') || hasSlot;
+            if (!isCallback) return '';
+
+            // Check callback status if linked
+            const cbStatus = (lead.callback_status || (lead.callback_booking && lead.callback_booking.callback_status) || '').toLowerCase();
+            if (cbStatus === 'completed' || cbStatus === 'cancelled') return '';
+
+            const targetUtcMs = getCallbackTargetUtc(lead);
+            if (!targetUtcMs || isNaN(targetUtcMs)) return '';
+
+            const now = Date.now();
+            const diffMs = targetUtcMs - now;
+
+            if (diffMs < 0) {
+                // OVERDUE / LATE
+                const diffMinutes = Math.floor(Math.abs(diffMs) / 60000);
+                const days = Math.floor(diffMinutes / 1440);
+                const hours = Math.floor((diffMinutes % 1440) / 60);
+                const mins = diffMinutes % 60;
+
+                let timeStr = '';
+                if (days > 0) {
+                    timeStr = `${days}d ${hours}h late`;
+                } else if (hours > 0) {
+                    timeStr = `${hours}h ${mins}m late`;
+                } else {
+                    timeStr = `${Math.max(1, mins)}m late`;
+                }
+
+                return `<span style="display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 700; color: #BE123C; background: #FFF1F2; border: 1px solid #FECDD3; padding: 1.5px 7px; border-radius: 6px; white-space: nowrap; box-shadow: 0 1px 2px rgba(190, 18, 60, 0.08);" title="Counselor callback is overdue by ${timeStr}">
+                    <span>⏲</span> <span>${timeStr}</span>
+                </span>`;
+            } else {
+                // UPCOMING / REMAINING
+                const diffMinutes = Math.floor(diffMs / 60000);
+                const days = Math.floor(diffMinutes / 1440);
+                const hours = Math.floor((diffMinutes % 1440) / 60);
+                const mins = diffMinutes % 60;
+
+                let timeStr = '';
+                if (days > 0) {
+                    timeStr = `${days}d ${hours}h remaining`;
+                } else if (hours > 0) {
+                    timeStr = `${hours}h ${mins}m remaining`;
+                } else {
+                    timeStr = `${Math.max(1, mins)}m remaining`;
+                }
+
+                return `<span style="display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 700; color: #047857; background: #ECFDF5; border: 1px solid #A7F3D0; padding: 1.5px 7px; border-radius: 6px; white-space: nowrap; box-shadow: 0 1px 2px rgba(4, 120, 87, 0.08);" title="Counselor callback is scheduled in ${timeStr}">
+                    <span>⏲</span> <span>${timeStr}</span>
+                </span>`;
+            }
+        }
+
         function renderLeadsTablePage() {
             const tbody = document.getElementById('leadsTableBody');
             if (!tbody) return;
@@ -1456,6 +1607,7 @@
             if (pageData.length > 0) {
                 tbody.innerHTML = pageData.map(lead => {
                     const dateStr = formatToIST(lead.created_at);
+                    const slaBadge = getCallbackSlaBadge(lead);
                     const statusBadge = lead.status === 'converted'
                         ? '<span class="badge" style="background: rgba(52, 211, 153, 0.12); color: var(--brand-emerald-400); border: 1px solid rgba(52, 211, 153, 0.25); white-space: nowrap;">â— Converted</span>'
                         : (lead.status === 'contacted'
@@ -1503,7 +1655,10 @@
                             <td style="font-size: 12px; vertical-align: middle;">${lead.program_interest || '—'}</td>
                             <td style="vertical-align: middle;">${typeBadge}</td>
                             <td style="vertical-align: middle;">${statusBadge}</td>
-                            <td style="font-size: 11px; color: #648781; white-space: nowrap; font-family: var(--brand-font-mono); vertical-align: middle;">${dateStr}</td>
+                            <td style="vertical-align: middle; white-space: nowrap;">
+                                <div style="font-size: 11px; color: #648781; font-family: var(--brand-font-mono); line-height: 1.3;">${dateStr}</div>
+                                ${slaBadge ? `<div style="margin-top: 4px;">${slaBadge}</div>` : ''}
+                            </td>
                             <td style="text-align: right; white-space: nowrap; vertical-align: middle;">
                                 <div style="display: inline-flex; gap: 6px;">
                                     <button class="brand-btn-secondary brand-btn-sm" style="font-size: 11px; height: 28px; padding: 0 10px;" onclick="openLeadDrawer(${lead.id})">

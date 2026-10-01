@@ -253,10 +253,21 @@ class LeadController
                    c.visitor_id, 
                    c.started_at as chat_started_at,
                    u.name as assigned_user_name,
-                   u.email as assigned_user_email
+                   u.email as assigned_user_email,
+                   cb.preferred_time_slot,
+                   cb.scheduled_at,
+                   cb.status as callback_status
             FROM leads l
             LEFT JOIN conversations c ON l.conversation_id = c.id
             LEFT JOIN users u ON l.assigned_user_id = u.id
+            LEFT JOIN (
+                SELECT id, conversation_id, student_phone, preferred_time_slot, scheduled_at, status, organization_id,
+                       ROW_NUMBER() OVER (PARTITION BY organization_id, COALESCE(NULLIF(conversation_id, 0), student_phone) ORDER BY id DESC) as rn
+                FROM counselor_callbacks
+            ) cb ON cb.organization_id = l.organization_id AND cb.rn = 1 AND (
+                (l.conversation_id IS NOT NULL AND l.conversation_id > 0 AND cb.conversation_id = l.conversation_id)
+                OR (l.phone IS NOT NULL AND l.phone != '' AND cb.student_phone = l.phone)
+            )
             WHERE l.organization_id = :org_id {$filter['sql']}
             ORDER BY l.id DESC
         ";
