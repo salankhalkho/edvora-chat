@@ -9866,8 +9866,6 @@ echo $response['reply'];
             filterLeadsTable();
         }
 
-            filterLeadsTable();
-        }
 
         function updateLeadsDeptDropdown() {
             const selectEl = document.getElementById('leadsDeptFilter');
@@ -10184,8 +10182,14 @@ echo $response['reply'];
             const typeFilter = document.getElementById('leadsTypeFilter');
             if (typeFilter) typeFilter.value = 'all';
             currentLeadsStatusFilter = 'all';
-            document.querySelectorAll('#leadsStatusTabsContainer .ckh-tab-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.getAttribute('data-leads-filter') === 'all');
+            currentLeadsChannelFilter = 'all';
+            document.querySelectorAll('#leadsStatusRow .ckh-tab-btn, #leadsStatusTabsContainer .ckh-tab-btn').forEach(btn => {
+                const attr = btn.getAttribute('data-leads-status') || btn.getAttribute('data-leads-filter') || '';
+                btn.classList.toggle('active', attr === 'all');
+            });
+            document.querySelectorAll('#leadsChannelRow .ckh-tab-btn').forEach(btn => {
+                const attr = btn.getAttribute('data-leads-channel') || btn.getAttribute('data-leads-filter') || '';
+                btn.classList.toggle('active', attr === 'all');
             });
             filterLeadsTable();
         }
