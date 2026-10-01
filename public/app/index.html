@@ -9421,6 +9421,7 @@ echo $response['reply'];
         let currentLeadsList = [];
         let filteredLeadsList = [];
         let currentLeadsStatusFilter = 'all';
+        let currentLeadsChannelFilter = 'all';
         let leadsCurrentPage = 1;
         let leadsPageSize = 50;
         let leadsTotalPages = 1;
@@ -9708,8 +9709,6 @@ echo $response['reply'];
                 });
         }
 
-        var currentLeadsStatusFilter = 'all';
-        var currentLeadsChannelFilter = 'all';
 
         function filterLeadsTable() {
             const query = (document.getElementById('leadsSearchInput')?.value || '').toLowerCase().trim();

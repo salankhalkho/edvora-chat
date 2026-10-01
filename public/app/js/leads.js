@@ -272,8 +272,8 @@
                 });
         }
 
-        var currentLeadsStatusFilter = 'all';
-        var currentLeadsChannelFilter = 'all';
+        window.currentLeadsStatusFilter = window.currentLeadsStatusFilter || 'all';
+        window.currentLeadsChannelFilter = window.currentLeadsChannelFilter || 'all';
 
         function filterLeadsTable() {
             const query = (document.getElementById('leadsSearchInput')?.value || '').toLowerCase().trim();
