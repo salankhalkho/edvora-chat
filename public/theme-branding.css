@@ -2536,6 +2536,44 @@ select.brand-input option {
       border: 1px solid #B9D7C7;
     }
 
+    /* Lead Student Profile Avatar & Cell */
+    .lead-avatar-cell {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      gap: 12px !important;
+    }
+
+    .lead-profile-avatar {
+      width: 36px !important;
+      height: 36px !important;
+      min-width: 36px !important;
+      max-width: 36px !important;
+      border-radius: 50% !important;
+      background: #E8F4F0;
+      color: #063D3B;
+      border: 1.5px solid #D1E5DE;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      flex-shrink: 0 !important;
+      box-shadow: 0 1px 3px rgba(6, 61, 59, 0.08);
+      transition: all 0.15s ease;
+    }
+
+    .lead-profile-avatar:hover {
+      background: #D5EBE3;
+      border-color: #B2D8CB;
+      transform: scale(1.05);
+    }
+
+    .lead-profile-avatar svg {
+      width: 16px;
+      height: 16px;
+      stroke: #063D3B;
+      stroke-width: 2.2;
+    }
+
     .dept-staff-name {
       font-size: 11.5px;
       font-weight: 700;
@@ -3205,6 +3243,118 @@ select.brand-input option {
     .ckh-tab-btn.active .ckh-tab-count {
       background: rgba(200, 255, 99, 0.25);
       color: #C8FF63;
+    }
+
+    /* Leads Status Tabs Filter Pills (Pastel Tinted Active System) */
+    #leadsStatusTabsContainer .ckh-tab-btn {
+      border: 1.5px solid transparent !important;
+      font-weight: 600;
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="all"]:not(.active):hover {
+      background: #F1F7F4 !important;
+      color: #063D3B !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="new"]:not(.active):hover {
+      background: rgba(99, 102, 241, 0.08) !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="contacted"]:not(.active):hover {
+      background: rgba(245, 158, 11, 0.08) !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="converted"]:not(.active):hover {
+      background: rgba(16, 185, 129, 0.08) !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="lost"]:not(.active):hover {
+      background: rgba(148, 163, 184, 0.12) !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="callbacks"]:not(.active):hover {
+      background: rgba(244, 63, 94, 0.08) !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="campus_tours"]:not(.active):hover {
+      background: rgba(139, 92, 246, 0.08) !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="scholarships"]:not(.active):hover {
+      background: rgba(20, 184, 166, 0.08) !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="all"].active {
+      background: #EBF4F0 !important;
+      color: #063D3B !important;
+      border-color: #C2DDD4 !important;
+      font-weight: 700 !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="all"].active .ckh-tab-count {
+      background: rgba(6, 61, 59, 0.12) !important;
+      color: #063D3B !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="new"].active {
+      background: #EEF2FF !important;
+      color: #4338CA !important;
+      border-color: #C7D2FE !important;
+      font-weight: 700 !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="new"].active .ckh-tab-count {
+      background: rgba(79, 70, 229, 0.16) !important;
+      color: #4338CA !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="contacted"].active {
+      background: #FEF3C7 !important;
+      color: #B45309 !important;
+      border-color: #FDE68A !important;
+      font-weight: 700 !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="contacted"].active .ckh-tab-count {
+      background: rgba(217, 119, 6, 0.18) !important;
+      color: #B45309 !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="converted"].active {
+      background: #ECFDF5 !important;
+      color: #047857 !important;
+      border-color: #A7F3D0 !important;
+      font-weight: 700 !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="converted"].active .ckh-tab-count {
+      background: rgba(5, 150, 105, 0.18) !important;
+      color: #047857 !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="lost"].active {
+      background: #F1F5F9 !important;
+      color: #475569 !important;
+      border-color: #CBD5E1 !important;
+      font-weight: 700 !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="lost"].active .ckh-tab-count {
+      background: rgba(100, 116, 139, 0.18) !important;
+      color: #475569 !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="callbacks"].active {
+      background: #FFE4E6 !important;
+      color: #BE123C !important;
+      border-color: #FECDD3 !important;
+      font-weight: 700 !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="callbacks"].active .ckh-tab-count {
+      background: rgba(225, 29, 72, 0.18) !important;
+      color: #BE123C !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="campus_tours"].active {
+      background: #F5F3FF !important;
+      color: #6D28D9 !important;
+      border-color: #DDD6FE !important;
+      font-weight: 700 !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="campus_tours"].active .ckh-tab-count {
+      background: rgba(124, 58, 237, 0.18) !important;
+      color: #6D28D9 !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="scholarships"].active {
+      background: #F0FDFA !important;
+      color: #0F766E !important;
+      border-color: #99F6E4 !important;
+      font-weight: 700 !important;
+    }
+    #leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="scholarships"].active .ckh-tab-count {
+      background: rgba(13, 148, 136, 0.18) !important;
+      color: #0F766E !important;
     }
 
     .ckh-search-box {
