@@ -546,6 +546,139 @@
         flex: none !important;
     }
 }
+
+/* ==========================================================================
+   LEADS STATUS TABS FILTER PILLS (PASTEL TINTED ACTIVE SYSTEM)
+   Matches Student Voice, Sync 88%, Campus Ops badge references
+   ========================================================================== */
+#leadsStatusTabsContainer .ckh-tab-btn {
+    border: 1.5px solid transparent !important;
+    font-weight: 600;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Inactive Hover States */
+#leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="all"]:not(.active):hover {
+    background: #F1F7F4 !important;
+    color: #063D3B !important;
+}
+#leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="new"]:not(.active):hover {
+    background: rgba(99, 102, 241, 0.08) !important;
+}
+#leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="contacted"]:not(.active):hover {
+    background: rgba(245, 158, 11, 0.08) !important;
+}
+#leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="converted"]:not(.active):hover {
+    background: rgba(16, 185, 129, 0.08) !important;
+}
+#leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="lost"]:not(.active):hover {
+    background: rgba(148, 163, 184, 0.12) !important;
+}
+#leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="callbacks"]:not(.active):hover {
+    background: rgba(244, 63, 94, 0.08) !important;
+}
+#leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="campus_tours"]:not(.active):hover {
+    background: rgba(139, 92, 246, 0.08) !important;
+}
+#leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="scholarships"]:not(.active):hover {
+    background: rgba(20, 184, 166, 0.08) !important;
+}
+
+/* 1. All Leads (Institutional Sage Active) */
+#leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="all"].active {
+    background: #EBF4F0 !important;
+    color: #063D3B !important;
+    border-color: #C2DDD4 !important;
+    font-weight: 700 !important;
+}
+#leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="all"].active .ckh-tab-count {
+    background: rgba(6, 61, 59, 0.12) !important;
+    color: #063D3B !important;
+}
+
+/* 2. New (Pastel Indigo Active) */
+#leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="new"].active {
+    background: #EEF2FF !important;
+    color: #4338CA !important;
+    border-color: #C7D2FE !important;
+    font-weight: 700 !important;
+}
+#leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="new"].active .ckh-tab-count {
+    background: rgba(79, 70, 229, 0.16) !important;
+    color: #4338CA !important;
+}
+
+/* 3. Contacted (Pastel Amber Active - matches Campus Ops) */
+#leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="contacted"].active {
+    background: #FEF3C7 !important;
+    color: #B45309 !important;
+    border-color: #FDE68A !important;
+    font-weight: 700 !important;
+}
+#leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="contacted"].active .ckh-tab-count {
+    background: rgba(217, 119, 6, 0.18) !important;
+    color: #B45309 !important;
+}
+
+/* 4. Converted (Pastel Mint Active - matches Sync 88%) */
+#leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="converted"].active {
+    background: #ECFDF5 !important;
+    color: #047857 !important;
+    border-color: #A7F3D0 !important;
+    font-weight: 700 !important;
+}
+#leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="converted"].active .ckh-tab-count {
+    background: rgba(5, 150, 105, 0.18) !important;
+    color: #047857 !important;
+}
+
+/* 5. Lost (Pastel Slate Active) */
+#leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="lost"].active {
+    background: #F1F5F9 !important;
+    color: #475569 !important;
+    border-color: #CBD5E1 !important;
+    font-weight: 700 !important;
+}
+#leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="lost"].active .ckh-tab-count {
+    background: rgba(100, 116, 139, 0.18) !important;
+    color: #475569 !important;
+}
+
+/* 6. Callbacks (Pastel Rose Active) */
+#leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="callbacks"].active {
+    background: #FFE4E6 !important;
+    color: #BE123C !important;
+    border-color: #FECDD3 !important;
+    font-weight: 700 !important;
+}
+#leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="callbacks"].active .ckh-tab-count {
+    background: rgba(225, 29, 72, 0.18) !important;
+    color: #BE123C !important;
+}
+
+/* 7. Campus Tours (Pastel Lavender Active - matches Student Voice) */
+#leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="campus_tours"].active {
+    background: #F5F3FF !important;
+    color: #6D28D9 !important;
+    border-color: #DDD6FE !important;
+    font-weight: 700 !important;
+}
+#leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="campus_tours"].active .ckh-tab-count {
+    background: rgba(124, 58, 237, 0.18) !important;
+    color: #6D28D9 !important;
+}
+
+/* 8. Scholarships (Pastel Teal Active) */
+#leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="scholarships"].active {
+    background: #F0FDFA !important;
+    color: #0F766E !important;
+    border-color: #99F6E4 !important;
+    font-weight: 700 !important;
+}
+#leadsStatusTabsContainer .ckh-tab-btn[data-leads-filter="scholarships"].active .ckh-tab-count {
+    background: rgba(13, 148, 136, 0.18) !important;
+    color: #0F766E !important;
+}
 </style>
 
 <script>
