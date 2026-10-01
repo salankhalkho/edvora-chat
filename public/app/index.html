@@ -9773,19 +9773,13 @@ echo $response['reply'];
                 const status = (lead.status || 'new').toLowerCase();
                 const lType = (lead.lead_type || '').toLowerCase();
 
-                if (filterKey === 'new') {
-                    return status === 'new';
-                } else if (filterKey === 'contacted') {
-                    return status === 'contacted';
-                } else if (filterKey === 'converted') {
-                    return status === 'converted';
-                } else if (filterKey === 'callbacks') {
-                    return lType.includes('callback');
-                } else if (filterKey === 'campus_tours') {
-                    return lType.includes('tour');
-                } else if (filterKey === 'scholarships') {
-                    return lType.includes('scholarship') || (lead.scholarship_tier && lead.scholarship_tier.trim() !== '');
-                }
+                if (filterKey === 'new') return status === 'new';
+                if (filterKey === 'contacted') return status === 'contacted';
+                if (filterKey === 'converted') return status === 'converted';
+                if (filterKey === 'lost') return status === 'lost';
+                if (filterKey === 'callbacks') return lType.includes('callback');
+                if (filterKey === 'campus_tours') return lType.includes('tour');
+                if (filterKey === 'scholarships') return lType.includes('scholarship') || (lead.scholarship_tier && lead.scholarship_tier.trim() !== '');
 
                 return true; // 'all'
             });
@@ -9800,24 +9794,20 @@ echo $response['reply'];
             const countNew = leadsScope.filter(l => (l.status || 'new').toLowerCase() === 'new').length;
             const countContacted = leadsScope.filter(l => (l.status || '').toLowerCase() === 'contacted').length;
             const countConverted = leadsScope.filter(l => (l.status || '').toLowerCase() === 'converted').length;
+            const countLost = leadsScope.filter(l => (l.status || '').toLowerCase() === 'lost').length;
             const countCallbacks = leadsScope.filter(l => (l.lead_type || '').toLowerCase().includes('callback')).length;
             const countTours = leadsScope.filter(l => (l.lead_type || '').toLowerCase().includes('tour')).length;
             const countSch = leadsScope.filter(l => (l.lead_type || '').toLowerCase().includes('scholarship') || (l.scholarship_tier && l.scholarship_tier.trim() !== '')).length;
 
-            const elAll = document.getElementById('leadsTabCountAll');
-            if (elAll) elAll.innerText = countAll;
-            const elNew = document.getElementById('leadsTabCountNew');
-            if (elNew) elNew.innerText = countNew;
-            const elCont = document.getElementById('leadsTabCountContacted');
-            if (elCont) elCont.innerText = countContacted;
-            const elConv = document.getElementById('leadsTabCountConverted');
-            if (elConv) elConv.innerText = countConverted;
-            const elCb = document.getElementById('leadsTabCountCallbacks');
-            if (elCb) elCb.innerText = countCallbacks;
-            const elTour = document.getElementById('leadsTabCountTours');
-            if (elTour) elTour.innerText = countTours;
-            const elSch = document.getElementById('leadsTabCountScholarships');
-            if (elSch) elSch.innerText = countSch;
+            const setCount = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+            setCount('leadsTabCountAll', countAll);
+            setCount('leadsTabCountNew', countNew);
+            setCount('leadsTabCountContacted', countContacted);
+            setCount('leadsTabCountConverted', countConverted);
+            setCount('leadsTabCountLost', countLost);
+            setCount('leadsTabCountCallbacks', countCallbacks);
+            setCount('leadsTabCountTours', countTours);
+            setCount('leadsTabCountScholarships', countSch);
         }
 
         function setLeadsStatusFilter(filterKey, el) {
@@ -9919,7 +9909,9 @@ echo $response['reply'];
                         ? '<span class="badge" style="background: rgba(52, 211, 153, 0.12); color: var(--brand-emerald-400); border: 1px solid rgba(52, 211, 153, 0.25); white-space: nowrap;">● Converted</span>'
                         : (lead.status === 'contacted'
                             ? '<span class="badge" style="background: rgba(251, 191, 36, 0.12); color: var(--brand-amber-400); border: 1px solid rgba(251, 191, 36, 0.25); white-space: nowrap;">● Contacted</span>'
-                            : '<span class="badge" style="background: rgba(99, 102, 241, 0.12); color: var(--brand-indigo-400); border: 1px solid rgba(99, 102, 241, 0.25); white-space: nowrap;">● New</span>');
+                            : (lead.status === 'lost'
+                                ? '<span class="badge" style="background: rgba(148, 163, 184, 0.12); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.25); white-space: nowrap;">● Lost</span>'
+                                : '<span class="badge" style="background: rgba(99, 102, 241, 0.12); color: var(--brand-indigo-400); border: 1px solid rgba(99, 102, 241, 0.25); white-space: nowrap;">● New</span>'));
 
                     const deptBadge = lead.department_name
                         ? `<span style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--brand-cyan-400); background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); padding: 2px 8px; border-radius: 12px; white-space: nowrap;">
