@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attribution Platform — edvora.chat</title>
+  <link rel="icon" type="image/svg+xml" href="/edvora_logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/theme-branding.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'e-mist': '#F1F7F4',
+            'e-teal': '#063D3B',
+            'e-pistachio': '#C8FF63',
+            'e-soft-pistachio': '#E6F7D2',
+            'e-sage': '#B9D7C7',
+            'e-border': '#DDE9E3',
+            'e-text': '#092F2E',
+            'e-muted': '#71817D'
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      --e-teal: #063D3B;
+      --e-pistachio: #C8FF63;
+      --e-soft-pistachio: #E6F7D2;
+      --e-sage: #B9D7C7;
+      --e-mist: #F1F7F4;
+      --e-border: #DDE9E3;
+      --e-card-border: #DCE9E5;
+      --e-text: #092F2E;
+      --e-muted: #71817D;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
+      background: #F1F7F4;
+      color: var(--e-text);
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Navigation Header */
+    .showcase-header {
+      background: #FFFFFF;
+      border-bottom: 1.5px solid var(--e-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(6, 61, 59, 0.04);
+    }
+    .header-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+    .brand-logo-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #063D3B;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #C8FF63;
+      font-weight: 800;
+      font-size: 15px;
+      box-shadow: 0 2px 6px rgba(6, 61, 59, 0.2);
+    }
+    .brand-title-area {
+      display: flex;
+      flex-direction: column;
+    }
+    .brand-name {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #063D3B;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+    }
+    .brand-tag {
+      font-size: 10.5px;
+      color: #648781;
+      font-weight: 600;
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-btn {
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .nav-btn-secondary {
+      background: #FFFFFF;
+      color: #063D3B;
+      border: 1px solid var(--e-border);
+    }
+    .nav-btn-secondary:hover {
+      background: #F4FAF7;
+      border-color: #B9D7C7;
+      transform: translateY(-1px);
+    }
+    .nav-btn-primary {
+      background: #063D3B;
+      color: #C8FF63;
+      border: 1px solid #063D3B;
+    }
+    .nav-btn-primary:hover {
+      background: #0A524F;
+      box-shadow: 0 4px 12px rgba(6, 61, 59, 0.2);
+      transform: translateY(-1px);
+    }
+
+    /* Sub Navigation Switcher Bar */
+    .subnav-bar {
+      background: #FAFDFB;
+      border-bottom: 1px solid #E6F0EC;
+      padding: 10px 24px;
+    }
+    .subnav-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .subnav-breadcrumbs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11.5px;
+      color: #648781;
+      font-weight: 600;
+    }
+    .subnav-breadcrumbs a {
+      color: #063D3B;
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .subnav-breadcrumbs a:hover {
+      text-decoration: underline;
+    }
+    .subnav-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .subnav-pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+    .subnav-pill.active {
+      background: #063D3B;
+      color: #C8FF63;
+    }
+    .subnav-pill:not(.active) {
+      background: #FFFFFF;
+      color: #4F7470;
+      border: 1px solid #DCE9E5;
+    }
+    .subnav-pill:not(.active):hover {
+      color: #063D3B;
+      background: #F4FAF7;
+    }
+
+    /* Main Section Container */
+    .main-wrapper {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 40px 24px 80px 24px;
+    }
+
+    /* Pill badge */
+    .attr-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(6, 61, 59, 0.08);
+      border: 1px solid rgba(6, 61, 59, 0.18);
+      color: #063D3B;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 100px;
+      margin-bottom: 14px;
+    }
+    .attr-pill::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #063D3B;
+      flex-shrink: 0;
+    }
+
+    /* Unified Attribution Dashboard Frame */
+    .attr-dashboard-frame {
+      background: #FFFFFF;
+      border: 1.5px solid #DCE9E5;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px -10px rgba(6, 61, 59, 0.09), 0 2px 8px rgba(6, 61, 59, 0.03);
+      margin-bottom: 28px;
+    }
+    .attr-dash-topbar {
+      background: #FFFFFF;
+      border-bottom: 1.5px solid #E6F0EC;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .attr-dash-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .attr-live-dot {
+      width: 8px;
+      height: 8px;
+      background: #10B981;
+      border-radius: 50%;
+      animation: pLd 1.7s ease-in-out infinite;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.7);
+      flex-shrink: 0;
+    }
+    @keyframes pLd {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(0.7); opacity: 0.5; }
+    }
+    .attr-dash-main-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #063D3B;
+      letter-spacing: -0.01em;
+    }
+    .attr-dash-sub-title {
+      font-size: 11.5px;
+      color: #648781;
+      font-weight: 500;
+    }
+    .attr-dash-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .attr-ctrl-pill {
+      background: #F4FAF7;
+      border: 1px solid #D1E5DE;
+      color: #063D3B;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: default;
+      user-select: none;
+      transition: background 0.15s ease;
+    }
+    .attr-ctrl-pill:hover {
+      background: #E8F5F1;
+    }
+    .attr-ctrl-sync {
+      background: #E8F5F1;
+      border: 1px solid #A7D7C8;
+      color: #047857;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 5px 12px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+    }
+
+    /* KPI Stat Ribbon */
+    .attr-kpi-ribbon {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      padding: 20px 24px;
+      background: #FAFCFB;
+      border-bottom: 1.5px solid #E6F0EC;
+    }
+    .attr-kpi-box {
+      background: #FFFFFF;
+      border: 1px solid #DCE9E5;
+      border-radius: 12px;
+      padding: 12px 16px;
+      box-shadow: 0 2px 6px rgba(6, 61, 59, 0.02);
+    }
+    .attr-kpi-val {
+      font-size: 20px;
+      font-weight: 900;
+      color: #063D3B;
+      line-height: 1.1;
+      font-variant-numeric: tabular-nums;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .attr-kpi-lbl {
+      font-size: 10px;
+      font-weight: 700;
+      color: #789993;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 4px;
+    }
+    .attr-kpi-badge {
+      font-size: 9px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 100px;
+    }
+
+    /* Table Wrap */
+    .attr-table-wrap {
+      overflow-x: auto;
+      padding: 0;
+      -webkit-overflow-scrolling: touch;
+    }
+    .attr-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 760px;
+    }
+    .attr-table thead tr {
+      background: #F4FAF7;
+      border-bottom: 1.5px solid #DCE9E5;
+    }
+    .attr-table thead th {
+      padding: 12px 20px;
+      text-align: left;
+      font-size: 10.5px;
+      font-weight: 800;
+      color: #5A7A73;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .attr-table thead th.rc {
+      text-align: right;
+    }
+    .attr-table tbody tr {
+      border-bottom: 1px solid #EDF5F2;
+      transition: background 0.18s;
+    }
+    .attr-table tbody tr:hover {
+      background: #F6FAF8;
+    }
+    .attr-table td {
+      padding: 14px 20px;
+      color: #063D3B;
+      vertical-align: middle;
+    }
+    .attr-table td.rn {
+      text-align: right;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+    .attr-table tfoot tr {
+      background: #F8FBFA;
+      border-top: 2px solid #DCE9E5;
+      font-weight: 800;
+    }
+    .attr-table tfoot td {
+      padding: 14px 20px;
+      color: #063D3B;
+    }
+
+    .src-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 800;
+      color: #FFFFFF;
+      margin-right: 10px;
+      vertical-align: middle;
+      flex-shrink: 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .src-g { background: #4285F4; }
+    .src-fb { background: #1877F2; }
+    .src-li { background: #0A66C2; }
+    .src-dt { background: #063D3B; }
+
+    .conv-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3.5px 10px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .cb-hi {
+      background: #ECFDF5;
+      color: #047857;
+      border: 1px solid #A7F3D0;
+    }
+    .cb-md {
+      background: #FEF3C7;
+      color: #B45309;
+      border: 1px solid #FDE68A;
+    }
+    .cb-lo {
+      background: #FEE2E2;
+      color: #B91C1C;
+      border: 1px solid #FECACA;
+    }
+
+    .perf-bar-wrap {
+      width: 90px;
+      background: #EEF5F2;
+      border-radius: 100px;
+      height: 7px;
+      overflow: hidden;
+    }
+    .perf-bar {
+      height: 7px;
+      border-radius: 100px;
+      background: #063D3B;
+      width: 0%;
+      transition: width 1s ease;
+    }
+    .perf-bar.pb-best {
+      background: linear-gradient(90deg, #047857, #10B981, #C8FF63);
+    }
+    .best-row {
+      background: #FFFBEB !important;
+      border-left: 4px solid #D97706 !important;
+    }
+    .best-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      background: #D97706;
+      color: #FFFFFF;
+      font-size: 8.5px;
+      font-weight: 800;
+      padding: 2.5px 8px;
+      border-radius: 100px;
+      margin-left: 8px;
+      vertical-align: middle;
+      box-shadow: 0 1px 3px rgba(217, 119, 6, 0.3);
+    }
+
+    /* Inside-Dashboard Advisory Panel */
+    .attr-advisory-panel {
+      padding: 24px 24px 24px;
+      background: #FFFFFF;
+      border-top: 1.5px solid #E6F0EC;
+    }
+    .attr-advisory-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .attr-advisory-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: #063D3B;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .attr-advisory-tag {
+      font-size: 11px;
+      font-weight: 600;
+      color: #789993;
+    }
+    .insight-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .insight-card {
+      background: #F9FBFA;
+      border: 1.5px solid #DCE9E5;
+      border-radius: 16px;
+      padding: 20px 18px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .insight-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 36px rgba(6, 61, 59, 0.08);
+      background: #FFFFFF;
+    }
+    .insight-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+    }
+    .ic-best::before { background: linear-gradient(90deg, #047857, #10B981); }
+    .ic-warn::before { background: linear-gradient(90deg, #B45309, #D97706); }
+    .ic-win::before { background: linear-gradient(90deg, #0284C7, #38BDF8); }
+
+    .insight-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .insight-ico { font-size: 20px; line-height: 1; }
+    .insight-tag {
+      font-size: 9.5px;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      padding: 2.5px 8px;
+      border-radius: 6px;
+    }
+    .it-best {
+      background: #ECFDF5;
+      color: #047857;
+      border: 1px solid #A7F3D0;
+    }
+    .it-warn {
+      background: #FEF3C7;
+      color: #B45309;
+      border: 1px solid #FDE68A;
+    }
+    .it-win {
+      background: #E0F2FE;
+      color: #0284C7;
+      border: 1px solid #BAE6FD;
+    }
+    .insight-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #063D3B;
+      margin-bottom: 7px;
+      line-height: 1.35;
+    }
+    .insight-body {
+      font-size: 12px;
+      color: #4F7470;
+      line-height: 1.6;
+    }
+    .insight-metric-pill {
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid #E5EFEA;
+      font-size: 11px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Page Footer */
+    .showcase-footer {
+      background: #FFFFFF;
+      border-top: 1px solid var(--e-border);
+      padding: 24px;
+      text-align: center;
+      font-size: 12px;
+      color: #71817D;
+    }
+    .showcase-footer a {
+      color: #063D3B;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .showcase-footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+      .attr-kpi-ribbon { grid-template-columns: repeat(2, 1fr); }
+      .insight-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .attr-kpi-ribbon { grid-template-columns: 1fr; }
+      .header-inner { padding: 0 16px; }
+      .main-wrapper { padding: 24px 16px 60px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Sticky Navigation Bar -->
+  <header class="showcase-header">
+    <div class="header-inner">
+      <a href="https://edvora.chat/" class="brand-group">
+        <div class="brand-logo-badge">E</div>
+        <div class="brand-title-area">
+          <span class="brand-name">edvora.chat</span>
+          <span class="brand-tag">Admissions Attribution Platform</span>
+        </div>
+      </a>
+
+      <div class="nav-actions">
+        <a href="/superadmin/" class="nav-btn nav-btn-secondary">
+          <span>←</span> Superadmin Control Center
+        </a>
+        <a href="/full-funnel-tracking.html" class="nav-btn nav-btn-secondary">
+          <span>Full Funnel Tracking</span> <span>↗</span>
+        </a>
+        <a href="/" class="nav-btn nav-btn-primary">
+          <span>Landing Page</span> <span>↗</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Sub Navigation Switcher Bar -->
+  <nav class="subnav-bar">
+    <div class="subnav-inner">
+      <div class="subnav-breadcrumbs">
+        <a href="/superadmin/">Super Admin</a>
+        <span>/</span>
+        <a href="/superadmin/?tab=branding">Branding &amp; Design Labs</a>
+        <span>/</span>
+        <span style="color: #063D3B; font-weight: 700;">Attribution Platform</span>
+      </div>
+
+      <div class="subnav-links">
+        <a href="/attribution-platform.html" class="subnav-pill active">
+          <span>🎯</span> Attribution Platform
+        </a>
+        <a href="/full-funnel-tracking.html" class="subnav-pill">
+          <span>🌊</span> Full Funnel Tracking
+        </a>
+        <a href="/dashboard" class="subnav-pill">
+          <span>📊</span> Admissions Dashboard
+        </a>
+        <a href="/knowledge-hub" class="subnav-pill">
+          <span>📚</span> Knowledge Hub
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Isolated Section -->
+  <main class="main-wrapper">
+    <section id="attribution-platform">
+      <div class="text-center mb-10 sm:mb-12">
+        <div class="attr-pill">Attribution Platform</div>
+        <h1 class="font-extrabold tracking-tight mt-3 mb-4" style="font-size:clamp(1.85rem,3.3vw,2.8rem);color:#063D3B;line-height:1.15">
+          You&rsquo;re Spending on 5 Channels.<br>Only One Is Worth It. <span style="color:#D97706">Which One?</span>
+        </h1>
+        <p class="text-[14.5px] sm:text-[15.5px] leading-[1.7] max-w-[780px] mx-auto" style="color:#4F7470">
+          Most admission teams allocate budget based on visitor counts. Edvora tracks every student from first click to final application &mdash; revealing which channel actually fills your classrooms.
+        </p>
+        <h2 class="font-extrabold tracking-tight mt-6" style="font-size:clamp(1.5rem,2.5vw,2.1rem);color:#6B8E87;line-height:1.15">
+          Hint: Edvora Attribution Platform Tells You That
+        </h2>
+      </div>
+
+      <!-- UNIFIED COHERENT ATTRIBUTION DASHBOARD -->
+      <div class="attr-dashboard-frame">
+        
+        <!-- Top App Navigation / Control Bar -->
+        <div class="attr-dash-topbar">
+          <div class="attr-dash-title-group">
+            <span class="attr-live-dot"></span>
+            <div>
+              <div class="attr-dash-main-title">Admissions Channel Attribution</div>
+              <div class="attr-dash-sub-title">Multi-touch conversion &amp; enrollment tracking</div>
+            </div>
+          </div>
+          <div class="attr-dash-controls">
+            <div class="attr-ctrl-pill">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              <span>Last 30 Days</span>
+            </div>
+            <div class="attr-ctrl-pill">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+              <span>All Programs</span>
+            </div>
+            <div class="attr-ctrl-sync">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              <span>Live CRM Sync</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI Stat Ribbon -->
+        <div class="attr-kpi-ribbon">
+          <div class="attr-kpi-box">
+            <div class="attr-kpi-val">
+              <span class="cnum" data-n="9720">0</span>
+              <span class="attr-kpi-badge" style="background:#ECFDF5; color:#047857;">+14.2%</span>
+            </div>
+            <div class="attr-kpi-lbl">Total Visitors</div>
+          </div>
+          <div class="attr-kpi-box">
+            <div class="attr-kpi-val">
+              <span class="cnum" data-n="996">0</span>
+              <span class="attr-kpi-badge" style="background:#F0FDF4; color:#16A34A;">10.2% Rate</span>
+            </div>
+            <div class="attr-kpi-lbl">Admissions Chats</div>
+          </div>
+          <div class="attr-kpi-box">
+            <div class="attr-kpi-val">
+              <span class="cnum" data-n="317">0</span>
+              <span class="attr-kpi-badge" style="background:#E0F2FE; color:#0284C7;">31.8% Capture</span>
+            </div>
+            <div class="attr-kpi-lbl">Qualified Leads</div>
+          </div>
+          <div class="attr-kpi-box">
+            <div class="attr-kpi-val" style="color:#047857;">
+              <span>5.7%</span>
+              <span class="attr-kpi-badge" style="background:#FEF3C7; color:#B45309;">★ LinkedIn</span>
+            </div>
+            <div class="attr-kpi-lbl">Highest ROI Channel</div>
+          </div>
+        </div>
+
+        <!-- Main Attribution Table -->
+        <div class="attr-table-wrap">
+          <table class="attr-table">
+            <thead>
+              <tr>
+                <th>Channel Source</th>
+                <th class="rc">Visitors</th>
+                <th class="rc">Chats</th>
+                <th class="rc">Leads</th>
+                <th class="rc">Campus Tours</th>
+                <th class="rc">Conversion</th>
+                <th style="min-width:110px">Funnel Performance</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="src-icon src-g">G</span>Google Search</td>
+                <td class="rn"><span class="cnum" data-n="4820">0</span></td>
+                <td class="rn"><span class="cnum" data-n="412">0</span></td>
+                <td class="rn"><span class="cnum" data-n="126">0</span></td>
+                <td class="rn"><span class="cnum" data-n="31">0</span></td>
+                <td class="rn"><span class="conv-badge cb-lo">2.6%</span></td>
+                <td><div class="perf-bar-wrap"><div class="perf-bar" data-pw="45.6"></div></div></td>
+              </tr>
+              <tr>
+                <td><span class="src-icon src-fb">f</span>Facebook Ads</td>
+                <td class="rn"><span class="cnum" data-n="2140">0</span></td>
+                <td class="rn"><span class="cnum" data-n="284">0</span></td>
+                <td class="rn"><span class="cnum" data-n="91">0</span></td>
+                <td class="rn"><span class="cnum" data-n="18">0</span></td>
+                <td class="rn"><span class="conv-badge cb-md">4.3%</span></td>
+                <td><div class="perf-bar-wrap"><div class="perf-bar" data-pw="75.4"></div></div></td>
+              </tr>
+              <tr class="best-row">
+                <td><span class="src-icon src-li">in</span>LinkedIn Ads <span class="best-badge">&#9733; Top Performer</span></td>
+                <td class="rn"><span class="cnum" data-n="840">0</span></td>
+                <td class="rn"><span class="cnum" data-n="126">0</span></td>
+                <td class="rn"><span class="cnum" data-n="48">0</span></td>
+                <td class="rn"><span class="cnum" data-n="11">0</span></td>
+                <td class="rn"><span class="conv-badge cb-hi">5.7%</span></td>
+                <td><div class="perf-bar-wrap"><div class="perf-bar pb-best" data-pw="100"></div></div></td>
+              </tr>
+              <tr>
+                <td><span class="src-icon src-dt">D</span>Direct / Brand</td>
+                <td class="rn"><span class="cnum" data-n="1920">0</span></td>
+                <td class="rn"><span class="cnum" data-n="174">0</span></td>
+                <td class="rn"><span class="cnum" data-n="52">0</span></td>
+                <td class="rn"><span class="cnum" data-n="9">0</span></td>
+                <td class="rn"><span class="conv-badge cb-lo">2.7%</span></td>
+                <td><div class="perf-bar-wrap"><div class="perf-bar" data-pw="47.4"></div></div></td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td>All Channels Combined</td>
+                <td class="rn"><span class="cnum" data-n="9720">0</span></td>
+                <td class="rn"><span class="cnum" data-n="996">0</span></td>
+                <td class="rn"><span class="cnum" data-n="317">0</span></td>
+                <td class="rn"><span class="cnum" data-n="69">0</span></td>
+                <td class="rn"><span class="conv-badge" style="background:#F0FDF4; color:#047857; border: 1px solid #A7F3D0;">3.3% Avg</span></td>
+                <td><div class="perf-bar-wrap"><div class="perf-bar" data-pw="57.8" style="background:#047857;"></div></div></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <!-- Integrated AI Admissions Advisory Panel -->
+        <div class="attr-advisory-panel">
+          <div class="attr-advisory-header">
+            <div class="attr-advisory-title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <span>AI Admissions Intelligence Advisory</span>
+            </div>
+            <span class="attr-advisory-tag">Data-Driven Optimization Recommendations</span>
+          </div>
+
+          <div class="insight-grid">
+            <!-- Card 1 -->
+            <div class="insight-card ic-best">
+              <div>
+                <div class="insight-header">
+                  <span class="insight-tag it-best">&#9733; Best Performer</span>
+                  <span class="insight-ico">&#127942;</span>
+                </div>
+                <div class="insight-title">LinkedIn converts at 5.7% &mdash; highest of any channel</div>
+                <div class="insight-body">Most teams underfund LinkedIn because visitor volume looks small. But fewer, better-qualified visitors convert 2.2&times; better than Google. Quality beats quantity &mdash; every time.</div>
+              </div>
+              <div class="insight-metric-pill">
+                <span style="color:#648781;">Efficiency Metric:</span>
+                <span style="color:#047857;">+2.2&times; vs Google ROI</span>
+              </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="insight-card ic-warn">
+              <div>
+                <div class="insight-header">
+                  <span class="insight-tag it-warn">&#9888;&#65039; Budget Risk</span>
+                  <span class="insight-ico">&#9888;&#65039;</span>
+                </div>
+                <div class="insight-title">Google gets 6&times; more budget, delivers half the ROI</div>
+                <div class="insight-body">Google drives 4,820 visitors vs LinkedIn&rsquo;s 840 &mdash; yet converts at 2.6% vs 5.7%. Every dollar over-allocated to Google is a dollar taken away from your highest-performing channel.</div>
+              </div>
+              <div class="insight-metric-pill">
+                <span style="color:#648781;">Opportunity Gap:</span>
+                <span style="color:#B45309;">2.6% vs 5.7% Conversion</span>
+              </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="insight-card ic-win">
+              <div>
+                <div class="insight-header">
+                  <span class="insight-tag it-win">&#128161; Quick Win</span>
+                  <span class="insight-ico">&#128161;</span>
+                </div>
+                <div class="insight-title">Reallocate 30% of Facebook spend &rarr; +14 campus tours</div>
+                <div class="insight-body">Shifting 30% of Facebook budget to LinkedIn could add &asymp;14 more campus tours per admission cycle &mdash; without increasing your total marketing spend by a single dollar.</div>
+              </div>
+              <div class="insight-metric-pill">
+                <span style="color:#648781;">Projected Gain:</span>
+                <span style="color:#0284C7;">+14 Campus Tours ($0 Ad Spend)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- Page Footer -->
+  <footer class="showcase-footer">
+    <div class="max-w-[1140px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        &copy; 2026 <strong>edvora.chat</strong> &bull; Multi-Tenant AI Chatbot SaaS for Colleges &amp; Universities
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="/superadmin/">Super Admin</a>
+        <span>&bull;</span>
+        <a href="/full-funnel-tracking.html">Full Funnel Tracking</a>
+        <span>&bull;</span>
+        <a href="/">Landing Page</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function(){
+      /* COUNT-UP ON LOAD */
+      function countUp(el, target, ms){
+        var s = Date.now();
+        (function tick(){
+          var p = Math.min((Date.now() - s) / ms, 1);
+          var e = 1 - Math.pow(1 - p, 3);
+          var v = Math.round(e * target);
+          el.textContent = v >= 1000 ? v.toLocaleString() : v;
+          if (p < 1) requestAnimationFrame(tick);
+        })();
+      }
+
+      function runAnimations() {
+        var attrSec = document.getElementById('attribution-platform');
+        if (!attrSec) return;
+        attrSec.querySelectorAll('.cnum[data-n]').forEach(function(el){
+          countUp(el, +el.getAttribute('data-n'), 1200);
+        });
+        attrSec.querySelectorAll('.perf-bar[data-pw]').forEach(function(b){
+          b.style.width = '0%';
+          setTimeout(function(){
+            b.style.width = b.getAttribute('data-pw') + '%';
+          }, 150);
+        });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', runAnimations);
+      } else {
+        runAnimations();
+      }
+    })();
+  </script>
+</body>
+</html>

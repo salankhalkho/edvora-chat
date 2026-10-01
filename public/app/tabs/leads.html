@@ -189,65 +189,83 @@
                 <a href="/privacy" target="_blank" style="color: #047857; text-decoration: underline; font-weight: 700; font-size: 11.5px;">Data Processing Agreement &rarr;</a>
             </div>
 
-            <!-- FILTER & SEARCH TOOLBAR -->
-            <div class="ckh-toolbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 12px !important; padding: 12px 20px !important;">
-                <div class="ckh-tabs-group" id="leadsStatusTabsContainer" style="display: flex !important; align-items: center !important; gap: 4px !important; flex-wrap: wrap !important; flex: 1 1 auto !important; min-width: 0 !important;">
-                    <button class="ckh-tab-btn active" data-leads-filter="all" onclick="setLeadsStatusFilter('all', this)">
-                        <span>All Leads</span>
-                        <span class="ckh-tab-count" id="leadsTabCountAll">0</span>
+            <!-- FILTER & SEARCH TOOLBAR (Option 1: Two Clean Intentional Rows) -->
+            <div class="ckh-toolbar" style="padding: 12px 20px !important; background: #FAFCFB !important; border-bottom: 1.5px solid #E6F0EC !important; display: flex !important; flex-direction: column !important; gap: 10px !important;">
+                
+                <!-- Row 1: Lifecycle Status Pills + Search Box -->
+                <div style="display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 12px !important; flex-wrap: nowrap !important;">
+                    <!-- Status Group -->
+                    <div class="ckh-tabs-group" id="leadsStatusRow" style="display: flex !important; align-items: center !important; gap: 4px !important; flex-wrap: nowrap !important; overflow-x: auto !important; scrollbar-width: none !important;">
+                        <span style="font-size: 11px !important; font-weight: 700 !important; color: #648781 !important; margin-right: 4px !important; text-transform: uppercase !important; letter-spacing: 0.3px !important; white-space: nowrap !important;">Status:</span>
+                        <button type="button" class="ckh-tab-btn active" data-leads-status="all" data-leads-filter="all" onclick="setLeadsStatusFilter('all', this)">
+                            <span>All Leads</span>
+                            <span class="ckh-tab-count" id="leadsTabCountAll">0</span>
+                        </button>
+                        <button type="button" class="ckh-tab-btn" data-leads-status="new" data-leads-filter="new" onclick="setLeadsStatusFilter('new', this)" style="color: #4F46E5;">
+                            <span style="width:6px; height:6px; border-radius:50%; background:#6366F1; display:inline-block;"></span>
+                            <span>New</span>
+                            <span class="ckh-tab-count" id="leadsTabCountNew" style="background: rgba(99, 102, 241, 0.12); color: #4F46E5;">0</span>
+                        </button>
+                        <button type="button" class="ckh-tab-btn" data-leads-status="contacted" data-leads-filter="contacted" onclick="setLeadsStatusFilter('contacted', this)" style="color: #D97706;">
+                            <span style="width:6px; height:6px; border-radius:50%; background:#F59E0B; display:inline-block;"></span>
+                            <span>Contacted</span>
+                            <span class="ckh-tab-count" id="leadsTabCountContacted" style="background: rgba(245, 158, 11, 0.12); color: #B45309;">0</span>
+                        </button>
+                        <button type="button" class="ckh-tab-btn" data-leads-status="converted" data-leads-filter="converted" onclick="setLeadsStatusFilter('converted', this)" style="color: #059669;">
+                            <span style="width:6px; height:6px; border-radius:50%; background:#10B981; display:inline-block;"></span>
+                            <span>Converted</span>
+                            <span class="ckh-tab-count" id="leadsTabCountConverted" style="background: rgba(16, 185, 129, 0.12); color: #047857;">0</span>
+                        </button>
+                        <button type="button" class="ckh-tab-btn" data-leads-status="lost" data-leads-filter="lost" onclick="setLeadsStatusFilter('lost', this)" style="color: #64748B;">
+                            <span style="width:6px; height:6px; border-radius:50%; background:#94A3B8; display:inline-block;"></span>
+                            <span>Lost</span>
+                            <span class="ckh-tab-count" id="leadsTabCountLost" style="background: rgba(148, 163, 184, 0.15); color: #64748B;">0</span>
+                        </button>
+                    </div>
+
+                    <!-- Search Input Box pinned to Row 1 right -->
+                    <div class="ckh-search-box" style="flex: 0 0 280px !important; min-width: 240px !important; max-width: 320px !important; margin-left: auto !important;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#648781" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input type="text" id="leadsSearchInput" class="ckh-search-input" placeholder="Search student name, email, phone, program, notes..." oninput="filterLeadsTable()" style="width: 100%;">
+                        <span style="font-size: 9.5px; font-family: 'JetBrains Mono', monospace; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: #F1F7F4; color: #648781; border: 1px solid #DCE9E5;">⌘K</span>
+                    </div>
+                </div>
+
+                <!-- Subtle separator between rows -->
+                <div style="height: 1px !important; background: #E6F0EC !important; margin: 0 !important; width: 100% !important;"></div>
+
+                <!-- Row 2: Inquiry Channel / Source Pills -->
+                <div class="ckh-tabs-group" id="leadsChannelRow" style="display: flex !important; align-items: center !important; gap: 4px !important; flex-wrap: nowrap !important; overflow-x: auto !important; scrollbar-width: none !important;">
+                    <span style="font-size: 11px !important; font-weight: 700 !important; color: #648781 !important; margin-right: 4px !important; text-transform: uppercase !important; letter-spacing: 0.3px !important; white-space: nowrap !important;">Channel:</span>
+                    <button type="button" class="ckh-tab-btn active" data-leads-channel="all" data-leads-filter="all" onclick="setLeadsChannelFilter('all', this)">
+                        <span>All Channels</span>
+                        <span class="ckh-tab-count" id="leadsTabCountChannelAll">0</span>
                     </button>
-                    <button class="ckh-tab-btn" data-leads-filter="new" onclick="setLeadsStatusFilter('new', this)" style="color: #4F46E5;">
-                        <span style="width:6px; height:6px; border-radius:50%; background:#6366F1; display:inline-block;"></span>
-                        <span>New</span>
-                        <span class="ckh-tab-count" id="leadsTabCountNew" style="background: rgba(99, 102, 241, 0.12); color: #4F46E5;">0</span>
-                    </button>
-                    <button class="ckh-tab-btn" data-leads-filter="contacted" onclick="setLeadsStatusFilter('contacted', this)" style="color: #D97706;">
-                        <span style="width:6px; height:6px; border-radius:50%; background:#F59E0B; display:inline-block;"></span>
-                        <span>Contacted</span>
-                        <span class="ckh-tab-count" id="leadsTabCountContacted" style="background: rgba(245, 158, 11, 0.12); color: #B45309;">0</span>
-                    </button>
-                    <button class="ckh-tab-btn" data-leads-filter="converted" onclick="setLeadsStatusFilter('converted', this)" style="color: #059669;">
-                        <span style="width:6px; height:6px; border-radius:50%; background:#10B981; display:inline-block;"></span>
-                        <span>Converted</span>
-                        <span class="ckh-tab-count" id="leadsTabCountConverted" style="background: rgba(16, 185, 129, 0.12); color: #047857;">0</span>
-                    </button>
-                    <button class="ckh-tab-btn" data-leads-filter="lost" onclick="setLeadsStatusFilter('lost', this)" style="color: #64748B;">
-                        <span style="width:6px; height:6px; border-radius:50%; background:#94A3B8; display:inline-block;"></span>
-                        <span>Lost</span>
-                        <span class="ckh-tab-count" id="leadsTabCountLost" style="background: rgba(148, 163, 184, 0.15); color: #64748B;">0</span>
-                    </button>
-                    <button class="ckh-tab-btn" data-leads-filter="callbacks" onclick="setLeadsStatusFilter('callbacks', this)" style="color: #E11D48;">
+                    <button type="button" class="ckh-tab-btn" data-leads-channel="callbacks" data-leads-filter="callbacks" onclick="setLeadsChannelFilter('callbacks', this)" style="color: #E11D48;">
                         <span style="width:6px; height:6px; border-radius:50%; background:#F43F5E; display:inline-block;"></span>
                         <span>Callbacks</span>
                         <span class="ckh-tab-count" id="leadsTabCountCallbacks" style="background: rgba(244, 63, 94, 0.12); color: #BE123C;">0</span>
                     </button>
-                    <button class="ckh-tab-btn" data-leads-filter="campus_tours" onclick="setLeadsStatusFilter('campus_tours', this)" style="color: #7C3AED;">
+                    <button type="button" class="ckh-tab-btn" data-leads-channel="campus_tours" data-leads-filter="campus_tours" onclick="setLeadsChannelFilter('campus_tours', this)" style="color: #7C3AED;">
                         <span style="width:6px; height:6px; border-radius:50%; background:#8B5CF6; display:inline-block;"></span>
                         <span>Campus Tours</span>
                         <span class="ckh-tab-count" id="leadsTabCountTours" style="background: rgba(139, 92, 246, 0.12); color: #6D28D9;">0</span>
                     </button>
-                    <button class="ckh-tab-btn" data-leads-filter="scholarships" onclick="setLeadsStatusFilter('scholarships', this)" style="color: #0D9488;">
+                    <button type="button" class="ckh-tab-btn" data-leads-channel="scholarships" data-leads-filter="scholarships" onclick="setLeadsChannelFilter('scholarships', this)" style="color: #0D9488;">
                         <span style="width:6px; height:6px; border-radius:50%; background:#14B8A6; display:inline-block;"></span>
                         <span>Scholarships</span>
                         <span class="ckh-tab-count" id="leadsTabCountScholarships" style="background: rgba(20, 184, 166, 0.12); color: #0F766E;">0</span>
                     </button>
-                    <button class="ckh-tab-btn" data-leads-filter="lead_magnets" onclick="setLeadsStatusFilter('lead_magnets', this)" style="color: #9333EA;">
+                    <button type="button" class="ckh-tab-btn" data-leads-channel="lead_magnets" data-leads-filter="lead_magnets" onclick="setLeadsChannelFilter('lead_magnets', this)" style="color: #9333EA;">
                         <span style="width:6px; height:6px; border-radius:50%; background:#A855F7; display:inline-block;"></span>
                         <span>Lead Magnets</span>
                         <span class="ckh-tab-count" id="leadsTabCountLeadMagnets" style="background: rgba(168, 85, 247, 0.12); color: #7E22CE;">0</span>
                     </button>
-                    <button class="ckh-tab-btn" data-leads-filter="general_inquiries" onclick="setLeadsStatusFilter('general_inquiries', this)" style="color: #0284C7;">
+                    <button type="button" class="ckh-tab-btn" data-leads-channel="general_inquiries" data-leads-filter="general_inquiries" onclick="setLeadsChannelFilter('general_inquiries', this)" style="color: #0284C7;">
                         <span style="width:6px; height:6px; border-radius:50%; background:#0EA5E9; display:inline-block;"></span>
                         <span>General Inquiries</span>
                         <span class="ckh-tab-count" id="leadsTabCountGeneralInquiries" style="background: rgba(14, 165, 233, 0.12); color: #0369A1;">0</span>
                     </button>
-                </div>
-
-                <!-- Search Input Box (Consolidated in top row) -->
-                <div class="ckh-search-box" style="flex: 0 0 280px; min-width: 240px; max-width: 320px; margin-left: auto;">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#648781" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <input type="text" id="leadsSearchInput" class="ckh-search-input" placeholder="Search student name, email, phone, program, notes..." oninput="filterLeadsTable()" style="width: 100%;">
-                    <span style="font-size: 9.5px; font-family: 'JetBrains Mono', monospace; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: #F1F7F4; color: #648781; border: 1px solid #DCE9E5;">⌘K</span>
                 </div>
 
                 <!-- Hidden Filter Fallbacks for script compatibility -->

@@ -121,6 +121,24 @@ $router->get('/knowledge-hub.html', function (Request $req) {
     require dirname(__DIR__) . '/public/knowledge-hub.html';
 });
 
+// Admissions Channel Attribution Platform Route
+$router->get('/attribution-platform', function (Request $req) {
+    require dirname(__DIR__) . '/public/attribution-platform.html';
+});
+
+$router->get('/attribution-platform.html', function (Request $req) {
+    require dirname(__DIR__) . '/public/attribution-platform.html';
+});
+
+// Full Funnel Student Journey Tracking Route
+$router->get('/full-funnel-tracking', function (Request $req) {
+    require dirname(__DIR__) . '/public/full-funnel-tracking.html';
+});
+
+$router->get('/full-funnel-tracking.html', function (Request $req) {
+    require dirname(__DIR__) . '/public/full-funnel-tracking.html';
+});
+
 // Dedicated Pricing Page Route
 $router->get('/pricing', function (Request $req) {
     require dirname(__DIR__) . '/app/Views/pricing.php';

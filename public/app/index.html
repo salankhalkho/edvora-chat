@@ -9708,13 +9708,17 @@ echo $response['reply'];
                 });
         }
 
+        var currentLeadsStatusFilter = 'all';
+        var currentLeadsChannelFilter = 'all';
+
         function filterLeadsTable() {
             const query = (document.getElementById('leadsSearchInput')?.value || '').toLowerCase().trim();
-            const filterKey = currentLeadsStatusFilter || 'all';
+            const statusKey = currentLeadsStatusFilter || 'all';
+            const channelKey = currentLeadsChannelFilter || 'all';
             const deptFilter = document.getElementById('leadsDeptFilter')?.value || 'all';
             const typeFilter = document.getElementById('leadsTypeFilter')?.value || 'all';
 
-            // 1. Filter by Department, Type/Intent, and Search Query (current active scope)
+            // 1. Filter by Department, Type/Intent (if present), and Search Query (current active scope)
             let scopeLeads = (currentLeadsList || []).filter(lead => {
                 // Search query match
                 if (query) {
@@ -9744,11 +9748,11 @@ echo $response['reply'];
                     }
                 }
 
-                // Type / Intent filter match
+                // Fallback Type filter match (if dropdown exists)
                 if (typeFilter !== 'all') {
                     const lType = (lead.lead_type || '').toLowerCase();
                     if (typeFilter === 'general') {
-                        if (lType === 'scholarship_eval' || lType.includes('scholarship') || lType.includes('callback') || lType.includes('tour') || lType.includes('asset') || lType.includes('prospectus') || lead.scholarship_tier) {
+                        if (lType === 'scholarship_eval' || lType.includes('scholarship') || lType.includes('callback') || lType.includes('tour') || lType.includes('asset') || lType.includes('prospectus') || lType.includes('brochure') || lead.scholarship_tier) {
                             return false;
                         }
                     } else if (typeFilter === 'callback') {
@@ -9765,25 +9769,36 @@ echo $response['reply'];
                 return true;
             });
 
-            // 2. Update status tab count badges according to scoped leads
+            // 2. Update status and channel count badges according to scopeLeads
             updateLeadsFilterTabCounts(scopeLeads);
 
-            // 3. Filter by Status Tab
+            // 3. Filter by Status AND Channel
             let filtered = scopeLeads.filter(lead => {
                 const status = (lead.status || 'new').toLowerCase();
                 const lType = (lead.lead_type || '').toLowerCase();
 
-                if (filterKey === 'new') return status === 'new';
-                if (filterKey === 'contacted') return status === 'contacted';
-                if (filterKey === 'converted') return status === 'converted';
-                if (filterKey === 'lost') return status === 'lost';
-                if (filterKey === 'callbacks') return lType.includes('callback');
-                if (filterKey === 'campus_tours') return lType.includes('tour');
-                if (filterKey === 'scholarships') return lType.includes('scholarship') || (lead.scholarship_tier && lead.scholarship_tier.trim() !== '');
-                if (filterKey === 'lead_magnets') return lType.includes('asset') || lType.includes('prospectus') || lType.includes('brochure');
-                if (filterKey === 'general_inquiries') return !(lType === 'scholarship_eval' || lType.includes('scholarship') || lType.includes('callback') || lType.includes('tour') || lType.includes('asset') || lType.includes('prospectus') || lType.includes('brochure') || (lead.scholarship_tier && lead.scholarship_tier.trim() !== ''));
+                // Status dimension filter
+                if (statusKey === 'new' && status !== 'new') return false;
+                if (statusKey === 'contacted' && status !== 'contacted') return false;
+                if (statusKey === 'converted' && status !== 'converted') return false;
+                if (statusKey === 'lost' && status !== 'lost') return false;
 
-                return true; // 'all'
+                // Channel dimension filter
+                if (channelKey === 'callbacks') {
+                    if (!lType.includes('callback')) return false;
+                } else if (channelKey === 'campus_tours') {
+                    if (!lType.includes('tour')) return false;
+                } else if (channelKey === 'scholarships') {
+                    if (!lType.includes('scholarship') && !(lead.scholarship_tier && lead.scholarship_tier.trim() !== '')) return false;
+                } else if (channelKey === 'lead_magnets') {
+                    if (!lType.includes('asset') && !lType.includes('prospectus') && !lType.includes('brochure')) return false;
+                } else if (channelKey === 'general_inquiries') {
+                    if (lType === 'scholarship_eval' || lType.includes('scholarship') || lType.includes('callback') || lType.includes('tour') || lType.includes('asset') || lType.includes('prospectus') || lType.includes('brochure') || (lead.scholarship_tier && lead.scholarship_tier.trim() !== '')) {
+                        return false;
+                    }
+                }
+
+                return true;
             });
 
             filteredLeadsList = filtered;
@@ -9797,6 +9812,8 @@ echo $response['reply'];
             const countContacted = leadsScope.filter(l => (l.status || '').toLowerCase() === 'contacted').length;
             const countConverted = leadsScope.filter(l => (l.status || '').toLowerCase() === 'converted').length;
             const countLost = leadsScope.filter(l => (l.status || '').toLowerCase() === 'lost').length;
+
+            const countChannelAll = leadsScope.length;
             const countCallbacks = leadsScope.filter(l => (l.lead_type || '').toLowerCase().includes('callback')).length;
             const countTours = leadsScope.filter(l => (l.lead_type || '').toLowerCase().includes('tour')).length;
             const countSch = leadsScope.filter(l => (l.lead_type || '').toLowerCase().includes('scholarship') || (l.scholarship_tier && l.scholarship_tier.trim() !== '')).length;
@@ -9815,6 +9832,8 @@ echo $response['reply'];
             setCount('leadsTabCountContacted', countContacted);
             setCount('leadsTabCountConverted', countConverted);
             setCount('leadsTabCountLost', countLost);
+
+            setCount('leadsTabCountChannelAll', countChannelAll);
             setCount('leadsTabCountCallbacks', countCallbacks);
             setCount('leadsTabCountTours', countTours);
             setCount('leadsTabCountScholarships', countSch);
@@ -9822,18 +9841,30 @@ echo $response['reply'];
             setCount('leadsTabCountGeneralInquiries', countGeneral);
         }
 
-        function setLeadsStatusFilter(filterKey, el) {
-            currentLeadsStatusFilter = filterKey;
+        function setLeadsStatusFilter(statusKey, el) {
+            if (['callbacks', 'campus_tours', 'scholarships', 'lead_magnets', 'general_inquiries'].includes(statusKey)) {
+                return setLeadsChannelFilter(statusKey, el);
+            }
+            currentLeadsStatusFilter = statusKey;
 
-            // Update tab button active states
-            document.querySelectorAll('#leadsStatusTabsContainer .ckh-tab-btn').forEach(btn => {
-                const attr = btn.getAttribute('data-leads-filter') || '';
-                if (attr === filterKey) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
+            document.querySelectorAll('#leadsStatusRow .ckh-tab-btn, #leadsStatusTabsContainer .ckh-tab-btn').forEach(btn => {
+                const attr = btn.getAttribute('data-leads-status') || btn.getAttribute('data-leads-filter') || '';
+                btn.classList.toggle('active', attr === statusKey);
             });
+
+            filterLeadsTable();
+        }
+
+        function setLeadsChannelFilter(channelKey, el) {
+            currentLeadsChannelFilter = channelKey;
+
+            document.querySelectorAll('#leadsChannelRow .ckh-tab-btn').forEach(btn => {
+                const attr = btn.getAttribute('data-leads-channel') || btn.getAttribute('data-leads-filter') || '';
+                btn.classList.toggle('active', attr === channelKey);
+            });
+
+            filterLeadsTable();
+        }
 
             filterLeadsTable();
         }
