@@ -27,7 +27,6 @@
     <div style="padding: 28px 28px 48px 28px; box-sizing: border-box; width: 100%;">
         
         <!-- Control Cards Grid -->
-        <!-- Control Cards Grid -->
         <style>
             .org-ref-card {
                 position: relative;
@@ -69,6 +68,8 @@
                 flex-shrink: 0;
                 letter-spacing: 0.02em;
                 transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+                margin-left: auto;
+                white-space: nowrap;
             }
             .org-manage-badge svg {
                 color: #FFFFFF !important;
@@ -138,38 +139,33 @@
             <div class="org-ref-card" onclick="switchNavTab('settings')">
                 <div class="org-ref-card-inner">
                     <div>
-                        <!-- Header Row: Icon + Title/Subtitle + Action Badge -->
-                        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 18px;">
-                            <div style="display: flex; align-items: center; gap: 14px;">
-                                <div style="width: 54px; height: 54px; border-radius: 16px; background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 50%, #EC4899 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px -3px rgba(139, 92, 246, 0.4); flex-shrink: 0;">
-                                    <span style="font-size: 26px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">🏛️</span>
-                                </div>
-                                <div>
-                                    <h3 style="font-size: 17px; font-weight: 800; color: #063D3B; margin: 0; line-height: 1.25; font-family: var(--brand-font-display); letter-spacing: -0.01em;">
-                                        Institution Profile
-                                    </h3>
-                                    <div style="font-size: 12px; font-weight: 700; color: #8B5CF6; margin-top: 3px;">
-                                        Profile &amp; Identity Module
-                                    </div>
+                        <!-- Header Row: Icon + Title/Subtitle (Full Width) -->
+                        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
+                            <div style="width: 54px; height: 54px; border-radius: 16px; background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 50%, #EC4899 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px -3px rgba(139, 92, 246, 0.4); flex-shrink: 0;">
+                                <span style="font-size: 26px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">🏛️</span>
+                            </div>
+                            <div style="flex: 1; min-width: 0;">
+                                <h3 style="font-size: 17px; font-weight: 800; color: #063D3B; margin: 0; line-height: 1.25; font-family: var(--brand-font-display); letter-spacing: -0.01em;">
+                                    Institution Profile
+                                </h3>
+                                <div style="font-size: 12px; font-weight: 700; color: #8B5CF6; margin-top: 3px;">
+                                    Profile &amp; Identity Module
                                 </div>
                             </div>
-                            <span class="org-manage-badge">
-                                <svg class="org-manage-gear-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                                <span>Manage</span>
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="4" y1="12" x2="20" y2="12"></line><polyline points="14 6 20 12 14 18"></polyline></svg>
-                            </span>
                         </div>
 
                         <!-- Description -->
-                        <p style="font-size: 12.5px; color: #4B5563; line-height: 1.55; margin: 0 0 16px 0; min-height: 48px;">
+                        <p style="font-size: 12.5px; color: #4B5563; line-height: 1.55; margin: 0; min-height: 48px;">
                             Manage official institution name, acronym, website URL, and primary academic cycle metadata.
                         </p>
+                    </div>
 
+                    <div style="margin-top: 18px;">
                         <!-- Hairline Divider -->
-                        <div style="height: 1px; width: 100%; background: linear-gradient(90deg, #E5E7EB 0%, #F3F4F6 100%); margin-bottom: 16px;"></div>
+                        <div style="height: 1px; width: 100%; background: linear-gradient(90deg, #E5E7EB 0%, #F3F4F6 100%); margin-bottom: 14px;"></div>
 
-                        <!-- Pill Tags -->
-                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        <!-- Pill Tags & Bottom-Right Manage Badge -->
+                        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
                             <span class="org-ref-chip org-ref-chip-blue">
                                 Identity &amp; Logo
                             </span>
@@ -178,6 +174,11 @@
                             </span>
                             <span class="org-ref-chip org-ref-chip-green">
                                 Cycle: Fall 2026
+                            </span>
+                            <span class="org-manage-badge">
+                                <svg class="org-manage-gear-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                <span>Manage</span>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="4" y1="12" x2="20" y2="12"></line><polyline points="14 6 20 12 14 18"></polyline></svg>
                             </span>
                         </div>
                     </div>
@@ -188,38 +189,33 @@
             <div class="org-ref-card" onclick="switchNavTab('campuses')">
                 <div class="org-ref-card-inner">
                     <div>
-                        <!-- Header Row: Icon + Title/Subtitle + Action Badge -->
-                        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 18px;">
-                            <div style="display: flex; align-items: center; gap: 14px;">
-                                <div style="width: 54px; height: 54px; border-radius: 16px; background: linear-gradient(135deg, #10B981 0%, #059669 50%, #047857 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px -3px rgba(16, 185, 129, 0.4); flex-shrink: 0;">
-                                    <span style="font-size: 26px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">🏫</span>
-                                </div>
-                                <div>
-                                    <h3 style="font-size: 17px; font-weight: 800; color: #063D3B; margin: 0; line-height: 1.25; font-family: var(--brand-font-display); letter-spacing: -0.01em;">
-                                        Campus
-                                    </h3>
-                                    <div style="font-size: 12px; font-weight: 700; color: #059669; margin-top: 3px;">
-                                        Locations &amp; Facilities
-                                    </div>
+                        <!-- Header Row: Icon + Title/Subtitle (Full Width) -->
+                        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
+                            <div style="width: 54px; height: 54px; border-radius: 16px; background: linear-gradient(135deg, #10B981 0%, #059669 50%, #047857 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px -3px rgba(16, 185, 129, 0.4); flex-shrink: 0;">
+                                <span style="font-size: 26px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">🏫</span>
+                            </div>
+                            <div style="flex: 1; min-width: 0;">
+                                <h3 style="font-size: 17px; font-weight: 800; color: #063D3B; margin: 0; line-height: 1.25; font-family: var(--brand-font-display); letter-spacing: -0.01em;">
+                                    Campus
+                                </h3>
+                                <div style="font-size: 12px; font-weight: 700; color: #059669; margin-top: 3px;">
+                                    Locations &amp; Facilities
                                 </div>
                             </div>
-                            <span class="org-manage-badge">
-                                <svg class="org-manage-gear-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                                <span>Manage</span>
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="4" y1="12" x2="20" y2="12"></line><polyline points="14 6 20 12 14 18"></polyline></svg>
-                            </span>
                         </div>
 
                         <!-- Description -->
-                        <p style="font-size: 12.5px; color: #4B5563; line-height: 1.55; margin: 0 0 16px 0; min-height: 48px;">
+                        <p style="font-size: 12.5px; color: #4B5563; line-height: 1.55; margin: 0; min-height: 48px;">
                             Configure main campus and regional branches, land area, hostel accommodations, virtual 3D tour links, and location contact details.
                         </p>
+                    </div>
 
+                    <div style="margin-top: 18px;">
                         <!-- Hairline Divider -->
-                        <div style="height: 1px; width: 100%; background: linear-gradient(90deg, #E5E7EB 0%, #F3F4F6 100%); margin-bottom: 16px;"></div>
+                        <div style="height: 1px; width: 100%; background: linear-gradient(90deg, #E5E7EB 0%, #F3F4F6 100%); margin-bottom: 14px;"></div>
 
-                        <!-- Pill Tags -->
-                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        <!-- Pill Tags & Bottom-Right Manage Badge -->
+                        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
                             <span class="org-ref-chip org-ref-chip-green">
                                 Multi-Campus Directory
                             </span>
@@ -228,6 +224,11 @@
                             </span>
                             <span class="org-ref-chip org-ref-chip-purple">
                                 Hostels &amp; Land Area
+                            </span>
+                            <span class="org-manage-badge">
+                                <svg class="org-manage-gear-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                <span>Manage</span>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="4" y1="12" x2="20" y2="12"></line><polyline points="14 6 20 12 14 18"></polyline></svg>
                             </span>
                         </div>
                     </div>
@@ -238,38 +239,33 @@
             <div class="org-ref-card" onclick="switchNavTab('chatbot')">
                 <div class="org-ref-card-inner">
                     <div>
-                        <!-- Header Row: Icon + Title/Subtitle + Action Badge -->
-                        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 18px;">
-                            <div style="display: flex; align-items: center; gap: 14px;">
-                                <div style="width: 54px; height: 54px; border-radius: 16px; background: linear-gradient(135deg, #6366F1 0%, #A855F7 50%, #EC4899 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px -3px rgba(168, 85, 247, 0.45); flex-shrink: 0;">
-                                    <span style="font-size: 26px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.18));">🔮</span>
-                                </div>
-                                <div>
-                                    <h3 style="font-size: 17px; font-weight: 800; color: #063D3B; margin: 0; line-height: 1.25; font-family: var(--brand-font-display); letter-spacing: -0.01em;">
-                                        ChatBot Settings
-                                    </h3>
-                                    <div style="font-size: 12px; font-weight: 700; color: #8B5CF6; margin-top: 3px;">
-                                        Customize Branding
-                                    </div>
+                        <!-- Header Row: Icon + Title/Subtitle (Full Width) -->
+                        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
+                            <div style="width: 54px; height: 54px; border-radius: 16px; background: linear-gradient(135deg, #6366F1 0%, #A855F7 50%, #EC4899 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px -3px rgba(168, 85, 247, 0.45); flex-shrink: 0;">
+                                <span style="font-size: 26px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.18));">🔮</span>
+                            </div>
+                            <div style="flex: 1; min-width: 0;">
+                                <h3 style="font-size: 17px; font-weight: 800; color: #063D3B; margin: 0; line-height: 1.25; font-family: var(--brand-font-display); letter-spacing: -0.01em;">
+                                    ChatBot Settings
+                                </h3>
+                                <div style="font-size: 12px; font-weight: 700; color: #8B5CF6; margin-top: 3px;">
+                                    Customize Branding
                                 </div>
                             </div>
-                            <span class="org-manage-badge">
-                                <svg class="org-manage-gear-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                                <span>Manage</span>
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="4" y1="12" x2="20" y2="12"></line><polyline points="14 6 20 12 14 18"></polyline></svg>
-                            </span>
                         </div>
 
                         <!-- Description -->
-                        <p style="font-size: 12.5px; color: #4B5563; line-height: 1.55; margin: 0 0 16px 0; min-height: 48px;">
+                        <p style="font-size: 12.5px; color: #4B5563; line-height: 1.55; margin: 0; min-height: 48px;">
                             Customize admissions bot persona, greeting message, theme colors, widget launcher style, and generate live website embed codes.
                         </p>
+                    </div>
 
+                    <div style="margin-top: 18px;">
                         <!-- Hairline Divider -->
-                        <div style="height: 1px; width: 100%; background: linear-gradient(90deg, #E5E7EB 0%, #F3F4F6 100%); margin-bottom: 16px;"></div>
+                        <div style="height: 1px; width: 100%; background: linear-gradient(90deg, #E5E7EB 0%, #F3F4F6 100%); margin-bottom: 14px;"></div>
 
-                        <!-- Pill Tags -->
-                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        <!-- Pill Tags & Bottom-Right Manage Badge -->
+                        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
                             <span class="org-ref-chip org-ref-chip-blue">
                                 Widget Styling
                             </span>
@@ -278,6 +274,11 @@
                             </span>
                             <span class="org-ref-chip org-ref-chip-green">
                                 Embed Snippet
+                            </span>
+                            <span class="org-manage-badge">
+                                <svg class="org-manage-gear-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                <span>Manage</span>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="4" y1="12" x2="20" y2="12"></line><polyline points="14 6 20 12 14 18"></polyline></svg>
                             </span>
                         </div>
                     </div>
@@ -288,38 +289,33 @@
             <div class="org-ref-card" onclick="switchNavTab('domain-whitelist')">
                 <div class="org-ref-card-inner">
                     <div>
-                        <!-- Header Row: Icon + Title/Subtitle + Action Badge -->
-                        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 18px;">
-                            <div style="display: flex; align-items: center; gap: 14px;">
-                                <div style="width: 54px; height: 54px; border-radius: 16px; background: linear-gradient(135deg, #0284C7 0%, #0EA5E9 50%, #38BDF8 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px -3px rgba(14, 165, 233, 0.4); flex-shrink: 0;">
-                                    <span style="font-size: 26px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">🛡️</span>
-                                </div>
-                                <div>
-                                    <h3 style="font-size: 17px; font-weight: 800; color: #063D3B; margin: 0; line-height: 1.25; font-family: var(--brand-font-display); letter-spacing: -0.01em;">
-                                        Domain Whitelisting
-                                    </h3>
-                                    <div style="font-size: 12px; font-weight: 700; color: #0284C7; margin-top: 3px;">
-                                        Origin Security &amp; Embed Control
-                                    </div>
+                        <!-- Header Row: Icon + Title/Subtitle (Full Width) -->
+                        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
+                            <div style="width: 54px; height: 54px; border-radius: 16px; background: linear-gradient(135deg, #0284C7 0%, #0EA5E9 50%, #38BDF8 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px -3px rgba(14, 165, 233, 0.4); flex-shrink: 0;">
+                                <span style="font-size: 26px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">🛡️</span>
+                            </div>
+                            <div style="flex: 1; min-width: 0;">
+                                <h3 style="font-size: 17px; font-weight: 800; color: #063D3B; margin: 0; line-height: 1.25; font-family: var(--brand-font-display); letter-spacing: -0.01em;">
+                                    Domain Whitelisting
+                                </h3>
+                                <div style="font-size: 12px; font-weight: 700; color: #0284C7; margin-top: 3px;">
+                                    Origin Security &amp; Embed Control
                                 </div>
                             </div>
-                            <span class="org-manage-badge">
-                                <svg class="org-manage-gear-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                                <span>Manage</span>
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="4" y1="12" x2="20" y2="12"></line><polyline points="14 6 20 12 14 18"></polyline></svg>
-                            </span>
                         </div>
 
                         <!-- Description -->
-                        <p style="font-size: 12.5px; color: #4B5563; line-height: 1.55; margin: 0 0 16px 0; min-height: 48px;">
+                        <p style="font-size: 12.5px; color: #4B5563; line-height: 1.55; margin: 0; min-height: 48px;">
                             Authorize official institutional websites and subdomains permitted to embed and interact with your AI chatbot widget.
                         </p>
+                    </div>
 
+                    <div style="margin-top: 18px;">
                         <!-- Hairline Divider -->
-                        <div style="height: 1px; width: 100%; background: linear-gradient(90deg, #E5E7EB 0%, #F3F4F6 100%); margin-bottom: 16px;"></div>
+                        <div style="height: 1px; width: 100%; background: linear-gradient(90deg, #E5E7EB 0%, #F3F4F6 100%); margin-bottom: 14px;"></div>
 
-                        <!-- Pill Tags -->
-                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        <!-- Pill Tags & Bottom-Right Manage Badge -->
+                        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
                             <span class="org-ref-chip org-ref-chip-blue">
                                 Origin Security
                             </span>
@@ -328,6 +324,11 @@
                             </span>
                             <span class="org-ref-chip org-ref-chip-purple">
                                 Up to 4 Domains
+                            </span>
+                            <span class="org-manage-badge">
+                                <svg class="org-manage-gear-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                <span>Manage</span>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="4" y1="12" x2="20" y2="12"></line><polyline points="14 6 20 12 14 18"></polyline></svg>
                             </span>
                         </div>
                     </div>
@@ -338,38 +339,33 @@
             <div class="org-ref-card" onclick="switchNavTab('multilingual')">
                 <div class="org-ref-card-inner">
                     <div>
-                        <!-- Header Row: Icon + Title/Subtitle + Action Badge -->
-                        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 18px;">
-                            <div style="display: flex; align-items: center; gap: 14px;">
-                                <div style="width: 54px; height: 54px; border-radius: 16px; background: linear-gradient(135deg, #0EA5E9 0%, #3B82F6 50%, #8B5CF6 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px -3px rgba(59, 130, 246, 0.4); flex-shrink: 0;">
-                                    <span style="font-size: 26px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">🌐</span>
-                                </div>
-                                <div>
-                                    <h3 style="font-size: 17px; font-weight: 800; color: #063D3B; margin: 0; line-height: 1.25; font-family: var(--brand-font-display); letter-spacing: -0.01em;">
-                                        Multilingual Support
-                                    </h3>
-                                    <div style="font-size: 12px; font-weight: 700; color: #8B5CF6; margin-top: 3px;">
-                                        Global Languages Module
-                                    </div>
+                        <!-- Header Row: Icon + Title/Subtitle (Full Width) -->
+                        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
+                            <div style="width: 54px; height: 54px; border-radius: 16px; background: linear-gradient(135deg, #0EA5E9 0%, #3B82F6 50%, #8B5CF6 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px -3px rgba(59, 130, 246, 0.4); flex-shrink: 0;">
+                                <span style="font-size: 26px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">🌐</span>
+                            </div>
+                            <div style="flex: 1; min-width: 0;">
+                                <h3 style="font-size: 17px; font-weight: 800; color: #063D3B; margin: 0; line-height: 1.25; font-family: var(--brand-font-display); letter-spacing: -0.01em;">
+                                    Multilingual Support
+                                </h3>
+                                <div style="font-size: 12px; font-weight: 700; color: #8B5CF6; margin-top: 3px;">
+                                    Global Languages Module
                                 </div>
                             </div>
-                            <span class="org-manage-badge">
-                                <svg class="org-manage-gear-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                                <span>Manage</span>
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="4" y1="12" x2="20" y2="12"></line><polyline points="14 6 20 12 14 18"></polyline></svg>
-                            </span>
                         </div>
 
                         <!-- Description -->
-                        <p style="font-size: 12.5px; color: #4B5563; line-height: 1.55; margin: 0 0 16px 0; min-height: 48px;">
+                        <p style="font-size: 12.5px; color: #4B5563; line-height: 1.55; margin: 0; min-height: 48px;">
                             Manage zero-setup native multilingual intelligence, enable/disable regional languages, and configure cross-lingual retrieval.
                         </p>
+                    </div>
 
+                    <div style="margin-top: 18px;">
                         <!-- Hairline Divider -->
-                        <div style="height: 1px; width: 100%; background: linear-gradient(90deg, #E5E7EB 0%, #F3F4F6 100%); margin-bottom: 16px;"></div>
+                        <div style="height: 1px; width: 100%; background: linear-gradient(90deg, #E5E7EB 0%, #F3F4F6 100%); margin-bottom: 14px;"></div>
 
-                        <!-- Pill Tags -->
-                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        <!-- Pill Tags & Bottom-Right Manage Badge -->
+                        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
                             <span class="org-ref-chip org-ref-chip-blue">
                                 25+ Languages
                             </span>
@@ -378,6 +374,11 @@
                             </span>
                             <span class="org-ref-chip org-ref-chip-green">
                                 Native LLM
+                            </span>
+                            <span class="org-manage-badge">
+                                <svg class="org-manage-gear-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                <span>Manage</span>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="4" y1="12" x2="20" y2="12"></line><polyline points="14 6 20 12 14 18"></polyline></svg>
                             </span>
                         </div>
                     </div>
@@ -388,38 +389,33 @@
             <div class="org-ref-card" onclick="switchNavTab('campus-tours-scheduling')">
                 <div class="org-ref-card-inner">
                     <div>
-                        <!-- Header Row: Icon + Title/Subtitle + Status Badge -->
-                        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 18px;">
-                            <div style="display: flex; align-items: center; gap: 14px;">
-                                <div style="width: 54px; height: 54px; border-radius: 16px; background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 50%, #EC4899 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px -3px rgba(168, 85, 247, 0.4); flex-shrink: 0;">
-                                    <span style="font-size: 26px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">🏫</span>
-                                </div>
-                                <div>
-                                    <h3 style="font-size: 17px; font-weight: 800; color: #063D3B; margin: 0; line-height: 1.25; font-family: var(--brand-font-display); letter-spacing: -0.01em;">
-                                        Campus Tours
-                                    </h3>
-                                    <div style="font-size: 12px; font-weight: 700; color: #8B5CF6; margin-top: 3px;">
-                                        Visitor Experience Module
-                                    </div>
+                        <!-- Header Row: Icon + Title/Subtitle (Full Width) -->
+                        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
+                            <div style="width: 54px; height: 54px; border-radius: 16px; background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 50%, #EC4899 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px -3px rgba(168, 85, 247, 0.4); flex-shrink: 0;">
+                                <span style="font-size: 26px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">🏫</span>
+                            </div>
+                            <div style="flex: 1; min-width: 0;">
+                                <h3 style="font-size: 17px; font-weight: 800; color: #063D3B; margin: 0; line-height: 1.25; font-family: var(--brand-font-display); letter-spacing: -0.01em;">
+                                    Campus Tours
+                                </h3>
+                                <div style="font-size: 12px; font-weight: 700; color: #8B5CF6; margin-top: 3px;">
+                                    Visitor Experience Module
                                 </div>
                             </div>
-                            <span class="org-manage-badge">
-                                <svg class="org-manage-gear-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                                <span>Manage</span>
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="4" y1="12" x2="20" y2="12"></line><polyline points="14 6 20 12 14 18"></polyline></svg>
-                            </span>
                         </div>
 
                         <!-- Description -->
-                        <p style="font-size: 12.5px; color: #4B5563; line-height: 1.55; margin: 0 0 16px 0; min-height: 48px;">
+                        <p style="font-size: 12.5px; color: #4B5563; line-height: 1.55; margin: 0; min-height: 48px;">
                             Set up in-person campus visit slots, counselor assignment routing, guided tour policies, and automated attendee follow-up triggers.
                         </p>
+                    </div>
 
+                    <div style="margin-top: 18px;">
                         <!-- Hairline Divider -->
-                        <div style="height: 1px; width: 100%; background: linear-gradient(90deg, #E5E7EB 0%, #F3F4F6 100%); margin-bottom: 16px;"></div>
+                        <div style="height: 1px; width: 100%; background: linear-gradient(90deg, #E5E7EB 0%, #F3F4F6 100%); margin-bottom: 14px;"></div>
 
-                        <!-- Pill Tags -->
-                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        <!-- Pill Tags & Bottom-Right Manage Badge -->
+                        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
                             <span class="org-ref-chip org-ref-chip-blue">
                                 Visit Schedule
                             </span>
@@ -428,6 +424,11 @@
                             </span>
                             <span class="org-ref-chip org-ref-chip-green">
                                 Feedback Surveys
+                            </span>
+                            <span class="org-manage-badge">
+                                <svg class="org-manage-gear-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                <span>Manage</span>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="4" y1="12" x2="20" y2="12"></line><polyline points="14 6 20 12 14 18"></polyline></svg>
                             </span>
                         </div>
                     </div>
@@ -438,38 +439,33 @@
             <div class="org-ref-card" onclick="switchNavTab('scholarship-configuration')">
                 <div class="org-ref-card-inner">
                     <div>
-                        <!-- Header Row: Icon + Title/Subtitle + Status Badge -->
-                        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 18px;">
-                            <div style="display: flex; align-items: center; gap: 14px;">
-                                <div style="width: 54px; height: 54px; border-radius: 16px; background: linear-gradient(135deg, #F59E0B 0%, #F97316 50%, #EC4899 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px -3px rgba(245, 158, 11, 0.4); flex-shrink: 0;">
-                                    <span style="font-size: 26px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">💰</span>
-                                </div>
-                                <div>
-                                    <h3 style="font-size: 17px; font-weight: 800; color: #063D3B; margin: 0; line-height: 1.25; font-family: var(--brand-font-display); letter-spacing: -0.01em;">
-                                        Scholarships
-                                    </h3>
-                                    <div style="font-size: 12px; font-weight: 700; color: #8B5CF6; margin-top: 3px;">
-                                        Financial Aid Module
-                                    </div>
+                        <!-- Header Row: Icon + Title/Subtitle (Full Width) -->
+                        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
+                            <div style="width: 54px; height: 54px; border-radius: 16px; background: linear-gradient(135deg, #F59E0B 0%, #F97316 50%, #EC4899 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px -3px rgba(245, 158, 11, 0.4); flex-shrink: 0;">
+                                <span style="font-size: 26px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">💰</span>
+                            </div>
+                            <div style="flex: 1; min-width: 0;">
+                                <h3 style="font-size: 17px; font-weight: 800; color: #063D3B; margin: 0; line-height: 1.25; font-family: var(--brand-font-display); letter-spacing: -0.01em;">
+                                    Scholarships
+                                </h3>
+                                <div style="font-size: 12px; font-weight: 700; color: #8B5CF6; margin-top: 3px;">
+                                    Financial Aid Module
                                 </div>
                             </div>
-                            <span class="org-manage-badge">
-                                <svg class="org-manage-gear-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                                <span>Manage</span>
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="4" y1="12" x2="20" y2="12"></line><polyline points="14 6 20 12 14 18"></polyline></svg>
-                            </span>
                         </div>
 
                         <!-- Description -->
-                        <p style="font-size: 12.5px; color: #4B5563; line-height: 1.55; margin: 0 0 16px 0; min-height: 48px;">
+                        <p style="font-size: 12.5px; color: #4B5563; line-height: 1.55; margin: 0; min-height: 48px;">
                             Configure merit scholarship tiers, entrance examination score cut-offs, fee concession brackets, and chatbot lead-magnet eligibility calculators.
                         </p>
+                    </div>
 
+                    <div style="margin-top: 18px;">
                         <!-- Hairline Divider -->
-                        <div style="height: 1px; width: 100%; background: linear-gradient(90deg, #E5E7EB 0%, #F3F4F6 100%); margin-bottom: 16px;"></div>
+                        <div style="height: 1px; width: 100%; background: linear-gradient(90deg, #E5E7EB 0%, #F3F4F6 100%); margin-bottom: 14px;"></div>
 
-                        <!-- Pill Tags -->
-                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        <!-- Pill Tags & Bottom-Right Manage Badge -->
+                        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
                             <span class="org-ref-chip org-ref-chip-blue">
                                 Merit Slabs
                             </span>
@@ -478,6 +474,11 @@
                             </span>
                             <span class="org-ref-chip org-ref-chip-green">
                                 Lead Calculator
+                            </span>
+                            <span class="org-manage-badge">
+                                <svg class="org-manage-gear-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                <span>Manage</span>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="4" y1="12" x2="20" y2="12"></line><polyline points="14 6 20 12 14 18"></polyline></svg>
                             </span>
                         </div>
                     </div>
@@ -488,38 +489,33 @@
             <div class="org-ref-card" onclick="switchNavTab('session-journeys')">
                 <div class="org-ref-card-inner">
                     <div>
-                        <!-- Header Row: Icon + Title/Subtitle + Status Badge -->
-                        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 18px;">
-                            <div style="display: flex; align-items: center; gap: 14px;">
-                                <div style="width: 54px; height: 54px; border-radius: 16px; background: linear-gradient(135deg, #0EA5E9 0%, #3B82F6 50%, #6366F1 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px -3px rgba(59, 130, 246, 0.4); flex-shrink: 0;">
-                                    <span style="font-size: 26px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">🧭</span>
-                                </div>
-                                <div>
-                                    <h3 style="font-size: 17px; font-weight: 800; color: #063D3B; margin: 0; line-height: 1.25; font-family: var(--brand-font-display); letter-spacing: -0.01em;">
-                                        Visitor Session Journeys
-                                    </h3>
-                                    <div style="font-size: 12px; font-weight: 700; color: #3B82F6; margin-top: 3px;">
-                                        Audience Experience Module
-                                    </div>
+                        <!-- Header Row: Icon + Title/Subtitle (Full Width) -->
+                        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
+                            <div style="width: 54px; height: 54px; border-radius: 16px; background: linear-gradient(135deg, #0EA5E9 0%, #3B82F6 50%, #6366F1 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px -3px rgba(59, 130, 246, 0.4); flex-shrink: 0;">
+                                <span style="font-size: 26px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">🧭</span>
+                            </div>
+                            <div style="flex: 1; min-width: 0;">
+                                <h3 style="font-size: 17px; font-weight: 800; color: #063D3B; margin: 0; line-height: 1.25; font-family: var(--brand-font-display); letter-spacing: -0.01em;">
+                                    Visitor Session Journeys
+                                </h3>
+                                <div style="font-size: 12px; font-weight: 700; color: #3B82F6; margin-top: 3px;">
+                                    Audience Experience Module
                                 </div>
                             </div>
-                            <span class="org-manage-badge">
-                                <svg class="org-manage-gear-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                                <span>Manage</span>
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="4" y1="12" x2="20" y2="12"></line><polyline points="14 6 20 12 14 18"></polyline></svg>
-                            </span>
                         </div>
 
                         <!-- Description -->
-                        <p style="font-size: 12.5px; color: #4B5563; line-height: 1.55; margin: 0 0 16px 0; min-height: 48px;">
+                        <p style="font-size: 12.5px; color: #4B5563; line-height: 1.55; margin: 0; min-height: 48px;">
                             Inspect individual visitor browsing paths, page dwell times, drop-off stages, and campaign attribution across all student sessions.
                         </p>
+                    </div>
 
+                    <div style="margin-top: 18px;">
                         <!-- Hairline Divider -->
-                        <div style="height: 1px; width: 100%; background: linear-gradient(90deg, #E5E7EB 0%, #F3F4F6 100%); margin-bottom: 16px;"></div>
+                        <div style="height: 1px; width: 100%; background: linear-gradient(90deg, #E5E7EB 0%, #F3F4F6 100%); margin-bottom: 14px;"></div>
 
-                        <!-- Pill Tags -->
-                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        <!-- Pill Tags & Bottom-Right Manage Badge -->
+                        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
                             <span class="org-ref-chip org-ref-chip-blue">
                                 Dwell Analytics
                             </span>
@@ -528,6 +524,11 @@
                             </span>
                             <span class="org-ref-chip org-ref-chip-green">
                                 Campaign Attribution
+                            </span>
+                            <span class="org-manage-badge">
+                                <svg class="org-manage-gear-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                <span>Manage</span>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="4" y1="12" x2="20" y2="12"></line><polyline points="14 6 20 12 14 18"></polyline></svg>
                             </span>
                         </div>
                     </div>
@@ -546,5 +547,3 @@
 
     </div>
 </div>
-
-
