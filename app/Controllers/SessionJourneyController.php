@@ -777,10 +777,10 @@ class SessionJourneyController
                 $where[] = "(vs.utm_source IS NULL OR vs.utm_source = '') AND (vs.referrer IS NULL OR vs.referrer = '')";
             } elseif ($channel === 'referral') {
                 $where[] = "(vs.utm_source IS NULL OR vs.utm_source = '') AND (vs.referrer IS NOT NULL AND vs.referrer != '')";
-            } elseif ($channel === 'paid') {
-                $where[] = "(vs.utm_medium IN ('cpc', 'ppc', 'paid', 'ad', 'ads') OR vs.utm_source LIKE '%google%' OR vs.utm_source LIKE '%facebook%' OR vs.utm_source LIKE '%instagram%' OR vs.utm_source LIKE '%linkedin%')";
+            } elseif ($channel === 'social') {
+                $where[] = "(vs.utm_medium IN ('social', 'social_share') OR vs.utm_source LIKE '%facebook%' OR vs.utm_source LIKE '%instagram%' OR vs.utm_source LIKE '%meta%' OR vs.utm_source LIKE '%linkedin%' OR vs.utm_source LIKE '%twitter%' OR vs.utm_source LIKE '%x.com%')";
             } elseif ($channel === 'organic') {
-                $where[] = "(vs.utm_medium = 'organic' OR (vs.referrer LIKE '%google%' AND (vs.utm_medium IS NULL OR vs.utm_medium = '')))";
+                $where[] = "(vs.utm_medium = 'organic' OR vs.utm_source LIKE '%google%' OR vs.referrer LIKE '%google%')";
             }
 
             if (!empty($search)) {
@@ -1078,18 +1078,14 @@ class SessionJourneyController
                 $badge = '📢';
                 $badgeBg = '#6B7280';
                 $badgeColor = '#FFFFFF';
-                $cpcBenchmark = 1.00;
-                $benchmarkCplRange = '~$25.00';
 
                 if (str_contains($src, 'google') || str_contains($ref, 'google')) {
                     $key = 'google';
-                    $label = 'Google Ads & Search';
-                    $type = 'paid';
+                    $label = 'Google Search & Web';
+                    $type = 'organic';
                     $badge = 'G';
                     $badgeBg = '#4285F4';
                     $badgeColor = '#FFFFFF';
-                    $cpcBenchmark = 1.45;
-                    $benchmarkCplRange = '~$28–$32';
                 } elseif (str_contains($src, 'facebook') || str_contains($src, 'instagram') || str_contains($src, 'meta') || str_contains($ref, 'facebook') || str_contains($ref, 'instagram')) {
                     $key = 'facebook';
                     $label = 'Meta (Facebook & IG)';
@@ -1097,17 +1093,13 @@ class SessionJourneyController
                     $badge = 'f';
                     $badgeBg = '#1877F2';
                     $badgeColor = '#FFFFFF';
-                    $cpcBenchmark = 0.85;
-                    $benchmarkCplRange = '~$18–$22';
                 } elseif (str_contains($src, 'linkedin') || str_contains($ref, 'linkedin')) {
                     $key = 'linkedin';
-                    $label = 'LinkedIn Ads';
-                    $type = 'paid';
+                    $label = 'LinkedIn';
+                    $type = 'social';
                     $badge = 'in';
                     $badgeBg = '#0077B5';
                     $badgeColor = '#FFFFFF';
-                    $cpcBenchmark = 2.10;
-                    $benchmarkCplRange = '~$34–$38';
                 } elseif ($med === 'qr' || str_contains($src, 'qr') || str_contains($src, 'event') || str_contains($cmp, 'open_house')) {
                     $key = 'events';
                     $label = 'Campus QR & Events';
@@ -1115,8 +1107,6 @@ class SessionJourneyController
                     $badge = '🎟️';
                     $badgeBg = '#D97706';
                     $badgeColor = '#FFFFFF';
-                    $cpcBenchmark = 0.20;
-                    $benchmarkCplRange = '~$3–$5';
                 } elseif (empty($src) && (empty($ref) || str_contains($ref, 'edvora.chat'))) {
                     $key = 'direct';
                     $label = 'Direct & Organic Search';
@@ -1124,8 +1114,6 @@ class SessionJourneyController
                     $badge = '🌐';
                     $badgeBg = '#059669';
                     $badgeColor = '#FFFFFF';
-                    $cpcBenchmark = 0.00;
-                    $benchmarkCplRange = '$0.00';
                 } elseif (!empty($ref)) {
                     $key = 'referral';
                     $label = 'Referral Link Traffic';
@@ -1133,8 +1121,6 @@ class SessionJourneyController
                     $badge = '🔗';
                     $badgeBg = '#8B5CF6';
                     $badgeColor = '#FFFFFF';
-                    $cpcBenchmark = 0.00;
-                    $benchmarkCplRange = '$0.00';
                 }
 
                 if (!isset($channelsMap[$key])) {
@@ -1149,9 +1135,7 @@ class SessionJourneyController
                         'chat' => 0,
                         'leads' => 0,
                         'high_intent' => 0,
-                        'enrolled' => 0,
-                        'cpcBenchmark' => $cpcBenchmark,
-                        'benchmarkCplRange' => $benchmarkCplRange
+                        'enrolled' => 0
                     ];
                 }
 
@@ -1164,15 +1148,6 @@ class SessionJourneyController
                 $rowMedium = !empty($r['utm_medium']) ? $r['utm_medium'] : ($key === 'direct' ? 'organic' : 'referral');
                 $rowCampaign = !empty($r['utm_campaign']) && $r['utm_campaign'] !== '-' ? $r['utm_campaign'] : ($key === 'direct' ? 'institutional_seo' : 'default_traffic');
                 $convRate = $sess > 0 ? round(($leads / $sess) * 100, 1) : 0;
-                
-                // CPL calculation Option A
-                if ($key === 'direct' || $key === 'referral') {
-                    $cplDisplay = '$0.00 (Estimated - Industry Benchmark)';
-                } else {
-                    $estSpend = $sess * $cpcBenchmark;
-                    $calcCpl = $leads > 0 ? round($estSpend / $leads, 2) : 0;
-                    $cplDisplay = $calcCpl > 0 ? '$' . number_format($calcCpl, 2) . ' (Estimated - Industry Benchmark)' : $benchmarkCplRange . ' (Estimated - Industry Benchmark)';
-                }
 
                 $tableRows[] = [
                     'rank' => $rankCounter++,
@@ -1183,7 +1158,6 @@ class SessionJourneyController
                     'chat' => $chats,
                     'leads' => $leads,
                     'bookings' => round($leads * 0.4),
-                    'cpl' => $cplDisplay,
                     'rate' => $convRate . '%',
                     'status' => $convRate >= 5.0 ? 'High Yield' : ($sess >= 50 ? 'High Volume' : 'Active'),
                     'type' => $type
@@ -1204,9 +1178,7 @@ class SessionJourneyController
                     'chat' => $chatEngaged,
                     'leads' => $totalLeads,
                     'high_intent' => $highIntentTotal,
-                    'enrolled' => $enrolledTotal,
-                    'cpcBenchmark' => 0.00,
-                    'benchmarkCplRange' => '$0.00'
+                    'enrolled' => $enrolledTotal
                 ];
 
                 $convRate = $inflow > 0 ? round(($totalLeads / $inflow) * 100, 1) : 0;
@@ -1219,7 +1191,6 @@ class SessionJourneyController
                     'chat' => $chatEngaged,
                     'leads' => $totalLeads,
                     'bookings' => $highIntentTotal,
-                    'cpl' => '$0.00 (Estimated - Industry Benchmark)',
                     'rate' => $convRate . '%',
                     'status' => $convRate >= 5.0 ? 'High Yield' : 'Active',
                     'type' => 'organic'
@@ -1230,10 +1201,6 @@ class SessionJourneyController
             $channelModels = [];
             
             // "all" channel model
-            $allCplDisplay = '$0.00 (Estimated - Industry Benchmark)';
-            if ($totalLeads > 0) {
-                $allCplDisplay = 'Mixed (Estimated - Industry Benchmark)';
-            }
             $channelModels['all'] = [
                 'name' => 'All Combined Channels',
                 'badge' => '★',
@@ -1257,9 +1224,6 @@ class SessionJourneyController
                     $highIntentRate . '% High-Intent',
                     $enrolledTotal > 0 ? ($enrolledRate . '% Enrolled') : '0 Verified (CRM Pending)'
                 ],
-                'estCostInflow' => '—',
-                'estCostLead' => $allCplDisplay,
-                'estCostEnrollment' => '—',
                 'roiRating' => $inflow > 0 ? 'Live Production Attribution' : 'No Traffic'
             ];
 
@@ -1274,17 +1238,6 @@ class SessionJourneyController
                 $cLeadPct = $cInflow > 0 ? round(($cLeads / $cInflow) * 100, 1) : 0;
                 $cHiPct = $cInflow > 0 ? round(($cHighIntent / $cInflow) * 100, 1) : 0;
                 $cEnrPct = $cInflow > 0 ? round(($cEnrolled / $cInflow) * 100, 1) : 0;
-
-                // CPL display Option A
-                if ($cKey === 'direct' || $cKey === 'referral') {
-                    $cplDisplay = '$0.00 (Estimated - Industry Benchmark)';
-                    $costInflow = '$0.00';
-                } else {
-                    $estSpend = $cInflow * $c['cpcBenchmark'];
-                    $calcCpl = $cLeads > 0 ? round($estSpend / $cLeads, 2) : 0;
-                    $cplDisplay = $calcCpl > 0 ? '$' . number_format($calcCpl, 2) . ' (Estimated - Industry Benchmark)' : $c['benchmarkCplRange'] . ' (Estimated - Industry Benchmark)';
-                    $costInflow = '$' . number_format($c['cpcBenchmark'], 2);
-                }
 
                 $channelModels[$cKey] = [
                     'name' => $c['name'],
@@ -1307,9 +1260,6 @@ class SessionJourneyController
                         $cHiPct . '% High-Intent',
                         $cEnrolled > 0 ? ($cEnrPct . '% Enrolled') : '0 Verified (CRM Pending)'
                     ],
-                    'estCostInflow' => $costInflow,
-                    'estCostLead' => $cplDisplay,
-                    'estCostEnrollment' => '—',
                     'roiRating' => $cLeadPct >= 5.0 ? 'High Yield Channel' : 'Active Channel'
                 ];
             }
