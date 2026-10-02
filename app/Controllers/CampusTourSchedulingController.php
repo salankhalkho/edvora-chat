@@ -1478,7 +1478,7 @@ class CampusTourSchedulingController
                 'max_tokens_override' => 900
             ]);
 
-            $summary = trim((string)($llmResponse['content'] ?? ''));
+            $summary = trim((string)($llmResponse['text'] ?? $llmResponse['content'] ?? ''));
 
             if (empty($summary)) {
                 Response::error('Failed to generate AI feedback summary. Please try again.', 500);
