@@ -7,6 +7,7 @@
 > 📖 **Deep-Dive Subsystem Guides:**
 > - [**Edvora Chatbot Technical Architecture (`architecture_chatbot.md`)**](file:///c:/xampp/htdocs/edvora.chat/architecture_chatbot.md) — Conversational AI lifecycle, Admissions Counselor State Machine, Anti-Fatigue Lead Cadence, Structured JSON Output Contract (`admissions_response`), Vector Search Engine, and `widget.js` client architecture.
 > - [**Domain Whitelisting & Embed Origin Security (`architecture_domain_whitelisting.md`)**](file:///c:/xampp/htdocs/edvora.chat/architecture_domain_whitelisting.md) — Multi-tenant domain whitelisting, registration auto-whitelist, 4-domain quota management, runtime Origin/Referer matching, and embed abuse prevention.
+> - [**Timezone & Primary Campus Localization Architecture (`architecture_timezone.md`)**](file:///c:/xampp/htdocs/edvora.chat/architecture_timezone.md) — Multi-tenant timezone resolution based on primary campus country (`campuses.country` where `is_primary = 1`), state-aware mapping, U.S.A. default fallback, UI localization, and CSV export synchronization.
 
 ---
 
@@ -81,6 +82,7 @@ For full technical specifications of the admissions chatbot, turn processing lif
 ├── architecture.md             ← Master technical & sub-system architecture index
 ├── architecture_chatbot.md     ← Authoritative admissions chatbot architecture & onboarding guide
 ├── architecture_domain_whitelisting.md ← Authoritative domain whitelisting & origin embed security guide
+├── architecture_timezone.md    ← Authoritative timezone & primary campus localization guide
 ├── AGENTS.md                   ← Mandatory agent/developer rules
 ├── BRANDING_GUIDELINES.md      ← UI/typography rules
 ├── theme-branding.css          ← Global design system CSS

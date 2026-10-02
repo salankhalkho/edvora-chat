@@ -13,7 +13,7 @@
                             <span>🔄</span> Refresh Queue
                         </button>
                         <a id="exportCallbacksBtn" href="/v1/callbacks/export" target="_blank" class="brand-btn-primary brand-btn-sm" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px;">
-                            📥 Export CSV (IST)
+                            📥 Export CSV (<span class="tenant-tz-label">EDT</span>)
                         </a>
                     </div>
                 </div>
@@ -81,7 +81,7 @@
                                     <th>Topic / Query</th>
                                     <th>Assigned Counselor</th>
                                     <th>Status</th>
-                                    <th>Requested (IST)</th>
+                                    <th id="cbColHeaderRequested">Requested (<span class="tenant-tz-label">EDT</span>)</th>
                                     <th style="text-align: right;">Action</th>
                                 </tr>
                             </thead>

@@ -42,6 +42,12 @@ class OrganizationController
             } catch (\Throwable $e) {}
         }
 
+        $tenantLoc = \App\Helpers\TenantLocalizationHelper::getTenantLocalization((int)$orgId);
+        $org['primary_campus'] = $tenantLoc;
+        $org['timezone'] = $tenantLoc['timezone'];
+        $org['timezone_short'] = $tenantLoc['timezone_short'];
+        $org['locale'] = $tenantLoc['locale'];
+
         Response::success($org);
     }
 

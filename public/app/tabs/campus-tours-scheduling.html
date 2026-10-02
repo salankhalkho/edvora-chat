@@ -87,7 +87,7 @@
                 <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 12px;">
                     <thead>
                         <tr style="background: #FAFCFB; border-bottom: 1px solid #E6F0EC; color: #648781; font-weight: 700; text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.5px;">
-                            <th style="padding: 12px 18px;">Date &amp; Time</th>
+                            <th id="tourSchedColHeaderDateTime" style="padding: 12px 18px;">Date &amp; Time (<span class="tenant-tz-label">EDT</span>)</th>
                             <th style="padding: 12px 18px;">Campus</th>
                             <th style="padding: 12px 18px;">Title &amp; Program Scope</th>
                             <th style="padding: 12px 18px;">Assigned Counselor</th>
@@ -240,6 +240,10 @@
                     var slots = res.data.slots || [];
                     var stats = res.data.stats || {};
 
+                    if (res.data && res.data.localization && typeof window.updateTenantLocalization === 'function') {
+                        window.updateTenantLocalization({ primary_campus: res.data.localization });
+                    }
+
                     if (document.getElementById('kpiUpcomingSlots')) document.getElementById('kpiUpcomingSlots').innerText = stats.upcoming_slots || 0;
                     if (document.getElementById('kpiTotalCapacity')) document.getElementById('kpiTotalCapacity').innerText = stats.total_capacity || 0;
                     if (document.getElementById('kpiAssignedCounselors')) document.getElementById('kpiAssignedCounselors').innerText = stats.assigned_counselors || 0;
@@ -252,6 +256,34 @@
                         return;
                     }
 
+                    function formatSlot12h(timeStr) {
+                        if (!timeStr) return '';
+                        var parts = timeStr.split(':');
+                        var h = parseInt(parts[0], 10);
+                        var m = parts[1] || '00';
+                        var ampm = h >= 12 ? 'PM' : 'AM';
+                        h = h % 12;
+                        if (h === 0) h = 12;
+                        return (h < 10 ? '0' + h : h) + ':' + m + ' ' + ampm;
+                    }
+
+                    function formatSlotDateNice(dateStr) {
+                        if (!dateStr) return '';
+                        try {
+                            var p = dateStr.split('-');
+                            if (p.length === 3) {
+                                var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                                var mIdx = parseInt(p[1], 10) - 1;
+                                var d = parseInt(p[2], 10);
+                                return (d < 10 ? '0' + d : d) + ' ' + (months[mIdx] || p[1]) + ' ' + p[0];
+                            }
+                            return dateStr;
+                        } catch(e) {
+                            return dateStr;
+                        }
+                    }
+
+                    var tzShort = window.tenantTzShort || 'EDT';
                     var html = '';
                     slots.forEach(function(s) {
                         var progBadgeHtml = '';
@@ -262,8 +294,11 @@
                             progBadgeHtml = '<span style="display:inline-flex; align-items:center; gap:3px; background:#EFF6FF; color:#1D4ED8; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:700; margin-top:4px;" title="' + s.programs.map(function(p){ return p.name; }).join(', ') + '">🎓 ' + progNames + '</span>';
                         }
 
+                        var slotDateDisplay = formatSlotDateNice(s.tour_date);
+                        var slotTimeDisplay = formatSlot12h(s.start_time) + ' – ' + formatSlot12h(s.end_time) + ' ' + tzShort;
+
                         html += '<tr style="border-bottom: 1px solid #E6F0EC;">';
-                        html += '<td style="padding: 12px 18px; font-weight: 700; color: #063D3B;">' + s.tour_date + '<div style="font-size:11px; color:#648781; font-weight:500;">' + s.start_time.substring(0,5) + ' - ' + s.end_time.substring(0,5) + '</div></td>';
+                        html += '<td style="padding: 12px 18px; font-weight: 700; color: #063D3B;">' + slotDateDisplay + '<div style="font-size:11px; color:#648781; font-weight:600; margin-top:2px;">' + slotTimeDisplay + '</div></td>';
                         html += '<td style="padding: 12px 18px; font-weight: 600;">' + s.campus_name + (s.is_primary ? ' <span style="font-size:10px; background:#ECFDF5; color:#047857; padding:2px 5px; border-radius:4px;">Main</span>' : '') + '</td>';
                         html += '<td style="padding: 12px 18px;"><a href="javascript:void(0)" onclick="openEditTourSlot(' + s.id + ')" style="text-decoration:none; font-weight:700; color:#063D3B; cursor:pointer;" title="Click to Edit Slot">' + s.title + '</a>' + progBadgeHtml + '</td>';
                         html += '<td style="padding: 12px 18px;">' + (s.counselor_name || '<span style="color:#94A3B8;">Auto-routed</span>') + '</td>';

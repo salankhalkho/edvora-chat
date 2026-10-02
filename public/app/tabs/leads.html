@@ -31,7 +31,7 @@
             </div>
 
             <!-- Export Buttons -->
-            <button type="button" onclick="exportLeadsFile('csv')" class="dept-btn-secondary" title="Export student contacts as CSV (IST)" style="height: 32px !important; padding: 0 12px !important; font-size: 11.5px !important; font-weight: 700 !important; border-radius: 8px !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; gap: 6px !important; background: #FFFFFF !important; border: 1.5px solid #DDE9E3 !important; color: #063D3B !important; transition: all 0.15s ease !important;">
+            <button type="button" id="leadsExportCsvBtn" onclick="exportLeadsFile('csv')" class="dept-btn-secondary" title="Export student contacts as CSV" style="height: 32px !important; padding: 0 12px !important; font-size: 11.5px !important; font-weight: 700 !important; border-radius: 8px !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; gap: 6px !important; background: #FFFFFF !important; border: 1.5px solid #DDE9E3 !important; color: #063D3B !important; transition: all 0.15s ease !important;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                 <span>Export CSV</span>
             </button>
@@ -47,7 +47,7 @@
         <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
             <div style="font-weight: 700; color: #063D3B; display: flex; align-items: center; gap: 6px;">
                 <span>📅</span>
-                <span>Custom Date Range (IST):</span>
+                <span>Custom Date Range (<span id="leadsRangeTzLabel" class="tenant-tz-label">EDT</span>):</span>
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
                 <label for="leadsCustomStartDate" style="font-size: 11px; font-weight: 600; color: #648781;">From:</label>
@@ -282,7 +282,7 @@
                             <th style="padding: 12px 18px; text-align: left; font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.5px;">Program Interest</th>
                             <th style="padding: 12px 18px; text-align: left; font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.5px;">Lead Type / Tier</th>
                             <th style="padding: 12px 18px; text-align: left; font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.5px;">Status</th>
-                            <th style="padding: 12px 18px; text-align: left; font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;">Date &amp; Time (IST)</th>
+                            <th id="leadsColHeaderDateTime" style="padding: 12px 18px; text-align: left; font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;">Date &amp; Time (<span class="tenant-tz-label">EDT</span>)</th>
                             <th style="padding: 12px 18px; text-align: right; font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase; letter-spacing: 0.5px; min-width: 100px;">Action</th>
                         </tr>
                     </thead>

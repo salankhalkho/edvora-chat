@@ -107,7 +107,9 @@ class CampusTourSchedulingController
         }
 
         $query = "
-            SELECT s.*, COALESCE(c.name, 'Main Campus') as campus_name, COALESCE(c.is_primary, 1) as is_primary, u.name as counselor_name
+            SELECT s.*, COALESCE(c.name, 'Main Campus') as campus_name, COALESCE(c.is_primary, 1) as is_primary,
+                   c.country as campus_country, c.state as campus_state, c.city as campus_city,
+                   u.name as counselor_name
             FROM campus_tour_slots s
             LEFT JOIN campuses c ON s.campus_id = c.id
             LEFT JOIN users u ON s.counselor_user_id = u.id
@@ -175,7 +177,8 @@ class CampusTourSchedulingController
         Response::success([
             'slots' => $slots,
             'stats' => $stats,
-            'resolved_campus_id' => $campusId
+            'resolved_campus_id' => $campusId,
+            'localization' => \App\Helpers\TenantLocalizationHelper::getTenantLocalization((int)$orgId)
         ]);
     }
 

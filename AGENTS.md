@@ -51,7 +51,7 @@ powershell -ExecutionPolicy Bypass -File .\deploy.ps1 -Message "feat/fix: descri
 ### Manual Fallback (If Running Step-by-Step):
 1. **Package:**
    ```powershell
-   tar.exe -czvf deploy_package.tar.gz app public workers BRANDING_GUIDELINES.md theme-branding.css AGENTS.md architecture.md architecture_chatbot.md architecture_domain_whitelisting.md architecture_department_team_management.md migrate.php deploy.ps1
+   tar.exe -czvf deploy_package.tar.gz app public workers BRANDING_GUIDELINES.md theme-branding.css AGENTS.md architecture.md architecture_chatbot.md architecture_domain_whitelisting.md architecture_timezone.md architecture_department_team_management.md migrate.php deploy.ps1
    ```
 2. **Upload (MANDATORY: Always use `-O` and `-o BatchMode=yes`):**
    ```powershell

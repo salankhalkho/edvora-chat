@@ -13,7 +13,7 @@
                             <span>🔄</span> Refresh Tours
                         </button>
                         <a id="exportCampusToursBtn" href="/v1/campus-tours/export" target="_blank" class="brand-btn-primary brand-btn-sm" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px;">
-                            📥 Export CSV (IST)
+                            📥 Export CSV (<span class="tenant-tz-label">EDT</span>)
                         </a>
                     </div>
                 </div>
@@ -70,7 +70,7 @@
                                     <th>Group Size</th>
                                     <th>Assigned Guide</th>
                                     <th>Status</th>
-                                    <th>Booked On (IST)</th>
+                                    <th id="tourColHeaderBookedOn">Booked On (<span class="tenant-tz-label">EDT</span>)</th>
                                     <th style="text-align: right;">Actions</th>
                                 </tr>
                             </thead>

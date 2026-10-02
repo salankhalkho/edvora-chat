@@ -578,19 +578,19 @@ class LeadController
 
         $format = strtolower((string)($request->get('format') ?? 'csv'));
 
-        $tz = new \DateTimeZone('Asia/Kolkata');
+        list($tz, $tzShort, $loc) = \App\Helpers\TenantLocalizationHelper::getTenantDateTimeZone((int)$orgId);
 
         if ($format === 'json') {
             header('Content-Type: application/json; charset=utf-8');
             header('Content-Disposition: attachment; filename=edvora_leads_export_' . date('Y-m-d') . '.json');
 
-            $exportData = array_map(function($row) use ($tz) {
+            $exportData = array_map(function($row) use ($tz, $tzShort) {
                 $formattedDate = $row['created_at'];
                 if (!empty($row['created_at'])) {
                     try {
                         $dt = new \DateTime($row['created_at']);
                         $dt->setTimezone($tz);
-                        $formattedDate = $dt->format('d M Y, h:i A') . ' IST';
+                        $formattedDate = $dt->format('d M Y, h:i A') . ' ' . $tzShort;
                     } catch (\Throwable $e) {}
                 }
                 return [
@@ -603,7 +603,8 @@ class LeadController
                     'program_interest' => $row['program_interest'],
                     'status' => $row['status'],
                     'notes' => $row['notes'],
-                    'created_at_ist' => $formattedDate,
+                    'created_at_localized' => $formattedDate,
+                    'created_at_timezone' => $tzShort,
                     'created_at_utc' => $row['created_at']
                 ];
             }, $leads);
@@ -611,6 +612,8 @@ class LeadController
             echo json_encode([
                 'institution_id' => $orgId,
                 'exported_at' => date('c'),
+                'timezone' => $loc['timezone'],
+                'timezone_short' => $tzShort,
                 'total_records' => count($exportData),
                 'compliance_format' => 'GDPR / CCPA / PIPEDA Data Portability',
                 'records' => $exportData
@@ -622,7 +625,7 @@ class LeadController
         header('Content-Disposition: attachment; filename=edvora_leads_' . date('Y-m-d') . '.csv');
 
         $output = fopen('php://output', 'w');
-        fputcsv($output, ['Name', 'Email', 'Phone', 'Lead Type', 'Assigned To', 'Program Interest', 'Status', 'Counselor Notes', 'Date & Time Captured (IST)']);
+        fputcsv($output, ['Name', 'Email', 'Phone', 'Lead Type', 'Assigned To', 'Program Interest', 'Status', 'Counselor Notes', 'Date & Time Captured (' . $tzShort . ')']);
 
         foreach ($leads as $row) {
             $formattedDate = 'N/A';
@@ -630,7 +633,7 @@ class LeadController
                 try {
                     $dt = new \DateTime($row['created_at']);
                     $dt->setTimezone($tz);
-                    $formattedDate = $dt->format('d M Y, h:i A') . ' IST';
+                    $formattedDate = $dt->format('d M Y, h:i A') . ' ' . $tzShort;
                 } catch (\Throwable $e) {
                     $formattedDate = $row['created_at'];
                 }

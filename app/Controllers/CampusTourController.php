@@ -426,17 +426,18 @@ class CampusTourController
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename=edvora_campus_tours_' . date('Y-m-d') . '.csv');
 
-        $output = fopen('php://output', 'w');
-        fputcsv($output, ['Student Name', 'Email', 'Phone', 'Assigned Coordinator', 'Preferred Date', 'Preferred Time', 'Group Size', 'Program Interest', 'Status', 'Counselor Notes', 'Booked On (IST)']);
+        list($tz, $tzShort, $loc) = \App\Helpers\TenantLocalizationHelper::getTenantDateTimeZone((int)$orgId);
 
-        $tz = new DateTimeZone('Asia/Kolkata');
+        $output = fopen('php://output', 'w');
+        fputcsv($output, ['Student Name', 'Email', 'Phone', 'Assigned Coordinator', 'Preferred Date', 'Preferred Time', 'Group Size', 'Program Interest', 'Status', 'Counselor Notes', 'Booked On (' . $tzShort . ')']);
+
         foreach ($tours as $row) {
             $formattedDate = 'N/A';
             if (!empty($row['created_at'])) {
                 try {
                     $dt = new DateTime($row['created_at']);
                     $dt->setTimezone($tz);
-                    $formattedDate = $dt->format('d M Y, h:i A') . ' IST';
+                    $formattedDate = $dt->format('d M Y, h:i A') . ' ' . $tzShort;
                 } catch (Throwable $e) {
                     $formattedDate = $row['created_at'];
                 }

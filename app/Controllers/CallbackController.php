@@ -398,21 +398,22 @@ class CallbackController
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename=edvora_counselor_callbacks_' . date('Y-m-d') . '.csv');
 
+        list($tz, $tzShort, $loc) = \App\Helpers\TenantLocalizationHelper::getTenantDateTimeZone((int)$orgId);
+
         $output = fopen('php://output', 'w');
         fputcsv($output, [
             'Student Name', 'Phone Number', 'Email Address', 'Assigned Counselor',
             'Preferred Time Slot', 'Discussion Topic', 'Status', 'Call Attempts', 'Counselor Resolution Notes',
-            'Requested Date & Time (IST)', 'Completed Date & Time (IST)'
+            'Requested Date & Time (' . $tzShort . ')', 'Completed Date & Time (' . $tzShort . ')'
         ]);
 
-        $tz = new \DateTimeZone('Asia/Kolkata');
         foreach ($rows as $r) {
             $createdIst = 'N/A';
             if (!empty($r['created_at'])) {
                 try {
                     $dt = new \DateTime($r['created_at']);
                     $dt->setTimezone($tz);
-                    $createdIst = $dt->format('d M Y, h:i A') . ' IST';
+                    $createdIst = $dt->format('d M Y, h:i A') . ' ' . $tzShort;
                 } catch (Throwable $e) {
                     $createdIst = $r['created_at'];
                 }
@@ -423,7 +424,7 @@ class CallbackController
                 try {
                     $dt2 = new \DateTime($r['completed_at']);
                     $dt2->setTimezone($tz);
-                    $completedIst = $dt2->format('d M Y, h:i A') . ' IST';
+                    $completedIst = $dt2->format('d M Y, h:i A') . ' ' . $tzShort;
                 } catch (Throwable $e) {
                     $completedIst = $r['completed_at'];
                 }

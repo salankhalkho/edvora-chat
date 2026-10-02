@@ -311,7 +311,12 @@ class AuthController
                 'name' => $user['org_name'],
                 'slug' => $user['org_slug'],
                 'onboarding_completed' => (int)$user['onboarding_completed'],
-                'onboarding_step' => (int)$user['onboarding_step']
+                'onboarding_step' => (int)$user['onboarding_step'],
+                'primary_campus' => \App\Helpers\TenantLocalizationHelper::getTenantLocalization((int)$user['organization_id']),
+                'country' => \App\Helpers\TenantLocalizationHelper::getTenantLocalization((int)$user['organization_id'])['country'],
+                'timezone' => \App\Helpers\TenantLocalizationHelper::getTenantLocalization((int)$user['organization_id'])['timezone'],
+                'timezone_short' => \App\Helpers\TenantLocalizationHelper::getTenantLocalization((int)$user['organization_id'])['timezone_short'],
+                'locale' => \App\Helpers\TenantLocalizationHelper::getTenantLocalization((int)$user['organization_id'])['locale']
             ] : null,
             'bot_token' => $botToken,
             'onboarding_required' => $onboardingRequired
@@ -411,7 +416,12 @@ class AuthController
                 'plan_name' => $user['plan_name'] ?? 'Starter',
                 'plan_id' => $effectivePlanId ?? 1,
                 'quotas' => $planQuotas,
-                'features' => $planFeatures
+                'features' => $planFeatures,
+                'primary_campus' => \App\Helpers\TenantLocalizationHelper::getTenantLocalization((int)$user['organization_id']),
+                'country' => \App\Helpers\TenantLocalizationHelper::getTenantLocalization((int)$user['organization_id'])['country'],
+                'timezone' => \App\Helpers\TenantLocalizationHelper::getTenantLocalization((int)$user['organization_id'])['timezone'],
+                'timezone_short' => \App\Helpers\TenantLocalizationHelper::getTenantLocalization((int)$user['organization_id'])['timezone_short'],
+                'locale' => \App\Helpers\TenantLocalizationHelper::getTenantLocalization((int)$user['organization_id'])['locale']
             ] : null,
             'bot_token' => $botToken,
             'onboarding_required' => $onboardingRequired
