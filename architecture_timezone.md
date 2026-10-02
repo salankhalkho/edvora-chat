@@ -123,7 +123,11 @@ A dedicated backend helper located in `app/Helpers/TenantLocalizationHelper.php`
 
 ## 5. Frontend Client Implementation Specification
 
-### 5.1 Global State in SPA (`public/app/index.html`)
+### 5.1 Global State in SPA (`public/app/js/tenant-localization.js`)
+To avoid bloating `public/app/index.html`, all client-side timezone resolution, caching, formatting, and DOM label binding are encapsulated within `public/app/js/tenant-localization.js`, loaded cleanly in `<head>`:
+```html
+<script src="js/tenant-localization.js?v=20261002"></script>
+```
 When `initAppIdentity()` runs:
 ```javascript
 window.tenantLocalization = org.primary_campus || {};

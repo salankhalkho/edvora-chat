@@ -463,6 +463,12 @@ $router->get('/session-journeys', function (Request $req) {
 $router->get('/superadmin/session-journeys', function (Request $req) {
     require dirname(__DIR__) . '/public/superadmin/session-journeys.html';
 });
+$router->get('/source_attribution', function (Request $req) {
+    require dirname(__DIR__) . '/public/source_attribution.html';
+});
+$router->get('/source-attribution', function (Request $req) {
+    require dirname(__DIR__) . '/public/source_attribution.html';
+});
 $router->get('/v1/superadmin/session-journeys', [SessionJourneyController::class, 'listSuperAdminSessions'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
 $router->get('/v1/superadmin/session-journeys/{sessionId}/steps', [SessionJourneyController::class, 'getSuperAdminSessionSteps'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
 $router->get('/v1/public/session-journeys', [SessionJourneyController::class, 'listSuperAdminSessions']);

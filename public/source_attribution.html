@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Traffic Source Attribution &amp; Funnel Tracking — edvora.chat</title>
+  <link rel="icon" type="image/svg+xml" href="/edvora_logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/theme-branding.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'e-mist': '#F1F7F4',
+            'e-teal': '#063D3B',
+            'e-pistachio': '#C8FF63',
+            'e-soft-pistachio': '#E6F7D2',
+            'e-sage': '#B9D7C7',
+            'e-border': '#DDE9E3',
+            'e-text': '#092F2E',
+            'e-muted': '#71817D'
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      --e-teal: #063D3B;
+      --e-pistachio: #C8FF63;
+      --e-soft-pistachio: #E6F7D2;
+      --e-sage: #B9D7C7;
+      --e-mist: #F1F7F4;
+      --e-border: #DDE9E3;
+      --e-card-border: #DCE9E5;
+      --e-text: #092F2E;
+      --e-muted: #71817D;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
+      background: #F1F7F4;
+      color: var(--e-text);
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Navigation Header */
+    .showcase-header {
+      background: #FFFFFF;
+      border-bottom: 1.5px solid var(--e-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(6, 61, 59, 0.04);
+    }
+    .header-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+    .brand-logo-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #063D3B;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #C8FF63;
+      font-weight: 800;
+      font-size: 15px;
+      box-shadow: 0 2px 6px rgba(6, 61, 59, 0.2);
+    }
+    .brand-name {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #063D3B;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+    }
+    .brand-tag {
+      font-size: 10.5px;
+      color: #648781;
+      font-weight: 600;
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-btn {
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .nav-btn-secondary {
+      background: #FFFFFF;
+      color: #063D3B;
+      border: 1px solid var(--e-border);
+    }
+    .nav-btn-secondary:hover {
+      background: #F4FAF7;
+      border-color: #B9D7C7;
+      transform: translateY(-1px);
+    }
+    .nav-btn-primary {
+      background: #063D3B;
+      color: #C8FF63;
+      border: 1px solid #063D3B;
+    }
+    .nav-btn-primary:hover {
+      background: #0A524F;
+      box-shadow: 0 4px 12px rgba(6, 61, 59, 0.2);
+      transform: translateY(-1px);
+    }
+
+    /* Sub Navigation Switcher Bar */
+    .subnav-bar {
+      background: #FAFDFB;
+      border-bottom: 1px solid #E6F0EC;
+      padding: 10px 24px;
+    }
+    .subnav-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .subnav-breadcrumbs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11.5px;
+      color: #648781;
+      font-weight: 600;
+    }
+    .subnav-breadcrumbs a {
+      color: #063D3B;
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .subnav-breadcrumbs a:hover {
+      text-decoration: underline;
+    }
+
+    /* Main Section Container */
+    .main-wrapper {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 30px 24px 80px 24px;
+    }
+
+    .ops-live-dot {
+      width: 8px;
+      height: 8px;
+      background: #10B981;
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.7);
+      display: inline-block;
+      animation: pLd 1.7s ease-in-out infinite;
+    }
+    @keyframes pLd {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(0.7); opacity: 0.5; }
+    }
+
+    /* Full Frame */
+    .sa-full-frame {
+      background: #FFFFFF;
+      border: 1.5px solid #DCE9E5;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px -10px rgba(6, 61, 59, 0.08), 0 2px 8px rgba(6, 61, 59, 0.03);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="showcase-header">
+    <div class="header-inner">
+      <a href="/app/#org-settings" class="brand-group">
+        <div class="brand-logo-badge">E</div>
+        <div class="brand-title-area">
+          <span class="brand-name">edvora.chat</span>
+          <span class="brand-tag">Admissions Intelligence Platform</span>
+        </div>
+      </a>
+
+      <div class="nav-actions">
+        <a href="/app/#org-settings" class="nav-btn nav-btn-secondary">
+          &larr; Control Panel
+        </a>
+        <a href="/app/#source_attribution" class="nav-btn nav-btn-primary">
+          Open in App Console &rarr;
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Sub Navigation Bar -->
+  <nav class="subnav-bar">
+    <div class="subnav-inner">
+      <div class="subnav-breadcrumbs">
+        <a href="/app/#overview">App</a>
+        <span>&rsaquo;</span>
+        <a href="/app/#org-settings">Control Panel</a>
+        <span>&rsaquo;</span>
+        <span style="color: #063D3B; font-weight: 800;">Traffic Source Attribution</span>
+      </div>
+
+      <div style="font-size: 11px; font-weight: 700; color: #047857; background: #E8F5F1; border: 1px solid #A7D7C8; padding: 4px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px;">
+        <span class="ops-live-dot"></span>
+        <span>Standalone Resource View (source_attribution.html)</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Isolated Section Container -->
+  <main class="main-wrapper">
+    <div class="sa-full-frame">
+      <!-- Included Content Body matching app tab -->
+      <!-- Embed the source_attribution tab container directly -->
+      <div id="saContainer">
+        <!-- Remote tab content loaded or embedded -->
+      </div>
+    </div>
+  </main>
+
+  <footer style="background: #FFFFFF; border-top: 1px solid #DDE9E3; padding: 24px; text-align: center; font-size: 12px; color: #71817D;">
+    &copy; 2026 Edvora.chat &bull; Higher-Ed Multi-Tenant Admissions AI &amp; Marketing Attribution.
+  </footer>
+
+  <script>
+    // Fetch and hydrate the tab view into the standalone page
+    fetch('/app/tabs/source_attribution.html?v=' + Date.now())
+      .then(res => res.text())
+      .then(html => {
+        const container = document.getElementById('saContainer');
+        if (container) {
+          container.innerHTML = html;
+          // Re-execute scripts inside loaded content
+          container.querySelectorAll('script').forEach(oldScript => {
+            const newScript = document.createElement('script');
+            Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+            newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+          });
+        }
+      })
+      .catch(err => {
+        console.error('Failed to load attribution tab:', err);
+      });
+  </script>
+</body>
+</html>

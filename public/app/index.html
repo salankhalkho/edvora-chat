@@ -2935,6 +2935,7 @@
             z-index: 2;
         }
     </style>
+    <script src="js/tenant-localization.js?v=20261002"></script>
 </head>
 <body>
 
@@ -4185,6 +4186,9 @@
             <div class="tab-content" id="tab-top_visited_pages" data-loaded="false"></div>
             <div class="tab-content" id="tab-top_exit_pages" data-loaded="false"></div>
             <div class="tab-content" id="tab-campaign_sources" data-loaded="false"></div>
+            <!-- Tab: Traffic Source Attribution & Funnel Tracking -->
+            <div class="tab-content" id="tab-source_attribution" data-loaded="false"></div>
+            <div class="tab-content" id="tab-source-attribution" data-loaded="false"></div>
             <!-- ── CHATBOT LAUNCH READINESS & CRITICAL ISSUES MODAL (LIGHT LUXURY) ── -->
             <div id="knowledgeGapsModal" style="display: none; position: fixed; inset: 0; background: rgba(6, 61, 59, 0.45); backdrop-filter: blur(6px); z-index: 999999; align-items: center; justify-content: center; padding: 20px;">
                 <div style="background: #FFFFFF; border: 1.5px solid #DCE9E5; border-radius: 16px; max-width: 600px; width: 100%; box-shadow: 0 20px 50px -10px rgba(6, 61, 59, 0.18), 0 4px 16px rgba(6, 61, 59, 0.05); overflow: hidden;">
@@ -5322,12 +5326,13 @@
             };
         }
 
-        const VALID_APP_TABS = ['overview', 'knowledge', 'knowledge-ingestion', 'academic-programs', 'academic-program-detail', 'course-staff-assignment', 'program-staff', 'program-lead-magnet', 'add-programs', 'edit-programs', 'leads', 'callbacks', 'campus-tours', 'campus-tours-scheduling', 'create-tour-slot', 'edit-tour-slot', 'scholarships', 'scholarship-configuration', 'scholarship-configuration-edit', 'session-journeys', 'top_visited_pages', 'top_exit_pages', 'campaign_sources', 'teams', 'assets', 'multilingual', 'conversion-engine', 'placeholder', 'analytics', 'knowledge-gaps', 'integrations', 'chatbot', 'test-chat', 'organization', 'org-settings', 'campuses', 'campus-editor', 'settings', 'chatbot_readiness', 'chatbot-readiness', 'domain-whitelist', 'knowledge-view', 'knowledge-editor', 'knowledge-edit', 'profile'];
+        const VALID_APP_TABS = ['overview', 'knowledge', 'knowledge-ingestion', 'academic-programs', 'academic-program-detail', 'course-staff-assignment', 'program-staff', 'program-lead-magnet', 'add-programs', 'edit-programs', 'leads', 'callbacks', 'campus-tours', 'campus-tours-scheduling', 'create-tour-slot', 'edit-tour-slot', 'scholarships', 'scholarship-configuration', 'scholarship-configuration-edit', 'session-journeys', 'top_visited_pages', 'top_exit_pages', 'campaign_sources', 'source_attribution', 'source-attribution', 'teams', 'assets', 'multilingual', 'conversion-engine', 'placeholder', 'analytics', 'knowledge-gaps', 'integrations', 'chatbot', 'test-chat', 'organization', 'org-settings', 'campuses', 'campus-editor', 'settings', 'chatbot_readiness', 'chatbot-readiness', 'domain-whitelist', 'knowledge-view', 'knowledge-editor', 'knowledge-edit', 'profile'];
 
         // Navigation Tabs Handling with Async Modular Loading
         const _tabLoadPromises = {};
         async function loadTabContent(tab) {
             if (!tab) tab = 'overview';
+            if (tab === 'source-attribution') tab = 'source_attribution';
             const pane = document.getElementById('tab-' + tab);
             if (!pane) return;
             if (pane.dataset.loaded === 'true') return;
@@ -5483,194 +5488,6 @@
             }
         }
         window.updateAppIdentityUI = updateAppIdentityUI;
-
-        function resolveClientTimezone(country, state) {
-            const cleanCountry = (country || '').trim().toLowerCase();
-            const cleanState = (state || '').trim().toLowerCase();
-            let timezone = 'America/New_York';
-            let tzShort = 'EDT';
-            let locale = 'en-US';
-
-            if (cleanCountry === 'india' || cleanCountry === 'in' || cleanCountry === 'bharat') {
-                timezone = 'Asia/Kolkata';
-                tzShort = 'IST';
-                locale = 'en-IN';
-            } else if (cleanCountry === 'united states' || cleanCountry === 'usa' || cleanCountry === 'us' || cleanCountry === 'united states of america') {
-                locale = 'en-US';
-                const centralStates = ['al', 'alabama', 'tx', 'texas', 'il', 'illinois', 'tn', 'tennessee', 'mo', 'missouri', 'wi', 'wisconsin', 'mn', 'minnesota', 'la', 'louisiana', 'ms', 'mississippi', 'ok', 'oklahoma', 'ks', 'kansas', 'ne', 'nebraska', 'ia', 'iowa', 'ar', 'arkansas', 'nd', 'north dakota', 'sd', 'south dakota'];
-                const mountainStates = ['co', 'colorado', 'ut', 'utah', 'nm', 'new mexico', 'id', 'idaho', 'mt', 'montana', 'wy', 'wyoming', 'az', 'arizona'];
-                const pacificStates = ['ca', 'california', 'wa', 'washington', 'or', 'oregon', 'nv', 'nevada'];
-
-                if (centralStates.includes(cleanState)) {
-                    timezone = 'America/Chicago';
-                    tzShort = 'CDT';
-                } else if (mountainStates.includes(cleanState)) {
-                    timezone = (cleanState === 'az' || cleanState === 'arizona') ? 'America/Phoenix' : 'America/Denver';
-                    tzShort = 'MDT';
-                } else if (pacificStates.includes(cleanState)) {
-                    timezone = 'America/Los_Angeles';
-                    tzShort = 'PDT';
-                } else if (cleanState === 'ak' || cleanState === 'alaska') {
-                    timezone = 'America/Anchorage';
-                    tzShort = 'AKDT';
-                } else if (cleanState === 'hi' || cleanState === 'hawaii') {
-                    timezone = 'Pacific/Honolulu';
-                    tzShort = 'HST';
-                } else {
-                    timezone = 'America/New_York';
-                    tzShort = 'EDT';
-                }
-            } else if (cleanCountry === 'united kingdom' || cleanCountry === 'uk' || cleanCountry === 'gb' || cleanCountry === 'great britain') {
-                timezone = 'Europe/London';
-                tzShort = 'BST';
-                locale = 'en-GB';
-            } else if (cleanCountry === 'canada' || cleanCountry === 'ca') {
-                timezone = (cleanState === 'bc' || cleanState === 'british columbia') ? 'America/Vancouver' : 'America/Toronto';
-                tzShort = (cleanState === 'bc' || cleanState === 'british columbia') ? 'PDT' : 'EDT';
-                locale = 'en-CA';
-            } else if (cleanCountry === 'australia' || cleanCountry === 'au') {
-                timezone = (cleanState === 'wa' || cleanState === 'perth') ? 'Australia/Perth' : 'Australia/Sydney';
-                tzShort = (cleanState === 'wa' || cleanState === 'perth') ? 'AWST' : 'AEST';
-                locale = 'en-AU';
-            } else if (cleanCountry === 'united arab emirates' || cleanCountry === 'uae' || cleanCountry === 'dubai') {
-                timezone = 'Asia/Dubai';
-                tzShort = 'GST';
-                locale = 'en-AE';
-            } else if (cleanCountry === 'singapore' || cleanCountry === 'sg') {
-                timezone = 'Asia/Singapore';
-                tzShort = 'SGT';
-                locale = 'en-SG';
-            } else if (cleanCountry === 'germany' || cleanCountry === 'france' || cleanCountry === 'europe') {
-                timezone = 'Europe/Berlin';
-                tzShort = 'CEST';
-                locale = 'en-DE';
-            } else if (cleanCountry === 'ireland') {
-                timezone = 'Europe/Dublin';
-                tzShort = 'IST';
-                locale = 'en-IE';
-            } else if (cleanCountry === 'japan') {
-                timezone = 'Asia/Tokyo';
-                tzShort = 'JST';
-                locale = 'ja-JP';
-            } else if (cleanCountry === 'south africa') {
-                timezone = 'Africa/Johannesburg';
-                tzShort = 'SAST';
-                locale = 'en-ZA';
-            } else {
-                timezone = 'America/New_York';
-                tzShort = 'EDT';
-                locale = 'en-US';
-            }
-            return { timezone, tzShort, locale };
-        }
-        window.resolveClientTimezone = resolveClientTimezone;
-
-        try {
-            window.tenantCountry = localStorage.getItem('edvora_tenant_country') || 'United States';
-            window.tenantTimezone = localStorage.getItem('edvora_tenant_tz') || 'America/New_York';
-            window.tenantTzShort = localStorage.getItem('edvora_tenant_tz_short') || 'EDT';
-            window.tenantLocale = 'en-US';
-            window.tenantLocalization = {
-                country: window.tenantCountry,
-                timezone: window.tenantTimezone,
-                timezone_short: window.tenantTzShort,
-                locale: window.tenantLocale
-            };
-        } catch(_) {}
-
-        function updateTenantLocalization(orgData) {
-            orgData = orgData || window.currentOrgProfile || {};
-            const primaryCamp = orgData.primary_campus || {};
-            const country = primaryCamp.country || orgData.country || 'United States';
-            const state = primaryCamp.state || orgData.state || '';
-
-            const resolved = resolveClientTimezone(country, state);
-            window.tenantCountry = primaryCamp.country || orgData.country || 'United States';
-            window.tenantTimezone = primaryCamp.timezone || orgData.timezone || resolved.timezone;
-            window.tenantTzShort = primaryCamp.timezone_short || orgData.timezone_short || resolved.tzShort;
-            window.tenantLocale = primaryCamp.locale || orgData.locale || resolved.locale;
-            window.tenantLocalization = {
-                country: window.tenantCountry,
-                timezone: window.tenantTimezone,
-                timezone_short: window.tenantTzShort,
-                locale: window.tenantLocale
-            };
-
-            try {
-                localStorage.setItem('edvora_tenant_country', window.tenantCountry);
-                localStorage.setItem('edvora_tenant_tz', window.tenantTimezone);
-                localStorage.setItem('edvora_tenant_tz_short', window.tenantTzShort);
-            } catch(_) {}
-
-            updateTenantTzLabels();
-        }
-        window.updateTenantLocalization = updateTenantLocalization;
-
-        function updateTenantTzLabels() {
-            const tz = window.tenantTzShort || 'EDT';
-
-            const leadsHdr = document.getElementById('leadsColHeaderDateTime');
-            if (leadsHdr) leadsHdr.innerHTML = 'Date &amp; Time (' + tz + ')';
-
-            const leadsRangeLabel = document.getElementById('leadsRangeTzLabel');
-            if (leadsRangeLabel) leadsRangeLabel.innerText = tz;
-
-            const leadsExportBtn = document.getElementById('leadsExportCsvBtn');
-            if (leadsExportBtn) leadsExportBtn.title = 'Export student contacts as CSV (' + tz + ')';
-
-            const tourSchedHdr = document.getElementById('tourSchedColHeaderDateTime');
-            if (tourSchedHdr) tourSchedHdr.innerHTML = 'Date &amp; Time (' + tz + ')';
-
-            const tourHdr = document.getElementById('tourColHeaderBookedOn');
-            if (tourHdr) tourHdr.innerHTML = 'Booked On (' + tz + ')';
-            const tourExport = document.getElementById('exportCampusToursBtn');
-            if (tourExport) tourExport.innerHTML = '📥 Export CSV (' + tz + ')';
-
-            const cbHdr = document.getElementById('cbColHeaderRequested');
-            if (cbHdr) cbHdr.innerHTML = 'Requested (' + tz + ')';
-            const cbExport = document.getElementById('exportCallbacksBtn');
-            if (cbExport) cbExport.innerHTML = '📥 Export CSV (' + tz + ')';
-
-            const ovRange = document.getElementById('ovRangeTzLabel');
-            if (ovRange) ovRange.innerText = tz;
-
-            document.querySelectorAll('.tenant-tz-label').forEach(el => {
-                el.innerText = tz;
-            });
-        }
-        window.updateTenantTzLabels = updateTenantTzLabels;
-
-        function formatTenantDateTime(dateInput, options) {
-            if (!dateInput) return 'N/A';
-            try {
-                let dateObj;
-                if (typeof dateInput === 'string' && !dateInput.endsWith('Z') && !dateInput.includes('T')) {
-                    dateObj = new Date(dateInput.replace(/-/g, '/') + ' UTC');
-                } else {
-                    dateObj = new Date(dateInput);
-                }
-                if (isNaN(dateObj.getTime())) return dateInput;
-
-                const tz = window.tenantTimezone || 'America/New_York';
-                const tzShort = window.tenantTzShort || 'EDT';
-                const locale = window.tenantLocale || 'en-US';
-
-                const formatted = dateObj.toLocaleString(locale, {
-                    timeZone: tz,
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                });
-                return (options && options.omitTz) ? formatted : (formatted + ' ' + tzShort);
-            } catch (e) {
-                return dateInput;
-            }
-        }
-        window.formatTenantDateTime = formatTenantDateTime;
-        window.formatToIST = formatTenantDateTime;
 
         // Immediate optimistic hydration from cached institution name & website
         try {
@@ -6128,7 +5945,7 @@
             } else if (tab === 'knowledge-gaps') {
                 const anItem = document.querySelector(`.nav-item[data-tab="analytics"]`);
                 if (anItem) anItem.classList.add('active');
-            } else if (tab === 'chatbot' || tab === 'settings' || tab === 'chatbot_readiness' || tab === 'chatbot-readiness' || tab === 'scholarships' || tab === 'scholarship-configuration' || tab === 'scholarship-configuration-edit' || tab === 'session-journeys' || tab === 'top_visited_pages' || tab === 'top_exit_pages' || tab === 'campaign_sources') {
+            } else if (tab === 'chatbot' || tab === 'settings' || tab === 'chatbot_readiness' || tab === 'chatbot-readiness' || tab === 'scholarships' || tab === 'scholarship-configuration' || tab === 'scholarship-configuration-edit' || tab === 'session-journeys' || tab === 'top_visited_pages' || tab === 'top_exit_pages' || tab === 'campaign_sources' || tab === 'source_attribution' || tab === 'source-attribution') {
                 const orgItem = document.querySelector(`.nav-item[data-tab="org-settings"]`);
                 if (orgItem) orgItem.classList.add('active');
             } else if (tab === 'add-programs' || tab === 'edit-programs' || tab === 'academic-program-detail' || tab === 'course-staff-assignment' || tab === 'program-staff' || tab === 'program-lead-magnet') {
@@ -6249,6 +6066,7 @@
             } else if (tab === 'top_visited_pages') { cleanTitle = 'Top Visited Pages & Dwell Time Report';
             } else if (tab === 'top_exit_pages') { cleanTitle = 'Top Exit & Drop-off Pages Report';
             } else if (tab === 'campaign_sources') { cleanTitle = 'Campaign Sources & Attribution Report';
+            } else if (tab === 'source_attribution' || tab === 'source-attribution') { cleanTitle = 'Traffic Source Attribution & Funnel Tracking';
             } else if (tab === 'profile') {
                 cleanTitle = 'My Profile & Security';
             }
@@ -6360,6 +6178,7 @@
                 } else if (tab === 'top_visited_pages') { if (typeof loadTopVisitedPages === 'function') loadTopVisitedPages(1);
                 } else if (tab === 'top_exit_pages') { if (typeof loadTopExitPages === 'function') loadTopExitPages(1);
                 } else if (tab === 'campaign_sources') { if (typeof loadCampaignSources === 'function') loadCampaignSources(1);
+                } else if (tab === 'source_attribution' || tab === 'source-attribution') { if (typeof loadSourceAttribution === 'function') loadSourceAttribution();
                 } else if (tab === 'profile') {
                     if (typeof loadProfileData === 'function') loadProfileData();
                 }
