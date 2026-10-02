@@ -8,6 +8,7 @@
 > - [**Edvora Chatbot Technical Architecture (`architecture_chatbot.md`)**](file:///c:/xampp/htdocs/edvora.chat/architecture_chatbot.md) — Conversational AI lifecycle, Admissions Counselor State Machine, Anti-Fatigue Lead Cadence, Structured JSON Output Contract (`admissions_response`), Vector Search Engine, and `widget.js` client architecture.
 > - [**Domain Whitelisting & Embed Origin Security (`architecture_domain_whitelisting.md`)**](file:///c:/xampp/htdocs/edvora.chat/architecture_domain_whitelisting.md) — Multi-tenant domain whitelisting, registration auto-whitelist, 4-domain quota management, runtime Origin/Referer matching, and embed abuse prevention.
 > - [**Timezone & Primary Campus Localization Architecture (`architecture_timezone.md`)**](file:///c:/xampp/htdocs/edvora.chat/architecture_timezone.md) — Multi-tenant timezone resolution based on primary campus country (`campuses.country` where `is_primary = 1`), state-aware mapping, U.S.A. default fallback, UI localization, and CSV export synchronization.
+> - [**Campus Creation & Tour Management Architecture (`architecture_campus_creation_and_tour_management.md`)**](file:///c:/xampp/htdocs/edvora.chat/architecture_campus_creation_and_tour_management.md) — End-to-end campus entity creation, academic program mapping, visit slot scheduling, chatbot booking, slot-specific attendee roster check-in, tokenized gate sharing, post-tour feedback surveys, and AI feedback synthesis.
 
 ---
 

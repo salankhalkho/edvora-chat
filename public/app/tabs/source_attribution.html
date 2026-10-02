@@ -444,9 +444,7 @@
             <!-- Filter & Search Bar -->
             <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 12px; padding: 14px 18px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
                 <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1;">
-                    <input type="text" id="saSearchInput" placeholder="Filter channels, campaigns, or referrers..." class="brand-input" style="height: 34px; font-size: 11.5px; width: 280px; max-width: 100%; border: 1.5px solid #D1E5DE; border-radius: 6px; padding: 0 12px;" oninput="filterSaTable()" />
-                    
-                    <select id="saChannelTypeSelect" class="brand-input" style="height: 34px; font-size: 11.5px; font-weight: 600; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D1E5DE; color: #063D3B;" onchange="filterSaTable()">
+                    <select id="saChannelTypeSelect" class="brand-input" style="height: 34px; font-size: 11.5px; font-weight: 600; width: 175px; min-width: 160px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D1E5DE; color: #063D3B; background: #FFFFFF; cursor: pointer;" onchange="filterSaTable()">
                         <option value="all">All Channel Types</option>
                         <option value="organic">Organic &amp; Direct</option>
                         <option value="social">Social Channels</option>
@@ -454,16 +452,18 @@
                         <option value="referral">Referral Traffic</option>
                     </select>
 
-                    <select id="saSortSelect" class="brand-input" style="height: 34px; font-size: 11.5px; font-weight: 600; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D1E5DE; color: #063D3B;" onchange="filterSaTable()">
+                    <select id="saSortSelect" class="brand-input" style="height: 34px; font-size: 11.5px; font-weight: 600; width: 215px; min-width: 200px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D1E5DE; color: #063D3B; background: #FFFFFF; cursor: pointer;" onchange="filterSaTable()">
                         <option value="conversions_desc" selected>Conversion Yield: High to Low</option>
                         <option value="inflow_desc">Inflow Visitors: High to Low</option>
                         <option value="leads_desc">Verified Leads: High to Low</option>
                         <option value="rate_desc">Conversion Rate %: High to Low</option>
                     </select>
+
+                    <input type="text" id="saSearchInput" placeholder="Search channels, campaigns, or referrers..." class="brand-input" style="height: 34px; font-size: 11.5px; width: 280px; max-width: 100%; border: 1.5px solid #D1E5DE; border-radius: 6px; padding: 0 12px;" oninput="filterSaTable()" />
                 </div>
 
-                <div style="font-size: 11.5px; color: #648781;" id="saTableCountLabel">
-                    Showing 6 channels
+                <div style="font-size: 11.5px; color: #648781; white-space: nowrap; flex-shrink: 0;" id="saTableCountLabel">
+                    Showing 0 channels
                 </div>
             </div>
 
