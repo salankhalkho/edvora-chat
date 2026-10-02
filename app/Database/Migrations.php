@@ -1887,7 +1887,7 @@ class Migrations
                 booking_id INT NOT NULL,
                 slot_id INT NOT NULL,
                 feedback_token VARCHAR(64) UNIQUE NOT NULL,
-                rating_overall TINYINT NOT NULL,
+                rating_overall TINYINT NULL DEFAULT NULL,
                 rating_facilities TINYINT NULL,
                 rating_guide TINYINT NULL,
                 intent_to_apply ENUM('definitely', 'likely', 'exploring', 'unlikely') DEFAULT 'likely',
@@ -1901,6 +1901,9 @@ class Migrations
                 FOREIGN KEY (slot_id) REFERENCES campus_tour_slots(id) ON DELETE CASCADE,
                 INDEX idx_feedback_slot (organization_id, slot_id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
+            // Ensure rating_overall is nullable for initial survey dispatch before student response
+            $this->db->exec("ALTER TABLE campus_tour_feedbacks MODIFY COLUMN rating_overall TINYINT NULL DEFAULT NULL;");
         } catch (Throwable $e) {
             error_log('[Migrations] campus_tour_feedbacks table: ' . $e->getMessage());
         }
