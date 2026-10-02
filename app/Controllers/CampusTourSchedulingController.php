@@ -684,7 +684,9 @@ class CampusTourSchedulingController
             // Automatically elevate lead intent score in leads table to 95 (Hot Lead)
             $stmtLead = $db->prepare("
                 UPDATE leads
-                SET intent_score = 95,
+                SET conversion_score = 95,
+                    conversion_score_rationale = 'Attended Campus Tour',
+                    pipeline_stage = 'campus_visit',
                     status = CASE WHEN status = 'new' THEN 'contacted' ELSE status END,
                     notes = CONCAT(COALESCE(notes, ''), ' | Attended Campus Tour on ', CURDATE()),
                     updated_at = NOW()
@@ -1048,7 +1050,9 @@ class CampusTourSchedulingController
             // Auto warm lead in leads CRM
             $stmtLead = $db->prepare("
                 UPDATE leads
-                SET intent_score = 95,
+                SET conversion_score = 95,
+                    conversion_score_rationale = 'Attended Campus Tour (Gate Check-In)',
+                    pipeline_stage = 'campus_visit',
                     status = CASE WHEN status = 'new' THEN 'contacted' ELSE status END,
                     notes = CONCAT(COALESCE(notes, ''), ' | Gate check-in attended on ', CURDATE()),
                     updated_at = NOW()

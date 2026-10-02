@@ -328,7 +328,9 @@ class CampusTourController
             // Auto-warm lead in leads table
             $stmtLead = $db->prepare("
                 UPDATE leads
-                SET intent_score = 95,
+                SET conversion_score = 95,
+                    conversion_score_rationale = 'Attended Campus Tour',
+                    pipeline_stage = 'campus_visit',
                     status = CASE WHEN status = 'new' THEN 'contacted' ELSE status END,
                     notes = CONCAT(COALESCE(notes, ''), ' | Attended Campus Tour on ', CURDATE()),
                     updated_at = NOW()
