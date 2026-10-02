@@ -379,17 +379,20 @@
         `).join('');
       }
 
-      const codeHtml = c.course_code 
-        ? `<span style="font-size:10.5px; font-family:'JetBrains Mono',monospace; font-weight:700; background:#F1F5F9; color:#475569; padding:2px 6px; border-radius:4px; margin-left:6px; border:1px solid #E2E8F0;">${escapeHtml(c.course_code)}</span>` 
+      const codeHtml = (c.course_code && String(c.course_code).trim())
+        ? `<span style="font-size:10.5px; font-family:'JetBrains Mono',monospace; font-weight:700; background:#F1F5F9; color:#475569; padding:2px 6px; border-radius:4px; margin-left:6px; border:1px solid #E2E8F0;">${escapeHtml(String(c.course_code).trim())}</span>` 
         : '';
 
-      const durationHtml = c.duration 
-        ? `<div style="font-size:11px; color:#648781; margin-top:2px;">⏳ ${escapeHtml(c.duration)}</div>`
+      const durVal = (c.duration || '').trim();
+      const isInvalidDur = !durVal || durVal.toLowerCase() === 'null' || durVal.toLowerCase() === 'none' || durVal.toLowerCase() === 'undefined';
+      const durationHtml = !isInvalidDur
+        ? `<div style="font-size:11px; color:#648781; margin-top:2px;">⏳ ${escapeHtml(durVal)}</div>`
         : '';
 
-      const feeHtml = c.total_fee 
-        ? `<div style="font-size:10.5px; color:#063D3B; font-weight:700; margin-top:3px;">💰 ${escapeHtml(c.currency || 'USD')} ${Number(c.total_fee).toLocaleString()}</div>`
-        : '';
+      const feeNum = parseFloat(c.total_fee);
+      const feeHtml = (!isNaN(feeNum) && feeNum > 0)
+        ? `<div style="font-size:10.5px; color:#063D3B; font-weight:700; margin-top:3px;">💰 ${escapeHtml(c.currency || 'USD')} ${feeNum.toLocaleString()}</div>`
+        : (c.total_fee === '0.00' || feeNum === 0 ? `<div style="font-size:10.5px; color:#059669; font-weight:700; margin-top:3px;">🎓 Fully Funded / Stipend</div>` : '');
 
       return `
         <tr data-course-id="${c.id}">
