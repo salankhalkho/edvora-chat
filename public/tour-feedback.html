@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Campus Tour Experience Survey — edvora.chat</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/theme-branding.css">
+    <style>
+        :root {
+            --brand-primary: #063D3B;
+            --brand-primary-dark: #032524;
+            --brand-accent: #C8FF63;
+            --brand-bg: #F4FAF7;
+            --brand-surface: #FFFFFF;
+            --brand-border: #D1E5DE;
+            --brand-text-main: #063D3B;
+            --brand-text-sub: #4F7470;
+            --brand-star-active: #F59E0B;
+            --brand-star-empty: #D1D5DB;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', var(--brand-font-sans), sans-serif;
+            background: var(--brand-bg);
+            color: var(--brand-text-main);
+            min-height: 100vh;
+            padding-bottom: 60px;
+        }
+
+        .survey-header {
+            background: var(--brand-primary);
+            color: #FFFFFF;
+            padding: 32px 20px 28px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--brand-accent);
+        }
+
+        .survey-container {
+            max-width: 600px;
+            margin: -20px auto 0 auto;
+            padding: 0 16px;
+        }
+
+        .survey-card {
+            background: #FFFFFF;
+            border: 1.5px solid var(--brand-border);
+            border-radius: 18px;
+            padding: 28px 24px;
+            box-shadow: 0 10px 30px rgba(6, 61, 59, 0.06);
+        }
+
+        .student-greeting {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--brand-primary);
+            margin-bottom: 4px;
+        }
+
+        .tour-meta-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #E8F4F0;
+            color: var(--brand-primary);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11.5px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .form-section {
+            margin-bottom: 24px;
+        }
+
+        .section-label {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--brand-primary);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .star-rating-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .star-btn {
+            background: none;
+            border: none;
+            font-size: 32px;
+            color: var(--brand-star-empty);
+            cursor: pointer;
+            line-height: 1;
+            transition: transform 0.1s ease, color 0.1s ease;
+            user-select: none;
+        }
+
+        .star-btn.active {
+            color: var(--brand-star-active);
+        }
+
+        .star-btn:hover {
+            transform: scale(1.15);
+        }
+
+        .rating-desc {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--brand-text-sub);
+            margin-left: 10px;
+        }
+
+        .intent-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .intent-chip {
+            padding: 12px 14px;
+            border: 1.5px solid var(--brand-border);
+            border-radius: 10px;
+            background: #FAFCFB;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.15s ease;
+        }
+
+        .intent-chip input {
+            display: none;
+        }
+
+        .intent-chip.selected {
+            border-color: var(--brand-primary);
+            background: #E8F4F0;
+        }
+
+        .intent-chip .chip-title {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: var(--brand-primary);
+        }
+
+        .intent-chip .chip-desc {
+            font-size: 10.5px;
+            color: var(--brand-text-sub);
+            margin-top: 2px;
+        }
+
+        .survey-textarea {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 13px;
+            font-family: inherit;
+            border: 1.5px solid var(--brand-border);
+            border-radius: 10px;
+            color: var(--brand-primary);
+            resize: vertical;
+            min-height: 80px;
+            outline: none;
+            transition: border-color 0.15s ease;
+        }
+
+        .survey-textarea:focus {
+            border-color: var(--brand-primary);
+        }
+
+        .btn-submit {
+            width: 100%;
+            height: 48px;
+            background: var(--brand-primary);
+            color: var(--brand-accent);
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 800;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(6, 61, 59, 0.2);
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-submit:hover {
+            background: var(--brand-primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .success-box {
+            text-align: center;
+            padding: 40px 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="survey-header">
+        <div style="font-size: 11px; font-weight: 800; color: var(--brand-accent); text-transform: uppercase; letter-spacing: 1px;" id="headerInst">
+            Campus Visit Experience
+        </div>
+        <h1 style="font-size: 22px; font-weight: 800; margin-top: 6px;">
+            How Was Your Campus Tour? 🏛️
+        </h1>
+        <p style="font-size: 12.5px; color: #A7C5C0; margin-top: 4px; max-width: 480px; margin-left: auto; margin-right: auto;">
+            Your feedback helps our faculty, tour guides, and admissions counselors make campus visits unforgettable for prospective students.
+        </p>
+    </header>
+
+    <div class="survey-container">
+        <div class="survey-card" id="mainSurveyCard">
+            
+            <div id="loadingState" style="text-align: center; padding: 40px; color: #648781;">
+                Loading survey details...
+            </div>
+
+            <div id="surveyForm" style="display: none;">
+                <div class="student-greeting" id="studentGreeting">Hi Prospective Student! 👋</div>
+                <div class="tour-meta-pill" id="tourMetaPill">🏫 Campus Tour</div>
+
+                <form onsubmit="submitSurvey(event)">
+                    
+                    <!-- 1. Overall Impression -->
+                    <div class="form-section">
+                        <label class="section-label">1. Overall Campus Impression *</label>
+                        <div class="star-rating-row" id="starsOverall">
+                            <button type="button" class="star-btn" data-val="1">★</button>
+                            <button type="button" class="star-btn" data-val="2">★</button>
+                            <button type="button" class="star-btn" data-val="3">★</button>
+                            <button type="button" class="star-btn" data-val="4">★</button>
+                            <button type="button" class="star-btn" data-val="5">★</button>
+                            <span class="rating-desc" id="descOverall">Select rating</span>
+                        </div>
+                    </div>
+
+                    <!-- 2. Academic Facilities & Labs -->
+                    <div class="form-section">
+                        <label class="section-label">2. Academic Facilities &amp; Labs</label>
+                        <div class="star-rating-row" id="starsFacilities">
+                            <button type="button" class="star-btn" data-val="1">★</button>
+                            <button type="button" class="star-btn" data-val="2">★</button>
+                            <button type="button" class="star-btn" data-val="3">★</button>
+                            <button type="button" class="star-btn" data-val="4">★</button>
+                            <button type="button" class="star-btn" data-val="5">★</button>
+                            <span class="rating-desc" id="descFacilities">Optional</span>
+                        </div>
+                    </div>
+
+                    <!-- 3. Tour Guide / Counselor Experience -->
+                    <div class="form-section">
+                        <label class="section-label">3. Tour Guide &amp; Staff Helpfulness</label>
+                        <div class="star-rating-row" id="starsGuide">
+                            <button type="button" class="star-btn" data-val="1">★</button>
+                            <button type="button" class="star-btn" data-val="2">★</button>
+                            <button type="button" class="star-btn" data-val="3">★</button>
+                            <button type="button" class="star-btn" data-val="4">★</button>
+                            <button type="button" class="star-btn" data-val="5">★</button>
+                            <span class="rating-desc" id="descGuide">Optional</span>
+                        </div>
+                    </div>
+
+                    <!-- 4. Intent to Apply -->
+                    <div class="form-section">
+                        <label class="section-label">4. After this visit, how likely are you to apply?</label>
+                        <div class="intent-grid">
+                            <label class="intent-chip selected" onclick="selectIntent(this)">
+                                <input type="radio" name="intent" value="definitely" checked />
+                                <div class="chip-title">🚀 Definitely Applying</div>
+                                <div class="chip-desc">This is my top choice</div>
+                            </label>
+
+                            <label class="intent-chip" onclick="selectIntent(this)">
+                                <input type="radio" name="intent" value="likely" />
+                                <div class="chip-title">👍 Likely to Apply</div>
+                                <div class="chip-desc">Very positive impression</div>
+                            </label>
+
+                            <label class="intent-chip" onclick="selectIntent(this)">
+                                <input type="radio" name="intent" value="exploring" />
+                                <div class="chip-title">🤔 Still Exploring</div>
+                                <div class="chip-desc">Comparing options</div>
+                            </label>
+
+                            <label class="intent-chip" onclick="selectIntent(this)">
+                                <input type="radio" name="intent" value="unlikely" />
+                                <div class="chip-title">❌ Unlikely</div>
+                                <div class="chip-desc">Not the right fit</div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 5. What stood out? -->
+                    <div class="form-section">
+                        <label class="section-label">5. What did you like most about the campus?</label>
+                        <textarea id="txtHighlights" class="survey-textarea" placeholder="e.g. Modern computer labs, friendly guides, green campus, library..."></textarea>
+                    </div>
+
+                    <!-- 6. Improvement Suggestions -->
+                    <div class="form-section">
+                        <label class="section-label">6. Anything we could improve for future visits?</label>
+                        <textarea id="txtImprovements" class="survey-textarea" placeholder="e.g. Would love to see hostels, more info on fee scholarships..."></textarea>
+                    </div>
+
+                    <!-- 7. Urgent Questions for Admissions -->
+                    <div class="form-section">
+                        <label class="section-label">7. Any pending questions for our admissions counselors?</label>
+                        <textarea id="txtQuestions" class="survey-textarea" placeholder="Ask anything about applications, scholarship deadlines, or hostel booking..."></textarea>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="btn-submit">
+                        <span>Submit Feedback</span> <span>&rarr;</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Success State -->
+            <div id="successState" style="display: none;" class="success-box">
+                <div style="font-size: 48px; margin-bottom: 12px;">🎉</div>
+                <h2 style="font-size: 20px; font-weight: 800; color: #063D3B;">Thank You So Much!</h2>
+                <p style="font-size: 13px; color: #4F7470; margin-top: 6px; line-height: 1.5;">
+                    Your feedback has been delivered directly to our admissions team and university leadership.
+                </p>
+                <div style="margin-top: 24px; padding: 14px; background: #F4FAF7; border-radius: 12px; font-size: 12px; color: #063D3B;">
+                    Have questions or ready to start your application? You can chat with our 24/7 Admissions Assistant anytime at <a href="https://edvora.chat" target="_blank" style="color: #063D3B; font-weight: 700;">edvora.chat</a>.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        var token = new URLSearchParams(window.location.search).get('token') || '';
+        var ratings = { overall: 5, facilities: 0, guide: 0 };
+        var ratingLabels = {
+            1: 'Needs Improvement',
+            2: 'Fair',
+            3: 'Good Experience',
+            4: 'Great Visit! ⭐',
+            5: 'Exceptional! 🌟'
+        };
+
+        function setupStarRow(rowId, key, descId) {
+            var row = document.getElementById(rowId);
+            var desc = document.getElementById(descId);
+            if (!row) return;
+
+            var buttons = row.querySelectorAll('.star-btn');
+            function updateStars(val) {
+                ratings[key] = val;
+                buttons.forEach(function(b, idx) {
+                    if (idx < val) b.classList.add('active');
+                    else b.classList.remove('active');
+                });
+                if (desc) desc.innerText = ratingLabels[val] || '';
+            }
+
+            buttons.forEach(function(btn) {
+                var v = parseInt(btn.getAttribute('data-val'), 10);
+                btn.onclick = function() { updateStars(v); };
+            });
+
+            if (ratings[key] > 0) updateStars(ratings[key]);
+        }
+
+        function selectIntent(chip) {
+            document.querySelectorAll('.intent-chip').forEach(function(c) { c.classList.remove('selected'); });
+            chip.classList.add('selected');
+            var radio = chip.querySelector('input');
+            if (radio) radio.checked = true;
+        }
+
+        function loadSurvey() {
+            if (!token) {
+                document.getElementById('loadingState').innerHTML = '<div style="color:#EF4444; font-weight:700;">Invalid survey link.<br><span style="font-size:12px; color:#648781;">Token missing from URL.</span></div>';
+                return;
+            }
+
+            fetch('/v1/public/tour-feedback/' + encodeURIComponent(token))
+                .then(function(res) { return res.json(); })
+                .then(function(res) {
+                    if (res.status === 'success' && res.data) {
+                        var d = res.data;
+                        document.getElementById('headerInst').innerText = d.institution_name || 'Campus Visit Experience';
+                        document.getElementById('studentGreeting').innerText = 'Hi ' + (d.student_name || 'Prospective Student') + '! 👋';
+                        document.getElementById('tourMetaPill').innerText = '🏫 ' + (d.campus_name || 'Campus') + ' • ' + (d.tour_date || 'Guided Tour');
+
+                        if (d.is_already_submitted) {
+                            document.getElementById('loadingState').style.display = 'none';
+                            document.getElementById('successState').style.display = 'block';
+                            document.querySelector('#successState h2').innerText = 'Feedback Already Submitted ✓';
+                            document.querySelector('#successState p').innerText = 'Thank you! You have already shared your thoughts for this campus tour on ' + (d.submitted_at ? d.submitted_at.substring(0, 10) : 'recent visit') + '.';
+                            return;
+                        }
+
+                        document.getElementById('loadingState').style.display = 'none';
+                        document.getElementById('surveyForm').style.display = 'block';
+
+                        setupStarRow('starsOverall', 'overall', 'descOverall');
+                        setupStarRow('starsFacilities', 'facilities', 'descFacilities');
+                        setupStarRow('starsGuide', 'guide', 'descGuide');
+                    } else {
+                        document.getElementById('loadingState').innerHTML = '<div style="color:#EF4444; font-weight:700;">⚠️ ' + (res.message || 'Survey link is invalid or expired.') + '</div>';
+                    }
+                })
+                .catch(function() {
+                    document.getElementById('loadingState').innerHTML = '<div style="color:#EF4444; font-weight:700;">Unable to connect to server.</div>';
+                });
+        }
+
+        function submitSurvey(e) {
+            e.preventDefault();
+            var btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span>Submitting Feedback...</span>';
+
+            var intentRadio = document.querySelector('input[name="intent"]:checked');
+            var intentVal = intentRadio ? intentRadio.value : 'likely';
+
+            var payload = {
+                rating_overall: ratings.overall,
+                rating_facilities: ratings.facilities > 0 ? ratings.facilities : null,
+                rating_guide: ratings.guide > 0 ? ratings.guide : null,
+                intent_to_apply: intentVal,
+                highlight_text: document.getElementById('txtHighlights').value.trim(),
+                improvement_text: document.getElementById('txtImprovements').value.trim(),
+                pending_questions: document.getElementById('txtQuestions').value.trim()
+            };
+
+            fetch('/v1/public/tour-feedback/' + encodeURIComponent(token), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(res) {
+                if (res.status === 'success') {
+                    document.getElementById('surveyForm').style.display = 'none';
+                    document.getElementById('successState').style.display = 'block';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    alert(res.message || 'Error submitting feedback.');
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>Submit Feedback</span> <span>&rarr;</span>';
+                }
+            })
+            .catch(function() {
+                alert('Network error. Please try again.');
+                btn.disabled = false;
+                btn.innerHTML = '<span>Submit Feedback</span> <span>&rarr;</span>';
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadSurvey);
+    </script>
+</body>
+</html>

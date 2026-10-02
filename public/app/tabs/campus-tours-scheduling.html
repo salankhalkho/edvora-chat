@@ -227,6 +227,165 @@
     </div>
 </div>
 
+<!-- Modal: Slot Attendee Manifest & Feedback Intelligence -->
+<div id="modalSlotRoster" style="display: none; position: fixed; inset: 0; background: rgba(6, 61, 59, 0.45); backdrop-filter: blur(4px); z-index: 99999; align-items: center; justify-content: center; padding: 16px;">
+    <div style="background: #FFFFFF; border-radius: 16px; max-width: 980px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(6, 61, 59, 0.2); border: 1.5px solid #D1E5DE;">
+        
+        <!-- Header -->
+        <div style="padding: 16px 24px; background: #FAFDFB; border-bottom: 1.5px solid #E6F0EC; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 22px;">📋</span>
+                <div>
+                    <div style="font-size: 16px; font-weight: 800; color: #063D3B;" id="rosterModalTitle">Campus Tour Attendee Manifest</div>
+                    <div style="font-size: 11.5px; color: #648781; margin-top: 2px;" id="rosterModalMeta">Loading slot details...</div>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <button type="button" onclick="closeSlotRosterModal()" style="background: #F1F7F4; border: 1px solid #D1E5DE; color: #648781; font-size: 16px; cursor: pointer; width: 30px; height: 30px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; line-height: 1;">✕</button>
+            </div>
+        </div>
+
+        <!-- Sub Tabs Ribbon -->
+        <div style="display: flex; align-items: center; background: #FFFFFF; border-bottom: 1px solid #E6F0EC; padding: 0 24px;">
+            <button type="button" id="tabBtnManifest" onclick="switchRosterSubTab('manifest')" style="height: 42px; border: none; background: none; font-size: 12px; font-weight: 800; color: #063D3B; border-bottom: 2.5px solid #063D3B; cursor: pointer; padding: 0 16px; display: inline-flex; align-items: center; gap: 6px;">
+                <span>👥</span> Attendee Manifest &amp; Check-In
+            </button>
+            <button type="button" id="tabBtnFeedback" onclick="switchRosterSubTab('feedback')" style="height: 42px; border: none; background: none; font-size: 12px; font-weight: 600; color: #648781; border-bottom: 2.5px solid transparent; cursor: pointer; padding: 0 16px; display: inline-flex; align-items: center; gap: 6px;">
+                <span>⭐</span> Candidate Feedback &amp; AI Intelligence
+            </button>
+        </div>
+
+        <!-- Scrollable Modal Body -->
+        <div style="flex: 1; overflow-y: auto; padding: 20px 24px; background: #FAFCFB;" id="rosterModalBody">
+            
+            <!-- SUB-TAB 1: Attendee Manifest & Check-In -->
+            <div id="subTabContentManifest">
+                <!-- KPI Strip -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 18px;">
+                    <div style="background: #FFFFFF; border: 1px solid #E6F0EC; border-radius: 10px; padding: 10px 14px; text-align: center;">
+                        <div style="font-size: 20px; font-weight: 800; color: #063D3B;" id="rosterKpiTotal">0</div>
+                        <div style="font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #648781;">Booked (Max <span id="rosterKpiMaxCap">15</span>)</div>
+                    </div>
+                    <div style="background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 10px; padding: 10px 14px; text-align: center;">
+                        <div style="font-size: 20px; font-weight: 800; color: #047857;" id="rosterKpiAttended">0</div>
+                        <div style="font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #047857;">Attended</div>
+                    </div>
+                    <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px; padding: 10px 14px; text-align: center;">
+                        <div style="font-size: 20px; font-weight: 800; color: #D97706;" id="rosterKpiPending">0</div>
+                        <div style="font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #D97706;">Pending / Registered</div>
+                    </div>
+                    <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 10px 14px; text-align: center;">
+                        <div style="font-size: 20px; font-weight: 800; color: #64748B;" id="rosterKpiNoShow">0</div>
+                        <div style="font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #64748B;">No-Show</div>
+                    </div>
+                </div>
+
+                <!-- Action Toolbar & Quick Search -->
+                <div style="background: #FFFFFF; border: 1px solid #E6F0EC; border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 240px;">
+                        <input type="text" id="rosterSearchInput" onkeyup="filterRosterAttendees()" placeholder="🔍 Quick search candidate by name, phone, or email..." class="brand-input" style="width: 100%; height: 34px; font-size: 11.5px; padding: 0 12px;" />
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <button type="button" onclick="downloadActiveSlotCsv()" class="brand-btn-secondary" style="height: 32px; padding: 0 12px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
+                            <span>📥</span> Download CSV
+                        </button>
+                        <button type="button" onclick="printActiveSlotRoster()" class="brand-btn-secondary" style="height: 32px; padding: 0 12px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
+                            <span>🖨️</span> Print Check-In Sheet
+                        </button>
+                        <button type="button" onclick="shareActiveSlotGateLink()" class="brand-btn-primary" style="height: 32px; padding: 0 14px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; background: #063D3B; color: #C8FF63;">
+                            <span>🔗</span> Share Gate Link
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Attendees Table -->
+                <div style="background: #FFFFFF; border: 1px solid #E6F0EC; border-radius: 10px; overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 11.5px;">
+                        <thead>
+                            <tr style="background: #F8FCFA; border-bottom: 1px solid #E6F0EC; color: #648781; font-weight: 700; font-size: 10.5px; text-transform: uppercase;">
+                                <th style="padding: 10px 14px;">Candidate &amp; Contacts</th>
+                                <th style="padding: 10px 14px;">Program / Visitors</th>
+                                <th style="padding: 10px 14px;">Attendance Status</th>
+                                <th style="padding: 10px 14px;">Check-In Time</th>
+                                <th style="padding: 10px 14px; text-align: right;">1-Click Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rosterAttendeesTableBody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 30px; color: #648781;">Loading attendee roster...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SUB-TAB 2: Candidate Feedback & AI Intelligence -->
+            <div id="subTabContentFeedback" style="display: none;">
+                
+                <!-- Feedback Scorecard Ribbon -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 18px;">
+                    <div style="background: #FFFFFF; border: 1px solid #E6F0EC; border-radius: 10px; padding: 12px 14px; text-align: center;">
+                        <div style="font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase;">Overall Rating</div>
+                        <div style="font-size: 22px; font-weight: 800; color: #D97706; margin-top: 3px;" id="fbCardOverall">⭐ — / 5.0</div>
+                    </div>
+                    <div style="background: #FFFFFF; border: 1px solid #E6F0EC; border-radius: 10px; padding: 12px 14px; text-align: center;">
+                        <div style="font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase;">Labs &amp; Facilities</div>
+                        <div style="font-size: 22px; font-weight: 800; color: #2563EB; margin-top: 3px;" id="fbCardFacilities">🏢 — / 5.0</div>
+                    </div>
+                    <div style="background: #FFFFFF; border: 1px solid #E6F0EC; border-radius: 10px; padding: 12px 14px; text-align: center;">
+                        <div style="font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase;">Guide &amp; Staff</div>
+                        <div style="font-size: 22px; font-weight: 800; color: #7C3AED; margin-top: 3px;" id="fbCardGuide">👔 — / 5.0</div>
+                    </div>
+                    <div style="background: #FFFFFF; border: 1px solid #E6F0EC; border-radius: 10px; padding: 12px 14px; text-align: center;">
+                        <div style="font-size: 11px; font-weight: 700; color: #648781; text-transform: uppercase;">Responses</div>
+                        <div style="font-size: 22px; font-weight: 800; color: #047857; margin-top: 3px;" id="fbCardResponses">0</div>
+                    </div>
+                </div>
+
+                <!-- Action Strip: Dispatch Surveys & AI Summary Trigger -->
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; background: #FFFFFF; border: 1px solid #E6F0EC; border-radius: 10px; padding: 12px 16px;">
+                    <div>
+                        <div style="font-size: 12.5px; font-weight: 800; color: #063D3B;">Feedback Engagement &amp; AI Intelligence</div>
+                        <div style="font-size: 11px; color: #648781; margin-top: 2px;">Dispatch verified feedback surveys to all checked-in attendees or synthesize responses using AI.</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <button type="button" onclick="dispatchActiveSlotFeedbacks()" class="brand-btn-secondary" style="height: 34px; padding: 0 14px; font-size: 11.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                            <span>📩</span> Send Survey to Attended Candidates
+                        </button>
+                        <button type="button" id="btnGenAiSummary" onclick="triggerActiveSlotAiSummary()" class="brand-btn-primary" style="height: 34px; padding: 0 16px; font-size: 11.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; background: #063D3B; color: #C8FF63;">
+                            <span>✨</span> Generate AI Executive Summary
+                        </button>
+                    </div>
+                </div>
+
+                <!-- AI Executive Summary Card Container -->
+                <div id="aiSummaryCard" style="display: none; background: #FFFFFF; border: 1.5px solid #C4B5FD; border-radius: 12px; padding: 18px 20px; margin-bottom: 20px; box-shadow: 0 4px 14px rgba(124, 58, 237, 0.08);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #EDE9FE; padding-bottom: 10px; margin-bottom: 14px;">
+                        <div style="display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 800; color: #5B21B6;">
+                            <span>✨</span> AI Executive Tour Brief &amp; Sentiment Analysis
+                        </div>
+                        <span style="font-size: 10.5px; color: #7C3AED; background: #F5F3FF; padding: 2px 8px; border-radius: 999px; font-weight: 700;" id="aiSummaryTimestamp">Generated Just Now</span>
+                    </div>
+                    <div id="aiSummaryContent" style="font-size: 12px; line-height: 1.6; color: #1E293B; white-space: pre-wrap;"></div>
+                </div>
+
+                <!-- Submitted Feedback Feed -->
+                <div style="font-size: 13px; font-weight: 800; color: #063D3B; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                    <span>💬</span> Candidate Feedback Responses
+                </div>
+                <div id="feedbacksFeedContainer" style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="text-align: center; padding: 30px; color: #648781;">Loading feedbacks...</div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
 <script>
 (function() {
     window.loadTourSlots = function() {
@@ -297,14 +456,22 @@
                         var slotDateDisplay = formatSlotDateNice(s.tour_date);
                         var slotTimeDisplay = formatSlot12h(s.start_time) + ' – ' + formatSlot12h(s.end_time) + ' ' + tzShort;
 
+                        var rosterPill = '<a href="javascript:void(0)" onclick="openSlotRosterModal(' + s.id + ')" style="text-decoration:none; display:inline-flex; align-items:center; gap:5px; background:' + ((s.booked_count || 0) > 0 ? '#E8F4F0' : '#F8FAFC') + '; border:1.5px solid ' + ((s.booked_count || 0) > 0 ? '#A7D9C9' : '#E2E8F0') + '; padding:3px 9px; border-radius:6px; font-size:11.5px; font-weight:800; color:#063D3B; cursor:pointer;" title="Click to view candidate attendee roster">' +
+                            '<span>👥</span> <span>' + (s.booked_count || 0) + ' / ' + s.max_capacity + '</span>' +
+                            '</a>';
+
                         html += '<tr style="border-bottom: 1px solid #E6F0EC;">';
                         html += '<td style="padding: 12px 18px; font-weight: 700; color: #063D3B;">' + slotDateDisplay + '<div style="font-size:11px; color:#648781; font-weight:600; margin-top:2px;">' + slotTimeDisplay + '</div></td>';
                         html += '<td style="padding: 12px 18px; font-weight: 600;">' + s.campus_name + (s.is_primary ? ' <span style="font-size:10px; background:#ECFDF5; color:#047857; padding:2px 5px; border-radius:4px;">Main</span>' : '') + '</td>';
                         html += '<td style="padding: 12px 18px;"><a href="javascript:void(0)" onclick="openEditTourSlot(' + s.id + ')" style="text-decoration:none; font-weight:700; color:#063D3B; cursor:pointer;" title="Click to Edit Slot">' + s.title + '</a>' + progBadgeHtml + '</td>';
                         html += '<td style="padding: 12px 18px;">' + (s.counselor_name || '<span style="color:#94A3B8;">Auto-routed</span>') + '</td>';
-                        html += '<td style="padding: 12px 18px; font-weight: 700;">' + (s.booked_count || 0) + ' / ' + s.max_capacity + '</td>';
+                        html += '<td style="padding: 12px 18px;">' + rosterPill + '</td>';
                         html += '<td style="padding: 12px 18px;"><span style="background:#ECFDF5; color:#047857; font-weight:700; padding:3px 8px; border-radius:9999px; font-size:10.5px;">ACTIVE</span></td>';
-                        html += '<td style="padding: 12px 18px; text-align: right;"><div style="display:inline-flex; align-items:center; gap:6px; justify-content:flex-end;"><button type="button" onclick="openEditTourSlot(' + s.id + ')" class="brand-btn-secondary" style="height:26px; padding:0 10px; font-size:10.5px; font-weight:700; color:#063D3B; border-color:#D1E5DE; background:#F4FAF7;">Edit</button><button type="button" onclick="cancelTourSlot(' + s.id + ')" class="brand-btn-secondary" style="height:26px; padding:0 8px; font-size:10.5px; color:#EF4444; border-color:#FCA5A5;">Cancel</button></div></td>';
+                        html += '<td style="padding: 12px 18px; text-align: right;"><div style="display:inline-flex; align-items:center; gap:6px; justify-content:flex-end;">' +
+                            '<button type="button" onclick="openSlotRosterModal(' + s.id + ')" class="brand-btn-primary" style="height:26px; padding:0 10px; font-size:10.5px; font-weight:700; color:#C8FF63; background:#063D3B; border-radius:4px; border:none; cursor:pointer;" title="View Attendee Manifest & Mark Attendance">👥 Roster (' + (s.booked_count || 0) + ')</button>' +
+                            '<button type="button" onclick="openEditTourSlot(' + s.id + ')" class="brand-btn-secondary" style="height:26px; padding:0 10px; font-size:10.5px; font-weight:700; color:#063D3B; border-color:#D1E5DE; background:#F4FAF7;">Edit</button>' +
+                            '<button type="button" onclick="cancelTourSlot(' + s.id + ')" class="brand-btn-secondary" style="height:26px; padding:0 8px; font-size:10.5px; color:#EF4444; border-color:#FCA5A5;">Cancel</button>' +
+                            '</div></td>';
                         html += '</tr>';
                     });
                     tbody.innerHTML = html;
@@ -450,6 +617,449 @@
         .then(function(res) { return res.json(); })
         .then(function(res) {
             if (res.status === 'success') alert('Policies & triggers saved successfully!');
+        });
+    };
+
+    // ==========================================
+    // SLOT ATTENDEE MANIFEST & CHECK-IN ENGINE
+    // ==========================================
+    window._activeRosterSlotId = null;
+    window._activeSlotAttendees = [];
+    window._activeSlotData = null;
+
+    window.openSlotRosterModal = function(slotId) {
+        window._activeRosterSlotId = slotId;
+        var modal = document.getElementById('modalSlotRoster');
+        if (modal) modal.style.display = 'flex';
+
+        switchRosterSubTab('manifest');
+        loadActiveSlotRoster(slotId);
+    };
+
+    window.closeSlotRosterModal = function() {
+        var modal = document.getElementById('modalSlotRoster');
+        if (modal) modal.style.display = 'none';
+        window._activeRosterSlotId = null;
+        if (typeof window.loadTourSlots === 'function') {
+            window.loadTourSlots();
+        }
+    };
+
+    window.switchRosterSubTab = function(subTab) {
+        var tabManifest = document.getElementById('subTabContentManifest');
+        var tabFeedback = document.getElementById('subTabContentFeedback');
+        var btnManifest = document.getElementById('tabBtnManifest');
+        var btnFeedback = document.getElementById('tabBtnFeedback');
+
+        if (subTab === 'manifest') {
+            if (tabManifest) tabManifest.style.display = 'block';
+            if (tabFeedback) tabFeedback.style.display = 'none';
+            if (btnManifest) {
+                btnManifest.style.fontWeight = '800';
+                btnManifest.style.color = '#063D3B';
+                btnManifest.style.borderBottomColor = '#063D3B';
+            }
+            if (btnFeedback) {
+                btnFeedback.style.fontWeight = '600';
+                btnFeedback.style.color = '#648781';
+                btnFeedback.style.borderBottomColor = 'transparent';
+            }
+        } else {
+            if (tabManifest) tabManifest.style.display = 'none';
+            if (tabFeedback) tabFeedback.style.display = 'block';
+            if (btnFeedback) {
+                btnFeedback.style.fontWeight = '800';
+                btnFeedback.style.color = '#063D3B';
+                btnFeedback.style.borderBottomColor = '#063D3B';
+            }
+            if (btnManifest) {
+                btnManifest.style.fontWeight = '600';
+                btnManifest.style.color = '#648781';
+                btnManifest.style.borderBottomColor = 'transparent';
+            }
+            if (window._activeRosterSlotId) {
+                loadActiveSlotFeedbacks(window._activeRosterSlotId);
+            }
+        }
+    };
+
+    function loadActiveSlotRoster(slotId) {
+        var token = localStorage.getItem('token') || (typeof window.token !== 'undefined' ? window.token : '');
+        var tbody = document.getElementById('rosterAttendeesTableBody');
+        if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#648781;">Loading attendee roster...</td></tr>';
+
+        fetch('/v1/campus-tours/slots/' + slotId + '/attendees', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(res) {
+            if (res.status === 'success' && res.data) {
+                var d = res.data;
+                window._activeSlotData = d.slot;
+                window._activeSlotAttendees = d.attendees || [];
+
+                // Header
+                var s = d.slot;
+                if (document.getElementById('rosterModalTitle')) {
+                    document.getElementById('rosterModalTitle').innerText = s.title + ' — Attendee Manifest';
+                }
+                if (document.getElementById('rosterModalMeta')) {
+                    document.getElementById('rosterModalMeta').innerText = '🏫 ' + (s.campus_name || 'Campus') + ' • 📅 ' + s.tour_date + ' (' + s.start_time.substring(0,5) + ' – ' + s.end_time.substring(0,5) + ' ' + (d.tz_short || 'EDT') + ') • 👔 ' + (s.counselor_name || 'Guide');
+                }
+
+                // KPIs
+                var stats = d.stats || {};
+                if (document.getElementById('rosterKpiTotal')) document.getElementById('rosterKpiTotal').innerText = stats.total_bookings || 0;
+                if (document.getElementById('rosterKpiMaxCap')) document.getElementById('rosterKpiMaxCap').innerText = s.max_capacity || 15;
+                if (document.getElementById('rosterKpiAttended')) document.getElementById('rosterKpiAttended').innerText = stats.attended_count || 0;
+                if (document.getElementById('rosterKpiPending')) document.getElementById('rosterKpiPending').innerText = stats.pending_count || 0;
+                if (document.getElementById('rosterKpiNoShow')) document.getElementById('rosterKpiNoShow').innerText = stats.no_show_count || 0;
+
+                renderRosterAttendees(window._activeSlotAttendees, d.tz_short || 'EDT');
+            } else {
+                if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#EF4444;">' + (res.message || 'Failed to load attendees') + '</td></tr>';
+            }
+        })
+        .catch(function() {
+            if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#EF4444;">Unable to connect to server.</td></tr>';
+        });
+    }
+
+    function renderRosterAttendees(attendees, tzShort) {
+        var tbody = document.getElementById('rosterAttendeesTableBody');
+        if (!tbody) return;
+
+        if (!attendees || attendees.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:32px; color:#648781;"><div style="font-size:24px; margin-bottom:6px;">👥</div><strong>No students booked for this slot yet.</strong><br><span style="font-size:11px;">Candidate registrations from the chatbot widget will appear here.</span></td></tr>';
+            return;
+        }
+
+        var html = '';
+        attendees.forEach(function(a) {
+            var cleanPhone = (a.student_phone || '').replace(/[^0-9+]/g, '');
+            var isAttended = a.status === 'attended';
+            var isNoShow = a.status === 'no_show';
+
+            var statusBadge = '';
+            if (isAttended) {
+                statusBadge = '<span style="display:inline-flex; align-items:center; gap:4px; background:#ECFDF5; color:#047857; font-weight:800; padding:2px 8px; border-radius:999px; font-size:10.5px;">✓ ATTENDED</span>';
+            } else if (isNoShow) {
+                statusBadge = '<span style="display:inline-flex; align-items:center; gap:4px; background:#F1F5F9; color:#64748B; font-weight:800; padding:2px 8px; border-radius:999px; font-size:10.5px;">NO-SHOW</span>';
+            } else if (a.status === 'confirmed') {
+                statusBadge = '<span style="display:inline-flex; align-items:center; gap:4px; background:#EFF6FF; color:#1D4ED8; font-weight:800; padding:2px 8px; border-radius:999px; font-size:10.5px;">CONFIRMED</span>';
+            } else {
+                statusBadge = '<span style="display:inline-flex; align-items:center; gap:4px; background:#FFFBEB; color:#D97706; font-weight:800; padding:2px 8px; border-radius:999px; font-size:10.5px;">PENDING</span>';
+            }
+
+            var checkInTimeStr = a.attended_at ? a.attended_at.substring(0, 16) : '—';
+
+            var waLink = 'https://wa.me/' + cleanPhone + '?text=' + encodeURIComponent('Hi ' + a.student_name + '! This is the admissions team regarding your campus tour visit.');
+
+            html += '<tr style="border-bottom: 1px solid #E6F0EC;">';
+            html += '  <td style="padding: 10px 14px;">';
+            html += '    <div style="font-weight: 800; color: #063D3B; font-size: 12px;">' + a.student_name + '</div>';
+            html += '    <div style="font-size: 11px; color: #648781;">' + (a.student_email || '—') + '</div>';
+            html += '    <div style="display: flex; gap: 4px; margin-top: 3px;">';
+            if (cleanPhone) {
+                html += '      <a href="tel:' + cleanPhone + '" style="text-decoration:none; display:inline-flex; align-items:center; gap:3px; background:#EFF6FF; color:#1D4ED8; font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px; border:1px solid #BFDBFE;">📞 ' + a.student_phone + '</a>';
+                html += '      <a href="' + waLink + '" target="_blank" style="text-decoration:none; display:inline-flex; align-items:center; gap:3px; background:#ECFDF5; color:#047857; font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px; border:1px solid #A7F3D0;">💬 WA</a>';
+            }
+            html += '    </div>';
+            html += '  </td>';
+
+            html += '  <td style="padding: 10px 14px;">';
+            html += '    <div style="font-weight:700; color:#063D3B;">' + (a.program_interest || 'General Tour') + '</div>';
+            html += '    <div style="font-size:10.5px; color:#648781; margin-top:2px;">👥 ' + (a.group_size || 1) + ' Visitor' + ((a.group_size || 1) > 1 ? 's' : '') + '</div>';
+            html += '  </td>';
+
+            html += '  <td style="padding: 10px 14px;">' + statusBadge + '</td>';
+            html += '  <td style="padding: 10px 14px; font-family:var(--brand-font-mono); font-size:11px; color:#648781;">' + checkInTimeStr + '</td>';
+
+            html += '  <td style="padding: 10px 14px; text-align: right;">';
+            html += '    <div style="display: inline-flex; align-items: center; gap: 6px; justify-content: flex-end;">';
+            if (isAttended) {
+                html += '      <button type="button" onclick="updateAttendeeAttendance(' + a.id + ', \'pending\')" class="brand-btn-secondary" style="height:26px; padding:0 8px; font-size:10.5px; color:#648781;" title="Mark status back to pending">Undo</button>';
+            } else {
+                html += '      <button type="button" onclick="updateAttendeeAttendance(' + a.id + ', \'attended\')" class="brand-btn-primary" style="height:26px; padding:0 10px; font-size:10.5px; font-weight:700; background:#047857; color:#FFFFFF; border:none; border-radius:4px; cursor:pointer;" title="Check-In Candidate and warm lead intent score">✓ Attended</button>';
+                html += '      <button type="button" onclick="updateAttendeeAttendance(' + a.id + ', \'no_show\')" class="brand-btn-secondary" style="height:26px; padding:0 8px; font-size:10.5px; color:#64748B;" title="Mark candidate as absent">No-Show</button>';
+            }
+            html += '    </div>';
+            html += '  </td>';
+            html += '</tr>';
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    window.filterRosterAttendees = function() {
+        var q = (document.getElementById('rosterSearchInput').value || '').trim().toLowerCase();
+        if (!q) {
+            renderRosterAttendees(window._activeSlotAttendees);
+            return;
+        }
+        var filtered = window._activeSlotAttendees.filter(function(a) {
+            return (a.student_name && a.student_name.toLowerCase().includes(q)) ||
+                   (a.student_phone && a.student_phone.includes(q)) ||
+                   (a.student_email && a.student_email.toLowerCase().includes(q)) ||
+                   (a.program_interest && a.program_interest.toLowerCase().includes(q));
+        });
+        renderRosterAttendees(filtered);
+    };
+
+    window.updateAttendeeAttendance = function(bookingId, targetStatus) {
+        if (!window._activeRosterSlotId) return;
+        var token = localStorage.getItem('token') || (typeof window.token !== 'undefined' ? window.token : '');
+
+        fetch('/v1/campus-tours/slots/' + window._activeRosterSlotId + '/attendees/' + bookingId + '/attendance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({ status: targetStatus })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(res) {
+            if (res.status === 'success') {
+                if (typeof showToast === 'function') {
+                    showToast('✓ Attendance updated to ' + targetStatus.toUpperCase(), 'success');
+                }
+                loadActiveSlotRoster(window._activeRosterSlotId);
+            } else {
+                alert(res.message || 'Error updating attendance');
+            }
+        })
+        .catch(function() { alert('Network error updating attendance'); });
+    };
+
+    window.downloadActiveSlotCsv = function() {
+        if (!window._activeRosterSlotId) return;
+        var slotId = window._activeRosterSlotId;
+        var token = localStorage.getItem('token') || (typeof window.token !== 'undefined' ? window.token : '');
+
+        fetch('/v1/campus-tours/slots/' + slotId + '/export', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(function(res) {
+            if (!res.ok) throw new Error('Download failed');
+            return res.blob();
+        })
+        .then(function(blob) {
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'Slot_' + slotId + '_Attendee_Roster.csv';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        })
+        .catch(function(err) {
+            alert('Failed to download CSV: ' + err.message);
+        });
+    };
+
+    window.shareActiveSlotGateLink = function() {
+        if (!window._activeRosterSlotId) return;
+        var slotId = window._activeRosterSlotId;
+        var token = localStorage.getItem('token') || (typeof window.token !== 'undefined' ? window.token : '');
+
+        fetch('/v1/campus-tours/slots/' + slotId + '/share-token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(res) {
+            if (res.status === 'success' && res.data && res.data.token) {
+                var fullUrl = window.location.origin + '/gate-checkin.html?token=' + res.data.token;
+                navigator.clipboard.writeText(fullUrl).then(function() {
+                    alert('✓ Security Gate Check-In Pass Link Copied to Clipboard!\n\n' + fullUrl + '\n\n(Share this URL with security desk or student ambassadors. Valid for 48 hours, no login required.)');
+                }).catch(function() {
+                    prompt('Security Gate Check-In Pass Link (Valid 48 hours):', fullUrl);
+                });
+            } else {
+                alert(res.message || 'Unable to generate share pass');
+            }
+        })
+        .catch(function() { alert('Error generating share link'); });
+    };
+
+    window.printActiveSlotRoster = function() {
+        if (!window._activeSlotData || !window._activeSlotAttendees) return;
+        var s = window._activeSlotData;
+        var attendees = window._activeSlotAttendees;
+
+        var printWin = window.open('', '_blank');
+        var html = '<!DOCTYPE html><html><head><title>Campus Tour Check-In Roster — Slot #' + s.id + '</title>';
+        html += '<style>';
+        html += 'body { font-family: sans-serif; padding: 24px; color: #000; }';
+        html += 'h1 { font-size: 18px; margin: 0 0 4px 0; }';
+        html += '.meta { font-size: 12px; color: #555; margin-bottom: 20px; }';
+        html += 'table { width: 100%; border-collapse: collapse; font-size: 11px; }';
+        html += 'th, td { border: 1px solid #999; padding: 6px 8px; text-align: left; }';
+        html += 'th { background: #eee; font-weight: bold; }';
+        html += '.box { width: 18px; height: 18px; border: 1px solid #333; display: inline-block; }';
+        html += '</style></head><body>';
+        html += '<h1>' + s.title + ' — Attendance Check-In Roster</h1>';
+        html += '<div class="meta">Campus: <strong>' + (s.campus_name || 'Main') + '</strong> | Date: <strong>' + s.tour_date + '</strong> (' + s.start_time.substring(0,5) + ' - ' + s.end_time.substring(0,5) + ') | Guide: <strong>' + (s.counselor_name || 'Unassigned') + '</strong> | Expected: <strong>' + attendees.length + ' Bookings</strong></div>';
+        html += '<table><thead><tr><th>#</th><th>Student Name</th><th>Phone Number</th><th>Program Interest</th><th>Visitors</th><th>Signature / Notes</th><th style="text-align:center;">Present</th></tr></thead><tbody>';
+
+        attendees.forEach(function(a, idx) {
+            html += '<tr>';
+            html += '<td>' + (idx + 1) + '</td>';
+            html += '<td><strong>' + a.student_name + '</strong><br><span style="font-size:9.5px; color:#555;">' + (a.student_email || '') + '</span></td>';
+            html += '<td>' + a.student_phone + '</td>';
+            html += '<td>' + (a.program_interest || 'General') + '</td>';
+            html += '<td style="text-align:center;">' + (a.group_size || 1) + '</td>';
+            html += '<td>' + (a.check_in_notes || '') + '</td>';
+            html += '<td style="text-align:center;"><div class="box">' + (a.status === 'attended' ? '✓' : '') + '</div></td>';
+            html += '</tr>';
+        });
+
+        html += '</tbody></table></body></html>';
+
+        printWin.document.write(html);
+        printWin.document.close();
+        printWin.focus();
+        setTimeout(function() { printWin.print(); }, 250);
+    };
+
+    // ==========================================
+    // FEEDBACKS & AI SYNTHESIS ENGINE
+    // ==========================================
+    function loadActiveSlotFeedbacks(slotId) {
+        var token = localStorage.getItem('token') || (typeof window.token !== 'undefined' ? window.token : '');
+        var feedContainer = document.getElementById('feedbacksFeedContainer');
+        if (feedContainer) feedContainer.innerHTML = '<div style="text-align:center; padding:30px; color:#648781;">Loading candidate feedback responses...</div>';
+
+        fetch('/v1/campus-tours/slots/' + slotId + '/feedbacks', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(res) {
+            if (res.status === 'success' && res.data) {
+                var sc = res.data.scorecard || {};
+                var feedbacks = res.data.feedbacks || [];
+                var slot = res.data.slot || {};
+
+                // Scorecards
+                if (document.getElementById('fbCardOverall')) document.getElementById('fbCardOverall').innerText = '⭐ ' + (sc.avg_overall_rating > 0 ? sc.avg_overall_rating : '—') + ' / 5.0';
+                if (document.getElementById('fbCardFacilities')) document.getElementById('fbCardFacilities').innerText = '🏢 ' + (sc.avg_facilities_rating > 0 ? sc.avg_facilities_rating : '—') + ' / 5.0';
+                if (document.getElementById('fbCardGuide')) document.getElementById('fbCardGuide').innerText = '👔 ' + (sc.avg_guide_rating > 0 ? sc.avg_guide_rating : '—') + ' / 5.0';
+                if (document.getElementById('fbCardResponses')) document.getElementById('fbCardResponses').innerText = sc.total_submitted + ' (' + sc.response_rate_percent + '%)';
+
+                // Cached AI summary
+                var aiCard = document.getElementById('aiSummaryCard');
+                var aiContent = document.getElementById('aiSummaryContent');
+                var aiTimestamp = document.getElementById('aiSummaryTimestamp');
+                if (slot.ai_feedback_summary) {
+                    if (aiCard) aiCard.style.display = 'block';
+                    if (aiContent) aiContent.innerText = slot.ai_feedback_summary;
+                    if (aiTimestamp) aiTimestamp.innerText = slot.ai_feedback_generated_at ? 'Updated ' + slot.ai_feedback_generated_at.substring(0, 16) : 'Cached Summary';
+                } else {
+                    if (aiCard) aiCard.style.display = 'none';
+                }
+
+                // Render feed
+                if (feedbacks.length === 0) {
+                    if (feedContainer) feedContainer.innerHTML = '<div style="text-align:center; padding:32px; color:#648781;"><div style="font-size:24px; margin-bottom:6px;">📩</div><strong>No student feedback received yet for this slot.</strong><br><span style="font-size:11px;">Click "Send Survey to Attended Candidates" above to dispatch surveys.</span></div>';
+                    return;
+                }
+
+                var html = '';
+                feedbacks.forEach(function(f) {
+                    var stars = '★'.repeat(f.rating_overall) + '☆'.repeat(5 - f.rating_overall);
+                    var intentBadge = '<span style="background:#EFF6FF; color:#1D4ED8; font-weight:700; font-size:10px; padding:2px 6px; border-radius:4px; text-transform:uppercase;">Intent: ' + f.intent_to_apply + '</span>';
+
+                    html += '<div style="background:#FFFFFF; border:1px solid #E6F0EC; border-radius:10px; padding:14px 16px;">';
+                    html += '  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">';
+                    html += '    <div>';
+                    html += '      <strong style="font-size:13px; color:#063D3B;">' + f.student_name + '</strong>';
+                    html += '      <span style="font-size:11px; color:#648781; margin-left:6px;">(' + (f.program_interest || 'General') + ')</span>';
+                    html += '    </div>';
+                    html += '    <div style="display:flex; align-items:center; gap:8px;">';
+                    html += '      ' + intentBadge;
+                    html += '      <span style="color:#D97706; font-size:14px; font-weight:800;">' + stars + '</span>';
+                    html += '    </div>';
+                    html += '  </div>';
+
+                    if (f.highlight_text) {
+                        html += '  <div style="font-size:11.5px; color:#063D3B; margin-top:4px;"><span style="color:#047857; font-weight:700;">What they loved:</span> "' + f.highlight_text + '"</div>';
+                    }
+                    if (f.improvement_text) {
+                        html += '  <div style="font-size:11.5px; color:#4F7470; margin-top:3px;"><span style="color:#D97706; font-weight:700;">Improvement idea:</span> "' + f.improvement_text + '"</div>';
+                    }
+                    if (f.pending_questions) {
+                        html += '  <div style="font-size:11.5px; color:#991B1B; background:#FEF2F2; padding:6px 10px; border-radius:6px; margin-top:6px; border:1px solid #FECDD3;"><span style="font-weight:700;">⚠️ Urgent Question:</span> "' + f.pending_questions + '"</div>';
+                    }
+                    html += '</div>';
+                });
+
+                if (feedContainer) feedContainer.innerHTML = html;
+            } else {
+                if (feedContainer) feedContainer.innerHTML = '<div style="text-align:center; padding:30px; color:#EF4444;">' + (res.message || 'Error loading feedback') + '</div>';
+            }
+        })
+        .catch(function() {
+            if (feedContainer) feedContainer.innerHTML = '<div style="text-align:center; padding:30px; color:#EF4444;">Unable to connect to server.</div>';
+        });
+    }
+
+    window.dispatchActiveSlotFeedbacks = function() {
+        if (!window._activeRosterSlotId) return;
+        var token = localStorage.getItem('token') || (typeof window.token !== 'undefined' ? window.token : '');
+        if (!confirm('Dispatch post-tour feedback surveys to all checked-in attendees of this slot?')) return;
+
+        fetch('/v1/campus-tours/slots/' + window._activeRosterSlotId + '/send-feedback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(res) {
+            if (res.status === 'success') {
+                alert('✓ ' + (res.message || 'Feedback surveys dispatched successfully!'));
+                loadActiveSlotFeedbacks(window._activeRosterSlotId);
+            } else {
+                alert(res.message || 'Unable to dispatch feedback surveys');
+            }
+        })
+        .catch(function() { alert('Error dispatching surveys'); });
+    };
+
+    window.triggerActiveSlotAiSummary = function() {
+        if (!window._activeRosterSlotId) return;
+        var token = localStorage.getItem('token') || (typeof window.token !== 'undefined' ? window.token : '');
+        var btn = document.getElementById('btnGenAiSummary');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span>🔄 Synthesizing with AI...</span>';
+        }
+
+        fetch('/v1/campus-tours/slots/' + window._activeRosterSlotId + '/ai-summary', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(res) {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<span>✨</span> Generate AI Executive Summary';
+            }
+            if (res.status === 'success' && res.data) {
+                var aiCard = document.getElementById('aiSummaryCard');
+                var aiContent = document.getElementById('aiSummaryContent');
+                var aiTimestamp = document.getElementById('aiSummaryTimestamp');
+                if (aiCard) aiCard.style.display = 'block';
+                if (aiContent) aiContent.innerText = res.data.summary;
+                if (aiTimestamp) aiTimestamp.innerText = 'Generated ' + (res.data.generated_at || 'Just Now');
+                aiCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                alert(res.message || 'Error generating AI summary');
+            }
+        })
+        .catch(function() {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<span>✨</span> Generate AI Executive Summary';
+            }
+            alert('AI engine error while synthesizing tour feedback');
         });
     };
 

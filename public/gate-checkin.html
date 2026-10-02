@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Campus Tour Gatekeeper Check-In — edvora.chat</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/theme-branding.css">
+    <style>
+        :root {
+            --brand-primary: #063D3B;
+            --brand-primary-light: #0B524F;
+            --brand-accent: #C8FF63;
+            --brand-bg: #F4FAF7;
+            --brand-surface: #FFFFFF;
+            --brand-border: #D1E5DE;
+            --brand-text-primary: #063D3B;
+            --brand-text-secondary: #4F7470;
+            --brand-text-muted: #8AA49E;
+            --brand-emerald: #10B981;
+            --brand-emerald-dark: #047857;
+            --brand-emerald-light: #ECFDF5;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', var(--brand-font-sans), sans-serif;
+            background: var(--brand-bg);
+            color: var(--brand-text-primary);
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        .gate-header {
+            background: var(--brand-primary);
+            color: #FFFFFF;
+            padding: 16px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 16px rgba(6, 61, 59, 0.15);
+        }
+
+        .gate-header-inner {
+            max-width: 720px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .gate-inst-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(200, 255, 99, 0.15);
+            border: 1px solid rgba(200, 255, 99, 0.3);
+            color: var(--brand-accent);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .gate-container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .slot-hero-card {
+            background: var(--brand-surface);
+            border: 1.5px solid var(--brand-border);
+            border-radius: 14px;
+            padding: 18px 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(6, 61, 59, 0.04);
+        }
+
+        .kpi-strip {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid #E6F0EC;
+        }
+
+        .kpi-tile {
+            text-align: center;
+            padding: 8px 4px;
+            background: #FAFCFB;
+            border-radius: 8px;
+            border: 1px solid #E6F0EC;
+        }
+
+        .kpi-val {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--brand-primary);
+        }
+
+        .kpi-lbl {
+            font-size: 10.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: var(--brand-text-secondary);
+            margin-top: 2px;
+        }
+
+        .search-wrap {
+            position: sticky;
+            top: 76px;
+            z-index: 90;
+            margin-bottom: 16px;
+        }
+
+        .search-input {
+            width: 100%;
+            height: 46px;
+            padding: 0 16px 0 42px;
+            font-size: 14px;
+            font-family: inherit;
+            background: #FFFFFF;
+            border: 1.5px solid var(--brand-border);
+            border-radius: 12px;
+            color: var(--brand-primary);
+            box-shadow: 0 4px 12px rgba(6, 61, 59, 0.06);
+            outline: none;
+            transition: all 0.15s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--brand-primary);
+            box-shadow: 0 0 0 3px rgba(6, 61, 59, 0.12);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 14px;
+            font-size: 16px;
+            color: var(--brand-text-muted);
+            pointer-events: none;
+        }
+
+        .attendee-card {
+            background: var(--brand-surface);
+            border: 1.5px solid var(--brand-border);
+            border-radius: 14px;
+            padding: 16px 18px;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 2px 6px rgba(6, 61, 59, 0.03);
+            transition: transform 0.15s ease, border-color 0.15s ease;
+        }
+
+        .attendee-card.attended {
+            border-color: var(--brand-emerald);
+            background: #FAFDFB;
+        }
+
+        .attendee-card.no_show {
+            border-color: #E2E8F0;
+            background: #F8FAFC;
+            opacity: 0.85;
+        }
+
+        .att-top-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .att-name {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--brand-primary);
+        }
+
+        .att-meta {
+            font-size: 12px;
+            color: var(--brand-text-secondary);
+            margin-top: 3px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .att-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            background: #E8F4F0;
+            color: var(--brand-primary);
+        }
+
+        .att-btn-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-checkin {
+            flex: 1;
+            min-height: 42px;
+            background: var(--brand-emerald-dark);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 10px;
+            font-size: 13.5px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 2px 6px rgba(4, 120, 87, 0.25);
+            transition: all 0.15s ease;
+        }
+
+        .btn-checkin:active {
+            transform: scale(0.98);
+        }
+
+        .btn-checked-badge {
+            flex: 1;
+            min-height: 42px;
+            background: var(--brand-emerald-light);
+            color: var(--brand-emerald-dark);
+            border: 1.5px solid var(--brand-emerald);
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-secondary-action {
+            height: 42px;
+            padding: 0 14px;
+            background: #FFFFFF;
+            color: var(--brand-text-secondary);
+            border: 1.5px solid var(--brand-border);
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-call {
+            height: 42px;
+            padding: 0 14px;
+            background: #EFF6FF;
+            color: #1D4ED8;
+            border: 1px solid #BFDBFE;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #063D3B;
+            color: #FFFFFF;
+            padding: 10px 20px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 9999;
+            display: none;
+            animation: toastPop 0.2s ease;
+        }
+
+        @keyframes toastPop {
+            from { opacity: 0; transform: translate(-50%, 10px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="gate-header">
+        <div class="gate-header-inner">
+            <div>
+                <div class="gate-inst-badge" id="headerInst">College Admissions</div>
+                <div style="font-size: 17px; font-weight: 800; margin-top: 3px; display: flex; align-items: center; gap: 6px;">
+                    <span>🛡️</span> Security Gate &amp; Roster Check-In
+                </div>
+            </div>
+            <button type="button" onclick="loadRosterData()" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: #fff; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                🔄 Refresh
+            </button>
+        </div>
+    </header>
+
+    <div class="gate-container">
+        
+        <!-- Slot Metadata Card -->
+        <div class="slot-hero-card" id="slotHero">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                <div>
+                    <h2 style="font-size: 16px; font-weight: 800; color: #063D3B;" id="slotTitle">Loading Tour Slot...</h2>
+                    <div style="font-size: 12px; color: #4F7470; margin-top: 3px;" id="slotCampus">—</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 13px; font-weight: 800; color: #063D3B;" id="slotDateTime">—</div>
+                    <div style="font-size: 11px; color: #648781;" id="slotGuide">Guide: —</div>
+                </div>
+            </div>
+
+            <div class="kpi-strip">
+                <div class="kpi-tile">
+                    <div class="kpi-val" id="kpiTotal">0</div>
+                    <div class="kpi-lbl">Expected</div>
+                </div>
+                <div class="kpi-tile" style="border-color: #A7F3D0; background: #ECFDF5;">
+                    <div class="kpi-val" style="color: #047857;" id="kpiAttended">0</div>
+                    <div class="kpi-lbl" style="color: #047857;">Checked In</div>
+                </div>
+                <div class="kpi-tile">
+                    <div class="kpi-val" style="color: #D97706;" id="kpiPending">0</div>
+                    <div class="kpi-lbl">Pending</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sticky Search Filter -->
+        <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" class="search-input" placeholder="Search candidate by name or phone..." onkeyup="filterCandidates()" />
+        </div>
+
+        <!-- Candidate Cards Container -->
+        <div id="attendeeList">
+            <div style="text-align: center; padding: 40px; color: #648781;">
+                Validating security pass and loading roster...
+            </div>
+        </div>
+
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        var token = new URLSearchParams(window.location.search).get('token') || '';
+        var rawAttendees = [];
+
+        function showToast(msg) {
+            var t = document.getElementById('toast');
+            if (!t) return;
+            t.innerText = msg;
+            t.style.display = 'block';
+            setTimeout(function() { t.style.display = 'none'; }, 2200);
+        }
+
+        function loadRosterData() {
+            if (!token) {
+                document.getElementById('attendeeList').innerHTML = '<div style="text-align:center; padding:40px; color:#EF4444; font-weight:700;">No pass token provided in URL.<br><span style="font-size:12px; color:#648781;">Please contact admissions leadership for a valid gate link.</span></div>';
+                return;
+            }
+
+            fetch('/v1/public/tour-roster/' + encodeURIComponent(token))
+                .then(function(res) { return res.json(); })
+                .then(function(res) {
+                    if (res.status === 'success' && res.data) {
+                        var d = res.data;
+                        document.getElementById('headerInst').innerText = d.institution_name || 'College Admissions';
+                        document.getElementById('slotTitle').innerText = d.slot_title || 'Guided Campus Visit';
+                        document.getElementById('slotCampus').innerText = '🏫 ' + (d.campus_name || 'Main Campus');
+                        document.getElementById('slotDateTime').innerText = '📅 ' + (d.tour_date || '') + ' (' + d.start_time + ' - ' + d.end_time + ' ' + (d.tz_short || 'EDT') + ')';
+                        document.getElementById('slotGuide').innerText = '👔 ' + (d.counselor_name || 'Admissions Team');
+
+                        rawAttendees = d.attendees || [];
+                        updateKpis(d.stats);
+                        renderAttendees(rawAttendees);
+                    } else {
+                        document.getElementById('attendeeList').innerHTML = '<div style="text-align:center; padding:40px; color:#EF4444; font-weight:700;">⚠️ ' + (res.message || 'Pass invalid or expired.') + '</div>';
+                    }
+                })
+                .catch(function(err) {
+                    document.getElementById('attendeeList').innerHTML = '<div style="text-align:center; padding:40px; color:#EF4444; font-weight:700;">Unable to connect to server. Please check your internet connection.</div>';
+                });
+        }
+
+        function updateKpis(stats) {
+            if (!stats) return;
+            document.getElementById('kpiTotal').innerText = stats.total || 0;
+            document.getElementById('kpiAttended').innerText = stats.attended || 0;
+            document.getElementById('kpiPending').innerText = stats.pending || 0;
+        }
+
+        function filterCandidates() {
+            var q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+            if (!q) {
+                renderAttendees(rawAttendees);
+                return;
+            }
+            var filtered = rawAttendees.filter(function(a) {
+                return (a.student_name && a.student_name.toLowerCase().includes(q)) ||
+                       (a.student_phone && a.student_phone.includes(q)) ||
+                       (a.student_email && a.student_email.toLowerCase().includes(q));
+            });
+            renderAttendees(filtered);
+        }
+
+        function renderAttendees(list) {
+            var container = document.getElementById('attendeeList');
+            if (!container) return;
+
+            if (list.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:40px; color:#648781;">No candidates match your search.</div>';
+                return;
+            }
+
+            var html = '';
+            list.forEach(function(a) {
+                var isAttended = a.status === 'attended';
+                var isNoShow = a.status === 'no_show';
+                var cardClass = isAttended ? 'attendee-card attended' : (isNoShow ? 'attendee-card no_show' : 'attendee-card');
+
+                var cleanPhone = (a.student_phone || '').replace(/[^0-9+]/g, '');
+
+                html += '<div class="' + cardClass + '">';
+                html += '  <div class="att-top-row">';
+                html += '    <div>';
+                html += '      <div class="att-name">' + a.student_name + '</div>';
+                html += '      <div class="att-meta">';
+                html += '        <span class="att-pill">👥 ' + (a.group_size || 1) + ' Visitor' + ((a.group_size || 1) > 1 ? 's' : '') + '</span>';
+                if (a.program_interest) {
+                    html += '    <span class="att-pill">🎓 ' + a.program_interest + '</span>';
+                }
+                html += '      </div>';
+                html += '    </div>';
+                if (cleanPhone) {
+                    html += '    <a href="tel:' + cleanPhone + '" class="btn-call">📞 Call</a>';
+                }
+                html += '  </div>';
+
+                html += '  <div class="att-btn-group">';
+                if (isAttended) {
+                    html += '    <div class="btn-checked-badge">✓ Checked In at Gate</div>';
+                    html += '    <button type="button" class="btn-secondary-action" onclick="toggleStatus(' + a.id + ', \'pending\')">Undo</button>';
+                } else if (isNoShow) {
+                    html += '    <button type="button" class="btn-checkin" onclick="toggleStatus(' + a.id + ', \'attended\')">✓ Mark Present</button>';
+                    html += '    <div style="font-size:12px; color:#94A3B8; font-weight:700;">Marked No-Show</div>';
+                } else {
+                    html += '    <button type="button" class="btn-checkin" onclick="toggleStatus(' + a.id + ', \'attended\')">✓ Check In Candidate</button>';
+                    html += '    <button type="button" class="btn-secondary-action" onclick="toggleStatus(' + a.id + ', \'no_show\')">No-Show</button>';
+                }
+                html += '  </div>';
+                html += '</div>';
+            });
+
+            container.innerHTML = html;
+        }
+
+        function toggleStatus(bookingId, targetStatus) {
+            fetch('/v1/public/tour-roster/' + encodeURIComponent(token) + '/check-in', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ booking_id: bookingId, status: targetStatus })
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(res) {
+                if (res.status === 'success') {
+                    showToast(targetStatus === 'attended' ? '✓ Candidate checked in!' : 'Status updated.');
+                    // Local state update
+                    rawAttendees.forEach(function(a) {
+                        if (a.id === bookingId) {
+                            a.status = targetStatus;
+                        }
+                    });
+                    // Recalculate KPIs locally
+                    var attCount = 0;
+                    rawAttendees.forEach(function(a) { if (a.status === 'attended') attCount++; });
+                    document.getElementById('kpiAttended').innerText = attCount;
+                    document.getElementById('kpiPending').innerText = rawAttendees.length - attCount;
+                    filterCandidates();
+                } else {
+                    alert(res.message || 'Error updating status');
+                }
+            })
+            .catch(function(e) {
+                alert('Network error. Please try again.');
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadRosterData);
+    </script>
+</body>
+</html>

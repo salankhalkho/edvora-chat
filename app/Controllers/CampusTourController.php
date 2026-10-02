@@ -316,15 +316,43 @@ class CampusTourController
             Response::error('Campus tour booking not found.', 404);
         }
 
-        $validStatuses = ['pending', 'confirmed', 'completed', 'cancelled', 'no_show'];
+        $validStatuses = ['pending', 'confirmed', 'attended', 'completed', 'cancelled', 'no_show'];
         $status = in_array($data['status'] ?? '', $validStatuses) ? $data['status'] : $existing['status'];
         $counselorNotes = $data['counselor_notes'] ?? $existing['counselor_notes'];
         $confirmedDate = !empty($data['confirmed_date']) ? $data['confirmed_date'] : $existing['confirmed_date'];
         $assignedUserId = isset($data['assigned_user_id']) ? ($data['assigned_user_id'] ? (int)$data['assigned_user_id'] : null) : $existing['assigned_user_id'];
+        $attendedAt = $existing['attended_at'];
+
+        if ($status === 'attended' && $existing['status'] !== 'attended') {
+            $attendedAt = date('Y-m-d H:i:s');
+            // Auto-warm lead in leads table
+            $stmtLead = $db->prepare("
+                UPDATE leads
+                SET intent_score = 95,
+                    status = CASE WHEN status = 'new' THEN 'contacted' ELSE status END,
+                    notes = CONCAT(COALESCE(notes, ''), ' | Attended Campus Tour on ', CURDATE()),
+                    updated_at = NOW()
+                WHERE organization_id = :org_id
+                  AND (
+                    (email = :email AND :email != '')
+                    OR (phone = :phone AND :phone != '')
+                    OR (conversation_id = :conv_id AND :conv_id IS NOT NULL)
+                  )
+            ");
+            $stmtLead->execute([
+                ':org_id' => $orgId,
+                ':email' => $existing['student_email'],
+                ':phone' => $existing['student_phone'],
+                ':conv_id' => $existing['conversation_id'] ?: null
+            ]);
+        } elseif ($status === 'no_show') {
+            $attendedAt = null;
+        }
 
         $stmtUpdate = $db->prepare("
             UPDATE campus_tour_bookings
             SET status = :status,
+                attended_at = :attended_at,
                 counselor_notes = :notes,
                 confirmed_date = :confirmed_date,
                 assigned_user_id = :assigned_user_id,
@@ -333,6 +361,7 @@ class CampusTourController
         ");
         $stmtUpdate->execute([
             ':status' => $status,
+            ':attended_at' => $attendedAt,
             ':notes' => $counselorNotes,
             ':confirmed_date' => $confirmedDate,
             ':assigned_user_id' => $assignedUserId,

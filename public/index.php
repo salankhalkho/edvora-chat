@@ -336,6 +336,21 @@ $router->delete('/v1/campus-tours/slots/{id}', [CampusTourSchedulingController::
 $router->get('/v1/campus-tours/settings', [CampusTourSchedulingController::class, 'getSettings'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->post('/v1/campus-tours/settings', [CampusTourSchedulingController::class, 'saveSettings'], [AuthMiddleware::class, TenantMiddleware::class]);
 
+// Campus Tour Slots Roster, Attendance, Gate Check-In & Feedback Routes
+$router->get('/v1/campus-tours/slots/{id}/attendees', [CampusTourSchedulingController::class, 'indexSlotAttendees'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->post('/v1/campus-tours/slots/{id}/attendees/{booking_id}/attendance', [CampusTourSchedulingController::class, 'updateAttendeeAttendance'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->get('/v1/campus-tours/slots/{id}/export', [CampusTourSchedulingController::class, 'exportSlotRoster'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->post('/v1/campus-tours/slots/{id}/share-token', [CampusTourSchedulingController::class, 'generateShareToken'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->post('/v1/campus-tours/slots/{id}/send-feedback', [CampusTourSchedulingController::class, 'sendSlotFeedbackSurveys'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->get('/v1/campus-tours/slots/{id}/feedbacks', [CampusTourSchedulingController::class, 'getSlotFeedbacks'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->post('/v1/campus-tours/slots/{id}/ai-summary', [CampusTourSchedulingController::class, 'generateSlotAiFeedbackSummary'], [AuthMiddleware::class, TenantMiddleware::class]);
+
+// Public Unauthenticated Gatekeeper & Student Feedback Endpoints
+$router->get('/v1/public/tour-roster/{token}', [CampusTourSchedulingController::class, 'getPublicRoster']);
+$router->post('/v1/public/tour-roster/{token}/check-in', [CampusTourSchedulingController::class, 'submitPublicGateCheckIn']);
+$router->get('/v1/public/tour-feedback/{token}', [CampusTourSchedulingController::class, 'getPublicTourFeedback']);
+$router->post('/v1/public/tour-feedback/{token}', [CampusTourSchedulingController::class, 'submitPublicTourFeedback']);
+
 // Campus Tour Booking Wildcard Routes (must come AFTER specific paths above)
 $router->get('/v1/campus-tours/{id}', [CampusTourController::class, 'show'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->put('/v1/campus-tours/{id}', [CampusTourController::class, 'update'], [AuthMiddleware::class, TenantMiddleware::class]);

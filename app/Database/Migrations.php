@@ -1832,6 +1832,93 @@ class Migrations
         } catch (Throwable $e) {
             error_log('[Migrations] leads.status enum expand: ' . $e->getMessage());
         }
+
+        // Campus Tour Attendance Columns & Expanded Status ENUM
+        try {
+            // Expand campus_tour_bookings status ENUM to include 'attended'
+            $this->db->exec("ALTER TABLE campus_tour_bookings MODIFY COLUMN status ENUM('pending', 'confirmed', 'attended', 'completed', 'cancelled', 'no_show') DEFAULT 'pending';");
+
+            $checkAttendedAt = $this->db->query("SHOW COLUMNS FROM campus_tour_bookings LIKE 'attended_at'");
+            if (!$checkAttendedAt->fetch()) {
+                $this->db->exec("ALTER TABLE campus_tour_bookings ADD COLUMN attended_at TIMESTAMP NULL AFTER confirmed_date;");
+            }
+
+            $checkCheckInUser = $this->db->query("SHOW COLUMNS FROM campus_tour_bookings LIKE 'check_in_by_user_id'");
+            if (!$checkCheckInUser->fetch()) {
+                $this->db->exec("ALTER TABLE campus_tour_bookings ADD COLUMN check_in_by_user_id INT NULL AFTER attended_at;");
+            }
+
+            $checkCheckInNotes = $this->db->query("SHOW COLUMNS FROM campus_tour_bookings LIKE 'check_in_notes'");
+            if (!$checkCheckInNotes->fetch()) {
+                $this->db->exec("ALTER TABLE campus_tour_bookings ADD COLUMN check_in_notes VARCHAR(255) NULL AFTER check_in_by_user_id;");
+            }
+
+            $checkFeedbackSent = $this->db->query("SHOW COLUMNS FROM campus_tour_bookings LIKE 'feedback_sent_at'");
+            if (!$checkFeedbackSent->fetch()) {
+                $this->db->exec("ALTER TABLE campus_tour_bookings ADD COLUMN feedback_sent_at TIMESTAMP NULL AFTER check_in_notes;");
+            }
+        } catch (Throwable $e) {
+            error_log('[Migrations] campus_tour_bookings attendance columns: ' . $e->getMessage());
+        }
+
+        // Campus Tour Roster Tokens Table (for on-ground security gate & student guide check-in)
+        try {
+            $this->db->exec("CREATE TABLE IF NOT EXISTS campus_tour_roster_tokens (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                organization_id INT NOT NULL,
+                slot_id INT NOT NULL,
+                access_token VARCHAR(64) UNIQUE NOT NULL,
+                created_by_user_id INT NULL,
+                expires_at DATETIME NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
+                FOREIGN KEY (slot_id) REFERENCES campus_tour_slots(id) ON DELETE CASCADE,
+                INDEX idx_roster_token_slot (organization_id, slot_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+        } catch (Throwable $e) {
+            error_log('[Migrations] campus_tour_roster_tokens table: ' . $e->getMessage());
+        }
+
+        // Campus Tour Feedbacks Table
+        try {
+            $this->db->exec("CREATE TABLE IF NOT EXISTS campus_tour_feedbacks (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                organization_id INT NOT NULL,
+                booking_id INT NOT NULL,
+                slot_id INT NOT NULL,
+                feedback_token VARCHAR(64) UNIQUE NOT NULL,
+                rating_overall TINYINT NOT NULL,
+                rating_facilities TINYINT NULL,
+                rating_guide TINYINT NULL,
+                intent_to_apply ENUM('definitely', 'likely', 'exploring', 'unlikely') DEFAULT 'likely',
+                highlight_text TEXT NULL,
+                improvement_text TEXT NULL,
+                pending_questions TEXT NULL,
+                submitted_at TIMESTAMP NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
+                FOREIGN KEY (booking_id) REFERENCES campus_tour_bookings(id) ON DELETE CASCADE,
+                FOREIGN KEY (slot_id) REFERENCES campus_tour_slots(id) ON DELETE CASCADE,
+                INDEX idx_feedback_slot (organization_id, slot_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+        } catch (Throwable $e) {
+            error_log('[Migrations] campus_tour_feedbacks table: ' . $e->getMessage());
+        }
+
+        // Campus Tour Slots: AI feedback summary columns
+        try {
+            $checkAiSummary = $this->db->query("SHOW COLUMNS FROM campus_tour_slots LIKE 'ai_feedback_summary'");
+            if (!$checkAiSummary->fetch()) {
+                $this->db->exec("ALTER TABLE campus_tour_slots ADD COLUMN ai_feedback_summary TEXT NULL AFTER counselor_user_id;");
+            }
+
+            $checkAiSummaryAt = $this->db->query("SHOW COLUMNS FROM campus_tour_slots LIKE 'ai_feedback_generated_at'");
+            if (!$checkAiSummaryAt->fetch()) {
+                $this->db->exec("ALTER TABLE campus_tour_slots ADD COLUMN ai_feedback_generated_at TIMESTAMP NULL AFTER ai_feedback_summary;");
+            }
+        } catch (Throwable $e) {
+            error_log('[Migrations] campus_tour_slots ai feedback columns: ' . $e->getMessage());
+        }
     }
 }
 

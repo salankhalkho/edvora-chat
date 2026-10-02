@@ -80,16 +80,23 @@ class EmailService
     /**
      * Send post-tour visit feedback survey email to student
      */
-    public static function sendCampusTourFeedbackSurvey(string $studentEmail, array $tourData, string $collegeName): bool
+    public static function sendCampusTourFeedbackSurvey(string $studentEmail, array $tourData, string $collegeName, string $feedbackUrl = ''): bool
     {
         $studentName = $tourData['student_name'] ?? 'Student';
         $subject = "How was your campus visit to {$collegeName}? We'd love your feedback!";
 
         $body = "Dear {$studentName},\n\n";
-        $body .= "Thank you for visiting {$collegeName} for your campus tour!\n\n";
-        $body .= "We hope you had a great experience discovering our campus, academic facilities, and student life.\n\n";
-        $body .= "To help us continuously enhance the campus tour experience for future students, please take a moment to share your quick thoughts and suggestions.\n\n";
-        $body .= "If you have any remaining questions about the admission process, scholarships, or next steps, feel free to reply directly to this email or chat with our admissions team at https://edvora.chat.\n\n";
+        $body .= "Thank you for visiting {$collegeName} for your guided campus tour!\n\n";
+        $body .= "We hope you had an inspiring experience discovering our campus, academic facilities, and vibrant student community.\n\n";
+
+        if (!empty($feedbackUrl)) {
+            $body .= "To help us continuously enhance the campus tour experience for future students, please take 60 seconds to share your quick feedback:\n";
+            $body .= "👉 " . $feedbackUrl . "\n\n";
+        } else {
+            $body .= "To help us continuously enhance the campus tour experience for future students, please take a moment to share your quick thoughts and suggestions.\n\n";
+        }
+
+        $body .= "If you have any remaining questions about the admission process, scholarships, or next steps, feel free to reply directly to this email or chat with our admissions team anytime.\n\n";
         $body .= "Warm regards,\nCampus Visit & Admissions Team\n{$collegeName}";
 
         return self::sendMail($studentEmail, $subject, $body);

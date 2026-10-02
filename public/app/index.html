@@ -10770,12 +10770,13 @@ echo $response['reply'];
 
                             const statusSelect = `
                                 <select class="brand-input" onchange="updateTourStatus(${t.id}, this.value)" style="height: 28px; font-size: 11px; padding: 0 6px; width: 130px; font-weight: 600; background-color: #FFFFFF; color: ${
-                                    t.status === 'completed' ? 'var(--brand-emerald-400)' :
+                                    t.status === 'attended' || t.status === 'completed' ? 'var(--brand-emerald-400)' :
                                     t.status === 'confirmed' ? 'var(--brand-amber-400)' :
                                     t.status === 'pending' ? '#A78BFA' : 'var(--brand-text-secondary)'
                                 };">
                                     <option value="pending" ${t.status === 'pending' ? 'selected' : ''}>🟣 Pending</option>
                                     <option value="confirmed" ${t.status === 'confirmed' ? 'selected' : ''}>🟡 Confirmed</option>
+                                    <option value="attended" ${t.status === 'attended' ? 'selected' : ''}>🟢 Attended</option>
                                     <option value="completed" ${t.status === 'completed' ? 'selected' : ''}>🟢 Completed</option>
                                     <option value="cancelled" ${t.status === 'cancelled' ? 'selected' : ''}>⚫ Cancelled</option>
                                     <option value="no_show" ${t.status === 'no_show' ? 'selected' : ''}>⚪ No Show</option>

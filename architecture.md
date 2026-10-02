@@ -84,6 +84,7 @@ For full technical specifications of the admissions chatbot, turn processing lif
 ├── architecture_chatbot.md     ← Authoritative admissions chatbot architecture & onboarding guide
 ├── architecture_domain_whitelisting.md ← Authoritative domain whitelisting & origin embed security guide
 ├── architecture_timezone.md    ← Authoritative timezone & primary campus localization guide
+├── architecture_campus_creation_and_tour_management.md ← Authoritative campus creation & tour lifecycle guide
 ├── AGENTS.md                   ← Mandatory agent/developer rules
 ├── BRANDING_GUIDELINES.md      ← UI/typography rules
 ├── theme-branding.css          ← Global design system CSS
