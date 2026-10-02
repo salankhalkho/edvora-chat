@@ -40,6 +40,8 @@ foreach ($plans as &$plan) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <!-- Cloudflare Worker Geo-Location Detector -->
+    <script src="https://geo-check.salan-khalkho.workers.dev/"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -252,32 +254,6 @@ foreach ($plans as &$plan) {
         }
 
         /* Interactive Switchers */
-        .currency-btn {
-            padding: 7px 16px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 700;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .currency-btn.active {
-            background: #063D3B;
-            color: #ffffff;
-            box-shadow: 0 4px 12px rgba(6, 61, 59, 0.18);
-        }
-        .currency-btn:not(.active) {
-            background: transparent;
-            color: #71817D;
-        }
-        .currency-btn:not(.active):hover {
-            color: #063D3B;
-            background: rgba(6, 61, 59, 0.05);
-        }
-
         .cycle-btn {
             padding: 7px 18px;
             border-radius: 10px;
@@ -415,7 +391,7 @@ foreach ($plans as &$plan) {
         }
     </style>
 </head>
-<body data-default-currency="<?= htmlspecialchars($defaultCurrency) ?>">
+<body data-default-country="<?= htmlspecialchars($clientCountry) ?>" data-default-currency="<?= htmlspecialchars($defaultCurrency) ?>">
 
 <!-- HEADER NAVBAR -->
 <?php require __DIR__ . '/partials/header.php'; ?>
@@ -437,19 +413,8 @@ foreach ($plans as &$plan) {
                 Equip your admissions department with full AI engagement, high-intent lead qualification, tour bookings, and document delivery.
             </p>
 
-            <!-- SWITCHERS CONTAINER -->
-            <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-                <!-- Currency Switcher -->
-                <div class="bg-white p-1 rounded-xl border border-e-border inline-flex items-center shadow-sm">
-                    <button id="currBtnUsd" onclick="setCurrency('USD')" class="currency-btn active">
-                        <span>🌐</span> <span>USA &amp; Canada ($ USD)</span>
-                    </button>
-                    <button id="currBtnInr" onclick="setCurrency('INR')" class="currency-btn">
-                        <span>🇮🇳</span> <span>India (INR ₹)</span>
-                    </button>
-                </div>
-
-                <!-- Billing Cycle Switcher -->
+            <!-- BILLING CYCLE SWITCHER -->
+            <div class="mt-8 flex items-center justify-center">
                 <div class="bg-white p-1 rounded-xl border border-e-border inline-flex items-center shadow-sm">
                     <button id="cycleBtnMonthly" onclick="setBillingCycle('monthly')" class="cycle-btn active">
                         Monthly
@@ -1086,35 +1051,51 @@ foreach ($plans as &$plan) {
 <?php require __DIR__ . '/partials/footer.php'; ?>
 
 <script>
-    let currentCurrency = document.body.dataset.defaultCurrency || 'INR';
+    // 1. Resolve visitor location and active currency
+    // Supports dev/QA URL parameters: ?country=US, ?country=IN, ?currency=USD, ?currency=INR
+    const urlParams = new URLSearchParams(window.location.search);
+    const countryParam = (urlParams.get('country') || '').toUpperCase();
+    const currencyParam = (urlParams.get('currency') || '').toUpperCase();
+
+    let detectedCountry = '';
+    if (countryParam) {
+        detectedCountry = countryParam;
+    } else if (currencyParam === 'INR') {
+        detectedCountry = 'IN';
+    } else if (currencyParam === 'USD') {
+        detectedCountry = 'US';
+    } else if (typeof window.visitorCountry !== 'undefined' && window.visitorCountry) {
+        detectedCountry = window.visitorCountry.toUpperCase();
+    } else if (document.body.dataset.defaultCountry) {
+        detectedCountry = document.body.dataset.defaultCountry.toUpperCase();
+    }
+
+    // Indian visitors see INR, rest of the world sees USD
+    let currentCurrency = (detectedCountry === 'IN') ? 'INR' : 'USD';
     let currentCycle = 'monthly';
 
-    // Check localStorage preference
-    const savedCurrency = localStorage.getItem('edvora_currency');
-    if (savedCurrency && (savedCurrency === 'INR' || savedCurrency === 'USD')) {
-        currentCurrency = savedCurrency;
-    }
+    // Expose for testing & console overrides
+    window.detectedCountry = detectedCountry;
+    window.currentCurrency = currentCurrency;
+
+    // Clear legacy localStorage cache
+    try {
+        localStorage.removeItem('edvora_currency');
+    } catch (e) {}
 
     function updatePricingDisplay() {
-        // Toggle buttons active state
-        document.getElementById('currBtnInr').classList.toggle('active', currentCurrency === 'INR');
-        document.getElementById('currBtnUsd').classList.toggle('active', currentCurrency === 'USD');
+        // Toggle billing cycle buttons active state
+        const monthlyBtn = document.getElementById('cycleBtnMonthly');
+        const yearlyBtn = document.getElementById('cycleBtnYearly');
+        if (monthlyBtn) monthlyBtn.classList.toggle('active', currentCycle === 'monthly');
+        if (yearlyBtn) yearlyBtn.classList.toggle('active', currentCycle === 'yearly');
 
-        document.getElementById('cycleBtnMonthly').classList.toggle('active', currentCycle === 'monthly');
-        document.getElementById('cycleBtnYearly').classList.toggle('active', currentCycle === 'yearly');
+        // Hide all price elements (both plan cards and comparison table)
+        document.querySelectorAll('.price-box, .usd-price, .inr-price').forEach(el => el.classList.add('hidden'));
 
-        // Hide all price boxes
-        document.querySelectorAll('.price-box').forEach(el => el.classList.add('hidden'));
-
-        // Show the active combination
+        // Show only the active currency + billing cycle combination
         const selector = `.${currentCurrency.toLowerCase()}-price.${currentCycle}-price`;
         document.querySelectorAll(selector).forEach(el => el.classList.remove('hidden'));
-    }
-
-    function setCurrency(curr) {
-        currentCurrency = curr;
-        localStorage.setItem('edvora_currency', curr);
-        updatePricingDisplay();
     }
 
     function setBillingCycle(cycle) {
