@@ -108,6 +108,58 @@
             timezone = 'Africa/Johannesburg';
             tzShort = 'SAST';
             locale = 'en-ZA';
+        } else if (cleanCountry === 'saudi arabia' || cleanCountry === 'sa') {
+            timezone = 'Asia/Riyadh';
+            tzShort = 'AST';
+            locale = 'ar-SA';
+        } else if (cleanCountry === 'qatar' || cleanCountry === 'qa') {
+            timezone = 'Asia/Qatar';
+            tzShort = 'AST';
+            locale = 'ar-QA';
+        } else if (cleanCountry === 'malaysia' || cleanCountry === 'my') {
+            timezone = 'Asia/Kuala_Lumpur';
+            tzShort = 'MYT';
+            locale = 'en-MY';
+        } else if (cleanCountry === 'netherlands' || cleanCountry === 'nl' || cleanCountry === 'holland') {
+            timezone = 'Europe/Amsterdam';
+            tzShort = 'CET';
+            locale = 'en-NL';
+        } else if (cleanCountry === 'spain' || cleanCountry === 'es') {
+            timezone = 'Europe/Madrid';
+            tzShort = 'CET';
+            locale = 'es-ES';
+        } else if (cleanCountry === 'italy' || cleanCountry === 'it') {
+            timezone = 'Europe/Rome';
+            tzShort = 'CET';
+            locale = 'it-IT';
+        } else if (cleanCountry === 'switzerland' || cleanCountry === 'ch') {
+            timezone = 'Europe/Zurich';
+            tzShort = 'CET';
+            locale = 'de-CH';
+        } else if (cleanCountry === 'sweden' || cleanCountry === 'se') {
+            timezone = 'Europe/Stockholm';
+            tzShort = 'CET';
+            locale = 'sv-SE';
+        } else if (cleanCountry === 'south korea' || cleanCountry === 'kr' || cleanCountry === 'korea') {
+            timezone = 'Asia/Seoul';
+            tzShort = 'KST';
+            locale = 'ko-KR';
+        } else if (cleanCountry === 'hong kong' || cleanCountry === 'hk') {
+            timezone = 'Asia/Hong_Kong';
+            tzShort = 'HKT';
+            locale = 'zh-HK';
+        } else if (cleanCountry === 'philippines' || cleanCountry === 'ph') {
+            timezone = 'Asia/Manila';
+            tzShort = 'PHT';
+            locale = 'en-PH';
+        } else if (cleanCountry === 'brazil' || cleanCountry === 'br') {
+            timezone = 'America/Sao_Paulo';
+            tzShort = 'BRT';
+            locale = 'pt-BR';
+        } else if (cleanCountry === 'mexico' || cleanCountry === 'mx') {
+            timezone = 'America/Mexico_City';
+            tzShort = 'CST';
+            locale = 'es-MX';
         } else {
             timezone = 'America/New_York';
             tzShort = 'EDT';

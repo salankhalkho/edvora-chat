@@ -545,7 +545,7 @@
                     setVal('settings_address_line', org.address_line);
                     setVal('settings_city', org.city);
                     setVal('settings_state', org.state);
-                    setVal('settings_country', org.country || 'India');
+                    setVal('settings_country', org.country || 'United States');
                     setVal('settings_pincode', org.pincode);
                     setVal('settings_institution_description', org.institution_description);
 
@@ -585,7 +585,7 @@
                 address_line: document.getElementById('settings_address_line') ? getVal('settings_address_line') : ((window.currentOrgProfile && window.currentOrgProfile.address_line) || ''),
                 city: document.getElementById('settings_city') ? getVal('settings_city') : ((window.currentOrgProfile && window.currentOrgProfile.city) || ''),
                 state: document.getElementById('settings_state') ? getVal('settings_state') : ((window.currentOrgProfile && window.currentOrgProfile.state) || ''),
-                country: document.getElementById('settings_country') ? (getVal('settings_country') || 'India') : ((window.currentOrgProfile && window.currentOrgProfile.country) || 'India'),
+                country: document.getElementById('settings_country') ? (getVal('settings_country') || 'United States') : ((window.currentOrgProfile && window.currentOrgProfile.country) || 'United States'),
                 pincode: document.getElementById('settings_pincode') ? getVal('settings_pincode') : ((window.currentOrgProfile && window.currentOrgProfile.pincode) || ''),
                 institution_description: getVal('settings_institution_description')
             };
@@ -773,7 +773,7 @@
                 const hasHostel = c.has_hostel == 1;
                 const status = c.status || 'active';
                 const area = c.campus_area ? escapeHtmlString(c.campus_area) : '<span style="color: #94A3B8; font-style: italic;">Not specified</span>';
-                const cityState = [c.city, c.state].filter(Boolean).join(', ') || (c.country || 'India');
+                const cityState = [c.city, c.state].filter(Boolean).join(', ') || (c.country || 'United States');
                 const hasTour = c.virtual_tour_url && c.virtual_tour_url.trim().length > 0;
                 const coursesCount = c.courses_count || 0;
                 const derivedDepts = c.derived_departments || [];
@@ -948,6 +948,11 @@
                     isPrimaryCheck.checked = (_campusesCache.length === 0);
                 }
 
+                const countrySelect = document.getElementById('cp_country');
+                if (countrySelect) {
+                    countrySelect.value = 'United States';
+                }
+
                 await loadCampusEditorCourses(null);
                 return;
             }
@@ -996,7 +1001,23 @@
             document.getElementById('cp_city').value = campus.city || '';
             document.getElementById('cp_state').value = campus.state || '';
             document.getElementById('cp_pincode').value = campus.pincode || '';
-            document.getElementById('cp_country').value = campus.country || 'India';
+            const countryEl = document.getElementById('cp_country');
+            if (countryEl) {
+                let countryVal = (campus.country || 'United States').trim();
+                if (!countryVal || ['usa', 'us', 'united states of america'].includes(countryVal.toLowerCase())) {
+                    countryVal = 'United States';
+                }
+                countryEl.value = countryVal;
+                if (!countryEl.value) {
+                    for (let opt of countryEl.options) {
+                        if (opt.value.toLowerCase() === countryVal.toLowerCase() || opt.text.toLowerCase().includes(countryVal.toLowerCase())) {
+                            countryEl.value = opt.value;
+                            break;
+                        }
+                    }
+                    if (!countryEl.value) countryEl.value = 'United States';
+                }
+            }
             document.getElementById('cp_contact_email').value = campus.contact_email || '';
             document.getElementById('cp_contact_phone').value = campus.contact_phone || '';
 
@@ -1157,7 +1178,7 @@
                 city: (document.getElementById('cp_city')?.value || '').trim(),
                 state: (document.getElementById('cp_state')?.value || '').trim(),
                 pincode: (document.getElementById('cp_pincode')?.value || '').trim(),
-                country: (document.getElementById('cp_country')?.value || 'India').trim(),
+                country: (document.getElementById('cp_country')?.value || 'United States').trim(),
                 contact_email: (document.getElementById('cp_contact_email')?.value || '').trim(),
                 contact_phone: (document.getElementById('cp_contact_phone')?.value || '').trim()
             };

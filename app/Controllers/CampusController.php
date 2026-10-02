@@ -177,7 +177,10 @@ class CampusController
             $addressLine = trim($data['address_line'] ?? '');
             $city = trim($data['city'] ?? '');
             $state = trim($data['state'] ?? '');
-            $country = trim($data['country'] ?? 'India');
+            $country = trim($data['country'] ?? 'United States');
+            if ($country === '' || in_array(strtolower($country), ['usa', 'us', 'united states of america'])) {
+                $country = 'United States';
+            }
             $pincode = trim($data['pincode'] ?? '');
             $status = (isset($data['status']) && in_array($data['status'], ['active', 'inactive'])) ? $data['status'] : 'active';
 
@@ -290,7 +293,10 @@ class CampusController
             $addressLine = trim($data['address_line'] ?? '');
             $city = trim($data['city'] ?? '');
             $state = trim($data['state'] ?? '');
-            $country = trim($data['country'] ?? 'India');
+            $country = trim($data['country'] ?? ($existing['country'] ?? 'United States'));
+            if ($country === '' || in_array(strtolower($country), ['usa', 'us', 'united states of america'])) {
+                $country = 'United States';
+            }
             $pincode = trim($data['pincode'] ?? '');
             $status = (isset($data['status']) && in_array($data['status'], ['active', 'inactive'])) ? $data['status'] : 'active';
 

@@ -77,8 +77,26 @@ The mapping engine resolves geographical entities into IANA timezones, canonical
 | **New Zealand** | *National* | `Pacific/Auckland` | `NZST` / `NZDT` | `en-NZ` |
 | **Japan** | *National* | `Asia/Tokyo` | `JST` | `ja-JP` |
 | **South Africa** | *National* | `Africa/Johannesburg` | `SAST` | `en-ZA` |
-| **Saudi Arabia / Qatar** | *National* | `Asia/Riyadh` / `Asia/Qatar` | `AST` | `ar-SA` |
-| **Any Unrecognized** | *Fallback to USA* | `America/New_York` | `EST` / `EDT` | `en-US` |
+| **Saudi Arabia** | *National* | `Asia/Riyadh` | `AST` | `ar-SA` |
+| **Qatar** | *National* | `Asia/Qatar` | `AST` | `ar-QA` |
+| **Malaysia** | *National* | `Asia/Kuala_Lumpur` | `MYT` | `en-MY` |
+| **Netherlands** | *National* | `Europe/Amsterdam` | `CET` | `en-NL` |
+| **Spain** | *National* | `Europe/Madrid` | `CET` | `es-ES` |
+| **Italy** | *National* | `Europe/Rome` | `CET` | `it-IT` |
+| **Switzerland** | *National* | `Europe/Zurich` | `CET` | `de-CH` |
+| **Sweden** | *National* | `Europe/Stockholm` | `CET` | `sv-SE` |
+| **South Korea** | *National* | `Asia/Seoul` | `KST` | `ko-KR` |
+| **Hong Kong** | *National* | `Asia/Hong_Kong` | `HKT` | `zh-HK` |
+| **Philippines** | *National* | `Asia/Manila` | `PHT` | `en-PH` |
+| **Brazil** | *National* | `America/Sao_Paulo` | `BRT` | `pt-BR` |
+| **Mexico** | *National* | `America/Mexico_City` | `CST` | `es-MX` |
+| **Any Unrecognized / Other** | *Fallback to USA* | `America/New_York` | `EST` / `EDT` | `en-US` |
+
+### 3.1 Strict Country Input Constraint (Dropdown Only)
+To eliminate typographical errors and prevent timezone engine divergence, the **Campus Editor (`#campus-editor`)** uses a strictly curated `<select id="cp_country">` dropdown rather than an open text field.
+- **Default Selected Country:** `United States` (`United States (USA)`).
+- **Free-Form Typing Prohibited:** Users cannot input arbitrary strings that would bypass or corrupt timezone mapping.
+- **Backend Normalization:** Both `CampusController` and `TenantLocalizationHelper` normalize inputs (`USA`, `US` → `United States`).
 
 ---
 

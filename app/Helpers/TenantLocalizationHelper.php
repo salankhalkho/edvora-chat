@@ -220,6 +220,36 @@ class TenantLocalizationHelper
         } elseif (in_array($cLower, ['malaysia', 'my'])) {
             $timezone = 'Asia/Kuala_Lumpur';
             $locale   = 'en-MY';
+        } elseif (in_array($cLower, ['netherlands', 'nl', 'holland'])) {
+            $timezone = 'Europe/Amsterdam';
+            $locale   = 'en-NL';
+        } elseif (in_array($cLower, ['spain', 'es', 'espana'])) {
+            $timezone = 'Europe/Madrid';
+            $locale   = 'es-ES';
+        } elseif (in_array($cLower, ['italy', 'it', 'italia'])) {
+            $timezone = 'Europe/Rome';
+            $locale   = 'it-IT';
+        } elseif (in_array($cLower, ['switzerland', 'ch'])) {
+            $timezone = 'Europe/Zurich';
+            $locale   = 'de-CH';
+        } elseif (in_array($cLower, ['sweden', 'se'])) {
+            $timezone = 'Europe/Stockholm';
+            $locale   = 'sv-SE';
+        } elseif (in_array($cLower, ['south korea', 'kr', 'korea'])) {
+            $timezone = 'Asia/Seoul';
+            $locale   = 'ko-KR';
+        } elseif (in_array($cLower, ['hong kong', 'hk'])) {
+            $timezone = 'Asia/Hong_Kong';
+            $locale   = 'zh-HK';
+        } elseif (in_array($cLower, ['philippines', 'ph'])) {
+            $timezone = 'Asia/Manila';
+            $locale   = 'en-PH';
+        } elseif (in_array($cLower, ['brazil', 'br', 'brasil'])) {
+            $timezone = 'America/Sao_Paulo';
+            $locale   = 'pt-BR';
+        } elseif (in_array($cLower, ['mexico', 'mx'])) {
+            $timezone = 'America/Mexico_City';
+            $locale   = 'es-MX';
         } else {
             // Unrecognized country: Fallback 3 (Default to U.S.A.)
             $timezone = 'America/New_York';
@@ -251,6 +281,16 @@ class TenantLocalizationHelper
             'Asia/Riyadh'         => 'AST',
             'Asia/Qatar'          => 'AST',
             'Asia/Kuala_Lumpur'   => 'MYT',
+            'Europe/Amsterdam'    => 'CET',
+            'Europe/Madrid'       => 'CET',
+            'Europe/Rome'         => 'CET',
+            'Europe/Zurich'       => 'CET',
+            'Europe/Stockholm'    => 'CET',
+            'Asia/Seoul'          => 'KST',
+            'Asia/Hong_Kong'      => 'HKT',
+            'Asia/Manila'         => 'PHT',
+            'America/Sao_Paulo'   => 'BRT',
+            'America/Mexico_City' => 'CST',
         ];
 
         if (isset($staticMap[$timezone])) {
