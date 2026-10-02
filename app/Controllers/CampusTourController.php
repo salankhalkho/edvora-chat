@@ -326,27 +326,35 @@ class CampusTourController
         if ($status === 'attended' && $existing['status'] !== 'attended') {
             $attendedAt = date('Y-m-d H:i:s');
             // Auto-warm lead in leads table
-            $stmtLead = $db->prepare("
-                UPDATE leads
-                SET conversion_score = 95,
-                    conversion_score_rationale = 'Attended Campus Tour',
-                    pipeline_stage = 'campus_visit',
-                    status = CASE WHEN status = 'new' THEN 'contacted' ELSE status END,
-                    notes = CONCAT(COALESCE(notes, ''), ' | Attended Campus Tour on ', CURDATE()),
-                    updated_at = NOW()
-                WHERE organization_id = :org_id
-                  AND (
-                    (email = :email AND :email != '')
-                    OR (phone = :phone AND :phone != '')
-                    OR (conversation_id = :conv_id AND :conv_id IS NOT NULL)
-                  )
-            ");
-            $stmtLead->execute([
-                ':org_id' => $orgId,
-                ':email' => $existing['student_email'],
-                ':phone' => $existing['student_phone'],
-                ':conv_id' => $existing['conversation_id'] ?: null
-            ]);
+            $whereClauses = [];
+            $leadParams = [':org_id' => $orgId];
+            if (!empty($existing['student_email'])) {
+                $whereClauses[] = "email = :email";
+                $leadParams[':email'] = $existing['student_email'];
+            }
+            if (!empty($existing['student_phone'])) {
+                $whereClauses[] = "phone = :phone";
+                $leadParams[':phone'] = $existing['student_phone'];
+            }
+            if (!empty($existing['conversation_id'])) {
+                $whereClauses[] = "conversation_id = :conv_id";
+                $leadParams[':conv_id'] = $existing['conversation_id'];
+            }
+
+            if (!empty($whereClauses)) {
+                $whereSql = implode(' OR ', $whereClauses);
+                $stmtLead = $db->prepare("
+                    UPDATE leads
+                    SET conversion_score = 95,
+                        conversion_score_rationale = 'Attended Campus Tour',
+                        pipeline_stage = 'campus_visit',
+                        status = CASE WHEN status = 'new' THEN 'contacted' ELSE status END,
+                        notes = CONCAT(COALESCE(notes, ''), ' | Attended Campus Tour on ', CURDATE()),
+                        updated_at = NOW()
+                    WHERE organization_id = :org_id AND ({$whereSql})
+                ");
+                $stmtLead->execute($leadParams);
+            }
         } elseif ($status === 'no_show') {
             $attendedAt = null;
         }

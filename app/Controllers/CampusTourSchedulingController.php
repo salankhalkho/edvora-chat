@@ -682,27 +682,35 @@ class CampusTourSchedulingController
             $checkInByUserId = $currentUserId;
 
             // Automatically elevate lead intent score in leads table to 95 (Hot Lead)
-            $stmtLead = $db->prepare("
-                UPDATE leads
-                SET conversion_score = 95,
-                    conversion_score_rationale = 'Attended Campus Tour',
-                    pipeline_stage = 'campus_visit',
-                    status = CASE WHEN status = 'new' THEN 'contacted' ELSE status END,
-                    notes = CONCAT(COALESCE(notes, ''), ' | Attended Campus Tour on ', CURDATE()),
-                    updated_at = NOW()
-                WHERE organization_id = :org_id
-                  AND (
-                    (email = :email AND :email != '')
-                    OR (phone = :phone AND :phone != '')
-                    OR (conversation_id = :conv_id AND :conv_id IS NOT NULL)
-                  )
-            ");
-            $stmtLead->execute([
-                ':org_id' => $orgId,
-                ':email' => $booking['student_email'],
-                ':phone' => $booking['student_phone'],
-                ':conv_id' => $booking['conversation_id'] ?: null
-            ]);
+            $whereClauses = [];
+            $leadParams = [':org_id' => $orgId];
+            if (!empty($booking['student_email'])) {
+                $whereClauses[] = "email = :email";
+                $leadParams[':email'] = $booking['student_email'];
+            }
+            if (!empty($booking['student_phone'])) {
+                $whereClauses[] = "phone = :phone";
+                $leadParams[':phone'] = $booking['student_phone'];
+            }
+            if (!empty($booking['conversation_id'])) {
+                $whereClauses[] = "conversation_id = :conv_id";
+                $leadParams[':conv_id'] = $booking['conversation_id'];
+            }
+
+            if (!empty($whereClauses)) {
+                $whereSql = implode(' OR ', $whereClauses);
+                $stmtLead = $db->prepare("
+                    UPDATE leads
+                    SET conversion_score = 95,
+                        conversion_score_rationale = 'Attended Campus Tour',
+                        pipeline_stage = 'campus_visit',
+                        status = CASE WHEN status = 'new' THEN 'contacted' ELSE status END,
+                        notes = CONCAT(COALESCE(notes, ''), ' | Attended Campus Tour on ', CURDATE()),
+                        updated_at = NOW()
+                    WHERE organization_id = :org_id AND ({$whereSql})
+                ");
+                $stmtLead->execute($leadParams);
+            }
         } elseif ($status === 'no_show') {
             $attendedAt = null;
         }
@@ -1048,27 +1056,35 @@ class CampusTourSchedulingController
 
         if ($status === 'attended') {
             // Auto warm lead in leads CRM
-            $stmtLead = $db->prepare("
-                UPDATE leads
-                SET conversion_score = 95,
-                    conversion_score_rationale = 'Attended Campus Tour (Gate Check-In)',
-                    pipeline_stage = 'campus_visit',
-                    status = CASE WHEN status = 'new' THEN 'contacted' ELSE status END,
-                    notes = CONCAT(COALESCE(notes, ''), ' | Gate check-in attended on ', CURDATE()),
-                    updated_at = NOW()
-                WHERE organization_id = :org_id
-                  AND (
-                    (email = :email AND :email != '')
-                    OR (phone = :phone AND :phone != '')
-                    OR (conversation_id = :conv_id AND :conv_id IS NOT NULL)
-                  )
-            ");
-            $stmtLead->execute([
-                ':org_id' => $orgId,
-                ':email' => $booking['student_email'],
-                ':phone' => $booking['student_phone'],
-                ':conv_id' => $booking['conversation_id'] ?: null
-            ]);
+            $whereClauses = [];
+            $leadParams = [':org_id' => $orgId];
+            if (!empty($booking['student_email'])) {
+                $whereClauses[] = "email = :email";
+                $leadParams[':email'] = $booking['student_email'];
+            }
+            if (!empty($booking['student_phone'])) {
+                $whereClauses[] = "phone = :phone";
+                $leadParams[':phone'] = $booking['student_phone'];
+            }
+            if (!empty($booking['conversation_id'])) {
+                $whereClauses[] = "conversation_id = :conv_id";
+                $leadParams[':conv_id'] = $booking['conversation_id'];
+            }
+
+            if (!empty($whereClauses)) {
+                $whereSql = implode(' OR ', $whereClauses);
+                $stmtLead = $db->prepare("
+                    UPDATE leads
+                    SET conversion_score = 95,
+                        conversion_score_rationale = 'Attended Campus Tour (Gate Check-In)',
+                        pipeline_stage = 'campus_visit',
+                        status = CASE WHEN status = 'new' THEN 'contacted' ELSE status END,
+                        notes = CONCAT(COALESCE(notes, ''), ' | Gate check-in attended on ', CURDATE()),
+                        updated_at = NOW()
+                    WHERE organization_id = :org_id AND ({$whereSql})
+                ");
+                $stmtLead->execute($leadParams);
+            }
         }
 
         Response::success([
