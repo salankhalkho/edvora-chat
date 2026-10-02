@@ -835,7 +835,7 @@
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 16px;">
                             <div>
                                 <label style="font-size: 11px; font-weight: 700; color: #4F7470; display: block; margin-bottom: 4px;">Target Website URL</label>
-                                <input type="text" id="utmBaseUrl" value="https://edvora.chat/admissions" class="brand-input" style="width: 100%; height: 34px; font-size: 11.5px; border: 1.5px solid #D1E5DE; border-radius: 6px; padding: 0 10px;" oninput="generateUtmLink()" />
+                                <input type="text" id="utmBaseUrl" value="" placeholder="https://your-institution.edu" class="brand-input" style="width: 100%; height: 34px; font-size: 11.5px; border: 1.5px solid #D1E5DE; border-radius: 6px; padding: 0 10px;" oninput="this.dataset.userEdited='true'; generateUtmLink();" />
                             </div>
                             <div>
                                 <label style="font-size: 11px; font-weight: 700; color: #4F7470; display: block; margin-bottom: 4px;">Campaign Source (utm_source)</label>
@@ -856,7 +856,7 @@
                             <div style="flex: 1; min-width: 260px;">
                                 <span style="font-size: 10.5px; font-weight: 800; text-transform: uppercase; color: #047857; letter-spacing: 0.3px; display: block; margin-bottom: 4px;">Generated Trackable Link</span>
                                 <div id="utmResultDisplay" style="font-size: 12px; font-family: var(--brand-font-mono, monospace); color: #063D3B; word-break: break-all; font-weight: 600;">
-                                    https://edvora.chat/admissions?utm_source=linkedin&amp;utm_medium=cpc&amp;utm_campaign=fall_2026_ug_admissions
+                                    &mdash;
                                 </div>
                             </div>
                             <button type="button" onclick="copyUtmLink()" id="btnCopyUtm" class="brand-btn-primary" style="height: 34px; padding: 0 16px; font-size: 11.5px; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
@@ -1166,8 +1166,62 @@
         renderMatrixTable(list);
     }
 
+    async function resolveTargetWebsiteUrl() {
+        const utmInput = document.getElementById('utmBaseUrl');
+        if (!utmInput) return;
+
+        // If user already typed/modified in this view, do not overwrite
+        if (utmInput.dataset.userEdited === 'true' && utmInput.value.trim()) {
+            generateUtmLink();
+            return;
+        }
+
+        // 1. Resolve from in-memory global state or localStorage cache
+        let website = (window.currentOrgProfile && window.currentOrgProfile.website_url)
+            || window.currentOrgWebsite
+            || localStorage.getItem('edvora_org_website')
+            || '';
+
+        // 2. Fallback: fetch from organization profile if token is present
+        if (!website) {
+            const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token') || '';
+            if (token) {
+                try {
+                    const res = await fetch('/v1/organization/profile', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const json = await res.json();
+                    if (json.status === 'success' && json.data && json.data.website_url) {
+                        website = json.data.website_url;
+                        window.currentOrgWebsite = website;
+                        try { localStorage.setItem('edvora_org_website', website); } catch(e) {}
+                    }
+                } catch(e) {
+                    console.warn('[SourceAttribution] Could not fetch organization website:', e);
+                }
+            }
+        }
+
+        website = (website || '').trim();
+        if (website) {
+            if (!website.startsWith('http://') && !website.startsWith('https://')) {
+                website = 'https://' + website;
+            }
+            utmInput.value = website;
+        } else if (!utmInput.value) {
+            utmInput.value = 'https://your-institution.edu';
+        }
+
+        generateUtmLink();
+    }
+
     function generateUtmLink() {
-        const base = document.getElementById('utmBaseUrl')?.value.trim() || 'https://edvora.chat/admissions';
+        const base = document.getElementById('utmBaseUrl')?.value.trim();
+        const display = document.getElementById('utmResultDisplay');
+        if (!base) {
+            if (display) display.innerText = '—';
+            return;
+        }
         const src = encodeURIComponent(document.getElementById('utmSource')?.value.trim() || 'linkedin');
         const med = encodeURIComponent(document.getElementById('utmMedium')?.value.trim() || 'cpc');
         const cmp = encodeURIComponent(document.getElementById('utmCampaign')?.value.trim() || 'fall_2026_ug_admissions');
@@ -1175,7 +1229,6 @@
         const sep = base.includes('?') ? '&' : '?';
         const fullUrl = `${base}${sep}utm_source=${src}&utm_medium=${med}&utm_campaign=${cmp}`;
         
-        const display = document.getElementById('utmResultDisplay');
         if (display) display.innerText = fullUrl;
     }
 
@@ -1241,7 +1294,7 @@
 
         selectSaChannel(currentSelectedChannel);
         filterSaTable();
-        generateUtmLink();
+        await resolveTargetWebsiteUrl();
     }
 
     function applyBaselineKpi() {
@@ -1267,7 +1320,8 @@
         return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    // Initialize on load
+    // Immediately resolve website and initialize on load
+    resolveTargetWebsiteUrl();
     loadSourceAttribution();
   </script>
 </body>
