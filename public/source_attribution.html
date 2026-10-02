@@ -207,6 +207,47 @@
       overflow: hidden;
       box-shadow: 0 20px 60px -10px rgba(6, 61, 59, 0.08), 0 2px 8px rgba(6, 61, 59, 0.03);
     }
+
+    .sa-view-btn {
+      height: 32px !important;
+      padding: 0 12px !important;
+      font-size: 11.5px !important;
+      font-weight: 700 !important;
+      border-radius: 8px !important;
+      cursor: pointer !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      background: #FFFFFF !important;
+      border: 1.5px solid #DDE9E3 !important;
+      color: #063D3B !important;
+      transition: all 0.15s ease !important;
+      user-select: none !important;
+      white-space: nowrap !important;
+      box-shadow: 0 1px 2px rgba(6, 61, 59, 0.03) !important;
+    }
+    .sa-view-btn svg {
+      color: #063D3B !important;
+      stroke: #063D3B !important;
+      flex-shrink: 0 !important;
+      transition: stroke 0.15s ease !important;
+    }
+    .sa-view-btn:hover {
+      background: #F4FAF7 !important;
+      border-color: #B9D7C7 !important;
+      color: #063D3B !important;
+      transform: translateY(-1px);
+    }
+    .sa-view-btn.sa-view-btn-active {
+      background: #063D3B !important;
+      color: #C8FF63 !important;
+      border-color: #063D3B !important;
+      box-shadow: 0 2px 6px rgba(6, 61, 59, 0.2) !important;
+    }
+    .sa-view-btn.sa-view-btn-active svg {
+      color: #C8FF63 !important;
+      stroke: #C8FF63 !important;
+    }
   </style>
 </head>
 <body>
@@ -261,8 +302,9 @@
             <!-- Top Control Bar (Inside Big Card) -->
             <div class="ops-dash-topbar" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 64px !important; height: 64px !important; padding: 14px 24px !important; box-sizing: border-box !important; width: 100% !important; background: #FFFFFF !important; border-bottom: 1.5px solid #E6F0EC !important;">
                 <div class="ops-dash-title-group" style="display: flex !important; align-items: center !important; gap: 12px !important;">
-                    <button type="button" onclick="location.href='/app/#org-settings'" class="brand-btn-secondary" style="height: 32px; padding: 0 11px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; border-radius: 6px; background: #F4FAF7; border: 1.5px solid #D1E5DE; color: var(--e-teal, #063D3B);" title="Return to Control Panel">
-                        &larr; Control Panel
+                    <button type="button" onclick="location.href='/app/#org-settings'" class="sa-view-btn" title="Return to Control Panel">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                        <span>Control Panel</span>
                     </button>
                     <span class="ops-live-dot"></span>
                     <div>
@@ -275,21 +317,32 @@
                     </div>
                 </div>
 
-                <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 10px !important; flex-shrink: 0 !important;">
-                    <!-- View Mode Switcher -->
-                    <div style="display: inline-flex; background: #F4FAF7; border: 1px solid #D1E5DE; border-radius: 8px; padding: 3px; gap: 3px;">
-                        <button type="button" id="saTabWaterfallBtn" onclick="switchSaSubView('waterfall')" class="brand-btn-secondary" style="height: 28px; padding: 0 10px; font-size: 11px; font-weight: 700; border-radius: 6px; border: none; cursor: pointer; background: #063D3B; color: #C8FF63;">
-                            🌊 Waterfall
-                        </button>
-                        <button type="button" id="saTabMatrixBtn" onclick="switchSaSubView('matrix')" class="brand-btn-secondary" style="height: 28px; padding: 0 10px; font-size: 11px; font-weight: 700; border-radius: 6px; border: none; cursor: pointer; background: transparent; color: #4F7470;">
-                            📊 Channels Table
-                        </button>
-                        <button type="button" id="saTabAdvisoryBtn" onclick="switchSaSubView('advisory')" class="brand-btn-secondary" style="height: 28px; padding: 0 10px; font-size: 11px; font-weight: 700; border-radius: 6px; border: none; cursor: pointer; background: transparent; color: #4F7470;">
-                            💡 Advisory &amp; UTM
-                        </button>
-                    </div>
+                <div class="ops-dash-controls" style="display: flex !important; align-items: center !important; gap: 8px !important; flex-shrink: 0 !important; flex-wrap: wrap;">
+                    <!-- View Mode Switcher Buttons matching Image 2 -->
+                    <button type="button" id="saTabWaterfallBtn" onclick="switchSaSubView('waterfall')" class="sa-view-btn sa-view-btn-active" title="View Full-Funnel Admissions Waterfall">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                        </svg>
+                        <span>Waterfall</span>
+                    </button>
+                    <button type="button" id="saTabMatrixBtn" onclick="switchSaSubView('matrix')" class="sa-view-btn" title="View Channels Attribution Table">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="3" y1="9" x2="21" y2="9"></line>
+                            <line x1="3" y1="15" x2="21" y2="15"></line>
+                            <line x1="9" y1="3" x2="9" y2="21"></line>
+                        </svg>
+                        <span>Channels Table</span>
+                    </button>
+                    <button type="button" id="saTabAdvisoryBtn" onclick="switchSaSubView('advisory')" class="sa-view-btn" title="View Admissions Advisory &amp; Campaign UTM Builder">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+                        </svg>
+                        <span>Advisory &amp; UTM</span>
+                    </button>
 
-                    <select id="saDaysRange" class="brand-input" style="height: 34px; font-size: 11.5px; font-weight: 600; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D1E5DE; color: #063D3B; background: #FFFFFF; cursor: pointer;" onchange="loadSourceAttribution()">
+                    <select id="saDaysRange" class="brand-input" style="height: 32px !important; font-size: 11.5px !important; font-weight: 600 !important; padding: 0 10px !important; border-radius: 8px !important; border: 1.5px solid #DDE9E3 !important; color: #063D3B !important; background: #FFFFFF !important; cursor: pointer !important;" onchange="loadSourceAttribution()">
                         <option value="7">Last 7 Days</option>
                         <option value="30" selected>Last 30 Days</option>
                         <option value="60">Last 60 Days</option>
@@ -297,8 +350,11 @@
                         <option value="180">Last 180 Days</option>
                         <option value="365">Last 365 Days</option>
                     </select>
-                    <button type="button" onclick="loadSourceAttribution()" class="brand-btn-secondary" style="height: 34px; padding: 0 13px; font-size: 11.5px; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border: 1.5px solid #D1E5DE; color: #063D3B;">
-                        <span>🔄 Refresh</span>
+                    <button type="button" onclick="loadSourceAttribution()" class="sa-view-btn" title="Refresh Live Data">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                        </svg>
+                        <span>Refresh</span>
                     </button>
                 </div>
             </div>
@@ -936,11 +992,9 @@
         const styleActive = (btn, active) => {
             if (!btn) return;
             if (active) {
-                btn.style.background = '#063D3B';
-                btn.style.color = '#C8FF63';
+                btn.classList.add('sa-view-btn-active');
             } else {
-                btn.style.background = 'transparent';
-                btn.style.color = '#4F7470';
+                btn.classList.remove('sa-view-btn-active');
             }
         };
 
