@@ -114,10 +114,10 @@
         <span>Doctoral / Other</span>
         <span class="ckh-tab-count" id="progTabCountDoc" style="background:#FEF3C7; color:#B45309;">0</span>
       </button>
-      <button class="ckh-tab-btn" id="progTabBtnOrphan" onclick="setProgramFilterType('orphan', this)" style="color:#DC2626;">
-        <span style="width:6px; height:6px; border-radius:50%; background:#DC2626; display:inline-block;"></span>
-        <span>Orphan Courses</span>
-        <span class="ckh-tab-count" id="progTabCountOrphan" style="background:#FEF2F2; color:#DC2626;">0</span>
+      <button class="ckh-tab-btn" id="progTabBtnOpen" onclick="setProgramFilterType('open', this)" style="color:#059669;">
+        <span style="width:6px; height:6px; border-radius:50%; background:#059669; display:inline-block;"></span>
+        <span>Admissions Open</span>
+        <span class="ckh-tab-count" id="progTabCountOpen" style="background:#ECFDF5; color:#059669;">0</span>
       </button>
     </div>
 
@@ -172,9 +172,19 @@
     currentTypeFilter: 'all'
   };
 
-  window.loadAcademicProgramsTab = async function() {
+  let _isLoadingPrograms = false;
+  let _lastLoadTimestamp = 0;
+
+  window.loadAcademicProgramsTab = async function(force = false) {
     const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token');
     if (!token) return;
+
+    const now = Date.now();
+    if (!force && (now - _lastLoadTimestamp < 800 || _isLoadingPrograms)) {
+      return;
+    }
+    _isLoadingPrograms = true;
+    _lastLoadTimestamp = now;
 
     try {
       const res = await fetch('/v1/programs', {
@@ -195,6 +205,8 @@
       if (tbody) {
         tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:32px; color:#DC2626; font-weight:600;">Failed to load academic programs: ${err.message}</td></tr>`;
       }
+    } finally {
+      _isLoadingPrograms = false;
     }
   };
 
@@ -234,6 +246,8 @@
     if (tPG) tPG.textContent = pg;
     const tDoc = document.getElementById('progTabCountDoc');
     if (tDoc) tDoc.textContent = doc;
+    const tOpen = document.getElementById('progTabCountOpen');
+    if (tOpen) tOpen.textContent = openCount;
 
     // Campuses dropdown
     const selCampus = document.getElementById('progCampusFilter');
@@ -257,6 +271,7 @@
     else if (type === 'undergraduate') document.getElementById('progTabBtnUG')?.classList.add('active');
     else if (type === 'postgraduate') document.getElementById('progTabBtnPG')?.classList.add('active');
     else if (type === 'doctoral') document.getElementById('progTabBtnDoc')?.classList.add('active');
+    else if (type === 'open') document.getElementById('progTabBtnOpen')?.classList.add('active');
 
     // Update KPI Ribbon active class
     document.querySelectorAll('.ckh-kpi-tile').forEach(tile => {

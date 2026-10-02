@@ -171,6 +171,15 @@
         <!-- SUB-VIEW 1: FULL-FUNNEL WATERFALL PROGRESSION                       -->
         <!-- ═══════════════════════════════════════════════════════════════════ -->
         <div id="saViewWaterfall" style="display: block;">
+
+            <!-- Empty State Notice for Zero-Traffic Tenants (No quick-action button per user instruction) -->
+            <div id="saEmptyStateNotice" style="display: none; background: #FAFDFB; border: 1.5px dashed #C3DFD3; border-radius: 14px; padding: 24px; text-align: center; margin-bottom: 20px;">
+                <div style="font-size: 26px; margin-bottom: 6px;">📊</div>
+                <div style="font-size: 13.5px; font-weight: 700; color: #063D3B;" id="saEmptyStateTitle">No visitor or campaign traffic recorded in the selected time period.</div>
+                <div style="font-size: 11.5px; color: #648781; margin-top: 4px; max-width: 580px; margin-left: auto; margin-right: auto; line-height: 1.5;">
+                    Live attribution tracks incoming web traffic and conversational milestones in real-time. Once prospective students visit your site or campaign links, their funnel progression will automatically appear here.
+                </div>
+            </div>
             
             <div style="background: #FFFFFF; border: 1.5px solid #E6F0EC; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.03); margin-bottom: 24px;">
                 
@@ -181,7 +190,7 @@
                         <span style="font-size: 13.5px; font-weight: 800; color: #063D3B;">Multi-Stage Admissions Progression Waterfall</span>
                     </div>
 
-                    <!-- Channel Filter Chips -->
+                    <!-- Channel Filter Chips (Populated dynamically) -->
                     <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;" id="saChannelChipsContainer">
                         <button type="button" class="sa-channel-btn sa-ch-active" data-channel="all" onclick="selectSaChannel('all')">
                             <span style="width: 7px; height: 7px; border-radius: 50%; background: #063D3B; display: inline-block;"></span>
@@ -420,20 +429,23 @@
                     <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap; font-size: 12px;">
                         <div>
                             <span style="color: #648781;">Est. Cost per Inflow:</span>
-                            <strong style="color: #063D3B; margin-left: 4px;" id="saEstCostInflow">$1.20</strong>
+                            <strong style="color: #063D3B; margin-left: 4px;" id="saEstCostInflow">$0.00</strong>
+                            <span style="font-size: 10px; font-weight: 600; color: #648781; margin-left: 3px;">(Estimated - Industry Benchmark)</span>
                         </div>
                         <div>
                             <span style="color: #648781;">Cost per Verified Lead:</span>
-                            <strong style="color: #059669; margin-left: 4px;" id="saEstCostLead">$24.00</strong>
+                            <strong style="color: #059669; margin-left: 4px;" id="saEstCostLead">$0.00</strong>
+                            <span style="font-size: 10px; font-weight: 600; color: #648781; margin-left: 3px;">(Estimated - Industry Benchmark)</span>
                         </div>
                         <div>
                             <span style="color: #648781;">Cost per Enrolled Student:</span>
-                            <strong style="color: #7C3AED; margin-left: 4px;" id="saEstCostEnrollment">$100.55</strong>
+                            <strong style="color: #7C3AED; margin-left: 4px;" id="saEstCostEnrollment">—</strong>
+                            <span style="font-size: 10px; font-weight: 600; color: #648781; margin-left: 3px;">(Estimated - Industry Benchmark)</span>
                         </div>
                     </div>
                     <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #059669; background: #ECFDF5; border: 1px solid #A7F3D0; padding: 4px 10px; border-radius: 8px;">
-                        <span>ROI Rating:</span>
-                        <span id="saRoiRating">Top Efficiency (Tier 1)</span>
+                        <span>Attribution Status:</span>
+                        <span id="saRoiRating">Live Production Attribution</span>
                     </div>
                 </div>
 
@@ -485,7 +497,7 @@
                                 <th style="padding: 12px 16px; text-align: right;">Chat Engaged</th>
                                 <th style="padding: 12px 16px; text-align: right;">Verified Leads</th>
                                 <th style="padding: 12px 16px; text-align: right;">Tour Bookings</th>
-                                <th style="padding: 12px 16px; text-align: right;">Est. CPL</th>
+                                <th style="padding: 12px 16px; text-align: right;">Est. CPL<br><span style="font-size: 8.5px; font-weight: 600; text-transform: none; color: #648781; display: block; margin-top: 1px;">(Estimated - Industry Benchmark)</span></th>
                                 <th style="padding: 12px 16px; text-align: right;">Conversion %</th>
                                 <th style="padding: 12px 16px; text-align: center; width: 120px;">Yield Status</th>
                             </tr>
@@ -517,15 +529,15 @@
                         <span style="font-size: 22px;">🏆</span>
                         <span style="font-size: 10px; font-weight: 800; text-transform: uppercase; background: #DCFCE7; color: #166534; padding: 2px 8px; border-radius: 6px;">Top Performer</span>
                     </div>
-                    <h4 style="font-size: 14px; font-weight: 800; color: #063D3B; margin: 0 0 6px 0;">
-                        LinkedIn Ads Leads at 5.7% Yield
+                    <h4 id="saAdvTopTitle" style="font-size: 14px; font-weight: 800; color: #063D3B; margin: 0 0 6px 0;">
+                        Direct &amp; Organic Leads Inflow
                     </h4>
-                    <p style="font-size: 11.5px; color: #4B5563; line-height: 1.55; margin: 0;">
-                        Targeted graduate and professional engineering degree campaigns generated the highest lead conversion yield and lowest drop-off rate of any channel.
+                    <p id="saAdvTopBody" style="font-size: 11.5px; color: #4B5563; line-height: 1.55; margin: 0;">
+                        Website organic visitors demonstrate highest intent with zero advertising cost ($0 CPL). Ensure conversational lead capture magnets are active across all program catalog pages.
                     </p>
                     <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #E6F0EC; font-size: 11px; font-weight: 700; color: #059669; display: flex; justify-content: space-between;">
                         <span>Recommendation:</span>
-                        <span>Scale Budget +25%</span>
+                        <span id="saAdvTopRec">Optimize Catalog Pages</span>
                     </div>
                 </div>
 
@@ -534,17 +546,17 @@
                     <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #D97706, #F59E0B);"></div>
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
                         <span style="font-size: 22px;">⚠️</span>
-                        <span style="font-size: 10px; font-weight: 800; text-transform: uppercase; background: #FEF3C7; color: #B45309; padding: 2px 8px; border-radius: 6px;">Funnel Leakage Alert</span>
+                        <span style="font-size: 10px; font-weight: 800; text-transform: uppercase; background: #FEF3C7; color: #B45309; padding: 2px 8px; border-radius: 6px;">Funnel Optimization</span>
                     </div>
-                    <h4 style="font-size: 14px; font-weight: 800; color: #063D3B; margin: 0 0 6px 0;">
-                        Meta Inflow Drop-off on Mobile
+                    <h4 id="saAdvLeakTitle" style="font-size: 14px; font-weight: 800; color: #063D3B; margin: 0 0 6px 0;">
+                        Engagement Progression
                     </h4>
-                    <p style="font-size: 11.5px; color: #4B5563; line-height: 1.55; margin: 0;">
-                        Meta traffic has strong click volume (3,150 clicks) but high bounce before engaging with the bot. Adding program-specific starter prompts reduces mobile bounce by 34%.
+                    <p id="saAdvLeakBody" style="font-size: 11.5px; color: #4B5563; line-height: 1.55; margin: 0;">
+                        Review multi-touch traffic sources to identify channels where visitors leave before launching the admissions assistant. Adding proactive prompts increases inquiry conversions.
                     </p>
                     <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #E6F0EC; font-size: 11px; font-weight: 700; color: #D97706; display: flex; justify-content: space-between;">
                         <span>Action:</span>
-                        <span>Add Proactive Greeting</span>
+                        <span id="saAdvLeakRec">Add Proactive Triggers</span>
                     </div>
                 </div>
 
@@ -553,17 +565,17 @@
                     <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #2563EB, #3B82F6);"></div>
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
                         <span style="font-size: 22px;">💎</span>
-                        <span style="font-size: 10px; font-weight: 800; text-transform: uppercase; background: #EFF6FF; color: #1D4ED8; padding: 2px 8px; border-radius: 6px;">Lowest Cost per Enrolled</span>
+                        <span style="font-size: 10px; font-weight: 800; text-transform: uppercase; background: #EFF6FF; color: #1D4ED8; padding: 2px 8px; border-radius: 6px;">Strategic Advantage</span>
                     </div>
-                    <h4 style="font-size: 14px; font-weight: 800; color: #063D3B; margin: 0 0 6px 0;">
-                        Campus Open House QR Codes
+                    <h4 id="saAdvRoiTitle" style="font-size: 14px; font-weight: 800; color: #063D3B; margin: 0 0 6px 0;">
+                        Campus Tour &amp; QR Campaigns
                     </h4>
-                    <p style="font-size: 11.5px; color: #4B5563; line-height: 1.55; margin: 0;">
-                        In-person QR codes placed on admissions brochures yielded a 4.6% direct tour booking rate with near-zero advertising spend ($0 CPL).
+                    <p id="saAdvRoiBody" style="font-size: 11.5px; color: #4B5563; line-height: 1.55; margin: 0;">
+                        Physical campus visit QR codes and direct brochure links drive high-intent prospective students with negligible acquisition cost.
                     </p>
                     <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #E6F0EC; font-size: 11px; font-weight: 700; color: #2563EB; display: flex; justify-content: space-between;">
                         <span>Next Step:</span>
-                        <span>Expand QR to Regional Fairs</span>
+                        <span id="saAdvRoiRec">Deploy Campus QR Codes</span>
                     </div>
                 </div>
 
@@ -623,103 +635,9 @@
 
 <script>
 (function() {
-    // Dataset models inspired by attribution-platform.html & full-funnel-tracking.html
-    const CHANNEL_MODELS = {
-        'all': {
-            name: 'All Channels',
-            badge: 'ALL',
-            badgeBg: '#063D3B',
-            badgeColor: '#C8FF63',
-            summary: 'Across all inbound marketing channels, <strong>9,720 visitors</strong> entered the funnel, resulting in <strong>1,458 chat interactions</strong> and <strong>486 verified admissions leads</strong> (5.0% yield).',
-            stages: [9720, 1458, 486, 243, 116],
-            stagePcts: ['100%', '15.0%', '5.0%', '2.5%', '1.2%'],
-            stageBadges: ['100% Inflow', '15.0% Engaged', '33.3% Yield', '50.0% of Leads', '47.7% Enrolled'],
-            estCostInflow: '$1.20',
-            estCostLead: '$24.00',
-            estCostEnrollment: '$100.55',
-            roiRating: 'Top Efficiency (Tier 1)'
-        },
-        'linkedin': {
-            name: 'LinkedIn Ads',
-            badge: 'in',
-            badgeBg: '#0A66C2',
-            badgeColor: '#FFFFFF',
-            summary: 'LinkedIn Ads generated <strong>840 visitors</strong>, <strong>126 conversations</strong>, and <strong>48 leads</strong> &mdash; with the highest conversion rate of any channel at <strong>5.7%</strong>.',
-            stages: [840, 126, 48, 28, 18],
-            stagePcts: ['100%', '15.0%', '5.7%', '3.3%', '2.1%'],
-            stageBadges: ['100% Inflow', '15.0% Engaged', '38.1% Yield ★', '58.3% High-Intent', '64.3% Enrolled'],
-            estCostInflow: '$2.10',
-            estCostLead: '$36.75',
-            estCostEnrollment: '$98.00',
-            roiRating: 'Highest Conversion Rate (★ Tier 1)'
-        },
-        'google': {
-            name: 'Google Ads & Search',
-            badge: 'G',
-            badgeBg: '#4285F4',
-            badgeColor: '#FFFFFF',
-            summary: 'Google search campaigns yielded <strong>4,200 visitors</strong>, <strong>588 chat interactions</strong>, and <strong>210 leads</strong> (5.0% yield) &mdash; driving the largest raw volume of applicants.',
-            stages: [4200, 588, 210, 95, 48],
-            stagePcts: ['100%', '14.0%', '5.0%', '2.3%', '1.1%'],
-            stageBadges: ['100% Inflow', '14.0% Engaged', '35.7% Yield', '45.2% High-Intent', '50.5% Enrolled'],
-            estCostInflow: '$1.45',
-            estCostLead: '$29.00',
-            estCostEnrollment: '$126.88',
-            roiRating: 'Scale & Volume Leader (Tier 1)'
-        },
-        'facebook': {
-            name: 'Meta (Facebook & IG)',
-            badge: 'f',
-            badgeBg: '#1877F2',
-            badgeColor: '#FFFFFF',
-            summary: 'Meta generated <strong>3,150 visitors</strong> and <strong>132 leads</strong> (4.2% conversion rate) &mdash; delivering cost-effective top-of-funnel reach with strong undergraduate engagement.',
-            stages: [3150, 441, 132, 54, 24],
-            stagePcts: ['100%', '14.0%', '4.2%', '1.7%', '0.8%'],
-            stageBadges: ['100% Inflow', '14.0% Engaged', '29.9% Yield', '40.9% High-Intent', '44.4% Enrolled'],
-            estCostInflow: '$0.85',
-            estCostLead: '$20.29',
-            estCostEnrollment: '$111.56',
-            roiRating: 'Lowest Top-of-Funnel CPC'
-        },
-        'direct': {
-            name: 'Direct & Organic Search',
-            badge: '🌐',
-            badgeBg: '#059669',
-            badgeColor: '#FFFFFF',
-            summary: 'Direct & organic search accounted for <strong>1,050 high-intent visitors</strong> and <strong>68 verified leads</strong> (6.5% yield) with zero ad spend acquisition cost.',
-            stages: [1050, 210, 68, 42, 21],
-            stagePcts: ['100%', '20.0%', '6.5%', '4.0%', '2.0%'],
-            stageBadges: ['100% Inflow', '20.0% Engaged', '32.4% Yield', '61.8% High-Intent', '50.0% Enrolled'],
-            estCostInflow: '$0.00',
-            estCostLead: '$0.00',
-            estCostEnrollment: '$0.00',
-            roiRating: 'Pure Organic Authority ($0 CPL)'
-        },
-        'events': {
-            name: 'Campus QR & Events',
-            badge: '🎟️',
-            badgeBg: '#D97706',
-            badgeColor: '#FFFFFF',
-            summary: 'Admissions day brochures and high school visit QR codes generated <strong>480 scans</strong> and <strong>28 direct tour bookings</strong> with exceptional in-person conversion.',
-            stages: [480, 93, 28, 24, 5],
-            stagePcts: ['100%', '19.4%', '5.8%', '5.0%', '1.0%'],
-            stageBadges: ['100% Inflow', '19.4% Engaged', '30.1% Yield', '85.7% Tour Rate', '20.8% Enrolled'],
-            estCostInflow: '$0.20',
-            estCostLead: '$3.43',
-            estCostEnrollment: '$19.20',
-            roiRating: 'Highest On-Campus Tour Rate'
-        }
-    };
-
-    const TABLE_DATA = [
-        { rank: 1, source: 'LinkedIn Ads', medium: 'cpc', campaign: 'ug_stem_admissions', visitors: 840, chat: 126, leads: 48, bookings: 28, cpl: '$36.75', rate: '5.7%', status: 'Best Channel', type: 'paid' },
-        { rank: 2, source: 'Direct / Organic', medium: 'organic', campaign: 'institutional_seo', visitors: 1050, chat: 210, leads: 68, bookings: 42, cpl: '$0.00', rate: '6.5%', status: 'High Yield', type: 'organic' },
-        { rank: 3, source: 'Campus QR Codes', medium: 'qr', campaign: 'fall_open_house', visitors: 480, chat: 93, leads: 28, bookings: 24, cpl: '$3.43', rate: '5.8%', status: 'High Yield', type: 'event' },
-        { rank: 4, source: 'Google Ads', medium: 'cpc', campaign: 'fall_2026_scholarships', visitors: 4200, chat: 588, leads: 210, bookings: 95, cpl: '$29.00', rate: '5.0%', status: 'High Volume', type: 'paid' },
-        { rank: 5, source: 'Meta (Instagram)', medium: 'social_paid', campaign: 'campus_life_stories', visitors: 1950, chat: 273, leads: 82, bookings: 33, cpl: '$21.10', rate: '4.2%', status: 'Moderate', type: 'social' },
-        { rank: 6, source: 'Meta (Facebook)', medium: 'cpc', campaign: 'parent_admissions_feed', visitors: 1200, chat: 168, leads: 50, bookings: 21, cpl: '$19.00', rate: '4.2%', status: 'Moderate', type: 'social' }
-    ];
-
+    // Dynamic Live Models (Loaded via /v1/analytics/attribution/funnel)
+    let CHANNEL_MODELS = {};
+    let TABLE_DATA = [];
     let currentSelectedChannel = 'all';
 
     function switchSaSubView(viewKey) {
@@ -748,9 +666,44 @@
         styleActive(btnAdvisory, viewKey === 'advisory');
     }
 
+    function renderChannelChips(list) {
+        const container = document.getElementById('saChannelChipsContainer');
+        if (!container) return;
+
+        if (!list || !list.length) {
+            container.innerHTML = `
+                <button type="button" class="sa-channel-btn sa-ch-active" data-channel="all" onclick="selectSaChannel('all')">
+                    <span style="width: 7px; height: 7px; border-radius: 50%; background: #063D3B; display: inline-block;"></span>
+                    <span>All Channels</span>
+                </button>
+            `;
+            return;
+        }
+
+        container.innerHTML = list.map(c => `
+            <button type="button" class="sa-channel-btn ${c.key === currentSelectedChannel ? 'sa-ch-active' : ''}" data-channel="${escapeHtml(c.key)}" onclick="selectSaChannel('${escapeHtml(c.key)}')">
+                <span style="width: 7px; height: 7px; border-radius: 50%; background: ${c.badgeBg || '#063D3B'}; display: inline-block;"></span>
+                <span>${escapeHtml(c.name)}</span>
+            </button>
+        `).join('');
+    }
+
     function selectSaChannel(key) {
         currentSelectedChannel = key;
-        const model = CHANNEL_MODELS[key] || CHANNEL_MODELS['all'];
+        const model = (CHANNEL_MODELS && CHANNEL_MODELS[key]) ? CHANNEL_MODELS[key] : (CHANNEL_MODELS['all'] || {
+            name: 'All Channels',
+            badge: 'ALL',
+            badgeBg: '#063D3B',
+            badgeColor: '#C8FF63',
+            summary: 'No campaign traffic recorded in this date window.',
+            stages: [0, 0, 0, 0, 0],
+            stagePcts: ['0%', '0%', '0%', '0%', '0%'],
+            stageBadges: ['0 Inflow', '0 Engaged', '0 Leads', '0 High-Intent', '0 Verified (CRM Pending)'],
+            estCostInflow: '$0.00',
+            estCostLead: '$0.00',
+            estCostEnrollment: '—',
+            roiRating: 'No Traffic'
+        });
 
         // Update active class on buttons
         document.querySelectorAll('.sa-channel-btn').forEach(btn => {
@@ -765,29 +718,30 @@
         const badgeEl = document.getElementById('saSummaryBadge');
         const textEl = document.getElementById('saSummaryText');
         if (badgeEl) {
-            badgeEl.innerText = model.badge;
-            badgeEl.style.background = model.badgeBg;
-            badgeEl.style.color = model.badgeColor;
+            badgeEl.innerText = model.badge || '★';
+            badgeEl.style.background = model.badgeBg || '#063D3B';
+            badgeEl.style.color = model.badgeColor || '#C8FF63';
         }
         if (textEl) {
-            textEl.innerHTML = model.summary;
+            textEl.innerHTML = model.summary || 'Live attribution data.';
         }
 
         // Update waterfall bars
-        const maxVal = model.stages[0] || 1;
+        const stages = model.stages || [0, 0, 0, 0, 0];
+        const maxVal = stages[0] || 0;
         for (let i = 1; i <= 5; i++) {
             const bar = document.getElementById('saBarStage' + i);
             const val = document.getElementById('saValStage' + i);
             const pct = document.getElementById('saPctStage' + i);
             const badge = document.getElementById('saBadgeStage' + i);
 
-            const count = model.stages[i - 1];
-            const pctWidth = Math.max(8, Math.round((count / maxVal) * 100));
+            const count = stages[i - 1] !== undefined ? stages[i - 1] : 0;
+            const pctWidth = maxVal > 0 ? Math.max(5, Math.round((count / maxVal) * 100)) : 0;
 
-            if (bar) bar.style.width = pctWidth + '%';
+            if (bar) bar.style.width = (count === 0 && maxVal === 0 ? '0%' : (pctWidth + '%'));
             if (val) val.innerText = Number(count).toLocaleString();
-            if (pct && i > 1) pct.innerText = model.stagePcts[i - 1];
-            if (badge && i > 1) badge.innerText = model.stageBadges[i - 1];
+            if (pct && i > 1) pct.innerText = model.stagePcts ? (model.stagePcts[i - 1] || '0%') : '0%';
+            if (badge && i > 1) badge.innerText = model.stageBadges ? (model.stageBadges[i - 1] || '0%') : '0%';
         }
 
         // Update bottom metrics
@@ -796,10 +750,10 @@
         const costEnroll = document.getElementById('saEstCostEnrollment');
         const roiRating = document.getElementById('saRoiRating');
 
-        if (costInflow) costInflow.innerText = model.estCostInflow;
-        if (costLead) costLead.innerText = model.estCostLead;
-        if (costEnroll) costEnroll.innerText = model.estCostEnrollment;
-        if (roiRating) roiRating.innerText = model.roiRating;
+        if (costInflow) costInflow.innerText = model.estCostInflow || '$0.00';
+        if (costLead) costLead.innerText = model.estCostLead || '$0.00';
+        if (costEnroll) costEnroll.innerText = model.estCostEnrollment || '—';
+        if (roiRating) roiRating.innerText = model.roiRating || 'Live Production Attribution';
     }
 
     function renderMatrixTable(items) {
@@ -878,7 +832,7 @@
                     <td style="padding: 14px 16px; text-align: right; color: #2563EB;">${totChat.toLocaleString()}</td>
                     <td style="padding: 14px 16px; text-align: right; color: #059669;">${totLeads.toLocaleString()}</td>
                     <td style="padding: 14px 16px; text-align: right; color: #7C3AED;">${totBookings.toLocaleString()}</td>
-                    <td style="padding: 14px 16px; text-align: right;">$24.00 avg</td>
+                    <td style="padding: 14px 16px; text-align: right;">Mixed (Estimated - Industry Benchmark)</td>
                     <td style="padding: 14px 16px; text-align: right; color: #059669;">${overallRate}</td>
                     <td style="padding: 14px 16px; text-align: center;"><span style="background: #063D3B; color: #C8FF63; padding: 2px 8px; border-radius: 6px; font-size: 10px;">Aggregated</span></td>
                 </tr>
@@ -997,69 +951,141 @@
         });
     }
 
+    function updateAdvisoryInsights(table, funnel) {
+        const topTitle = document.getElementById('saAdvTopTitle');
+        const topBody = document.getElementById('saAdvTopBody');
+        const topRec = document.getElementById('saAdvTopRec');
+
+        const leakTitle = document.getElementById('saAdvLeakTitle');
+        const leakBody = document.getElementById('saAdvLeakBody');
+        const leakRec = document.getElementById('saAdvLeakRec');
+
+        if (!funnel || funnel.inflow === 0) {
+            if (topTitle) topTitle.innerText = 'No Traffic Detected Yet';
+            if (topBody) topBody.innerText = 'Deploy campaign UTM parameters or embed the admissions assistant widget to begin capturing real visitor attribution.';
+            if (topRec) topRec.innerText = 'Launch Campaign';
+
+            if (leakTitle) leakTitle.innerText = 'Funnel Baseline';
+            if (leakBody) leakBody.innerText = 'Ensure proactive greetings are turned on so that when students arrive, conversation engagement triggers smoothly.';
+            if (leakRec) leakRec.innerText = 'Review Greetings';
+            return;
+        }
+
+        // Top Performer
+        if (table && table.length > 0) {
+            const best = table[0];
+            if (topTitle) topTitle.innerText = `${best.source} (${best.rate} Yield)`;
+            if (topBody) topBody.innerHTML = `Campaign <strong>${escapeHtml(best.campaign)}</strong> generated <strong>${Number(best.visitors).toLocaleString()} visitors</strong> and <strong>${Number(best.leads).toLocaleString()} verified leads</strong>. It represents your highest-yield acquisition channel.`;
+            if (topRec) topRec.innerText = 'Scale Channel Budget';
+        }
+
+        // Funnel Optimization
+        if (funnel.chat_rate < 15.0) {
+            if (leakTitle) leakTitle.innerText = `Chat Inflow Drop-off (${funnel.chat_rate}%)`;
+            if (leakBody) leakBody.innerHTML = `Only <strong>${funnel.chat_rate}%</strong> of visiting students start a chat interaction. Adding contextual proactive prompts across catalog pages can lift engagement to 20%+.`;
+            if (leakRec) leakRec.innerText = 'Enable Proactive Triggers';
+        } else {
+            if (leakTitle) leakTitle.innerText = `Strong Conversational Yield (${funnel.chat_rate}%)`;
+            if (leakBody) leakBody.innerHTML = `Your chatbot is actively converting <strong>${funnel.chat_rate}%</strong> of visitors into inquiries. Continue monitoring counselor callback response time to accelerate enrollment.`;
+            if (leakRec) leakRec.innerText = 'Monitor Response Speed';
+        }
+    }
+
     async function loadSourceAttribution() {
         const days = document.getElementById('saDaysRange')?.value || '30';
-        const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token') || '';
+        const token = localStorage.getItem('token') || localStorage.getItem('edvora_token') || sessionStorage.getItem('token') || sessionStorage.getItem('edvora_token') || '';
         const orgId = localStorage.getItem('edvora_org_id') || sessionStorage.getItem('edvora_org_id') || '';
 
         const daysLabel = document.getElementById('saKpiDaysLabel');
         if (daysLabel) daysLabel.innerText = `Multi-touch visitors \u2022 ${days}d window`;
 
-        // If authenticated, attempt fetching live tenant attribution data
-        if (token) {
-            try {
-                let url = `/v1/analytics/session-journeys/campaign-sources?days=${days}&page=1&limit=25`;
-                if (orgId) url += `&organization_id=${encodeURIComponent(orgId)}`;
-                const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
-                const json = await res.json();
+        const emptyNotice = document.getElementById('saEmptyStateNotice');
 
-                if (json.status === 'success' && json.data && json.data.summary) {
-                    const sum = json.data.summary;
-                    const liveInflow = Number(sum.total_sessions || 0);
-                    const liveConv = Number(sum.total_conversions || 0);
-                    
-                    if (liveInflow > 0) {
-                        const liveChats = Math.round(liveInflow * 0.45); // estimated conversational touches
-                        const liveHighIntent = Math.round(liveConv * 0.4);
-                        
-                        document.getElementById('saKpiInflow').innerText = liveInflow.toLocaleString();
-                        document.getElementById('saKpiChat').innerText = liveChats.toLocaleString();
-                        document.getElementById('saKpiChatRate').innerText = ((liveChats / liveInflow) * 100).toFixed(1) + '% engagement rate';
-                        document.getElementById('saKpiLeads').innerText = liveConv.toLocaleString();
-                        document.getElementById('saKpiLeadYield').innerText = (sum.overall_conversion_rate || 0) + '% lead yield';
-                        document.getElementById('saKpiHighIntent').innerText = liveHighIntent.toLocaleString();
-                        document.getElementById('saKpiHighIntentRate').innerText = ((liveHighIntent / liveInflow) * 100).toFixed(1) + '% high-intent progression';
-
-                        // If live sources exist, merge into TABLE_DATA
-                        if (json.data.sources && json.data.sources.length) {
-                            json.data.sources.forEach((s, idx) => {
-                                const exist = TABLE_DATA.find(t => t.source.toLowerCase() === s.source.toLowerCase());
-                                if (exist) {
-                                    exist.visitors = Math.max(exist.visitors, s.session_count);
-                                    exist.leads = Math.max(exist.leads, s.conversions);
-                                }
-                            });
-                        }
-                    } else {
-                        applyBaselineKpi();
-                    }
-                } else {
-                    applyBaselineKpi();
-                }
-            } catch(e) {
-                console.warn('[SourceAttribution] API fallback to benchmark data:', e);
-                applyBaselineKpi();
+        if (!token) {
+            if (emptyNotice) {
+                emptyNotice.style.display = 'block';
+                const emptyTitle = document.getElementById('saEmptyStateTitle');
+                if (emptyTitle) emptyTitle.innerText = 'Please sign in to view live organization attribution data.';
             }
-        } else {
-            applyBaselineKpi();
+            renderZeroKpi();
+            return;
         }
 
-        selectSaChannel(currentSelectedChannel);
-        filterSaTable();
-        await resolveTargetWebsiteUrl();
+        try {
+            let url = `/v1/analytics/attribution/funnel?days=${days}`;
+            if (orgId) url += `&organization_id=${encodeURIComponent(orgId)}`;
+            const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
+            const json = await res.json();
+
+            if (json.status === 'success' && json.data) {
+                const data = json.data;
+                const funnel = data.funnel || {};
+
+                // Update KPI ribbon with real database counts
+                const kInflow = document.getElementById('saKpiInflow');
+                const kChat = document.getElementById('saKpiChat');
+                const kChatRate = document.getElementById('saKpiChatRate');
+                const kLeads = document.getElementById('saKpiLeads');
+                const kLeadYield = document.getElementById('saKpiLeadYield');
+                const kHighIntent = document.getElementById('saKpiHighIntent');
+                const kHighIntentRate = document.getElementById('saKpiHighIntentRate');
+
+                if (kInflow) kInflow.innerText = Number(funnel.inflow || 0).toLocaleString();
+                if (kChat) kChat.innerText = Number(funnel.chat_engaged || 0).toLocaleString();
+                if (kChatRate) kChatRate.innerText = (funnel.chat_rate || 0) + '% engagement rate';
+                if (kLeads) kLeads.innerText = Number(funnel.leads || 0).toLocaleString();
+                if (kLeadYield) kLeadYield.innerText = (funnel.lead_yield || 0) + '% lead conversion yield';
+                if (kHighIntent) kHighIntent.innerText = Number(funnel.high_intent || 0).toLocaleString();
+                if (kHighIntentRate) kHighIntentRate.innerText = (funnel.high_intent_rate || 0) + '% high-intent progression';
+
+                // Set channel models and table rows
+                CHANNEL_MODELS = data.channel_models || {};
+                TABLE_DATA = data.channels_table || [];
+
+                // Render dynamic channel filter chips in Waterfall view
+                renderChannelChips(data.channels_list || []);
+
+                // Empty state handling
+                if (!funnel.inflow || funnel.inflow === 0) {
+                    if (emptyNotice) {
+                        emptyNotice.style.display = 'block';
+                        const emptyTitle = document.getElementById('saEmptyStateTitle');
+                        if (emptyTitle) emptyTitle.innerText = 'No visitor or campaign traffic recorded in the selected time period.';
+                    }
+                } else {
+                    if (emptyNotice) emptyNotice.style.display = 'none';
+                }
+
+                // If current selected channel is not in the models, reset to 'all'
+                if (!CHANNEL_MODELS[currentSelectedChannel]) {
+                    currentSelectedChannel = 'all';
+                }
+
+                selectSaChannel(currentSelectedChannel);
+                filterSaTable();
+                updateAdvisoryInsights(TABLE_DATA, funnel);
+            } else {
+                if (emptyNotice) {
+                    emptyNotice.style.display = 'block';
+                    const emptyTitle = document.getElementById('saEmptyStateTitle');
+                    if (emptyTitle) emptyTitle.innerText = json.message || 'No visitor or campaign traffic recorded in the selected time period.';
+                }
+                renderZeroKpi();
+            }
+        } catch(e) {
+            console.error('[SourceAttribution] Error loading live attribution:', e);
+            if (emptyNotice) {
+                emptyNotice.style.display = 'block';
+                const emptyTitle = document.getElementById('saEmptyStateTitle');
+                if (emptyTitle) emptyTitle.innerText = 'Could not load attribution data. Please verify your connection.';
+            }
+            renderZeroKpi();
+        }
+
+        resolveTargetWebsiteUrl();
     }
 
-    function applyBaselineKpi() {
+    function renderZeroKpi() {
         const kInflow = document.getElementById('saKpiInflow');
         const kChat = document.getElementById('saKpiChat');
         const kChatRate = document.getElementById('saKpiChatRate');
@@ -1068,13 +1094,35 @@
         const kHighIntent = document.getElementById('saKpiHighIntent');
         const kHighIntentRate = document.getElementById('saKpiHighIntentRate');
 
-        if (kInflow) kInflow.innerText = '9,720';
-        if (kChat) kChat.innerText = '1,458';
-        if (kChatRate) kChatRate.innerText = '15.0% engagement rate';
-        if (kLeads) kLeads.innerText = '486';
-        if (kLeadYield) kLeadYield.innerText = '5.0% lead conversion yield';
-        if (kHighIntent) kHighIntent.innerText = '243';
-        if (kHighIntentRate) kHighIntentRate.innerText = '2.5% tour & callback rate';
+        if (kInflow) kInflow.innerText = '0';
+        if (kChat) kChat.innerText = '0';
+        if (kChatRate) kChatRate.innerText = '0.0% engagement rate';
+        if (kLeads) kLeads.innerText = '0';
+        if (kLeadYield) kLeadYield.innerText = '0.0% lead conversion yield';
+        if (kHighIntent) kHighIntent.innerText = '0';
+        if (kHighIntentRate) kHighIntentRate.innerText = '0.0% high-intent progression';
+
+        CHANNEL_MODELS = {
+            'all': {
+                name: 'All Channels',
+                badge: 'ALL',
+                badgeBg: '#063D3B',
+                badgeColor: '#C8FF63',
+                summary: 'No campaign visits or chatbot sessions recorded in this time window.',
+                stages: [0, 0, 0, 0, 0],
+                stagePcts: ['0%', '0%', '0%', '0%', '0%'],
+                stageBadges: ['0 Inflow', '0 Engaged', '0 Leads', '0 High-Intent', '0 Verified (CRM Pending)'],
+                estCostInflow: '$0.00',
+                estCostLead: '$0.00',
+                estCostEnrollment: '—',
+                roiRating: 'No Traffic'
+            }
+        };
+        TABLE_DATA = [];
+        renderChannelChips([]);
+        selectSaChannel('all');
+        filterSaTable();
+        updateAdvisoryInsights([], { inflow: 0 });
     }
 
     function escapeHtml(str) {

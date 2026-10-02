@@ -480,6 +480,7 @@ $router->get('/v1/analytics/session-journeys/top-visited-pages', [SessionJourney
 $router->get('/v1/analytics/session-journeys/top-exit-pages', [SessionJourneyController::class, 'getTopExitPagesReport'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->get('/v1/analytics/session-journeys/campaign-sources', [SessionJourneyController::class, 'getCampaignSourcesReport'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->get('/v1/analytics/session-journeys/{sessionId}/steps', [SessionJourneyController::class, 'getSessionSteps'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->get('/v1/analytics/attribution/funnel', [SessionJourneyController::class, 'getAttributionFunnelReport'], [AuthMiddleware::class, TenantMiddleware::class]);
 
 // High-Speed Visitor Tracking Beacon Route (Public Widget & SPA)
 $router->post('/v1/tracking/beacon', [TrackingController::class, 'handleBeacon']);
