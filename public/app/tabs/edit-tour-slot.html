@@ -92,13 +92,13 @@
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                             <div>
                                 <label for="etsStartTime" style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
-                                    <span>⏰</span> Start Time <span style="color: #EF4444;">*</span>
+                                    <span>⏰</span> Start Time (<span class="tenant-tz-label">EDT</span>) <span style="color: #EF4444;">*</span>
                                 </label>
                                 <input type="time" id="etsStartTime" required value="10:00" onchange="updateEtsLivePreview()" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
                             </div>
                             <div>
                                 <label for="etsEndTime" style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #4F7470; margin-bottom: 6px;">
-                                    <span>🏁</span> End Time <span style="color: #EF4444;">*</span>
+                                    <span>🏁</span> End Time (<span class="tenant-tz-label">EDT</span>) <span style="color: #EF4444;">*</span>
                                 </label>
                                 <input type="time" id="etsEndTime" required value="11:30" onchange="updateEtsLivePreview()" class="brand-input" style="width: 100%; box-sizing: border-box; height: 38px; font-size: 12.5px; border: 1.5px solid #DCE9E5; border-radius: 6px; padding: 0 12px;" />
                             </div>
@@ -231,7 +231,7 @@
                             <!-- Right Slot Choice List (Cal.com Look) -->
                             <div style="display: flex; flex-direction: column; gap: 6px;">
                                 <div style="font-size: 11px; font-weight: 700; color: #063D3B; margin-bottom: 2px;" id="etsPreviewSelectedDayTitle">
-                                    Selected Time
+                                    Selected Time (<span class="tenant-tz-label">EDT</span>)
                                 </div>
                                 
                                 <div id="etsPreviewTimePill" style="border: 1.5px solid #063D3B; background: #ECFDF5; border-radius: 8px; padding: 9px 10px; display: flex; align-items: center; justify-content: space-between; cursor: default;">
@@ -309,6 +309,9 @@
                 loadSlotData(targetId);
             });
         });
+        if (typeof updateTenantTzLabels === 'function') {
+            updateTenantTzLabels();
+        }
     };
 
     function loadEtsCampusesAndStaff(callback) {
@@ -687,7 +690,8 @@
             var minutes = startVal.split(':')[1];
             var ampm = hours >= 12 ? 'pm' : 'am';
             var h12 = hours % 12 || 12;
-            document.getElementById('etsPreviewSlotTimeText').innerText = h12 + ':' + minutes + ampm;
+            var tzShort = (window.tenantLocalization && window.tenantLocalization.timezone_short) ? window.tenantLocalization.timezone_short : 'EDT';
+            document.getElementById('etsPreviewSlotTimeText').innerText = h12 + ':' + minutes + ampm + ' ' + tzShort;
         }
 
         renderEtsPreviewCalendar(dateVal);

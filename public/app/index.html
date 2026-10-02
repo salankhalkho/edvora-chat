@@ -5565,6 +5565,19 @@
         }
         window.resolveClientTimezone = resolveClientTimezone;
 
+        try {
+            window.tenantCountry = localStorage.getItem('edvora_tenant_country') || 'United States';
+            window.tenantTimezone = localStorage.getItem('edvora_tenant_tz') || 'America/New_York';
+            window.tenantTzShort = localStorage.getItem('edvora_tenant_tz_short') || 'EDT';
+            window.tenantLocale = 'en-US';
+            window.tenantLocalization = {
+                country: window.tenantCountry,
+                timezone: window.tenantTimezone,
+                timezone_short: window.tenantTzShort,
+                locale: window.tenantLocale
+            };
+        } catch(_) {}
+
         function updateTenantLocalization(orgData) {
             orgData = orgData || window.currentOrgProfile || {};
             const primaryCamp = orgData.primary_campus || {};
@@ -5576,6 +5589,12 @@
             window.tenantTimezone = primaryCamp.timezone || orgData.timezone || resolved.timezone;
             window.tenantTzShort = primaryCamp.timezone_short || orgData.timezone_short || resolved.tzShort;
             window.tenantLocale = primaryCamp.locale || orgData.locale || resolved.locale;
+            window.tenantLocalization = {
+                country: window.tenantCountry,
+                timezone: window.tenantTimezone,
+                timezone_short: window.tenantTzShort,
+                locale: window.tenantLocale
+            };
 
             try {
                 localStorage.setItem('edvora_tenant_country', window.tenantCountry);

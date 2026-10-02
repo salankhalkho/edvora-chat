@@ -59,192 +59,13 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Top Navigation Header */
-    .showcase-header {
-      background: #FFFFFF;
-      border-bottom: 1.5px solid var(--e-border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 2px 12px rgba(6, 61, 59, 0.08);
-      color: var(--e-text);
-    }
-    .header-inner {
-      max-width: 1240px;
-      margin: 0 auto;
-      padding: 0 24px;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-    }
-    .brand-group {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      text-decoration: none;
-    }
-    .brand-logo-badge {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      background: #063D3B;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #C8FF63;
-      font-weight: 800;
-      font-size: 15px;
-      box-shadow: 0 2px 6px rgba(6, 61, 59, 0.2);
-    }
-    .brand-title-area {
-      display: flex;
-      flex-direction: column;
-    }
-    .brand-name {
-      font-size: 13.5px;
-      font-weight: 800;
-      color: #063D3B;
-      line-height: 1.2;
-      letter-spacing: -0.01em;
-    }
-    .brand-tag {
-      font-size: 10.5px;
-      color: #648781;
-      font-weight: 600;
-    }
-    .nav-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .nav-btn {
-      font-size: 11.5px;
-      font-weight: 700;
-      padding: 6px 14px;
-      border-radius: 8px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      text-decoration: none;
-      transition: all 0.2s ease;
-    }
-    .nav-btn-secondary {
-      background: #FFFFFF;
-      color: #063D3B;
-      border: 1px solid var(--e-border);
-    }
-    .nav-btn-secondary:hover {
-      background: #F4FAF7;
-      border-color: #B9D7C7;
-      transform: translateY(-1px);
-    }
-    .nav-btn-primary {
-      background: #063D3B;
-      color: #C8FF63;
-      border: 1px solid #063D3B;
-    }
-    .nav-btn-primary:hover {
-      background: #0A524F;
-      box-shadow: 0 4px 12px rgba(6, 61, 59, 0.2);
-      transform: translateY(-1px);
-    }
-
-    /* Sub Navigation Switcher Bar */
-    .subnav-bar {
-      background: #FAFDFB;
-      border-bottom: 1px solid #E6F0EC;
-      padding: 10px 24px;
-      color: var(--e-text);
-    }
-    .subnav-inner {
-      max-width: 1240px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .subnav-breadcrumbs {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 11.5px;
-      color: #648781;
-      font-weight: 600;
-    }
-    .subnav-breadcrumbs a {
-      color: #063D3B;
-      text-decoration: none;
-      font-weight: 700;
-    }
-    .subnav-breadcrumbs a:hover {
-      text-decoration: underline;
-    }
-    .subnav-links {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .subnav-pill {
-      font-size: 11px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 6px;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      transition: all 0.15s ease;
-    }
-    .subnav-pill.active {
-      background: #063D3B;
-      color: #C8FF63;
-    }
-    .subnav-pill:not(.active) {
-      background: #FFFFFF;
-      color: #4F7470;
-      border: 1px solid #DCE9E5;
-    }
-    .subnav-pill:not(.active):hover {
-      color: #063D3B;
-      background: #F4FAF7;
-    }
-
     /* Main Section Container */
     .main-wrapper {
       max-width: 1180px;
       margin: 0 auto;
-      padding: 48px 24px 80px 24px;
+      padding: 40px 24px 60px 24px;
     }
 
-    /* Journey Pill */
-    .jrny-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(200, 255, 99, 0.15);
-      border: 1px solid rgba(200, 255, 99, 0.3);
-      color: #C8FF63;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.09em;
-      text-transform: uppercase;
-      padding: 5px 14px;
-      border-radius: 100px;
-      margin-bottom: 14px;
-    }
-    .jrny-pill::before {
-      content: '';
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #C8FF63;
-      animation: pLd 1.7s ease-in-out infinite;
-      flex-shrink: 0;
-    }
     @keyframes pLd {
       0%, 100% { transform: scale(1); opacity: 1; }
       50% { transform: scale(0.7); opacity: 0.5; }
@@ -566,67 +387,10 @@
 </head>
 <body>
 
-  <!-- Top Sticky Navigation Bar -->
-  <header class="showcase-header">
-    <div class="header-inner">
-      <a href="https://edvora.chat/" class="brand-group">
-        <div class="brand-logo-badge">E</div>
-        <div class="brand-title-area">
-          <span class="brand-name">edvora.chat</span>
-          <span class="brand-tag">Full Funnel Student Journey Tracking</span>
-        </div>
-      </a>
-
-      <div class="nav-actions">
-        <a href="/superadmin/" class="nav-btn nav-btn-secondary">
-          <span>←</span> Superadmin Control Center
-        </a>
-        <a href="/attribution-platform.html" class="nav-btn nav-btn-secondary">
-          <span>Attribution Platform</span> <span>↗</span>
-        </a>
-        <a href="/" class="nav-btn nav-btn-primary">
-          <span>Landing Page</span> <span>↗</span>
-        </a>
-      </div>
-    </div>
-  </header>
-
-  <!-- Sub Navigation Switcher Bar -->
-  <nav class="subnav-bar">
-    <div class="subnav-inner">
-      <div class="subnav-breadcrumbs">
-        <a href="/superadmin/">Super Admin</a>
-        <span>/</span>
-        <a href="/superadmin/?tab=branding">Branding &amp; Design Labs</a>
-        <span>/</span>
-        <span style="color: #063D3B; font-weight: 700;">Full Funnel Tracking</span>
-      </div>
-
-      <div class="subnav-links">
-        <a href="/full-funnel-tracking.html" class="subnav-pill active">
-          <span>🌊</span> Full Funnel Tracking
-        </a>
-        <a href="/attribution-platform.html" class="subnav-pill">
-          <span>🎯</span> Attribution Platform
-        </a>
-        <a href="/dashboard" class="subnav-pill">
-          <span>📊</span> Admissions Dashboard
-        </a>
-        <a href="/knowledge-hub" class="subnav-pill">
-          <span>📚</span> Knowledge Hub
-        </a>
-      </div>
-    </div>
-  </nav>
-
   <!-- Main Isolated Section -->
   <main class="main-wrapper">
     <section id="student-journey">
-      <div class="text-center mb-10 sm:mb-12">
-        <div class="jrny-pill">Full Funnel Tracking</div>
-        <h1 class="font-extrabold tracking-tight mt-3 mb-4" style="font-size:clamp(1.85rem,3.3vw,2.8rem);color:#ffffff;line-height:1.15">
-          Edvora Doesn&rsquo;t Just Track Clicks.<br>It Tracks Journeys.
-        </h1>
+      <div class="text-center mb-8 sm:mb-10">
         <p class="text-[14.5px] sm:text-[15.5px] leading-[1.7] max-w-[780px] mx-auto" style="color:rgba(255,255,255,0.75)">
           Every visitor is tagged at source. Every conversation is recorded. Every lead, callback request, tour booking, and application is linked back to the channel that brought them in.
         </p>
@@ -723,22 +487,6 @@
       </div>
     </section>
   </main>
-
-  <!-- Page Footer -->
-  <footer class="showcase-footer">
-    <div class="max-w-[1140px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div>
-        &copy; 2026 <strong>edvora.chat</strong> &bull; Multi-Tenant AI Chatbot SaaS for Colleges &amp; Universities
-      </div>
-      <div class="flex items-center gap-4">
-        <a href="/superadmin/">Super Admin</a>
-        <span>&bull;</span>
-        <a href="/attribution-platform.html">Attribution Platform</a>
-        <span>&bull;</span>
-        <a href="/">Landing Page</a>
-      </div>
-    </div>
-  </footer>
 
   <script>
     (function(){
