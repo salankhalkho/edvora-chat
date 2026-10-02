@@ -924,6 +924,35 @@
     // ==========================================
     // FEEDBACKS & AI SYNTHESIS ENGINE
     // ==========================================
+    function renderAiSummaryMarkdown(md) {
+        if (!md) return '';
+        var lines = md.split('\n');
+        var out = [];
+        var inList = false;
+
+        lines.forEach(function(line) {
+            var trimmed = line.trim();
+            if (trimmed.startsWith('### ')) {
+                if (inList) { out.push('</ul>'); inList = false; }
+                var headerText = trimmed.substring(4);
+                out.push('<h4 style="margin: 14px 0 6px 0; color: #5B21B6; font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 6px;">' + headerText + '</h4>');
+            } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+                if (!inList) { out.push('<ul style="margin: 4px 0 10px 18px; padding: 0; color: #1E293B;">'); inList = true; }
+                var bullet = trimmed.substring(2);
+                bullet = bullet.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                out.push('<li style="margin-bottom: 4px; font-size: 12px; line-height: 1.5;">' + bullet + '</li>');
+            } else if (trimmed.length > 0) {
+                if (inList) { out.push('</ul>'); inList = false; }
+                var p = trimmed.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                out.push('<p style="margin: 4px 0 8px 0; font-size: 12px; line-height: 1.6; color: #334155;">' + p + '</p>');
+            } else {
+                if (inList) { out.push('</ul>'); inList = false; }
+            }
+        });
+        if (inList) out.push('</ul>');
+        return out.join('');
+    }
+
     function loadActiveSlotFeedbacks(slotId) {
         var token = localStorage.getItem('token') || (typeof window.token !== 'undefined' ? window.token : '');
         var feedContainer = document.getElementById('feedbacksFeedContainer');
@@ -951,7 +980,7 @@
                 var aiTimestamp = document.getElementById('aiSummaryTimestamp');
                 if (slot.ai_feedback_summary) {
                     if (aiCard) aiCard.style.display = 'block';
-                    if (aiContent) aiContent.innerText = slot.ai_feedback_summary;
+                    if (aiContent) aiContent.innerHTML = renderAiSummaryMarkdown(slot.ai_feedback_summary);
                     if (aiTimestamp) aiTimestamp.innerText = slot.ai_feedback_generated_at ? 'Updated ' + slot.ai_feedback_generated_at.substring(0, 16) : 'Cached Summary';
                 } else {
                     if (aiCard) aiCard.style.display = 'none';
@@ -1047,7 +1076,7 @@
                 var aiContent = document.getElementById('aiSummaryContent');
                 var aiTimestamp = document.getElementById('aiSummaryTimestamp');
                 if (aiCard) aiCard.style.display = 'block';
-                if (aiContent) aiContent.innerText = res.data.summary;
+                if (aiContent) aiContent.innerHTML = renderAiSummaryMarkdown(res.data.summary);
                 if (aiTimestamp) aiTimestamp.innerText = 'Generated ' + (res.data.generated_at || 'Just Now');
                 aiCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             } else {
