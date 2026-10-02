@@ -1115,6 +1115,9 @@
                                 <span>🏷️</span> Institutional Plans &amp; Decoupled Pricing Manager
                             </div>
                             <div style="display: flex; gap: 8px; align-items: center;">
+                                <button type="button" onclick="openTestPricingModal()" class="brand-btn brand-btn-primary brand-btn-sm" style="display: inline-flex; align-items: center; gap: 6px;" title="Guide and simulator on how to test multi-currency pricing">
+                                    <span>🧪</span> Test Pricing
+                                </button>
                                 <button onclick="loadPlans()" class="brand-btn brand-btn-secondary brand-btn-sm">
                                     🔄 Refresh Plans
                                 </button>
@@ -4154,5 +4157,7 @@
             initSuperAdmin();
         }
     </script>
+    <!-- Multi-Currency Pricing Testing Guide & Simulator Component -->
+    <script src="/superadmin/test-pricing-guide.js"></script>
 </body>
 </html>

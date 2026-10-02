@@ -1,8 +1,12 @@
 <?php
 use App\Config\Database;
 
-// Detect visitor country
-$clientCountry = strtoupper($_SERVER['HTTP_CF_IPCOUNTRY'] ?? $_SERVER['GEOIP_COUNTRY_CODE'] ?? '');
+// Detect visitor country (supports dev/QA ?country=US/IN or ?currency=USD/INR override)
+$overrideCountry = strtoupper(trim($_GET['country'] ?? ''));
+if (!$overrideCountry && isset($_GET['currency'])) {
+    $overrideCountry = (strtoupper(trim($_GET['currency'])) === 'INR') ? 'IN' : 'US';
+}
+$clientCountry = $overrideCountry ?: strtoupper($_SERVER['HTTP_CF_IPCOUNTRY'] ?? $_SERVER['GEOIP_COUNTRY_CODE'] ?? '');
 $defaultCurrency = ($clientCountry === 'IN') ? 'INR' : 'USD';
 
 // Fetch active plans from database
@@ -1084,6 +1088,15 @@ foreach ($plans as &$plan) {
     } catch (e) {}
 
     function updatePricingDisplay() {
+        // Support runtime DevTools console override: window.visitorCountry = 'US' or window.currentCurrency = 'USD'
+        if (typeof window.visitorCountry !== 'undefined' && window.visitorCountry) {
+            currentCurrency = (window.visitorCountry.toUpperCase() === 'IN') ? 'INR' : 'USD';
+            window.currentCurrency = currentCurrency;
+            window.detectedCountry = window.visitorCountry.toUpperCase();
+        } else if (window.currentCurrency && (window.currentCurrency === 'INR' || window.currentCurrency === 'USD')) {
+            currentCurrency = window.currentCurrency.toUpperCase();
+        }
+
         // Toggle billing cycle buttons active state
         const monthlyBtn = document.getElementById('cycleBtnMonthly');
         const yearlyBtn = document.getElementById('cycleBtnYearly');
@@ -1097,6 +1110,7 @@ foreach ($plans as &$plan) {
         const selector = `.${currentCurrency.toLowerCase()}-price.${currentCycle}-price`;
         document.querySelectorAll(selector).forEach(el => el.classList.remove('hidden'));
     }
+    window.updatePricingDisplay = updatePricingDisplay;
 
     function setBillingCycle(cycle) {
         currentCycle = cycle;
