@@ -7,6 +7,7 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Services\ContentEngine;
 use App\Services\IntentClassifier;
+use App\Services\LeadExtractorService;
 use App\Services\LlmService;
 use App\Services\ProgramDetector;
 use App\Services\PromptBuilder;
@@ -233,6 +234,34 @@ class ChatController
             ':content' => $userMessage
         ]);
 
+        // 3b. Proactively Scan User Message for Contact Information (Email, Phone, Name) & Capture to Leads DB
+        $extractedContact = LeadExtractorService::extract($userMessage);
+        if ($extractedContact['has_contact_info']) {
+            LeadExtractorService::syncConversationalLead(
+                $db,
+                $orgId,
+                $botId,
+                $convId,
+                $extractedContact,
+                $currentProgramId ?? null,
+                $currentProgramInterest ?? null,
+                $sessionId ?? null,
+                $visitorId ?? null
+            );
+
+            // Update in-memory state for immediate turn prompt context
+            if (!empty($extractedContact['name'])) {
+                $visitorName = $extractedContact['name'];
+            }
+            if (!empty($extractedContact['email'])) {
+                $visitorEmail = $extractedContact['email'];
+                $leadCaptured = true;
+            }
+            if (!empty($extractedContact['phone'])) {
+                $leadCaptured = true;
+            }
+        }
+
         // 4. Fetch Recent Conversation History (strictly past 6 messages including the message just saved)
         $stmtHistory = $db->prepare("
             SELECT role, content FROM messages
@@ -425,9 +454,13 @@ class ChatController
                 }
 
                 if (!empty($rawTriggerType)) {
-                    $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, $rawTriggerType, $userMessage, $activeProgramData);
-                    $leadFormsShown[] = ($rawTriggerType === 'scholarship_eval') ? 'scholarship_calculator' : $rawTriggerType;
-                    $leadFormsShown = array_values(array_unique($leadFormsShown));
+                    if (!empty($extractedContact['has_lead_contact']) && in_array($rawTriggerType, ['counselor_callback', 'brochure', 'scholarship_eval', 'asset_delivery'], true)) {
+                        $leadTriggerPayload = null;
+                    } else {
+                        $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, $rawTriggerType, $userMessage, $activeProgramData);
+                        $leadFormsShown[] = ($rawTriggerType === 'scholarship_eval') ? 'scholarship_calculator' : $rawTriggerType;
+                        $leadFormsShown = array_values(array_unique($leadFormsShown));
+                    }
                 }
             }
 
@@ -557,6 +590,10 @@ class ChatController
                 if (!empty($followUpMessage)) {
                     $aiResponseText = $followUpMessage;
                     $followUpMessage = null;
+                } elseif (!empty($extractedContact) && $extractedContact['has_lead_contact']) {
+                    $thankName = (!empty($visitorName) && $visitorName !== 'Prospective Student') ? " " . htmlspecialchars($visitorName) : "";
+                    $contactSummary = !empty($extractedContact['email']) ? $extractedContact['email'] : (!empty($extractedContact['phone']) ? $extractedContact['phone'] : 'your contact details');
+                    $aiResponseText = "Thank you{$thankName}! I've noted your contact details ({$contactSummary}). Our admissions team will connect with you shortly. How else can I assist you with our programs today?";
                 } else {
                     $aiResponseText = "How can I assist you with our academic programs and admissions today?";
                 }
@@ -672,6 +709,9 @@ class ChatController
                 'turn_count'           => $turnCount,
                 'user_message_count'   => $userMessageCountSinceLastOffer,
                 'lead_captured'        => $leadCaptured,
+                'visitor_name'         => $visitorName,
+                'visitor_email'        => $visitorEmail,
+                'contact_captured'     => !empty($extractedContact['has_contact_info']) ? $extractedContact : null,
                 'lead_forms_shown'     => $leadFormsShown,
                 'active_program'       => $activeProgramData ? $activeProgramData['course_name'] : null,
                 'masked_email'         => $maskedEmail,

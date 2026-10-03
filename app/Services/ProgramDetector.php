@@ -222,7 +222,58 @@ class ProgramDetector
                 ':oid'   => $orgId
             ]);
 
-            // Step 2: Round-robin staff assignment (always computed upfront for INSERT path)
+            // Retrieve conversation visitor info if available
+            $stmtConvData = $db->prepare("SELECT visitor_name, visitor_email, visitor_phone FROM conversations WHERE id = :cid AND organization_id = :oid");
+            $stmtConvData->execute([':cid' => $convId, ':oid' => $orgId]);
+            $convData = $stmtConvData->fetch(PDO::FETCH_ASSOC);
+
+            $shiftNote = "\n[Program interest updated to " . $programName . " on " . date('Y-m-d H:i:s') . "]";
+            $insertNotes = 'Identified interest in ' . $programName . ' during admissions counseling.';
+
+            // Step 2: Check if a lead row already exists for this conversation (e.g. chat_capture, program_interest, general)
+            $stmtExisting = $db->prepare("
+                SELECT id, program_interest, notes, name, email, phone, conversion_score
+                FROM leads
+                WHERE conversation_id = :cid AND organization_id = :oid
+                ORDER BY id DESC LIMIT 1
+            ");
+            $stmtExisting->execute([':cid' => $convId, ':oid' => $orgId]);
+            $existingLead = $stmtExisting->fetch(PDO::FETCH_ASSOC);
+
+            if ($existingLead) {
+                $newNotes = $existingLead['notes'] ?? '';
+                if (($existingLead['program_interest'] ?? '') !== $programName) {
+                    $newNotes .= $shiftNote;
+                }
+                $vName = (!empty($convData['visitor_name']) && $convData['visitor_name'] !== 'Prospective Student') ? $convData['visitor_name'] : null;
+                $vEmail = !empty($convData['visitor_email']) ? $convData['visitor_email'] : null;
+                $vPhone = !empty($convData['visitor_phone']) ? $convData['visitor_phone'] : null;
+
+                $stmtUpdate = $db->prepare("
+                    UPDATE leads
+                    SET program_id = :pid,
+                        program_interest = :pname,
+                        notes = :notes,
+                        name = IF((name = 'Prospective Student' OR name IS NULL OR name = '') AND :vname IS NOT NULL, :vname, name),
+                        email = IF(email IS NULL AND :vemail IS NOT NULL, :vemail, email),
+                        phone = IF(phone IS NULL AND :vphone IS NOT NULL, :vphone, phone),
+                        updated_at = NOW()
+                    WHERE id = :id AND organization_id = :oid
+                ");
+                $stmtUpdate->execute([
+                    ':pid'    => $programId,
+                    ':pname'  => $programName,
+                    ':notes'  => $newNotes,
+                    ':vname'  => $vName,
+                    ':vemail' => $vEmail,
+                    ':vphone' => $vPhone,
+                    ':id'     => (int)$existingLead['id'],
+                    ':oid'    => $orgId
+                ]);
+                return;
+            }
+
+            // Step 3: Round-robin staff assignment (always computed upfront for INSERT path)
             $assignedUserId = null;
             $stmtRr = $db->prepare("
                 SELECT u.id
@@ -239,21 +290,19 @@ class ProgramDetector
                 $assignedUserId = (int)$rrStaff['id'];
             }
 
-            // Step 3: Atomic UPSERT — INSERT on first detection, UPDATE on shift
-            // The unique key uq_leads_conv_type(conversation_id, lead_type) guarantees
-            // only one program_interest lead per conversation regardless of concurrency.
-            // On duplicate: update program info and append shift note only if program changed.
-            $shiftNote = "\n[Program interest updated to " . $programName . " on " . date('Y-m-d H:i:s') . "]";
-            $insertNotes = 'Identified interest in ' . $programName . ' during admissions counseling.';
+            $leadName = (!empty($convData['visitor_name']) && $convData['visitor_name'] !== 'Prospective Student') ? $convData['visitor_name'] : 'Prospective Student';
+            $leadEmail = !empty($convData['visitor_email']) ? $convData['visitor_email'] : null;
+            $leadPhone = !empty($convData['visitor_phone']) ? $convData['visitor_phone'] : null;
 
+            // Step 4: Atomic UPSERT — INSERT on first detection, UPDATE on shift
             $stmtUpsert = $db->prepare("
                 INSERT INTO leads (
                     organization_id, chatbot_id, conversation_id, program_id, assigned_user_id,
-                    name, program_interest, lead_type, status, pipeline_stage,
+                    name, email, phone, program_interest, lead_type, status, pipeline_stage,
                     conversion_score, conversion_score_rationale, notes, created_at, updated_at
                 ) VALUES (
                     :oid, :bot_id, :cid, :pid, :assigned_uid,
-                    'Prospective Student', :pname, 'program_interest', 'new', 'qualified',
+                    :name, :email, :phone, :pname, 'program_interest', 'new', 'qualified',
                     50, 'Academic program interest identified', :insert_notes, NOW(), NOW()
                 )
                 ON DUPLICATE KEY UPDATE
@@ -264,18 +313,21 @@ class ProgramDetector
                     program_interest = VALUES(program_interest),
                     updated_at       = NOW()
             ");
-            $stmtUpsert->bindValue(':oid',          $orgId,       PDO::PARAM_INT);
-            $stmtUpsert->bindValue(':bot_id',        $botId,       PDO::PARAM_INT);
-            $stmtUpsert->bindValue(':cid',           $convId,      PDO::PARAM_INT);
-            $stmtUpsert->bindValue(':pid',           $programId,   PDO::PARAM_INT);
+            $stmtUpsert->bindValue(':oid',          $orgId,          PDO::PARAM_INT);
+            $stmtUpsert->bindValue(':bot_id',       $botId,          PDO::PARAM_INT);
+            $stmtUpsert->bindValue(':cid',          $convId,         PDO::PARAM_INT);
+            $stmtUpsert->bindValue(':pid',          $programId,      PDO::PARAM_INT);
             if ($assignedUserId !== null) {
                 $stmtUpsert->bindValue(':assigned_uid', $assignedUserId, PDO::PARAM_INT);
             } else {
-                $stmtUpsert->bindValue(':assigned_uid', null, PDO::PARAM_NULL);
+                $stmtUpsert->bindValue(':assigned_uid', null,            PDO::PARAM_NULL);
             }
-            $stmtUpsert->bindValue(':pname',        $programName, PDO::PARAM_STR);
-            $stmtUpsert->bindValue(':insert_notes', $insertNotes, PDO::PARAM_STR);
-            $stmtUpsert->bindValue(':shift_note',   $shiftNote,   PDO::PARAM_STR);
+            $stmtUpsert->bindValue(':name',         $leadName,       PDO::PARAM_STR);
+            $stmtUpsert->bindValue(':email',        $leadEmail,      $leadEmail ? PDO::PARAM_STR : PDO::PARAM_NULL);
+            $stmtUpsert->bindValue(':phone',        $leadPhone,      $leadPhone ? PDO::PARAM_STR : PDO::PARAM_NULL);
+            $stmtUpsert->bindValue(':pname',        $programName,    PDO::PARAM_STR);
+            $stmtUpsert->bindValue(':insert_notes', $insertNotes,    PDO::PARAM_STR);
+            $stmtUpsert->bindValue(':shift_note',   $shiftNote,      PDO::PARAM_STR);
             $stmtUpsert->execute();
 
         } catch (Throwable $e) {

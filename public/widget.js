@@ -901,6 +901,13 @@
                 if (res.data.conversation_id) {
                     currentConversationId = res.data.conversation_id;
                 }
+                if (res.data.contact_captured) {
+                    saveStoredLead({
+                        name: res.data.visitor_name || (res.data.contact_captured ? res.data.contact_captured.name : ''),
+                        email: res.data.visitor_email || (res.data.contact_captured ? res.data.contact_captured.email : ''),
+                        phone: (res.data.contact_captured ? res.data.contact_captured.phone : '')
+                    });
+                }
                 if (res.data.program_catalog) {
                     var orgName = (res.data.program_catalog.organization_name || config.organization_name || 'our institution').trim();
                     var catalogIntro = (res.data.response && res.data.response.trim() !== '') ? res.data.response.trim() : ('At ' + orgName + ', we offer the following academic programs:');
