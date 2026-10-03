@@ -898,6 +898,26 @@
             removeTypingIndicator();
 
             if (res.status === 'success' && res.data) {
+                // Testing & Debugging: real-time phase indicator & console logger
+                if (res.data.active_phase) {
+                    if (isTest || window.edvoraDebug || window.location.search.indexOf('debug') !== -1) {
+                        var subtitleEl = document.getElementById('edvoraSubtitle');
+                        if (subtitleEl) {
+                            subtitleEl.innerHTML = '<span class="edvora-online-dot"></span>' + res.data.active_phase;
+                            subtitleEl.title = 'Active Phase: ' + (res.data.active_phase_key || res.data.active_phase);
+                        }
+                        console.log('%c🤖 [EDVORA PHASE DEBUGGER]', 'background: #063d3b; color: #c8ff63; font-weight: bold; font-size: 11px; padding: 3px 6px; border-radius: 4px;', {
+                            Phase: res.data.active_phase,
+                            PhaseKey: res.data.active_phase_key,
+                            ActiveProgram: res.data.active_program || '(none)',
+                            Intent: res.data.intent_tier,
+                            Turn: res.data.turn_count,
+                            LeadFormsShown: res.data.lead_forms_shown || [],
+                            LeadTrigger: res.data.lead_capture_trigger ? res.data.lead_capture_trigger.type : null
+                        });
+                    }
+                }
+
                 if (res.data.conversation_id) {
                     currentConversationId = res.data.conversation_id;
                 }
