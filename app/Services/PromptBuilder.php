@@ -165,17 +165,14 @@ class PromptBuilder
                 $content = strtolower($conversationHistory[$i]['content'] ?? '');
                 if (preg_match('/\b(brochure|prospectus|curriculum guide)\b/i', $content)) {
                     $lastAssistantOffer = 'brochure';
-                    break;
                 } elseif (preg_match('/\b(campus tour|visit campus|tour of our campus)\b/i', $content)) {
                     $lastAssistantOffer = 'campus_tour';
-                    break;
                 } elseif (preg_match('/\b(counselor callback|callback|phone call|call from (an|our) admissions counselor)\b/i', $content)) {
                     $lastAssistantOffer = 'counselor_callback';
-                    break;
                 } elseif (preg_match('/\b(scholarship evaluation|scholarship calculator|check your eligibility)\b/i', $content)) {
                     $lastAssistantOffer = 'scholarship_calculator';
-                    break;
                 }
+                break; // Unconditionally stop after inspecting the immediate previous assistant message
             }
         }
 
