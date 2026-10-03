@@ -196,9 +196,45 @@ class ProgramDetector
         if (count($uniquePartial) === 1) {
             return reset($uniquePartial);
         }
-        // If multiple partial matches exist (e.g. "MBA" matching both Manderson MBA and Executive MBA),
-        // it is an umbrella/multi-program inquiry. Do NOT prematurely lock; let the LLM present all options.
+        // If multiple partial matches exist (e.g. "MBA" matching both Manderson MBA and Executive MBA):
         if (count($uniquePartial) > 1) {
+            // Check if user specified a distinguishing keyword (length >= 4) that belongs to ONLY one of the candidates
+            $candidateScores = [];
+            $queryTokens = preg_split('/[\s,\.\?\!\-\(\)\/]+/', $cleanQuery);
+            $queryTokens = array_filter($queryTokens, fn($t) => strlen($t) >= 4);
+
+            foreach ($uniquePartial as $pId => $prog) {
+                $pNameTokens = preg_split('/[\s,\.\?\!\-\(\)\/]+/', mb_strtolower($prog['course_name'], 'UTF-8'));
+                $matchingUniqueTokens = 0;
+                foreach ($queryTokens as $qTok) {
+                    if (in_array($qTok, $pNameTokens, true)) {
+                        // Check if this token is shared with any other candidate
+                        $sharedWithOther = false;
+                        foreach ($uniquePartial as $otherId => $otherProg) {
+                            if ($otherId === $pId) continue;
+                            $otherTokens = preg_split('/[\s,\.\?\!\-\(\)\/]+/', mb_strtolower($otherProg['course_name'], 'UTF-8'));
+                            if (in_array($qTok, $otherTokens, true)) {
+                                $sharedWithOther = true;
+                                break;
+                            }
+                        }
+                        if (!$sharedWithOther) {
+                            $matchingUniqueTokens++;
+                        }
+                    }
+                }
+                if ($matchingUniqueTokens > 0) {
+                    $candidateScores[$pId] = $matchingUniqueTokens;
+                }
+            }
+
+            // If exactly one candidate has unique distinguishing words from the user query, select it
+            if (count($candidateScores) === 1) {
+                $winnerId = array_key_first($candidateScores);
+                return $uniquePartial[$winnerId];
+            }
+
+            // Otherwise it is an umbrella/multi-program inquiry. Do NOT prematurely lock; let the LLM present all options.
             return null;
         }
 
