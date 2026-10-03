@@ -179,7 +179,7 @@ try {
     if ($progRow) {
         $program = ['id' => (int)$progRow['id'], 'course_name' => $progRow['course_name']];
     } else {
-        $db->exec("INSERT INTO programs (organization_id, course_name, degree_level, is_active) VALUES ({$orgId}, 'Test Program B.A.', 'undergraduate', 1)");
+        $db->exec("INSERT INTO programs (organization_id, course_name, program_type) VALUES ({$orgId}, 'Test Program B.A.', 'undergraduate')");
         $tmpProgId = (int)$db->lastInsertId();
         $program = ['id' => $tmpProgId, 'course_name' => 'Test Program B.A.'];
     }
