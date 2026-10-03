@@ -122,52 +122,108 @@ class ProgramDetector
             return null;
         }
 
+        $exactMatches = [];
+        $partialMatches = [];
+
         foreach ($programs as $prog) {
             $name = mb_strtolower($prog['course_name'], 'UTF-8');
             $code = !empty($prog['course_code']) ? mb_strtolower($prog['course_code'], 'UTF-8') : null;
 
+            // Direct exact name match (e.g. user typed "Executive MBA" or full course name)
             if (str_contains($cleanQuery, $name)) {
-                return $prog;
+                $exactMatches[] = $prog;
+                continue;
             }
 
+            // Direct course code match (e.g. "MBA-610")
             if ($code && strlen($code) >= 3 && preg_match('/\b' . preg_quote($code, '/') . '\b/i', $cleanQuery)) {
-                return $prog;
+                $exactMatches[] = $prog;
+                continue;
             }
 
+            // Sub-name match without generic degree prefixes (e.g. "Computer Science", "Finance")
             $subName = preg_replace('/^(b\.?s\.?|b\.?tech\.?|m\.?s\.?|m\.?tech\.?|b\.?b\.?a\.?|m\.?b\.?a\.?|ph\.?d\.?|diploma|certificate)\s+(in|of)?\s*/i', '', $name);
             $subName = trim($subName);
             if (!empty($subName) && strlen($subName) >= 5 && str_contains($cleanQuery, $subName)) {
-                return $prog;
+                $partialMatches[] = $prog;
+                continue;
             }
 
             $parts = preg_split('/\s*(&|and)\s*/i', $subName);
+            $partMatched = false;
             foreach ($parts as $part) {
                 $part = trim($part);
                 if (strlen($part) >= 4 && str_contains($cleanQuery, $part)) {
-                    return $prog;
+                    $partialMatches[] = $prog;
+                    $partMatched = true;
+                    break;
                 }
             }
+            if ($partMatched) {
+                continue;
+            }
 
+            // Alias match
             $aliases = self::getProgramAliases($name);
             foreach ($aliases as $alias) {
                 if (preg_match('/\b' . preg_quote($alias, '/') . '\b/i', $cleanQuery)) {
-                    return $prog;
+                    $partialMatches[] = $prog;
+                    break;
                 }
             }
         }
 
+        // Deduplicate matches by program ID
+        $uniqueExact = [];
+        foreach ($exactMatches as $p) {
+            $uniqueExact[$p['id']] = $p;
+        }
+        $uniquePartial = [];
+        foreach ($partialMatches as $p) {
+            $uniquePartial[$p['id']] = $p;
+        }
+
+        // 1. If exactly one course has an exact name or code match, return it
+        if (count($uniqueExact) === 1) {
+            return reset($uniqueExact);
+        }
+        // If multiple exact matches exist, it is ambiguous
+        if (count($uniqueExact) > 1) {
+            return null;
+        }
+
+        // 2. If exactly one course matched via partial/alias, return it
+        if (count($uniquePartial) === 1) {
+            return reset($uniquePartial);
+        }
+        // If multiple partial matches exist (e.g. "MBA" matching both Manderson MBA and Executive MBA),
+        // it is an umbrella/multi-program inquiry. Do NOT prematurely lock; let the LLM present all options.
+        if (count($uniquePartial) > 1) {
+            return null;
+        }
+
+        // 3. Fallback: Context sources from RAG
+        // Only if ALL identified context sources point to the same single program
+        $contextProgramIds = [];
         foreach ($contextSources as $src) {
             if (!empty($src['program_id'])) {
+                $contextProgramIds[(int)$src['program_id']] = true;
+            } else {
+                $srcTitle = mb_strtolower($src['title'] ?? '', 'UTF-8');
                 foreach ($programs as $prog) {
-                    if ((int)$prog['id'] === (int)$src['program_id']) {
-                        return $prog;
+                    $pName = mb_strtolower($prog['course_name'], 'UTF-8');
+                    if (str_contains($srcTitle, $pName)) {
+                        $contextProgramIds[(int)$prog['id']] = true;
                     }
                 }
             }
-            $srcTitle = mb_strtolower($src['title'] ?? '', 'UTF-8');
+        }
+
+        // Only lock if exactly one distinct program is represented in context sources
+        if (count($contextProgramIds) === 1) {
+            $singleProgId = array_key_first($contextProgramIds);
             foreach ($programs as $prog) {
-                $pName = mb_strtolower($prog['course_name'], 'UTF-8');
-                if (str_contains($srcTitle, $pName)) {
+                if ((int)$prog['id'] === $singleProgId) {
                     return $prog;
                 }
             }
@@ -190,8 +246,10 @@ class ProgramDetector
         if (str_contains($lower, 'data science') || str_contains($lower, 'machine learning')) {
             $aliases = array_merge($aliases, ['data science', 'ds', 'machine learning', 'ml']);
         }
-        if (str_contains($lower, 'mba')) {
-            $aliases = array_merge($aliases, ['mba', 'executive mba', 'emba', 'management']);
+        if (str_contains($lower, 'executive mba') || str_contains($lower, 'emba')) {
+            $aliases = array_merge($aliases, ['executive mba', 'emba', 'mba']);
+        } elseif (str_contains($lower, 'mba')) {
+            $aliases = array_merge($aliases, ['mba', 'master of business administration']);
         }
         if (str_contains($lower, 'biomedical')) {
             $aliases = array_merge($aliases, ['biomedical', 'biomedical engineering', 'bme']);
