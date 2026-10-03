@@ -482,7 +482,8 @@ class ChatController
             }
 
             // [c] SEEKING_CATALOGUE: Interactive catalog triggers with clean intro bubble and enriched transcript
-            if ($parsedIntent === 'seeking_catalogue' || $parsedIntent === 'c' || (!empty($rawProgramTrigger) && $rawProgramTrigger !== 'null')) {
+            // Strictly guard: only trigger when intent is genuinely seeking_catalogue, never when intent is information_seeking
+            if ($parsedIntent === 'seeking_catalogue' || $parsedIntent === 'c') {
                 $parsedIntent = 'seeking_catalogue';
                 $followUpMessage = null;
 
