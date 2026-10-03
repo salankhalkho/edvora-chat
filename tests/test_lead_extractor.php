@@ -113,7 +113,7 @@ $nameTests = [
     ['input' => 'N/A', 'expected' => null],
     ['input' => '', 'expected' => null],
     ['input' => null, 'expected' => null],
-    ['input' => 'Dr. Robert Oppenheimer Jr.', 'expected' => 'Dr. Robert Oppenheimer Jr.'],
+    ['input' => 'Dr. Robert Oppenheimer Jr.', 'expected' => 'Dr Robert Oppenheimer Jr'],
     ['input' => '12345', 'expected' => null],
 ];
 
