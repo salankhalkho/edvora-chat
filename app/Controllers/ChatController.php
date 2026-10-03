@@ -445,29 +445,33 @@ class ChatController
                     break;
                 }
             }
-            $prevHadOffer = str_contains($lastOfferText, 'tour') || str_contains($lastOfferText, 'visit') ||
-                            str_contains($lastOfferText, 'scholarship') || str_contains($lastOfferText, 'waiver') ||
-                            str_contains($lastOfferText, 'syllabus') || str_contains($lastOfferText, 'brochure') ||
-                            str_contains($lastOfferText, 'prospectus') || str_contains($lastOfferText, 'curriculum') ||
-                            str_contains($lastOfferText, 'call') || str_contains($lastOfferText, 'callback') ||
-                            str_contains($lastOfferText, 'counselor') || str_contains($lastOfferText, 'staff');
 
-            if ($parsedIntent === 'accepting_offer' || $parsedIntent === 'a' || ($isAffirmative && $prevHadOffer)) {
+            // Check if last assistant message actually contained an explicit lead offer (strict boundaries to avoid substrings like 'typically')
+            $lastHadExplicitOffer = false;
+            $detectedOfferType = null;
+            if (preg_match('/\b(campus tour|visit campus|book a tour|schedule a tour|take a tour)\b/i', $lastOfferText)) {
+                $lastHadExplicitOffer = true;
+                $detectedOfferType = 'campus_tour';
+            } elseif (preg_match('/\b(scholarship evaluation|scholarship calculator|check your eligibility|financial aid evaluation)\b/i', $lastOfferText)) {
+                $lastHadExplicitOffer = true;
+                $detectedOfferType = 'scholarship_eval';
+            } elseif (preg_match('/\b(program brochure|download the brochure|brochure|prospectus|course brochure)\b/i', $lastOfferText)) {
+                $lastHadExplicitOffer = true;
+                $detectedOfferType = 'brochure';
+            } elseif (preg_match('/\b(counselor callback|admissions counselor callback|request a callback|callback from (an|our) admissions counselor|phone call)\b/i', $lastOfferText)) {
+                $lastHadExplicitOffer = true;
+                $detectedOfferType = 'counselor_callback';
+            }
+
+            // Only trigger lead form if intent is accepting_offer OR (user affirmed an explicit lead offer AND intent is NOT information_seeking)
+            if ($parsedIntent === 'accepting_offer' || $parsedIntent === 'a' || ($isAffirmative && $lastHadExplicitOffer && $parsedIntent !== 'information_seeking')) {
                 $parsedIntent = 'accepting_offer';
                 $aiResponseText = null;
                 $followUpMessage = null;
                 $analytics['intent_label'] = 'ACCEPTING_OFFER';
 
-                if (empty($rawTriggerType)) {
-                    if (str_contains($lastOfferText, 'tour') || str_contains($lastOfferText, 'visit')) {
-                        $rawTriggerType = 'campus_tour';
-                    } elseif (str_contains($lastOfferText, 'scholarship') || str_contains($lastOfferText, 'waiver')) {
-                        $rawTriggerType = 'scholarship_eval';
-                    } elseif (str_contains($lastOfferText, 'syllabus') || str_contains($lastOfferText, 'brochure') || str_contains($lastOfferText, 'prospectus') || str_contains($lastOfferText, 'curriculum')) {
-                        $rawTriggerType = 'brochure';
-                    } elseif (str_contains($lastOfferText, 'call') || str_contains($lastOfferText, 'advisor') || str_contains($lastOfferText, 'counselor') || str_contains($lastOfferText, 'staff') || str_contains($lastOfferText, 'complaint')) {
-                        $rawTriggerType = 'counselor_callback';
-                    }
+                if (empty($rawTriggerType) && !empty($detectedOfferType)) {
+                    $rawTriggerType = $detectedOfferType;
                 }
 
                 if (!empty($rawTriggerType)) {
