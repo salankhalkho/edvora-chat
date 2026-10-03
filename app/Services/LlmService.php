@@ -162,7 +162,7 @@ class LlmService
                     'required'             => [
                         'intent', 'intent_explanation', 'bubble_1', 'bubble_2', 'lead_form_trigger', 'human_trigger', 'program_trigger',
                         'visitor_type', 'sentiment', 'emotion', 'frustration', 'conversation_trend',
-                        'conversation_stage', 'lead_intent', 'needs_human'
+                        'conversation_stage', 'lead_intent', 'needs_human', 'student_name'
                     ],
                     'properties' => [
                         'intent'             => ['type' => 'string'],
@@ -180,6 +180,7 @@ class LlmService
                         'conversation_stage' => ['type' => 'string'],
                         'lead_intent'        => ['type' => 'string'],
                         'needs_human'        => ['type' => 'boolean'],
+                        'student_name'       => ['type' => ['string', 'null']],
                     ],
                 ],
             ],

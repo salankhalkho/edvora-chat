@@ -60,10 +60,10 @@ class LeadExtractorService
 
         $email = self::extractEmail($rawMessage);
         $phone = self::extractPhone($rawMessage);
-        $name  = self::extractName($rawMessage, $email, $phone);
+        $name  = null; // Delegated to LLM semantic JSON analysis to eliminate false positives
 
         $hasLeadContact = ($email !== null || $phone !== null);
-        $hasContactInfo = ($hasLeadContact || $name !== null);
+        $hasContactInfo = $hasLeadContact;
 
         return [
             'has_contact_info' => $hasContactInfo,
@@ -217,8 +217,20 @@ class LeadExtractorService
     }
 
     /**
-     * Clean and validate candidate name string.
+     * Clean and validate candidate name string (supports LLM extracted name or manual input).
      */
+    public static function sanitizeName(?string $raw): ?string
+    {
+        if ($raw === null) {
+            return null;
+        }
+        $trimmed = trim($raw);
+        if ($trimmed === '' || strcasecmp($trimmed, 'null') === 0 || strcasecmp($trimmed, 'none') === 0 || strcasecmp($trimmed, 'n/a') === 0) {
+            return null;
+        }
+        return self::cleanCandidateName($trimmed);
+    }
+
     private static function cleanCandidateName(string $raw): ?string
     {
         $words = preg_split('/\s+/', trim($raw));

@@ -410,6 +410,23 @@ class ChatController
                 $analytics['needs_human']        = !empty($parsed['needs_human']) ? 1 : 0;
                 $analytics['human_trigger']      = in_array($parsed['human_trigger'] ?? '', ['emotional_distress', 'wants_human']) ? $parsed['human_trigger'] : null;
                 $analytics['visitor_type']       = in_array($parsed['visitor_type'] ?? '', ['unknown', 'prospective', 'student']) ? $parsed['visitor_type'] : 'unknown';
+
+                // Extract student name parsed with full semantic intelligence by LLM
+                $llmStudentName = LeadExtractorService::sanitizeName($parsed['student_name'] ?? null);
+                if (!empty($llmStudentName)) {
+                    $visitorName = $llmStudentName;
+                    LeadExtractorService::syncConversationalLead(
+                        $db,
+                        $orgId,
+                        $botId,
+                        $convId,
+                        ['name' => $llmStudentName, 'email' => $visitorEmail, 'phone' => null],
+                        $currentProgramId ?? null,
+                        $currentProgramInterest ?? null,
+                        $sessionId ?? null,
+                        $visitorId ?? null
+                    );
+                }
             } else {
                 error_log("[ChatController] LLM JSON parse failed. Raw: " . substr($rawAiResponse, 0, 300));
                 $aiResponseText = trim($rawAiResponse);

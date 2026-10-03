@@ -17,78 +17,66 @@ use App\Config\Database;
 use App\Services\LeadExtractorService;
 use App\Services\ProgramDetector;
 
-echo "=== 1. TESTING CONTACT EXTRACTION LOGIC ===\n";
+echo "=== 1. TESTING CONTACT EXTRACTION LOGIC (EMAIL & PHONE) ===\n";
 
 $testCases = [
     [
         'input' => "Hi, my name is John Doe, email is john.doe@gmail.com and phone is 9876543210. Tell me about B.Tech CSE.",
-        'expected_name' => "John Doe",
         'expected_email' => "john.doe@gmail.com",
         'expected_phone' => "9876543210",
     ],
     [
         'input' => "I am interested in MBA programs",
-        'expected_name' => null,
         'expected_email' => null,
         'expected_phone' => null,
     ],
     [
         'input' => "rahul.sharma@yahoo.com",
-        'expected_name' => null,
         'expected_email' => "rahul.sharma@yahoo.com",
         'expected_phone' => null,
     ],
     [
         'input' => "My number is +1 (555) 234-5678",
-        'expected_name' => null,
         'expected_email' => null,
         'expected_phone' => "+15552345678",
     ],
     [
         'input' => "Can someone call me at +91 98765 43210? I'm Rahul Verma.",
-        'expected_name' => "Rahul Verma",
         'expected_email' => null,
         'expected_phone' => "+919876543210",
     ],
     [
         'input' => "Name: Priya Patel, Phone: 9876543210, priya@patel.com",
-        'expected_name' => "Priya Patel",
         'expected_email' => "priya@patel.com",
         'expected_phone' => "9876543210",
     ],
     [
         'input' => "This is David Miller. Reach me at contact@test.org or 415-555-0199",
-        'expected_name' => "David Miller",
         'expected_email' => "contact@test.org",
         'expected_phone' => "4155550199",
     ],
     [
         'input' => "What are the fees for 2024-2025 batch? My budget is $50000",
-        'expected_name' => null,
         'expected_email' => null,
         'expected_phone' => null,
     ],
     [
         'input' => "I scored 95% in 12th grade.",
-        'expected_name' => null,
         'expected_email' => null,
         'expected_phone' => null,
     ],
     [
         'input' => "Hello! My name is Emily Watson. Please send prospectus to emily@cambridge.edu",
-        'expected_name' => "Emily Watson",
         'expected_email' => "emily@cambridge.edu",
         'expected_phone' => null,
     ],
     [
         'input' => "Alex Johnson, alex.j@gmail.com, +44 7911 123456",
-        'expected_name' => "Alex Johnson",
         'expected_email' => "alex.j@gmail.com",
         'expected_phone' => "+447911123456",
     ],
     [
         'input' => "I am a student looking for scholarships",
-        'expected_name' => null,
         'expected_email' => null,
         'expected_phone' => null,
     ],
@@ -97,16 +85,14 @@ $testCases = [
 $passedCount = 0;
 foreach ($testCases as $i => $tc) {
     $result = LeadExtractorService::extract($tc['input']);
-    $nameMatch = ($result['name'] === $tc['expected_name']);
     $emailMatch = ($result['email'] === $tc['expected_email']);
     $phoneMatch = ($result['phone'] === $tc['expected_phone']);
 
-    if ($nameMatch && $emailMatch && $phoneMatch) {
+    if ($emailMatch && $phoneMatch) {
         $passedCount++;
         echo "  [PASS] Test #" . ($i + 1) . "\n";
     } else {
         echo "  [FAIL] Test #" . ($i + 1) . " ('" . $tc['input'] . "')\n";
-        echo "    Name:  expected '" . ($tc['expected_name'] ?? 'NULL') . "', got '" . ($result['name'] ?? 'NULL') . "'\n";
         echo "    Email: expected '" . ($tc['expected_email'] ?? 'NULL') . "', got '" . ($result['email'] ?? 'NULL') . "'\n";
         echo "    Phone: expected '" . ($tc['expected_phone'] ?? 'NULL') . "', got '" . ($result['phone'] ?? 'NULL') . "'\n";
     }
@@ -117,6 +103,35 @@ echo "Total Extraction Tests Passed: {$passedCount} / " . count($testCases) . "\
 if ($passedCount !== count($testCases)) {
     exit(1);
 }
+
+echo "=== 1B. TESTING LLM STUDENT NAME SANITIZATION ===\n";
+$nameTests = [
+    ['input' => 'John Doe', 'expected' => 'John Doe'],
+    ['input' => '  Emily Watson  ', 'expected' => 'Emily Watson'],
+    ['input' => 'null', 'expected' => null],
+    ['input' => 'none', 'expected' => null],
+    ['input' => 'N/A', 'expected' => null],
+    ['input' => '', 'expected' => null],
+    ['input' => null, 'expected' => null],
+    ['input' => 'Dr. Robert Oppenheimer Jr.', 'expected' => 'Dr. Robert Oppenheimer Jr.'],
+    ['input' => '12345', 'expected' => null],
+];
+
+$namePassed = 0;
+foreach ($nameTests as $j => $nt) {
+    $sanitized = LeadExtractorService::sanitizeName($nt['input']);
+    if ($sanitized === $nt['expected']) {
+        $namePassed++;
+        echo "  [PASS] Name Test #" . ($j + 1) . " ('" . ($nt['input'] ?? 'NULL') . "' -> '" . ($sanitized ?? 'NULL') . "')\n";
+    } else {
+        echo "  [FAIL] Name Test #" . ($j + 1) . ": expected '" . ($nt['expected'] ?? 'NULL') . "', got '" . ($sanitized ?? 'NULL') . "'\n";
+    }
+}
+
+if ($namePassed !== count($nameTests)) {
+    exit(1);
+}
+echo "Total Name Sanitization Tests Passed: {$namePassed} / " . count($nameTests) . "\n\n";
 
 echo "=== 2. TESTING DATABASE SYNC INTEGRATION ===\n";
 try {
@@ -142,9 +157,12 @@ try {
 
     echo "Created test conversation #{$testConvId}\n";
 
-    // Test turn 1: User introduces name and email
+    // Test turn 1: User introduces name (via LLM) and email (via extractor)
     $msg1 = "Hello! My name is Arthur Pendragon and email is arthur.p@camelot.edu";
     $extracted1 = LeadExtractorService::extract($msg1);
+    $llmName = LeadExtractorService::sanitizeName("Arthur Pendragon");
+    $extracted1['name'] = $llmName;
+
     $leadId1 = LeadExtractorService::syncConversationalLead($db, $orgId, $botId, $testConvId, $extracted1, null, null, null, $testVisitorId);
     echo "Turn 1 Sync: Lead ID = {$leadId1}\n";
 
