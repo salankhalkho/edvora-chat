@@ -249,14 +249,18 @@ class ProgramDetector
                 $vEmail = !empty($convData['visitor_email']) ? $convData['visitor_email'] : null;
                 $vPhone = !empty($convData['visitor_phone']) ? $convData['visitor_phone'] : null;
 
+                $targetName = (!empty($existingLead['name']) && $existingLead['name'] !== 'Prospective Student') ? $existingLead['name'] : ($vName ?: 'Prospective Student');
+                $targetEmail = !empty($existingLead['email']) ? $existingLead['email'] : $vEmail;
+                $targetPhone = !empty($existingLead['phone']) ? $existingLead['phone'] : $vPhone;
+
                 $stmtUpdate = $db->prepare("
                     UPDATE leads
                     SET program_id = :pid,
                         program_interest = :pname,
                         notes = :notes,
-                        name = IF((name = 'Prospective Student' OR name IS NULL OR name = '') AND :vname IS NOT NULL, :vname, name),
-                        email = IF(email IS NULL AND :vemail IS NOT NULL, :vemail, email),
-                        phone = IF(phone IS NULL AND :vphone IS NOT NULL, :vphone, phone),
+                        name = :name,
+                        email = :email,
+                        phone = :phone,
                         updated_at = NOW()
                     WHERE id = :id AND organization_id = :oid
                 ");
@@ -264,9 +268,9 @@ class ProgramDetector
                     ':pid'    => $programId,
                     ':pname'  => $programName,
                     ':notes'  => $newNotes,
-                    ':vname'  => $vName,
-                    ':vemail' => $vEmail,
-                    ':vphone' => $vPhone,
+                    ':name'   => $targetName,
+                    ':email'  => $targetEmail,
+                    ':phone'  => $targetPhone,
                     ':id'     => (int)$existingLead['id'],
                     ':oid'    => $orgId
                 ]);

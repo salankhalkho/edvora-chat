@@ -173,21 +173,33 @@ try {
     echo "  [PASS] Lead row updated with Phone, preserving Name and Email\n";
 
     // Test turn 3: Program interest detected
-    $program = ['id' => 999999, 'course_name' => 'Medieval History B.A.'];
+    $stmtProg = $db->prepare("SELECT id, course_name FROM programs WHERE organization_id = :oid LIMIT 1");
+    $stmtProg->execute([':oid' => $orgId]);
+    $progRow = $stmtProg->fetch(PDO::FETCH_ASSOC);
+    if ($progRow) {
+        $program = ['id' => (int)$progRow['id'], 'course_name' => $progRow['course_name']];
+    } else {
+        $db->exec("INSERT INTO programs (organization_id, course_name, degree_level, is_active) VALUES ({$orgId}, 'Test Program B.A.', 'undergraduate', 1)");
+        $tmpProgId = (int)$db->lastInsertId();
+        $program = ['id' => $tmpProgId, 'course_name' => 'Test Program B.A.'];
+    }
     ProgramDetector::syncProgramLead($db, $orgId, $botId, $testConvId, $program);
 
     $stmtCheck3 = $db->prepare("SELECT * FROM leads WHERE id = :id");
     $stmtCheck3->execute([':id' => $leadId2]);
     $leadRow3 = $stmtCheck3->fetch(PDO::FETCH_ASSOC);
 
-    assert($leadRow3['program_interest'] === 'Medieval History B.A.', "Program interest must be set on existing lead");
+    assert($leadRow3['program_interest'] === $program['course_name'], "Program interest must be set on existing lead");
     assert($leadRow3['email'] === 'arthur.p@camelot.edu', "Email must remain preserved after program detection");
     assert($leadRow3['name'] === 'Arthur Pendragon', "Name must remain preserved after program detection");
     echo "  [PASS] Program interest linked to lead row without data loss\n";
 
     // Clean up test records
-    $db->exec("DELETE FROM leads WHERE id = {$leadId1}");
+    $db->exec("DELETE FROM leads WHERE conversation_id = {$testConvId}");
     $db->exec("DELETE FROM conversations WHERE id = {$testConvId}");
+    if (isset($tmpProgId)) {
+        $db->exec("DELETE FROM programs WHERE id = {$tmpProgId}");
+    }
     echo "Cleaned up test conversation and lead records.\n";
     echo "=== ALL INTEGRATION TESTS PASSED SUCCESSFULLY! ===\n";
 

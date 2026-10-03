@@ -297,25 +297,32 @@ class LeadExtractorService
             $isInitialCapture = empty($convRow['lead_captured_at']) && $hasLeadContactNow;
 
             // Update conversations table
+            $nameCollected = (!empty($finalName) && $finalName !== 'Prospective Student') ? 1 : ($convRow['lead_name_collected'] ?? 0);
+            $emailCollected = !empty($finalEmail) ? 1 : ($convRow['lead_email_collected'] ?? 0);
+            $phoneCollected = !empty($finalPhone) ? 1 : ($convRow['lead_phone_collected'] ?? 0);
+
             $stmtUpdateConv = $db->prepare("
                 UPDATE conversations
-                SET visitor_name = COALESCE(:vname, visitor_name),
-                    visitor_email = COALESCE(:vemail, visitor_email),
-                    visitor_phone = COALESCE(:vphone, visitor_phone),
-                    lead_name_collected = IF(:vname IS NOT NULL AND :vname != '', 1, lead_name_collected),
-                    lead_email_collected = IF(:vemail IS NOT NULL AND :vemail != '', 1, lead_email_collected),
-                    lead_phone_collected = IF(:vphone IS NOT NULL AND :vphone != '', 1, lead_phone_collected),
-                    lead_program_interest = COALESCE(:pname, lead_program_interest),
-                    program_id = COALESCE(:pid, program_id),
+                SET visitor_name = :vname,
+                    visitor_email = :vemail,
+                    visitor_phone = :vphone,
+                    lead_name_collected = :name_col,
+                    lead_email_collected = :email_col,
+                    lead_phone_collected = :phone_col,
+                    lead_program_interest = :pname,
+                    program_id = :pid,
                     lead_captured_at = IF(:has_contact = 1 AND lead_captured_at IS NULL, NOW(), lead_captured_at)
                 WHERE id = :cid AND organization_id = :oid
             ");
             $stmtUpdateConv->execute([
-                ':vname'       => $extractedName,
-                ':vemail'      => $extractedEmail,
-                ':vphone'      => $extractedPhone,
-                ':pname'       => $programInterest,
-                ':pid'         => $programId,
+                ':vname'       => $finalName,
+                ':vemail'      => $finalEmail,
+                ':vphone'      => $finalPhone,
+                ':name_col'    => $nameCollected,
+                ':email_col'   => $emailCollected,
+                ':phone_col'   => $phoneCollected,
+                ':pname'       => $finalProgName,
+                ':pid'         => $finalProgId,
                 ':has_contact' => $hasLeadContactNow ? 1 : 0,
                 ':cid'         => $convId,
                 ':oid'         => $orgId
@@ -323,7 +330,7 @@ class LeadExtractorService
 
             // Step 2: Check for existing lead row for this conversation
             $stmtLeadCheck = $db->prepare("
-                SELECT id, name, email, phone, program_interest, program_id, lead_type, conversion_score, notes
+                SELECT id, name, email, phone, program_interest, program_id, lead_type, conversion_score, notes, pipeline_stage, conversion_score_rationale
                 FROM leads
                 WHERE conversation_id = :cid AND organization_id = :oid
                 ORDER BY id DESC LIMIT 1
@@ -354,33 +361,46 @@ class LeadExtractorService
                 $newNotes = ($existingLead['notes'] ?? '') . $captureNote;
                 $newScore = $hasLeadContactNow ? max((int)($existingLead['conversion_score'] ?? 50), 80) : (int)($existingLead['conversion_score'] ?? 50);
 
+                $targetLeadName = (!empty($existingLead['name']) && $existingLead['name'] !== 'Prospective Student')
+                    ? $existingLead['name']
+                    : ($finalName ?: 'Prospective Student');
+                $targetLeadEmail = !empty($existingLead['email']) ? $existingLead['email'] : $finalEmail;
+                $targetLeadPhone = !empty($existingLead['phone']) ? $existingLead['phone'] : $finalPhone;
+                $targetStage = ($hasLeadContactNow && ($existingLead['pipeline_stage'] ?? 'new') === 'new')
+                    ? 'qualified'
+                    : ($existingLead['pipeline_stage'] ?? 'new');
+                $targetRationale = $hasLeadContactNow
+                    ? 'Contact details proactively captured from chat dialogue'
+                    : ($existingLead['conversion_score_rationale'] ?? 'Active inquiry exploring academic programs');
+
                 $stmtUpdateLead = $db->prepare("
                     UPDATE leads
-                    SET name = IF((name = 'Prospective Student' OR name IS NULL OR name = '') AND :name IS NOT NULL, :name, name),
-                        email = COALESCE(:email, email),
-                        phone = COALESCE(:phone, phone),
-                        program_interest = COALESCE(:prog_name, program_interest),
-                        program_id = COALESCE(:prog_id, program_id),
-                        session_id = COALESCE(:sid, session_id),
-                        pipeline_stage = IF(:has_contact = 1 AND pipeline_stage = 'new', 'qualified', pipeline_stage),
+                    SET name = :name,
+                        email = :email,
+                        phone = :phone,
+                        program_interest = :prog_name,
+                        program_id = :prog_id,
+                        session_id = :sid,
+                        pipeline_stage = :stage,
                         conversion_score = :score,
-                        conversion_score_rationale = IF(:has_contact = 1, 'Contact details proactively captured from chat dialogue', conversion_score_rationale),
+                        conversion_score_rationale = :rationale,
                         notes = :notes,
                         updated_at = NOW()
                     WHERE id = :lid AND organization_id = :oid
                 ");
                 $stmtUpdateLead->execute([
-                    ':name'        => $extractedName,
-                    ':email'       => $extractedEmail,
-                    ':phone'       => $extractedPhone,
-                    ':prog_name'   => $finalProgName,
-                    ':prog_id'     => $finalProgId,
-                    ':sid'         => $sessionId ?: null,
-                    ':has_contact' => $hasLeadContactNow ? 1 : 0,
-                    ':score'       => $newScore,
-                    ':notes'       => $newNotes,
-                    ':lid'         => $leadId,
-                    ':oid'         => $orgId
+                    ':name'      => $targetLeadName,
+                    ':email'     => $targetLeadEmail,
+                    ':phone'     => $targetLeadPhone,
+                    ':prog_name' => $finalProgName,
+                    ':prog_id'   => $finalProgId,
+                    ':sid'       => $sessionId ?: null,
+                    ':stage'     => $targetStage,
+                    ':score'     => $newScore,
+                    ':rationale' => $targetRationale,
+                    ':notes'     => $newNotes,
+                    ':lid'       => $leadId,
+                    ':oid'       => $orgId
                 ]);
             } else {
                 // INSERT new lead record
