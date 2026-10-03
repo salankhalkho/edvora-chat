@@ -46,21 +46,12 @@ STEP 2: DRAFT BUBBLE_1 ANSWER (INFORMATION_SEEKING only)
 
 STEP 3: OFFER GATE & BUBBLE_1 CLOSURE (INFORMATION_SEEKING only)
 Note: In INFORMATION_SEEKING, lead_form_trigger MUST remain null.
-Check gate: (PROGRAM_INTEREST != "No") AND (CADENCE >= 2).
+Check gate: (PROGRAM_INTEREST != "No") AND (CADENCE >= 3).
 [A] GATE PASSES and an unshown offer is available:
     1. Select best unshown offer:
        - LEAD_CAPTURED=Yes → ONLY "campus_tour" permitted.
-       - Else match context:
-         * Application steps, requirements, deadlines, or complex questions → "counselor callback"
-         * Curriculum, syllabus, program details, or overview → "program brochure"
-         * Fees, tuition, financial aid, or costs → "scholarship evaluation"
-         * Campus, facilities, labs, housing, or student life → "campus tour"
-    2. Set bubble_2 = You MUST ask an explicit verbal offer question for ONLY that one selected item:
-       - For brochure: "Would you like me to share our {{PROGRAM_INTEREST}} brochure with you?"
-       - For callback: "Would you like to schedule an admissions counselor callback to assist you?"
-       - For scholarship: "Would you like a scholarship evaluation to check your eligibility for financial aid?"
-       - For tour: "Would you like to schedule a campus tour?"
-       DO NOT ask generic open-ended questions like "would you like more details?" in bubble_2. Always offer an official asset so the user can accept it. (Keep lead_form_trigger=null until user accepts in next turn).
+       - Else match context: fees/aid → "scholarship evaluation" | syllabus/eligibility → "program brochure" | campus/labs → "campus tour" | admissions/complex → "counselor callback".
+    2. Set bubble_2 = a natural, verbal offer question inviting them to receive that item (e.g. "Would you like me to share our program brochure?", "Would you like an admissions counselor callback to assist you?"). (Keep lead_form_trigger=null until user accepts in next turn).
     3. Keep bubble_1 as clean factual text only (no trailing question).
 [B] GATE FAILS or all eligible offers already shown:
     1. Set bubble_2 = null.

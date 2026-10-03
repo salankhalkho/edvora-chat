@@ -576,32 +576,37 @@ class ChatController
                         $followUpMessage = null;
                     }
                 }
-                // Cadence Gate: user_message_count >= 3 required (except escalation e & f)
-                elseif ($userMessageCountSinceLastOffer < 3 && !$isEscalation) {
+                // Cadence Gate: user_message_count >= 2 required (except escalation e & f)
+                elseif ($userMessageCountSinceLastOffer < 2 && !$isEscalation) {
                     $followUpMessage = null;
                 }
             }
 
-            // Track offer presentation in session state
+            // Track offer presentation in session state (strictly only when an actual lead asset was offered)
             if (!empty($followUpMessage)) {
                 $lowerFu = strtolower($followUpMessage);
-                $offeredKey = 'counselor_callback';
-                if (str_contains($lowerFu, 'tour') || str_contains($lowerFu, 'visit')) {
+                $offeredKey = null;
+                if (preg_match('/\b(tour|visit)\b/i', $lowerFu)) {
                     $offeredKey = 'campus_tour';
-                } elseif (str_contains($lowerFu, 'scholarship') || str_contains($lowerFu, 'waiver')) {
+                } elseif (preg_match('/\b(scholarship|financial aid|waiver)\b/i', $lowerFu)) {
                     $offeredKey = 'scholarship_calculator';
-                } elseif (str_contains($lowerFu, 'brochure') || str_contains($lowerFu, 'prospectus') || str_contains($lowerFu, 'syllabus')) {
+                } elseif (preg_match('/\b(brochure|prospectus)\b/i', $lowerFu)) {
                     $offeredKey = 'brochure';
+                } elseif (preg_match('/\b(counselor callback|callback|phone call|call from (an|our) admissions counselor|speak with an advisor)\b/i', $lowerFu)) {
+                    $offeredKey = 'counselor_callback';
                 }
-                $leadFormsShown[] = $offeredKey;
-                $leadFormsShown = array_values(array_unique($leadFormsShown));
 
-                $stmtConvUpdate = $db->prepare("UPDATE conversations SET last_offer_turn = :turn, total_offers_count = total_offers_count + 1, lead_forms_shown = :shown WHERE id = :id");
-                $stmtConvUpdate->execute([
-                    ':turn' => $turnCount,
-                    ':shown' => json_encode($leadFormsShown),
-                    ':id' => $convId
-                ]);
+                if (!empty($offeredKey)) {
+                    $leadFormsShown[] = $offeredKey;
+                    $leadFormsShown = array_values(array_unique($leadFormsShown));
+
+                    $stmtConvUpdate = $db->prepare("UPDATE conversations SET last_offer_turn = :turn, total_offers_count = total_offers_count + 1, lead_forms_shown = :shown WHERE id = :id");
+                    $stmtConvUpdate->execute([
+                        ':turn' => $turnCount,
+                        ':shown' => json_encode($leadFormsShown),
+                        ':id' => $convId
+                    ]);
+                }
             } elseif (!empty($leadTriggerPayload)) {
                 $stmtConvUpdate = $db->prepare("UPDATE conversations SET lead_forms_shown = :shown WHERE id = :id");
                 $stmtConvUpdate->execute([
