@@ -486,8 +486,11 @@ class ChatController
             }
 
             // [c] SEEKING_CATALOGUE: Interactive catalog triggers with clean intro bubble and enriched transcript
-            // Strictly guard: only trigger when intent is genuinely seeking_catalogue, never when intent is information_seeking
-            if ($parsedIntent === 'seeking_catalogue' || $parsedIntent === 'c') {
+            // Guard: Trigger if intent is genuinely seeking_catalogue, or if user asked broad catalog question without mentioning a specific major
+            $isBroadCatalogRequest = (bool)preg_match('/\b(all courses|course list|courses available|courses do you offer|courses do you have|program list|programs do you offer|all programs|list of (courses|programs)|show catalog|course catalog|program catalog|what courses|what programs)\b/i', $userMessage);
+            $hasSpecificSubject = (bool)preg_match('/\b(mba|executive mba|computer science|cs|nursing|engineering|finance|accounting|biology|chemistry|psychology|law)\b/i', $userMessage);
+
+            if ($parsedIntent === 'seeking_catalogue' || $parsedIntent === 'c' || ($rawProgramTrigger === 'all' && $isBroadCatalogRequest && !$hasSpecificSubject)) {
                 $parsedIntent = 'seeking_catalogue';
                 $followUpMessage = null;
 
