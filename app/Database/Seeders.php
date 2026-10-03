@@ -43,6 +43,26 @@ class Seeders
             }
         }
 
+        // 2b. Default Phased Master Prompts
+        $promptsDir = dirname(__DIR__) . '/Config/Prompts';
+        $phaseFallbacks = [
+            'master_prompt_phase_1'     => 'phase_1.txt',
+            'master_prompt_phase_2'     => 'phase_2.txt',
+            'master_prompt_scholarship' => 'scholarship.txt',
+            'master_prompt_phase_3'     => 'phase_3.txt',
+        ];
+
+        foreach ($phaseFallbacks as $phaseKey => $phaseFile) {
+            $stmt = $this->db->prepare("SELECT id, value_text FROM platform_config WHERE key_name = :k");
+            $stmt->execute([':k' => $phaseKey]);
+            $existing = $stmt->fetch(\PDO::FETCH_ASSOC);
+            if (!$existing && file_exists("{$promptsDir}/{$phaseFile}")) {
+                $content = trim(file_get_contents("{$promptsDir}/{$phaseFile}"));
+                $stmtInsert = $this->db->prepare("INSERT INTO platform_config (key_name, value_text, updated_at) VALUES (:k, :val, NOW())");
+                $stmtInsert->execute([':k' => $phaseKey, ':val' => $content]);
+            }
+        }
+
         // 3. Default Plans (Starter, Growth, Pro)
         $plans = [
             [

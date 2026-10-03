@@ -332,7 +332,20 @@ class ChatController
         $lastOfferTurn = (int)($conv['last_offer_turn'] ?? 0);
         $userMessageCountSinceLastOffer = max(0, $turnCount - $lastOfferTurn);
 
-        // 8. Build Fresh Structured System Prompt
+        // 8. Determine Active Conversational Phase
+        $activePhaseKey = PromptBuilder::determinePhase($userMessage, $leadCaptured, $activeProgramData, $leadFormsShown, $history);
+        $phaseLabels = [
+            'master_prompt_phase_1'     => 'Phase 1: Discovery & Rapport',
+            'master_prompt_phase_2'     => 'Phase 2: Program & Offers',
+            'master_prompt_scholarship' => 'Specialized: Financial Aid & Scholarships',
+            'master_prompt_phase_3'     => 'Phase 3: Post-Lead Advisory',
+        ];
+        $activePhaseLabel = $phaseLabels[$activePhaseKey] ?? 'Phase 1: Discovery & Rapport';
+        if (!headers_sent()) {
+            header("X-Chatbot-Phase: {$activePhaseLabel}");
+        }
+
+        // Build Fresh Structured System Prompt
         $systemPrompt = PromptBuilder::build(
             $orgId,
             $contextSources,
@@ -341,7 +354,8 @@ class ChatController
             $leadFormsShown,
             $userMessageCountSinceLastOffer,
             $history,
-            $bot['system_prompt_override'] ?? null
+            $bot['system_prompt_override'] ?? null,
+            $userMessage
         );
 
         // 9. Invoke LLM Service with Strict Structured Schema
@@ -351,7 +365,7 @@ class ChatController
             'activity_type'            => 'chat_completion',
             'reference_type'           => 'conversation',
             'reference_id'             => $convId,
-            'description'              => "Chat turn #{$turnCount}",
+            'description'              => "Turn #{$turnCount} [{$activePhaseLabel}]",
             'response_format_override' => LlmService::getAdmissionsResponseSchema(),
         ];
 
@@ -576,8 +590,9 @@ class ChatController
                         $followUpMessage = null;
                     }
                 }
-                // Cadence Gate: user_message_count >= 2 required (except escalation e & f)
-                elseif ($userMessageCountSinceLastOffer < 2 && !$isEscalation) {
+                // Cadence Gate: user_message_count >= 2 required (except escalation e & f, and scholarship/aid inquiries)
+                $isScholarshipOffer = (bool)preg_match('/\b(scholarship|financial aid|waiver)\b/i', (string)$followUpMessage);
+                if ($userMessageCountSinceLastOffer < 2 && !$isEscalation && !$isScholarshipOffer) {
                     $followUpMessage = null;
                 }
             }
@@ -752,6 +767,8 @@ class ChatController
                 'needs_human'          => (bool)$analytics['needs_human'],
                 'is_fallback'          => (bool)$isFallback,
                 'source'               => $msgSource,
+                'active_phase'         => $activePhaseLabel,
+                'active_phase_key'     => $activePhaseKey,
             ]);
 
         } catch (Throwable $e) {

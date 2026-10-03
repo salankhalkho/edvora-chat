@@ -1036,32 +1036,53 @@
                     </div>
                 </div>
 
-                <!-- 2. MASTER PROMPT TAB -->
+                <!-- 2. MASTER PROMPT TAB (PHASED) -->
                 <div class="tab-view" id="tab-prompt">
                     <div class="brand-panel">
                         <div class="brand-panel-header" style="height: auto; min-height: var(--brand-panel-header-h); padding: 8px 16px;">
                             <div class="panel-heading" style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px;">
-                                <div><span>⚡</span> Global Master System Prompt Template</div>
-                                <div style="font-size: 11px; font-weight: 400; color: var(--brand-text-muted);">
-                                    Master prompt is saved in the Database (<code>platform_config</code> table)
+                                <div><span>🧠</span> Conversational Phase Prompts Manager</div>
+                                <div id="promptLastUpdated" style="font-size: 11px; font-weight: 400; color: var(--brand-text-muted);">
+                                    Managed dynamically per phase in <code>platform_config</code>
                                 </div>
                             </div>
-                            <button onclick="loadMasterPrompt()" class="brand-btn brand-btn-secondary brand-btn-sm">
-                                🔄 Reload
+                            <button type="button" onclick="loadPhasedPrompts()" class="brand-btn brand-btn-secondary brand-btn-sm">
+                                🔄 Reload All
                             </button>
                         </div>
-                        <p style="color: var(--brand-text-muted); margin-bottom: 14px; line-height: 1.5;">
-                            This prompt acts as the foundational guardrail prepended to <strong>all AI chatbot conversations</strong> across all college tenants.
-                            Dynamic placeholders: <code>{{COLLEGE_NAME}}</code>, <code>{{KNOWLEDGE_CONTEXT}}</code>.
-                        </p>
+
+                        <!-- Phase Sub-tabs -->
+                        <div style="display: flex; border-bottom: 1px solid var(--brand-border, #e2e8f0); gap: 8px; margin-bottom: 12px; padding: 4px 0; overflow-x: auto;">
+                            <button type="button" class="brand-btn brand-btn-ghost phase-tab-btn active" data-phase="master_prompt_phase_1" onclick="switchPromptPhase('master_prompt_phase_1')" style="font-size: 12px; padding: 6px 12px;">
+                                🎯 Phase 1: Discovery &amp; Rapport
+                            </button>
+                            <button type="button" class="brand-btn brand-btn-ghost phase-tab-btn" data-phase="master_prompt_phase_2" onclick="switchPromptPhase('master_prompt_phase_2')" style="font-size: 12px; padding: 6px 12px;">
+                                🚀 Phase 2: Program &amp; Offers
+                            </button>
+                            <button type="button" class="brand-btn brand-btn-ghost phase-tab-btn" data-phase="master_prompt_scholarship" onclick="switchPromptPhase('master_prompt_scholarship')" style="font-size: 12px; padding: 6px 12px;">
+                                💰 Financial Aid &amp; Scholarships
+                            </button>
+                            <button type="button" class="brand-btn brand-btn-ghost phase-tab-btn" data-phase="master_prompt_phase_3" onclick="switchPromptPhase('master_prompt_phase_3')" style="font-size: 12px; padding: 6px 12px;">
+                                🎓 Phase 3: Post-Lead Advisory
+                            </button>
+                            <button type="button" class="brand-btn brand-btn-ghost phase-tab-btn" data-phase="master_prompt" onclick="switchPromptPhase('master_prompt')" style="font-size: 12px; padding: 6px 12px;">
+                                ⚙️ Legacy Fallback Prompt
+                            </button>
+                        </div>
+
+                        <!-- Phase Description Banner -->
+                        <div id="phaseDescriptionText" style="padding: 10px 14px; background: var(--brand-bg-subtle, #f8fafc); border: 1px solid var(--brand-border, #e2e8f0); border-radius: 6px; font-size: 12px; color: var(--brand-text-default, #334155); margin-bottom: 14px; line-height: 1.5;">
+                            Phase 1: Discovery &amp; Rapport — Used when the visitor has NOT yet chosen a specific program. Friendly, warm, chatty, probing. Answers general questions and catalog requests. Zero lead pitching.
+                        </div>
+
                         <form id="promptForm">
                             <div class="form-group" style="margin-bottom: 16px;">
-                                <textarea id="promptText" class="form-textarea" required placeholder="Enter system prompt..." style="field-sizing: content; min-height: 500px; resize: vertical; overflow-y: visible;"></textarea>
+                                <textarea id="promptText" class="form-textarea" required placeholder="Enter system prompt for active phase..." style="field-sizing: content; min-height: 500px; resize: vertical; overflow-y: visible; font-family: monospace; font-size: 12px; line-height: 1.5;"></textarea>
                             </div>
                             <div style="display: flex; align-items: center; justify-content: space-between;">
                                 <div id="promptCharCount" style="color: var(--brand-text-muted); font-size: 11px;">0 characters</div>
-                                <button type="submit" class="brand-btn brand-btn-primary">
-                                    💾 Save Master Prompt
+                                <button type="submit" id="savePromptBtn" class="brand-btn brand-btn-primary">
+                                    💾 Save Active Phase Prompt
                                 </button>
                             </div>
                         </form>
@@ -2634,47 +2655,11 @@
         }
 
         async function loadMasterPrompt() {
-            const data = await apiFetch('/v1/superadmin/prompt');
-            if (data.status === 'success') {
-                const prompt = data.data.master_prompt || '';
-                const el = document.getElementById('promptText');
-                el.value = prompt;
-                updateCharCount(prompt);
-                autoResizePromptText();
-                setTimeout(autoResizePromptText, 100);
+            if (typeof window.loadPhasedPrompts === 'function') {
+                return window.loadPhasedPrompts();
             }
         }
 
-        function updateCharCount(text) {
-            document.getElementById('promptCharCount').innerText = `${text.length.toLocaleString()} characters`;
-        }
-
-        document.getElementById('promptText').addEventListener('input', (e) => {
-            updateCharCount(e.target.value);
-            autoResizePromptText();
-        });
-
-        document.getElementById('promptForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const text = document.getElementById('promptText').value.trim();
-            const btn = e.target.querySelector('button');
-            btn.disabled = true;
-            btn.innerText = 'Saving Master Prompt...';
-
-            const data = await apiFetch('/v1/superadmin/prompt', {
-                method: 'PUT',
-                body: JSON.stringify({ master_prompt: text })
-            });
-
-            btn.disabled = false;
-            btn.innerText = '💾 Save Master Prompt';
-
-            if (data.status === 'success') {
-                showToast('Master Prompt updated successfully!', 'success');
-            } else {
-                showToast(data.message || 'Failed to update master prompt.', 'error');
-            }
-        };
 
         // ==========================================
         // COLLEGE TENANTS LOGIC
@@ -4159,5 +4144,7 @@
     </script>
     <!-- Multi-Currency Pricing Testing Guide & Simulator Component -->
     <script src="/superadmin/test-pricing-guide.js"></script>
+    <!-- Phased Prompts Manager Component -->
+    <script src="/superadmin/phased-prompts.js"></script>
 </body>
 </html>

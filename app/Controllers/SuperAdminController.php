@@ -16,41 +16,107 @@ use Throwable;
 class SuperAdminController
 {
     /**
-     * GET /v1/superadmin/prompt — Retrieve Master Prompt
+     * GET /v1/superadmin/prompt — Retrieve Master Prompts (Phased & Legacy)
      */
     public function getMasterPrompt(Request $request, array $params = []): void
     {
         $db = Database::getConnection();
-        $stmt = $db->query("SELECT value_text, updated_at FROM platform_config WHERE key_name = 'master_prompt' LIMIT 1");
-        $config = $stmt->fetch();
+        $keys = ['master_prompt', 'master_prompt_phase_1', 'master_prompt_phase_2', 'master_prompt_scholarship', 'master_prompt_phase_3'];
+        $inClause = "'" . implode("','", $keys) . "'";
+        $stmt = $db->query("SELECT key_name, value_text, updated_at FROM platform_config WHERE key_name IN ({$inClause})");
+        $rows = $stmt->fetchAll();
+
+        $prompts = [];
+        $latestUpdate = null;
+        foreach ($rows as $r) {
+            $prompts[$r['key_name']] = $r['value_text'];
+            if (!$latestUpdate || ($r['updated_at'] && $r['updated_at'] > $latestUpdate)) {
+                $latestUpdate = $r['updated_at'];
+            }
+        }
+
+        // Load default fallbacks from disk if phase keys are not yet configured in DB
+        $promptsDir = dirname(__DIR__) . '/Config/Prompts';
+        $phaseFallbacks = [
+            'master_prompt_phase_1'     => 'phase_1.txt',
+            'master_prompt_phase_2'     => 'phase_2.txt',
+            'master_prompt_scholarship' => 'scholarship.txt',
+            'master_prompt_phase_3'     => 'phase_3.txt',
+        ];
+
+        foreach ($phaseFallbacks as $k => $file) {
+            if (empty($prompts[$k]) && file_exists("{$promptsDir}/{$file}")) {
+                $prompts[$k] = file_get_contents("{$promptsDir}/{$file}");
+            }
+        }
 
         Response::success([
-            'master_prompt' => $config['value_text'] ?? '',
-            'updated_at' => $config['updated_at'] ?? null
+            'master_prompt'             => $prompts['master_prompt'] ?? '',
+            'master_prompt_phase_1'     => $prompts['master_prompt_phase_1'] ?? '',
+            'master_prompt_phase_2'     => $prompts['master_prompt_phase_2'] ?? '',
+            'master_prompt_scholarship' => $prompts['master_prompt_scholarship'] ?? '',
+            'master_prompt_phase_3'     => $prompts['master_prompt_phase_3'] ?? '',
+            'updated_at'                => $latestUpdate
         ]);
     }
 
     /**
-     * PUT /v1/superadmin/prompt — Update Master Prompt
+     * PUT /v1/superadmin/prompt — Update Master Prompts (Individual or Phased)
      */
     public function updateMasterPrompt(Request $request, array $params = []): void
     {
-        $prompt = trim((string)$request->get('master_prompt'));
-        if (empty($prompt)) {
-            Response::error('Master prompt cannot be empty.', 422);
+        $db = Database::getConnection();
+        $allowedKeys = [
+            'master_prompt',
+            'master_prompt_phase_1',
+            'master_prompt_phase_2',
+            'master_prompt_scholarship',
+            'master_prompt_phase_3'
+        ];
+
+        $targetKey = trim((string)$request->get('key', ''));
+        $singlePrompt = $request->get('prompt');
+
+        $updatesMade = 0;
+        $savedValues = [];
+
+        // Scenario 1: Explicit key + prompt provided
+        if (!empty($targetKey) && in_array($targetKey, $allowedKeys, true) && $singlePrompt !== null) {
+            $val = trim((string)$singlePrompt);
+            $stmt = $db->prepare("
+                INSERT INTO platform_config (key_name, value_text, updated_at)
+                VALUES (:k, :v, NOW())
+                ON DUPLICATE KEY UPDATE value_text = VALUES(value_text), updated_at = NOW()
+            ");
+            $stmt->execute([':k' => $targetKey, ':v' => $val]);
+            $updatesMade++;
+            $savedValues[$targetKey] = $val;
+            AuditLogger::log("{$targetKey}_updated", 'platform_config', null);
+        } else {
+            // Scenario 2: Key-value body (e.g. { master_prompt_phase_1: '...', master_prompt_phase_2: '...' })
+            $stmt = $db->prepare("
+                INSERT INTO platform_config (key_name, value_text, updated_at)
+                VALUES (:k, :v, NOW())
+                ON DUPLICATE KEY UPDATE value_text = VALUES(value_text), updated_at = NOW()
+            ");
+
+            foreach ($allowedKeys as $k) {
+                $val = $request->get($k);
+                if ($val !== null) {
+                    $trimmed = trim((string)$val);
+                    $stmt->execute([':k' => $k, ':v' => $trimmed]);
+                    $updatesMade++;
+                    $savedValues[$k] = $trimmed;
+                    AuditLogger::log("{$k}_updated", 'platform_config', null);
+                }
+            }
         }
 
-        $db = Database::getConnection();
-        $stmt = $db->prepare("
-            INSERT INTO platform_config (key_name, value_text, updated_at)
-            VALUES ('master_prompt', :prompt, NOW())
-            ON DUPLICATE KEY UPDATE value_text = VALUES(value_text), updated_at = NOW()
-        ");
-        $stmt->execute([':prompt' => $prompt]);
+        if ($updatesMade === 0) {
+            Response::error('No valid prompt data provided to update.', 422);
+        }
 
-        AuditLogger::log('master_prompt_updated', 'platform_config', null);
-
-        Response::success(['master_prompt' => $prompt], 'Master prompt updated successfully');
+        Response::success($savedValues, 'Master prompts updated successfully');
     }
 
     /**
