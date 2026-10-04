@@ -931,7 +931,13 @@
                 }
 
                 if (res.data.lead_capture_trigger) {
-                    renderLeadBanner(res.data.lead_capture_trigger);
+                    if (res.data.response && res.data.response.trim() !== '') {
+                        setTimeout(function () {
+                            renderLeadBanner(res.data.lead_capture_trigger);
+                        }, 300);
+                    } else {
+                        renderLeadBanner(res.data.lead_capture_trigger);
+                    }
                 }
 
                 // If follow-up provoking question is provided, display it as a separate bubble with natural typing delay
@@ -1155,7 +1161,8 @@
                 }).catch(function () {});
             }
 
-            appendMessage('assistant', '✅ I have dispatched ' + trigger.headline + ' to your email on file (' + (stored.masked_email || stored.email) + '). Please check your inbox shortly!');
+            var sentHeadline = (trigger.headline || 'the brochure').replace(/^Get\s+/i, '');
+            appendMessage('assistant', '✅ I have dispatched ' + sentHeadline + ' to your email on file (' + (stored.masked_email || stored.email) + '). Please check your inbox shortly!');
             return;
         }
 
@@ -1165,7 +1172,7 @@
         banner.style.cssText = 'background: #EFF6FF; border: 1.5px solid #93C5FD; border-radius: 12px; padding: 14px; margin-top: 8px; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.08); font-size: 12px;';
         banner.innerHTML = `
             <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
-                <span style="font-size:16px;">📧</span>
+                <span style="font-size:16px;">${trigger.icon || '📘'}</span>
                 <strong style="color: #1E3A8A; font-size: 13px;">${trigger.headline}</strong>
             </div>
             <div style="margin-bottom: 10px; font-size: 11px; color: #475569; line-height: 1.4;">${trigger.description}</div>
@@ -1238,13 +1245,14 @@
                         }).catch(function () {});
                     }
 
+                    var sentHeadline = (trigger.headline || 'the brochure').replace(/^Get\s+/i, '');
                     banner.innerHTML = `
                         <div style="display:flex; align-items:center; gap:8px;">
                             <span style="font-size:22px;">✅</span>
                             <div>
                                 <strong style="color: #166534; font-size:13px;">Document Dispatched!</strong>
                                 <div style="font-size: 11px; color: #15803D; margin-top:2px;">
-                                    We have sent <strong>${trigger.headline}</strong> to <strong>${saved.masked_email || email}</strong>. Please check your inbox!
+                                    We have sent <strong>${sentHeadline}</strong> to <strong>${saved.masked_email || email}</strong>. Please check your inbox!
                                 </div>
                             </div>
                         </div>

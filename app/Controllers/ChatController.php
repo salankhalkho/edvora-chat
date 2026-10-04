@@ -480,7 +480,6 @@ class ChatController
             // Only trigger lead form if intent is accepting_offer OR (user affirmed an explicit lead offer AND intent is NOT information_seeking)
             if ($parsedIntent === 'accepting_offer' || $parsedIntent === 'a' || ($isAffirmative && $lastHadExplicitOffer && $parsedIntent !== 'information_seeking')) {
                 $parsedIntent = 'accepting_offer';
-                $aiResponseText = null;
                 $followUpMessage = null;
                 $analytics['intent_label'] = 'ACCEPTING_OFFER';
 
@@ -495,6 +494,38 @@ class ChatController
                         $leadTriggerPayload = self::resolveLeadTrigger($db, $orgId, $rawTriggerType, $userMessage, $activeProgramData);
                         $leadFormsShown[] = ($rawTriggerType === 'scholarship_eval') ? 'scholarship_calculator' : $rawTriggerType;
                         $leadFormsShown = array_values(array_unique($leadFormsShown));
+
+                        // Conversational bridge acknowledgment (Message 1) and enriched staff transcript (Option 1)
+                        $progName = !empty($activeProgramData['course_name']) ? trim($activeProgramData['course_name']) : '';
+                        $progBrochureLabel = !empty($progName) ? ($progName . ' brochure') : 'brochure';
+
+                        if ($rawTriggerType === 'brochure' || $rawTriggerType === 'asset_delivery') {
+                            $aiResponseText = "Absolutely! 😊 I’d be happy to send that to you. Please share your details below, and I’ll have the {$progBrochureLabel} sent to your email.";
+                            $formTitle = !empty($leadTriggerPayload['headline']) ? $leadTriggerPayload['headline'] : ("Get the " . ($progName ? ($progName . ' Brochure') : 'Official Brochure'));
+                            $intentExplanation = "Lead form presented: {$formTitle}";
+                            $analytics['intent_explanation'] = $intentExplanation;
+                            $dbMessageContent = $aiResponseText . "\n\n[📋 Lead Form Presented: 📘 {$formTitle} (Fields: Full Name, Email Address, Phone Number)]";
+                        } elseif ($rawTriggerType === 'campus_tour') {
+                            $aiResponseText = "Wonderful! We'd love to show you around our campus. 😊 Pick a convenient date and time below to reserve your guided visit.";
+                            $intentExplanation = "Lead form presented: Book a Guided Campus Tour";
+                            $analytics['intent_explanation'] = $intentExplanation;
+                            $dbMessageContent = $aiResponseText . "\n\n[📋 Lead Form Presented: 🏫 Book a Guided Campus Tour (Fields: Full Name, Email Address, Phone Number, Preferred Date/Slot)]";
+                        } elseif ($rawTriggerType === 'counselor_callback') {
+                            $aiResponseText = "I’d be happy to arrange that for you! 😊 Please share your contact details below so our admissions counselor can connect with you.";
+                            $intentExplanation = "Lead form presented: Request Counselor Callback";
+                            $analytics['intent_explanation'] = $intentExplanation;
+                            $dbMessageContent = $aiResponseText . "\n\n[📋 Lead Form Presented: 📞 Request Counselor Callback (Fields: Your Name, Email Address, Mobile Phone, Preferred Call Time)]";
+                        } elseif ($rawTriggerType === 'scholarship_eval') {
+                            $aiResponseText = "Great! Let’s calculate your scholarship eligibility and fee waiver. 😊 Please share a few quick details below to get started.";
+                            $intentExplanation = "Lead form presented: Evaluate Scholarship Eligibility";
+                            $analytics['intent_explanation'] = $intentExplanation;
+                            $dbMessageContent = $aiResponseText . "\n\n[📋 Lead Form Presented: 🎓 Evaluate Scholarship Eligibility (Fields: Full Name, Email Address, Mobile Phone, Academic Merit Score)]";
+                        } else {
+                            $aiResponseText = "Absolutely! 😊 Please share a few quick details below so we can assist you.";
+                            $intentExplanation = "Lead form presented: " . $rawTriggerType;
+                            $analytics['intent_explanation'] = $intentExplanation;
+                            $dbMessageContent = $aiResponseText . "\n\n[📋 Lead Form Presented: {$rawTriggerType}]";
+                        }
                     }
                 }
             }
@@ -803,15 +834,21 @@ class ChatController
                 $asset = $stmtAsset->fetch();
             }
 
-            $assetTitle = $asset['title'] ?? (!empty($progName) ? ($progName . ' Prospectus & Brochure') : 'Official Academic Prospectus');
+            $rawTitle = $asset['title'] ?? (!empty($progName) ? ($progName . ' Brochure') : 'Academic Brochure');
+            $cleanTitle = trim(str_ireplace(['Prospectus & Brochure', 'Prospectus and Brochure'], 'Brochure', $rawTitle));
+            if (!preg_match('/\b(brochure|prospectus|handbook|guide)\b/i', $cleanTitle)) {
+                $cleanTitle .= ' Brochure';
+            }
+            $assetTitle = $cleanTitle;
             $assetId = !empty($asset['id']) ? (int)$asset['id'] : null;
 
             return [
                 'type' => 'asset_delivery',
                 'asset_id' => $assetId,
-                'headline' => "Download " . $assetTitle,
+                'headline' => "Get the " . $assetTitle,
+                'icon' => '📘',
                 'program_name' => $progName,
-                'description' => "Enter your details to receive {$assetTitle} sent directly to your email.",
+                'description' => "Share your details below and we’ll send the brochure directly to your email.",
                 'fields' => ['name', 'email', 'phone']
             ];
         }
@@ -820,9 +857,10 @@ class ChatController
             $progSubject = !empty($progName) ? " for {$progName}" : "";
             return [
                 'type' => 'counselor_callback',
-                'headline' => "Request a Counselor Callback",
+                'headline' => "Request Counselor Callback",
+                'icon' => '📞',
                 'program_name' => $progName,
-                'description' => "Leave your contact number so our admissions counselor can connect with you regarding admissions{$progSubject}.",
+                'description' => "Leave your contact details so our admissions counselor can connect with you regarding admissions{$progSubject}.",
                 'fields' => ['name', 'email', 'phone']
             ];
         }
@@ -830,7 +868,8 @@ class ChatController
         if (in_array($triggerType, ['campus_tour', 'tour', 'visit'], true)) {
             return [
                 'type' => 'campus_tour',
-                'headline' => "Schedule a Guided Campus Tour",
+                'headline' => "Book a Guided Campus Tour",
+                'icon' => '🏫',
                 'program_name' => $progName,
                 'description' => "Experience our campus, labs, and academic facilities firsthand with a personalized guided visit.",
                 'fields' => ['name', 'email', 'phone']
@@ -841,6 +880,7 @@ class ChatController
             return [
                 'type' => 'scholarship_eval',
                 'headline' => "Evaluate Scholarship Eligibility",
+                'icon' => '🎓',
                 'program_name' => $progName,
                 'description' => "Check your merit score and calculate tuition fee waiver in 30 seconds.",
                 'fields' => ['name', 'email', 'phone']
