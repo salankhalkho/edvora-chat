@@ -1075,13 +1075,13 @@
                             Phase 1: Discovery &amp; Rapport — Used when the visitor has NOT yet chosen a specific program. Friendly, warm, chatty, probing. Answers general questions and catalog requests. Zero lead pitching.
                         </div>
 
-                        <form id="promptForm">
+                        <form id="promptForm" onsubmit="event.preventDefault(); saveCurrentPhasePrompt(event);">
                             <div class="form-group" style="margin-bottom: 16px;">
                                 <textarea id="promptText" class="form-textarea" required placeholder="Enter system prompt for active phase..." style="field-sizing: content; min-height: 500px; resize: vertical; overflow-y: visible; font-family: monospace; font-size: 12px; line-height: 1.5;"></textarea>
                             </div>
                             <div style="display: flex; align-items: center; justify-content: space-between;">
                                 <div id="promptCharCount" style="color: var(--brand-text-muted); font-size: 11px;">0 characters</div>
-                                <button type="submit" id="savePromptBtn" class="brand-btn brand-btn-primary">
+                                <button type="button" id="savePromptBtn" onclick="saveCurrentPhasePrompt(event)" class="brand-btn brand-btn-primary">
                                     💾 Save Active Phase Prompt
                                 </button>
                             </div>

@@ -56,9 +56,14 @@ class Seeders
             $stmt = $this->db->prepare("SELECT id, value_text FROM platform_config WHERE key_name = :k");
             $stmt->execute([':k' => $phaseKey]);
             $existing = $stmt->fetch(\PDO::FETCH_ASSOC);
-            if (!$existing && file_exists("{$promptsDir}/{$phaseFile}")) {
+            $val = trim($existing['value_text'] ?? '');
+            if ((!$existing || empty($val) || $val === 'salan') && file_exists("{$promptsDir}/{$phaseFile}")) {
                 $content = trim(file_get_contents("{$promptsDir}/{$phaseFile}"));
-                $stmtInsert = $this->db->prepare("INSERT INTO platform_config (key_name, value_text, updated_at) VALUES (:k, :val, NOW())");
+                $stmtInsert = $this->db->prepare("
+                    INSERT INTO platform_config (key_name, value_text, updated_at) 
+                    VALUES (:k, :val, NOW())
+                    ON DUPLICATE KEY UPDATE value_text = VALUES(value_text), updated_at = NOW()
+                ");
                 $stmtInsert->execute([':k' => $phaseKey, ':val' => $content]);
             }
         }
