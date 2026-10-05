@@ -4444,17 +4444,9 @@
 .routing-card-mobile {
   display: none;
 }
-@media(max-width: 960px){
-  .routing-cards-desktop {
-    display: none !important;
-  }
-  .routing-card-mobile {
-    display: block !important;
-  }
-  .routing-dispatch-stage {
-    display: none !important;
-  }
-  .routing-roi-strip {
+/* Mobile / Small Screens (<= 768px): Hide Entire Intelligent Campus Routing Section */
+@media(max-width: 768px){
+  #campus-routing {
     display: none !important;
   }
 }
