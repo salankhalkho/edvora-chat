@@ -1693,6 +1693,15 @@
   .pro-compare-grid, .pro-ctrl-grid{grid-template-columns:1fr}
   .pro-chat-grid{grid-template-columns:1fr}
 }
+
+/* Small devices / Mobile (<= 768px): Hide Proactive Engagement Guardrails and Recovered Admissions Funnel */
+@media(max-width: 768px){
+  #proactive-roi .pro-ctrl-grid,
+  #proactive-roi .pro-dash-card,
+  #proactive-roi .pro-roi-panel {
+    display: none !important;
+  }
+}
 </style>
 
 <!-- ===================================================================== -->
