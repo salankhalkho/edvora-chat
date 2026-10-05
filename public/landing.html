@@ -5968,7 +5968,7 @@
   </div>
 
   <!-- Bento Grid of 6 Compliance & Security Pillars -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+  <div class="security-pillars-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
     
     <!-- Pillar 1: Cookie Audits & Consent Management -->
     <div class="glass rounded-2xl p-7 flex flex-col justify-between border border-e-border card-hover reveal reveal-delay-1">
@@ -6093,7 +6093,7 @@
   </div>
 
   <!-- High-Confidence Institutional Dashboard Self-Service Callout -->
-  <div class="glass rounded-2xl p-5 sm:p-7 md:p-8 border border-e-border flex flex-col md:flex-row items-center justify-between gap-5 sm:gap-6 reveal" style="background:linear-gradient(135deg, rgba(230,247,210,0.55) 0%, rgba(255,255,255,0.95) 100%);">
+  <div class="security-callout-banner glass rounded-2xl p-5 sm:p-7 md:p-8 border border-e-border flex flex-col md:flex-row items-center justify-between gap-5 sm:gap-6 reveal" style="background:linear-gradient(135deg, rgba(230,247,210,0.55) 0%, rgba(255,255,255,0.95) 100%);">
     <div class="flex items-start gap-3.5 sm:gap-4 w-full">
       <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background:#063D3B; color:#C8FF63;">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -6121,6 +6121,16 @@
 <!-- MOCK DASHBOARD: COLLEGE ADMISSIONS & OPERATIONS COMMAND CENTER            -->
 <!-- ========================================================================= -->
 <style>
+/* Mobile / Small Screens (<= 768px): Hide Compliance Pillars Grid and Self-Service Governance Callout */
+@media(max-width: 768px){
+  #security .security-pillars-grid,
+  #security .security-callout-banner {
+    display: none !important;
+  }
+  #security .mb-16 {
+    margin-bottom: 0 !important;
+  }
+}
 .ops-dashboard-frame {
   background: #ffffff;
   border: 1.5px solid #DCE9E5;
