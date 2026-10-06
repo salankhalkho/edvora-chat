@@ -5436,8 +5436,74 @@
       <span class="cta-trust-badge"><span class="badge-icon">🔒</span> <span><strong>AES-256</strong> &amp; TLS 1.3</span></span>
       <span class="cta-trust-badge"><span class="badge-icon">🚫</span> <span><strong>Zero Model</strong> Training</span></span>
       <span class="cta-trust-badge"><span class="badge-icon">♿</span> <span><strong>WCAG 2.1 AA</strong> Ready</span></span>
-      <span class="cta-trust-badge"><span class="badge-icon">⚡</span> <span><strong>10-Min</strong> Setup</span></span>
-      <span class="cta-trust-badge"><span class="badge-icon">🟢</span> <span><strong>99.9%</strong> Uptime SLA</span></span>
+    </div>
+  </div>
+
+  <!-- Mobile-Only Compact 6-Card Compliance Grid (<= 768px) -->
+  <div class="security-mobile-grid mb-8">
+    <div class="grid grid-cols-2 gap-2">
+      <!-- 1. Cookie -->
+      <div class="bg-white p-2.5 rounded-xl border border-[#DCE9E5] shadow-xs flex items-center gap-2">
+        <span class="w-7 h-7 rounded-lg bg-[#FEF3C7] text-sm flex items-center justify-center flex-shrink-0">🍪</span>
+        <div class="min-w-0">
+          <div class="text-[9px] font-bold text-[#D97706] uppercase tracking-wide truncate">Consent</div>
+          <div class="text-[11.5px] font-bold text-[#063D3B] leading-tight truncate">Cookie Audits</div>
+        </div>
+      </div>
+
+      <!-- 2. US CCPA -->
+      <div class="bg-white p-2.5 rounded-xl border border-[#DCE9E5] shadow-xs flex items-center gap-2">
+        <span class="w-7 h-7 rounded-lg bg-[#E0F2FE] text-[#0284C7] font-black text-[10px] flex items-center justify-center flex-shrink-0">US</span>
+        <div class="min-w-0">
+          <div class="text-[9px] font-bold text-[#0284C7] uppercase tracking-wide truncate">US Privacy</div>
+          <div class="text-[11.5px] font-bold text-[#063D3B] leading-tight truncate">CCPA / CPRA</div>
+        </div>
+      </div>
+
+      <!-- 3. UK GDPR -->
+      <div class="bg-white p-2.5 rounded-xl border border-[#DCE9E5] shadow-xs flex items-center gap-2">
+        <span class="w-7 h-7 rounded-lg bg-[#F3E8FF] text-[#7E22CE] font-black text-[10px] flex items-center justify-center flex-shrink-0">GB</span>
+        <div class="min-w-0">
+          <div class="text-[9px] font-bold text-[#7E22CE] uppercase tracking-wide truncate">UK &amp; EU</div>
+          <div class="text-[11.5px] font-bold text-[#063D3B] leading-tight truncate">GDPR &amp; PECR</div>
+        </div>
+      </div>
+
+      <!-- 4. Canada -->
+      <div class="bg-white p-2.5 rounded-xl border border-[#DCE9E5] shadow-xs flex items-center gap-2">
+        <span class="w-7 h-7 rounded-lg bg-[#FEF2F2] text-[#DC2626] font-black text-[10px] flex items-center justify-center flex-shrink-0">CA</span>
+        <div class="min-w-0">
+          <div class="text-[9px] font-bold text-[#DC2626] uppercase tracking-wide truncate">Canada</div>
+          <div class="text-[11.5px] font-bold text-[#063D3B] leading-tight truncate">PIPEDA &amp; CPPA</div>
+        </div>
+      </div>
+
+      <!-- 5. FERPA -->
+      <div class="bg-white p-2.5 rounded-xl border border-[#DCE9E5] shadow-xs flex items-center gap-2">
+        <span class="w-7 h-7 rounded-lg bg-[#E8F5F1] text-[#047857] font-bold text-xs flex items-center justify-center flex-shrink-0">🛡️</span>
+        <div class="min-w-0">
+          <div class="text-[9px] font-bold text-[#047857] uppercase tracking-wide truncate">Higher Ed</div>
+          <div class="text-[11.5px] font-bold text-[#063D3B] leading-tight truncate">FERPA Shield</div>
+        </div>
+      </div>
+
+      <!-- 6. DPA -->
+      <div class="bg-white p-2.5 rounded-xl border border-[#DCE9E5] shadow-xs flex items-center gap-2">
+        <span class="w-7 h-7 rounded-lg bg-[#ECFDF5] text-[#059669] font-bold text-xs flex items-center justify-center flex-shrink-0">📄</span>
+        <div class="min-w-0">
+          <div class="text-[9px] font-bold text-[#059669] uppercase tracking-wide truncate">Legal</div>
+          <div class="text-[11.5px] font-bold text-[#063D3B] leading-tight truncate">DPA &amp; SCCs</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pure Security & Accessibility Sub-Strip -->
+    <div class="p-2.5 rounded-xl bg-white border border-[#DCE9E5] text-[10.5px] text-center text-[#063D3B] font-semibold flex items-center justify-around flex-wrap gap-1 shadow-xs mt-2.5">
+      <span>🔒 AES-256 &amp; TLS 1.3</span>
+      <span class="text-[#A2C7BC]">&bull;</span>
+      <span>🚫 Zero Model Training</span>
+      <span class="text-[#A2C7BC]">&bull;</span>
+      <span>♿ WCAG 2.1 AA Ready</span>
     </div>
   </div>
 
@@ -5592,14 +5658,23 @@
 </section>
 
 <style>
-/* Mobile / Small Screens (<= 768px): Hide Compliance Pillars Grid and Self-Service Governance Callout */
+/* Security Mobile Grid: Hidden on desktop (> 768px), visible on mobile (<= 768px) */
+.security-mobile-grid {
+  display: none;
+}
 @media(max-width: 768px){
+  .security-mobile-grid {
+    display: block !important;
+  }
+  #security .edvora-hero-trust-badges {
+    display: none !important;
+  }
   #security .security-pillars-grid,
   #security .security-callout-banner {
     display: none !important;
   }
   #security .mb-16 {
-    margin-bottom: 0 !important;
+    margin-bottom: 20px !important;
   }
 }
 </style>
