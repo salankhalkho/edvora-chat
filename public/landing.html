@@ -891,6 +891,7 @@
                 justify-content: space-between;
                 width: 100%;
                 padding: 0 2px 8px 2px;
+                pointer-events: auto;
             }
             .mobile-live-status-wrap {
                 display: inline-flex;
@@ -902,6 +903,7 @@
                 letter-spacing: -0.015em;
                 cursor: pointer;
                 user-select: none;
+                pointer-events: auto;
             }
             .mobile-live-dot {
                 width: 9px;
@@ -948,6 +950,14 @@
                 overflow: hidden;
                 position: relative;
                 text-align: left !important;
+                pointer-events: none;
+                user-select: none;
+                touch-action: pan-y;
+            }
+            .edvora-widget-preview-mobile .edvora-messages-body {
+                pointer-events: none;
+                touch-action: pan-y;
+                overscroll-behavior: auto;
             }
             .edvora-widget-preview-mobile .edvora-messages-body,
             .edvora-widget-preview-mobile .edvora-msg-row-assistant,
