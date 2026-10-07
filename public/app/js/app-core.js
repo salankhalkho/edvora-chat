@@ -256,7 +256,8 @@
         }
 
         function syncAuthFromUrl() {
-            const hash = (window.location.hash || '').toLowerCase();
+            const rawHash = (window.location.hash || '').toLowerCase();
+            const hash = rawHash.split('?')[0].split('&')[0];
             const path = (window.location.pathname || '').toLowerCase();
             const search = window.location.search || '';
             const params = new URLSearchParams(search);

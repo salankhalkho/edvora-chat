@@ -48,7 +48,8 @@
                     document.documentElement.classList.add('has-auth-token');
                 }
                 // Pre-evaluate signup/register mode from hash or URL path
-                const hash = (window.location.hash || '').toLowerCase();
+                const rawHash = (window.location.hash || '').toLowerCase();
+                const hash = rawHash.split('?')[0].split('&')[0];
                 const path = (window.location.pathname || '').toLowerCase();
                 const search = window.location.search || '';
                 const params = new URLSearchParams(search);
@@ -71,6 +72,7 @@
         html.in-smart-onboarding #appContainer { display: none !important; }
         html.in-smart-onboarding #authContainer { display: none !important; }
         html.in-smart-onboarding #onboardingContainer { display: none !important; }
+        html.auth-mode-signup #loginCard { display: none !important; }
         html.auth-mode-signup #signupCard { display: block !important; }
 
         @keyframes smartPulse {
@@ -5291,7 +5293,8 @@
         }
 
         function syncAuthFromUrl() {
-            const hash = (window.location.hash || '').toLowerCase();
+            const rawHash = (window.location.hash || '').toLowerCase();
+            const hash = rawHash.split('?')[0].split('&')[0];
             const path = (window.location.pathname || '').toLowerCase();
             const search = window.location.search || '';
             const params = new URLSearchParams(search);

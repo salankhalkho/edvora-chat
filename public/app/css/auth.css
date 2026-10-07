@@ -1,4 +1,4 @@
-﻿/* ═══════════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════════
    AUTH.CSS - Auth state visibility switches, login/signup keyframes
    SELECTORS: html.has-auth-token, html.in-onboarding, html.in-smart-onboarding,
               html.auth-mode-signup, @keyframes smartPulse, @keyframes smartChipPop
@@ -14,6 +14,7 @@
         html.in-smart-onboarding #appContainer { display: none !important; }
         html.in-smart-onboarding #authContainer { display: none !important; }
         html.in-smart-onboarding #onboardingContainer { display: none !important; }
+        html.auth-mode-signup #loginCard { display: none !important; }
         html.auth-mode-signup #signupCard { display: block !important; }
 
         @keyframes smartPulse {
