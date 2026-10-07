@@ -1776,7 +1776,7 @@
 // ── initDashboard() is placed here (app boot entry point) ──
 // It was originally between loadCampusTours() and startOnboardingWizard()
 // BUG AREA: dashboard initialization order -> initDashboard()
-        async function initDashboard() {
+        async function initDashboard(forcedTab = null) {
             if (!token) return;
 
             try {
@@ -1879,18 +1879,21 @@
                         }).catch(() => {});
                 } catch(e) {}
 
-                // Determine active tab from URL hash or localStorage
-                let rawUrlHash = location.hash.replace('#', '').trim();
-                let urlHash = rawUrlHash.split('?')[0];
-                let initialTab = (urlHash && VALID_APP_TABS.includes(urlHash)) 
-                    ? urlHash 
-                    : (localStorage.getItem('edvora_active_tab') || 'overview');
+                // Determine active tab: if explicitly forced (e.g. on fresh login), use that. Otherwise read URL hash / localStorage for page refreshes
+                let initialTab = forcedTab;
+                if (!initialTab) {
+                    let rawUrlHash = location.hash.replace('#', '').trim();
+                    let urlHash = rawUrlHash.split('?')[0];
+                    initialTab = (urlHash && VALID_APP_TABS.includes(urlHash)) 
+                        ? urlHash 
+                        : (localStorage.getItem('edvora_active_tab') || 'overview');
+                }
 
                 if (!VALID_APP_TABS.includes(initialTab)) {
                     initialTab = 'overview';
                 }
 
-                await switchNavTab(initialTab, null, false);
+                await switchNavTab(initialTab, null, forcedTab ? true : false);
                 if (initialTab === 'overview') { loadAnalytics(); }
 
                 // Fetch initial callbacks summary for sidebar notification badge

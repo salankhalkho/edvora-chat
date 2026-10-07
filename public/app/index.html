@@ -57,6 +57,16 @@
                 if (hash === '#signup' || hash === '#register' || path.endsWith('/signup') || path.endsWith('/register') || mode === 'signup' || mode === 'register') {
                     document.documentElement.classList.add('auth-mode-signup');
                 }
+                // If unauthenticated, clear any stale inner dashboard tab hashes so they never linger on login screen
+                if (!document.documentElement.classList.contains('has-auth-token')) {
+                    if (hash !== '#signup' && hash !== '#register') {
+                        try {
+                            if (window.location.hash && window.location.hash !== '#login') {
+                                history.replaceState(null, '', '#login');
+                            }
+                        } catch(_) {}
+                    }
+                }
             } catch(e) {
                 try { localStorage.removeItem('edvora_token'); } catch(_) {}
             }
@@ -8661,7 +8671,9 @@ echo $response['reply'];
                     currentDepartments = [];
                     availableOrgStaff = [];
                     availableOrgKs = [];
-                    initDashboard();
+                    localStorage.setItem('edvora_active_tab', 'overview');
+                    try { history.replaceState(null, '', '#overview'); } catch(_) {}
+                    initDashboard('overview');
                 } else {
                     showAuthError('loginError', data.message || 'Invalid email address or password.');
                 }
@@ -9191,7 +9203,9 @@ echo $response['reply'];
             document.documentElement.classList.remove('in-smart-onboarding');
             const container = document.getElementById('smartOnboardingContainer');
             if (container) container.style.display = 'none';
-            initDashboard();
+            localStorage.setItem('edvora_active_tab', 'overview');
+            try { history.replaceState(null, '', '#overview'); } catch(_) {}
+            initDashboard('overview');
         }
 
         // Logout Event
@@ -11222,7 +11236,7 @@ echo $response['reply'];
         }
 
         // Dashboard Initialization
-        async function initDashboard() {
+        async function initDashboard(forcedTab = null) {
             if (!token) return;
 
             try {
@@ -11348,22 +11362,25 @@ echo $response['reply'];
                         }).catch(() => {});
                 } catch(e) {}
 
-                // Determine active tab from URL hash or localStorage
-                let rawUrlHash = location.hash.replace('#', '').trim();
-                let urlHash = rawUrlHash.split('?')[0];
-                if (urlHash === 'departments' || (urlHash && (urlHash.startsWith('dept-') || urlHash === 'department-editor'))) {
-                    urlHash = 'academic-programs';
-                    try { history.replaceState(null, '', '#academic-programs'); } catch(e) {}
+                // Determine active tab: if explicitly forced (e.g. on fresh login), use that. Otherwise read URL hash / localStorage for page refreshes
+                let initialTab = forcedTab;
+                if (!initialTab) {
+                    let rawUrlHash = location.hash.replace('#', '').trim();
+                    let urlHash = rawUrlHash.split('?')[0];
+                    if (urlHash === 'departments' || (urlHash && (urlHash.startsWith('dept-') || urlHash === 'department-editor'))) {
+                        urlHash = 'academic-programs';
+                        try { history.replaceState(null, '', '#academic-programs'); } catch(e) {}
+                    }
+                    initialTab = (urlHash && VALID_APP_TABS.includes(urlHash)) 
+                        ? urlHash 
+                        : (localStorage.getItem('edvora_active_tab') || 'overview');
                 }
-                let initialTab = (urlHash && VALID_APP_TABS.includes(urlHash)) 
-                    ? urlHash 
-                    : (localStorage.getItem('edvora_active_tab') || 'overview');
 
                 if (!VALID_APP_TABS.includes(initialTab)) {
                     initialTab = 'overview';
                 }
 
-                await switchNavTab(initialTab, null, false);
+                await switchNavTab(initialTab, null, forcedTab ? true : false);
                 if (initialTab === 'overview') { loadAnalytics(); }
 
                 // Preload organization staff/counselors for leads, callbacks, tours, and routing
@@ -11437,7 +11454,9 @@ echo $response['reply'];
             document.documentElement.classList.remove('in-onboarding');
             document.getElementById('onboardingContainer').style.display = 'none';
             document.getElementById('appContainer').style.display = 'grid';
-            initDashboard();
+            localStorage.setItem('edvora_active_tab', 'overview');
+            try { history.replaceState(null, '', '#overview'); } catch(_) {}
+            initDashboard('overview');
         }
 
         // ═══════════════════════════════════════════════════════════════════

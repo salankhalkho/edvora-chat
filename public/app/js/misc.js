@@ -2162,8 +2162,9 @@ echo $response['reply'];
                             currentDepartments = [];
                             availableOrgStaff = [];
                             availableOrgKs = [];
-                            // Onboarding paused: land directly on dashboard
-                            initDashboard();
+                            localStorage.setItem('edvora_active_tab', 'overview');
+                            try { history.replaceState(null, '', '#overview'); } catch(_) {}
+                            initDashboard('overview');
                         } else {
                             showAuthError('loginError', data.message || 'Invalid email address or password.');
                         }
