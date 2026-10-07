@@ -5667,8 +5667,8 @@
             }
         });
 
-        // Initialize auth card state on initial execution
-        syncAuthFromUrl();
+        // Initialize auth card state on initial execution (only when logged out; logged-in refresh must not touch auth UI/hash)
+        if (!token && !localStorage.getItem('edvora_refresh_token')) syncAuthFromUrl();
 
         // Dynamic App Identity Hydration & Missing College Name Alert Handler
         function updateAppIdentityUI(org, user) {
