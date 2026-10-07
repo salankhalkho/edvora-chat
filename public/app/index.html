@@ -26,25 +26,7 @@
             try {
                 const storedToken = localStorage.getItem('edvora_token');
                 const storedRefresh = localStorage.getItem('edvora_refresh_token');
-                if (storedToken) {
-                    const parts = storedToken.split('.');
-                    if (parts.length === 3) {
-                        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-                        // Show dashboard optimistically if token is valid or refresh token is available
-                        if (payload && payload.exp && (payload.exp * 1000) > (Date.now() + 10000)) {
-                            document.documentElement.classList.add('has-auth-token');
-                        } else if (storedRefresh) {
-                            // Access token expired, but valid 30-day refresh token exists: keep auth shell active
-                            document.documentElement.classList.add('has-auth-token');
-                        } else {
-                            localStorage.removeItem('edvora_token');
-                        }
-                    } else if (storedRefresh) {
-                        document.documentElement.classList.add('has-auth-token');
-                    } else {
-                        localStorage.removeItem('edvora_token');
-                    }
-                } else if (storedRefresh) {
+                if (storedToken || storedRefresh) {
                     document.documentElement.classList.add('has-auth-token');
                 }
                 // Pre-evaluate signup/register mode from hash or URL path
@@ -57,19 +39,7 @@
                 if (hash === '#signup' || hash === '#register' || path.endsWith('/signup') || path.endsWith('/register') || mode === 'signup' || mode === 'register') {
                     document.documentElement.classList.add('auth-mode-signup');
                 }
-                // If unauthenticated, clear any stale inner dashboard tab hashes so they never linger on login screen
-                if (!document.documentElement.classList.contains('has-auth-token')) {
-                    if (hash !== '#signup' && hash !== '#register') {
-                        try {
-                            if (window.location.hash && window.location.hash !== '#login') {
-                                history.replaceState(null, '', '#login');
-                            }
-                        } catch(_) {}
-                    }
-                }
-            } catch(e) {
-                try { localStorage.removeItem('edvora_token'); } catch(_) {}
-            }
+            } catch(_) {}
         })();
     </script>
     <style>
