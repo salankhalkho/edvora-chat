@@ -63,8 +63,10 @@
         })();
     </script>
     <style>
+        html:not(.has-auth-token) #appContainer { display: none !important; }
+        html:not(.has-auth-token) #authContainer { display: flex !important; }
         html.has-auth-token #authContainer { display: none !important; }
-        html.has-auth-token:not(.in-onboarding) #appContainer { display: grid !important; }
+        html.has-auth-token:not(.in-onboarding):not(.in-smart-onboarding) #appContainer { display: grid !important; }
         html.in-onboarding #onboardingContainer { display: flex !important; }
         html.in-onboarding #appContainer { display: none !important; }
         html.in-onboarding #authContainer { display: none !important; }
@@ -5373,19 +5375,50 @@
             return null;
         }
 
+        function handleLogout() {
+            localStorage.removeItem('edvora_token');
+            localStorage.removeItem('edvora_refresh_token');
+            localStorage.removeItem('edvora_org_name');
+            localStorage.removeItem('edvora_org_id');
+            localStorage.removeItem('edvora_org_website');
+            localStorage.removeItem('edvora_active_tab');
+            localStorage.removeItem('edvora_studio_subtab');
+            sessionStorage.clear();
+            document.documentElement.classList.remove('has-auth-token', 'in-onboarding', 'in-smart-onboarding');
+            token = null;
+            currentUser = null;
+            currentDepartments = [];
+            const appEl = document.getElementById('appContainer');
+            const authEl = document.getElementById('authContainer');
+            if (appEl) appEl.style.setProperty('display', 'none', 'important');
+            if (authEl) authEl.style.setProperty('display', 'flex', 'important');
+            if (typeof setAuthCard === 'function') setAuthCard('login');
+            window.location.hash = '#login';
+            window.location.reload();
+        }
+        window.handleLogout = handleLogout;
+
         function handleSessionExpired(customMsg = 'Your session has expired. Please log in again.') {
             localStorage.removeItem('edvora_token');
             localStorage.removeItem('edvora_refresh_token');
+            localStorage.removeItem('edvora_active_tab');
+            sessionStorage.clear();
             document.documentElement.classList.remove('has-auth-token');
             token = null;
             currentUser = null;
             const appEl = document.getElementById('appContainer');
             const authEl = document.getElementById('authContainer');
-            if (appEl) appEl.style.display = 'none';
-            if (authEl) authEl.style.display = 'flex';
+            if (appEl) appEl.style.setProperty('display', 'none', 'important');
+            if (authEl) authEl.style.setProperty('display', 'flex', 'important');
             if (typeof setAuthCard === 'function') setAuthCard('login');
+            try {
+                if (window.location.hash !== '#login') {
+                    history.replaceState(null, '', '#login');
+                }
+            } catch(_) {}
             showToast(customMsg, 'error');
         }
+        window.handleSessionExpired = handleSessionExpired;
 
         window.fetch = async function(resource, init = {}) {
             const url = typeof resource === 'string' ? resource : (resource ? resource.url : '');
@@ -5393,20 +5426,47 @@
             // Auto-attach Bearer token for /v1/ API requests if not already explicitly provided on protected routes
             const isAuthRoute = url.includes('/v1/auth/login') || url.includes('/v1/auth/signup') || url.includes('/v1/auth/refresh') || url.includes('/v1/auth/forgot-password');
             
-            if (url.startsWith('/v1/') && !isAuthRoute && token) {
+            const activeToken = token || localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token');
+            if (activeToken) token = activeToken;
+
+            if (url.startsWith('/v1/') && !isAuthRoute && activeToken) {
                 init.headers = init.headers || {};
+                let needsAuth = true;
                 if (init.headers instanceof Headers) {
-                    if (!init.headers.has('Authorization')) {
-                        init.headers.set('Authorization', 'Bearer ' + token);
+                    const currentAuth = init.headers.get('Authorization') || init.headers.get('authorization');
+                    if (currentAuth && currentAuth !== 'Bearer null' && currentAuth !== 'Bearer undefined' && currentAuth !== 'Bearer ') {
+                        needsAuth = false;
+                    } else {
+                        init.headers.set('Authorization', 'Bearer ' + activeToken);
+                        needsAuth = false;
                     }
                 } else if (Array.isArray(init.headers)) {
-                    const hasAuth = init.headers.some(h => h[0].toLowerCase() === 'authorization');
-                    if (!hasAuth) {
-                        init.headers.push(['Authorization', 'Bearer ' + token]);
+                    const idx = init.headers.findIndex(h => h[0].toLowerCase() === 'authorization');
+                    if (idx >= 0) {
+                        const val = init.headers[idx][1];
+                        if (!val || val === 'Bearer null' || val === 'Bearer undefined' || val === 'Bearer ') {
+                            init.headers[idx][1] = 'Bearer ' + activeToken;
+                        }
+                        needsAuth = false;
                     }
-                } else {
-                    if (!init.headers['Authorization'] && !init.headers['authorization']) {
-                        init.headers['Authorization'] = 'Bearer ' + token;
+                } else if (typeof init.headers === 'object') {
+                    const authKey = Object.keys(init.headers).find(k => k.toLowerCase() === 'authorization');
+                    if (authKey) {
+                        const val = init.headers[authKey];
+                        if (!val || val === 'Bearer null' || val === 'Bearer undefined' || val === 'Bearer ') {
+                            init.headers[authKey] = 'Bearer ' + activeToken;
+                        }
+                        needsAuth = false;
+                    }
+                }
+
+                if (needsAuth) {
+                    if (init.headers instanceof Headers) {
+                        init.headers.set('Authorization', 'Bearer ' + activeToken);
+                    } else if (Array.isArray(init.headers)) {
+                        init.headers.push(['Authorization', 'Bearer ' + activeToken]);
+                    } else {
+                        init.headers['Authorization'] = 'Bearer ' + activeToken;
                     }
                 }
             }
@@ -9134,19 +9194,10 @@ echo $response['reply'];
         }
 
         // Logout Event
-        document.getElementById('logoutBtn').onclick = () => {
-            localStorage.removeItem('edvora_token');
-            localStorage.removeItem('edvora_refresh_token');
-            localStorage.removeItem('edvora_org_name');
-            localStorage.removeItem('edvora_active_tab');
-            localStorage.removeItem('edvora_studio_subtab');
-            document.documentElement.classList.remove('has-auth-token');
-            token = null;
-            currentUser = null;
-            currentDepartments = [];
-            location.hash = '';
-            location.reload();
-        };
+        const logoutBtnEl = document.getElementById('logoutBtn');
+        if (logoutBtnEl) {
+            logoutBtnEl.onclick = handleLogout;
+        }
         window.currentGlobalTimeWindow = '30d';
         window.overviewCustomStartDate = '';
         window.overviewCustomEndDate = '';

@@ -964,7 +964,7 @@
 
     async function loadSourceAttribution() {
         const days = document.getElementById('saDaysRange')?.value || '30';
-        const token = localStorage.getItem('token') || localStorage.getItem('edvora_token') || sessionStorage.getItem('token') || sessionStorage.getItem('edvora_token') || '';
+        const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token') || localStorage.getItem('token') || '';
         const orgId = localStorage.getItem('edvora_org_id') || sessionStorage.getItem('edvora_org_id') || '';
 
         const daysLabel = document.getElementById('saKpiDaysLabel');

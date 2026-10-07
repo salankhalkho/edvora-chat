@@ -684,7 +684,7 @@
     };
 
     function loadActiveSlotRoster(slotId) {
-        var token = localStorage.getItem('token') || (typeof window.token !== 'undefined' ? window.token : '');
+        var token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token') || localStorage.getItem('token') || (typeof window.token !== 'undefined' ? window.token : '');
         var tbody = document.getElementById('rosterAttendeesTableBody');
         if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#648781;">Loading attendee roster...</td></tr>';
 
@@ -808,7 +808,7 @@
 
     window.updateAttendeeAttendance = function(bookingId, targetStatus) {
         if (!window._activeRosterSlotId) return;
-        var token = localStorage.getItem('token') || (typeof window.token !== 'undefined' ? window.token : '');
+        var token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token') || localStorage.getItem('token') || (typeof window.token !== 'undefined' ? window.token : '');
 
         fetch('/v1/campus-tours/slots/' + window._activeRosterSlotId + '/attendees/' + bookingId + '/attendance', {
             method: 'POST',
@@ -832,7 +832,7 @@
     window.downloadActiveSlotCsv = function() {
         if (!window._activeRosterSlotId) return;
         var slotId = window._activeRosterSlotId;
-        var token = localStorage.getItem('token') || (typeof window.token !== 'undefined' ? window.token : '');
+        var token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token') || localStorage.getItem('token') || (typeof window.token !== 'undefined' ? window.token : '');
 
         fetch('/v1/campus-tours/slots/' + slotId + '/export', {
             headers: { 'Authorization': 'Bearer ' + token }
@@ -859,7 +859,7 @@
     window.shareActiveSlotGateLink = function() {
         if (!window._activeRosterSlotId) return;
         var slotId = window._activeRosterSlotId;
-        var token = localStorage.getItem('token') || (typeof window.token !== 'undefined' ? window.token : '');
+        var token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token') || localStorage.getItem('token') || (typeof window.token !== 'undefined' ? window.token : '');
 
         fetch('/v1/campus-tours/slots/' + slotId + '/share-token', {
             method: 'POST',
@@ -954,7 +954,7 @@
     }
 
     function loadActiveSlotFeedbacks(slotId) {
-        var token = localStorage.getItem('token') || (typeof window.token !== 'undefined' ? window.token : '');
+        var token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token') || localStorage.getItem('token') || (typeof window.token !== 'undefined' ? window.token : '');
         var feedContainer = document.getElementById('feedbacksFeedContainer');
         if (feedContainer) feedContainer.innerHTML = '<div style="text-align:center; padding:30px; color:#648781;">Loading candidate feedback responses...</div>';
 
@@ -1033,7 +1033,7 @@
 
     window.dispatchActiveSlotFeedbacks = function() {
         if (!window._activeRosterSlotId) return;
-        var token = localStorage.getItem('token') || (typeof window.token !== 'undefined' ? window.token : '');
+        var token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token') || localStorage.getItem('token') || (typeof window.token !== 'undefined' ? window.token : '');
         if (!confirm('Dispatch post-tour feedback surveys to all checked-in attendees of this slot?')) return;
 
         fetch('/v1/campus-tours/slots/' + window._activeRosterSlotId + '/send-feedback', {
@@ -1054,7 +1054,7 @@
 
     window.triggerActiveSlotAiSummary = function() {
         if (!window._activeRosterSlotId) return;
-        var token = localStorage.getItem('token') || (typeof window.token !== 'undefined' ? window.token : '');
+        var token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token') || localStorage.getItem('token') || (typeof window.token !== 'undefined' ? window.token : '');
         var btn = document.getElementById('btnGenAiSummary');
         if (btn) {
             btn.disabled = true;

@@ -176,8 +176,14 @@
   let _lastLoadTimestamp = 0;
 
   window.loadAcademicProgramsTab = async function(force = false) {
-    const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token');
-    if (!token) return;
+    const token = localStorage.getItem('edvora_token') || sessionStorage.getItem('edvora_token') || (typeof window.token !== 'undefined' ? window.token : '');
+    if (!token) {
+      const tbody = document.getElementById('programsTableBody');
+      if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:32px; color:#DC2626; font-weight:600;">Active session required. Please sign in to view academic programs.</td></tr>`;
+      }
+      return;
+    }
 
     const now = Date.now();
     if (!force && (now - _lastLoadTimestamp < 800 || _isLoadingPrograms)) {
