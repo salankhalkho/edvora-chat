@@ -8813,7 +8813,7 @@ function animateDeptCounters() {
   <p class="text-[20px] font-medium mb-10" style="color:rgba(255,255,255,.65)">Edvora helps you capture the opportunity.</p>
   <div class="flex items-center justify-center gap-4 flex-wrap">
     <a href="/app#signup" class="btn-primary text-[16px] px-9 py-4">Register Your College &rarr;</a>
-    <button onclick="openDemo()" class="text-[16px] font-semibold px-9 py-4 rounded-xl transition-all" style="color:#fff;border:1.5px solid rgba(255,255,255,.25)" onmouseover="this.style.borderColor='rgba(200,255,99,.5)';this.style.color='#C8FF63'" onmouseout="this.style.borderColor='rgba(255,255,255,.25)';this.style.color='#fff'">See Edvora in Action</button>
+    <a href="/try" class="text-[16px] font-semibold px-9 py-4 rounded-xl transition-all inline-flex items-center justify-center" style="color:#fff;border:1.5px solid rgba(255,255,255,.25)" onmouseover="this.style.borderColor='rgba(200,255,99,.5)';this.style.color='#C8FF63'" onmouseout="this.style.borderColor='rgba(255,255,255,.25)';this.style.color='#fff'">See Edvora in Action</a>
   </div>
 </div>
 </section>
@@ -8826,7 +8826,7 @@ function animateDeptCounters() {
     <h2 class="font-extrabold text-e-teal tracking-tight mb-2.5 text-[22px] sm:text-[28px] md:text-[36px] leading-[1.2]">Every Student Conversation Is an Opportunity.</h2>
     <p class="text-[13.5px] sm:text-[15px] text-e-muted max-w-[540px] mx-auto leading-[1.6] mb-5 sm:mb-7">Give prospective students instant answers. Give counselors better context. Give admissions leaders a clearer view of the journey from interest to enrollment.</p>
     <div class="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-4 max-w-[380px] sm:max-w-none mx-auto mb-5">
-      <button onclick="openDemo()" class="btn-primary text-[14px] sm:text-[15px] font-bold py-3 sm:py-3.5 px-6 sm:px-8 w-full sm:w-auto text-center justify-center rounded-xl shadow-sm">See Edvora in Action &rarr;</button>
+      <a href="/try" class="btn-primary text-[14px] sm:text-[15px] font-bold py-3 sm:py-3.5 px-6 sm:px-8 w-full sm:w-auto text-center justify-center rounded-xl shadow-sm">See Edvora in Action &rarr;</a>
       <a href="/app#signup" class="btn-secondary text-[14px] sm:text-[15px] font-semibold py-3 sm:py-3.5 px-6 sm:px-8 w-full sm:w-auto text-center justify-center rounded-xl">Register College</a>
     </div>
     <div class="flex items-center justify-center gap-3 sm:gap-6 flex-wrap text-[11px] sm:text-[12.5px] text-[#4F7470] pt-3.5 border-t border-[rgba(6,61,59,0.08)]">
@@ -8947,7 +8947,7 @@ document.querySelectorAll('.reveal').forEach(el=>revealObs.observe(el));
 const navbar=document.getElementById('navbar');
 window.addEventListener('scroll',()=>{navbar.classList.toggle('scrolled',window.scrollY>40)},{passive:true});
 function toggleMenu(){const m=document.getElementById('mobile-menu');const open=m.classList.toggle('open');document.body.style.overflow=open?'hidden':'';}
-function openDemo(){document.getElementById('demo-modal').classList.add('open');document.body.style.overflow='hidden';setTimeout(()=>document.getElementById('demo-institution').focus(),100);}
+function openDemo(){window.location.href='/try';}
 function closeDemo(){document.getElementById('demo-modal').classList.remove('open');document.body.style.overflow='';}
 document.getElementById('demo-modal').addEventListener('click',function(e){if(e.target===this)closeDemo();});
 function submitDemo(e){e.preventDefault();const inst=document.getElementById('demo-institution').value.trim();const email=document.getElementById('demo-work-email').value.trim();if(!inst||!email){alert('Please fill in your institution name and work email.');return;}document.getElementById('demo-form').classList.add('hidden');document.getElementById('demo-success').classList.remove('hidden');}
