@@ -1045,6 +1045,83 @@ updatePricingDisplay();</code></pre>
             background: #334155;
             color: #ffffff;
         }
+
+        /* Pulsating Arrow Attention Grabber (Test Pricing Button) */
+        .tpg-pulsating-arrow-wrap {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+            padding: 2px 4px;
+            margin-right: 2px;
+            border-radius: 6px;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+            vertical-align: middle;
+        }
+        .tpg-pulsating-arrow-wrap:hover {
+            transform: scale(1.08);
+        }
+        .tpg-pulsating-arrow-wrap:active {
+            transform: scale(0.96);
+        }
+        .tpg-arrow-ping {
+            position: absolute;
+            left: 2px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ef4444;
+            box-shadow: 0 0 10px #ef4444;
+            pointer-events: none;
+            animation: tpgPing 1.35s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+        .tpg-pulsating-arrow {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ef4444;
+            animation: tpgArrowPulse 1.35s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.75));
+        }
+        .tpg-pulsating-arrow:hover {
+            color: #f43f5e;
+            filter: drop-shadow(0 0 12px rgba(244, 63, 94, 1));
+        }
+        .tpg-pulsating-arrow-svg {
+            width: 24px;
+            height: 24px;
+            display: block;
+            stroke: currentColor;
+        }
+        @keyframes tpgArrowPulse {
+            0%, 100% {
+                transform: translateX(0) scale(1);
+                filter: drop-shadow(0 0 3px rgba(239, 68, 68, 0.65));
+                opacity: 0.88;
+            }
+            50% {
+                transform: translateX(6px) scale(1.18);
+                filter: drop-shadow(0 0 10px rgba(239, 68, 68, 1)) drop-shadow(0 0 18px rgba(244, 63, 94, 0.85));
+                opacity: 1;
+            }
+        }
+        @keyframes tpgPing {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.95;
+            }
+            75%, 100% {
+                transform: scale(2.8);
+                opacity: 0;
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .tpg-pulsating-arrow, .tpg-arrow-ping {
+                animation: none !important;
+            }
+        }
         `;
 
         const styleEl = document.createElement('style');
@@ -1178,5 +1255,50 @@ updatePricingDisplay();</code></pre>
             btn.innerText = orig;
             btn.classList.remove('copied');
         }, 1800);
+    }
+
+    // Auto-mount and self-heal the pulsating attention arrow before "Test Pricing" button
+    function ensurePulsatingArrow() {
+        const btn = document.querySelector('button[onclick*="openTestPricingModal"]');
+        if (!btn) return;
+        if (document.getElementById('testPricingPulsatingArrow')) return;
+
+        const arrowWrap = document.createElement('div');
+        arrowWrap.id = 'testPricingPulsatingArrow';
+        arrowWrap.className = 'tpg-pulsating-arrow-wrap';
+        arrowWrap.setAttribute('role', 'button');
+        arrowWrap.setAttribute('tabindex', '0');
+        arrowWrap.setAttribute('title', 'Click to Test Multi-Currency Pricing (USD / INR Simulator & Guide)');
+        arrowWrap.innerHTML = `
+            <span class="tpg-arrow-ping"></span>
+            <div class="tpg-pulsating-arrow">
+                <svg class="tpg-pulsating-arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="19" y2="12"></line>
+                    <polyline points="13 6 19 12 13 18"></polyline>
+                </svg>
+            </div>
+        `;
+        arrowWrap.addEventListener('click', () => {
+            if (typeof window.openTestPricingModal === 'function') {
+                window.openTestPricingModal();
+            }
+        });
+        arrowWrap.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                if (typeof window.openTestPricingModal === 'function') {
+                    window.openTestPricingModal();
+                }
+            }
+        });
+        btn.parentNode.insertBefore(arrowWrap, btn);
+    }
+
+    // Immediate initialization on script load
+    injectStyles();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', ensurePulsatingArrow);
+    } else {
+        ensurePulsatingArrow();
     }
 })();
