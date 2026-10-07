@@ -476,7 +476,7 @@ foreach ($plans as &$plan) {
                     <!-- Price Display -->
                     <div class="mb-6 pb-6 border-b <?= $isGrowth ? 'border-white/15' : 'border-e-border' ?>">
                         <!-- USD Monthly -->
-                        <div class="price-box usd-price monthly-price">
+                        <div class="price-box usd-price monthly-price <?= $defaultCurrency === 'USD' ? '' : 'hidden' ?>">
                             <div class="flex items-baseline gap-1">
                                 <span class="text-[36px] font-black <?= $textColor ?> tracking-tight">$<?= $priceMonthlyUsd ?></span>
                                 <span class="text-[14px] font-medium <?= $subTextColor ?>">/month</span>
@@ -493,7 +493,7 @@ foreach ($plans as &$plan) {
                         </div>
 
                         <!-- INR Monthly -->
-                        <div class="price-box inr-price monthly-price hidden">
+                        <div class="price-box inr-price monthly-price <?= $defaultCurrency === 'INR' ? '' : 'hidden' ?>">
                             <div class="flex items-baseline gap-1">
                                 <span class="text-[36px] font-black <?= $textColor ?> tracking-tight">&#8377;<?= $priceMonthlyInr ?></span>
                                 <span class="text-[14px] font-medium <?= $subTextColor ?>">/month</span>
@@ -597,9 +597,9 @@ foreach ($plans as &$plan) {
                                     $priceYearlyInr = number_format(($p['price_yearly_paise'] / 100) / 12);
                                 ?>
                                 <td class="text-center font-bold text-[15px] py-4 <?= $isHighlight ? 'highlight-col text-e-teal' : 'text-e-text' ?>">
-                                    <span class="usd-price monthly-price">$<?= $priceMonthlyUsd ?>/mo</span>
+                                    <span class="usd-price monthly-price <?= $defaultCurrency === 'USD' ? '' : 'hidden' ?>">$<?= $priceMonthlyUsd ?>/mo</span>
                                     <span class="usd-price yearly-price hidden">$<?= $priceYearlyUsd ?>/mo</span>
-                                    <span class="inr-price monthly-price hidden">&#8377;<?= $priceMonthlyInr ?>/mo</span>
+                                    <span class="inr-price monthly-price <?= $defaultCurrency === 'INR' ? '' : 'hidden' ?>">&#8377;<?= $priceMonthlyInr ?>/mo</span>
                                     <span class="inr-price yearly-price hidden">&#8377;<?= $priceYearlyInr ?>/mo</span>
                                 </td>
                             <?php endforeach; ?>
@@ -1061,21 +1061,27 @@ foreach ($plans as &$plan) {
     const countryParam = (urlParams.get('country') || '').toUpperCase();
     const currencyParam = (urlParams.get('currency') || '').toUpperCase();
 
-    let detectedCountry = '';
+    // Check if an explicit QA/test URL override was provided in the query string
+    const hasUrlOverride = Boolean(countryParam || currencyParam);
+    let urlOverrideCurrency = null;
     if (countryParam) {
-        detectedCountry = countryParam;
-    } else if (currencyParam === 'INR') {
-        detectedCountry = 'IN';
-    } else if (currencyParam === 'USD') {
-        detectedCountry = 'US';
-    } else if (typeof window.visitorCountry !== 'undefined' && window.visitorCountry) {
-        detectedCountry = window.visitorCountry.toUpperCase();
-    } else if (document.body.dataset.defaultCountry) {
-        detectedCountry = document.body.dataset.defaultCountry.toUpperCase();
+        urlOverrideCurrency = (countryParam === 'IN') ? 'INR' : 'USD';
+    } else if (currencyParam === 'INR' || currencyParam === 'USD') {
+        urlOverrideCurrency = currencyParam;
     }
 
-    // Indian visitors see INR, rest of the world sees USD
-    let currentCurrency = (detectedCountry === 'IN') ? 'INR' : 'USD';
+    // Capture initial Cloudflare Worker geo-location result
+    const initialWorkerCountry = (typeof window.visitorCountry !== 'undefined' && window.visitorCountry)
+        ? window.visitorCountry.toUpperCase()
+        : '';
+
+    let detectedCountry = countryParam 
+        || (currencyParam === 'INR' ? 'IN' : (currencyParam === 'USD' ? 'US' : ''))
+        || initialWorkerCountry 
+        || (document.body.dataset.defaultCountry ? document.body.dataset.defaultCountry.toUpperCase() : '');
+
+    // Active currency: URL override takes highest priority, otherwise geo detection
+    let currentCurrency = urlOverrideCurrency || ((detectedCountry === 'IN') ? 'INR' : 'USD');
     let currentCycle = 'monthly';
 
     // Expose for testing & console overrides
@@ -1088,14 +1094,26 @@ foreach ($plans as &$plan) {
     } catch (e) {}
 
     function updatePricingDisplay() {
-        // Support runtime DevTools console override: window.visitorCountry = 'US' or window.currentCurrency = 'USD'
-        if (typeof window.visitorCountry !== 'undefined' && window.visitorCountry) {
-            currentCurrency = (window.visitorCountry.toUpperCase() === 'IN') ? 'INR' : 'USD';
-            window.currentCurrency = currentCurrency;
-            window.detectedCountry = window.visitorCountry.toUpperCase();
-        } else if (window.currentCurrency && (window.currentCurrency === 'INR' || window.currentCurrency === 'USD')) {
-            currentCurrency = window.currentCurrency.toUpperCase();
+        if (hasUrlOverride) {
+            // URL parameter has priority over initial worker detection
+            currentCurrency = urlOverrideCurrency;
+            // Support DevTools console override if developer explicitly sets window.currentCurrency
+            if (window.currentCurrency && (window.currentCurrency.toUpperCase() === 'INR' || window.currentCurrency.toUpperCase() === 'USD') && window.currentCurrency.toUpperCase() !== urlOverrideCurrency) {
+                currentCurrency = window.currentCurrency.toUpperCase();
+            }
+        } else {
+            // No URL override: support worker detection and DevTools console runtime overrides
+            if (typeof window.visitorCountry !== 'undefined' && window.visitorCountry) {
+                currentCurrency = (window.visitorCountry.toUpperCase() === 'IN') ? 'INR' : 'USD';
+            } else if (window.currentCurrency && (window.currentCurrency.toUpperCase() === 'INR' || window.currentCurrency.toUpperCase() === 'USD')) {
+                currentCurrency = window.currentCurrency.toUpperCase();
+            } else if (document.body.dataset.defaultCountry) {
+                currentCurrency = (document.body.dataset.defaultCountry.toUpperCase() === 'IN') ? 'INR' : 'USD';
+            }
         }
+
+        window.currentCurrency = currentCurrency;
+        window.detectedCountry = (currentCurrency === 'INR') ? 'IN' : (countryParam || 'US');
 
         // Toggle billing cycle buttons active state
         const monthlyBtn = document.getElementById('cycleBtnMonthly');
@@ -1135,7 +1153,8 @@ foreach ($plans as &$plan) {
         if (nav) nav.classList.toggle('scrolled', window.scrollY > 40);
     }, { passive: true });
 
-    // Initialize on load
+    // Initialize display immediately and on DOMContentLoaded
+    updatePricingDisplay();
     document.addEventListener('DOMContentLoaded', () => {
         updatePricingDisplay();
     });
