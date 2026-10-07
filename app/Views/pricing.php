@@ -552,7 +552,7 @@ foreach ($plans as &$plan) {
                             <?= htmlspecialchars($ctaText) ?>
                         </button>
                     <?php else: ?>
-                        <a href="<?= htmlspecialchars($ctaLink) ?>" class="<?= $isGrowth ? 'btn-primary' : 'btn-secondary' ?> py-3.5 justify-center text-[14.5px] w-full font-bold">
+                        <a href="<?= htmlspecialchars($ctaLink) ?>" data-plan="<?= htmlspecialchars($p['name']) ?>" class="plan-cta-btn <?= $isGrowth ? 'btn-primary' : 'btn-secondary' ?> py-3.5 justify-center text-[14.5px] w-full font-bold">
                             <?= htmlspecialchars($ctaText) ?>
                         </a>
                     <?php endif; ?>
@@ -1127,6 +1127,14 @@ foreach ($plans as &$plan) {
         // Show only the active currency + billing cycle combination
         const selector = `.${currentCurrency.toLowerCase()}-price.${currentCycle}-price`;
         document.querySelectorAll(selector).forEach(el => el.classList.remove('hidden'));
+
+        // Dynamically update CTA links with plan, billing cycle, and currency
+        document.querySelectorAll('.plan-cta-btn').forEach(btn => {
+            const plan = btn.dataset.plan;
+            if (plan && plan.toLowerCase() !== 'pro') {
+                btn.href = `/app#signup?plan=${encodeURIComponent(plan)}&cycle=${encodeURIComponent(currentCycle)}&currency=${encodeURIComponent(currentCurrency)}`;
+            }
+        });
     }
     window.updatePricingDisplay = updatePricingDisplay;
 

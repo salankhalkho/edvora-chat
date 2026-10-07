@@ -54,5 +54,29 @@ class TenantMiddleware
 
         // Attach tenant organization_id to global request state
         $GLOBALS['organization_id'] = $orgId;
+
+        // Superadmin bypasses subscription gate
+        if (!empty($user['role']) && in_array($user['role'], ['superadmin', 'super_admin'])) {
+            return;
+        }
+
+        // Allow billing & auth routes so unpaid tenants can select plans & execute payments
+        $uri = $request->getUri();
+        if (str_starts_with($uri, '/v1/billing') || str_starts_with($uri, '/v1/auth')) {
+            return;
+        }
+
+        // Check if organization has an active commercial subscription
+        $db = \App\Config\Database::getConnection();
+        $stmtSub = $db->prepare("SELECT subscription_status FROM organizations WHERE id = :id LIMIT 1");
+        $stmtSub->execute([':id' => $orgId]);
+        $orgRow = $stmtSub->fetch();
+
+        if (!$orgRow || $orgRow['subscription_status'] !== 'active') {
+            Response::error('Active commercial subscription required. Please complete payment to access console.', 402, [
+                'code' => 'PAYMENT_REQUIRED',
+                'subscription_status' => $orgRow['subscription_status'] ?? 'pending_payment'
+            ]);
+        }
     }
 }

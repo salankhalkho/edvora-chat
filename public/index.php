@@ -385,6 +385,8 @@ $router->get('/v1/uploads/avatars/{org_id}/{filename}', [WidgetCustomizationCont
 
 // Billing & Subscription Routes (Protected + Tenant Context)
 $router->get('/v1/billing/subscription', [BillingController::class, 'show'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->post('/v1/billing/create-order', [BillingController::class, 'createOrder'], [AuthMiddleware::class, TenantMiddleware::class]);
+$router->post('/v1/billing/verify-payment', [BillingController::class, 'verifyPayment'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->post('/v1/billing/create-subscription', [BillingController::class, 'createSubscription'], [AuthMiddleware::class, TenantMiddleware::class]);
 $router->post('/v1/billing/webhook', [BillingController::class, 'webhook']);
 

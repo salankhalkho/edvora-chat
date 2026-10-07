@@ -2936,8 +2936,9 @@
             flex-shrink: 0;
             z-index: 2;
         }
-    </style>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="js/tenant-localization.js?v=20261002"></script>
+    <script src="js/checkout.js?v=20261007"></script>
 </head>
 <body>
 
@@ -2998,6 +2999,18 @@
                 </div>
             </div>
 
+            <!-- Preselected Plan Badge (Scenario 1) -->
+            <div id="signupSelectedPlanBadge" style="display: none; margin-bottom: 16px; background: #E6F7D2; border: 1px solid #B9D7C7; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #063D3B; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 14px;">🏷️</span>
+                    <div>
+                        <span style="font-weight: 700;" id="signupSelectedPlanName">Starter Plan</span> &bull; <span id="signupSelectedPlanPrice">₹2,999/month</span>
+                        <div style="font-size: 10.5px; color: #047857;" id="signupSelectedPlanCycle">Billed monthly</div>
+                    </div>
+                </div>
+                <a href="#" id="signupChangePlanLink" onclick="event.preventDefault(); window.edvoraCheckout.switchView('select-plan');" style="color: #063D3B; font-weight: 700; text-decoration: underline; font-size: 11.5px;">Change</a>
+            </div>
+
             <div id="signupError" class="auth-error-banner" style="display: none;" role="alert">
                 <svg class="auth-error-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10"></circle>
@@ -3049,6 +3062,214 @@
             
             <div class="auth-toggle">
                 Already registered? <a href="#" id="showLogin">Sign In</a>
+            </div>
+        </div>
+
+        <!-- Plan Selection Card (Scenario 2 Step 2) -->
+        <div class="auth-card-wrapper" id="planSelectCard" style="display: none; max-width: 580px;">
+            <div class="auth-brand-header">
+                <div class="auth-logo-badge">✦</div>
+                <div>
+                    <div class="auth-title">Select College Plan</div>
+                    <div class="auth-sub">Choose your subscription tier to activate your AI console</div>
+                </div>
+            </div>
+
+            <!-- Controls: Billing Cycle & Currency Switcher -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+                <!-- Billing Switcher -->
+                <div style="display: inline-flex; background: #F1F7F4; border: 1px solid #DDE9E3; border-radius: 8px; padding: 3px;">
+                    <button type="button" id="planSelBtnMonthly" onclick="window.edvoraCheckout.setBillingCycle('monthly')" style="border: none; background: #063D3B; color: #fff; font-size: 11.5px; font-weight: 600; padding: 5px 12px; border-radius: 6px; cursor: pointer;">
+                        Monthly
+                    </button>
+                    <button type="button" id="planSelBtnYearly" onclick="window.edvoraCheckout.setBillingCycle('yearly')" style="border: none; background: transparent; color: #475569; font-size: 11.5px; font-weight: 600; padding: 5px 12px; border-radius: 6px; cursor: pointer;">
+                        Yearly <span style="background: #C8FF63; color: #063D3B; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 10px; margin-left: 4px;">Save ~17%</span>
+                    </button>
+                </div>
+
+                <!-- Currency Switcher -->
+                <div style="display: inline-flex; background: #F1F7F4; border: 1px solid #DDE9E3; border-radius: 8px; padding: 3px;">
+                    <button type="button" id="planSelBtnInr" onclick="window.edvoraCheckout.switchCurrency('INR')" style="border: none; background: #063D3B; color: #fff; font-size: 11.5px; font-weight: 600; padding: 5px 10px; border-radius: 6px; cursor: pointer;">
+                        INR (₹)
+                    </button>
+                    <button type="button" id="planSelBtnUsd" onclick="window.edvoraCheckout.switchCurrency('USD')" style="border: none; background: transparent; color: #475569; font-size: 11.5px; font-weight: 600; padding: 5px 10px; border-radius: 6px; cursor: pointer;">
+                        USD ($)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Two Plan Cards -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px;">
+                <!-- Starter Plan -->
+                <div style="background: #FFFFFF; border: 1.5px solid #DDE9E3; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="font-size: 11px; font-weight: 800; color: #047857; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Starter</div>
+                        <h4 style="font-size: 16px; font-weight: 800; color: #063D3B; margin: 0 0 8px 0;">Starter Plan</h4>
+                        <div style="display: flex; align-items: baseline; gap: 4px; margin-bottom: 12px;">
+                            <span id="planSelStarterPrice" style="font-size: 22px; font-weight: 900; color: #063D3B;">₹2,999</span>
+                            <span id="planSelStarterSub" style="font-size: 11px; color: #64748b;">/month</span>
+                        </div>
+                        <ul style="list-style: none; padding: 0; margin: 0 0 16px 0; font-size: 11.5px; color: #334155; line-height: 1.6;">
+                            <li style="margin-bottom: 4px;">✓ 1 Department Chatbot</li>
+                            <li style="margin-bottom: 4px;">✓ 2,000 AI Conversations/mo</li>
+                            <li style="margin-bottom: 4px;">✓ 200 Qualified Leads/mo</li>
+                            <li style="margin-bottom: 4px;">✓ 20 Knowledge Sources</li>
+                            <li>✓ 2 Counselor Seats</li>
+                        </ul>
+                    </div>
+                    <button type="button" onclick="window.edvoraCheckout.selectPlan('Starter')" class="brand-btn-secondary" style="width: 100%; height: 36px; font-size: 12px; font-weight: 700;">
+                        Select Starter →
+                    </button>
+                </div>
+
+                <!-- Growth Plan -->
+                <div style="background: #063D3B; color: #ffffff; border: 1.5px solid #063D3B; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+                    <div style="position: absolute; top: -10px; right: 14px; background: #C8FF63; color: #063D3B; font-size: 9.5px; font-weight: 800; padding: 2px 8px; border-radius: 10px; text-transform: uppercase;">
+                        Most Popular
+                    </div>
+                    <div>
+                        <div style="font-size: 11px; font-weight: 800; color: #C8FF63; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Growth</div>
+                        <h4 style="font-size: 16px; font-weight: 800; color: #ffffff; margin: 0 0 8px 0;">Growth Plan</h4>
+                        <div style="display: flex; align-items: baseline; gap: 4px; margin-bottom: 12px;">
+                            <span id="planSelGrowthPrice" style="font-size: 22px; font-weight: 900; color: #ffffff;">₹6,999</span>
+                            <span id="planSelGrowthSub" style="font-size: 11px; color: #A3D4BE;">/month</span>
+                        </div>
+                        <ul style="list-style: none; padding: 0; margin: 0 0 16px 0; font-size: 11.5px; color: #E2ECE7; line-height: 1.6;">
+                            <li style="margin-bottom: 4px;">✓ 3 Department Chatbots</li>
+                            <li style="margin-bottom: 4px;">✓ 200,000 AI Conversations/mo</li>
+                            <li style="margin-bottom: 4px;">✓ Unlimited Leads &amp; Tours</li>
+                            <li style="margin-bottom: 4px;">✓ 100 Knowledge Sources</li>
+                            <li>✓ 10 Counselor Seats</li>
+                        </ul>
+                    </div>
+                    <button type="button" onclick="window.edvoraCheckout.selectPlan('Growth')" style="width: 100%; height: 36px; font-size: 12px; font-weight: 700; background: #C8FF63; color: #063D3B; border: none; border-radius: 6px; cursor: pointer;">
+                        Select Growth →
+                    </button>
+                </div>
+            </div>
+
+            <div class="auth-toggle">
+                Already registered? <a href="#" onclick="window.edvoraCheckout.switchView('login')">Sign In</a>
+            </div>
+        </div>
+
+        <!-- Checkout Gateway Card (Order Summary & Payment Gateway Launch) -->
+        <div class="auth-card-wrapper" id="checkoutGatewayCard" style="display: none; max-width: 480px;">
+            <div class="auth-brand-header">
+                <div class="auth-logo-badge">✦</div>
+                <div>
+                    <div class="auth-title">Complete Subscription</div>
+                    <div class="auth-sub" id="chkGatewayTitle">Review order summary and proceed to secure checkout</div>
+                </div>
+            </div>
+
+            <div id="checkoutGatewayError" class="auth-error-banner" style="display: none;" role="alert">
+                <span id="checkoutGatewayErrorText"></span>
+            </div>
+
+            <!-- Order Summary Box -->
+            <div style="background: #F8FBF9; border: 1.5px solid #DCE8E2; border-radius: 12px; padding: 18px 20px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px dashed #DCE8E2;">
+                    <span style="font-size: 12px; color: #64748b;">Institution</span>
+                    <span style="font-size: 13px; font-weight: 700; color: #063D3B;" id="chkSummaryOrgName">College</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px dashed #DCE8E2;">
+                    <span style="font-size: 12px; color: #64748b;">Selected Tier</span>
+                    <span style="font-size: 13px; font-weight: 700; color: #063D3B;" id="chkSummaryPlanName">Starter Plan</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px dashed #DCE8E2;">
+                    <span style="font-size: 12px; color: #64748b;">Billing Cycle</span>
+                    <span style="font-size: 12px; font-weight: 600; color: #334155;" id="chkSummaryBilling">Monthly Subscription</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                    <span style="font-size: 13px; font-weight: 800; color: #063D3B;">Total Payable</span>
+                    <span style="font-size: 24px; font-weight: 900; color: #063D3B;" id="chkSummaryAmount">₹2,999</span>
+                </div>
+            </div>
+
+            <!-- Razorpay Button (INR) -->
+            <button type="button" id="chkBtnRazorpay" onclick="window.edvoraCheckout.payWithRazorpay()" class="brand-btn-primary" style="width: 100%; height: 44px; font-size: 13.5px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <span>🔒</span> <span>Pay with Razorpay (UPI / Cards)</span>
+            </button>
+
+            <!-- PayPal Container (USD) -->
+            <div id="chkPaypalContainer" style="display: none; margin-bottom: 12px;">
+                <div id="chkPaypalBtnWrapper"></div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; margin-top: 10px;">
+                <a href="#" id="chkCurrencyToggleLink" onclick="window.edvoraCheckout.toggleCurrencyCheckout()" style="color: #047857; text-decoration: underline; font-weight: 600;">
+                    Switch Currency / Gateway
+                </a>
+                <a href="#" onclick="window.edvoraCheckout.switchView('select-plan')" style="color: #64748b; text-decoration: underline;">
+                    Change Plan
+                </a>
+            </div>
+
+            <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid #E2ECE7; text-align: center; font-size: 11px; color: #94a3b8; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <span>🔒 256-bit SSL Encrypted</span> &bull; <span>FERPA &amp; SOC2 Compliant</span>
+            </div>
+        </div>
+
+        <!-- Payment Status Page Card (Scenario 1 & 2 Step 4) -->
+        <div class="auth-card-wrapper" id="paymentStatusCard" style="display: none; max-width: 480px;">
+            <!-- 4a. SUCCESS VIEW -->
+            <div id="statusSuccessView" style="display: none; text-align: center;">
+                <div style="width: 56px; height: 56px; background: #E6F7D2; border: 2px solid #B9D7C7; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 26px; color: #047857; margin: 0 auto 16px auto;">
+                    ✓
+                </div>
+                <h3 style="font-size: 22px; font-weight: 900; color: #063D3B; margin: 0 0 6px 0;">Payment Successful! 🎉</h3>
+                <p style="font-size: 13.5px; color: #475569; margin: 0 0 20px 0; line-height: 1.5;">
+                    Welcome to Edvora! Your institutional subscription has been verified and your AI console is ready.
+                </p>
+
+                <div style="background: #F8FBF9; border: 1.5px solid #DCE8E2; border-radius: 12px; padding: 16px; margin-bottom: 20px; text-align: left; font-size: 12.5px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: #64748b;">Activated Plan:</span>
+                        <strong style="color: #063D3B;" id="statusSuccessPlan">Starter Plan (Monthly)</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: #64748b;">Amount Paid:</span>
+                        <strong style="color: #063D3B;" id="statusSuccessAmount">₹2,999</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #64748b;">Transaction Reference:</span>
+                        <strong style="color: #063D3B; font-family: monospace;" id="statusSuccessTxId">EDV-TXN-1234</strong>
+                    </div>
+                </div>
+
+                <div style="background: #E8F5EE; border-left: 4px solid #047857; border-radius: 6px; padding: 12px 14px; margin-bottom: 24px; text-align: left; font-size: 12px; color: #2D5A46; line-height: 1.5;">
+                    📧 A friendly welcome email with your setup guide has been dispatched to <strong id="statusSuccessEmail">your email</strong>.
+                </div>
+
+                <button type="button" onclick="window.edvoraCheckout.switchView('login')" class="brand-btn-primary" style="width: 100%; height: 42px; font-size: 13.5px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <span>Sign In to Console &rarr;</span>
+                </button>
+            </div>
+
+            <!-- 4b. FAILED VIEW -->
+            <div id="statusFailedView" style="display: none; text-align: center;">
+                <div style="width: 56px; height: 56px; background: #FEF2F2; border: 2px solid #FCA5A5; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 26px; color: #DC2626; margin: 0 auto 16px auto;">
+                    ✕
+                </div>
+                <h3 style="font-size: 22px; font-weight: 900; color: #991B1B; margin: 0 0 6px 0;">Transaction Incomplete</h3>
+                <p style="font-size: 13.5px; color: #475569; margin: 0 0 16px 0; line-height: 1.5;">
+                    Your payment could not be processed. No charges were made to your account.
+                </p>
+
+                <div style="background: #FFF5F5; border: 1px solid #FED7D7; border-radius: 8px; padding: 12px 14px; margin-bottom: 22px; text-align: left; font-size: 12px; color: #9B2C2C; line-height: 1.5;" id="statusFailedReasonText">
+                    Payment cancelled by user.
+                </div>
+
+                <button type="button" onclick="window.edvoraCheckout.retryPayment()" class="brand-btn-primary" style="width: 100%; height: 42px; font-size: 13.5px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <span>Try Again ↻</span>
+                </button>
+
+                <div style="display: flex; justify-content: center; gap: 16px; font-size: 12px; margin-top: 8px;">
+                    <a href="#" onclick="window.edvoraCheckout.switchView('select-plan')" style="color: #047857; text-decoration: underline;">Choose Another Plan</a>
+                    <span style="color: #cbd5e1;">&bull;</span>
+                    <a href="#" onclick="window.edvoraCheckout.switchView('login')" style="color: #64748b; text-decoration: underline;">Back to Sign In</a>
+                </div>
             </div>
         </div>
 
@@ -5277,6 +5498,10 @@
 
         // Auth Modal Card State Controller
         function setAuthCard(mode) {
+            if (window.edvoraCheckout && typeof window.edvoraCheckout.switchView === 'function') {
+                window.edvoraCheckout.switchView(mode);
+                return;
+            }
             clearAuthError('loginError');
             clearAuthError('signupError');
             const loginCard = document.getElementById('loginCard');
@@ -5299,7 +5524,15 @@
             const search = window.location.search || '';
             const params = new URLSearchParams(search);
             const mode = params.get('mode');
-            if (hash === '#signup' || hash === '#register' || path.endsWith('/signup') || path.endsWith('/register') || mode === 'signup' || mode === 'register') {
+            if (hash === '#select-plan') {
+                setAuthCard('select-plan');
+            } else if (hash === '#checkout') {
+                setAuthCard('checkout');
+            } else if (hash === '#payment-success') {
+                setAuthCard('status-success');
+            } else if (hash === '#payment-failed') {
+                setAuthCard('status-failed');
+            } else if (hash === '#signup' || hash === '#register' || path.endsWith('/signup') || path.endsWith('/register') || mode === 'signup' || mode === 'register') {
                 setAuthCard('signup');
             } else {
                 setAuthCard('login');
@@ -8336,6 +8569,30 @@ echo $response['reply'];
                     if (data.data.refresh_token) {
                         localStorage.setItem('edvora_refresh_token', data.data.refresh_token);
                     }
+
+                    // Strict Payment Gate: check if commercial subscription is pending
+                    const isPaymentPending = Boolean(data.data.payment_required || (data.data.subscription_status && data.data.subscription_status !== 'active' && data.data.user?.role !== 'superadmin'));
+                    if (isPaymentPending) {
+                        const chkState = window.edvoraCheckoutState || {};
+                        chkState.orgId = data.data.organization?.id;
+                        chkState.orgName = data.data.organization?.name || '';
+                        chkState.userEmail = data.data.user?.email || email;
+                        chkState.userName = data.data.user?.name || '';
+                        if (data.data.plan_name) {
+                            chkState.plan = data.data.plan_name;
+                            chkState.planId = data.data.plan_id;
+                        }
+
+                        if (data.data.plan_name) {
+                            window.edvoraCheckout.switchView('checkout');
+                        } else {
+                            window.edvoraCheckout.switchView('select-plan');
+                        }
+
+                        showToast('Commercial subscription payment required. Please complete checkout to enter console.', 'warning');
+                        return;
+                    }
+
                     if (data.data.organization) {
                         updateAppIdentityUI(data.data.organization, data.data.user);
                     }
@@ -8343,7 +8600,6 @@ echo $response['reply'];
                     currentDepartments = [];
                     availableOrgStaff = [];
                     availableOrgKs = [];
-                    // Onboarding paused: land directly on dashboard
                     initDashboard();
                 } else {
                     showAuthError('loginError', data.message || 'Invalid email address or password.');
@@ -8371,8 +8627,8 @@ echo $response['reply'];
             }
 
             const websiteVal = (document.getElementById('signupWebsite')?.value || '').trim();
-
             const collegeNameVal = (document.getElementById('signupCollegeName')?.value || '').trim();
+            const chkState = window.edvoraCheckoutState || {};
 
             try {
                 const res = await fetch('/v1/auth/signup', {
@@ -8383,7 +8639,10 @@ echo $response['reply'];
                         college_name: collegeNameVal,
                         email: document.getElementById('signupEmail').value.trim(),
                         password: document.getElementById('signupPassword').value,
-                        website_url: websiteVal
+                        website_url: websiteVal,
+                        plan: chkState.hasPreselectedPlan ? chkState.plan : null,
+                        billing_cycle: chkState.cycle || 'monthly',
+                        currency: chkState.currency || 'INR'
                     })
                 });
                 const data = await res.json();
@@ -8393,21 +8652,30 @@ echo $response['reply'];
                     if (data.data.refresh_token) {
                         localStorage.setItem('edvora_refresh_token', data.data.refresh_token);
                     }
-                    document.documentElement.classList.add('has-auth-token');
-                    currentDepartments = [];
-                    availableOrgStaff = [];
-                    availableOrgKs = [];
 
-                    if (data.data.organization) {
-                        updateAppIdentityUI(data.data.organization, data.data.user);
+                    // Update local checkout state for gateway & order summary
+                    chkState.orgId = data.data.organization?.id;
+                    chkState.orgName = data.data.organization?.name || collegeNameVal;
+                    chkState.userEmail = document.getElementById('signupEmail').value.trim();
+                    chkState.userName = document.getElementById('signupName').value.trim();
+
+                    if (data.data.plan_name) {
+                        chkState.plan = data.data.plan_name;
+                        chkState.planId = data.data.plan_id;
                     }
+                    if (data.data.billing_cycle) chkState.cycle = data.data.billing_cycle;
+                    if (data.data.currency) chkState.currency = data.data.currency;
 
-                    // Onboarding paused: land directly on dashboard
-                    document.documentElement.classList.remove('auth-mode-signup', 'in-smart-onboarding', 'in-onboarding');
-                    history.replaceState(null, '', '#overview');
-
-                    showToast('Account created successfully! Welcome to your dashboard.', 'success');
-                    initDashboard();
+                    // Commercial Gate: DO NOT enter dashboard until payment is complete
+                    if (data.data.has_preselected_plan) {
+                        // Scenario 1: Preselected plan -> Proceed to Payment Gateway
+                        window.edvoraCheckout.switchView('checkout');
+                        showToast('Account registered! Please complete payment to activate your console.', 'info');
+                    } else {
+                        // Scenario 2: No plan preselected -> Proceed to Plan Selection
+                        window.edvoraCheckout.switchView('select-plan');
+                        showToast('Account registered! Please choose your plan to activate your console.', 'info');
+                    }
                 } else {
                     showAuthError('signupError', data.message || 'Signup failed. Please verify your details.');
                 }
@@ -10916,15 +11184,38 @@ echo $response['reply'];
                     return;
                 }
 
+                const user = meData.data.user || {};
+                const org = meData.data.organization || {};
+
+                // Strict Commercial Gate: check if subscription is pending
+                if (org && org.subscription_status !== 'active' && user.role !== 'superadmin') {
+                    document.documentElement.classList.remove('has-auth-token');
+                    document.getElementById('appContainer').style.display = 'none';
+                    document.getElementById('authContainer').style.display = 'flex';
+
+                    const chkState = window.edvoraCheckoutState || {};
+                    chkState.orgId = org.id;
+                    chkState.orgName = org.name;
+                    chkState.userEmail = user.email;
+                    chkState.userName = user.name;
+                    if (org.plan_name) chkState.plan = org.plan_name;
+
+                    if (org.plan_name) {
+                        window.edvoraCheckout.switchView('checkout');
+                    } else {
+                        window.edvoraCheckout.switchView('select-plan');
+                    }
+                    showToast('Commercial subscription payment required to enter console.', 'warning');
+                    return;
+                }
+
                 // Smart Onboarding replaces the mandatory 16-step wizard
                 // App container is shown directly, and any gaps are flagged via the notification badge.
                 document.getElementById('authContainer').style.display = 'none';
                 document.getElementById('appContainer').style.display = 'grid';
 
-                const user = meData.data.user || {};
                 currentUser = user;
                 window.currentUser = user;
-                const org = meData.data.organization || {};
                 window.currentOrgProfile = org;
                 const botToken = meData.data.bot_token;
                 window.currentBotToken = botToken || '';

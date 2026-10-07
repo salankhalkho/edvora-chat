@@ -541,4 +541,165 @@ HTML;
         $encrypted = openssl_encrypt($key, 'AES-256-CBC', md5($secret), 0, $iv);
         return bin2hex($iv . $encrypted);
     }
+
+    /**
+     * Send friendly welcome email upon registration + payment success
+     * Uses platform_config dynamically for fresh SMTP credentials.
+     */
+    public static function sendWelcomeSubscriptionEmail(
+        string $toEmail,
+        string $recipientName,
+        string $institutionName,
+        string $planName = 'Starter',
+        string $billingCycle = 'monthly',
+        string $currency = 'INR',
+        string $amountFormatted = '',
+        string $dashboardUrl = 'https://edvora.chat/app#login'
+    ): bool {
+        if (empty($toEmail) || !filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+
+        $cleanName = trim($recipientName);
+        $firstName = !empty($cleanName) ? trim(explode(' ', $cleanName)[0]) : 'there';
+        $institutionName = htmlspecialchars(trim($institutionName));
+        $planName = htmlspecialchars(trim($planName));
+        $subject = "Welcome to Edvora! {$institutionName} is ready to launch 🎉";
+
+        $html = <<<HTML
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{$subject}</title>
+</head>
+<body style="margin: 0; padding: 28px 12px; background-color: #F1F7F4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; line-height: 1.6;">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #DCE8E2; overflow: hidden; box-shadow: 0 4px 24px rgba(6, 61, 59, 0.06);">
+    
+    <!-- Top Brand Header -->
+    <div style="background: #063D3B; padding: 32px 32px 28px 32px; text-align: left;">
+      <div style="display: inline-block; font-size: 11px; font-weight: 700; color: #063D3B; background: #C8FF63; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px;">
+        Account Activated &bull; {$planName} Plan
+      </div>
+      <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 0 0 6px 0; letter-spacing: -0.02em;">
+        Welcome to Edvora! 🎉
+      </h1>
+      <p style="color: #A3D4BE; font-size: 14px; margin: 0;">
+        {$institutionName} &bull; AI Admissions Console
+      </p>
+    </div>
+
+    <!-- Main Content Body -->
+    <div style="padding: 32px;">
+      <p style="font-size: 16px; color: #063D3B; font-weight: 600; margin-top: 0;">
+        Hi {$firstName},
+      </p>
+      
+      <p style="font-size: 14.5px; color: #334155; margin-bottom: 16px;">
+        Welcome to <strong>Edvora</strong>! 🎉
+      </p>
+
+      <p style="font-size: 14.5px; color: #334155; margin-bottom: 16px;">
+        We’re excited to have <strong>{$institutionName}</strong> on board.
+      </p>
+
+      <p style="font-size: 14.5px; color: #475569; margin-bottom: 24px; line-height: 1.6;">
+        Edvora is built to help colleges and universities engage prospective students, answer their questions instantly, capture high-intent leads, and connect students with the right people across your institution.
+      </p>
+
+      <p style="font-size: 14.5px; color: #334155; margin-bottom: 24px;">
+        You’re now ready to start setting up your institution.
+      </p>
+
+      <!-- Primary High-Converting CTA Button -->
+      <div style="text-align: center; margin: 28px 0;">
+        <a href="{$dashboardUrl}" style="display: inline-block; background: #063D3B; color: #ffffff; font-size: 15px; font-weight: 700; padding: 14px 32px; border-radius: 8px; text-decoration: none; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.2);">
+          Access Your Admissions Console &rarr;
+        </a>
+      </div>
+
+      <!-- Quick Start Card -->
+      <div style="background: #F8FBF9; border: 1.5px solid #DCE8E2; border-radius: 12px; padding: 22px 24px; margin: 28px 0;">
+        <h3 style="font-size: 15px; font-weight: 800; color: #063D3B; margin: 0 0 16px 0; letter-spacing: -0.01em;">
+          A great place to start
+        </h3>
+
+        <div style="margin-bottom: 16px;">
+          <div style="font-size: 14px; font-weight: 700; color: #063D3B; margin-bottom: 4px;">1. Add your institution details</div>
+          <div style="font-size: 13.5px; color: #475569; line-height: 1.5;">Set up your campuses, programs, departments, and team members.</div>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <div style="font-size: 14px; font-weight: 700; color: #063D3B; margin-bottom: 4px;">2. Add your knowledge</div>
+          <div style="font-size: 13.5px; color: #475569; line-height: 1.5;">Upload your prospectuses, fee structures, policies, brochures, or simply add important pages from your website. Edvora uses your approved institutional content to power the AI assistant.</div>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <div style="font-size: 14px; font-weight: 700; color: #063D3B; margin-bottom: 4px;">3. Configure your admissions assistant</div>
+          <div style="font-size: 13.5px; color: #475569; line-height: 1.5;">Customize its name, personality, welcome message, branding, and how it should interact with prospective students.</div>
+        </div>
+
+        <div>
+          <div style="font-size: 14px; font-weight: 700; color: #063D3B; margin-bottom: 4px;">4. Connect it to your website</div>
+          <div style="font-size: 13.5px; color: #475569; line-height: 1.5;">Once you're ready, you can deploy Edvora directly on your website and start engaging students 24/7.</div>
+        </div>
+      </div>
+
+      <p style="font-size: 13.5px; color: #64748b; font-style: italic; margin-bottom: 24px;">
+        And you don't have to set everything up at once. You can start small and build from there.
+      </p>
+
+      <div style="background: #E8F5EE; border-left: 4px solid #047857; border-radius: 6px; padding: 14px 18px; margin-bottom: 24px;">
+        <div style="font-size: 13px; font-weight: 700; color: #047857; margin-bottom: 4px;">Your Edvora dashboard is ready:</div>
+        <div style="font-size: 13px; color: #2D5A46;">
+          <a href="{$dashboardUrl}" style="color: #047857; font-weight: 600; text-decoration: underline;">{$dashboardUrl}</a>
+        </div>
+      </div>
+
+      <p style="font-size: 13.5px; color: #475569; margin-bottom: 20px;">
+        If you ever need help, simply reply to this email. We’re happy to help you get your institution up and running.
+      </p>
+
+      <p style="font-size: 13.5px; color: #334155; margin-bottom: 24px;">
+        Welcome aboard. We’re looking forward to helping <strong>{$institutionName} turn more student questions into meaningful conversations and admissions opportunities.</strong>
+      </p>
+
+      <p style="font-size: 14px; color: #063D3B; margin-bottom: 0;">
+        Warm regards,<br>
+        <strong>The Edvora Team</strong><br>
+        <a href="https://edvora.chat" style="color: #047857; text-decoration: none;">https://edvora.chat</a>
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #F8FBF9; padding: 20px 32px; border-top: 1px solid #DCE8E2; text-align: center;">
+      <p style="font-size: 11.5px; color: #94a3b8; margin: 0;">
+        &copy; 2026 edvora.chat &bull; AI-Powered Admissions Engagement for Higher Education &bull; FERPA & SOC2 Compliant
+      </p>
+    </div>
+  </div>
+</body>
+</html>
+HTML;
+
+        $plain = "Hi {$firstName},\n\n"
+            . "Welcome to Edvora! 🎉\n\n"
+            . "We're excited to have {$institutionName} on board.\n\n"
+            . "Edvora is built to help colleges and universities engage prospective students, answer their questions instantly, capture high-intent leads, and connect students with the right people across your institution.\n\n"
+            . "You're now ready to start setting up your institution.\n\n"
+            . "Access Your Admissions Console:\n{$dashboardUrl}\n\n"
+            . "--- A GREAT PLACE TO START ---\n"
+            . "1. Add your institution details\nSet up your campuses, programs, departments, and team members.\n\n"
+            . "2. Add your knowledge\nUpload your prospectuses, fee structures, policies, brochures, or simply add important pages from your website.\n\n"
+            . "3. Configure your admissions assistant\nCustomize its name, personality, welcome message, branding, and how it should interact with prospective students.\n\n"
+            . "4. Connect it to your website\nOnce you're ready, you can deploy Edvora directly on your website and start engaging students 24/7.\n\n"
+            . "And you don't have to set everything up at once. You can start small and build from there.\n\n"
+            . "Your Edvora dashboard is ready:\n{$dashboardUrl}\n\n"
+            . "If you ever need help, simply reply to this email. We're happy to help you get your institution up and running.\n\n"
+            . "Welcome aboard. We're looking forward to helping {$institutionName} turn more student questions into meaningful conversations and admissions opportunities.\n\n"
+            . "Warm regards,\nThe Edvora Team\nhttps://edvora.chat";
+
+        return self::sendMail($toEmail, $subject, $html, true);
+    }
 }

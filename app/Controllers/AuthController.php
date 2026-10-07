@@ -71,18 +71,51 @@ class AuthController
             $slug .= '-' . substr(bin2hex(random_bytes(3)), 0, 6);
         }
 
-        // Fetch default plan (Starter)
-        $stmtPlan = $db->query("SELECT id FROM plans WHERE is_default = 1 LIMIT 1");
-        $defaultPlan = $stmtPlan->fetch();
-        $planId = $defaultPlan ? (int)$defaultPlan['id'] : 1;
+        // Resolve plan if selected (by ID or by name)
+        $selectedPlanInput = $data['plan'] ?? null;
+        $planId = null;
+        $planName = null;
+        if (!empty($selectedPlanInput)) {
+            if (is_numeric($selectedPlanInput)) {
+                $stmtPlan = $db->prepare("SELECT id, name FROM plans WHERE id = :pid AND is_active = 1 LIMIT 1");
+                $stmtPlan->execute([':pid' => (int)$selectedPlanInput]);
+            } else {
+                $stmtPlan = $db->prepare("SELECT id, name FROM plans WHERE LOWER(name) = LOWER(:pname) AND is_active = 1 LIMIT 1");
+                $stmtPlan->execute([':pname' => trim((string)$selectedPlanInput)]);
+            }
+            $foundPlan = $stmtPlan->fetch();
+            if ($foundPlan) {
+                $planId = (int)$foundPlan['id'];
+                $planName = $foundPlan['name'];
+            }
+        }
+
+        // If no plan selected (Scenario 2), default to Starter as baseline placeholder
+        if (!$planId) {
+            $stmtDef = $db->query("SELECT id, name FROM plans WHERE is_default = 1 LIMIT 1");
+            $defaultPlan = $stmtDef->fetch();
+            if ($defaultPlan) {
+                $planId = (int)$defaultPlan['id'];
+                $planName = $defaultPlan['name'];
+            } else {
+                $planId = 1;
+                $planName = 'Starter';
+            }
+        }
+
+        $billingCycle = in_array(strtolower($data['billing_cycle'] ?? ''), ['monthly', 'yearly']) ? strtolower($data['billing_cycle']) : 'monthly';
+        $currency = strtoupper(trim($data['currency'] ?? 'INR'));
+        if (!in_array($currency, ['INR', 'USD'])) {
+            $currency = 'INR';
+        }
 
         try {
             $db->beginTransaction();
 
-            // 1. Create Organization with website_url (onboarding paused, mark completed)
+            // 1. Create Organization with subscription_status = 'pending_payment'
             $stmtOrg = $db->prepare("
                 INSERT INTO organizations (name, slug, website_url, primary_color, plan_id, subscription_status, onboarding_completed, onboarding_step)
-                VALUES (:name, :slug, :website_url, '#2563EB', :plan_id, 'active', 1, 1)
+                VALUES (:name, :slug, :website_url, '#2563EB', :plan_id, 'pending_payment', 1, 1)
             ");
             $stmtOrg->execute([
                 ':name' => $collegeName,
@@ -129,14 +162,16 @@ class AuthController
             ]);
             $chatbotId = (int)$db->lastInsertId();
 
-            // 4. Create Active Subscription Row
+            // 4. Create Pending Subscription Row (Status: 'pending_payment')
             $stmtSub = $db->prepare("
-                INSERT INTO subscriptions (organization_id, plan_id, billing_cycle, status, current_period_start, current_period_end)
-                VALUES (:org_id, :plan_id, 'monthly', 'active', NOW(), DATE_ADD(NOW(), INTERVAL 1 MONTH))
+                INSERT INTO subscriptions (organization_id, plan_id, billing_cycle, status, currency, current_period_start, current_period_end)
+                VALUES (:org_id, :plan_id, :cycle, 'pending_payment', :currency, NOW(), DATE_ADD(NOW(), INTERVAL 1 MONTH))
             ");
             $stmtSub->execute([
                 ':org_id' => $orgId,
-                ':plan_id' => $planId
+                ':plan_id' => $planId,
+                ':cycle' => $billingCycle,
+                ':currency' => $currency
             ]);
 
             // 5. Create Monthly Usage Log
@@ -190,6 +225,9 @@ class AuthController
                     'name' => $collegeName,
                     'slug' => $slug,
                     'website_url' => $normalizedWebsite,
+                    'plan_id' => $planId,
+                    'plan_name' => $planName,
+                    'subscription_status' => 'pending_payment',
                     'onboarding_completed' => 1,
                     'onboarding_step' => 1
                 ],
@@ -198,9 +236,16 @@ class AuthController
                     'name' => 'AI Admissions Assistant',
                     'bot_token' => $botToken
                 ],
+                'subscription_status' => 'pending_payment',
+                'payment_required' => true,
+                'plan_id' => $planId,
+                'plan_name' => $planName,
+                'billing_cycle' => $billingCycle,
+                'currency' => $currency,
+                'has_preselected_plan' => !empty($data['plan']),
                 'onboarding_required' => false,
                 'onboarding_mode' => 'disabled'
-            ], 'Account created successfully', 201);
+            ], 'Account created successfully. Payment required to activate console.', 201);
 
         } catch (Throwable $e) {
             if ($db->inTransaction()) {
@@ -292,11 +337,31 @@ class AuthController
         // Departments deprecated - return empty list
         $userDepartments = [];
 
+        $isSuperAdmin = ($user['role'] === 'superadmin' || $user['role'] === 'super_admin');
+        $subStatus = $isSuperAdmin ? 'active' : ($user['subscription_status'] ?? 'pending_payment');
+        $paymentRequired = (!$isSuperAdmin && $subStatus !== 'active');
+
+        $userPlanId = null;
+        $userPlanName = null;
+        if (!empty($user['organization_id'])) {
+            $stmtOrgPlan = $db->prepare("SELECT o.plan_id, p.name as plan_name FROM organizations o LEFT JOIN plans p ON o.plan_id = p.id WHERE o.id = :oid LIMIT 1");
+            $stmtOrgPlan->execute([':oid' => $user['organization_id']]);
+            $orgPlanRow = $stmtOrgPlan->fetch();
+            if ($orgPlanRow) {
+                $userPlanId = $orgPlanRow['plan_id'];
+                $userPlanName = $orgPlanRow['plan_name'];
+            }
+        }
+
         Response::success([
             'access_token' => $accessToken,
             'refresh_token' => $refreshToken,
             'token_type' => 'Bearer',
             'expires_in' => $ttl,
+            'subscription_status' => $subStatus,
+            'payment_required' => $paymentRequired,
+            'plan_id' => $userPlanId,
+            'plan_name' => $userPlanName,
             'user' => [
                 'id' => (int)$user['id'],
                 'name' => $user['name'],
@@ -310,6 +375,9 @@ class AuthController
                 'institute_id' => $user['institute_id'] ?? md5((string)$user['organization_id']),
                 'name' => $user['org_name'],
                 'slug' => $user['org_slug'],
+                'plan_id' => $userPlanId,
+                'plan_name' => $userPlanName,
+                'subscription_status' => $subStatus,
                 'onboarding_completed' => (int)$user['onboarding_completed'],
                 'onboarding_step' => (int)$user['onboarding_step'],
                 'primary_campus' => \App\Helpers\TenantLocalizationHelper::getTenantLocalization((int)$user['organization_id']),

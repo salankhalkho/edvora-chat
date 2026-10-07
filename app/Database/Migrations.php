@@ -1922,6 +1922,39 @@ class Migrations
         } catch (Throwable $e) {
             error_log('[Migrations] campus_tour_slots ai feedback columns: ' . $e->getMessage());
         }
+
+        // Commercial Subscription & Payment Gateway Columns
+        try {
+            $this->db->exec("ALTER TABLE organizations MODIFY COLUMN subscription_status ENUM('active','inactive','trial','cancelled','pending_payment') DEFAULT 'pending_payment';");
+            $this->db->exec("ALTER TABLE subscriptions MODIFY COLUMN status ENUM('active','cancelled','halted','expired','pending_payment') DEFAULT 'pending_payment';");
+
+            $colsGateway = $this->db->query("SHOW COLUMNS FROM subscriptions LIKE 'payment_gateway'");
+            if (!$colsGateway->fetch()) {
+                $this->db->exec("ALTER TABLE subscriptions ADD COLUMN payment_gateway ENUM('razorpay', 'paypal') NULL AFTER razorpay_subscription_id;");
+            }
+
+            $colsPaypalOrder = $this->db->query("SHOW COLUMNS FROM subscriptions LIKE 'paypal_order_id'");
+            if (!$colsPaypalOrder->fetch()) {
+                $this->db->exec("ALTER TABLE subscriptions ADD COLUMN paypal_order_id VARCHAR(255) NULL AFTER payment_gateway;");
+            }
+
+            $colsPaypalCap = $this->db->query("SHOW COLUMNS FROM subscriptions LIKE 'paypal_capture_id'");
+            if (!$colsPaypalCap->fetch()) {
+                $this->db->exec("ALTER TABLE subscriptions ADD COLUMN paypal_capture_id VARCHAR(255) NULL AFTER paypal_order_id;");
+            }
+
+            $colsCurrency = $this->db->query("SHOW COLUMNS FROM subscriptions LIKE 'currency'");
+            if (!$colsCurrency->fetch()) {
+                $this->db->exec("ALTER TABLE subscriptions ADD COLUMN currency VARCHAR(10) DEFAULT 'INR' AFTER paypal_capture_id;");
+            }
+
+            $colsAmount = $this->db->query("SHOW COLUMNS FROM subscriptions LIKE 'amount_paid'");
+            if (!$colsAmount->fetch()) {
+                $this->db->exec("ALTER TABLE subscriptions ADD COLUMN amount_paid INT DEFAULT 0 AFTER currency;");
+            }
+        } catch (Throwable $e) {
+            error_log('[Migrations] commercial payment columns: ' . $e->getMessage());
+        }
     }
 }
 
