@@ -976,16 +976,6 @@ foreach ($plans as &$plan) {
 
             <div class="faq-item">
                 <div class="faq-question" onclick="toggleFaq(this)">
-                    <span>How are institutions in the US, Canada, and internationally billed?</span>
-                    <span class="faq-icon text-[18px]">▼</span>
-                </div>
-                <div class="faq-answer">
-                    Institutions in the United States, Canada, and internationally are billed in US Dollars ($ USD) via credit card, ACH, wire transfer, or standard institutional Purchase Orders (NET 30 / W-9 vendor compliant). Indian institutions can be billed in INR (₹) via GST-compliant invoicing.
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFaq(this)">
                     <span>Do you offer a guided pilot or trial for universities?</span>
                     <span class="faq-icon text-[18px]">▼</span>
                 </div>
