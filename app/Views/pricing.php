@@ -817,7 +817,6 @@ foreach ($plans as &$plan) {
                         <tr><td colspan="<?= count($plans) + 1 ?>" class="cat-header">Admissions Engine Details</td></tr>
                         <?php 
                             $admissionsDetails = [
-                                'counselor_callback' => 'Counselor 1-on-1 Callback Dispatch',
                                 'asset_delivery' => 'Instant Fee &amp; Prospectus PDF Delivery'
                             ];
                         ?>
