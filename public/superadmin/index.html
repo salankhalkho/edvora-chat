@@ -1369,9 +1369,6 @@
                                             <input type="checkbox" id="feat_asset_delivery" /> Fee &amp; Prospectus PDF Delivery
                                         </label>
                                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                                            <input type="checkbox" id="feat_intent_scoring" /> Intent Scoring &amp; Lead Qualification
-                                        </label>
-                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                                             <input type="checkbox" id="feat_custom_branding" /> Custom Branding &amp; Avatars
                                         </label>
                                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
@@ -3455,7 +3452,7 @@
                 'crm_integration', 'multiple_campuses', 'custom_workflows',
                 'dedicated_onboarding', 'custom_integrations',
                 // Detailed Subsystem Features
-                'campus_tour', 'counselor_callback', 'asset_delivery', 'intent_scoring',
+                'campus_tour', 'counselor_callback', 'asset_delivery',
                 'custom_branding', 'allowed_domains', 'multilingual', 'url_auto_refresh',
                 'mobile_sdk', 'multiple_chatbots', 'analytics_dashboard', 'knowledge_gap_detection',
                 'csv_export', 'institutional_privacy', 'whatsapp_integration', 'sla_guarantee'
@@ -3533,7 +3530,6 @@
                     campus_tour: document.getElementById('feat_campus_tour').checked ? 1 : 0,
                     counselor_callback: document.getElementById('feat_counselor_callback').checked ? 1 : 0,
                     asset_delivery: document.getElementById('feat_asset_delivery').checked ? 1 : 0,
-                    intent_scoring: document.getElementById('feat_intent_scoring').checked ? 1 : 0,
                     custom_branding: document.getElementById('feat_custom_branding').checked ? 1 : 0,
                     allowed_domains: document.getElementById('feat_allowed_domains').checked ? 1 : 0,
                     multilingual: document.getElementById('feat_multilingual').checked ? 1 : 0,

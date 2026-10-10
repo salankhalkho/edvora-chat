@@ -818,8 +818,7 @@ foreach ($plans as &$plan) {
                         <?php 
                             $admissionsDetails = [
                                 'counselor_callback' => 'Counselor 1-on-1 Callback Dispatch',
-                                'asset_delivery' => 'Instant Fee &amp; Prospectus PDF Delivery',
-                                'intent_scoring' => 'Automated Intent Scoring &amp; Lead Qualification'
+                                'asset_delivery' => 'Instant Fee &amp; Prospectus PDF Delivery'
                             ];
                         ?>
                         <?php foreach ($admissionsDetails as $fKey => $fLabel): ?>

@@ -1318,7 +1318,6 @@ class Migrations
                 'campus_tour' => 'Campus Tour Booking & Slot Scheduling',
                 'counselor_callback' => 'Counselor 1-on-1 Callback Dispatch',
                 'asset_delivery' => 'Instant Fee & Prospectus PDF Delivery',
-                'intent_scoring' => 'Automated Intent Scoring & Lead Qualification',
                 'custom_branding' => 'Custom Branding, Colors & Avatar',
                 'allowed_domains' => 'Allowed Domains & Embed Security',
                 'multilingual' => 'Multi-Language Admissions Counseling',
@@ -1343,7 +1342,7 @@ class Migrations
                     'analytics' => 0, 'crm_integration' => 0, 'multiple_campuses' => 0, 'custom_workflows' => 0,
                     'dedicated_onboarding' => 0, 'custom_integrations' => 0,
                     // Detailed Subsystems
-                    'campus_tour' => 1, 'counselor_callback' => 1, 'asset_delivery' => 1, 'intent_scoring' => 1,
+                    'campus_tour' => 1, 'counselor_callback' => 1, 'asset_delivery' => 1,
                     'custom_branding' => 1, 'allowed_domains' => 1, 'multilingual' => 1, 'url_auto_refresh' => 0,
                     'mobile_sdk' => 1, 'multiple_chatbots' => 0, 'analytics_dashboard' => 1, 'knowledge_gap_detection' => 1,
                     'csv_export' => 1, 'institutional_privacy' => 1, 'support_channel' => 0, 'whatsapp_integration' => 0,
@@ -1356,7 +1355,7 @@ class Migrations
                     'analytics' => 1, 'crm_integration' => 1, 'multiple_campuses' => 0, 'custom_workflows' => 0,
                     'dedicated_onboarding' => 1, 'custom_integrations' => 0,
                     // Detailed Subsystems
-                    'campus_tour' => 1, 'counselor_callback' => 1, 'asset_delivery' => 1, 'intent_scoring' => 1,
+                    'campus_tour' => 1, 'counselor_callback' => 1, 'asset_delivery' => 1,
                     'custom_branding' => 1, 'allowed_domains' => 1, 'multilingual' => 1, 'url_auto_refresh' => 1,
                     'mobile_sdk' => 1, 'multiple_chatbots' => 1, 'analytics_dashboard' => 1, 'knowledge_gap_detection' => 1,
                     'csv_export' => 1, 'institutional_privacy' => 1, 'support_channel' => 1, 'whatsapp_integration' => 0,
@@ -1369,13 +1368,16 @@ class Migrations
                     'analytics' => 1, 'crm_integration' => 1, 'multiple_campuses' => 1, 'custom_workflows' => 1,
                     'dedicated_onboarding' => 1, 'custom_integrations' => 1,
                     // Detailed Subsystems
-                    'campus_tour' => 1, 'counselor_callback' => 1, 'asset_delivery' => 1, 'intent_scoring' => 1,
+                    'campus_tour' => 1, 'counselor_callback' => 1, 'asset_delivery' => 1,
                     'custom_branding' => 1, 'allowed_domains' => 1, 'multilingual' => 1, 'url_auto_refresh' => 1,
                     'mobile_sdk' => 1, 'multiple_chatbots' => 1, 'analytics_dashboard' => 1, 'knowledge_gap_detection' => 1,
                     'csv_export' => 1, 'institutional_privacy' => 1, 'support_channel' => 2, 'whatsapp_integration' => 1,
                     'sla_guarantee' => 1
                 ]
             ];
+
+            // Retired feature: purge from plan_features
+            $this->db->exec("DELETE FROM plan_features WHERE feature_key = 'intent_scoring'");
 
             $stmtInsertFeat = $this->db->prepare("
                 INSERT INTO plan_features (plan_id, feature_key, feature_label, is_enabled)
