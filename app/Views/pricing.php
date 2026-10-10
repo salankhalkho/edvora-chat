@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 use App\Config\Database;
 
 // Detect visitor country (supports dev/QA ?country=US/IN or ?currency=USD/INR override)
@@ -514,7 +514,7 @@ foreach ($plans as &$plan) {
                     <ul class="space-y-3.5 mb-8 flex-1 list-none p-0 text-[13.5px]">
                         <li class="flex items-center gap-2.5 <?= $textColor ?>">
                             <span class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 <?= $borderIconBg ?> text-[11px] font-black">✓</span>
-                            <span><strong><?= $qChatbots ?></strong> Department Chatbot<?= $qChatbots === 1 || $qChatbots === '1' ? '' : 's' ?></span>
+                            <span><strong><?= $qChatbots ?></strong> Chatbot<?= $qChatbots === 1 || $qChatbots === '1' ? '' : 's' ?></span>
                         </li>
                         <li class="flex items-center gap-2.5 <?= $textColor ?>">
                             <span class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 <?= $borderIconBg ?> text-[11px] font-black">✓</span>
@@ -650,9 +650,9 @@ foreach ($plans as &$plan) {
                         <!-- Section: Core Capacity & Usage Quotas -->
                         <tr><td colspan="<?= count($plans) + 1 ?>" class="cat-header">Core Capacity &amp; Usage Quotas</td></tr>
                         
-                        <!-- Row: Department Chatbots -->
+                        <!-- Row: Chatbots -->
                         <tr>
-                            <td class="font-semibold text-e-teal">Department Chatbots</td>
+                            <td class="font-semibold text-e-teal">Chatbots</td>
                             <?php foreach ($plans as $p): ?>
                                 <?php 
                                     $val = $p['quota_map']['max_chatbots'] ?? 1;
