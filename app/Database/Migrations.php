@@ -1375,7 +1375,7 @@ class Migrations
             ];
 
             // Retired feature: purge from plan_features
-            $this->db->exec("DELETE FROM plan_features WHERE feature_key IN ('intent_scoring', 'whatsapp_integration', 'counselor_callback')");
+            $this->db->exec("DELETE FROM plan_features WHERE feature_key IN ('intent_scoring', 'whatsapp_integration', 'counselor_callback', 'dedicated_manager')");
 
             $stmtInsertFeat = $this->db->prepare("
                 INSERT INTO plan_features (plan_id, feature_key, feature_label, is_enabled)
