@@ -619,8 +619,8 @@ foreach ($plans as &$plan) {
                                 'crm_integration' => 'CRM integration',
                                 'multiple_campuses' => 'Multiple campuses',
                                 'custom_workflows' => 'Custom workflows',
-                                'dedicated_onboarding' => 'Dedicated onboarding',
-                                'custom_integrations' => 'Custom integrations'
+                                'custom_integrations' => 'Custom integrations',
+                                'dedicated_onboarding' => 'Dedicated onboarding'
                             ];
                         ?>
 
