@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 use App\Config\Database;
 
 // Detect visitor country (supports dev/QA ?country=US/IN or ?currency=USD/INR override)
@@ -657,7 +657,7 @@ foreach ($plans as &$plan) {
                                 <?php 
                                     $val = $p['quota_map']['max_chatbots'] ?? 1;
                                     $isHighlight = (!empty($p['badge_text']) || stripos($p['name'], 'Growth') !== false);
-                                    $display = ($val == -1) ? 'Unlimited Multi-Campus' : ($val . ' Department' . ($val == 1 ? '' : 's'));
+                                    $display = ($val == -1) ? 'Unlimited' : (string)$val;
                                     $colorClass = ($val == -1) ? 'font-bold text-emerald-700' : ($isHighlight ? 'font-bold text-e-teal' : '');
                                 ?>
                                 <td class="text-center <?= $isHighlight ? 'highlight-col' : '' ?> <?= $colorClass ?>">
