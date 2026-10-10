@@ -1329,7 +1329,6 @@ class Migrations
                 'csv_export' => 'CSV Lead & Analytics Export',
                 'institutional_privacy' => 'Institutional Privacy & Data Encryption',
                 'support_channel' => 'Support Channel Tier',
-                'whatsapp_integration' => 'WhatsApp Official Business Integration',
                 'sla_guarantee' => 'SLA & 99.9% Uptime Guarantee'
             ];
 
@@ -1345,7 +1344,7 @@ class Migrations
                     'campus_tour' => 1, 'counselor_callback' => 1, 'asset_delivery' => 1,
                     'custom_branding' => 1, 'allowed_domains' => 1, 'multilingual' => 1, 'url_auto_refresh' => 0,
                     'mobile_sdk' => 1, 'multiple_chatbots' => 0, 'analytics_dashboard' => 1, 'knowledge_gap_detection' => 1,
-                    'csv_export' => 1, 'institutional_privacy' => 1, 'support_channel' => 0, 'whatsapp_integration' => 0,
+                    'csv_export' => 1, 'institutional_privacy' => 1, 'support_channel' => 0,
                     'sla_guarantee' => 0
                 ],
                 2 => [
@@ -1358,7 +1357,7 @@ class Migrations
                     'campus_tour' => 1, 'counselor_callback' => 1, 'asset_delivery' => 1,
                     'custom_branding' => 1, 'allowed_domains' => 1, 'multilingual' => 1, 'url_auto_refresh' => 1,
                     'mobile_sdk' => 1, 'multiple_chatbots' => 1, 'analytics_dashboard' => 1, 'knowledge_gap_detection' => 1,
-                    'csv_export' => 1, 'institutional_privacy' => 1, 'support_channel' => 1, 'whatsapp_integration' => 0,
+                    'csv_export' => 1, 'institutional_privacy' => 1, 'support_channel' => 1,
                     'sla_guarantee' => 0
                 ],
                 3 => [
@@ -1371,13 +1370,13 @@ class Migrations
                     'campus_tour' => 1, 'counselor_callback' => 1, 'asset_delivery' => 1,
                     'custom_branding' => 1, 'allowed_domains' => 1, 'multilingual' => 1, 'url_auto_refresh' => 1,
                     'mobile_sdk' => 1, 'multiple_chatbots' => 1, 'analytics_dashboard' => 1, 'knowledge_gap_detection' => 1,
-                    'csv_export' => 1, 'institutional_privacy' => 1, 'support_channel' => 2, 'whatsapp_integration' => 1,
+                    'csv_export' => 1, 'institutional_privacy' => 1, 'support_channel' => 2,
                     'sla_guarantee' => 1
                 ]
             ];
 
             // Retired feature: purge from plan_features
-            $this->db->exec("DELETE FROM plan_features WHERE feature_key = 'intent_scoring'");
+            $this->db->exec("DELETE FROM plan_features WHERE feature_key IN ('intent_scoring', 'whatsapp_integration')");
 
             $stmtInsertFeat = $this->db->prepare("
                 INSERT INTO plan_features (plan_id, feature_key, feature_label, is_enabled)

@@ -1399,9 +1399,6 @@
                                             <input type="checkbox" id="feat_institutional_privacy" /> Institutional Privacy &amp; Encryption
                                         </label>
                                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                                            <input type="checkbox" id="feat_whatsapp_integration" /> Official WhatsApp Integration
-                                        </label>
-                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                                             <input type="checkbox" id="feat_sla_guarantee" /> SLA &amp; 99.9% Uptime Guarantee
                                         </label>
                                         <div class="form-group" style="margin-bottom: 0; grid-column: span 2;">
@@ -3455,7 +3452,7 @@
                 'campus_tour', 'counselor_callback', 'asset_delivery',
                 'custom_branding', 'allowed_domains', 'multilingual', 'url_auto_refresh',
                 'mobile_sdk', 'multiple_chatbots', 'analytics_dashboard', 'knowledge_gap_detection',
-                'csv_export', 'institutional_privacy', 'whatsapp_integration', 'sla_guarantee'
+                'csv_export', 'institutional_privacy', 'sla_guarantee'
             ];
             featureCheckboxKeys.forEach(k => {
                 const el = document.getElementById('feat_' + k);
@@ -3540,7 +3537,6 @@
                     knowledge_gap_detection: document.getElementById('feat_knowledge_gap_detection').checked ? 1 : 0,
                     csv_export: document.getElementById('feat_csv_export').checked ? 1 : 0,
                     institutional_privacy: document.getElementById('feat_institutional_privacy').checked ? 1 : 0,
-                    whatsapp_integration: document.getElementById('feat_whatsapp_integration').checked ? 1 : 0,
                     sla_guarantee: document.getElementById('feat_sla_guarantee').checked ? 1 : 0,
                     support_channel: parseInt(document.getElementById('feat_support_channel').value) || 0
                 }

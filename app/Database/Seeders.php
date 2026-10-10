@@ -96,7 +96,6 @@ class Seeders
                     'analytics_dashboard' => 1,
                     'url_auto_refresh' => 0,
                     'multiple_chatbots' => 0,
-                    'whatsapp_integration' => 0,
                     'sla_guarantee' => 0,
                     'dedicated_manager' => 0,
                     'custom_integrations' => 0
@@ -128,7 +127,6 @@ class Seeders
                     'analytics_dashboard' => 1,
                     'url_auto_refresh' => 1,
                     'multiple_chatbots' => 1,
-                    'whatsapp_integration' => 0,
                     'sla_guarantee' => 0,
                     'dedicated_manager' => 0,
                     'custom_integrations' => 0
@@ -160,7 +158,6 @@ class Seeders
                     'analytics_dashboard' => 1,
                     'url_auto_refresh' => 1,
                     'multiple_chatbots' => 1,
-                    'whatsapp_integration' => 1,
                     'sla_guarantee' => 1,
                     'dedicated_manager' => 1,
                     'custom_integrations' => 1

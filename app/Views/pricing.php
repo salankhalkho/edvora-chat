@@ -538,10 +538,10 @@ foreach ($plans as &$plan) {
                             <span>Campus Tour &amp; Counselor Scheduling</span>
                         </li>
                         <?php endif; ?>
-                        <?php if (!empty($p['feature_map']['whatsapp_integration'])): ?>
+                        <?php if (!empty($p['feature_map']['sla_guarantee'])): ?>
                         <li class="flex items-center gap-2.5 <?= $textColor ?>">
                             <span class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 <?= $borderIconBg ?> text-[11px] font-black">✓</span>
-                            <span>WhatsApp Integration &amp; 99.9% SLA</span>
+                            <span>99.9% Uptime SLA</span>
                         </li>
                         <?php endif; ?>
                     </ul>
@@ -922,24 +922,6 @@ foreach ($plans as &$plan) {
                                 ?>
                                 <td class="text-center <?= $isHighlight ? 'highlight-col' : '' ?> <?= $sClass ?>">
                                     <?= $sText ?>
-                                </td>
-                            <?php endforeach; ?>
-                        </tr>
-
-                        <!-- WhatsApp Integration -->
-                        <tr>
-                            <td class="font-semibold text-e-teal">WhatsApp Official Business Integration</td>
-                            <?php foreach ($plans as $p): ?>
-                                <?php 
-                                    $isEnabled = !empty($p['feature_map']['whatsapp_integration']);
-                                    $isHighlight = (!empty($p['badge_text']) || stripos($p['name'], 'Growth') !== false);
-                                ?>
-                                <td class="text-center <?= $isHighlight ? 'highlight-col' : '' ?>">
-                                    <?php if ($isEnabled): ?>
-                                        <span class="font-bold text-emerald-700"><span class="matrix-check">✓</span> Included</span>
-                                    <?php else: ?>
-                                        <span class="matrix-cross">✕</span>
-                                    <?php endif; ?>
                                 </td>
                             <?php endforeach; ?>
                         </tr>
