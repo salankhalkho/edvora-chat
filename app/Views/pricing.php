@@ -640,7 +640,7 @@ foreach ($plans as &$plan) {
                                         <?php elseif (!empty($val)): ?>
                                             <span class="text-emerald-600 font-bold text-[16px]">✓</span>
                                         <?php else: ?>
-                                            <span class="text-gray-400 font-normal">&mdash;</span>
+                                            <span class="text-slate-400 font-bold text-[15px]">✕</span>
                                         <?php endif; ?>
                                     </td>
                                 <?php endforeach; ?>
