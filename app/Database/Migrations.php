@@ -1306,7 +1306,6 @@ class Migrations
                 'counselor_handoff' => 'Counselor Handoff',
                 'whatsapp' => 'WhatsApp',
                 'appointment_booking' => 'Appointment Booking',
-                'campus_visits' => 'Campus Visits',
                 'analytics' => 'Analytics Tier',
                 'crm_integration' => 'CRM Integration',
                 'multiple_campuses' => 'Multiple Campuses',
@@ -1315,7 +1314,7 @@ class Migrations
                 'custom_integrations' => 'Custom Integrations',
 
                 // Detailed Platform & Sub-System Features
-                'campus_tour' => 'Campus Tour Booking & Slot Scheduling',
+                'campus_tour' => 'Campus Tour & Counselor Scheduling',
                 'asset_delivery' => 'Instant Fee & Prospectus PDF Delivery',
                 'custom_branding' => 'Custom Branding, Colors & Avatar',
                 'allowed_domains' => 'Allowed Domains & Embed Security',
@@ -1336,7 +1335,7 @@ class Migrations
                 1 => [
                     // Top 14
                     'ai_admissions_chatbot' => 1, 'lead_capture' => 1, 'lead_qualification' => 0, 'program_recommendations' => 0,
-                    'counselor_handoff' => 0, 'whatsapp' => 0, 'appointment_booking' => 0, 'campus_visits' => 0,
+                    'counselor_handoff' => 0, 'whatsapp' => 0, 'appointment_booking' => 0,
                     'analytics' => 0, 'crm_integration' => 0, 'multiple_campuses' => 0, 'custom_workflows' => 0,
                     'dedicated_onboarding' => 0, 'custom_integrations' => 0,
                     // Detailed Subsystems
@@ -1349,7 +1348,7 @@ class Migrations
                 2 => [
                     // Top 14
                     'ai_admissions_chatbot' => 1, 'lead_capture' => 1, 'lead_qualification' => 1, 'program_recommendations' => 1,
-                    'counselor_handoff' => 1, 'whatsapp' => 1, 'appointment_booking' => 1, 'campus_visits' => 1,
+                    'counselor_handoff' => 1, 'whatsapp' => 1, 'appointment_booking' => 1,
                     'analytics' => 1, 'crm_integration' => 1, 'multiple_campuses' => 0, 'custom_workflows' => 0,
                     'dedicated_onboarding' => 1, 'custom_integrations' => 0,
                     // Detailed Subsystems
@@ -1362,7 +1361,7 @@ class Migrations
                 3 => [
                     // Top 14
                     'ai_admissions_chatbot' => 1, 'lead_capture' => 1, 'lead_qualification' => 1, 'program_recommendations' => 1,
-                    'counselor_handoff' => 1, 'whatsapp' => 1, 'appointment_booking' => 1, 'campus_visits' => 1,
+                    'counselor_handoff' => 1, 'whatsapp' => 1, 'appointment_booking' => 1,
                     'analytics' => 1, 'crm_integration' => 1, 'multiple_campuses' => 1, 'custom_workflows' => 1,
                     'dedicated_onboarding' => 1, 'custom_integrations' => 1,
                     // Detailed Subsystems
@@ -1375,7 +1374,7 @@ class Migrations
             ];
 
             // Retired feature: purge from plan_features
-            $this->db->exec("DELETE FROM plan_features WHERE feature_key IN ('intent_scoring', 'whatsapp_integration', 'counselor_callback', 'dedicated_manager')");
+            $this->db->exec("DELETE FROM plan_features WHERE feature_key IN ('campus_visits', 'intent_scoring', 'whatsapp_integration', 'counselor_callback', 'dedicated_manager')");
 
             $stmtInsertFeat = $this->db->prepare("
                 INSERT INTO plan_features (plan_id, feature_key, feature_label, is_enabled)

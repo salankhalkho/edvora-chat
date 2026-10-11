@@ -614,7 +614,7 @@ foreach ($plans as &$plan) {
                                 'counselor_handoff' => 'Counselor handoff',
                                 'whatsapp' => 'WhatsApp',
                                 'appointment_booking' => 'Appointment booking',
-                                'campus_visits' => 'Campus visits',
+                                'campus_tour' => 'Campus visits',
                                 'analytics' => 'Analytics',
                                 'crm_integration' => 'CRM integration',
                                 'multiple_campuses' => 'Multiple campuses',

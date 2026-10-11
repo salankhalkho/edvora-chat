@@ -1328,9 +1328,6 @@
                                             <input type="checkbox" id="feat_appointment_booking" /> Appointment Booking
                                         </label>
                                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                                            <input type="checkbox" id="feat_campus_visits" /> Campus Visits
-                                        </label>
-                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                                             <input type="checkbox" id="feat_crm_integration" /> CRM Integration
                                         </label>
                                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
@@ -3442,7 +3439,7 @@
             const featureCheckboxKeys = [
                 // Top 14 Features
                 'ai_admissions_chatbot', 'lead_capture', 'lead_qualification', 'program_recommendations',
-                'counselor_handoff', 'whatsapp', 'appointment_booking', 'campus_visits',
+                'counselor_handoff', 'whatsapp', 'appointment_booking',
                 'crm_integration', 'multiple_campuses', 'custom_workflows',
                 'dedicated_onboarding', 'custom_integrations',
                 // Detailed Subsystem Features
@@ -3513,7 +3510,6 @@
                     counselor_handoff: document.getElementById('feat_counselor_handoff').checked ? 1 : 0,
                     whatsapp: document.getElementById('feat_whatsapp').checked ? 1 : 0,
                     appointment_booking: document.getElementById('feat_appointment_booking').checked ? 1 : 0,
-                    campus_visits: document.getElementById('feat_campus_visits').checked ? 1 : 0,
                     analytics: parseInt(document.getElementById('feat_analytics').value) || 0,
                     crm_integration: document.getElementById('feat_crm_integration').checked ? 1 : 0,
                     multiple_campuses: document.getElementById('feat_multiple_campuses').checked ? 1 : 0,
