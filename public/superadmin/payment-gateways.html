@@ -706,7 +706,7 @@
                     return;
                 }
 
-                cachedGateways = json.data || [];
+                cachedGateways = Array.isArray(json.data) ? json.data : (json.data?.data || []);
                 const tbody = document.getElementById('gatewaysTableBody');
 
                 if (!cachedGateways.length) {

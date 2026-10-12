@@ -1407,7 +1407,7 @@ class SuperAdminController
             ORDER BY target_region ASC, is_active DESC, id ASC
         ");
         $gateways = $stmt->fetchAll();
-        Response::success(['data' => $gateways]);
+        Response::success($gateways);
     }
 
     /**
