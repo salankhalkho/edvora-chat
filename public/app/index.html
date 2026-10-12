@@ -2921,7 +2921,7 @@
     </style>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="js/tenant-localization.js?v=20261002"></script>
-    <script src="js/checkout.js?v=20261007"></script>
+    <script src="js/checkout.js?v=20261012"></script>
 </head>
 <body>
 
@@ -3049,7 +3049,7 @@
         </div>
 
         <!-- Plan Selection Card (Scenario 2 Step 2) -->
-        <div class="auth-card-wrapper" id="planSelectCard" style="display: none; max-width: 580px;">
+        <div class="auth-card-wrapper" id="planSelectCard" style="display: none; max-width: 880px; width: 95%;">
             <div class="auth-brand-header">
                 <div class="auth-logo-badge">✦</div>
                 <div>
@@ -3081,53 +3081,11 @@
                 </div>
             </div>
 
-            <!-- Two Plan Cards -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px;">
-                <!-- Starter Plan -->
-                <div style="background: #FFFFFF; border: 1.5px solid #DDE9E3; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
-                    <div>
-                        <div style="font-size: 11px; font-weight: 800; color: #047857; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Starter</div>
-                        <h4 style="font-size: 16px; font-weight: 800; color: #063D3B; margin: 0 0 8px 0;">Starter Plan</h4>
-                        <div style="display: flex; align-items: baseline; gap: 4px; margin-bottom: 12px;">
-                            <span id="planSelStarterPrice" style="font-size: 22px; font-weight: 900; color: #063D3B;">₹2,999</span>
-                            <span id="planSelStarterSub" style="font-size: 11px; color: #64748b;">/month</span>
-                        </div>
-                        <ul style="list-style: none; padding: 0; margin: 0 0 16px 0; font-size: 11.5px; color: #334155; line-height: 1.6;">
-                            <li style="margin-bottom: 4px;">✓ 1 Department Chatbot</li>
-                            <li style="margin-bottom: 4px;">✓ 2,000 AI Conversations/mo</li>
-                            <li style="margin-bottom: 4px;">✓ 200 Qualified Leads/mo</li>
-                            <li style="margin-bottom: 4px;">✓ 20 Knowledge Sources</li>
-                            <li>✓ 2 Counselor Seats</li>
-                        </ul>
-                    </div>
-                    <button type="button" onclick="window.edvoraCheckout.selectPlan('Starter')" class="brand-btn-secondary" style="width: 100%; height: 36px; font-size: 12px; font-weight: 700;">
-                        Select Starter →
-                    </button>
-                </div>
-
-                <!-- Growth Plan -->
-                <div style="background: #063D3B; color: #ffffff; border: 1.5px solid #063D3B; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
-                    <div style="position: absolute; top: -10px; right: 14px; background: #C8FF63; color: #063D3B; font-size: 9.5px; font-weight: 800; padding: 2px 8px; border-radius: 10px; text-transform: uppercase;">
-                        Most Popular
-                    </div>
-                    <div>
-                        <div style="font-size: 11px; font-weight: 800; color: #C8FF63; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Growth</div>
-                        <h4 style="font-size: 16px; font-weight: 800; color: #ffffff; margin: 0 0 8px 0;">Growth Plan</h4>
-                        <div style="display: flex; align-items: baseline; gap: 4px; margin-bottom: 12px;">
-                            <span id="planSelGrowthPrice" style="font-size: 22px; font-weight: 900; color: #ffffff;">₹6,999</span>
-                            <span id="planSelGrowthSub" style="font-size: 11px; color: #A3D4BE;">/month</span>
-                        </div>
-                        <ul style="list-style: none; padding: 0; margin: 0 0 16px 0; font-size: 11.5px; color: #E2ECE7; line-height: 1.6;">
-                            <li style="margin-bottom: 4px;">✓ 3 Department Chatbots</li>
-                            <li style="margin-bottom: 4px;">✓ 200,000 AI Conversations/mo</li>
-                            <li style="margin-bottom: 4px;">✓ Unlimited Leads &amp; Tours</li>
-                            <li style="margin-bottom: 4px;">✓ 100 Knowledge Sources</li>
-                            <li>✓ 10 Counselor Seats</li>
-                        </ul>
-                    </div>
-                    <button type="button" onclick="window.edvoraCheckout.selectPlan('Growth')" style="width: 100%; height: 36px; font-size: 12px; font-weight: 700; background: #C8FF63; color: #063D3B; border: none; border-radius: 6px; cursor: pointer;">
-                        Select Growth →
-                    </button>
+            <!-- Dynamic Plan Cards Container (Hydrated dynamically from database via checkout.js) -->
+            <div id="planCardsContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 20px;">
+                <div style="grid-column: 1 / -1; text-align: center; padding: 28px; color: #64748b; font-size: 12px;">
+                    <span class="brand-spinner" style="width: 14px; height: 14px; border: 2px solid #063D3B; border-top-color: transparent; border-radius: 50%; display: inline-block; animation: smartPulse 0.8s infinite; margin-right: 6px;"></span>
+                    Loading subscription plans...
                 </div>
             </div>
 

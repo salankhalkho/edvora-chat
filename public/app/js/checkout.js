@@ -32,11 +32,14 @@
 
     const state = window.edvoraCheckoutState;
 
-    // Plan Specifications & Pricing
-    const PLAN_PRICING = {
+    // Initial Plan Specifications & Pricing Fallback
+    let PLAN_PRICING = {
         Starter: {
             id: 1,
             name: 'Starter',
+            description: 'Perfect for small institutes launching their first AI assistant',
+            badge: null,
+            isGrowth: false,
             inr: { monthly: 2999, yearly: 29990, formattedMonthly: '₹2,999/mo', formattedYearly: '₹29,990/yr' },
             usd: { monthly: 299, yearly: 2490, formattedMonthly: '$299/mo', formattedYearly: '$2,490/yr' },
             highlights: ['1 Department Chatbot', '2,000 AI Conversations / mo', '200 Qualified Leads / mo', '20 Knowledge Sources', '2 Counselor Seats']
@@ -44,11 +47,111 @@
         Growth: {
             id: 2,
             name: 'Growth',
+            description: 'Best for growing colleges needing multiple bots & higher limits',
+            badge: 'Most Popular',
+            isGrowth: true,
             inr: { monthly: 6999, yearly: 69990, formattedMonthly: '₹6,999/mo', formattedYearly: '₹69,990/yr' },
             usd: { monthly: 699, yearly: 5990, formattedMonthly: '$699/mo', formattedYearly: '$5,990/yr' },
             highlights: ['3 Department Chatbots', '200,000 AI Conversations / mo', 'Unlimited Qualified Leads', '100 Knowledge Sources', '10 Counselor Seats & Tours']
+        },
+        Pro: {
+            id: 3,
+            name: 'Pro',
+            description: 'For large universities requiring maximum capacity & custom limits',
+            badge: null,
+            isGrowth: false,
+            inr: { monthly: 14999, yearly: 149990, formattedMonthly: '₹14,999/mo', formattedYearly: '₹149,990/yr' },
+            usd: { monthly: 2100, yearly: 21000, formattedMonthly: '$2,100/mo', formattedYearly: '$21,000/yr' },
+            highlights: ['Unlimited Chatbots', 'Unlimited Conversations', 'Unlimited Qualified Leads', 'Unlimited Knowledge Sources', 'Dedicated SLA & Onboarding']
         }
     };
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    /**
+     * Fetch dynamic plans and live database prices from /v1/public/plans
+     */
+    async function fetchDynamicPlans() {
+        try {
+            const res = await fetch('/v1/public/plans');
+            const json = await res.json();
+            if (json.status === 'success' && Array.isArray(json.data) && json.data.length > 0) {
+                const newPricing = {};
+                json.data.forEach(p => {
+                    const inrMonthly = Math.round((p.price_monthly_paise || 0) / 100);
+                    const inrYearly = Math.round((p.price_yearly_paise || 0) / 100);
+                    const usdMonthly = Math.round((p.price_monthly_usd_cents || 0) / 100);
+                    const usdYearly = Math.round((p.price_yearly_usd_cents || 0) / 100);
+
+                    const quotaMap = {};
+                    (p.quotas || []).forEach(q => { quotaMap[q.quota_key] = q.quota_value; });
+
+                    const chatbots = quotaMap['max_chatbots'] === -1 ? 'Unlimited' : (quotaMap['max_chatbots'] || 1);
+                    const msgs = quotaMap['max_messages_per_month'] === -1 ? 'Unlimited' : Number(quotaMap['max_messages_per_month'] || 2000).toLocaleString();
+                    const leads = quotaMap['max_leads_per_month'] === -1 ? 'Unlimited' : Number(quotaMap['max_leads_per_month'] || 100).toLocaleString();
+                    const sources = quotaMap['max_knowledge_sources'] === -1 ? 'Unlimited' : (quotaMap['max_knowledge_sources'] || 20);
+                    const staff = quotaMap['max_staff_users'] === -1 ? 'Unlimited' : (quotaMap['max_staff_users'] || 1);
+
+                    const isGrowth = p.name.toLowerCase() === 'growth' || (!p.badge_text && p.sort_order === 2);
+                    const badge = p.badge_text || (isGrowth ? 'Most Popular' : null);
+
+                    const highlights = [
+                        `${chatbots} Department Chatbot${chatbots === 1 || chatbots === '1' ? '' : 's'}`,
+                        `${msgs} AI Conversations / mo`,
+                        `${leads} Qualified Leads / mo`,
+                        `${sources} Knowledge Sources`,
+                        `${staff} Counselor Seat${staff === 1 || staff === '1' ? '' : 's'}`
+                    ];
+
+                    newPricing[p.name] = {
+                        id: p.id,
+                        name: p.name,
+                        description: p.description || '',
+                        badge: badge,
+                        isGrowth: isGrowth,
+                        inr: {
+                            monthly: inrMonthly,
+                            yearly: inrYearly,
+                            formattedMonthly: '₹' + inrMonthly.toLocaleString() + '/mo',
+                            formattedYearly: '₹' + inrYearly.toLocaleString() + '/yr'
+                        },
+                        usd: {
+                            monthly: usdMonthly,
+                            yearly: usdYearly,
+                            formattedMonthly: '$' + usdMonthly.toLocaleString() + '/mo',
+                            formattedYearly: '$' + usdYearly.toLocaleString() + '/yr'
+                        },
+                        highlights: highlights
+                    };
+                });
+
+                PLAN_PRICING = newPricing;
+
+                // Sync current selected plan
+                const foundPlan = Object.values(PLAN_PRICING).find(p => p.name.toLowerCase() === (state.plan || '').toLowerCase());
+                if (foundPlan) {
+                    state.plan = foundPlan.name;
+                    state.planId = foundPlan.id;
+                }
+
+                updateSignupPlanBadgeUI();
+                renderPlanCardsUI();
+                if (document.getElementById('checkoutGatewayCard')?.style.display === 'block') {
+                    renderCheckoutSummaryUI();
+                }
+            }
+        } catch (err) {
+            console.warn('Could not fetch dynamic plans, using cached pricing:', err);
+        }
+    }
 
     /**
      * Initialize URL parameters and detected geo currency
@@ -67,10 +170,10 @@
         // 1. Detect Plan
         const planParam = urlParams.get('plan');
         if (planParam) {
-            const normalizedPlan = planParam.charAt(0).toUpperCase() + planParam.slice(1).toLowerCase();
-            if (PLAN_PRICING[normalizedPlan]) {
-                state.plan = normalizedPlan;
-                state.planId = PLAN_PRICING[normalizedPlan].id;
+            const foundKey = Object.keys(PLAN_PRICING).find(k => k.toLowerCase() === planParam.trim().toLowerCase());
+            if (foundKey) {
+                state.plan = PLAN_PRICING[foundKey].name;
+                state.planId = PLAN_PRICING[foundKey].id;
                 state.hasPreselectedPlan = true;
             }
         }
@@ -109,6 +212,10 @@
 
         // Update signup card pill badge if preselected plan exists (Scenario 1)
         updateSignupPlanBadgeUI();
+
+        // Render cards & fetch dynamic database plans
+        renderPlanCardsUI();
+        fetchDynamicPlans();
     }
 
     /**
@@ -122,12 +229,15 @@
 
         if (!badgeEl) return;
 
-        if (state.hasPreselectedPlan && PLAN_PRICING[state.plan]) {
-            const planData = PLAN_PRICING[state.plan];
-            const priceInfo = (state.currency === 'USD') ? planData.usd : planData.inr;
-            const priceDisplay = (state.cycle === 'yearly') ? priceInfo.formattedYearly : priceInfo.formattedMonthly;
+        const currentPlanObj = Object.values(PLAN_PRICING).find(p => p.name.toLowerCase() === (state.plan || '').toLowerCase());
+        if (state.hasPreselectedPlan && currentPlanObj) {
+            const isUsd = state.currency === 'USD';
+            const priceInfo = isUsd ? currentPlanObj.usd : currentPlanObj.inr;
+            const priceVal = (state.cycle === 'yearly') ? priceInfo.yearly : priceInfo.monthly;
+            const priceFormatted = isUsd ? `$${priceVal.toLocaleString()}` : `₹${priceVal.toLocaleString()}`;
+            const priceDisplay = (state.cycle === 'yearly') ? `${priceFormatted}/yr` : `${priceFormatted}/month`;
 
-            if (nameEl) nameEl.textContent = `${planData.name} Plan`;
+            if (nameEl) nameEl.textContent = `${currentPlanObj.name} Plan`;
             if (priceEl) priceEl.textContent = priceDisplay;
             if (cycleEl) cycleEl.textContent = (state.cycle === 'yearly') ? 'Billed annually (~17% savings)' : 'Billed monthly';
             badgeEl.style.display = 'flex';
@@ -208,42 +318,104 @@
      * Render Plan Selection Cards (Scenario 2 Step 2)
      */
     function renderPlanCardsUI() {
+        const container = document.getElementById('planCardsContainer');
+        const isUsd = state.currency === 'USD';
+        const isYearly = state.cycle === 'yearly';
+
+        if (container) {
+            const plansList = Object.values(PLAN_PRICING);
+            if (plansList.length > 0) {
+                container.innerHTML = plansList.map(plan => {
+                    const priceInfo = isUsd ? plan.usd : plan.inr;
+                    const priceVal = isYearly ? priceInfo.yearly : priceInfo.monthly;
+                    const formattedPrice = isUsd ? `$${priceVal.toLocaleString()}` : `₹${priceVal.toLocaleString()}`;
+                    const subText = isYearly ? '/year' : '/month';
+                    const isSelected = state.plan.toLowerCase() === plan.name.toLowerCase();
+                    const isGrowth = plan.isGrowth || plan.name.toLowerCase() === 'growth';
+
+                    const cardBg = isGrowth ? '#063D3B' : '#FFFFFF';
+                    const cardColor = isGrowth ? '#FFFFFF' : '#063D3B';
+                    const cardBorder = isGrowth ? '1.5px solid #063D3B' : (isSelected ? '2px solid #047857' : '1.5px solid #DDE9E3');
+                    const badgeHtml = plan.badge ? `
+                        <div style="position: absolute; top: -10px; right: 14px; background: #C8FF63; color: #063D3B; font-size: 9.5px; font-weight: 800; padding: 2px 8px; border-radius: 10px; text-transform: uppercase;">
+                            ${escapeHtml(plan.badge)}
+                        </div>
+                    ` : '';
+
+                    const highlightsHtml = (plan.highlights || []).map(h => `
+                        <li style="margin-bottom: 5px; display: flex; align-items: baseline; gap: 6px;">
+                            <span style="color: ${isGrowth ? '#C8FF63' : '#047857'}; font-weight: 800;">✓</span>
+                            <span>${escapeHtml(h)}</span>
+                        </li>
+                    `).join('');
+
+                    const btnHtml = isGrowth
+                        ? `<button type="button" onclick="window.edvoraCheckout.selectPlan('${escapeHtml(plan.name)}')" style="width: 100%; height: 36px; font-size: 12px; font-weight: 700; background: #C8FF63; color: #063D3B; border: none; border-radius: 6px; cursor: pointer; transition: opacity 0.15s;">Select ${escapeHtml(plan.name)} →</button>`
+                        : `<button type="button" onclick="window.edvoraCheckout.selectPlan('${escapeHtml(plan.name)}')" class="brand-btn-secondary" style="width: 100%; height: 36px; font-size: 12px; font-weight: 700;">Select ${escapeHtml(plan.name)} →</button>`;
+
+                    return `
+                        <div style="background: ${cardBg}; color: ${cardColor}; border: ${cardBorder}; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                            ${badgeHtml}
+                            <div>
+                                <div style="font-size: 11px; font-weight: 800; color: ${isGrowth ? '#C8FF63' : '#047857'}; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">
+                                    ${escapeHtml(plan.name)}
+                                </div>
+                                <h4 style="font-size: 16px; font-weight: 800; color: ${cardColor}; margin: 0 0 6px 0;">
+                                    ${escapeHtml(plan.name)} Plan
+                                </h4>
+                                <div style="display: flex; align-items: baseline; gap: 4px; margin-bottom: 12px;">
+                                    <span style="font-size: 22px; font-weight: 900; color: ${cardColor};">${formattedPrice}</span>
+                                    <span style="font-size: 11px; color: ${isGrowth ? '#A3D4BE' : '#64748b'};">${subText}</span>
+                                </div>
+                                <ul style="list-style: none; padding: 0; margin: 0 0 16px 0; font-size: 11.5px; color: ${isGrowth ? '#E2ECE7' : '#334155'}; line-height: 1.5;">
+                                    ${highlightsHtml}
+                                </ul>
+                            </div>
+                            ${btnHtml}
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Backward compatibility for static elements if present
         const starterPriceEl = document.getElementById('planSelStarterPrice');
         const starterSubEl = document.getElementById('planSelStarterSub');
         const growthPriceEl = document.getElementById('planSelGrowthPrice');
         const growthSubEl = document.getElementById('planSelGrowthSub');
 
-        const isUsd = state.currency === 'USD';
-        const isYearly = state.cycle === 'yearly';
-
-        if (starterPriceEl && starterSubEl) {
-            starterPriceEl.textContent = isUsd 
-                ? (isYearly ? '$2,490' : '$299') 
-                : (isYearly ? '₹29,990' : '₹2,999');
-            starterSubEl.textContent = isYearly ? '/year (save 17%)' : '/month';
+        if (starterPriceEl && starterSubEl && PLAN_PRICING.Starter) {
+            const pInfo = isUsd ? PLAN_PRICING.Starter.usd : PLAN_PRICING.Starter.inr;
+            const pVal = isYearly ? pInfo.yearly : pInfo.monthly;
+            starterPriceEl.textContent = isUsd ? `$${pVal.toLocaleString()}` : `₹${pVal.toLocaleString()}`;
+            starterSubEl.textContent = isYearly ? '/year (save ~17%)' : '/month';
         }
 
-        if (growthPriceEl && growthSubEl) {
-            growthPriceEl.textContent = isUsd 
-                ? (isYearly ? '$5,990' : '$699') 
-                : (isYearly ? '₹69,990' : '₹6,999');
-            growthSubEl.textContent = isYearly ? '/year (save 17%)' : '/month';
+        if (growthPriceEl && growthSubEl && PLAN_PRICING.Growth) {
+            const pInfo = isUsd ? PLAN_PRICING.Growth.usd : PLAN_PRICING.Growth.inr;
+            const pVal = isYearly ? pInfo.yearly : pInfo.monthly;
+            growthPriceEl.textContent = isUsd ? `$${pVal.toLocaleString()}` : `₹${pVal.toLocaleString()}`;
+            growthSubEl.textContent = isYearly ? '/year (save ~17%)' : '/month';
         }
 
         // Cycle switcher button states
         const btnCycleMonthly = document.getElementById('planSelBtnMonthly');
         const btnCycleYearly = document.getElementById('planSelBtnYearly');
         if (btnCycleMonthly && btnCycleYearly) {
-            btnCycleMonthly.classList.toggle('active', !isYearly);
-            btnCycleYearly.classList.toggle('active', isYearly);
+            btnCycleMonthly.style.background = !isYearly ? '#063D3B' : 'transparent';
+            btnCycleMonthly.style.color = !isYearly ? '#fff' : '#475569';
+            btnCycleYearly.style.background = isYearly ? '#063D3B' : 'transparent';
+            btnCycleYearly.style.color = isYearly ? '#fff' : '#475569';
         }
 
         // Currency switcher button states
         const btnCurrInr = document.getElementById('planSelBtnInr');
         const btnCurrUsd = document.getElementById('planSelBtnUsd');
         if (btnCurrInr && btnCurrUsd) {
-            btnCurrInr.classList.toggle('active', !isUsd);
-            btnCurrUsd.classList.toggle('active', isUsd);
+            btnCurrInr.style.background = !isUsd ? '#063D3B' : 'transparent';
+            btnCurrInr.style.color = !isUsd ? '#fff' : '#475569';
+            btnCurrUsd.style.background = isUsd ? '#063D3B' : 'transparent';
+            btnCurrUsd.style.color = isUsd ? '#fff' : '#475569';
         }
     }
 
@@ -264,10 +436,11 @@
         if (planNameEl) planNameEl.textContent = `${state.plan} Plan`;
         if (billingEl) billingEl.textContent = (state.cycle === 'yearly') ? 'Annual Subscription (1 Year)' : 'Monthly Subscription';
 
-        const planData = PLAN_PRICING[state.plan] || PLAN_PRICING.Starter;
+        const planData = Object.values(PLAN_PRICING).find(p => p.name.toLowerCase() === (state.plan || '').toLowerCase()) || PLAN_PRICING.Starter || Object.values(PLAN_PRICING)[0];
         const isUsd = state.currency === 'USD';
         const priceInfo = isUsd ? planData.usd : planData.inr;
-        const totalFormatted = (state.cycle === 'yearly') ? priceInfo.formattedYearly : priceInfo.formattedMonthly;
+        const priceVal = (state.cycle === 'yearly') ? priceInfo.yearly : priceInfo.monthly;
+        const totalFormatted = isUsd ? `$${priceVal.toLocaleString()}` : `₹${priceVal.toLocaleString()}`;
 
         if (amountEl) amountEl.textContent = totalFormatted;
 
@@ -531,9 +704,10 @@
         init: initCheckoutParameters,
         switchView: switchAuthView,
         selectPlan: function (planName) {
-            if (PLAN_PRICING[planName]) {
-                state.plan = planName;
-                state.planId = PLAN_PRICING[planName].id;
+            const found = Object.values(PLAN_PRICING).find(p => p.name.toLowerCase() === (planName || '').toLowerCase());
+            if (found) {
+                state.plan = found.name;
+                state.planId = found.id;
                 switchAuthView('checkout');
             }
         },
