@@ -489,6 +489,8 @@ $router->get('/session-journeys', function (Request $req) {
 });
 $router->get('/superadmin/session-journeys', function (Request $req) {
     require dirname(__DIR__) . '/public/superadmin/session-journeys.html';
+});
+
 // Dedicated Standalone Payment Gateway Manager (No Bloat in index.html)
 $router->get('/payment-gateways', function (Request $req) {
     require dirname(__DIR__) . '/public/superadmin/payment-gateways.html';
