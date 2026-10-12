@@ -1097,15 +1097,29 @@ class SuperAdminController
     }
 
     /**
-     * Encrypt API key using AES-256-CBC
+     * Encrypt API key / secret using AES-256-CBC
      */
-    private static function encryptKey(string $key): string
+    public static function encryptKey(string $key): string
     {
         $secret = Env::get('LLM_ENCRYPTION_KEY', 'EdvoraLLM_SecretEncryptionKey2026!');
         $ivLen = openssl_cipher_iv_length('AES-256-CBC');
         $iv = openssl_random_pseudo_bytes($ivLen);
         $encrypted = openssl_encrypt($key, 'AES-256-CBC', md5($secret), 0, $iv);
         return bin2hex($iv . $encrypted);
+    }
+
+    /**
+     * Decrypt AES-256 encrypted key / secret
+     */
+    public static function decryptKey(string $encryptedHex): string
+    {
+        $secret = Env::get('LLM_ENCRYPTION_KEY', 'EdvoraLLM_SecretEncryptionKey2026!');
+        $data = @hex2bin($encryptedHex);
+        if ($data === false) return '';
+        $ivLen = openssl_cipher_iv_length('AES-256-CBC');
+        $iv = substr($data, 0, $ivLen);
+        $encrypted = substr($data, $ivLen);
+        return openssl_decrypt($encrypted, 'AES-256-CBC', md5($secret), 0, $iv) ?: '';
     }
 
     /**
@@ -1357,6 +1371,312 @@ class SuperAdminController
                 'total_rows' => $totalRows,
                 'total_pages' => (int)ceil($totalRows / $perPage)
             ]
+        ]);
+    }
+
+    /**
+     * GET /v1/superadmin/payment-gateways — List all payment gateways
+     */
+    public function getPaymentGateways(Request $request, array $params = []): void
+    {
+        $db = Database::getConnection();
+        $stmt = $db->query("
+            SELECT 
+                id, name, gateway_type, target_region, mode,
+                key_id, 
+                IF(key_secret_encrypted IS NOT NULL AND key_secret_encrypted != '', 1, 0) AS has_key_secret,
+                IF(webhook_secret_encrypted IS NOT NULL AND webhook_secret_encrypted != '', 1, 0) AS has_webhook_secret,
+                merchant_account_id, is_active,
+                last_tested_at, last_test_status, last_test_message,
+                created_at, updated_at
+            FROM payment_gateways
+            ORDER BY target_region ASC, is_active DESC, id ASC
+        ");
+        $gateways = $stmt->fetchAll();
+        Response::success(['data' => $gateways]);
+    }
+
+    /**
+     * POST /v1/superadmin/payment-gateways — Add a payment gateway
+     */
+    public function createPaymentGateway(Request $request, array $params = []): void
+    {
+        $data = $request->all();
+        $name = trim($data['name'] ?? '');
+        $gatewayType = strtolower(trim($data['gateway_type'] ?? ''));
+        $targetRegion = strtolower(trim($data['target_region'] ?? 'domestic_inr'));
+        $mode = strtolower(trim($data['mode'] ?? 'sandbox'));
+        $keyId = trim($data['key_id'] ?? '');
+        $keySecret = trim($data['key_secret'] ?? '');
+        $webhookSecret = trim($data['webhook_secret'] ?? '');
+        $merchantAccountId = trim($data['merchant_account_id'] ?? '');
+        $isActive = !empty($data['is_active']) ? 1 : 0;
+
+        if (empty($name) || empty($gatewayType) || empty($keyId)) {
+            Response::error('Gateway Name, Type, and Public Key / Client ID are required.', 422);
+        }
+        if (!in_array($gatewayType, ['razorpay', 'paypal', 'stripe', 'cashfree'])) {
+            Response::error('Invalid gateway type.', 422);
+        }
+        if (!in_array($targetRegion, ['domestic_inr', 'international_usd'])) {
+            Response::error('Invalid target region.', 422);
+        }
+        if (!in_array($mode, ['sandbox', 'live'])) {
+            $mode = 'sandbox';
+        }
+
+        $db = Database::getConnection();
+
+        // Strict 1-active rule per region: if this gateway is active, deactivate all others for this region
+        if ($isActive === 1) {
+            $stmtUnset = $db->prepare("UPDATE payment_gateways SET is_active = 0 WHERE target_region = :region");
+            $stmtUnset->execute([':region' => $targetRegion]);
+        }
+
+        $keySecretEncrypted = !empty($keySecret) ? self::encryptKey($keySecret) : '';
+        $webhookSecretEncrypted = !empty($webhookSecret) ? self::encryptKey($webhookSecret) : null;
+
+        $stmt = $db->prepare("
+            INSERT INTO payment_gateways (name, gateway_type, target_region, mode, key_id, key_secret_encrypted, webhook_secret_encrypted, merchant_account_id, is_active, created_at, updated_at)
+            VALUES (:name, :gtype, :region, :mode, :kid, :ksecret, :wsecret, :mid, :active, NOW(), NOW())
+        ");
+        $stmt->execute([
+            ':name' => $name,
+            ':gtype' => $gatewayType,
+            ':region' => $targetRegion,
+            ':mode' => $mode,
+            ':kid' => $keyId,
+            ':ksecret' => $keySecretEncrypted,
+            ':wsecret' => $webhookSecretEncrypted,
+            ':mid' => !empty($merchantAccountId) ? $merchantAccountId : null,
+            ':active' => $isActive
+        ]);
+
+        $newId = (int)$db->lastInsertId();
+        Response::success(['id' => $newId], 'Payment gateway added successfully');
+    }
+
+    /**
+     * PUT /v1/superadmin/payment-gateways/{id} — Update a payment gateway
+     */
+    public function updatePaymentGateway(Request $request, array $params = []): void
+    {
+        $id = (int)($params['id'] ?? $request->get('id'));
+        if (!$id) {
+            Response::error('Gateway ID missing.', 422);
+        }
+
+        $db = Database::getConnection();
+        $stmtExist = $db->prepare("SELECT * FROM payment_gateways WHERE id = :id LIMIT 1");
+        $stmtExist->execute([':id' => $id]);
+        $existing = $stmtExist->fetch();
+        if (!$existing) {
+            Response::error('Payment gateway not found.', 404);
+        }
+
+        $data = $request->all();
+        $name = trim($data['name'] ?? $existing['name']);
+        $gatewayType = strtolower(trim($data['gateway_type'] ?? $existing['gateway_type']));
+        $targetRegion = strtolower(trim($data['target_region'] ?? $existing['target_region']));
+        $mode = strtolower(trim($data['mode'] ?? $existing['mode']));
+        $keyId = trim($data['key_id'] ?? $existing['key_id']);
+        $merchantAccountId = isset($data['merchant_account_id']) ? trim($data['merchant_account_id']) : $existing['merchant_account_id'];
+        $isActive = isset($data['is_active']) ? (!empty($data['is_active']) ? 1 : 0) : (int)$existing['is_active'];
+
+        // Strict 1-active rule per region: if setting to active, deactivate all others for this region
+        if ($isActive === 1) {
+            $stmtUnset = $db->prepare("UPDATE payment_gateways SET is_active = 0 WHERE target_region = :region AND id != :id");
+            $stmtUnset->execute([':region' => $targetRegion, ':id' => $id]);
+        }
+
+        $sql = "UPDATE payment_gateways SET name = :name, gateway_type = :gtype, target_region = :region, mode = :mode, key_id = :kid, merchant_account_id = :mid, is_active = :active, updated_at = NOW()";
+        $updateParams = [
+            ':name' => $name,
+            ':gtype' => $gatewayType,
+            ':region' => $targetRegion,
+            ':mode' => $mode,
+            ':kid' => $keyId,
+            ':mid' => !empty($merchantAccountId) ? $merchantAccountId : null,
+            ':active' => $isActive,
+            ':id' => $id
+        ];
+
+        if (!empty($data['key_secret'])) {
+            $sql .= ", key_secret_encrypted = :ksecret";
+            $updateParams[':ksecret'] = self::encryptKey(trim($data['key_secret']));
+        }
+        if (isset($data['webhook_secret']) && $data['webhook_secret'] !== '') {
+            $sql .= ", webhook_secret_encrypted = :wsecret";
+            $updateParams[':wsecret'] = self::encryptKey(trim($data['webhook_secret']));
+        }
+
+        $sql .= " WHERE id = :id";
+        $stmt = $db->prepare($sql);
+        $stmt->execute($updateParams);
+
+        Response::success(null, 'Payment gateway updated successfully');
+    }
+
+    /**
+     * DELETE /v1/superadmin/payment-gateways/{id} — Delete payment gateway
+     */
+    public function deletePaymentGateway(Request $request, array $params = []): void
+    {
+        $id = (int)($params['id'] ?? $request->get('id'));
+        $db = Database::getConnection();
+        $stmt = $db->prepare("DELETE FROM payment_gateways WHERE id = :id");
+        $stmt->execute([':id' => $id]);
+        Response::success(null, 'Payment gateway deleted successfully');
+    }
+
+    /**
+     * POST /v1/superadmin/payment-gateways/{id}/test — Live connectivity test
+     */
+    public function testPaymentGateway(Request $request, array $params = []): void
+    {
+        $id = (int)($params['id'] ?? $request->get('id'));
+        $db = Database::getConnection();
+        $stmt = $db->prepare("SELECT * FROM payment_gateways WHERE id = :id LIMIT 1");
+        $stmt->execute([':id' => $id]);
+        $gw = $stmt->fetch();
+
+        if (!$gw) {
+            Response::error('Payment gateway not found.', 404);
+        }
+
+        $type = strtolower($gw['gateway_type']);
+        $keyId = trim($gw['key_id']);
+        $secret = !empty($gw['key_secret_encrypted']) ? self::decryptKey($gw['key_secret_encrypted']) : '';
+        $mode = $gw['mode'];
+
+        $testStatus = 'error';
+        $testMsg = 'Unknown error';
+
+        if (empty($keyId)) {
+            $testMsg = 'Public Key / Client ID is empty.';
+        } elseif (empty($secret)) {
+            $testMsg = 'Secret key is missing or not configured.';
+        } else {
+            try {
+                if ($type === 'razorpay') {
+                    $ch = curl_init('https://api.razorpay.com/v1/payments?count=1');
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($ch, CURLOPT_USERPWD, $keyId . ':' . $secret);
+                    curl_setopt($ch, CURLOPT_TIMEOUT, 12);
+                    $res = curl_exec($ch);
+                    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                    $curlErr = curl_error($ch);
+                    curl_close($ch);
+
+                    if ($httpCode === 200) {
+                        $testStatus = 'ok';
+                        $testMsg = 'Razorpay authenticated successfully (' . ($mode === 'live' ? 'Live Mode' : 'Test Mode') . ')';
+                    } elseif ($httpCode === 401) {
+                        $testStatus = 'error';
+                        $testMsg = 'Authentication failed: Invalid Razorpay Key ID or Key Secret';
+                    } else {
+                        $json = json_decode($res, true);
+                        $errDesc = $json['error']['description'] ?? ($curlErr ?: "HTTP {$httpCode}");
+                        $testStatus = 'error';
+                        $testMsg = 'Razorpay responded with error: ' . $errDesc;
+                    }
+                } elseif ($type === 'paypal') {
+                    $tokenUrl = ($mode === 'live')
+                        ? 'https://api-m.paypal.com/v1/oauth2/token'
+                        : 'https://api-m.sandbox.paypal.com/v1/oauth2/token';
+
+                    $ch = curl_init($tokenUrl);
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($ch, CURLOPT_USERPWD, $keyId . ':' . $secret);
+                    curl_setopt($ch, CURLOPT_POST, true);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, 'grant_type=client_credentials');
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/json', 'Accept-Language: en_US']);
+                    curl_setopt($ch, CURLOPT_TIMEOUT, 12);
+                    $res = curl_exec($ch);
+                    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                    $curlErr = curl_error($ch);
+                    curl_close($ch);
+
+                    $json = json_decode($res, true);
+                    if ($httpCode === 200 && !empty($json['access_token'])) {
+                        $testStatus = 'ok';
+                        $testMsg = 'PayPal OAuth authenticated successfully (' . ($mode === 'live' ? 'Live Mode' : 'Sandbox Mode') . ')';
+                    } else {
+                        $errDesc = $json['error_description'] ?? ($json['error'] ?? ($curlErr ?: "HTTP {$httpCode}"));
+                        $testStatus = 'error';
+                        $testMsg = 'PayPal authentication failed: ' . $errDesc;
+                    }
+                } elseif ($type === 'stripe') {
+                    $ch = curl_init('https://api.stripe.com/v1/balance');
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $secret]);
+                    curl_setopt($ch, CURLOPT_TIMEOUT, 12);
+                    $res = curl_exec($ch);
+                    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                    $curlErr = curl_error($ch);
+                    curl_close($ch);
+
+                    if ($httpCode === 200) {
+                        $testStatus = 'ok';
+                        $testMsg = 'Stripe API authenticated successfully';
+                    } else {
+                        $json = json_decode($res, true);
+                        $errDesc = $json['error']['message'] ?? ($curlErr ?: "HTTP {$httpCode}");
+                        $testStatus = 'error';
+                        $testMsg = 'Stripe authentication failed: ' . $errDesc;
+                    }
+                } else {
+                    $testStatus = 'ok';
+                    $testMsg = 'Credentials format saved successfully for ' . ucfirst($type);
+                }
+            } catch (Throwable $e) {
+                $testStatus = 'error';
+                $testMsg = 'Connection error: ' . $e->getMessage();
+            }
+        }
+
+        $stmtUpdate = $db->prepare("
+            UPDATE payment_gateways 
+            SET last_tested_at = NOW(), last_test_status = :status, last_test_message = :msg
+            WHERE id = :id
+        ");
+        $stmtUpdate->execute([':status' => $testStatus, ':msg' => substr($testMsg, 0, 490), ':id' => $id]);
+
+        Response::success([
+            'test_status' => $testStatus,
+            'test_message' => $testMsg,
+            'tested_at' => date('Y-m-d H:i:s')
+        ], $testMsg);
+    }
+
+    /**
+     * GET /v1/public/payment-gateways — Public checkout active gateways (Zero secrets exposed)
+     */
+    public function getPublicPaymentGateways(Request $request, array $params = []): void
+    {
+        $db = Database::getConnection();
+        $stmt = $db->query("
+            SELECT id, name, gateway_type, target_region, mode, key_id, merchant_account_id
+            FROM payment_gateways
+            WHERE is_active = 1
+            ORDER BY target_region ASC, id ASC
+        ");
+        $rows = $stmt->fetchAll();
+
+        $domestic = null;
+        $international = null;
+
+        foreach ($rows as $row) {
+            if ($row['target_region'] === 'domestic_inr' && !$domestic) {
+                $domestic = $row;
+            } elseif ($row['target_region'] === 'international_usd' && !$international) {
+                $international = $row;
+            }
+        }
+
+        Response::success([
+            'domestic' => $domestic,
+            'international' => $international
         ]);
     }
 }

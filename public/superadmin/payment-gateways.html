@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Gateway Manager — edvora.chat Superadmin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/theme-branding.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: #0b0f19;
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 12px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #topHeader {
+            height: 48px;
+            background: #111827;
+            border-bottom: 1px solid #1f2937;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-title {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2.5px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-superadmin { background: rgba(14, 165, 233, 0.2); color: #38bdf8; border: 1px solid rgba(14, 165, 233, 0.4); }
+        .badge-active { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+        .badge-inactive { background: rgba(156, 163, 175, 0.15); color: #9ca3af; border: 1px solid rgba(156, 163, 175, 0.3); }
+        .badge-live { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+        .badge-sandbox { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+        .badge-ok { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .badge-error { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn {
+            height: 30px;
+            padding: 0 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 11.5px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            border: 1px solid transparent;
+            transition: all 0.15s ease;
+        }
+        .btn-primary { background: #047857; color: #fff; border-color: #059669; }
+        .btn-primary:hover { background: #065f46; }
+        .btn-secondary { background: #1f2937; color: #d1d5db; border-color: #374151; }
+        .btn-secondary:hover { background: #374151; color: #fff; }
+        .btn-danger { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border-color: rgba(239, 68, 68, 0.3); }
+        .btn-danger:hover { background: #dc2626; color: #fff; }
+        .btn-sm { height: 26px; padding: 0 9px; font-size: 11px; }
+
+        .main-container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 24px 20px 48px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Overview Cards */
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+        }
+        .overview-card {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 10px;
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .overview-card-title {
+            font-size: 11.5px;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .overview-card-val {
+            font-size: 18px;
+            font-weight: 800;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .overview-card-sub {
+            font-size: 11px;
+            color: #6b7280;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Section Panels */
+        .section-panel {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .section-header {
+            padding: 14px 20px;
+            background: #162032;
+            border-bottom: 1px solid #1f2937;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .section-title {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-desc {
+            padding: 10px 20px;
+            background: rgba(15, 23, 42, 0.6);
+            font-size: 11px;
+            color: #94a3b8;
+            border-bottom: 1px solid #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Table */
+        .gateway-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11.5px;
+        }
+        .gateway-table th {
+            text-align: left;
+            padding: 10px 16px;
+            background: #0f172a;
+            color: #94a3b8;
+            font-weight: 600;
+            font-size: 10.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #1f2937;
+        }
+        .gateway-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #1f2937;
+            color: #e2e8f0;
+            vertical-align: middle;
+        }
+        .gateway-table tr:hover td {
+            background: rgba(30, 41, 59, 0.5);
+        }
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        .modal-card {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 540px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+        .modal-header {
+            padding: 14px 20px;
+            background: #162032;
+            border-bottom: 1px solid #1f2937;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-title {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .modal-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .form-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .form-input, .form-select {
+            height: 34px;
+            background: #0b0f19;
+            border: 1px solid #374151;
+            border-radius: 6px;
+            color: #fff;
+            padding: 0 10px;
+            font-size: 12px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        .form-input:focus, .form-select:focus {
+            border-color: #38bdf8;
+        }
+        .modal-footer {
+            padding: 12px 20px;
+            background: #0f172a;
+            border-top: 1px solid #1f2937;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .alert-bar {
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 11.5px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+        .alert-success { background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: #34d399; }
+        .alert-danger { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header id="topHeader">
+        <div class="header-title">
+            <span style="font-size: 16px;">💳</span>
+            <span>Multi-Region Payment Gateway Manager</span>
+            <span class="badge badge-superadmin">SUPERADMIN</span>
+        </div>
+        <div class="header-actions">
+            <a href="/superadmin" class="btn btn-secondary">← Back to Dashboard</a>
+            <button onclick="loadGateways()" class="btn btn-secondary">🔄 Refresh</button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+
+        <!-- Notification Banner -->
+        <div id="statusBanner" class="alert-bar"></div>
+
+        <!-- Overview Cards -->
+        <div class="overview-grid">
+            <div class="overview-card" style="border-left: 3px solid #38bdf8;">
+                <div class="overview-card-title">
+                    <span>🇮🇳 Domestic Active Gateway</span>
+                    <span id="domesticActiveBadge" class="badge badge-inactive">None Active</span>
+                </div>
+                <div class="overview-card-val" id="domesticActiveTitle">—</div>
+                <div class="overview-card-sub" id="domesticActiveSub">Direct checkout routing for India (INR ₹)</div>
+            </div>
+
+            <div class="overview-card" style="border-left: 3px solid #818cf8;">
+                <div class="overview-card-title">
+                    <span>🌐 International Active Gateway</span>
+                    <span id="intlActiveBadge" class="badge badge-inactive">None Active</span>
+                </div>
+                <div class="overview-card-val" id="intlActiveTitle">—</div>
+                <div class="overview-card-sub" id="intlActiveSub">Direct checkout routing for Global (USD $)</div>
+            </div>
+
+            <div class="overview-card" style="border-left: 3px solid #34d399;">
+                <div class="overview-card-title">
+                    <span>⚡ Rule Enforcement</span>
+                    <span class="badge badge-active">Active</span>
+                </div>
+                <div class="overview-card-val" style="font-size: 14px;">Strict 1-Active Rule</div>
+                <div class="overview-card-sub">Zero selectors on checkout. Only active gateway executes.</div>
+            </div>
+        </div>
+
+        <!-- Section 1: Domestic Gateways (India / INR) -->
+        <section class="section-panel">
+            <div class="section-header">
+                <div class="section-title">
+                    <span>🇮🇳</span> Domestic Payment Gateways (India &bull; INR ₹)
+                </div>
+                <button onclick="openAddModal('domestic_inr')" class="btn btn-primary btn-sm">
+                    + Add Domestic Gateway
+                </button>
+            </div>
+            <div class="section-desc">
+                <span>ℹ️</span> <strong>Strict 1-Active Rule:</strong> Only one gateway can be active for India. Colleges paying in INR will directly be routed to this active gateway. Activating a gateway automatically deactivates any other domestic gateway.
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="gateway-table">
+                    <thead>
+                        <tr>
+                            <th>Gateway Name</th>
+                            <th>Provider</th>
+                            <th>Environment</th>
+                            <th>Public Key / Client ID</th>
+                            <th>Secrets Stored</th>
+                            <th>Status</th>
+                            <th>Connection Test</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="domesticTableBody">
+                        <tr><td colspan="8" style="text-align: center; color: #64748b; padding: 24px;">Loading domestic gateways...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 2: International Gateways (Global / USD) -->
+        <section class="section-panel">
+            <div class="section-header">
+                <div class="section-title">
+                    <span>🌐</span> International Payment Gateways (Global &bull; USD $)
+                </div>
+                <button onclick="openAddModal('international_usd')" class="btn btn-primary btn-sm">
+                    + Add International Gateway
+                </button>
+            </div>
+            <div class="section-desc">
+                <span>ℹ️</span> <strong>Strict 1-Active Rule:</strong> Only one gateway can be active for International. Universities paying in USD will directly be routed to this active gateway. Activating a gateway automatically deactivates any other international gateway.
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="gateway-table">
+                    <thead>
+                        <tr>
+                            <th>Gateway Name</th>
+                            <th>Provider</th>
+                            <th>Environment</th>
+                            <th>Client ID / Public Key</th>
+                            <th>Secrets Stored</th>
+                            <th>Status</th>
+                            <th>Connection Test</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="intlTableBody">
+                        <tr><td colspan="8" style="text-align: center; color: #64748b; padding: 24px;">Loading international gateways...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal: Add / Edit Gateway -->
+    <div id="gatewayModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">Configure Payment Gateway</div>
+                <button onclick="closeModal()" style="background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;">&times;</button>
+            </div>
+            <form id="gatewayForm" onsubmit="saveGateway(event)">
+                <input type="hidden" id="gwEditId" value="">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Gateway Name *</label>
+                        <input type="text" id="gwName" class="form-input" placeholder="e.g. Razorpay Domestic UPI/Cards, PayPal Global" required>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="form-group">
+                            <label class="form-label">Gateway Provider *</label>
+                            <select id="gwType" class="form-select" required onchange="handleTypeChange()">
+                                <option value="razorpay">Razorpay</option>
+                                <option value="paypal">PayPal</option>
+                                <option value="stripe">Stripe</option>
+                                <option value="cashfree">Cashfree</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Target Region *</label>
+                            <select id="gwRegion" class="form-select" required>
+                                <option value="domestic_inr">India (INR ₹)</option>
+                                <option value="international_usd">International (USD $)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Environment Mode *</label>
+                        <select id="gwMode" class="form-select" required>
+                            <option value="sandbox">Sandbox / Test Mode</option>
+                            <option value="live">Production / Live Mode</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" id="lblKeyId">Public Key ID / Client ID *</label>
+                        <input type="text" id="gwKeyId" class="form-input mono" placeholder="rzp_test_... or Client ID" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span id="lblKeySecret">Secret Key / Client Secret</span>
+                            <span id="secretHint" style="color: #94a3b8; font-size: 10px; font-weight: normal;"></span>
+                        </label>
+                        <input type="password" id="gwKeySecret" class="form-input mono" placeholder="Enter API secret">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Webhook Secret (Optional)</label>
+                        <input type="password" id="gwWebhookSecret" class="form-input mono" placeholder="Optional webhook signing secret">
+                    </div>
+
+                    <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid #1f2937; border-radius: 8px; padding: 10px 12px; display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="gwIsActive" style="width: 16px; height: 16px; cursor: pointer;">
+                        <div>
+                            <label for="gwIsActive" style="font-weight: 700; color: #fff; cursor: pointer;">Set as the Active Gateway for this region</label>
+                            <div style="font-size: 10.5px; color: #94a3b8;">Will automatically set any other active gateway for this region to inactive.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="closeModal()" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" id="btnSaveGw" class="btn btn-primary">Save Gateway Configuration</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let gatewaysList = [];
+
+        function getAuthHeaders() {
+            const token = localStorage.getItem('edvora_superadmin_token') || localStorage.getItem('edvora_token') || '';
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            };
+        }
+
+        function showBanner(msg, isError = false) {
+            const el = document.getElementById('statusBanner');
+            el.className = `alert-bar ${isError ? 'alert-danger' : 'alert-success'}`;
+            el.innerHTML = `<span>${isError ? '⚠️' : '✓'}</span> <span>${msg}</span>`;
+            el.style.display = 'flex';
+            setTimeout(() => { el.style.display = 'none'; }, 6000);
+        }
+
+        async function loadGateways() {
+            try {
+                const res = await fetch('/v1/superadmin/payment-gateways', { headers: getAuthHeaders() });
+                const json = await res.json();
+                if (json.status === 'success' && Array.isArray(json.data)) {
+                    gatewaysList = json.data;
+                    renderGateways();
+                } else {
+                    showBanner(json.message || 'Failed to load gateways', true);
+                }
+            } catch (err) {
+                console.error(err);
+                showBanner('Network error loading payment gateways.', true);
+            }
+        }
+
+        function renderGateways() {
+            const domestic = gatewaysList.filter(g => g.target_region === 'domestic_inr');
+            const intl = gatewaysList.filter(g => g.target_region === 'international_usd');
+
+            // Update overview cards
+            const domActive = domestic.find(g => Number(g.is_active) === 1);
+            const intlActive = intl.find(g => Number(g.is_active) === 1);
+
+            const domBadge = document.getElementById('domesticActiveBadge');
+            const domTitle = document.getElementById('domesticActiveTitle');
+            const domSub = document.getElementById('domesticActiveSub');
+
+            if (domActive) {
+                domBadge.className = 'badge badge-active';
+                domBadge.textContent = 'ACTIVE';
+                domTitle.textContent = domActive.name;
+                domSub.textContent = `${domActive.gateway_type.toUpperCase()} • ${domActive.mode.toUpperCase()} • Key: ${domActive.key_id.substring(0, 12)}...`;
+            } else {
+                domBadge.className = 'badge badge-inactive';
+                domBadge.textContent = 'NONE ACTIVE';
+                domTitle.textContent = 'No Active Gateway';
+                domSub.textContent = 'Checkout in INR will show fallback or unavailable notice';
+            }
+
+            const intlBadge = document.getElementById('intlActiveBadge');
+            const intlTitle = document.getElementById('intlActiveTitle');
+            const intlSub = document.getElementById('intlActiveSub');
+
+            if (intlActive) {
+                intlBadge.className = 'badge badge-active';
+                intlBadge.textContent = 'ACTIVE';
+                intlTitle.textContent = intlActive.name;
+                intlSub.textContent = `${intlActive.gateway_type.toUpperCase()} • ${intlActive.mode.toUpperCase()} • Client: ${intlActive.key_id.substring(0, 12)}...`;
+            } else {
+                intlBadge.className = 'badge badge-inactive';
+                intlBadge.textContent = 'NONE ACTIVE';
+                intlTitle.textContent = 'No Active Gateway';
+                intlSub.textContent = 'Checkout in USD will show fallback or unavailable notice';
+            }
+
+            renderTable('domesticTableBody', domestic);
+            renderTable('intlTableBody', intl);
+        }
+
+        function renderTable(tableId, list) {
+            const tbody = document.getElementById(tableId);
+            if (!list || list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #64748b; padding: 24px;">No gateways configured in this region yet. Click "+ Add Gateway" above.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map(g => {
+                const isActive = Number(g.is_active) === 1;
+                const isLive = g.mode === 'live';
+                const statusBadge = isActive
+                    ? `<span class="badge badge-active">ACTIVE</span>`
+                    : `<span class="badge badge-inactive">INACTIVE</span>`;
+                const modeBadge = isLive
+                    ? `<span class="badge badge-live">LIVE</span>`
+                    : `<span class="badge badge-sandbox">SANDBOX</span>`;
+
+                let testBadge = `<span class="badge badge-neutral">Untested</span>`;
+                if (g.last_test_status === 'ok') {
+                    testBadge = `<span class="badge badge-ok" title="${escapeHtml(g.last_test_message || '')}">✓ Connected</span>`;
+                } else if (g.last_test_status === 'error') {
+                    testBadge = `<span class="badge badge-error" title="${escapeHtml(g.last_test_message || '')}">✕ Error</span>`;
+                }
+
+                const activateBtn = isActive
+                    ? `<button disabled class="btn btn-secondary btn-sm" style="opacity: 0.4; cursor: default;">Current Active</button>`
+                    : `<button onclick="activateGateway(${g.id})" class="btn btn-primary btn-sm">⚡ Set Active</button>`;
+
+                return `
+                    <tr style="${isActive ? 'background: rgba(16, 185, 129, 0.05);' : ''}">
+                        <td>
+                            <strong style="color: #fff;">${escapeHtml(g.name)}</strong>
+                        </td>
+                        <td>
+                            <span style="font-weight: 700; text-transform: capitalize;">${escapeHtml(g.gateway_type)}</span>
+                        </td>
+                        <td>${modeBadge}</td>
+                        <td class="mono" style="color: #38bdf8;">${escapeHtml(g.key_id)}</td>
+                        <td>
+                            ${g.has_key_secret ? '<span style="color: #34d399;">🔒 Stored (AES-256)</span>' : '<span style="color: #f87171;">Missing</span>'}
+                        </td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                ${testBadge}
+                                <button onclick="testGateway(${g.id}, this)" class="btn btn-secondary btn-sm" title="Ping API credentials">⚡ Test</button>
+                            </div>
+                        </td>
+                        <td style="text-align: right;">
+                            <div style="display: inline-flex; align-items: center; gap: 6px;">
+                                ${activateBtn}
+                                <button onclick="openEditModal(${g.id})" class="btn btn-secondary btn-sm">Edit</button>
+                                <button onclick="deleteGateway(${g.id})" class="btn btn-danger btn-sm">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function handleTypeChange() {
+            const type = document.getElementById('gwType').value;
+            const region = document.getElementById('gwRegion');
+            if (type === 'razorpay' || type === 'cashfree') {
+                region.value = 'domestic_inr';
+            } else if (type === 'paypal' || type === 'stripe') {
+                region.value = 'international_usd';
+            }
+        }
+
+        function openAddModal(defaultRegion = 'domestic_inr') {
+            document.getElementById('modalTitle').textContent = 'Add Payment Gateway';
+            document.getElementById('gwEditId').value = '';
+            document.getElementById('gwName').value = defaultRegion === 'domestic_inr' ? 'Razorpay Domestic' : 'PayPal Global';
+            document.getElementById('gwType').value = defaultRegion === 'domestic_inr' ? 'razorpay' : 'paypal';
+            document.getElementById('gwRegion').value = defaultRegion;
+            document.getElementById('gwMode').value = 'sandbox';
+            document.getElementById('gwKeyId').value = '';
+            document.getElementById('gwKeySecret').value = '';
+            document.getElementById('gwWebhookSecret').value = '';
+            document.getElementById('gwIsActive').checked = true;
+            document.getElementById('secretHint').textContent = '(Required)';
+            document.getElementById('gwKeySecret').required = true;
+            document.getElementById('gatewayModal').style.display = 'flex';
+        }
+
+        function openEditModal(id) {
+            const g = gatewaysList.find(x => x.id === id);
+            if (!g) return;
+            document.getElementById('modalTitle').textContent = 'Edit Payment Gateway: ' + g.name;
+            document.getElementById('gwEditId').value = g.id;
+            document.getElementById('gwName').value = g.name;
+            document.getElementById('gwType').value = g.gateway_type;
+            document.getElementById('gwRegion').value = g.target_region;
+            document.getElementById('gwMode').value = g.mode;
+            document.getElementById('gwKeyId').value = g.key_id;
+            document.getElementById('gwKeySecret').value = '';
+            document.getElementById('gwKeySecret').required = false;
+            document.getElementById('gwWebhookSecret').value = '';
+            document.getElementById('secretHint').textContent = '(Leave empty to keep existing secret)';
+            document.getElementById('gwIsActive').checked = Number(g.is_active) === 1;
+            document.getElementById('gatewayModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('gatewayModal').style.display = 'none';
+        }
+
+        async function saveGateway(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSaveGw');
+            const orig = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = 'Saving...';
+
+            const editId = document.getElementById('gwEditId').value;
+            const payload = {
+                name: document.getElementById('gwName').value.trim(),
+                gateway_type: document.getElementById('gwType').value,
+                target_region: document.getElementById('gwRegion').value,
+                mode: document.getElementById('gwMode').value,
+                key_id: document.getElementById('gwKeyId').value.trim(),
+                is_active: document.getElementById('gwIsActive').checked ? 1 : 0
+            };
+
+            const secret = document.getElementById('gwKeySecret').value.trim();
+            if (secret) payload.key_secret = secret;
+
+            const webhook = document.getElementById('gwWebhookSecret').value.trim();
+            if (webhook) payload.webhook_secret = webhook;
+
+            try {
+                const url = editId ? `/v1/superadmin/payment-gateways/${editId}` : '/v1/superadmin/payment-gateways';
+                const method = editId ? 'PUT' : 'POST';
+
+                const res = await fetch(url, {
+                    method: method,
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(payload)
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showBanner(editId ? 'Gateway updated successfully!' : 'Gateway created successfully!');
+                    closeModal();
+                    loadGateways();
+                } else {
+                    showBanner(json.message || 'Error saving gateway', true);
+                }
+            } catch (err) {
+                console.error(err);
+                showBanner('Network error saving gateway.', true);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = orig;
+            }
+        }
+
+        async function activateGateway(id) {
+            if (!confirm('Make this gateway the single ACTIVE gateway for this region? (The previous active gateway for this region will be deactivated).')) return;
+            try {
+                const res = await fetch(`/v1/superadmin/payment-gateways/${id}`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ is_active: 1 })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showBanner('Gateway activated successfully!');
+                    loadGateways();
+                } else {
+                    showBanner(json.message || 'Error activating gateway', true);
+                }
+            } catch (err) {
+                console.error(err);
+                showBanner('Network error activating gateway.', true);
+            }
+        }
+
+        async function deleteGateway(id) {
+            if (!confirm('Are you sure you want to permanently delete this payment gateway?')) return;
+            try {
+                const res = await fetch(`/v1/superadmin/payment-gateways/${id}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showBanner('Gateway deleted.');
+                    loadGateways();
+                } else {
+                    showBanner(json.message || 'Error deleting gateway', true);
+                }
+            } catch (err) {
+                console.error(err);
+                showBanner('Network error deleting gateway.', true);
+            }
+        }
+
+        async function testGateway(id, btn) {
+            const orig = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = 'Testing...';
+
+            try {
+                const res = await fetch(`/v1/superadmin/payment-gateways/${id}/test`, {
+                    method: 'POST',
+                    headers: getAuthHeaders()
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    const data = json.data || {};
+                    if (data.test_status === 'ok') {
+                        showBanner(`Success: ${data.test_message || 'Authenticated successfully!'}`);
+                    } else {
+                        showBanner(`Connection Test Failed: ${data.test_message || 'Error'}`, true);
+                    }
+                    loadGateways();
+                } else {
+                    showBanner(json.message || 'Test failed', true);
+                }
+            } catch (err) {
+                console.error(err);
+                showBanner('Network error running connection test.', true);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = orig;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadGateways);
+    </script>
+</body>
+</html>

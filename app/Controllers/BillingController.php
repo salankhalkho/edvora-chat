@@ -116,15 +116,27 @@ class BillingController
             $formattedAmount = '₹' . number_format($amountRupees);
         }
 
-        $orderId = 'EDV-' . strtoupper(substr($gateway, 0, 3)) . '-' . strtoupper(bin2hex(random_bytes(6)));
+        $orderId = 'EDV-' . strtoupper(bin2hex(random_bytes(6)));
 
         // Update organization's targeted plan
         $stmtUpdateOrg = $db->prepare("UPDATE organizations SET plan_id = :pid WHERE id = :oid");
         $stmtUpdateOrg->execute([':pid' => $plan['id'], ':oid' => $orgId]);
 
+        // Query single active payment gateway for region
+        $targetRegion = ($currency === 'USD') ? 'international_usd' : 'domestic_inr';
+        $stmtGw = $db->prepare("SELECT * FROM payment_gateways WHERE target_region = :region AND is_active = 1 LIMIT 1");
+        $stmtGw->execute([':region' => $targetRegion]);
+        $activeGw = $stmtGw->fetch();
+
+        $gatewayType = $activeGw ? strtolower($activeGw['gateway_type']) : (($currency === 'USD') ? 'paypal' : 'razorpay');
+        $gatewayMode = $activeGw['mode'] ?? 'sandbox';
+
         $payload = [
             'order_id' => $orderId,
-            'gateway' => $gateway,
+            'gateway' => $gatewayType,
+            'gateway_name' => $activeGw['name'] ?? ucfirst($gatewayType),
+            'gateway_mode' => $gatewayMode,
+            'target_region' => $targetRegion,
             'plan_id' => (int)$plan['id'],
             'plan_name' => $plan['name'],
             'plan_description' => $plan['description'] ?? '',
@@ -135,12 +147,56 @@ class BillingController
             'amount_subunits' => ($currency === 'USD') ? $amountCents : $amountPaise
         ];
 
-        if ($gateway === 'razorpay') {
-            $payload['razorpay_key_id'] = Env::get('RAZORPAY_KEY_ID', 'rzp_test_edvora2026Key');
-            $payload['razorpay_order_id'] = $orderId;
+        if ($gatewayType === 'razorpay') {
+            $keyId = $activeGw['key_id'] ?? Env::get('RAZORPAY_KEY_ID', 'rzp_test_placeholder');
+            $secret = !empty($activeGw['key_secret_encrypted']) 
+                ? \App\Controllers\SuperAdminController::decryptKey($activeGw['key_secret_encrypted']) 
+                : Env::get('RAZORPAY_KEY_SECRET', '');
+
+            $rzpOrderId = null;
+            // Attempt official Razorpay Orders API call if real credentials configured
+            if (!empty($secret) && !str_starts_with($keyId, 'rzp_test_placeholder') && !str_starts_with($keyId, 'rzp_test_edvora')) {
+                try {
+                    $ch = curl_init('https://api.razorpay.com/v1/orders');
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($ch, CURLOPT_USERPWD, $keyId . ':' . $secret);
+                    curl_setopt($ch, CURLOPT_POST, true);
+                    curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
+                        'amount' => $amountPaise,
+                        'currency' => 'INR',
+                        'receipt' => $orderId,
+                        'notes' => [
+                            'organization_id' => (string)$orgId,
+                            'plan_id' => (string)$plan['id'],
+                            'billing_cycle' => $billingCycle
+                        ]
+                    ]));
+                    $res = curl_exec($ch);
+                    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                    curl_close($ch);
+
+                    if ($httpCode === 200 || $httpCode === 201) {
+                        $json = json_decode($res, true);
+                        if (!empty($json['id'])) {
+                            $rzpOrderId = $json['id'];
+                        }
+                    } else {
+                        error_log("[BillingController] Razorpay Orders API returned HTTP {$httpCode}: {$res}");
+                    }
+                } catch (Throwable $e) {
+                    error_log('[BillingController] Razorpay Orders API error: ' . $e->getMessage());
+                }
+            }
+
+            $payload['razorpay_key_id'] = $keyId;
+            $payload['razorpay_order_id'] = $rzpOrderId; // Only passed if real Razorpay order created
+        } elseif ($gatewayType === 'paypal') {
+            $payload['paypal_client_id'] = $activeGw['key_id'] ?? Env::get('PAYPAL_CLIENT_ID', 'sb');
+            $payload['paypal_mode'] = $gatewayMode;
         } else {
-            $payload['paypal_client_id'] = Env::get('PAYPAL_CLIENT_ID', 'sb');
-            $payload['paypal_mode'] = Env::get('PAYPAL_MODE', 'sandbox');
+            $payload['gateway_key_id'] = $activeGw['key_id'] ?? '';
         }
 
         Response::success($payload, 'Commercial order generated successfully');
@@ -183,13 +239,19 @@ class BillingController
 
         if ($gateway === 'razorpay') {
             $transactionId = $razorpayPaymentId ?: ('PAY_' . bin2hex(random_bytes(8)));
-            $secret = Env::get('RAZORPAY_KEY_SECRET', 'EdvoraRazorpaySecret2026!');
+            
+            $stmtGw = $db->prepare("SELECT * FROM payment_gateways WHERE gateway_type = 'razorpay' AND is_active = 1 LIMIT 1");
+            $stmtGw->execute();
+            $gw = $stmtGw->fetch();
+            $secret = $gw && !empty($gw['key_secret_encrypted'])
+                ? \App\Controllers\SuperAdminController::decryptKey($gw['key_secret_encrypted'])
+                : Env::get('RAZORPAY_KEY_SECRET', 'EdvoraRazorpaySecret2026!');
 
             // Verify signature if both order_id and signature provided
             if (!empty($razorpayOrderId) && !empty($razorpaySignature) && !empty($secret)) {
                 $expected = hash_hmac('sha256', $razorpayOrderId . '|' . $razorpayPaymentId, $secret);
                 // Allow fallback in test mode if running simulation
-                if (!hash_equals($expected, $razorpaySignature) && !str_starts_with($secret, 'EdvoraRazorpaySecret')) {
+                if (!hash_equals($expected, $razorpaySignature) && !str_starts_with($secret, 'EdvoraRazorpaySecret') && !str_starts_with($secret, 'placeholder')) {
                     Response::error('Payment signature verification failed.', 400);
                 }
             }

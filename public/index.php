@@ -429,6 +429,16 @@ $router->get('/v1/superadmin/smtp', [SuperAdminController::class, 'getSmtpSettin
 $router->put('/v1/superadmin/smtp', [SuperAdminController::class, 'updateSmtpSettings'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
 $router->post('/v1/superadmin/smtp/test', [SuperAdminController::class, 'testSmtpConnection'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
 
+// Super Admin Payment Gateway Routes (Protected + Super Admin Role)
+$router->get('/v1/superadmin/payment-gateways', [SuperAdminController::class, 'getPaymentGateways'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->post('/v1/superadmin/payment-gateways', [SuperAdminController::class, 'createPaymentGateway'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->put('/v1/superadmin/payment-gateways/{id}', [SuperAdminController::class, 'updatePaymentGateway'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->delete('/v1/superadmin/payment-gateways/{id}', [SuperAdminController::class, 'deletePaymentGateway'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->post('/v1/superadmin/payment-gateways/{id}/test', [SuperAdminController::class, 'testPaymentGateway'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+
+// Public Checkout Payment Gateways (Active Only, Zero Secrets)
+$router->get('/v1/public/payment-gateways', [SuperAdminController::class, 'getPublicPaymentGateways']);
+
 // Super Admin Demo Intelligence Routes (Protected + Super Admin Role)
 $router->get('/v1/superadmin/demos', [SuperAdminController::class, 'listDemos'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
 $router->get('/v1/superadmin/demos/export', [SuperAdminController::class, 'exportDemosCsv'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
@@ -479,7 +489,14 @@ $router->get('/session-journeys', function (Request $req) {
 });
 $router->get('/superadmin/session-journeys', function (Request $req) {
     require dirname(__DIR__) . '/public/superadmin/session-journeys.html';
+// Dedicated Standalone Payment Gateway Manager (No Bloat in index.html)
+$router->get('/payment-gateways', function (Request $req) {
+    require dirname(__DIR__) . '/public/superadmin/payment-gateways.html';
 });
+$router->get('/superadmin/payment-gateways', function (Request $req) {
+    require dirname(__DIR__) . '/public/superadmin/payment-gateways.html';
+});
+
 $router->get('/source_attribution', function (Request $req) {
     require dirname(__DIR__) . '/public/source_attribution.html';
 });

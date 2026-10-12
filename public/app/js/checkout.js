@@ -153,6 +153,27 @@
         }
     }
 
+    // Active Regional Gateways Cache (Domestic & International)
+    let activeRegionalGateways = { domestic: null, international: null };
+
+    /**
+     * Fetch active payment gateways configured in Superadmin from /v1/public/payment-gateways
+     */
+    async function fetchActivePaymentGateways() {
+        try {
+            const res = await fetch('/v1/public/payment-gateways');
+            const json = await res.json();
+            if (json.status === 'success' && json.data) {
+                activeRegionalGateways = json.data;
+                if (document.getElementById('checkoutGatewayCard')?.style.display === 'block') {
+                    renderCheckoutSummaryUI();
+                }
+            }
+        } catch (err) {
+            console.warn('Could not fetch active payment gateways:', err);
+        }
+    }
+
     /**
      * Initialize URL parameters and detected geo currency
      */
@@ -213,9 +234,10 @@
         // Update signup card pill badge if preselected plan exists (Scenario 1)
         updateSignupPlanBadgeUI();
 
-        // Render cards & fetch dynamic database plans
+        // Render cards & fetch dynamic database plans & active gateways
         renderPlanCardsUI();
         fetchDynamicPlans();
+        fetchActivePaymentGateways();
     }
 
     /**
@@ -456,20 +478,23 @@
 
         if (amountEl) amountEl.textContent = totalFormatted;
 
+        const activeGw = isUsd ? activeRegionalGateways.international : activeRegionalGateways.domestic;
+        const gwName = activeGw ? activeGw.name : (isUsd ? 'PayPal' : 'Razorpay');
+
         if (isUsd) {
-            if (gatewayTitleEl) gatewayTitleEl.textContent = 'Pay with PayPal or International Card';
+            if (gatewayTitleEl) gatewayTitleEl.textContent = `Pay with ${gwName} (International / Cards)`;
             if (razorpayBtn) razorpayBtn.style.display = 'none';
             if (paypalContainer) paypalContainer.style.display = 'block';
-            if (currencyToggleLink) currencyToggleLink.textContent = 'Switch to INR (Razorpay)';
+            if (currencyToggleLink) currencyToggleLink.textContent = 'Switch to INR (Domestic)';
             initPayPalButton();
         } else {
-            if (gatewayTitleEl) gatewayTitleEl.textContent = 'Pay with Razorpay (UPI, Cards, NetBanking)';
+            if (gatewayTitleEl) gatewayTitleEl.textContent = `Pay with ${gwName} (UPI, Cards, NetBanking)`;
             if (razorpayBtn) {
                 razorpayBtn.style.display = 'flex';
-                razorpayBtn.innerHTML = `<span>🔒</span> <span>Pay ${totalFormatted} via Razorpay</span>`;
+                razorpayBtn.innerHTML = `<span>🔒</span> <span>Pay ${totalFormatted} via ${gwName}</span>`;
             }
             if (paypalContainer) paypalContainer.style.display = 'none';
-            if (currencyToggleLink) currencyToggleLink.textContent = 'Switch to USD (PayPal)';
+            if (currencyToggleLink) currencyToggleLink.textContent = 'Switch to USD (International)';
         }
     }
 
@@ -531,7 +556,6 @@
                 name: 'EdvoraChat',
                 description: `${order.plan_name} Plan (${order.billing_cycle})`,
                 image: '/edvora_logo.svg',
-                order_id: order.razorpay_order_id,
                 prefill: {
                     name: state.userName || '',
                     email: state.userEmail || ''
@@ -556,6 +580,20 @@
                     });
                 }
             };
+
+            // Only attach order_id if a genuine Razorpay server order was generated
+            if (order.razorpay_order_id && String(order.razorpay_order_id).startsWith('order_')) {
+                options.order_id = order.razorpay_order_id;
+            }
+
+            // If placeholder test keys are in use and not configured in Superadmin yet
+            if (String(order.razorpay_key_id).startsWith('rzp_test_placeholder') || String(order.razorpay_key_id).startsWith('rzp_test_edvora')) {
+                const proceed = confirm(`Notice: The active Domestic Gateway is currently in Sandbox Test Mode with placeholder credentials. Real API keys have not yet been configured in Superadmin.\n\nWould you like to complete a Sandbox Test Payment simulation now to activate your account?`);
+                if (proceed) {
+                    await window.edvoraCheckout.simulateTestPaymentSuccess();
+                    return;
+                }
+            }
 
             const rzp = new window.Razorpay(options);
             rzp.on('payment.failed', function (errResponse) {

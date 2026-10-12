@@ -1954,6 +1954,32 @@ class Migrations
         } catch (Throwable $e) {
             error_log('[Migrations] commercial payment columns: ' . $e->getMessage());
         }
+
+        // 34. DYNAMIC PAYMENT GATEWAYS MANAGER
+        try {
+            $this->db->exec("
+                CREATE TABLE IF NOT EXISTS payment_gateways (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    name VARCHAR(100) NOT NULL,
+                    gateway_type ENUM('razorpay', 'paypal', 'stripe', 'cashfree') NOT NULL,
+                    target_region ENUM('domestic_inr', 'international_usd') NOT NULL DEFAULT 'domestic_inr',
+                    mode ENUM('sandbox', 'live') NOT NULL DEFAULT 'sandbox',
+                    key_id VARCHAR(255) NOT NULL,
+                    key_secret_encrypted TEXT NOT NULL,
+                    webhook_secret_encrypted TEXT NULL,
+                    merchant_account_id VARCHAR(255) NULL,
+                    is_active TINYINT(1) NOT NULL DEFAULT 0,
+                    last_tested_at TIMESTAMP NULL,
+                    last_test_status ENUM('ok', 'error') NULL,
+                    last_test_message VARCHAR(500) NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    INDEX idx_region_active (target_region, is_active)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+            ");
+        } catch (Throwable $e) {
+            error_log('[Migrations] payment_gateways table: ' . $e->getMessage());
+        }
     }
 }
 
