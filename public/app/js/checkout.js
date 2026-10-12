@@ -464,7 +464,6 @@
         const gatewayTitleEl = document.getElementById('chkGatewayTitle');
         const razorpayBtn = document.getElementById('chkBtnRazorpay');
         const paypalContainer = document.getElementById('chkPaypalContainer');
-        const currencyToggleLink = document.getElementById('chkCurrencyToggleLink');
 
         if (orgNameEl) orgNameEl.textContent = state.orgName || 'Your College Account';
         if (planNameEl) planNameEl.textContent = `${state.plan} Plan`;
@@ -485,7 +484,6 @@
             if (gatewayTitleEl) gatewayTitleEl.textContent = `Pay with ${gwName} (International / Cards)`;
             if (razorpayBtn) razorpayBtn.style.display = 'none';
             if (paypalContainer) paypalContainer.style.display = 'block';
-            if (currencyToggleLink) currencyToggleLink.textContent = 'Switch to INR (Domestic)';
             initPayPalButton();
         } else {
             if (gatewayTitleEl) gatewayTitleEl.textContent = `Pay with ${gwName} (UPI, Cards, NetBanking)`;
@@ -494,7 +492,6 @@
                 razorpayBtn.innerHTML = `<span>🔒</span> <span>Pay ${totalFormatted} via ${gwName}</span>`;
             }
             if (paypalContainer) paypalContainer.style.display = 'none';
-            if (currencyToggleLink) currencyToggleLink.textContent = 'Switch to USD (International)';
         }
     }
 
