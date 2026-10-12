@@ -151,8 +151,20 @@ $router->get('/privacy', function (Request $req) {
 $router->get('/terms', function (Request $req) {
     require dirname(__DIR__) . '/app/Views/terms.php';
 });
+$router->get('/refund-policy', function (Request $req) {
+    require dirname(__DIR__) . '/app/Views/refund.php';
+});
+$router->get('/cancellation-policy', function (Request $req) {
+    require dirname(__DIR__) . '/app/Views/refund.php';
+});
+$router->get('/cancellation-refund-policy', function (Request $req) {
+    require dirname(__DIR__) . '/app/Views/refund.php';
+});
+$router->get('/shipping-policy', function (Request $req) {
+    require dirname(__DIR__) . '/app/Views/shipping.php';
+});
 $router->get('/contact', function (Request $req) {
-    require dirname(__DIR__) . '/public/landing.html';
+    require dirname(__DIR__) . '/app/Views/contact.php';
 });
 
 // Personalized Interactive Demo Builder Tool Routes

@@ -32,9 +32,11 @@
         <li><a href="/app#signup" class="text-[13px] text-e-muted hover:text-e-teal transition-colors">Register College</a></li>
         <li><a href="/mobile-integration" class="text-[13px] text-e-muted hover:text-e-teal transition-colors">Mobile SDK Docs</a></li>
         <li><button onclick="openDemo()" class="text-[13px] text-e-muted hover:text-e-teal transition-colors text-left p-0 border-0 bg-transparent cursor-pointer font-inherit">Book a Demo</button></li>
-        <li><button onclick="EdvoraConsent.openModal()" class="text-[13px] text-e-muted hover:text-e-teal transition-colors text-left p-0 border-0 bg-transparent cursor-pointer font-inherit">Cookie Settings</button></li>
-        <li><a href="/privacy" class="text-[13px] text-e-muted hover:text-e-teal transition-colors">Privacy Policy &amp; DPA</a></li>
+        <li><a href="/privacy" class="text-[13px] text-e-muted hover:text-e-teal transition-colors">Privacy Policy &amp; Disclosures</a></li>
         <li><a href="/terms" class="text-[13px] text-e-muted hover:text-e-teal transition-colors">Terms of Service</a></li>
+        <li><a href="/refund-policy" class="text-[13px] text-e-muted hover:text-e-teal transition-colors">Refund &amp; Cancellation Policy</a></li>
+        <li><a href="/shipping-policy" class="text-[13px] text-e-muted hover:text-e-teal transition-colors">Shipping &amp; Delivery Policy</a></li>
+        <li><a href="/contact" class="text-[13px] text-e-muted hover:text-e-teal transition-colors">Contact Us &amp; Grievance</a></li>
       </ul>
     </div>
     <div>
