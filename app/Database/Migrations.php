@@ -1977,6 +1977,17 @@ class Migrations
                     INDEX idx_region_active (target_region, is_active)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
             ");
+
+            $count = (int)$this->db->query("SELECT COUNT(*) FROM payment_gateways")->fetchColumn();
+            if ($count === 0) {
+                $encSecret = \App\Controllers\SuperAdminController::encryptKey('placeholder_secret');
+                $stmtSeed = $this->db->prepare("
+                    INSERT INTO payment_gateways (name, gateway_type, target_region, mode, key_id, key_secret_encrypted, is_active)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ");
+                $stmtSeed->execute(['Razorpay Domestic (UPI / Cards)', 'razorpay', 'domestic_inr', 'sandbox', 'rzp_test_placeholder', $encSecret, 1]);
+                $stmtSeed->execute(['PayPal Global Checkout', 'paypal', 'international_usd', 'sandbox', 'sb', $encSecret, 1]);
+            }
         } catch (Throwable $e) {
             error_log('[Migrations] payment_gateways table: ' . $e->getMessage());
         }
