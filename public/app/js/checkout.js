@@ -40,8 +40,8 @@
             description: 'Perfect for small institutes launching their first AI assistant',
             badge: null,
             isGrowth: false,
-            inr: { monthly: 2999, yearly: 29990, formattedMonthly: '₹2,999/mo', formattedYearly: '₹29,990/yr' },
-            usd: { monthly: 299, yearly: 2490, formattedMonthly: '$299/mo', formattedYearly: '$2,490/yr' },
+            inr: { monthly: 2999, yearly: 29870, formattedMonthly: '₹2,999/mo', formattedYearly: '₹29,870/yr' },
+            usd: { monthly: 299, yearly: 2978, formattedMonthly: '$299/mo', formattedYearly: '$2,978/yr' },
             highlights: ['1 Department Chatbot', '2,000 AI Conversations / mo', '200 Qualified Leads / mo', '20 Knowledge Sources', '2 Counselor Seats']
         },
         Growth: {
@@ -50,8 +50,8 @@
             description: 'Best for growing colleges needing multiple bots & higher limits',
             badge: 'Most Popular',
             isGrowth: true,
-            inr: { monthly: 6999, yearly: 69990, formattedMonthly: '₹6,999/mo', formattedYearly: '₹69,990/yr' },
-            usd: { monthly: 699, yearly: 5990, formattedMonthly: '$699/mo', formattedYearly: '$5,990/yr' },
+            inr: { monthly: 4999, yearly: 49790, formattedMonthly: '₹4,999/mo', formattedYearly: '₹49,790/yr' },
+            usd: { monthly: 699, yearly: 6962, formattedMonthly: '$699/mo', formattedYearly: '$6,962/yr' },
             highlights: ['3 Department Chatbots', '200,000 AI Conversations / mo', 'Unlimited Qualified Leads', '100 Knowledge Sources', '10 Counselor Seats & Tours']
         },
         Pro: {
@@ -60,8 +60,8 @@
             description: 'For large universities requiring maximum capacity & custom limits',
             badge: null,
             isGrowth: false,
-            inr: { monthly: 14999, yearly: 149990, formattedMonthly: '₹14,999/mo', formattedYearly: '₹149,990/yr' },
-            usd: { monthly: 2100, yearly: 21000, formattedMonthly: '$2,100/mo', formattedYearly: '$21,000/yr' },
+            inr: { monthly: 9999, yearly: 99590, formattedMonthly: '₹9,999/mo', formattedYearly: '₹99,590/yr' },
+            usd: { monthly: 2100, yearly: 20916, formattedMonthly: '$2,100/mo', formattedYearly: '$20,916/yr' },
             highlights: ['Unlimited Chatbots', 'Unlimited Conversations', 'Unlimited Qualified Leads', 'Unlimited Knowledge Sources', 'Dedicated SLA & Onboarding']
         }
     };
@@ -572,7 +572,8 @@
                     await handlePaymentVerification({
                         gateway: 'razorpay',
                         razorpay_payment_id: response.razorpay_payment_id,
-                        razorpay_order_id: response.razorpay_order_id || order.order_id,
+                        razorpay_subscription_id: response.razorpay_subscription_id || order.razorpay_subscription_id,
+                        razorpay_order_id: response.razorpay_order_id || order.razorpay_order_id || order.order_id,
                         razorpay_signature: response.razorpay_signature,
                         plan_id: order.plan_id,
                         billing_cycle: order.billing_cycle,
@@ -581,8 +582,11 @@
                 }
             };
 
-            // Only attach order_id if a genuine Razorpay server order was generated
-            if (order.razorpay_order_id && String(order.razorpay_order_id).startsWith('order_')) {
+            // If recurring subscription created, attach subscription_id and remove amount
+            if (order.razorpay_subscription_id && String(order.razorpay_subscription_id).startsWith('sub_')) {
+                options.subscription_id = order.razorpay_subscription_id;
+                delete options.amount;
+            } else if (order.razorpay_order_id && String(order.razorpay_order_id).startsWith('order_')) {
                 options.order_id = order.razorpay_order_id;
             }
 
@@ -625,14 +629,23 @@
         try {
             const order = await requestCreateOrder();
             const clientId = order.paypal_client_id || 'sb';
+            const isSubscription = Boolean(order.paypal_plan_id && order.paypal_plan_id.startsWith('P-'));
+            const sdkIntent = isSubscription ? 'subscription' : 'capture';
+            const sdkVault = isSubscription ? '&vault=true' : '';
+            const scriptSrc = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=USD&intent=${sdkIntent}${sdkVault}`;
+
+            const existingScript = document.getElementById('paypal-sdk-script');
+            if (existingScript && existingScript.getAttribute('data-plan') !== (order.paypal_plan_id || '')) {
+                existingScript.remove();
+                if (window.paypal) delete window.paypal;
+            }
 
             if (!window.paypal) {
                 await new Promise((resolve, reject) => {
-                    const existing = document.getElementById('paypal-sdk-script');
-                    if (existing) existing.remove();
                     const script = document.createElement('script');
                     script.id = 'paypal-sdk-script';
-                    script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=USD&intent=capture`;
+                    script.setAttribute('data-plan', order.paypal_plan_id || '');
+                    script.src = scriptSrc;
                     script.onload = () => resolve();
                     script.onerror = () => reject(new Error('Failed to load PayPal SDK'));
                     document.head.appendChild(script);
@@ -640,14 +653,45 @@
             }
 
             container.innerHTML = '';
-            window.paypal.Buttons({
+            const buttonOptions = {
                 style: {
                     layout: 'vertical',
                     color: 'gold',
                     shape: 'rect',
-                    label: 'pay'
+                    label: isSubscription ? 'subscribe' : 'pay'
                 },
-                createOrder: function (data, actions) {
+                onCancel: function () {
+                    showPaymentStatus(false, 'PayPal checkout cancelled. Please retry to activate your console.');
+                },
+                onError: function (err) {
+                    console.error('PayPal Buttons Error:', err);
+                    showPaymentStatus(false, 'PayPal encountered an error. Please retry or choose another payment method.');
+                }
+            };
+
+            if (isSubscription) {
+                buttonOptions.createSubscription = function (data, actions) {
+                    return actions.subscription.create({
+                        'plan_id': order.paypal_plan_id
+                    });
+                };
+                buttonOptions.onApprove = async function (data, actions) {
+                    try {
+                        await handlePaymentVerification({
+                            gateway: 'paypal',
+                            paypal_subscription_id: data.subscriptionID,
+                            paypal_order_id: data.orderID,
+                            plan_id: order.plan_id,
+                            billing_cycle: order.billing_cycle,
+                            currency: 'USD'
+                        });
+                    } catch (err) {
+                        console.error('PayPal Subscription Approval Error:', err);
+                        showPaymentStatus(false, 'Failed to complete PayPal subscription approval. Please try again.');
+                    }
+                };
+            } else {
+                buttonOptions.createOrder = function (data, actions) {
                     return actions.order.create({
                         purchase_units: [{
                             description: `${order.plan_name} Plan (${order.billing_cycle}) - edvora.chat`,
@@ -657,8 +701,8 @@
                             }
                         }]
                     });
-                },
-                onApprove: async function (data, actions) {
+                };
+                buttonOptions.onApprove = async function (data, actions) {
                     try {
                         const details = await actions.order.capture();
                         await handlePaymentVerification({
@@ -673,15 +717,10 @@
                         console.error('PayPal Capture Error:', captureErr);
                         showPaymentStatus(false, 'PayPal capture failed. Please try again.');
                     }
-                },
-                onCancel: function () {
-                    showPaymentStatus(false, 'PayPal checkout cancelled. Please retry to activate your console.');
-                },
-                onError: function (err) {
-                    console.error('PayPal Buttons Error:', err);
-                    showPaymentStatus(false, 'PayPal encountered an error. Please retry or choose another payment method.');
-                }
-            }).render(container);
+                };
+            }
+
+            window.paypal.Buttons(buttonOptions).render(container);
 
         } catch (err) {
             console.error('PayPal Init Error:', err);

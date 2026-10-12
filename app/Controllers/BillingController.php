@@ -153,9 +153,50 @@ class BillingController
                 ? \App\Controllers\SuperAdminController::decryptKey($activeGw['key_secret_encrypted']) 
                 : Env::get('RAZORPAY_KEY_SECRET', '');
 
+            $rzpPlanId = ($billingCycle === 'yearly') ? ($plan['razorpay_plan_id_yearly'] ?? null) : ($plan['razorpay_plan_id_monthly'] ?? null);
+            $rzpSubscriptionId = null;
             $rzpOrderId = null;
-            // Attempt official Razorpay Orders API call if real credentials configured
-            if (!empty($secret) && !str_starts_with($keyId, 'rzp_test_placeholder') && !str_starts_with($keyId, 'rzp_test_edvora')) {
+
+            // Attempt official Razorpay Subscriptions API call if real credentials and plan configured
+            if (!empty($secret) && !empty($rzpPlanId) && !str_starts_with($keyId, 'rzp_test_placeholder') && !str_starts_with($keyId, 'rzp_test_edvora')) {
+                try {
+                    $ch = curl_init('https://api.razorpay.com/v1/subscriptions');
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($ch, CURLOPT_USERPWD, $keyId . ':' . $secret);
+                    curl_setopt($ch, CURLOPT_POST, true);
+                    curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
+                        'plan_id' => $rzpPlanId,
+                        'total_count' => ($billingCycle === 'yearly' ? 10 : 120),
+                        'quantity' => 1,
+                        'customer_notify' => 1,
+                        'notes' => [
+                            'organization_id' => (string)$orgId,
+                            'plan_id' => (string)$plan['id'],
+                            'billing_cycle' => $billingCycle,
+                            'receipt' => $orderId
+                        ]
+                    ]));
+                    $res = curl_exec($ch);
+                    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                    curl_close($ch);
+
+                    if ($httpCode === 200 || $httpCode === 201) {
+                        $json = json_decode($res, true);
+                        if (!empty($json['id'])) {
+                            $rzpSubscriptionId = $json['id'];
+                        }
+                    } else {
+                        error_log("[BillingController] Razorpay Subscriptions API returned HTTP {$httpCode}: {$res}");
+                    }
+                } catch (Throwable $e) {
+                    error_log('[BillingController] Razorpay Subscriptions API error: ' . $e->getMessage());
+                }
+            }
+
+            // Fallback to Razorpay Orders API if subscription was not created or no subscription plan configured
+            if (empty($rzpSubscriptionId) && !empty($secret) && !str_starts_with($keyId, 'rzp_test_placeholder') && !str_starts_with($keyId, 'rzp_test_edvora')) {
                 try {
                     $ch = curl_init('https://api.razorpay.com/v1/orders');
                     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -182,19 +223,23 @@ class BillingController
                         if (!empty($json['id'])) {
                             $rzpOrderId = $json['id'];
                         }
-                    } else {
-                        error_log("[BillingController] Razorpay Orders API returned HTTP {$httpCode}: {$res}");
                     }
                 } catch (Throwable $e) {
-                    error_log('[BillingController] Razorpay Orders API error: ' . $e->getMessage());
+                    error_log('[BillingController] Razorpay Orders API fallback error: ' . $e->getMessage());
                 }
             }
 
             $payload['razorpay_key_id'] = $keyId;
-            $payload['razorpay_order_id'] = $rzpOrderId; // Only passed if real Razorpay order created
+            $payload['razorpay_plan_id'] = $rzpPlanId;
+            $payload['razorpay_subscription_id'] = $rzpSubscriptionId;
+            $payload['razorpay_order_id'] = $rzpOrderId;
+            $payload['is_recurring'] = !empty($rzpSubscriptionId) || !empty($rzpPlanId);
         } elseif ($gatewayType === 'paypal') {
+            $ppPlanId = ($billingCycle === 'yearly') ? ($plan['paypal_plan_id_yearly'] ?? null) : ($plan['paypal_plan_id_monthly'] ?? null);
             $payload['paypal_client_id'] = $activeGw['key_id'] ?? Env::get('PAYPAL_CLIENT_ID', 'sb');
             $payload['paypal_mode'] = $gatewayMode;
+            $payload['paypal_plan_id'] = $ppPlanId;
+            $payload['is_recurring'] = !empty($ppPlanId);
         } else {
             $payload['gateway_key_id'] = $activeGw['key_id'] ?? '';
         }
@@ -231,14 +276,16 @@ class BillingController
 
         $transactionId = '';
         $razorpayPaymentId = $request->get('razorpay_payment_id') ?: null;
+        $razorpaySubscriptionId = $request->get('razorpay_subscription_id') ?: null;
         $razorpayOrderId = $request->get('razorpay_order_id') ?: null;
         $razorpaySignature = $request->get('razorpay_signature') ?: null;
 
+        $paypalSubscriptionId = $request->get('paypal_subscription_id') ?: null;
         $paypalOrderId = $request->get('paypal_order_id') ?: null;
         $paypalCaptureId = $request->get('paypal_capture_id') ?: null;
 
         if ($gateway === 'razorpay') {
-            $transactionId = $razorpayPaymentId ?: ('PAY_' . bin2hex(random_bytes(8)));
+            $transactionId = $razorpaySubscriptionId ?: ($razorpayPaymentId ?: ('PAY_' . bin2hex(random_bytes(8))));
             
             $stmtGw = $db->prepare("SELECT * FROM payment_gateways WHERE gateway_type = 'razorpay' AND is_active = 1 LIMIT 1");
             $stmtGw->execute();
@@ -247,16 +294,26 @@ class BillingController
                 ? \App\Controllers\SuperAdminController::decryptKey($gw['key_secret_encrypted'])
                 : Env::get('RAZORPAY_KEY_SECRET', 'EdvoraRazorpaySecret2026!');
 
-            // Verify signature if both order_id and signature provided
-            if (!empty($razorpayOrderId) && !empty($razorpaySignature) && !empty($secret)) {
-                $expected = hash_hmac('sha256', $razorpayOrderId . '|' . $razorpayPaymentId, $secret);
-                // Allow fallback in test mode if running simulation
-                if (!hash_equals($expected, $razorpaySignature) && !str_starts_with($secret, 'EdvoraRazorpaySecret') && !str_starts_with($secret, 'placeholder')) {
+            // Verify signature if signature provided
+            if (!empty($razorpaySignature) && !empty($secret)) {
+                $isValid = false;
+                if (!empty($razorpaySubscriptionId) && !empty($razorpayPaymentId)) {
+                    // Razorpay Recurring Subscription Signature: payment_id|subscription_id
+                    $expectedSubSig = hash_hmac('sha256', $razorpayPaymentId . '|' . $razorpaySubscriptionId, $secret);
+                    $isValid = hash_equals($expectedSubSig, $razorpaySignature);
+                }
+                if (!$isValid && !empty($razorpayOrderId) && !empty($razorpayPaymentId)) {
+                    // Razorpay Order Signature: order_id|payment_id
+                    $expectedOrderSig = hash_hmac('sha256', $razorpayOrderId . '|' . $razorpayPaymentId, $secret);
+                    $isValid = hash_equals($expectedOrderSig, $razorpaySignature);
+                }
+
+                if (!$isValid && !str_starts_with($secret, 'EdvoraRazorpaySecret') && !str_starts_with($secret, 'placeholder') && !str_starts_with($gw['key_id'] ?? '', 'rzp_test_placeholder')) {
                     Response::error('Payment signature verification failed.', 400);
                 }
             }
         } elseif ($gateway === 'paypal') {
-            $transactionId = $paypalCaptureId ?: ($paypalOrderId ?: ('PP_CAP_' . bin2hex(random_bytes(8))));
+            $transactionId = $paypalSubscriptionId ?: ($paypalCaptureId ?: ($paypalOrderId ?: ('PP_SUB_' . bin2hex(random_bytes(8)))));
         } else {
             Response::error('Unsupported payment gateway.', 400);
         }
@@ -274,6 +331,8 @@ class BillingController
             $amountFormatted = '₹' . number_format($paise / 100);
         }
 
+        $recordedRzpSubId = $razorpaySubscriptionId ?: $razorpayPaymentId;
+
         try {
             $db->beginTransaction();
 
@@ -282,11 +341,13 @@ class BillingController
                 UPDATE organizations
                 SET subscription_status = 'active',
                     plan_id = :plan_id,
+                    razorpay_subscription_id = :rzp_id,
                     updated_at = NOW()
                 WHERE id = :org_id
             ");
             $stmtOrg->execute([
                 ':plan_id' => $planId,
+                ':rzp_id' => $recordedRzpSubId ?: $paypalSubscriptionId,
                 ':org_id' => $orgId
             ]);
 
@@ -305,6 +366,7 @@ class BillingController
                         status = 'active',
                         payment_gateway = :gateway,
                         razorpay_subscription_id = :rzp_id,
+                        paypal_subscription_id = :pp_sub,
                         paypal_order_id = :pp_order,
                         paypal_capture_id = :pp_cap,
                         currency = :currency,
@@ -318,7 +380,8 @@ class BillingController
                     ':plan_id' => $planId,
                     ':cycle' => $billingCycle,
                     ':gateway' => $gateway,
-                    ':rzp_id' => $razorpayPaymentId,
+                    ':rzp_id' => $recordedRzpSubId,
+                    ':pp_sub' => $paypalSubscriptionId,
                     ':pp_order' => $paypalOrderId,
                     ':pp_cap' => $paypalCaptureId,
                     ':currency' => $currency,
@@ -327,15 +390,16 @@ class BillingController
                 ]);
             } else {
                 $stmtInsertSub = $db->prepare("
-                    INSERT INTO subscriptions (organization_id, plan_id, billing_cycle, status, payment_gateway, razorpay_subscription_id, paypal_order_id, paypal_capture_id, currency, amount_paid, current_period_start, current_period_end)
-                    VALUES (:org_id, :plan_id, :cycle, 'active', :gateway, :rzp_id, :pp_order, :pp_cap, :currency, :amount_paid, NOW(), DATE_ADD(NOW(), INTERVAL {$periodInterval}))
+                    INSERT INTO subscriptions (organization_id, plan_id, billing_cycle, status, payment_gateway, razorpay_subscription_id, paypal_subscription_id, paypal_order_id, paypal_capture_id, currency, amount_paid, current_period_start, current_period_end)
+                    VALUES (:org_id, :plan_id, :cycle, 'active', :gateway, :rzp_id, :pp_sub, :pp_order, :pp_cap, :currency, :amount_paid, NOW(), DATE_ADD(NOW(), INTERVAL {$periodInterval}))
                 ");
                 $stmtInsertSub->execute([
                     ':org_id' => $orgId,
                     ':plan_id' => $planId,
                     ':cycle' => $billingCycle,
                     ':gateway' => $gateway,
-                    ':rzp_id' => $razorpayPaymentId,
+                    ':rzp_id' => $recordedRzpSubId,
+                    ':pp_sub' => $paypalSubscriptionId,
                     ':pp_order' => $paypalOrderId,
                     ':pp_cap' => $paypalCaptureId,
                     ':currency' => $currency,
@@ -433,38 +497,78 @@ class BillingController
         $subEntity = $data['payload']['subscription']['entity'] ?? [];
         $razorpaySubId = $subEntity['id'] ?? '';
 
-        if (empty($event) || empty($razorpaySubId)) {
-            Response::success(null, 'Webhook received (no subscription entity to process)');
+        if (!empty($event) && !empty($razorpaySubId)) {
+            $db = Database::getConnection();
+
+            switch ($event) {
+                case 'subscription.authenticated':
+                case 'subscription.charged':
+                case 'subscription.activated':
+                    $stmt = $db->prepare("
+                        UPDATE subscriptions s
+                        JOIN organizations o ON s.organization_id = o.id
+                        SET s.status = 'active',
+                            o.subscription_status = 'active',
+                            s.current_period_end = CASE
+                                WHEN s.billing_cycle = 'yearly' THEN DATE_ADD(GREATEST(COALESCE(s.current_period_end, NOW()), NOW()), INTERVAL 1 YEAR)
+                                ELSE DATE_ADD(GREATEST(COALESCE(s.current_period_end, NOW()), NOW()), INTERVAL 1 MONTH)
+                            END,
+                            s.updated_at = NOW(),
+                            o.updated_at = NOW()
+                        WHERE s.razorpay_subscription_id = :sub_id
+                    ");
+                    $stmt->execute([':sub_id' => $razorpaySubId]);
+                    break;
+
+                case 'subscription.halted':
+                case 'subscription.cancelled':
+                    $stmt = $db->prepare("
+                        UPDATE subscriptions s
+                        JOIN organizations o ON s.organization_id = o.id
+                        SET s.status = 'cancelled', o.subscription_status = 'cancelled', s.updated_at = NOW(), o.updated_at = NOW()
+                        WHERE s.razorpay_subscription_id = :sub_id
+                    ");
+                    $stmt->execute([':sub_id' => $razorpaySubId]);
+                    break;
+            }
+
+            AuditLogger::log('razorpay_webhook_processed', 'subscription', null, ['event' => $event, 'razorpay_sub_id' => $razorpaySubId]);
         }
 
-        $db = Database::getConnection();
-
-        switch ($event) {
-            case 'subscription.authenticated':
-            case 'subscription.charged':
-            case 'subscription.activated':
-                $stmt = $db->prepare("
-                    UPDATE subscriptions s
-                    JOIN organizations o ON s.organization_id = o.id
-                    SET s.status = 'active', o.subscription_status = 'active', s.updated_at = NOW()
-                    WHERE s.razorpay_subscription_id = :sub_id
-                ");
-                $stmt->execute([':sub_id' => $razorpaySubId]);
-                break;
-
-            case 'subscription.halted':
-            case 'subscription.cancelled':
-                $stmt = $db->prepare("
-                    UPDATE subscriptions s
-                    JOIN organizations o ON s.organization_id = o.id
-                    SET s.status = 'cancelled', o.subscription_status = 'cancelled', s.updated_at = NOW()
-                    WHERE s.razorpay_subscription_id = :sub_id
-                ");
-                $stmt->execute([':sub_id' => $razorpaySubId]);
-                break;
+        // PayPal Webhook Handling
+        $ppEventType = $data['event_type'] ?? '';
+        if (!empty($ppEventType)) {
+            $resource = $data['resource'] ?? [];
+            $ppSubId = $resource['billing_agreement_id'] ?? ($resource['id'] ?? '');
+            if (!empty($ppSubId)) {
+                $db = Database::getConnection();
+                if (in_array($ppEventType, ['PAYMENT.SALE.COMPLETED', 'BILLING.SUBSCRIPTION.ACTIVATED'])) {
+                    $stmt = $db->prepare("
+                        UPDATE subscriptions s
+                        JOIN organizations o ON s.organization_id = o.id
+                        SET s.status = 'active',
+                            o.subscription_status = 'active',
+                            s.current_period_end = CASE
+                                WHEN s.billing_cycle = 'yearly' THEN DATE_ADD(GREATEST(COALESCE(s.current_period_end, NOW()), NOW()), INTERVAL 1 YEAR)
+                                ELSE DATE_ADD(GREATEST(COALESCE(s.current_period_end, NOW()), NOW()), INTERVAL 1 MONTH)
+                            END,
+                            s.updated_at = NOW(),
+                            o.updated_at = NOW()
+                        WHERE s.paypal_subscription_id = :sub_id
+                    ");
+                    $stmt->execute([':sub_id' => $ppSubId]);
+                } elseif (in_array($ppEventType, ['BILLING.SUBSCRIPTION.CANCELLED', 'BILLING.SUBSCRIPTION.SUSPENDED'])) {
+                    $stmt = $db->prepare("
+                        UPDATE subscriptions s
+                        JOIN organizations o ON s.organization_id = o.id
+                        SET s.status = 'cancelled', o.subscription_status = 'cancelled', s.updated_at = NOW(), o.updated_at = NOW()
+                        WHERE s.paypal_subscription_id = :sub_id
+                    ");
+                    $stmt->execute([':sub_id' => $ppSubId]);
+                }
+                AuditLogger::log('paypal_webhook_processed', 'subscription', null, ['event' => $ppEventType, 'paypal_sub_id' => $ppSubId]);
+            }
         }
-
-        AuditLogger::log('razorpay_webhook_processed', 'subscription', null, ['event' => $event, 'razorpay_sub_id' => $razorpaySubId]);
 
         Response::success(null, 'Webhook processed successfully');
     }

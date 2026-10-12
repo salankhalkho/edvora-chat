@@ -1991,8 +1991,88 @@ class Migrations
         } catch (Throwable $e) {
             error_log('[Migrations] payment_gateways table: ' . $e->getMessage());
         }
+
+        // 35. SUBSCRIPTION RECURRING GATEWAY PLAN MAPPING & PLANS SEEDING
+        try {
+            // Check & add PayPal Plan ID columns to plans table
+            $checkPpMonthly = $this->db->query("SHOW COLUMNS FROM plans LIKE 'paypal_plan_id_monthly'");
+            if (!$checkPpMonthly->fetch()) {
+                $this->db->exec("ALTER TABLE plans ADD COLUMN paypal_plan_id_monthly VARCHAR(255) NULL AFTER razorpay_plan_id_yearly, ADD COLUMN paypal_plan_id_yearly VARCHAR(255) NULL AFTER paypal_plan_id_monthly;");
+            }
+
+            // Check & add paypal_subscription_id to subscriptions table
+            $checkPpSub = $this->db->query("SHOW COLUMNS FROM subscriptions LIKE 'paypal_subscription_id'");
+            if (!$checkPpSub->fetch()) {
+                $this->db->exec("ALTER TABLE subscriptions ADD COLUMN paypal_subscription_id VARCHAR(255) NULL AFTER razorpay_subscription_id;");
+            }
+
+            // Seed/Update official Gateway Plan IDs and synchronized prices for Starter, Growth, and Pro
+            $planUpdates = [
+                'Starter' => [
+                    'price_monthly_paise' => 299900,
+                    'price_yearly_paise' => 2987000,
+                    'price_monthly_usd_cents' => 29900,
+                    'price_yearly_usd_cents' => 297800,
+                    'razorpay_plan_id_monthly' => 'plan_TmyioJdeWXW7ue',
+                    'razorpay_plan_id_yearly' => 'plan_TmyyCBtFSYQdx1',
+                    'paypal_plan_id_monthly' => 'P-7CU934531N133570ANLGM26A',
+                    'paypal_plan_id_yearly' => 'P-8DL11775TU1283533NLGM5MA'
+                ],
+                'Growth' => [
+                    'price_monthly_paise' => 499900,
+                    'price_yearly_paise' => 4979000,
+                    'price_monthly_usd_cents' => 69900,
+                    'price_yearly_usd_cents' => 696200,
+                    'razorpay_plan_id_monthly' => 'plan_TmywW1sIo2vXiX',
+                    'razorpay_plan_id_yearly' => 'plan_Tmz1ZrtiyCsnbn',
+                    'paypal_plan_id_monthly' => 'P-0BB12687F21214814NLGM4NQ',
+                    'paypal_plan_id_yearly' => 'P-1VL49593D8340032VNLGM5XI'
+                ],
+                'Pro' => [
+                    'price_monthly_paise' => 999900,
+                    'price_yearly_paise' => 9959000,
+                    'price_monthly_usd_cents' => 210000,
+                    'price_yearly_usd_cents' => 2091600,
+                    'razorpay_plan_id_monthly' => 'plan_TmyxI8nGVZ7vW3',
+                    'razorpay_plan_id_yearly' => 'plan_Tmz2bdlewoFYNP',
+                    'paypal_plan_id_monthly' => 'P-0L686825P59673724NLGM5AA',
+                    'paypal_plan_id_yearly' => 'P-12652134N40192455NLGM6FY'
+                ]
+            ];
+
+            $stmtPlanSync = $this->db->prepare("
+                UPDATE plans SET
+                    price_monthly_paise = :pm_inr,
+                    price_yearly_paise = :py_inr,
+                    price_monthly_usd_cents = :pm_usd,
+                    price_yearly_usd_cents = :py_usd,
+                    razorpay_plan_id_monthly = :rzp_m,
+                    razorpay_plan_id_yearly = :rzp_y,
+                    paypal_plan_id_monthly = :pp_m,
+                    paypal_plan_id_yearly = :pp_y,
+                    updated_at = NOW()
+                WHERE LOWER(name) = LOWER(:pname)
+            ");
+
+            foreach ($planUpdates as $pName => $pData) {
+                $stmtPlanSync->execute([
+                    ':pm_inr' => $pData['price_monthly_paise'],
+                    ':py_inr' => $pData['price_yearly_paise'],
+                    ':pm_usd' => $pData['price_monthly_usd_cents'],
+                    ':py_usd' => $pData['price_yearly_usd_cents'],
+                    ':rzp_m' => $pData['razorpay_plan_id_monthly'],
+                    ':rzp_y' => $pData['razorpay_plan_id_yearly'],
+                    ':pp_m' => $pData['paypal_plan_id_monthly'],
+                    ':pp_y' => $pData['paypal_plan_id_yearly'],
+                    ':pname' => $pName
+                ]);
+            }
+        } catch (Throwable $e) {
+            error_log('[Migrations] subscription plan mapping: ' . $e->getMessage());
+        }
     }
 }
+
 
 
 

@@ -405,7 +405,7 @@ $router->post('/v1/billing/webhook', [BillingController::class, 'webhook']);
 // Public Plans & Pricing API Route
 $router->get('/v1/public/plans', function (Request $req) {
     $db = \App\Config\Database::getConnection();
-    $stmt = $db->query("SELECT id, name, description, badge_text, cta_text, cta_link, price_monthly_paise, price_yearly_paise, price_monthly_usd_cents, price_yearly_usd_cents, is_default, sort_order FROM plans WHERE is_active = 1 ORDER BY sort_order ASC, id ASC");
+    $stmt = $db->query("SELECT id, name, description, badge_text, cta_text, cta_link, price_monthly_paise, price_yearly_paise, price_monthly_usd_cents, price_yearly_usd_cents, razorpay_plan_id_monthly, razorpay_plan_id_yearly, paypal_plan_id_monthly, paypal_plan_id_yearly, is_default, sort_order FROM plans WHERE is_active = 1 ORDER BY sort_order ASC, id ASC");
     $plans = $stmt->fetchAll();
 
     foreach ($plans as &$plan) {

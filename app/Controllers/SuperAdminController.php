@@ -478,9 +478,10 @@ class SuperAdminController
         }
 
         $db = Database::getConnection();
-        $stmtCheck = $db->prepare("SELECT id FROM plans WHERE id = :id");
+        $stmtCheck = $db->prepare("SELECT * FROM plans WHERE id = :id");
         $stmtCheck->execute([':id' => $id]);
-        if (!$stmtCheck->fetch()) {
+        $existingPlan = $stmtCheck->fetch();
+        if (!$existingPlan) {
             Response::error('Plan not found.', 404);
         }
 
@@ -489,19 +490,24 @@ class SuperAdminController
         try {
             $db->beginTransaction();
 
-            $name = trim($data['name'] ?? '');
-            $description = trim($data['description'] ?? '');
-            $priceMonthlyPaise = isset($data['price_monthly_paise']) ? (int)$data['price_monthly_paise'] : 0;
-            $priceYearlyPaise = isset($data['price_yearly_paise']) ? (int)$data['price_yearly_paise'] : 0;
-            $priceMonthlyUsdCents = isset($data['price_monthly_usd_cents']) ? (int)$data['price_monthly_usd_cents'] : 0;
-            $priceYearlyUsdCents = isset($data['price_yearly_usd_cents']) ? (int)$data['price_yearly_usd_cents'] : 0;
-            $isActive = isset($data['is_active']) ? (int)(bool)$data['is_active'] : 1;
-            $isDefault = isset($data['is_default']) ? (int)(bool)$data['is_default'] : 0;
-            $sortOrder = isset($data['sort_order']) ? (int)$data['sort_order'] : 0;
+            $name = trim($data['name'] ?? $existingPlan['name']);
+            $description = trim($data['description'] ?? $existingPlan['description']);
+            $priceMonthlyPaise = isset($data['price_monthly_paise']) ? (int)$data['price_monthly_paise'] : (int)$existingPlan['price_monthly_paise'];
+            $priceYearlyPaise = isset($data['price_yearly_paise']) ? (int)$data['price_yearly_paise'] : (int)$existingPlan['price_yearly_paise'];
+            $priceMonthlyUsdCents = isset($data['price_monthly_usd_cents']) ? (int)$data['price_monthly_usd_cents'] : (int)$existingPlan['price_monthly_usd_cents'];
+            $priceYearlyUsdCents = isset($data['price_yearly_usd_cents']) ? (int)$data['price_yearly_usd_cents'] : (int)$existingPlan['price_yearly_usd_cents'];
+            $isActive = isset($data['is_active']) ? (int)(bool)$data['is_active'] : (int)$existingPlan['is_active'];
+            $isDefault = isset($data['is_default']) ? (int)(bool)$data['is_default'] : (int)$existingPlan['is_default'];
+            $sortOrder = isset($data['sort_order']) ? (int)$data['sort_order'] : (int)$existingPlan['sort_order'];
 
-            $badgeText = isset($data['badge_text']) ? trim($data['badge_text']) : null;
-            $ctaText = isset($data['cta_text']) ? trim($data['cta_text']) : null;
-            $ctaLink = isset($data['cta_link']) ? trim($data['cta_link']) : null;
+            $badgeText = isset($data['badge_text']) ? trim($data['badge_text']) : $existingPlan['badge_text'];
+            $ctaText = isset($data['cta_text']) ? trim($data['cta_text']) : $existingPlan['cta_text'];
+            $ctaLink = isset($data['cta_link']) ? trim($data['cta_link']) : $existingPlan['cta_link'];
+
+            $razorpayPlanIdMonthly = array_key_exists('razorpay_plan_id_monthly', $data) ? trim((string)$data['razorpay_plan_id_monthly']) : ($existingPlan['razorpay_plan_id_monthly'] ?? null);
+            $razorpayPlanIdYearly = array_key_exists('razorpay_plan_id_yearly', $data) ? trim((string)$data['razorpay_plan_id_yearly']) : ($existingPlan['razorpay_plan_id_yearly'] ?? null);
+            $paypalPlanIdMonthly = array_key_exists('paypal_plan_id_monthly', $data) ? trim((string)$data['paypal_plan_id_monthly']) : ($existingPlan['paypal_plan_id_monthly'] ?? null);
+            $paypalPlanIdYearly = array_key_exists('paypal_plan_id_yearly', $data) ? trim((string)$data['paypal_plan_id_yearly']) : ($existingPlan['paypal_plan_id_yearly'] ?? null);
 
             if ($isDefault === 1) {
                 $stmtUnsetDefault = $db->prepare("UPDATE plans SET is_default = 0 WHERE id != :id");
@@ -519,6 +525,10 @@ class SuperAdminController
                     price_yearly_paise = :py_inr,
                     price_monthly_usd_cents = :pm_usd,
                     price_yearly_usd_cents = :py_usd,
+                    razorpay_plan_id_monthly = :rzp_m,
+                    razorpay_plan_id_yearly = :rzp_y,
+                    paypal_plan_id_monthly = :pp_m,
+                    paypal_plan_id_yearly = :pp_y,
                     is_active = :active,
                     is_default = :def,
                     sort_order = :sort,
@@ -535,6 +545,10 @@ class SuperAdminController
                 ':py_inr' => $priceYearlyPaise,
                 ':pm_usd' => $priceMonthlyUsdCents,
                 ':py_usd' => $priceYearlyUsdCents,
+                ':rzp_m' => !empty($razorpayPlanIdMonthly) ? $razorpayPlanIdMonthly : null,
+                ':rzp_y' => !empty($razorpayPlanIdYearly) ? $razorpayPlanIdYearly : null,
+                ':pp_m' => !empty($paypalPlanIdMonthly) ? $paypalPlanIdMonthly : null,
+                ':pp_y' => !empty($paypalPlanIdYearly) ? $paypalPlanIdYearly : null,
                 ':active' => $isActive,
                 ':def' => $isDefault,
                 ':sort' => $sortOrder,

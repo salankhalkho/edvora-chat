@@ -508,8 +508,91 @@
                     </div>
                 </div>
 
+                <!-- THIRD PANEL: Institutional Recurring Plans & Gateway IDs Mapping -->
+                <div class="brand-panel">
+                    <div class="brand-panel-header">
+                        <div class="panel-heading">
+                            <span>🏷️</span> Institutional Recurring Plan IDs (Razorpay &amp; PayPal)
+                        </div>
+                        <button onclick="loadPlanMappings()" class="brand-btn brand-btn-secondary brand-btn-sm">
+                            🔄 Refresh Plans
+                        </button>
+                    </div>
+                    <p style="font-size: 11.5px; color: var(--brand-text-muted); margin-bottom: 14px;">
+                        These IDs map Edvora subscription plans directly to recurring e-Mandates on Razorpay and billing agreements on PayPal.
+                    </p>
+                    <div style="overflow-x: auto;">
+                        <table class="brand-table">
+                            <thead>
+                                <tr>
+                                    <th>Plan Name</th>
+                                    <th>India Pricing</th>
+                                    <th>Razorpay Plan IDs</th>
+                                    <th>Global Pricing</th>
+                                    <th>PayPal Plan IDs</th>
+                                    <th style="text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="plansMappingTableBody">
+                                <tr><td colspan="6" style="text-align: center; color: var(--brand-text-muted);">Loading plan mappings...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div>
         </main>
+    </div>
+
+    <!-- Edit Plan Mapping Modal -->
+    <div id="planMappingModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: #111827; border: 1px solid #1f2937; border-radius: 8px; width: 560px; max-width: 95vw; padding: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px;">
+                <div style="font-size: 13px; font-weight: 700; color: #fff;" id="modalPlanTitle">Edit Recurring Gateway Plan IDs</div>
+                <button type="button" onclick="closePlanMappingModal()" style="background: none; border: none; color: #9ca3af; font-size: 18px; cursor: pointer;">&times;</button>
+            </div>
+            <form onsubmit="savePlanMapping(event)">
+                <input type="hidden" id="editPlanId" value="" />
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label class="form-label">Razorpay Monthly Plan ID (India)</label>
+                        <input type="text" id="editRzpMonthly" class="form-input" placeholder="e.g. plan_TmyioJdeWXW7ue" style="font-family: 'JetBrains Mono', monospace;" />
+                    </div>
+                    <div class="form-group full-width">
+                        <label class="form-label">Razorpay Yearly Plan ID (India)</label>
+                        <input type="text" id="editRzpYearly" class="form-input" placeholder="e.g. plan_TmyyCBtFSYQdx1" style="font-family: 'JetBrains Mono', monospace;" />
+                    </div>
+                    <div class="form-group full-width">
+                        <label class="form-label">PayPal Monthly Plan ID (USD)</label>
+                        <input type="text" id="editPpMonthly" class="form-input" placeholder="e.g. P-7CU934531N133570ANLGM26A" style="font-family: 'JetBrains Mono', monospace;" />
+                    </div>
+                    <div class="form-group full-width">
+                        <label class="form-label">PayPal Yearly Plan ID (USD)</label>
+                        <input type="text" id="editPpYearly" class="form-input" placeholder="e.g. P-8DL11775TU1283533NLGM5MA" style="font-family: 'JetBrains Mono', monospace;" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Monthly Price (INR ₹)</label>
+                        <input type="number" id="editPriceInrM" class="form-input" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Yearly Price (INR ₹)</label>
+                        <input type="number" id="editPriceInrY" class="form-input" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Monthly Price (USD $)</label>
+                        <input type="number" id="editPriceUsdM" class="form-input" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Yearly Price (USD $)</label>
+                        <input type="number" id="editPriceUsdY" class="form-input" required />
+                    </div>
+                    <div class="form-group full-width" style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px;">
+                        <button type="button" onclick="closePlanMappingModal()" class="brand-btn brand-btn-secondary">Cancel</button>
+                        <button type="submit" class="brand-btn brand-btn-primary" id="btnSavePlanMapping">💾 Save Plan IDs</button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script>
@@ -838,15 +921,139 @@
             }
         }
 
-        function handleLogout() {
-            localStorage.removeItem('edvora_super_token');
-            localStorage.removeItem('edvora_super_refresh_token');
-            window.location.href = '/superadmin#login';
+        let cachedPlanMappings = [];
+
+        async function loadPlanMappings() {
+            try {
+                const tbody = document.getElementById('plansMappingTableBody');
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--brand-text-muted);">Fetching recurring plan mappings...</td></tr>';
+
+                const res = await fetch('/v1/public/plans');
+                const json = await res.json();
+                if (json.status !== 'success' || !json.data) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #f87171;">Failed to load plans.</td></tr>';
+                    return;
+                }
+
+                cachedPlanMappings = json.data;
+                tbody.innerHTML = cachedPlanMappings.map(p => {
+                    const inrM = Math.round((p.price_monthly_paise || 0) / 100).toLocaleString('en-IN');
+                    const inrY = Math.round((p.price_yearly_paise || 0) / 100).toLocaleString('en-IN');
+                    const usdM = Math.round((p.price_monthly_usd_cents || 0) / 100).toLocaleString('en-US');
+                    const usdY = Math.round((p.price_yearly_usd_cents || 0) / 100).toLocaleString('en-US');
+
+                    const rzpM = p.razorpay_plan_id_monthly ? `<code style="color: #34d399; font-size: 11px;">${escapeHtml(p.razorpay_plan_id_monthly)}</code>` : '<span style="color:#6b7280; font-size: 10px;">None</span>';
+                    const rzpY = p.razorpay_plan_id_yearly ? `<code style="color: #34d399; font-size: 11px;">${escapeHtml(p.razorpay_plan_id_yearly)}</code>` : '<span style="color:#6b7280; font-size: 10px;">None</span>';
+
+                    const ppM = p.paypal_plan_id_monthly ? `<code style="color: #38bdf8; font-size: 11px;">${escapeHtml(p.paypal_plan_id_monthly)}</code>` : '<span style="color:#6b7280; font-size: 10px;">None</span>';
+                    const ppY = p.paypal_plan_id_yearly ? `<code style="color: #38bdf8; font-size: 11px;">${escapeHtml(p.paypal_plan_id_yearly)}</code>` : '<span style="color:#6b7280; font-size: 10px;">None</span>';
+
+                    return `
+                        <tr>
+                            <td>
+                                <strong style="font-size: 13px; color: #fff;">${escapeHtml(p.name)}</strong>
+                                <div style="font-size: 10px; color: var(--brand-text-muted);">ID: ${p.id}</div>
+                            </td>
+                            <td>
+                                <div><strong style="color: #34d399;">₹${inrM}</strong><span style="font-size:10px; color: var(--brand-text-muted);">/mo</span></div>
+                                <div style="font-size: 11px; color: #a7f3d0;">₹${inrY}<span style="font-size:10px; color: var(--brand-text-muted);">/yr</span></div>
+                            </td>
+                            <td>
+                                <div><span style="font-size: 10px; color: var(--brand-text-muted);">Monthly:</span> ${rzpM}</div>
+                                <div style="margin-top: 2px;"><span style="font-size: 10px; color: var(--brand-text-muted);">Yearly:</span> ${rzpY}</div>
+                            </td>
+                            <td>
+                                <div><strong style="color: #38bdf8;">$${usdM}</strong><span style="font-size:10px; color: var(--brand-text-muted);">/mo</span></div>
+                                <div style="font-size: 11px; color: #bae6fd;">$${usdY}<span style="font-size:10px; color: var(--brand-text-muted);">/yr</span></div>
+                            </td>
+                            <td>
+                                <div><span style="font-size: 10px; color: var(--brand-text-muted);">Monthly:</span> ${ppM}</div>
+                                <div style="margin-top: 2px;"><span style="font-size: 10px; color: var(--brand-text-muted);">Yearly:</span> ${ppY}</div>
+                            </td>
+                            <td style="text-align: right;">
+                                <button type="button" onclick="openEditPlanMapping(${p.id})" class="brand-btn brand-btn-secondary brand-btn-sm">
+                                    ✏️ Edit IDs
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('plansMappingTableBody').innerHTML = '<tr><td colspan="6" style="text-align: center; color: #f87171;">Error loading plan mappings.</td></tr>';
+            }
+        }
+
+        function openEditPlanMapping(id) {
+            const p = cachedPlanMappings.find(item => Number(item.id) === Number(id));
+            if (!p) return;
+
+            document.getElementById('editPlanId').value = p.id;
+            document.getElementById('modalPlanTitle').innerText = `Edit Recurring Plan IDs: ${p.name}`;
+            document.getElementById('editRzpMonthly').value = p.razorpay_plan_id_monthly || '';
+            document.getElementById('editRzpYearly').value = p.razorpay_plan_id_yearly || '';
+            document.getElementById('editPpMonthly').value = p.paypal_plan_id_monthly || '';
+            document.getElementById('editPpYearly').value = p.paypal_plan_id_yearly || '';
+
+            document.getElementById('editPriceInrM').value = Math.round((p.price_monthly_paise || 0) / 100);
+            document.getElementById('editPriceInrY').value = Math.round((p.price_yearly_paise || 0) / 100);
+            document.getElementById('editPriceUsdM').value = Math.round((p.price_monthly_usd_cents || 0) / 100);
+            document.getElementById('editPriceUsdY').value = Math.round((p.price_yearly_usd_cents || 0) / 100);
+
+            const modal = document.getElementById('planMappingModal');
+            modal.style.display = 'flex';
+        }
+
+        function closePlanMappingModal() {
+            document.getElementById('planMappingModal').style.display = 'none';
+        }
+
+        async function savePlanMapping(e) {
+            e.preventDefault();
+            const id = document.getElementById('editPlanId').value;
+            const btn = document.getElementById('btnSavePlanMapping');
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
+
+            const payload = {
+                razorpay_plan_id_monthly: document.getElementById('editRzpMonthly').value.trim(),
+                razorpay_plan_id_yearly: document.getElementById('editRzpYearly').value.trim(),
+                paypal_plan_id_monthly: document.getElementById('editPpMonthly').value.trim(),
+                paypal_plan_id_yearly: document.getElementById('editPpYearly').value.trim(),
+                price_monthly_paise: Math.round(Number(document.getElementById('editPriceInrM').value) * 100),
+                price_yearly_paise: Math.round(Number(document.getElementById('editPriceInrY').value) * 100),
+                price_monthly_usd_cents: Math.round(Number(document.getElementById('editPriceUsdM').value) * 100),
+                price_yearly_usd_cents: Math.round(Number(document.getElementById('editPriceUsdY').value) * 100)
+            };
+
+            try {
+                const res = await fetch(`/v1/superadmin/plans/${id}`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(payload)
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showBanner('Plan recurring IDs updated successfully!');
+                    closePlanMappingModal();
+                    await loadPlanMappings();
+                } else {
+                    showBanner(json.message || 'Error updating plan', true);
+                }
+            } catch (err) {
+                console.error(err);
+                showBanner('Network error updating plan IDs.', true);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = '💾 Save Plan IDs';
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             resetGatewayForm();
             loadGateways();
+            loadPlanMappings();
         });
     </script>
 </body>
