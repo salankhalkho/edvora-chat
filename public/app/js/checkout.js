@@ -315,6 +315,18 @@
     window.switchAuthView = switchAuthView;
 
     /**
+     * Route an organization with pending payment to either #select-plan (default) or #checkout
+     */
+    function routePendingSubscription(orgData) {
+        const hash = (window.location.hash || '').split('?')[0].toLowerCase();
+        if (hash === '#select-plan' || !state.hasPreselectedPlan) {
+            switchAuthView('select-plan');
+        } else {
+            switchAuthView('checkout');
+        }
+    }
+
+    /**
      * Render Plan Selection Cards (Scenario 2 Step 2)
      */
     function renderPlanCardsUI() {
@@ -703,11 +715,13 @@
     window.edvoraCheckout = {
         init: initCheckoutParameters,
         switchView: switchAuthView,
+        routePendingSubscription: routePendingSubscription,
         selectPlan: function (planName) {
             const found = Object.values(PLAN_PRICING).find(p => p.name.toLowerCase() === (planName || '').toLowerCase());
             if (found) {
                 state.plan = found.name;
                 state.planId = found.id;
+                state.hasPreselectedPlan = true;
                 switchAuthView('checkout');
             }
         },

@@ -8588,11 +8588,7 @@ echo $response['reply'];
                             chkState.planId = data.data.plan_id;
                         }
 
-                        if (data.data.plan_name) {
-                            window.edvoraCheckout.switchView('checkout');
-                        } else {
-                            window.edvoraCheckout.switchView('select-plan');
-                        }
+                        window.edvoraCheckout.routePendingSubscription(data.data.organization || data.data);
 
                         showToast('Commercial subscription payment required. Please complete checkout to enter console.', 'warning');
                         return;
@@ -11219,11 +11215,7 @@ echo $response['reply'];
                     chkState.userName = user.name;
                     if (org.plan_name) chkState.plan = org.plan_name;
 
-                    if (org.plan_name) {
-                        window.edvoraCheckout.switchView('checkout');
-                    } else {
-                        window.edvoraCheckout.switchView('select-plan');
-                    }
+                    window.edvoraCheckout.routePendingSubscription(org);
                     showToast('Commercial subscription payment required to enter console.', 'warning');
                     return;
                 }
