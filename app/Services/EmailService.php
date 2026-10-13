@@ -702,4 +702,265 @@ HTML;
 
         return self::sendMail($toEmail, $subject, $html, true);
     }
+
+    /**
+     * Send warm welcome email immediately after account registration (before payment)
+     */
+    public static function sendSignupWelcomeEmail(
+        string $toEmail,
+        string $recipientName,
+        string $institutionName,
+        string $planName = 'Starter',
+        string $billingCycle = 'monthly',
+        string $checkoutUrl = 'https://edvora.chat/app/#checkout'
+    ): bool {
+        if (empty($toEmail) || !filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+
+        $cleanName = trim($recipientName);
+        $displayName = !empty($cleanName) ? htmlspecialchars($cleanName) : 'there';
+        $institutionNameEsc = htmlspecialchars(trim($institutionName));
+        $planNameEsc = htmlspecialchars(ucfirst(trim($planName)));
+        $billingCycleEsc = htmlspecialchars(strtolower(trim($billingCycle)) === 'yearly' ? 'Yearly' : 'Monthly');
+        $toEmailEsc = htmlspecialchars(trim($toEmail));
+        $checkoutUrlEsc = htmlspecialchars(trim($checkoutUrl));
+
+        $subject = "Welcome to Edvora! Let's get {$institutionName} ready ✨";
+
+        $html = <<<HTML
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{$subject}</title>
+</head>
+<body style="margin: 0; padding: 28px 12px; background-color: #F1F7F4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; line-height: 1.6;">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #DCE8E2; overflow: hidden; box-shadow: 0 4px 24px rgba(6, 61, 59, 0.06);">
+    
+    <!-- Top Brand Header -->
+    <div style="background: #063D3B; padding: 32px 32px 28px 32px; text-align: left;">
+      <div style="display: inline-block; font-size: 11px; font-weight: 700; color: #063D3B; background: #C8FF63; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px;">
+        Account Created &bull; Next: Activate Console
+      </div>
+      <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 0 0 6px 0; letter-spacing: -0.02em;">
+        Welcome to Edvora! ✨
+      </h1>
+      <p style="color: #A3D4BE; font-size: 14px; margin: 0;">
+        {$institutionNameEsc} &bull; AI Admissions Assistant
+      </p>
+    </div>
+
+    <!-- Main Content Body -->
+    <div style="padding: 32px;">
+      <p style="font-size: 15.5px; color: #063D3B; font-weight: 600; margin-top: 0;">
+        Hi {$displayName},
+      </p>
+
+      <p style="font-size: 14.5px; color: #334155; margin-bottom: 16px;">
+        Welcome to Edvora! We're glad to have you and <strong>{$institutionNameEsc}</strong> on board.
+      </p>
+
+      <p style="font-size: 14.5px; color: #334155; margin-bottom: 20px; line-height: 1.6;">
+        You've taken the first step towards making it easier for prospective students to discover your programs, get answers to their admissions questions, and connect with your team.
+      </p>
+
+      <p style="font-size: 15px; font-weight: 700; color: #063D3B; margin-bottom: 8px;">
+        Let's get your admissions assistant ready.
+      </p>
+
+      <p style="font-size: 14.5px; color: #475569; margin-bottom: 24px;">
+        There's just one step left before you can activate your Edvora account: completing your subscription.
+      </p>
+
+      <!-- Primary CTA Button -->
+      <div style="text-align: center; margin: 28px 0;">
+        <a href="{$checkoutUrlEsc}" style="display: inline-block; background: #063D3B; color: #ffffff; font-size: 15px; font-weight: 700; padding: 14px 34px; border-radius: 8px; text-decoration: none; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.2);">
+          Complete Your Subscription &rarr;
+        </a>
+      </div>
+
+      <!-- Selected Details Box -->
+      <div style="background: #F8FBF9; border: 1.5px solid #DCE8E2; border-radius: 12px; padding: 20px 22px; margin: 26px 0;">
+        <div style="font-size: 13px; font-weight: 700; color: #063D3B; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.04em;">
+          Here's what you've selected:
+        </div>
+        <div style="font-size: 13.5px; color: #334155; margin-bottom: 6px;">
+          <span style="color: #64748b;">Institution:</span> <strong>{$institutionNameEsc}</strong>
+        </div>
+        <div style="font-size: 13.5px; color: #334155; margin-bottom: 6px;">
+          <span style="color: #64748b;">Plan:</span> <strong>{$planNameEsc} Plan ({$billingCycleEsc})</strong>
+        </div>
+        <div style="font-size: 13.5px; color: #334155;">
+          <span style="color: #64748b;">Login email:</span> <strong>{$toEmailEsc}</strong>
+        </div>
+      </div>
+
+      <p style="font-size: 14px; color: #475569; margin-bottom: 18px; line-height: 1.6;">
+        Once your subscription is active, you can start setting up your AI admissions assistant to answer student questions and help turn website visitors into prospective applicants.
+      </p>
+
+      <p style="font-size: 14px; color: #475569; margin-bottom: 24px; line-height: 1.6;">
+        And don't worry &mdash; if you have any questions along the way, simply reply to this email. We're happy to help.
+      </p>
+
+      <p style="font-size: 14px; color: #063D3B; font-weight: 600; margin-bottom: 24px;">
+        Looking forward to helping {$institutionNameEsc} welcome more prospective students!
+      </p>
+
+      <p style="font-size: 14px; color: #063D3B; margin-bottom: 0;">
+        Warm regards,<br>
+        <strong>Team Edvora</strong><br>
+        <a href="https://edvora.chat" style="color: #047857; text-decoration: none;">https://edvora.chat</a>
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #F8FBF9; padding: 20px 32px; border-top: 1px solid #DCE8E2; text-align: center;">
+      <p style="font-size: 11.5px; color: #94a3b8; margin: 0;">
+        &copy; 2026 edvora.chat &bull; AI-Powered Admissions Assistant for Higher Education &bull; FERPA & SOC2 Compliant
+      </p>
+    </div>
+  </div>
+</body>
+</html>
+HTML;
+
+        return self::sendMail($toEmail, $subject, $html, true);
+    }
+
+    /**
+     * Send friendly follow-up payment reminder email (~24 hours later if subscription pending)
+     */
+    public static function sendPaymentReminderEmail(
+        string $toEmail,
+        string $recipientName,
+        string $institutionName,
+        string $planName = 'Starter',
+        string $billingCycle = 'monthly',
+        string $checkoutUrl = 'https://edvora.chat/app/#checkout'
+    ): bool {
+        if (empty($toEmail) || !filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+
+        $cleanName = trim($recipientName);
+        $displayName = !empty($cleanName) ? htmlspecialchars($cleanName) : 'there';
+        $institutionNameEsc = htmlspecialchars(trim($institutionName));
+        $planNameEsc = htmlspecialchars(ucfirst(trim($planName)));
+        $toEmailEsc = htmlspecialchars(trim($toEmail));
+        $checkoutUrlEsc = htmlspecialchars(trim($checkoutUrl));
+
+        $subject = "Let's get {$institutionName} ready for students";
+
+        $html = <<<HTML
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{$subject}</title>
+</head>
+<body style="margin: 0; padding: 28px 12px; background-color: #F1F7F4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; line-height: 1.6;">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #DCE8E2; overflow: hidden; box-shadow: 0 4px 24px rgba(6, 61, 59, 0.06);">
+    
+    <!-- Top Brand Header -->
+    <div style="background: #063D3B; padding: 32px 32px 28px 32px; text-align: left;">
+      <div style="display: inline-block; font-size: 11px; font-weight: 700; color: #063D3B; background: #C8FF63; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px;">
+        Checking In &bull; One Step Away
+      </div>
+      <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 0 0 6px 0; letter-spacing: -0.02em;">
+        Let's get {$institutionNameEsc} ready for students
+      </h1>
+      <p style="color: #A3D4BE; font-size: 14px; margin: 0;">
+        Edvora AI Admissions Assistant
+      </p>
+    </div>
+
+    <!-- Main Content Body -->
+    <div style="padding: 32px;">
+      <p style="font-size: 15.5px; color: #063D3B; font-weight: 600; margin-top: 0;">
+        Hi {$displayName},
+      </p>
+
+      <p style="font-size: 14.5px; color: #334155; margin-bottom: 16px;">
+        Just checking in! You recently created an Edvora account for <strong>{$institutionNameEsc}</strong>, and we wanted to help you take the next step.
+      </p>
+
+      <p style="font-size: 14.5px; color: #334155; margin-bottom: 22px; line-height: 1.6;">
+        Your account is all set up, but your subscription is still pending. Once you complete it, you'll be able to activate your AI admissions assistant and start preparing it for your prospective students.
+      </p>
+
+      <!-- Key Benefits List -->
+      <div style="background: #F8FBF9; border: 1.5px solid #DCE8E2; border-radius: 12px; padding: 22px 24px; margin: 24px 0;">
+        <div style="font-size: 14px; font-weight: 700; color: #063D3B; margin-bottom: 14px;">
+          With Edvora, you can:
+        </div>
+
+        <div style="margin-bottom: 14px; display: flex; align-items: flex-start;">
+          <span style="color: #047857; font-weight: bold; font-size: 16px; margin-right: 10px; line-height: 1.4;">&bull;</span>
+          <div style="font-size: 13.5px; color: #334155; line-height: 1.5;">
+            <strong>Answer student questions 24/7</strong> about your programs, fees, eligibility, and admissions process.
+          </div>
+        </div>
+
+        <div style="margin-bottom: 14px; display: flex; align-items: flex-start;">
+          <span style="color: #047857; font-weight: bold; font-size: 16px; margin-right: 10px; line-height: 1.4;">&bull;</span>
+          <div style="font-size: 13.5px; color: #334155; line-height: 1.5;">
+            <strong>Capture and qualify student leads</strong> while prospective students explore your website.
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: flex-start;">
+          <span style="color: #047857; font-weight: bold; font-size: 16px; margin-right: 10px; line-height: 1.4;">&bull;</span>
+          <div style="font-size: 13.5px; color: #334155; line-height: 1.5;">
+            <strong>Connect interested students with your team</strong> through counselor callbacks, appointment bookings, and campus visits.
+          </div>
+        </div>
+      </div>
+
+      <p style="font-size: 14px; color: #475569; margin-bottom: 24px; line-height: 1.6;">
+        You don't have to figure everything out on your own. We're here to help you get started.
+      </p>
+
+      <!-- Primary CTA Button -->
+      <div style="text-align: center; margin: 28px 0;">
+        <a href="{$checkoutUrlEsc}" style="display: inline-block; background: #063D3B; color: #ffffff; font-size: 15px; font-weight: 700; padding: 14px 34px; border-radius: 8px; text-decoration: none; box-shadow: 0 2px 8px rgba(6, 61, 59, 0.2);">
+          Activate Your Edvora Account &rarr;
+        </a>
+      </div>
+
+      <p style="font-size: 13.5px; color: #475569; margin-bottom: 20px; line-height: 1.6;">
+        Your selected plan is saved, so you can simply log in using <strong>{$toEmailEsc}</strong> and complete your subscription.
+      </p>
+
+      <p style="font-size: 13.5px; color: #475569; margin-bottom: 24px; line-height: 1.6;">
+        If something is holding you back &mdash; whether it's a question about the plans, setup, or how Edvora would work for {$institutionNameEsc} &mdash; just hit reply. We'd be happy to help.
+      </p>
+
+      <p style="font-size: 14px; color: #063D3B; font-weight: 600; margin-bottom: 24px;">
+        Hope to see you and {$institutionNameEsc} get started soon!
+      </p>
+
+      <p style="font-size: 14px; color: #063D3B; margin-bottom: 0;">
+        Warm regards,<br>
+        <strong>Team Edvora</strong><br>
+        <a href="https://edvora.chat" style="color: #047857; text-decoration: none;">https://edvora.chat</a>
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #F8FBF9; padding: 20px 32px; border-top: 1px solid #DCE8E2; text-align: center;">
+      <p style="font-size: 11.5px; color: #94a3b8; margin: 0;">
+        &copy; 2026 edvora.chat &bull; AI-Powered Admissions Assistant for Higher Education &bull; FERPA & SOC2 Compliant
+      </p>
+    </div>
+  </div>
+</body>
+</html>
+HTML;
+
+        return self::sendMail($toEmail, $subject, $html, true);
+    }
 }

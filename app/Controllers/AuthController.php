@@ -208,6 +208,35 @@ class AuthController
             $GLOBALS['auth_user'] = $accessTokenPayload;
             AuditLogger::log('signup_success', 'user', $userId, ['organization_name' => $collegeName]);
 
+            // Queue Welcome Email (immediate) & Friendly Payment Reminder (~24 hours later)
+            try {
+                $emailPayload = json_encode([
+                    'user_id' => $userId,
+                    'organization_id' => $orgId,
+                    'user_name' => trim($data['name']),
+                    'user_email' => $email,
+                    'institution_name' => $collegeName,
+                    'plan_name' => $planName,
+                    'billing_cycle' => $billingCycle
+                ]);
+
+                // 1. Immediate Signup Welcome Email
+                $stmtJobWelcome = $db->prepare("
+                    INSERT INTO jobs (type, payload, status, run_at, created_at)
+                    VALUES ('send_signup_welcome_email', :payload, 'pending', NOW(), NOW())
+                ");
+                $stmtJobWelcome->execute([':payload' => $emailPayload]);
+
+                // 2. Friendly Payment Reminder in 24 hours (sent only if subscription still pending)
+                $stmtJobReminder = $db->prepare("
+                    INSERT INTO jobs (type, payload, status, run_at, created_at)
+                    VALUES ('send_payment_reminder_email', :payload, 'pending', DATE_ADD(NOW(), INTERVAL 24 HOUR), NOW())
+                ");
+                $stmtJobReminder->execute([':payload' => $emailPayload]);
+            } catch (Throwable $jobErr) {
+                error_log("[AuthController] Failed to queue welcome/reminder email jobs: " . $jobErr->getMessage());
+            }
+
             Response::success([
                 'access_token' => $accessToken,
                 'refresh_token' => $refreshToken,

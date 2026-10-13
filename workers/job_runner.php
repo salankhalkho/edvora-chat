@@ -319,6 +319,54 @@ while (true) {
                     ");
 
                     echo "[" . date('Y-m-d H:i:s') . "] Completed evaluate_content_health for org: " . ($orgId ?: 'ALL') . "\n";
+
+                } elseif ($type === 'send_signup_welcome_email') {
+                    $userEmail       = $payload['user_email'] ?? '';
+                    $userName        = $payload['user_name'] ?? '';
+                    $institutionName = $payload['institution_name'] ?? '';
+                    $planName        = $payload['plan_name'] ?? 'Starter';
+                    $billingCycle    = $payload['billing_cycle'] ?? 'monthly';
+
+                    if (!empty($userEmail)) {
+                        \App\Services\EmailService::sendSignupWelcomeEmail(
+                            $userEmail,
+                            $userName,
+                            $institutionName,
+                            $planName,
+                            $billingCycle
+                        );
+                        echo "[" . date('Y-m-d H:i:s') . "] send_signup_welcome_email delivered to {$userEmail} for {$institutionName}.\n";
+                    }
+
+                } elseif ($type === 'send_payment_reminder_email') {
+                    $orgId           = (int)($payload['organization_id'] ?? 0);
+                    $userEmail       = $payload['user_email'] ?? '';
+                    $userName        = $payload['user_name'] ?? '';
+                    $institutionName = $payload['institution_name'] ?? '';
+                    $planName        = $payload['plan_name'] ?? 'Starter';
+                    $billingCycle    = $payload['billing_cycle'] ?? 'monthly';
+
+                    // Verify if the organization's subscription is still pending payment
+                    $stmtSub = $db->prepare("
+                        SELECT status FROM subscriptions
+                        WHERE organization_id = :org_id
+                        ORDER BY id DESC LIMIT 1
+                    ");
+                    $stmtSub->execute([':org_id' => $orgId]);
+                    $sub = $stmtSub->fetch(\PDO::FETCH_ASSOC);
+
+                    if ($sub && in_array($sub['status'], ['active', 'trialing'])) {
+                        echo "[" . date('Y-m-d H:i:s') . "] Org #{$orgId} ({$institutionName}) already active ({$sub['status']}), skipping payment reminder.\n";
+                    } elseif (!empty($userEmail)) {
+                        \App\Services\EmailService::sendPaymentReminderEmail(
+                            $userEmail,
+                            $userName,
+                            $institutionName,
+                            $planName,
+                            $billingCycle
+                        );
+                        echo "[" . date('Y-m-d H:i:s') . "] send_payment_reminder_email delivered to {$userEmail} for {$institutionName}.\n";
+                    }
                 }
 
                 // Mark job as done
