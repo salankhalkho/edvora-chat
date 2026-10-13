@@ -2921,7 +2921,7 @@
     </style>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="js/tenant-localization.js?v=20261002"></script>
-    <script src="js/checkout.js?v=20261012"></script>
+    <script src="js/checkout.js?v=20261013c"></script>
 </head>
 <body>
 
@@ -8580,6 +8580,11 @@ echo $response['reply'];
                         chkState.orgName = data.data.organization?.name || '';
                         chkState.userEmail = data.data.user?.email || email;
                         chkState.userName = data.data.user?.name || '';
+                        try {
+                            localStorage.setItem('edvora_user_email', chkState.userEmail);
+                            localStorage.setItem('edvora_user_name', chkState.userName);
+                            localStorage.setItem('edvora_org_name', chkState.orgName);
+                        } catch (_) {}
                         if (data.data.plan_name) {
                             chkState.plan = data.data.plan_name;
                             chkState.planId = data.data.plan_id;
@@ -8669,6 +8674,11 @@ echo $response['reply'];
                     chkState.orgName = data.data.organization?.name || collegeNameVal;
                     chkState.userEmail = document.getElementById('signupEmail').value.trim();
                     chkState.userName = document.getElementById('signupName').value.trim();
+                    try {
+                        localStorage.setItem('edvora_user_email', chkState.userEmail);
+                        localStorage.setItem('edvora_user_name', chkState.userName);
+                        localStorage.setItem('edvora_org_name', chkState.orgName);
+                    } catch (_) {}
 
                     if (data.data.plan_name) {
                         chkState.plan = data.data.plan_name;
@@ -8681,9 +8691,12 @@ echo $response['reply'];
                     if (data.data.has_preselected_plan) {
                         // Scenario 1: Preselected plan -> Proceed to Payment Gateway
                         window.edvoraCheckout.switchView('checkout');
+                        if (window.edvoraCheckout && typeof window.edvoraCheckout.payWithRazorpay === 'function' && chkState.currency !== 'USD') {
+                            window.edvoraCheckout.payWithRazorpay();
+                        }
                         showToast('Account registered! Please complete payment to activate your console.', 'info');
                     } else {
-                        // Scenario 2: No plan preselected -> Proceed to Plan Selection
+                        // Scenario 2: No plan preselected -> Proceed to Plan Selection (Step 1)
                         window.edvoraCheckout.switchView('select-plan');
                         showToast('Account registered! Please choose your plan to activate your console.', 'info');
                     }

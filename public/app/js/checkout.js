@@ -528,10 +528,15 @@
         return data.data;
     }
 
+    let isPaymentLaunching = false;
+
     /**
      * Launch Razorpay Checkout Gateway Modal
      */
     async function launchRazorpayPayment() {
+        if (isPaymentLaunching) return;
+        isPaymentLaunching = true;
+
         const btn = document.getElementById('chkBtnRazorpay');
         const origText = btn ? btn.innerHTML : '';
         if (btn) {
@@ -546,6 +551,9 @@
                 throw new Error('Razorpay SDK is not loaded. Please refresh the page.');
             }
 
+            const prefillName = state.userName || window.currentUser?.name || localStorage.getItem('edvora_user_name') || '';
+            const prefillEmail = state.userEmail || window.currentUser?.email || localStorage.getItem('edvora_user_email') || '';
+
             const options = {
                 key: order.razorpay_key_id,
                 amount: order.amount_subunits,
@@ -554,15 +562,22 @@
                 description: `${order.plan_name} Plan (${order.billing_cycle})`,
                 image: '/edvora_logo.svg',
                 prefill: {
-                    name: state.userName || '',
-                    email: state.userEmail || ''
+                    name: prefillName,
+                    email: prefillEmail
                 },
                 theme: {
                     color: '#063D3B'
                 },
                 modal: {
                     ondismiss: function () {
-                        showPaymentStatus(false, 'Transaction was cancelled before completion. Please try again to activate your account.');
+                        // User dismissed or closed the checkout modal.
+                        // Keep them on #checkout so they can retry or change their plan.
+                        const errEl = document.getElementById('checkoutGatewayError');
+                        const errTxt = document.getElementById('checkoutGatewayErrorText');
+                        if (errEl && errTxt) {
+                            errTxt.textContent = 'Checkout was closed. You can complete your subscription below or choose another plan.';
+                            errEl.style.display = 'block';
+                        }
                     }
                 },
                 handler: async function (response) {
@@ -607,6 +622,7 @@
             console.error('Razorpay Error:', err);
             showPaymentStatus(false, err.message || 'Unable to connect to Razorpay. Please retry.');
         } finally {
+            isPaymentLaunching = false;
             if (btn) {
                 btn.disabled = false;
                 btn.innerHTML = origText;
@@ -790,13 +806,16 @@
         init: initCheckoutParameters,
         switchView: switchAuthView,
         routePendingSubscription: routePendingSubscription,
-        selectPlan: function (planName) {
+        selectPlan: async function (planName) {
             const found = Object.values(PLAN_PRICING).find(p => p.name.toLowerCase() === (planName || '').toLowerCase());
             if (found) {
                 state.plan = found.name;
                 state.planId = found.id;
                 state.hasPreselectedPlan = true;
                 switchAuthView('checkout');
+                if (state.currency === 'INR') {
+                    await launchRazorpayPayment();
+                }
             }
         },
         setBillingCycle: function (cycle) {
@@ -817,6 +836,9 @@
         payWithRazorpay: launchRazorpayPayment,
         retryPayment: function () {
             switchAuthView('checkout');
+            if (state.currency === 'INR') {
+                launchRazorpayPayment();
+            }
         },
         simulateTestPaymentSuccess: async function () {
             // Safe developer testing helper
