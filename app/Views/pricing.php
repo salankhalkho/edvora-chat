@@ -1057,9 +1057,10 @@ foreach ($plans as &$plan) {
     window.detectedCountry = detectedCountry;
     window.currentCurrency = currentCurrency;
 
-    // Clear legacy localStorage cache
+    // Persist chosen currency and country to localStorage for cross-page checkout state
     try {
-        localStorage.removeItem('edvora_currency');
+        localStorage.setItem('edvora_checkout_currency', currentCurrency);
+        localStorage.setItem('edvora_checkout_country', detectedCountry);
     } catch (e) {}
 
     function updatePricingDisplay() {
@@ -1084,6 +1085,12 @@ foreach ($plans as &$plan) {
         window.currentCurrency = currentCurrency;
         window.detectedCountry = (currentCurrency === 'INR') ? 'IN' : (countryParam || 'US');
 
+        // Persist to localStorage whenever display is refreshed
+        try {
+            localStorage.setItem('edvora_checkout_currency', currentCurrency);
+            localStorage.setItem('edvora_checkout_country', window.detectedCountry);
+        } catch (e) {}
+
         // Toggle billing cycle buttons active state
         const monthlyBtn = document.getElementById('cycleBtnMonthly');
         const yearlyBtn = document.getElementById('cycleBtnYearly');
@@ -1097,11 +1104,18 @@ foreach ($plans as &$plan) {
         const selector = `.${currentCurrency.toLowerCase()}-price.${currentCycle}-price`;
         document.querySelectorAll(selector).forEach(el => el.classList.remove('hidden'));
 
-        // Dynamically update CTA links with plan, billing cycle, and currency
+        // Dynamically update CTA links with plan, billing cycle, currency, and country
         document.querySelectorAll('.plan-cta-btn').forEach(btn => {
             const plan = btn.dataset.plan;
             if (plan && plan.toLowerCase() !== 'pro') {
-                btn.href = `/app#signup?plan=${encodeURIComponent(plan)}&cycle=${encodeURIComponent(currentCycle)}&currency=${encodeURIComponent(currentCurrency)}`;
+                btn.href = `/app#signup?plan=${encodeURIComponent(plan)}&cycle=${encodeURIComponent(currentCycle)}&currency=${encodeURIComponent(currentCurrency)}&country=${encodeURIComponent(window.detectedCountry)}`;
+            }
+        });
+
+        // Also update any standalone Register College links on the page
+        document.querySelectorAll('a[href*="/app#signup"]').forEach(link => {
+            if (!link.classList.contains('plan-cta-btn')) {
+                link.href = `/app#signup?currency=${encodeURIComponent(currentCurrency)}&country=${encodeURIComponent(window.detectedCountry)}`;
             }
         });
     }

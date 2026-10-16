@@ -188,28 +188,41 @@
             });
         }
 
-        // 1. Detect Plan
-        const planParam = urlParams.get('plan');
+        // 1. Detect Plan (URL parameter takes priority, followed by stored plan from pricing page)
+        const storedPlan = localStorage.getItem('edvora_checkout_plan');
+        const planParam = urlParams.get('plan') || storedPlan;
         if (planParam) {
             const foundKey = Object.keys(PLAN_PRICING).find(k => k.toLowerCase() === planParam.trim().toLowerCase());
             if (foundKey) {
                 state.plan = PLAN_PRICING[foundKey].name;
                 state.planId = PLAN_PRICING[foundKey].id;
                 state.hasPreselectedPlan = true;
+                try {
+                    localStorage.setItem('edvora_checkout_plan', state.plan);
+                } catch (_) {}
             }
         }
 
         // 2. Detect Billing Cycle
-        const cycleParam = urlParams.get('cycle') || urlParams.get('billing') || urlParams.get('billing_cycle');
+        const storedCycle = localStorage.getItem('edvora_checkout_cycle');
+        const cycleParam = urlParams.get('cycle') || urlParams.get('billing') || urlParams.get('billing_cycle') || storedCycle;
         if (cycleParam && (cycleParam.toLowerCase() === 'yearly' || cycleParam.toLowerCase() === 'annual')) {
             state.cycle = 'yearly';
         } else {
             state.cycle = 'monthly';
         }
+        try {
+            localStorage.setItem('edvora_checkout_cycle', state.cycle);
+        } catch (_) {}
 
         // 3. Detect Currency & Gateway
+        // Priority: 1. URL currency -> 2. URL country -> 3. Stored currency -> 4. Stored country -> 5. Geo/Timezone -> 6. Fallback
         const currencyParam = (urlParams.get('currency') || '').toUpperCase();
-        let detectedCountry = (window.visitorCountry || window.detectedCountry || '').toUpperCase();
+        const countryParam = (urlParams.get('country') || '').toUpperCase();
+        const storedCurrency = (localStorage.getItem('edvora_checkout_currency') || '').toUpperCase();
+        const storedCountry = (localStorage.getItem('edvora_checkout_country') || '').toUpperCase();
+
+        let detectedCountry = countryParam || storedCountry || (window.visitorCountry || window.detectedCountry || '').toUpperCase();
         if (!detectedCountry) {
             try {
                 const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
@@ -221,6 +234,12 @@
 
         if (currencyParam === 'USD' || currencyParam === 'INR') {
             state.currency = currencyParam;
+        } else if (countryParam) {
+            state.currency = (countryParam === 'IN') ? 'INR' : 'USD';
+        } else if (storedCurrency === 'USD' || storedCurrency === 'INR') {
+            state.currency = storedCurrency;
+        } else if (storedCountry) {
+            state.currency = (storedCountry === 'IN') ? 'INR' : 'USD';
         } else if (detectedCountry === 'IN') {
             state.currency = 'INR';
         } else if (detectedCountry && detectedCountry !== 'IN') {
@@ -228,6 +247,16 @@
         } else {
             state.currency = 'INR'; // Default fallback
         }
+
+        // Persist resolved currency and country
+        try {
+            localStorage.setItem('edvora_checkout_currency', state.currency);
+            if (countryParam) {
+                localStorage.setItem('edvora_checkout_country', countryParam);
+            } else if (!storedCountry) {
+                localStorage.setItem('edvora_checkout_country', (state.currency === 'INR') ? 'IN' : 'US');
+            }
+        } catch (_) {}
 
         state.gateway = (state.currency === 'USD') ? 'paypal' : 'razorpay';
 
@@ -340,6 +369,29 @@
      * Route an organization with pending payment to either #select-plan (default) or #checkout
      */
     function routePendingSubscription(orgData) {
+        if (orgData) {
+            const orgCurrency = (orgData.currency || '').toUpperCase();
+            if (orgCurrency === 'USD' || orgCurrency === 'INR') {
+                state.currency = orgCurrency;
+                state.gateway = (state.currency === 'USD') ? 'paypal' : 'razorpay';
+                try {
+                    localStorage.setItem('edvora_checkout_currency', state.currency);
+                } catch (_) {}
+            }
+            if (orgData.plan_name) {
+                state.plan = orgData.plan_name;
+                state.hasPreselectedPlan = true;
+                try {
+                    localStorage.setItem('edvora_checkout_plan', state.plan);
+                } catch (_) {}
+            }
+            if (orgData.billing_cycle) {
+                state.cycle = (orgData.billing_cycle === 'yearly') ? 'yearly' : 'monthly';
+                try {
+                    localStorage.setItem('edvora_checkout_cycle', state.cycle);
+                } catch (_) {}
+            }
+        }
         const hash = (window.location.hash || '').split('?')[0].toLowerCase();
         if (hash === '#select-plan' || !state.hasPreselectedPlan) {
             switchAuthView('select-plan');
@@ -812,6 +864,10 @@
                 state.plan = found.name;
                 state.planId = found.id;
                 state.hasPreselectedPlan = true;
+                try {
+                    localStorage.setItem('edvora_checkout_plan', state.plan);
+                    localStorage.setItem('edvora_checkout_cycle', state.cycle);
+                } catch (_) {}
                 switchAuthView('checkout');
                 if (state.currency === 'INR') {
                     await launchRazorpayPayment();
@@ -820,11 +876,18 @@
         },
         setBillingCycle: function (cycle) {
             state.cycle = (cycle === 'yearly') ? 'yearly' : 'monthly';
+            try {
+                localStorage.setItem('edvora_checkout_cycle', state.cycle);
+            } catch (_) {}
             renderPlanCardsUI();
         },
         switchCurrency: function (curr) {
             state.currency = (curr === 'USD') ? 'USD' : 'INR';
             state.gateway = (state.currency === 'USD') ? 'paypal' : 'razorpay';
+            try {
+                localStorage.setItem('edvora_checkout_currency', state.currency);
+                localStorage.setItem('edvora_checkout_country', (state.currency === 'INR') ? 'IN' : 'US');
+            } catch (_) {}
             renderPlanCardsUI();
             if (document.getElementById('checkoutGatewayCard')?.style.display === 'block') {
                 renderCheckoutSummaryUI();
@@ -862,11 +925,12 @@
         return str;
     }
 
-    // Auto-initialize when DOM is ready
+    // Auto-initialize when DOM is ready and on URL hash change
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initCheckoutParameters);
     } else {
         initCheckoutParameters();
     }
+    window.addEventListener('hashchange', initCheckoutParameters);
 
 })();

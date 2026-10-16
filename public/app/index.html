@@ -8588,6 +8588,23 @@ echo $response['reply'];
                         if (data.data.plan_name) {
                             chkState.plan = data.data.plan_name;
                             chkState.planId = data.data.plan_id;
+                            chkState.hasPreselectedPlan = true;
+                            try {
+                                localStorage.setItem('edvora_checkout_plan', chkState.plan);
+                            } catch (_) {}
+                        }
+                        if (data.data.currency) {
+                            chkState.currency = data.data.currency;
+                            chkState.gateway = (chkState.currency === 'USD') ? 'paypal' : 'razorpay';
+                            try {
+                                localStorage.setItem('edvora_checkout_currency', chkState.currency);
+                            } catch (_) {}
+                        }
+                        if (data.data.billing_cycle) {
+                            chkState.cycle = data.data.billing_cycle;
+                            try {
+                                localStorage.setItem('edvora_checkout_cycle', chkState.cycle);
+                            } catch (_) {}
                         }
 
                         window.edvoraCheckout.routePendingSubscription(data.data.organization || data.data);
@@ -8646,6 +8663,10 @@ echo $response['reply'];
             const collegeNameVal = (document.getElementById('signupCollegeName')?.value || '').trim();
             const chkState = window.edvoraCheckoutState || {};
 
+            const resolvedPlan = chkState.hasPreselectedPlan ? chkState.plan : (localStorage.getItem('edvora_checkout_plan') || null);
+            const resolvedCycle = chkState.cycle || localStorage.getItem('edvora_checkout_cycle') || 'monthly';
+            const resolvedCurrency = chkState.currency || localStorage.getItem('edvora_checkout_currency') || 'INR';
+
             try {
                 const res = await fetch('/v1/auth/signup', {
                     method: 'POST',
@@ -8656,9 +8677,9 @@ echo $response['reply'];
                         email: document.getElementById('signupEmail').value.trim(),
                         password: document.getElementById('signupPassword').value,
                         website_url: websiteVal,
-                        plan: chkState.hasPreselectedPlan ? chkState.plan : null,
-                        billing_cycle: chkState.cycle || 'monthly',
-                        currency: chkState.currency || 'INR'
+                        plan: resolvedPlan,
+                        billing_cycle: resolvedCycle,
+                        currency: resolvedCurrency
                     })
                 });
                 const data = await res.json();
@@ -8683,12 +8704,29 @@ echo $response['reply'];
                     if (data.data.plan_name) {
                         chkState.plan = data.data.plan_name;
                         chkState.planId = data.data.plan_id;
+                        chkState.hasPreselectedPlan = true;
+                        try {
+                            localStorage.setItem('edvora_checkout_plan', chkState.plan);
+                        } catch (_) {}
                     }
-                    if (data.data.billing_cycle) chkState.cycle = data.data.billing_cycle;
-                    if (data.data.currency) chkState.currency = data.data.currency;
+                    if (data.data.billing_cycle) {
+                        chkState.cycle = data.data.billing_cycle;
+                        try {
+                            localStorage.setItem('edvora_checkout_cycle', chkState.cycle);
+                        } catch (_) {}
+                    }
+                    if (data.data.currency) {
+                        chkState.currency = data.data.currency;
+                    } else {
+                        chkState.currency = resolvedCurrency;
+                    }
+                    try {
+                        localStorage.setItem('edvora_checkout_currency', chkState.currency);
+                    } catch (_) {}
+                    chkState.gateway = (chkState.currency === 'USD') ? 'paypal' : 'razorpay';
 
                     // Commercial Gate: DO NOT enter dashboard until payment is complete
-                    if (data.data.has_preselected_plan) {
+                    if (data.data.has_preselected_plan || chkState.hasPreselectedPlan) {
                         // Scenario 1: Preselected plan -> Proceed to Payment Gateway
                         window.edvoraCheckout.switchView('checkout');
                         if (window.edvoraCheckout && typeof window.edvoraCheckout.payWithRazorpay === 'function' && chkState.currency !== 'USD') {
@@ -11222,8 +11260,20 @@ echo $response['reply'];
                     chkState.orgId = org.id;
                     chkState.orgName = org.name;
                     chkState.userEmail = user.email;
-                    chkState.userName = user.name;
-                    if (org.plan_name) chkState.plan = org.plan_name;
+                    if (org.plan_name) {
+                        chkState.plan = org.plan_name;
+                        chkState.hasPreselectedPlan = true;
+                    }
+                    if (org.currency) {
+                        chkState.currency = org.currency;
+                        chkState.gateway = (chkState.currency === 'USD') ? 'paypal' : 'razorpay';
+                        try {
+                            localStorage.setItem('edvora_checkout_currency', chkState.currency);
+                        } catch (_) {}
+                    }
+                    if (org.billing_cycle) {
+                        chkState.cycle = org.billing_cycle;
+                    }
 
                     window.edvoraCheckout.routePendingSubscription(org);
                     showToast('Commercial subscription payment required to enter console.', 'warning');

@@ -370,8 +370,8 @@ class AuthController
         $subStatus = $isSuperAdmin ? 'active' : ($user['subscription_status'] ?? 'pending_payment');
         $paymentRequired = (!$isSuperAdmin && $subStatus !== 'active');
 
-        $userPlanId = null;
-        $userPlanName = null;
+        $userCurrency = 'INR';
+        $userBillingCycle = 'monthly';
         if (!empty($user['organization_id'])) {
             $stmtOrgPlan = $db->prepare("SELECT o.plan_id, p.name as plan_name FROM organizations o LEFT JOIN plans p ON o.plan_id = p.id WHERE o.id = :oid LIMIT 1");
             $stmtOrgPlan->execute([':oid' => $user['organization_id']]);
@@ -379,6 +379,14 @@ class AuthController
             if ($orgPlanRow) {
                 $userPlanId = $orgPlanRow['plan_id'];
                 $userPlanName = $orgPlanRow['plan_name'];
+            }
+
+            $stmtSub = $db->prepare("SELECT billing_cycle, currency FROM subscriptions WHERE organization_id = :oid ORDER BY id DESC LIMIT 1");
+            $stmtSub->execute([':oid' => $user['organization_id']]);
+            $subRow = $stmtSub->fetch();
+            if ($subRow) {
+                $userCurrency = $subRow['currency'] ?? 'INR';
+                $userBillingCycle = $subRow['billing_cycle'] ?? 'monthly';
             }
         }
 
@@ -391,6 +399,8 @@ class AuthController
             'payment_required' => $paymentRequired,
             'plan_id' => $userPlanId,
             'plan_name' => $userPlanName,
+            'billing_cycle' => $userBillingCycle,
+            'currency' => $userCurrency,
             'user' => [
                 'id' => (int)$user['id'],
                 'name' => $user['name'],
@@ -406,6 +416,8 @@ class AuthController
                 'slug' => $user['org_slug'],
                 'plan_id' => $userPlanId,
                 'plan_name' => $userPlanName,
+                'billing_cycle' => $userBillingCycle,
+                'currency' => $userCurrency,
                 'subscription_status' => $subStatus,
                 'onboarding_completed' => (int)$user['onboarding_completed'],
                 'onboarding_step' => (int)$user['onboarding_step'],
@@ -485,6 +497,18 @@ class AuthController
         // Departments deprecated - return empty list
         $userDepartments = [];
 
+        $orgCurrency = 'INR';
+        $orgBillingCycle = 'monthly';
+        if (!empty($user['organization_id'])) {
+            $stmtSub = $db->prepare("SELECT billing_cycle, currency FROM subscriptions WHERE organization_id = :oid ORDER BY id DESC LIMIT 1");
+            $stmtSub->execute([':oid' => $user['organization_id']]);
+            $subRow = $stmtSub->fetch();
+            if ($subRow) {
+                $orgCurrency = $subRow['currency'] ?? 'INR';
+                $orgBillingCycle = $subRow['billing_cycle'] ?? 'monthly';
+            }
+        }
+
         // Onboarding paused: always false so users remain on dashboard
         $onboardingRequired = false;
 
@@ -512,6 +536,8 @@ class AuthController
                 'onboarding_step' => (int)$user['onboarding_step'],
                 'plan_name' => $user['plan_name'] ?? 'Starter',
                 'plan_id' => $effectivePlanId ?? 1,
+                'billing_cycle' => $orgBillingCycle,
+                'currency' => $orgCurrency,
                 'quotas' => $planQuotas,
                 'features' => $planFeatures,
                 'primary_campus' => \App\Helpers\TenantLocalizationHelper::getTenantLocalization((int)$user['organization_id']),
