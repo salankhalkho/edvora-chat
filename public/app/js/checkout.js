@@ -779,7 +779,7 @@
             const scriptSrc = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=USD&intent=${sdkIntent}${sdkVault}`;
 
             const existingScript = document.getElementById('paypal-sdk-script');
-            if (existingScript && existingScript.getAttribute('data-plan') !== (order.paypal_plan_id || '')) {
+            if (existingScript && (existingScript.getAttribute('data-plan') !== (order.paypal_plan_id || '') || existingScript.getAttribute('data-client-id') !== clientId)) {
                 existingScript.remove();
                 if (window.paypal) delete window.paypal;
             }
@@ -789,6 +789,7 @@
                     const script = document.createElement('script');
                     script.id = 'paypal-sdk-script';
                     script.setAttribute('data-plan', order.paypal_plan_id || '');
+                    script.setAttribute('data-client-id', clientId);
                     script.src = scriptSrc;
                     script.onload = () => resolve();
                     script.onerror = () => reject(new Error('Failed to load PayPal SDK'));
