@@ -14,14 +14,85 @@
 (function () {
     'use strict';
 
+    function getCookie(name) {
+        try {
+            const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+            return v ? decodeURIComponent(v[2]) : null;
+        } catch (_) {
+            return null;
+        }
+    }
+
+    function resolveInitialState() {
+        const urlParams = new URLSearchParams(window.location.search);
+        let rawHash = window.location.hash || '';
+        if (rawHash.includes('?')) {
+            const hashParts = rawHash.split('?')[1];
+            const hashParams = new URLSearchParams(hashParts);
+            hashParams.forEach((val, key) => {
+                if (!urlParams.has(key)) urlParams.set(key, val);
+            });
+        }
+
+        const planParam = urlParams.get('plan') || localStorage.getItem('edvora_checkout_plan');
+        const cycleParam = urlParams.get('cycle') || urlParams.get('billing') || urlParams.get('billing_cycle') || localStorage.getItem('edvora_checkout_cycle');
+        const currencyParam = (urlParams.get('currency') || getCookie('edvora_checkout_currency') || localStorage.getItem('edvora_checkout_currency') || '').toUpperCase();
+        const countryParam = (urlParams.get('country') || getCookie('edvora_checkout_country') || localStorage.getItem('edvora_checkout_country') || '').toUpperCase();
+
+        let isUsd = false;
+        if (currencyParam === 'USD' || countryParam === 'US') {
+            isUsd = true;
+        } else if (currencyParam === 'INR' || countryParam === 'IN') {
+            isUsd = false;
+        } else {
+            let detectedCountry = (window.visitorCountry || window.detectedCountry || '').toUpperCase();
+            if (!detectedCountry) {
+                try {
+                    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+                    if (tz.includes('Calcutta') || tz.includes('Kolkata') || tz.includes('India')) {
+                        detectedCountry = 'IN';
+                    }
+                } catch (_) {}
+            }
+            isUsd = (detectedCountry && detectedCountry !== 'IN');
+        }
+
+        const finalCurrency = isUsd ? 'USD' : 'INR';
+        const finalGateway = isUsd ? 'paypal' : 'razorpay';
+
+        // Keep localStorage and cookies in sync
+        try {
+            localStorage.setItem('edvora_checkout_currency', finalCurrency);
+            document.cookie = `edvora_checkout_currency=${finalCurrency}; path=/; max-age=86400; SameSite=Lax`;
+            if (isUsd) {
+                localStorage.setItem('edvora_checkout_country', 'US');
+                document.cookie = `edvora_checkout_country=US; path=/; max-age=86400; SameSite=Lax`;
+            }
+            if (planParam) {
+                localStorage.setItem('edvora_checkout_plan', planParam);
+            }
+        } catch (_) {}
+
+        return {
+            plan: planParam || 'Starter',
+            planId: 1,
+            cycle: (cycleParam && (cycleParam.toLowerCase() === 'yearly' || cycleParam.toLowerCase() === 'annual')) ? 'yearly' : 'monthly',
+            currency: finalCurrency,
+            gateway: finalGateway,
+            hasPreselectedPlan: Boolean(planParam)
+        };
+    }
+
+    const _initial = resolveInitialState();
+
     // Global Checkout State
     window.edvoraCheckoutState = {
-        plan: 'Starter',
-        planId: 1,
-        cycle: 'monthly',
-        currency: 'INR',
-        gateway: 'razorpay',
-        hasPreselectedPlan: false,
+        plan: _initial.plan,
+        planId: _initial.planId,
+        cycle: _initial.cycle,
+        currency: _initial.currency,
+        gateway: _initial.gateway,
+        hasPreselectedPlan: _initial.hasPreselectedPlan,
         orgId: null,
         orgName: '',
         userEmail: '',
@@ -216,13 +287,15 @@
         } catch (_) {}
 
         // 3. Detect Currency & Gateway
-        // Priority: 1. URL currency -> 2. URL country -> 3. Stored currency -> 4. Stored country -> 5. Geo/Timezone -> 6. Fallback
+        // Priority: 1. URL currency -> 2. URL country -> 3. Cookie currency -> 4. Cookie country -> 5. Stored currency -> 6. Stored country -> 7. Geo/Timezone -> 8. Fallback
         const currencyParam = (urlParams.get('currency') || '').toUpperCase();
         const countryParam = (urlParams.get('country') || '').toUpperCase();
+        const cookieCurrency = (getCookie('edvora_checkout_currency') || '').toUpperCase();
+        const cookieCountry = (getCookie('edvora_checkout_country') || '').toUpperCase();
         const storedCurrency = (localStorage.getItem('edvora_checkout_currency') || '').toUpperCase();
         const storedCountry = (localStorage.getItem('edvora_checkout_country') || '').toUpperCase();
 
-        let detectedCountry = countryParam || storedCountry || (window.visitorCountry || window.detectedCountry || '').toUpperCase();
+        let detectedCountry = countryParam || cookieCountry || storedCountry || (window.visitorCountry || window.detectedCountry || '').toUpperCase();
         if (!detectedCountry) {
             try {
                 const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
@@ -236,6 +309,10 @@
             state.currency = currencyParam;
         } else if (countryParam) {
             state.currency = (countryParam === 'IN') ? 'INR' : 'USD';
+        } else if (cookieCurrency === 'USD' || cookieCurrency === 'INR') {
+            state.currency = cookieCurrency;
+        } else if (cookieCountry) {
+            state.currency = (cookieCountry === 'IN') ? 'INR' : 'USD';
         } else if (storedCurrency === 'USD' || storedCurrency === 'INR') {
             state.currency = storedCurrency;
         } else if (storedCountry) {
@@ -323,26 +400,28 @@
 
         document.documentElement.classList.remove('auth-mode-signup', 'has-auth-token');
 
+        const searchPrefix = window.location.search || '';
+
         if (mode === 'login') {
             if (cards.login) cards.login.style.display = 'block';
-            history.replaceState(null, '', '#login');
+            history.replaceState(null, '', searchPrefix + '#login');
         } else if (mode === 'signup') {
             document.documentElement.classList.add('auth-mode-signup');
             if (cards.signup) cards.signup.style.display = 'block';
             updateSignupPlanBadgeUI();
-            history.replaceState(null, '', '#signup');
+            history.replaceState(null, '', searchPrefix + '#signup');
         } else if (mode === 'select-plan') {
             if (cards['select-plan']) {
                 cards['select-plan'].style.display = 'block';
                 renderPlanCardsUI();
             }
-            history.replaceState(null, '', '#select-plan');
+            history.replaceState(null, '', searchPrefix + '#select-plan');
         } else if (mode === 'checkout') {
             if (cards.checkout) {
                 cards.checkout.style.display = 'block';
                 renderCheckoutSummaryUI();
             }
-            history.replaceState(null, '', '#checkout');
+            history.replaceState(null, '', searchPrefix + '#checkout');
         } else if (mode === 'status-success') {
             if (cards.status) {
                 cards.status.style.display = 'block';
@@ -351,7 +430,7 @@
                 if (successView) successView.style.display = 'block';
                 if (failedView) failedView.style.display = 'none';
             }
-            history.replaceState(null, '', '#payment-success');
+            history.replaceState(null, '', searchPrefix + '#payment-success');
         } else if (mode === 'status-failed') {
             if (cards.status) {
                 cards.status.style.display = 'block';
@@ -360,7 +439,7 @@
                 if (successView) successView.style.display = 'none';
                 if (failedView) failedView.style.display = 'block';
             }
-            history.replaceState(null, '', '#payment-failed');
+            history.replaceState(null, '', searchPrefix + '#payment-failed');
         }
     }
     window.switchAuthView = switchAuthView;

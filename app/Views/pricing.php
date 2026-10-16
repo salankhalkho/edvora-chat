@@ -9,6 +9,11 @@ if (!$overrideCountry && isset($_GET['currency'])) {
 $clientCountry = $overrideCountry ?: strtoupper($_SERVER['HTTP_CF_IPCOUNTRY'] ?? $_SERVER['GEOIP_COUNTRY_CODE'] ?? '');
 $defaultCurrency = ($clientCountry === 'IN') ? 'INR' : 'USD';
 
+if ($overrideCountry || isset($_GET['country']) || isset($_GET['currency'])) {
+    @setcookie('edvora_checkout_currency', $defaultCurrency, time() + 86400, '/');
+    @setcookie('edvora_checkout_country', $clientCountry, time() + 86400, '/');
+}
+
 // Fetch active plans from database
 $db = Database::getConnection();
 $stmt = $db->query("SELECT * FROM plans WHERE is_active = 1 ORDER BY sort_order ASC, id ASC");
@@ -458,7 +463,13 @@ foreach ($plans as &$plan) {
 
                     $badge = !empty($p['badge_text']) ? $p['badge_text'] : ($isGrowth ? 'Most Popular' : null);
                     $ctaText = !empty($p['cta_text']) ? $p['cta_text'] : ($isGrowth ? 'Register Institution →' : (stripos($p['name'], 'Pro') !== false ? 'Book Enterprise Demo →' : 'Get Started →'));
-                    $ctaLink = !empty($p['cta_link']) ? $p['cta_link'] : ($isGrowth ? '/app#signup?plan=' . urlencode($p['name']) : (stripos($p['name'], 'Pro') !== false ? '#demo' : '/app#signup?plan=' . urlencode($p['name'])));
+                    $planQuery = http_build_query([
+                        'plan' => $p['name'],
+                        'cycle' => 'monthly',
+                        'currency' => $defaultCurrency,
+                        'country' => $clientCountry
+                    ]);
+                    $ctaLink = !empty($p['cta_link']) ? $p['cta_link'] : ($isGrowth ? '/app?' . $planQuery . '#signup' : (stripos($p['name'], 'Pro') !== false ? '#demo' : '/app?' . $planQuery . '#signup'));
                 ?>
                 <div class="<?= $cardClass ?>">
                     <?php if ($badge): ?>
@@ -1008,7 +1019,7 @@ foreach ($plans as &$plan) {
                 <button onclick="openDemo()" class="btn-primary text-[15.5px] px-8 py-3.5 font-bold">
                     Schedule an Institutional Demo &rarr;
                 </button>
-                <a href="/app#signup" class="btn-secondary text-[15.5px] px-8 py-3.5 font-bold">
+                <a href="/app?<?= http_build_query(['currency' => $defaultCurrency, 'country' => $clientCountry]) ?>#signup" class="btn-secondary text-[15.5px] px-8 py-3.5 font-bold">
                     Register Your College
                 </a>
             </div>
@@ -1057,10 +1068,12 @@ foreach ($plans as &$plan) {
     window.detectedCountry = detectedCountry;
     window.currentCurrency = currentCurrency;
 
-    // Persist chosen currency and country to localStorage for cross-page checkout state
+    // Persist chosen currency and country to localStorage and cookie for cross-page checkout state
     try {
         localStorage.setItem('edvora_checkout_currency', currentCurrency);
         localStorage.setItem('edvora_checkout_country', detectedCountry);
+        document.cookie = `edvora_checkout_currency=${currentCurrency}; path=/; max-age=86400; SameSite=Lax`;
+        document.cookie = `edvora_checkout_country=${detectedCountry}; path=/; max-age=86400; SameSite=Lax`;
     } catch (e) {}
 
     function updatePricingDisplay() {
@@ -1085,10 +1098,12 @@ foreach ($plans as &$plan) {
         window.currentCurrency = currentCurrency;
         window.detectedCountry = (currentCurrency === 'INR') ? 'IN' : (countryParam || 'US');
 
-        // Persist to localStorage whenever display is refreshed
+        // Persist to localStorage and cookie whenever display is refreshed
         try {
             localStorage.setItem('edvora_checkout_currency', currentCurrency);
             localStorage.setItem('edvora_checkout_country', window.detectedCountry);
+            document.cookie = `edvora_checkout_currency=${currentCurrency}; path=/; max-age=86400; SameSite=Lax`;
+            document.cookie = `edvora_checkout_country=${window.detectedCountry}; path=/; max-age=86400; SameSite=Lax`;
         } catch (e) {}
 
         // Toggle billing cycle buttons active state
@@ -1104,18 +1119,18 @@ foreach ($plans as &$plan) {
         const selector = `.${currentCurrency.toLowerCase()}-price.${currentCycle}-price`;
         document.querySelectorAll(selector).forEach(el => el.classList.remove('hidden'));
 
-        // Dynamically update CTA links with plan, billing cycle, currency, and country
+        // Dynamically update CTA links with query string BEFORE hash so URLSearchParams always succeeds
         document.querySelectorAll('.plan-cta-btn').forEach(btn => {
             const plan = btn.dataset.plan;
             if (plan && plan.toLowerCase() !== 'pro') {
-                btn.href = `/app#signup?plan=${encodeURIComponent(plan)}&cycle=${encodeURIComponent(currentCycle)}&currency=${encodeURIComponent(currentCurrency)}&country=${encodeURIComponent(window.detectedCountry)}`;
+                btn.href = `/app?plan=${encodeURIComponent(plan)}&cycle=${encodeURIComponent(currentCycle)}&currency=${encodeURIComponent(currentCurrency)}&country=${encodeURIComponent(window.detectedCountry)}#signup`;
             }
         });
 
         // Also update any standalone Register College links on the page
-        document.querySelectorAll('a[href*="/app#signup"]').forEach(link => {
+        document.querySelectorAll('a[href*="/app#signup"], a[href*="/app?"]').forEach(link => {
             if (!link.classList.contains('plan-cta-btn')) {
-                link.href = `/app#signup?currency=${encodeURIComponent(currentCurrency)}&country=${encodeURIComponent(window.detectedCountry)}`;
+                link.href = `/app?currency=${encodeURIComponent(currentCurrency)}&country=${encodeURIComponent(window.detectedCountry)}#signup`;
             }
         });
     }

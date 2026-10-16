@@ -2921,7 +2921,7 @@
     </style>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="js/tenant-localization.js?v=20261002"></script>
-    <script src="js/checkout.js?v=20261013c"></script>
+    <script src="js/checkout.js?v=20261016_usd_v4"></script>
 </head>
 <body>
 
@@ -5547,7 +5547,7 @@
             showSignupEl.onclick = (e) => {
                 e.preventDefault();
                 if (window.location.hash !== '#signup') {
-                    history.replaceState(null, '', '#signup');
+                    history.replaceState(null, '', (window.location.search || '') + '#signup');
                 }
                 setAuthCard('signup');
             };
@@ -5558,7 +5558,7 @@
             showLoginEl.onclick = (e) => {
                 e.preventDefault();
                 if (window.location.hash !== '#login' && window.location.hash !== '') {
-                    history.replaceState(null, '', '#login');
+                    history.replaceState(null, '', (window.location.search || '') + '#login');
                 }
                 setAuthCard('login');
             };
@@ -8663,9 +8663,26 @@ echo $response['reply'];
             const collegeNameVal = (document.getElementById('signupCollegeName')?.value || '').trim();
             const chkState = window.edvoraCheckoutState || {};
 
+            function _getCookieVal(name) {
+                try {
+                    const m = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+                    return m ? decodeURIComponent(m[2]) : null;
+                } catch (_) { return null; }
+            }
+            const urlQuery = new URLSearchParams(window.location.search);
+            const queryCurrency = (urlQuery.get('currency') || '').toUpperCase();
+            const queryCountry = (urlQuery.get('country') || '').toUpperCase();
+            const cookieCurrency = (_getCookieVal('edvora_checkout_currency') || '').toUpperCase();
+            const cookieCountry = (_getCookieVal('edvora_checkout_country') || '').toUpperCase();
+            const localCurrency = (localStorage.getItem('edvora_checkout_currency') || '').toUpperCase();
+
+            let resolvedCurrency = 'INR';
+            if (queryCurrency === 'USD' || queryCountry === 'US' || cookieCurrency === 'USD' || cookieCountry === 'US' || (chkState.currency || '').toUpperCase() === 'USD' || localCurrency === 'USD') {
+                resolvedCurrency = 'USD';
+            }
+
             const resolvedPlan = chkState.hasPreselectedPlan ? chkState.plan : (localStorage.getItem('edvora_checkout_plan') || null);
             const resolvedCycle = chkState.cycle || localStorage.getItem('edvora_checkout_cycle') || 'monthly';
-            const resolvedCurrency = chkState.currency || localStorage.getItem('edvora_checkout_currency') || 'INR';
 
             try {
                 const res = await fetch('/v1/auth/signup', {
@@ -8726,10 +8743,11 @@ echo $response['reply'];
                     chkState.gateway = (chkState.currency === 'USD') ? 'paypal' : 'razorpay';
 
                     // Commercial Gate: DO NOT enter dashboard until payment is complete
+                    const isUsdPayment = (chkState.currency === 'USD' || resolvedCurrency === 'USD' || (data.data.currency || '').toUpperCase() === 'USD');
                     if (data.data.has_preselected_plan || chkState.hasPreselectedPlan) {
                         // Scenario 1: Preselected plan -> Proceed to Payment Gateway
                         window.edvoraCheckout.switchView('checkout');
-                        if (window.edvoraCheckout && typeof window.edvoraCheckout.payWithRazorpay === 'function' && chkState.currency !== 'USD') {
+                        if (!isUsdPayment && window.edvoraCheckout && typeof window.edvoraCheckout.payWithRazorpay === 'function') {
                             window.edvoraCheckout.payWithRazorpay();
                         }
                         showToast('Account registered! Please complete payment to activate your console.', 'info');
