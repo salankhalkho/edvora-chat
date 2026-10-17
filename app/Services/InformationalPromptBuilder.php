@@ -70,7 +70,7 @@ STRICT GUARDRAILS:
 - You are an informational product advisor for Edvora.chat SaaS. You are NOT a university admissions bot asking students for their GPA or degree interest.
 - NEVER ask visitors for their personal contact details (name, email, phone number) and NEVER attempt to trigger lead capture forms, campus tour bookings, or brochure downloads.
 - Quote exact prices, quotas, and features ONLY from the LIVE PLANS & PRICING table and KNOWLEDGE BASE CONTEXT below. Do not invent features or discounts that are not listed.
-- Provide both USD ($) and INR (₹) pricing when asked about cost, or match the currency the user asks about. Mention both monthly and yearly billing options (highlighting annual savings where applicable).
+- Provide all pricing strictly and exclusively in US Dollars (USD / $). NEVER quote or mention Indian Rupee (INR / ₹) prices under any circumstances. Mention both monthly and yearly billing options (highlighting annual savings where applicable).
 - Keep responses warm, consultative, well-structured, and easy to scan (2 to 5 sentences or clean bullet points when comparing plans or features).
 PROMPT;
     }
@@ -84,7 +84,6 @@ PROMPT;
         try {
             $stmt = $db->query("
                 SELECT id, name, description, badge_text,
-                       price_monthly_paise, price_yearly_paise,
                        price_monthly_usd_cents, price_yearly_usd_cents,
                        is_default, sort_order
                 FROM plans
@@ -98,7 +97,7 @@ PROMPT;
             }
 
             $lines = ["=== AUTHORITATIVE LIVE PLANS & PRICING (AUTO-SYNCED FROM DATABASE) ==="];
-            $lines[] = "Always use these exact figures when quoting prices or comparing plans:\n";
+            $lines[] = "Always use these exact figures when quoting prices or comparing plans. All prices are in USD ($):\n";
 
             foreach ($plans as $plan) {
                 $pId = (int)$plan['id'];
@@ -106,8 +105,6 @@ PROMPT;
                 $badge = !empty($plan['badge_text']) ? " ({$plan['badge_text']})" : '';
                 $desc = !empty($plan['description']) ? trim($plan['description']) : '';
 
-                $inrMonthly = number_format(((int)$plan['price_monthly_paise']) / 100, 0);
-                $inrYearly  = number_format(((int)$plan['price_yearly_paise']) / 100, 0);
                 $usdMonthly = number_format(((int)$plan['price_monthly_usd_cents']) / 100, 0);
                 $usdYearly  = number_format(((int)$plan['price_yearly_usd_cents']) / 100, 0);
 
@@ -115,8 +112,7 @@ PROMPT;
                 if ($desc !== '') {
                     $lines[] = "  Summary: {$desc}";
                 }
-                $lines[] = "  Pricing (USD - International): \${$usdMonthly}/month (or \${$usdYearly}/year billed annually)";
-                $lines[] = "  Pricing (INR - India): ₹{$inrMonthly}/month (or ₹{$inrYearly}/year billed annually)";
+                $lines[] = "  Pricing (USD): \${$usdMonthly}/month (or \${$usdYearly}/year billed annually)";
 
                 // Fetch Quotas
                 $stmtQ = $db->prepare("SELECT quota_key, quota_label, quota_value, quota_period FROM plan_quotas WHERE plan_id = :pid ORDER BY id ASC");
