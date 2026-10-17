@@ -107,11 +107,28 @@ class ContentEngine
      */
     private static function mapKnowledgeItems(array $items, int $organizationId): array
     {
+        $titleMap = [];
+        $sourceIds = array_values(array_unique(array_filter(array_map(fn($it) => (int)($it['source_id'] ?? 0), $items))));
+        if (!empty($sourceIds)) {
+            try {
+                $db = Database::getConnection();
+                $inPlaceholders = implode(',', array_fill(0, count($sourceIds), '?'));
+                $stmtTitles = $db->prepare("SELECT id, title FROM knowledge_sources WHERE organization_id = ? AND id IN ({$inPlaceholders})");
+                $stmtTitles->execute(array_merge([$organizationId], $sourceIds));
+                foreach ($stmtTitles->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                    $titleMap[(int)$row['id']] = $row['title'];
+                }
+            } catch (Throwable $e) {
+                // Fallback if lookup fails
+            }
+        }
+
         $mapped = [];
         foreach ($items as $item) {
+            $sid = (int)$item['source_id'];
             $mapped[] = [
-                'id'                => (int)$item['source_id'],
-                'title'             => 'Program / Course Knowledge',
+                'id'                => $sid,
+                'title'             => $titleMap[$sid] ?? ($item['title'] ?? "Knowledge Source #{$sid}"),
                 'processed_content' => $item['content'],
                 'program_id'        => $item['program_id'] ?? null,
                 'score'             => round((float)$item['score'], 4),

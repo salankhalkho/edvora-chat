@@ -59,6 +59,10 @@ class ChatController
         $welcomeMsg = !empty($customization['welcome_message']) ? $customization['welcome_message'] : ($bot['welcome_message'] ?: "Hi there! 👋 Welcome to {$bot['org_name']}. Ask me anything about degree programs, admissions, eligibility, fees, or campus life!");
 
         if ($isInformational) {
+            if (($customization['header_bot_name'] ?? '') === ($bot['org_name'] ?? '') && !empty($bot['name'])) {
+                $customization['header_bot_name'] = $bot['name'];
+            }
+            $botDisplayName = !empty($customization['header_bot_name']) ? $customization['header_bot_name'] : ($bot['name'] ?: $bot['org_name']);
             $hasAssets = false;
             $hasCampuses = false;
             $hasCallbacks = false;

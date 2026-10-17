@@ -86,6 +86,9 @@ class SystemBotController
         $bot = $sys['bot'];
 
         $customization = WidgetCustomizationController::cascadeLookup($db, $botId, $orgId);
+        if (($customization['header_bot_name'] ?? '') === 'Edvora.chat (System)' && !empty($bot['name'])) {
+            $customization['header_bot_name'] = $bot['name'];
+        }
         $customization['show_action_brochure'] = false;
         $customization['show_action_callback'] = false;
         $customization['show_action_tour'] = false;
