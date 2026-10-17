@@ -45,6 +45,7 @@ use App\Controllers\ScholarshipController;
 use App\Controllers\SessionJourneyController;
 use App\Controllers\SmartOnboardingController;
 use App\Controllers\SuperAdminController;
+use App\Controllers\SystemBotController;
 use App\Controllers\TrackingController;
 use App\Controllers\WidgetCustomizationController;
 use App\Core\Request;
@@ -510,6 +511,30 @@ $router->get('/payment-gateways', function (Request $req) {
 $router->get('/superadmin/payment-gateways', function (Request $req) {
     require dirname(__DIR__) . '/public/superadmin/payment-gateways.html';
 });
+
+// Dedicated Standalone Edvora Website Chatbot Manager (No Bloat in index.html)
+$router->get('/system-bot', function (Request $req) {
+    require dirname(__DIR__) . '/public/superadmin/system-bot.html';
+});
+$router->get('/superadmin/system-bot', function (Request $req) {
+    require dirname(__DIR__) . '/public/superadmin/system-bot.html';
+});
+$router->get('/v1/superadmin/system-bot/config', [SystemBotController::class, 'getConfig'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->put('/v1/superadmin/system-bot/customization', [SystemBotController::class, 'updateCustomization'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->post('/v1/superadmin/system-bot/avatar', [SystemBotController::class, 'uploadAvatar'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->put('/v1/superadmin/system-bot/prompt', [SystemBotController::class, 'updatePrompt'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->get('/v1/superadmin/system-bot/knowledge', [SystemBotController::class, 'listKnowledge'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->get('/v1/superadmin/system-bot/knowledge/{id}', [SystemBotController::class, 'showKnowledge'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->post('/v1/superadmin/system-bot/knowledge/paste', [SystemBotController::class, 'pasteKnowledge'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->post('/v1/superadmin/system-bot/knowledge/url', [SystemBotController::class, 'addUrlKnowledge'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->post('/v1/superadmin/system-bot/knowledge/upload', [SystemBotController::class, 'uploadKnowledge'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->put('/v1/superadmin/system-bot/knowledge/{id}', [SystemBotController::class, 'updateKnowledge'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->post('/v1/superadmin/system-bot/knowledge/{id}', [SystemBotController::class, 'updateKnowledge'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->delete('/v1/superadmin/system-bot/knowledge/{id}', [SystemBotController::class, 'deleteKnowledge'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->post('/v1/superadmin/system-bot/knowledge/{id}/refresh', [SystemBotController::class, 'refreshKnowledge'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->post('/v1/superadmin/system-bot/crawl-website', [SystemBotController::class, 'crawlWebsite'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->get('/v1/superadmin/system-bot/telemetry', [SystemBotController::class, 'getTelemetry'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->get('/v1/superadmin/system-bot/conversations/{id}', [SystemBotController::class, 'getConversationTranscript'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
 
 $router->get('/source_attribution', function (Request $req) {
     require dirname(__DIR__) . '/public/source_attribution.html';

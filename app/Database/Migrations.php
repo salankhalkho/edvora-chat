@@ -2070,6 +2070,67 @@ class Migrations
         } catch (Throwable $e) {
             error_log('[Migrations] subscription plan mapping: ' . $e->getMessage());
         }
+
+        // 36. PLATFORM SYSTEM ORGANIZATION & INFORMATIONAL CHATBOT MODE
+        try {
+            $checkIsSystem = $this->db->query("SHOW COLUMNS FROM organizations LIKE 'is_system'");
+            if (!$checkIsSystem->fetch()) {
+                $this->db->exec("ALTER TABLE organizations ADD COLUMN is_system TINYINT(1) NOT NULL DEFAULT 0 AFTER subscription_status, ADD INDEX idx_org_is_system (is_system);");
+            }
+
+            $checkChatMode = $this->db->query("SHOW COLUMNS FROM chatbots LIKE 'chat_mode'");
+            if (!$checkChatMode->fetch()) {
+                $this->db->exec("ALTER TABLE chatbots ADD COLUMN chat_mode ENUM('admissions', 'informational') NOT NULL DEFAULT 'admissions' AFTER is_active;");
+            }
+
+            // Ensure System Organization exists
+            $stmtSysOrg = $this->db->query("SELECT id FROM organizations WHERE is_system = 1 LIMIT 1");
+            $sysOrgId = (int)$stmtSysOrg->fetchColumn();
+
+            if (!$sysOrgId) {
+                $stmtBySlug = $this->db->prepare("SELECT id FROM organizations WHERE slug = 'edvora-system' LIMIT 1");
+                $stmtBySlug->execute();
+                $sysOrgId = (int)$stmtBySlug->fetchColumn();
+
+                if ($sysOrgId) {
+                    $this->db->prepare("UPDATE organizations SET is_system = 1, subscription_status = 'active' WHERE id = :id")->execute([':id' => $sysOrgId]);
+                } else {
+                    $stmtInsOrg = $this->db->prepare("
+                        INSERT INTO organizations (name, slug, primary_color, subscription_status, is_system, website_url, created_at, updated_at)
+                        VALUES ('Edvora.chat (System)', 'edvora-system', '#4F46E5', 'active', 1, 'https://edvora.chat', NOW(), NOW())
+                    ");
+                    $stmtInsOrg->execute();
+                    $sysOrgId = (int)$this->db->lastInsertId();
+                    $this->db->exec("UPDATE organizations SET institute_id = MD5(CAST(id AS CHAR)) WHERE id = {$sysOrgId} AND (institute_id IS NULL OR institute_id = '')");
+                }
+            }
+
+            // Ensure System Chatbot exists
+            if ($sysOrgId > 0) {
+                $stmtSysBot = $this->db->prepare("SELECT id FROM chatbots WHERE organization_id = :oid LIMIT 1");
+                $stmtSysBot->execute([':oid' => $sysOrgId]);
+                $sysBotId = (int)$stmtSysBot->fetchColumn();
+
+                if (!$sysBotId) {
+                    $botToken = 'edvora_saas_' . substr(md5('edvora_system_bot_' . $sysOrgId), 0, 20);
+                    $welcomeMsg = "Hi there! 👋 Welcome to Edvora.chat. Ask me anything about our AI Admissions Chatbot platform, features, integrations, or pricing plans!";
+                    $stmtInsBot = $this->db->prepare("
+                        INSERT INTO chatbots (organization_id, name, welcome_message, primary_color, bot_token, allowed_domains, is_active, chat_mode, lead_capture_enabled, quick_chips, created_at, updated_at)
+                        VALUES (:oid, 'Edvora Product Assistant', :welcome, '#4F46E5', :token, :domains, 1, 'informational', 0, '[]', NOW(), NOW())
+                    ");
+                    $stmtInsBot->execute([
+                        ':oid' => $sysOrgId,
+                        ':welcome' => $welcomeMsg,
+                        ':token' => $botToken,
+                        ':domains' => json_encode(['edvora.chat', '*.edvora.chat', 'localhost', '127.0.0.1'])
+                    ]);
+                } else {
+                    $this->db->prepare("UPDATE chatbots SET chat_mode = 'informational', lead_capture_enabled = 0, is_active = 1 WHERE id = :bid")->execute([':bid' => $sysBotId]);
+                }
+            }
+        } catch (Throwable $e) {
+            error_log('[Migrations] system organization & informational mode: ' . $e->getMessage());
+        }
     }
 }
 

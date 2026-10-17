@@ -1,0 +1,1786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edvora Website Chatbot — SuperAdmin Console</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/theme-branding.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: var(--brand-bg-dark, #0b0f19);
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 12px;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        #appContainer {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar Navigation */
+        .brand-sidebar {
+            width: 220px;
+            min-width: 220px;
+            background: var(--brand-bg-sidebar, #0e1320);
+            border-right: 1px solid var(--brand-border-color, #1f2937);
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+        }
+        .sidebar-header {
+            height: 48px;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--brand-border-color, #1f2937);
+            font-weight: 700;
+            font-size: 14px;
+            color: #fff;
+        }
+        .sidebar-header .badge-super {
+            background: rgba(99, 102, 241, 0.2);
+            color: #818cf8;
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .sidebar-nav {
+            flex: 1;
+            padding: 12px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            overflow-y: auto;
+        }
+        .nav-section-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            padding: 10px 12px 4px;
+        }
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: var(--brand-radius-sm, 6px);
+            color: var(--brand-text-muted, #9ca3af);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-decoration: none;
+        }
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+        .nav-link.active {
+            background: var(--brand-primary, #6366f1);
+            color: #fff;
+            font-weight: 600;
+        }
+        .sidebar-footer {
+            padding: 12px;
+            border-top: 1px solid var(--brand-border-color, #1f2937);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Main Content */
+        .brand-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--brand-bg-dark, #0b0f19);
+        }
+        .brand-header {
+            height: 48px;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--brand-bg-card, #111827) !important;
+            border-bottom: 1px solid var(--brand-border-color, #1f2937) !important;
+        }
+        .header-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff !important;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .mode-pill {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            font-size: 10.5px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 999px;
+        }
+        .brand-body {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        /* Panels */
+        .brand-panel {
+            background: var(--brand-bg-card, #111827) !important;
+            border: 1px solid var(--brand-border-color, #1f2937) !important;
+            border-radius: var(--brand-radius-md, 8px) !important;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .brand-panel-header {
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+            padding-bottom: 8px;
+        }
+        .panel-heading {
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff !important;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Form Elements */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        .form-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--brand-text-muted, #9ca3af);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            height: 34px;
+            padding: 0 12px;
+            background: #080c14;
+            border: 1px solid var(--brand-border-color, #1f2937);
+            border-radius: var(--brand-radius-sm, 6px);
+            color: #fff;
+            font-size: 12px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.15s ease;
+        }
+        .form-textarea {
+            height: auto;
+            min-height: 90px;
+            padding: 10px 12px;
+            line-height: 1.5;
+            resize: vertical;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: var(--brand-primary, #6366f1);
+        }
+        .form-hint {
+            font-size: 11px;
+            color: var(--brand-text-muted, #9ca3af);
+        }
+
+        .color-picker-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .color-picker-wrap input[type="color"] {
+            width: 36px;
+            height: 34px;
+            border: 1px solid #374151;
+            border-radius: 6px;
+            background: #080c14;
+            cursor: pointer;
+            padding: 2px;
+        }
+
+        /* Buttons */
+        .brand-btn {
+            height: 32px;
+            padding: 0 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            border-radius: var(--brand-radius-sm, 6px);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.15s ease;
+            text-decoration: none;
+        }
+        .brand-btn-sm {
+            height: 26px;
+            padding: 0 10px;
+            font-size: 11px;
+        }
+        .brand-btn-primary { background: var(--brand-primary, #6366f1); color: #fff; }
+        .brand-btn-primary:hover { background: var(--brand-primary-hover, #4f46e5); }
+        .brand-btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border: 1px solid var(--brand-border-color, #1f2937);
+        }
+        .brand-btn-secondary:hover { background: rgba(255, 255, 255, 0.14); }
+        .brand-btn-success {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.35);
+        }
+        .brand-btn-success:hover { background: rgba(16, 185, 129, 0.25); }
+        .brand-btn-danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.35);
+        }
+        .brand-btn-danger:hover { background: rgba(239, 68, 68, 0.25); }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .metric-card {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 8px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: #6366f1;
+        }
+        .metric-card.green::before { background: #10b981; }
+        .metric-card.blue::before { background: #3b82f6; }
+        .metric-card.amber::before { background: #f59e0b; }
+        .metric-label {
+            font-size: 10.5px;
+            font-weight: 600;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .metric-val {
+            font-size: 20px;
+            font-weight: 800;
+            color: #fff;
+        }
+        .metric-sub {
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        /* Tables */
+        .brand-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .brand-table th {
+            text-align: left;
+            padding: 10px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            border-bottom: 1px solid #1f2937;
+            background: rgba(255,255,255,0.02);
+        }
+        .brand-table td {
+            padding: 11px 12px;
+            font-size: 12px;
+            color: #e5e7eb;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            vertical-align: middle;
+        }
+        .brand-table tr:hover td {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .code-box {
+            background: #060911;
+            border: 1px solid #1f2937;
+            border-radius: 6px;
+            padding: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px;
+            color: #a5b4fc;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        .banner-alert {
+            padding: 10px 14px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 12px;
+            font-weight: 500;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+        .banner-alert-success {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.35);
+        }
+        .banner-alert-error {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.35);
+        }
+
+        /* Live Widget Preview Card */
+        .widget-preview-box {
+            width: 340px;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.12);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.45);
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+            color: #1e293b;
+        }
+        .wp-header {
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #4F46E5;
+            color: #ffffff;
+        }
+        .wp-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .wp-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .wp-body {
+            padding: 16px;
+            background: #f9fafb;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 210px;
+        }
+        .wp-bubble-bot {
+            background: #f1f5f9;
+            color: #1e293b;
+            padding: 10px 13px;
+            border-radius: 14px;
+            font-size: 12px;
+            line-height: 1.45;
+            max-width: 88%;
+            align-self: flex-start;
+        }
+        .wp-bubble-user {
+            background: #4F46E5;
+            color: #ffffff;
+            padding: 9px 13px;
+            border-radius: 14px;
+            font-size: 12px;
+            line-height: 1.45;
+            max-width: 82%;
+            align-self: flex-end;
+        }
+        .wp-footer {
+            padding: 10px 12px;
+            background: #ffffff;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .wp-input {
+            flex: 1;
+            height: 32px;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            padding: 0 12px;
+            font-size: 11.5px;
+            display: flex;
+            align-items: center;
+            color: #94a3b8;
+        }
+        .wp-send {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #4F46E5;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        /* Transcript Drawer / Modal */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.72);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-card {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 10px;
+            width: 780px;
+            max-width: 96vw;
+            max-height: 88vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
+        }
+        .modal-header {
+            padding: 14px 20px;
+            border-bottom: 1px solid #1f2937;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 700;
+            font-size: 13px;
+            color: #fff;
+        }
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .chat-transcript-msg {
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-transcript-msg.user { align-items: flex-end; }
+        .chat-transcript-msg.assistant { align-items: flex-start; }
+        .chat-bubble {
+            max-width: 82%;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 12px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        .chat-transcript-msg.user .chat-bubble {
+            background: #4f46e5;
+            color: #fff;
+        }
+        .chat-transcript-msg.assistant .chat-bubble {
+            background: #1f2937;
+            color: #f3f4f6;
+            border: 1px solid #374151;
+        }
+        .chat-meta {
+            font-size: 10.5px;
+            color: #9ca3af;
+            margin-top: 4px;
+            display: flex;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div id="appContainer">
+        <!-- Left Sidebar -->
+        <aside class="brand-sidebar">
+            <div class="sidebar-header">
+                <span>edvora.chat</span>
+                <span class="badge-super">System Bot</span>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">Edvora Website Bot</div>
+                <a class="nav-link active" data-section="customize" onclick="switchSection('customize')">
+                    <span>🎨</span> Customize &amp; Embed
+                </a>
+                <a class="nav-link" data-section="knowledge" onclick="switchSection('knowledge')">
+                    <span>📚</span> Knowledge &amp; Crawl
+                </a>
+                <a class="nav-link" data-section="prompt" onclick="switchSection('prompt')">
+                    <span>⚡</span> Bot Instructions &amp; Plans
+                </a>
+                <a class="nav-link" data-section="telemetry" onclick="switchSection('telemetry')">
+                    <span>📊</span> Telemetry &amp; Transcripts
+                </a>
+
+                <div class="nav-section-label" style="margin-top: 12px;">SuperAdmin Navigation</div>
+                <a class="nav-link" href="/superadmin">
+                    <span>⬅️</span> Back to SuperAdmin
+                </a>
+                <a class="nav-link" href="/superadmin?tab=plans">
+                    <span>🏷️</span> Plans &amp; Pricing Table
+                </a>
+                <a class="nav-link" href="/session-journeys">
+                    <span>🧭</span> All Session Journeys
+                </a>
+                <a class="nav-link" href="/llm-spendings">
+                    <span>💳</span> LLM Spendings
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <span style="color: var(--brand-text-muted); font-size: 11px;">Informational Mode</span>
+                <a id="btnTestBotLive" href="/test" target="_blank" class="brand-btn brand-btn-primary brand-btn-sm">Test Bot ↗</a>
+            </div>
+        </aside>
+
+        <!-- Main Area -->
+        <main class="brand-main">
+            <header class="brand-header">
+                <div class="header-title">
+                    <span id="headerSectionTitle">🎨 Customize Widget &amp; Embed Code</span>
+                    <span class="mode-pill">Informational Mode • Live Plans Synced</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span id="headerTokenBadge" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #9ca3af; background: #080c14; padding: 4px 10px; border-radius: 4px; border: 1px solid #1f2937;">Token: loading...</span>
+                    <button onclick="reloadAll()" class="brand-btn brand-btn-secondary brand-btn-sm">🔄 Refresh</button>
+                </div>
+            </header>
+
+            <div class="brand-body" id="mainScrollBody">
+                <div id="statusBanner" class="banner-alert"></div>
+
+                <!-- ========================================== -->
+                <!-- SECTION 1: CUSTOMIZE WIDGET & EMBED CODE   -->
+                <!-- ========================================== -->
+                <div id="sec-customize" class="bot-section">
+                    <!-- Embed Code Panel -->
+                    <div class="brand-panel">
+                        <div class="brand-panel-header">
+                            <div class="panel-heading">
+                                <span>💻</span> Website Chat-Widget Embed Snippet (For edvora.chat pages)
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button onclick="copyEmbedCode()" class="brand-btn brand-btn-primary brand-btn-sm">📋 Copy Embed Snippet</button>
+                                <a id="btnOpenTestPage" href="/test" target="_blank" class="brand-btn brand-btn-secondary brand-btn-sm">🧪 Open Standalone Test Chat ↗</a>
+                            </div>
+                        </div>
+                        <p style="color: #9ca3af; font-size: 11.5px; margin-bottom: 10px;">
+                            Paste this snippet before the closing <code>&lt;/body&gt;</code> tag on any <strong>edvora.chat</strong> page. It uses the existing <code>widget.js</code> &amp; LLM gateway in <strong>Informational Mode</strong> (no admissions lead forms, no campus tours, no starter chips, and live plan pricing synced automatically from the <code>plans</code> table).
+                        </p>
+                        <div class="code-box" id="embedCodeBox">Loading embed snippet...</div>
+                    </div>
+
+                    <!-- Customization + Live Preview Split -->
+                    <div style="display: grid; grid-template-columns: 1fr 360px; gap: 20px; align-items: start;">
+                        <div class="brand-panel" style="margin-bottom: 0;">
+                            <div class="brand-panel-header">
+                                <div class="panel-heading">
+                                    <span>🎨</span> Appearance, Colors, Avatar &amp; Welcome Message
+                                </div>
+                                <button onclick="saveCustomization()" class="brand-btn brand-btn-primary brand-btn-sm" id="btnSaveCust">💾 Save Appearance</button>
+                            </div>
+
+                            <form id="custForm" onsubmit="event.preventDefault(); saveCustomization();">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label class="form-label">Chatbot Header Title</label>
+                                        <input type="text" id="custBotName" class="form-input" placeholder="Edvora Product Assistant" oninput="updatePreview()" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Header Subtitle</label>
+                                        <input type="text" id="custSubtitle" class="form-input" placeholder="Online • Product &amp; Pricing Advisor" oninput="updatePreview()" />
+                                    </div>
+
+                                    <div class="form-group full-width">
+                                        <label class="form-label">Welcome Greeting Message</label>
+                                        <textarea id="custWelcome" class="form-textarea" rows="3" oninput="updatePreview()" placeholder="Hi there! 👋 Welcome to Edvora.chat..."></textarea>
+                                        <div class="form-hint">Displayed immediately when a visitor opens the chat widget on edvora.chat. (Starter chips &amp; lead forms are disabled.)</div>
+                                    </div>
+
+                                    <!-- Avatar Upload & Preset -->
+                                    <div class="form-group full-width" style="background: rgba(255,255,255,0.02); padding: 14px; border-radius: 6px; border: 1px solid #1f2937;">
+                                        <label class="form-label">Bot Avatar Image</label>
+                                        <div style="display: flex; align-items: center; gap: 14px; margin-top: 4px;">
+                                            <div id="avatarThumb" style="width: 44px; height: 44px; border-radius: 50%; background: #1f2937; display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 20px; border: 1px solid #374151;">🤖</div>
+                                            <div style="display: flex; flex-direction: column; gap: 6px; flex: 1;">
+                                                <div style="display: flex; gap: 8px; align-items: center;">
+                                                    <input type="file" id="avatarFileInput" accept="image/*" style="display: none;" onchange="uploadBotAvatar(this)" />
+                                                    <button type="button" onclick="document.getElementById('avatarFileInput').click()" class="brand-btn brand-btn-secondary brand-btn-sm">📤 Upload Custom Avatar</button>
+                                                    <button type="button" onclick="clearBotAvatar()" class="brand-btn brand-btn-danger brand-btn-sm">Reset to Default Icon</button>
+                                                </div>
+                                                <input type="text" id="custAvatarUrl" class="form-input" placeholder="/v1/uploads/avatars/..." readonly style="height: 28px; font-size: 11px; color: #9ca3af;" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Colors -->
+                                    <div class="form-group">
+                                        <label class="form-label">Header &amp; Primary Brand Color</label>
+                                        <div class="color-picker-wrap">
+                                            <input type="color" id="custHeaderBgPicker" value="#4F46E5" onchange="syncColor('custHeaderBg', this.value)" />
+                                            <input type="text" id="custHeaderBg" class="form-input" value="#4F46E5" oninput="syncPicker('custHeaderBgPicker', this.value); updatePreview();" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Header Text Color</label>
+                                        <div class="color-picker-wrap">
+                                            <input type="color" id="custHeaderTextPicker" value="#ffffff" onchange="syncColor('custHeaderText', this.value)" />
+                                            <input type="text" id="custHeaderText" class="form-input" value="#ffffff" oninput="syncPicker('custHeaderTextPicker', this.value); updatePreview();" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">User Message Bubble Color</label>
+                                        <div class="color-picker-wrap">
+                                            <input type="color" id="custUserBubbleBgPicker" value="#4F46E5" onchange="syncColor('custUserBubbleBg', this.value)" />
+                                            <input type="text" id="custUserBubbleBg" class="form-input" value="#4F46E5" oninput="syncPicker('custUserBubbleBgPicker', this.value); updatePreview();" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">User Bubble Text Color</label>
+                                        <div class="color-picker-wrap">
+                                            <input type="color" id="custUserBubbleTextPicker" value="#ffffff" onchange="syncColor('custUserBubbleText', this.value)" />
+                                            <input type="text" id="custUserBubbleText" class="form-input" value="#ffffff" oninput="syncPicker('custUserBubbleTextPicker', this.value); updatePreview();" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Bot Message Bubble Color</label>
+                                        <div class="color-picker-wrap">
+                                            <input type="color" id="custBotBubbleBgPicker" value="#f1f5f9" onchange="syncColor('custBotBubbleBg', this.value)" />
+                                            <input type="text" id="custBotBubbleBg" class="form-input" value="#f1f5f9" oninput="syncPicker('custBotBubbleBgPicker', this.value); updatePreview();" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Bot Bubble Text Color</label>
+                                        <div class="color-picker-wrap">
+                                            <input type="color" id="custBotBubbleTextPicker" value="#1e293b" onchange="syncColor('custBotBubbleText', this.value)" />
+                                            <input type="text" id="custBotBubbleText" class="form-input" value="#1e293b" oninput="syncPicker('custBotBubbleTextPicker', this.value); updatePreview();" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Launcher Button Color</label>
+                                        <div class="color-picker-wrap">
+                                            <input type="color" id="custLauncherBgPicker" value="#4F46E5" onchange="syncColor('custLauncherBg', this.value)" />
+                                            <input type="text" id="custLauncherBg" class="form-input" value="#4F46E5" oninput="syncPicker('custLauncherBgPicker', this.value); updatePreview();" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Send Button Color</label>
+                                        <div class="color-picker-wrap">
+                                            <input type="color" id="custSendBtnBgPicker" value="#4F46E5" onchange="syncColor('custSendBtnBg', this.value)" />
+                                            <input type="text" id="custSendBtnBg" class="form-input" value="#4F46E5" oninput="syncPicker('custSendBtnBgPicker', this.value); updatePreview();" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Launcher Style</label>
+                                        <select id="custLauncherStyle" class="form-select">
+                                            <option value="circle">Circle Button</option>
+                                            <option value="pill">Pill with Label</option>
+                                            <option value="square">Rounded Square</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Launcher Pill Text</label>
+                                        <input type="text" id="custLauncherText" class="form-input" value="Ask Edvora AI" />
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Input Placeholder</label>
+                                        <input type="text" id="custPlaceholder" class="form-input" value="Ask about Edvora features or pricing..." oninput="updatePreview()" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Widget Theme</label>
+                                        <select id="custTheme" class="form-select" onchange="updatePreview()">
+                                            <option value="light">Light Mode</option>
+                                            <option value="dark">Dark Mode</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div style="margin-top: 18px; display: flex; justify-content: flex-end;">
+                                    <button type="submit" class="brand-btn brand-btn-primary">💾 Save Widget Customization</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Live Visual Preview -->
+                        <div style="position: sticky; top: 0;">
+                            <div style="font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
+                                Live Widget Preview (No Starter Chips / No Lead Forms)
+                            </div>
+                            <div class="widget-preview-box" id="wpContainer">
+                                <div class="wp-header" id="wpHeader">
+                                    <div class="wp-avatar" id="wpAvatar">🤖</div>
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 13px;" id="wpTitle">Edvora Product Assistant</div>
+                                        <div style="font-size: 10.5px; opacity: 0.85;" id="wpSub">Online • Replies instantly</div>
+                                    </div>
+                                </div>
+                                <div class="wp-body" id="wpBody">
+                                    <div class="wp-bubble-bot" id="wpWelcome">
+                                        Hi there! 👋 Welcome to Edvora.chat. Ask me anything about our AI Admissions Chatbot platform, features, integrations, or pricing plans!
+                                    </div>
+                                    <div class="wp-bubble-user" id="wpUserSample">
+                                        How do the Growth and Pro plans differ?
+                                    </div>
+                                    <div class="wp-bubble-bot" id="wpBotSample">
+                                        The <strong>Growth</strong> plan ($699/mo or ₹4,999/mo) is ideal for growing colleges needing multi-department routing and campus tour scheduling, while <strong>Pro</strong> ($2,100/mo or ₹9,999/mo) unlocks higher quotas and full enterprise capabilities!
+                                    </div>
+                                </div>
+                                <div class="wp-footer" id="wpFooter">
+                                    <div class="wp-input" id="wpInput">Ask about Edvora features or pricing...</div>
+                                    <div class="wp-send" id="wpSend">➤</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- SECTION 2: KNOWLEDGE BASE & CRAWLER        -->
+                <!-- ========================================== -->
+                <div id="sec-knowledge" class="bot-section" style="display: none;">
+                    <!-- 1-Click Crawl Edvora.chat Website -->
+                    <div class="brand-panel">
+                        <div class="brand-panel-header">
+                            <div class="panel-heading">
+                                <span>🌐</span> Auto-Crawl Edvora.chat Website Pages
+                            </div>
+                            <button onclick="crawlEdvoraWebsite()" id="btnCrawlSite" class="brand-btn brand-btn-success brand-btn-sm">
+                                🚀 Crawl All Edvora.chat Pages Now
+                            </button>
+                        </div>
+                        <p style="color: #9ca3af; font-size: 11.5px;">
+                            Automatically scrapes and indexes <code>edvora.chat</code> landing, pricing, command center dashboard, central knowledge hub, channel attribution, full-funnel tracking, mobile SDK integration, privacy/FERPA compliance, and terms pages into the System Bot's vector knowledge base.
+                        </p>
+                    </div>
+
+                    <!-- Add Content: Paste Text / Scrape URL / Upload File -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="brand-panel">
+                            <div class="brand-panel-header">
+                                <div class="panel-heading"><span>📝</span> Add Custom Knowledge (Paste Text / FAQ)</div>
+                            </div>
+                            <form onsubmit="addPastedKnowledge(event)">
+                                <div class="form-group" style="margin-bottom: 10px;">
+                                    <label class="form-label">Title *</label>
+                                    <input type="text" id="pasteTitle" class="form-input" placeholder="e.g. Edvora Sales Battlecard &amp; Differentiators" required />
+                                </div>
+                                <div class="form-group" style="margin-bottom: 10px;">
+                                    <label class="form-label">Category</label>
+                                    <input type="text" id="pasteCategory" class="form-input" value="Product &amp; Pricing" />
+                                </div>
+                                <div class="form-group" style="margin-bottom: 12px;">
+                                    <label class="form-label">Content *</label>
+                                    <textarea id="pasteContent" class="form-textarea" rows="5" placeholder="Paste product details, FAQs, plan comparisons, or objection handling..." required></textarea>
+                                </div>
+                                <button type="submit" class="brand-btn brand-btn-primary brand-btn-sm" id="btnAddPaste">➕ Save &amp; Embed Text</button>
+                            </form>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 20px;">
+                            <div class="brand-panel" style="margin-bottom: 0;">
+                                <div class="brand-panel-header">
+                                    <div class="panel-heading"><span>🔗</span> Add Web Page URL</div>
+                                </div>
+                                <form onsubmit="addUrlKnowledge(event)">
+                                    <div class="form-grid" style="margin-bottom: 12px;">
+                                        <div class="form-group">
+                                            <label class="form-label">URL *</label>
+                                            <input type="url" id="scrapeUrl" class="form-input" placeholder="https://edvora.chat/..." required />
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Custom Title (Optional)</label>
+                                            <input type="text" id="scrapeTitle" class="form-input" placeholder="Auto-detected if blank" />
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="brand-btn brand-btn-primary brand-btn-sm" id="btnAddUrl">🌐 Scrape &amp; Embed URL</button>
+                                </form>
+                            </div>
+
+                            <div class="brand-panel" style="margin-bottom: 0;">
+                                <div class="brand-panel-header">
+                                    <div class="panel-heading"><span>📄</span> Upload Document (PDF, DOCX, TXT)</div>
+                                </div>
+                                <form onsubmit="uploadDocKnowledge(event)">
+                                    <div class="form-grid" style="margin-bottom: 12px;">
+                                        <div class="form-group">
+                                            <label class="form-label">Select File *</label>
+                                            <input type="file" id="uploadDocFile" accept=".pdf,.docx,.txt" class="form-input" style="padding-top: 5px;" required />
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Document Title</label>
+                                            <input type="text" id="uploadDocTitle" class="form-input" placeholder="Optional title" />
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="brand-btn brand-btn-primary brand-btn-sm" id="btnUploadDoc">📤 Upload &amp; Embed File</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Knowledge Sources Table -->
+                    <div class="brand-panel">
+                        <div class="brand-panel-header">
+                            <div class="panel-heading">
+                                <span>📚</span> System Bot Knowledge Sources (<span id="kbCountLabel">0</span>)
+                            </div>
+                            <button onclick="loadKnowledgeList()" class="brand-btn brand-btn-secondary brand-btn-sm">🔄 Refresh Sources</button>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table class="brand-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Title</th>
+                                        <th>Type</th>
+                                        <th>Category</th>
+                                        <th>Tokens</th>
+                                        <th>Status</th>
+                                        <th>Last Updated</th>
+                                        <th style="text-align: right;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="kbTableBody">
+                                    <tr><td colspan="8" style="text-align: center; color: #9ca3af;">Loading knowledge sources...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- SECTION 3: BOT INSTRUCTIONS & LIVE PLANS   -->
+                <!-- ========================================== -->
+                <div id="sec-prompt" class="bot-section" style="display: none;">
+                    <div class="brand-panel">
+                        <div class="brand-panel-header">
+                            <div class="panel-heading">
+                                <span>⚡</span> System Bot Instructions (Informational &amp; Persuasive SaaS Advisor)
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button onclick="resetDefaultPrompt()" class="brand-btn brand-btn-secondary brand-btn-sm">↺ Reset to Default</button>
+                                <button onclick="saveBotPrompt()" class="brand-btn brand-btn-primary brand-btn-sm" id="btnSavePrompt">💾 Save Instructions</button>
+                            </div>
+                        </div>
+                        <p style="color: #9ca3af; font-size: 11.5px; margin-bottom: 12px;">
+                            These instructions govern how the Edvora Website Chatbot answers visitors. Live plan prices, quotas, and features from the <code>plans</code> database table are automatically appended below this prompt on every turn.
+                        </p>
+                        <textarea id="systemPromptTextarea" class="form-textarea" rows="13" style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px;"></textarea>
+                    </div>
+
+                    <div class="brand-panel">
+                        <div class="brand-panel-header">
+                            <div class="panel-heading">
+                                <span>🏷️</span> Auto-Synced Live Plans &amp; Pricing Block (Read-Only Preview from <code>plans</code> Table)
+                            </div>
+                            <a href="/superadmin?tab=plans" class="brand-btn brand-btn-secondary brand-btn-sm">✏️ Edit Plans in SuperAdmin</a>
+                        </div>
+                        <p style="color: #9ca3af; font-size: 11.5px; margin-bottom: 10px;">
+                            Whenever you update a plan's price, quota, or feature toggle in the SuperAdmin Plans Manager, the block below updates automatically in real time — zero manual re-sync required.
+                        </p>
+                        <div class="code-box" id="livePlansPreviewBox" style="color: #34d399;">Loading live plans context...</div>
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- SECTION 4: TELEMETRY & CHAT TRANSCRIPTS    -->
+                <!-- ========================================== -->
+                <div id="sec-telemetry" class="bot-section" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span style="font-size: 11.5px; color: #9ca3af; font-weight: 600;">Time Window:</span>
+                            <select id="telemetryDays" class="form-select" style="width: 140px; height: 30px;" onchange="loadTelemetry()">
+                                <option value="7">Last 7 Days</option>
+                                <option value="30" selected>Last 30 Days</option>
+                                <option value="90">Last 90 Days</option>
+                                <option value="365">Last 365 Days</option>
+                            </select>
+                            <input type="text" id="telemetrySearch" class="form-input" placeholder="Search transcripts or visitor ID..." style="width: 260px; height: 30px;" oninput="debounceTelemetrySearch()" />
+                        </div>
+                        <button onclick="loadTelemetry()" class="brand-btn brand-btn-secondary brand-btn-sm">🔄 Refresh Telemetry</button>
+                    </div>
+
+                    <!-- KPI Cards -->
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-label">Total Conversations</div>
+                            <div class="metric-val" id="kpiConvs">0</div>
+                            <div class="metric-sub" id="kpiQuestions">0 visitor questions asked</div>
+                        </div>
+                        <div class="metric-card green">
+                            <div class="metric-label">Visitor Sessions &amp; Dwell</div>
+                            <div class="metric-val" id="kpiSessions">0</div>
+                            <div class="metric-sub" id="kpiDwell">Avg dwell: 0s • 0 pages/session</div>
+                        </div>
+                        <div class="metric-card blue">
+                            <div class="metric-label">Total Messages</div>
+                            <div class="metric-val" id="kpiMessages">0</div>
+                            <div class="metric-sub" id="kpiEngaged">0 chat-engaged sessions</div>
+                        </div>
+                        <div class="metric-card amber">
+                            <div class="metric-label">LLM Tokens &amp; Spend</div>
+                            <div class="metric-val" id="kpiTokens">0</div>
+                            <div class="metric-sub" id="kpiCost">$0.0000 est • 0ms avg latency</div>
+                        </div>
+                    </div>
+
+                    <!-- Conversations & Transcripts Table -->
+                    <div class="brand-panel">
+                        <div class="brand-panel-header">
+                            <div class="panel-heading">
+                                <span>💬</span> Visitor Chat Transcripts &amp; Session Attribution
+                            </div>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table class="brand-table">
+                                <thead>
+                                    <tr>
+                                        <th>Conv ID</th>
+                                        <th>Visitor / Mode</th>
+                                        <th>Entry Page</th>
+                                        <th>First Visitor Question</th>
+                                        <th>Messages</th>
+                                        <th>Sentiment / Stage</th>
+                                        <th>Last Active</th>
+                                        <th style="text-align: right;">Transcript</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="conversationsTableBody">
+                                    <tr><td colspan="8" style="text-align: center; color: #9ca3af;">Loading conversations...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Knowledge Modal -->
+    <div id="editKbModal" class="modal-backdrop">
+        <div class="modal-card">
+            <div class="modal-header">
+                <span id="editKbModalTitle">✏️ Edit Knowledge Source</span>
+                <button onclick="closeEditKbModal()" class="brand-btn brand-btn-secondary brand-btn-sm">✕ Close</button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="saveEditedKnowledge(event)">
+                    <input type="hidden" id="editKbId" />
+                    <div class="form-grid" style="margin-bottom: 12px;">
+                        <div class="form-group">
+                            <label class="form-label">Title *</label>
+                            <input type="text" id="editKbTitle" class="form-input" required />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Category</label>
+                            <input type="text" id="editKbCategory" class="form-input" />
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label class="form-label">Processed Text Content (Re-chunks &amp; Re-embeds automatically on save)</label>
+                        <textarea id="editKbContent" class="form-textarea" rows="14" style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px;"></textarea>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                        <button type="button" onclick="closeEditKbModal()" class="brand-btn brand-btn-secondary">Cancel</button>
+                        <button type="submit" class="brand-btn brand-btn-primary" id="btnSaveKbEdit">💾 Save &amp; Re-Embed</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conversation Transcript Modal -->
+    <div id="transcriptModal" class="modal-backdrop">
+        <div class="modal-card">
+            <div class="modal-header">
+                <span id="transcriptModalTitle">💬 Conversation Transcript</span>
+                <button onclick="closeTranscriptModal()" class="brand-btn brand-btn-secondary brand-btn-sm">✕ Close</button>
+            </div>
+            <div class="modal-body" id="transcriptModalBody">
+                Loading transcript...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let systemBotState = {
+            bot_token: '',
+            default_prompt: '',
+            customization: {}
+        };
+        let searchTimer = null;
+
+        function getToken() {
+            return localStorage.getItem('edvora_super_token')
+                || localStorage.getItem('edvora_superadmin_token')
+                || localStorage.getItem('edvora_token')
+                || '';
+        }
+
+        function getAuthHeaders(isJson = true) {
+            const headers = { 'Authorization': `Bearer ${getToken()}` };
+            if (isJson) headers['Content-Type'] = 'application/json';
+            return headers;
+        }
+
+        function showBanner(msg, isError = false) {
+            const b = document.getElementById('statusBanner');
+            b.className = `banner-alert ${isError ? 'banner-alert-error' : 'banner-alert-success'}`;
+            b.innerHTML = `<span>${isError ? '❌' : '✓'}</span> <span>${msg}</span>`;
+            b.style.display = 'flex';
+            setTimeout(() => { b.style.display = 'none'; }, 6000);
+        }
+
+        function switchSection(sec) {
+            document.querySelectorAll('.bot-section').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.sidebar-nav .nav-link[data-section]').forEach(el => el.classList.remove('active'));
+
+            const target = document.getElementById(`sec-${sec}`);
+            if (target) target.style.display = 'block';
+
+            const link = document.querySelector(`.sidebar-nav .nav-link[data-section="${sec}"]`);
+            if (link) link.classList.add('active');
+
+            const titles = {
+                customize: '🎨 Customize Widget & Embed Code',
+                knowledge: '📚 Knowledge Base & Website Crawler',
+                prompt: '⚡ Bot Instructions & Live Plans Sync',
+                telemetry: '📊 Telemetry & Visitor Chat Transcripts'
+            };
+            document.getElementById('headerSectionTitle').innerText = titles[sec] || 'Edvora Website Chatbot';
+            document.getElementById('mainScrollBody').scrollTo({ top: 0, behavior: 'smooth' });
+
+            if (sec === 'knowledge') loadKnowledgeList();
+            if (sec === 'telemetry') loadTelemetry();
+        }
+
+        function syncColor(inputId, val) {
+            document.getElementById(inputId).value = val;
+            updatePreview();
+        }
+        function syncPicker(pickerId, val) {
+            if (/^#[0-9a-fA-F]{6}$/.test(val.trim())) {
+                document.getElementById(pickerId).value = val.trim();
+            }
+        }
+
+        function updatePreview() {
+            const name = document.getElementById('custBotName').value || 'Edvora Product Assistant';
+            const sub = document.getElementById('custSubtitle').value || 'Online • Replies instantly';
+            const welcome = document.getElementById('custWelcome').value || 'Hi there! 👋 Welcome to Edvora.chat.';
+            const headerBg = document.getElementById('custHeaderBg').value || '#4F46E5';
+            const headerText = document.getElementById('custHeaderText').value || '#ffffff';
+            const userBg = document.getElementById('custUserBubbleBg').value || '#4F46E5';
+            const userText = document.getElementById('custUserBubbleText').value || '#ffffff';
+            const botBg = document.getElementById('custBotBubbleBg').value || '#f1f5f9';
+            const botText = document.getElementById('custBotBubbleText').value || '#1e293b';
+            const sendBg = document.getElementById('custSendBtnBg').value || '#4F46E5';
+            const placeholder = document.getElementById('custPlaceholder').value || 'Ask about Edvora features or pricing...';
+            const avatarUrl = document.getElementById('custAvatarUrl').value;
+            const theme = document.getElementById('custTheme').value;
+
+            document.getElementById('wpTitle').innerText = name;
+            document.getElementById('wpSub').innerText = sub;
+            document.getElementById('wpWelcome').innerText = welcome;
+            document.getElementById('wpInput').innerText = placeholder;
+
+            const wpHeader = document.getElementById('wpHeader');
+            wpHeader.style.background = headerBg;
+            wpHeader.style.color = headerText;
+
+            const wpUser = document.getElementById('wpUserSample');
+            wpUser.style.background = userBg;
+            wpUser.style.color = userText;
+
+            const wpWelcome = document.getElementById('wpWelcome');
+            const wpBotSample = document.getElementById('wpBotSample');
+            wpWelcome.style.background = botBg;
+            wpWelcome.style.color = botText;
+            wpBotSample.style.background = botBg;
+            wpBotSample.style.color = botText;
+
+            document.getElementById('wpSend').style.background = sendBg;
+
+            const wpBody = document.getElementById('wpBody');
+            const wpFooter = document.getElementById('wpFooter');
+            if (theme === 'dark') {
+                wpBody.style.background = '#0f172a';
+                wpFooter.style.background = '#1e293b';
+                wpFooter.style.borderColor = '#334155';
+            } else {
+                wpBody.style.background = '#f9fafb';
+                wpFooter.style.background = '#ffffff';
+                wpFooter.style.borderColor = '#e2e8f0';
+            }
+
+            const avatarHtml = avatarUrl ? `<img src="${avatarUrl}" alt="Avatar" />` : '🤖';
+            document.getElementById('wpAvatar').innerHTML = avatarHtml;
+            document.getElementById('avatarThumb').innerHTML = avatarHtml;
+        }
+
+        async function loadSystemBotConfig() {
+            try {
+                const res = await fetch('/v1/superadmin/system-bot/config', { headers: getAuthHeaders() });
+                if (res.status === 401 || res.status === 403) {
+                    window.location.href = '/superadmin';
+                    return;
+                }
+                const json = await res.json();
+                if (json.status !== 'success') {
+                    showBanner(json.message || 'Failed to load system bot config', true);
+                    return;
+                }
+
+                const d = json.data;
+                systemBotState.bot_token = d.bot_token;
+                systemBotState.default_prompt = d.default_prompt || '';
+                systemBotState.customization = d.customization || {};
+
+                document.getElementById('headerTokenBadge').innerText = `Token: ${d.bot_token}`;
+                document.getElementById('btnTestBotLive').href = `/test/${d.bot_token}`;
+                document.getElementById('btnOpenTestPage').href = `/test/${d.bot_token}`;
+
+                const embedCode = `<!-- Edvora.chat SaaS Website Chatbot (Informational Mode) -->\n<script \n  src="https://edvora.chat/widget.js" \n  data-bot-token="${d.bot_token}" \n  async>\n<\/script>`;
+                document.getElementById('embedCodeBox').innerText = embedCode;
+
+                const c = d.customization || {};
+                document.getElementById('custBotName').value = c.header_bot_name || d.bot_name || 'Edvora Product Assistant';
+                document.getElementById('custSubtitle').value = c.header_subtitle || 'Online • Product & Pricing Advisor';
+                document.getElementById('custWelcome').value = c.welcome_message || d.welcome_message || '';
+                document.getElementById('custAvatarUrl').value = c.avatar_url || '';
+
+                setColorField('custHeaderBg', 'custHeaderBgPicker', c.header_bg || '#4F46E5');
+                setColorField('custHeaderText', 'custHeaderTextPicker', c.header_text_color || '#ffffff');
+                setColorField('custUserBubbleBg', 'custUserBubbleBgPicker', c.user_bubble_bg || '#4F46E5');
+                setColorField('custUserBubbleText', 'custUserBubbleTextPicker', c.user_bubble_text || '#ffffff');
+                setColorField('custBotBubbleBg', 'custBotBubbleBgPicker', c.bot_bubble_bg || '#f1f5f9');
+                setColorField('custBotBubbleText', 'custBotBubbleTextPicker', c.bot_bubble_text || '#1e293b');
+                setColorField('custLauncherBg', 'custLauncherBgPicker', c.launcher_bg || '#4F46E5');
+                setColorField('custSendBtnBg', 'custSendBtnBgPicker', c.send_btn_bg || '#4F46E5');
+
+                document.getElementById('custLauncherStyle').value = c.launcher_style || 'circle';
+                document.getElementById('custLauncherText').value = c.launcher_text || 'Ask Edvora AI';
+                document.getElementById('custPlaceholder').value = c.input_placeholder || 'Ask about Edvora features or pricing...';
+                document.getElementById('custTheme').value = c.theme || 'light';
+
+                document.getElementById('systemPromptTextarea').value = d.system_prompt || '';
+                document.getElementById('livePlansPreviewBox').innerText = d.live_plans_context || '';
+
+                updatePreview();
+            } catch (e) {
+                showBanner('Error loading configuration: ' + e.message, true);
+            }
+        }
+
+        function setColorField(inputId, pickerId, val) {
+            document.getElementById(inputId).value = val;
+            if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+                document.getElementById(pickerId).value = val;
+            }
+        }
+
+        function copyEmbedCode() {
+            const text = document.getElementById('embedCodeBox').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showBanner('Embed code snippet copied to clipboard!');
+            });
+        }
+
+        async function saveCustomization() {
+            const btn = document.getElementById('btnSaveCust');
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
+
+            const avatarUrl = document.getElementById('custAvatarUrl').value.trim();
+            const cfg = {
+                header_bot_name: document.getElementById('custBotName').value.trim(),
+                header_subtitle: document.getElementById('custSubtitle').value.trim(),
+                welcome_message: document.getElementById('custWelcome').value.trim(),
+                avatar_type: avatarUrl ? 'upload' : 'preset',
+                avatar_url: avatarUrl || null,
+                header_bg: document.getElementById('custHeaderBg').value.trim(),
+                header_text_color: document.getElementById('custHeaderText').value.trim(),
+                user_bubble_bg: document.getElementById('custUserBubbleBg').value.trim(),
+                user_bubble_text: document.getElementById('custUserBubbleText').value.trim(),
+                bot_bubble_bg: document.getElementById('custBotBubbleBg').value.trim(),
+                bot_bubble_text: document.getElementById('custBotBubbleText').value.trim(),
+                launcher_bg: document.getElementById('custLauncherBg').value.trim(),
+                send_btn_bg: document.getElementById('custSendBtnBg').value.trim(),
+                launcher_style: document.getElementById('custLauncherStyle').value,
+                launcher_text: document.getElementById('custLauncherText').value.trim(),
+                input_placeholder: document.getElementById('custPlaceholder').value.trim(),
+                theme: document.getElementById('custTheme').value,
+                quick_chips: '',
+                show_action_brochure: false,
+                show_action_callback: false,
+                show_action_tour: false
+            };
+
+            try {
+                const res = await fetch('/v1/superadmin/system-bot/customization', {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ config: cfg })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showBanner('Widget customization saved!');
+                } else {
+                    showBanner(json.message || 'Failed to save customization', true);
+                }
+            } catch (e) {
+                showBanner('Error saving customization: ' + e.message, true);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = '💾 Save Appearance';
+            }
+        }
+
+        async function uploadBotAvatar(input) {
+            if (!input.files || !input.files[0]) return;
+            const fd = new FormData();
+            fd.append('image', input.files[0]);
+
+            try {
+                const res = await fetch('/v1/superadmin/system-bot/avatar?type=avatar', {
+                    method: 'POST',
+                    headers: getAuthHeaders(false),
+                    body: fd
+                });
+                const json = await res.json();
+                if (json.status === 'success' && json.data && json.data.url) {
+                    document.getElementById('custAvatarUrl').value = json.data.url;
+                    updatePreview();
+                    showBanner('Avatar image uploaded! Click Save Appearance to apply.');
+                } else {
+                    showBanner(json.message || 'Avatar upload failed', true);
+                }
+            } catch (e) {
+                showBanner('Upload error: ' + e.message, true);
+            }
+        }
+
+        function clearBotAvatar() {
+            document.getElementById('custAvatarUrl').value = '';
+            updatePreview();
+        }
+
+        // ==========================================
+        // KNOWLEDGE BASE FUNCTIONS
+        // ==========================================
+        async function loadKnowledgeList() {
+            const tbody = document.getElementById('kbTableBody');
+            try {
+                const res = await fetch('/v1/superadmin/system-bot/knowledge', { headers: getAuthHeaders() });
+                const json = await res.json();
+                if (json.status !== 'success') {
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#f87171;">${json.message || 'Error loading sources'}</td></tr>`;
+                    return;
+                }
+                const list = json.data || [];
+                document.getElementById('kbCountLabel').innerText = list.length;
+
+                if (list.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#9ca3af;padding:24px;">No knowledge sources yet. Click <strong>"Crawl All Edvora.chat Pages Now"</strong> above to seed the knowledge base!</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = list.map(item => {
+                    const statusBadge = item.status === 'active'
+                        ? `<span style="color:#34d399;font-weight:600;">● Active</span>`
+                        : `<span style="color:#fbbf24;font-weight:600;">● ${item.status}</span>`;
+                    const urlInfo = item.source_url ? `<div style="font-size:10.5px;color:#6b7280;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(item.source_url)}</div>` : '';
+                    const refreshBtn = item.type === 'url'
+                        ? `<button onclick="refreshKbUrl(${item.id})" class="brand-btn brand-btn-secondary brand-btn-sm" title="Re-crawl URL">🔄</button>`
+                        : '';
+                    return `
+                        <tr>
+                            <td style="font-family:'JetBrains Mono',monospace;color:#9ca3af;">#${item.id}</td>
+                            <td>
+                                <div style="font-weight:600;color:#fff;">${escapeHtml(item.title)}</div>
+                                ${urlInfo}
+                            </td>
+                            <td><span style="background:#1f2937;padding:2px 7px;border-radius:4px;font-size:11px;">${escapeHtml(item.type)}</span></td>
+                            <td>${escapeHtml(item.category || 'General')}</td>
+                            <td style="font-family:'JetBrains Mono',monospace;">${(item.token_count || 0).toLocaleString()}</td>
+                            <td>${statusBadge}</td>
+                            <td style="color:#9ca3af;font-size:11px;">${item.updated_at || item.created_at || ''}</td>
+                            <td style="text-align:right;white-space:nowrap;">
+                                ${refreshBtn}
+                                <button onclick="openEditKbModal(${item.id})" class="brand-btn brand-btn-secondary brand-btn-sm">✏️ View / Edit</button>
+                                <button onclick="deleteKbSource(${item.id})" class="brand-btn brand-btn-danger brand-btn-sm">🗑️</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#f87171;">Error: ${escapeHtml(e.message)}</td></tr>`;
+            }
+        }
+
+        async function crawlEdvoraWebsite() {
+            const btn = document.getElementById('btnCrawlSite');
+            btn.disabled = true;
+            btn.innerText = '⏳ Crawling edvora.chat pages...';
+            try {
+                const res = await fetch('/v1/superadmin/system-bot/crawl-website', {
+                    method: 'POST',
+                    headers: getAuthHeaders()
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showBanner(`Crawled ${json.data.crawled_count} Edvora.chat pages and queued vector embeddings!`);
+                    loadKnowledgeList();
+                } else {
+                    showBanner(json.message || 'Crawl failed', true);
+                }
+            } catch (e) {
+                showBanner('Crawl error: ' + e.message, true);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = '🚀 Crawl All Edvora.chat Pages Now';
+            }
+        }
+
+        async function addPastedKnowledge(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnAddPaste');
+            btn.disabled = true;
+            try {
+                const res = await fetch('/v1/superadmin/system-bot/knowledge/paste', {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({
+                        title: document.getElementById('pasteTitle').value.trim(),
+                        category: document.getElementById('pasteCategory').value.trim(),
+                        content: document.getElementById('pasteContent').value.trim()
+                    })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    document.getElementById('pasteTitle').value = '';
+                    document.getElementById('pasteContent').value = '';
+                    showBanner('Knowledge text saved and queued for embedding!');
+                    loadKnowledgeList();
+                } else {
+                    showBanner(json.message || 'Failed to add knowledge', true);
+                }
+            } catch (err) {
+                showBanner('Error: ' + err.message, true);
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function addUrlKnowledge(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnAddUrl');
+            btn.disabled = true;
+            try {
+                const res = await fetch('/v1/superadmin/system-bot/knowledge/url', {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({
+                        url: document.getElementById('scrapeUrl').value.trim(),
+                        title: document.getElementById('scrapeTitle').value.trim(),
+                        category: 'Website Page'
+                    })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    document.getElementById('scrapeUrl').value = '';
+                    document.getElementById('scrapeTitle').value = '';
+                    showBanner('URL scraped and queued for embedding!');
+                    loadKnowledgeList();
+                } else {
+                    showBanner(json.message || 'Failed to scrape URL', true);
+                }
+            } catch (err) {
+                showBanner('Error: ' + err.message, true);
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function uploadDocKnowledge(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('uploadDocFile');
+            if (!fileInput.files || !fileInput.files[0]) return;
+
+            const btn = document.getElementById('btnUploadDoc');
+            btn.disabled = true;
+
+            const fd = new FormData();
+            fd.append('file', fileInput.files[0]);
+            fd.append('title', document.getElementById('uploadDocTitle').value.trim());
+            fd.append('category', 'Uploaded Document');
+
+            try {
+                const res = await fetch('/v1/superadmin/system-bot/knowledge/upload', {
+                    method: 'POST',
+                    headers: getAuthHeaders(false),
+                    body: fd
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    fileInput.value = '';
+                    document.getElementById('uploadDocTitle').value = '';
+                    showBanner('Document uploaded and queued for embedding!');
+                    loadKnowledgeList();
+                } else {
+                    showBanner(json.message || 'Upload failed', true);
+                }
+            } catch (err) {
+                showBanner('Error: ' + err.message, true);
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function openEditKbModal(id) {
+            try {
+                const res = await fetch(`/v1/superadmin/system-bot/knowledge/${id}`, { headers: getAuthHeaders() });
+                const json = await res.json();
+                if (json.status !== 'success') {
+                    showBanner(json.message || 'Could not load source', true);
+                    return;
+                }
+                const s = json.data;
+                document.getElementById('editKbId').value = s.id;
+                document.getElementById('editKbTitle').value = s.title || '';
+                document.getElementById('editKbCategory').value = s.category || 'General';
+                document.getElementById('editKbContent').value = s.raw_content || s.content || '';
+                document.getElementById('editKbModal').style.display = 'flex';
+            } catch (e) {
+                showBanner('Error: ' + e.message, true);
+            }
+        }
+
+        function closeEditKbModal() {
+            document.getElementById('editKbModal').style.display = 'none';
+        }
+
+        async function saveEditedKnowledge(e) {
+            e.preventDefault();
+            const id = document.getElementById('editKbId').value;
+            const btn = document.getElementById('btnSaveKbEdit');
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`/v1/superadmin/system-bot/knowledge/${id}`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({
+                        title: document.getElementById('editKbTitle').value.trim(),
+                        category: document.getElementById('editKbCategory').value.trim(),
+                        raw_content: document.getElementById('editKbContent').value
+                    })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    closeEditKbModal();
+                    showBanner('Knowledge source updated and re-embedding queued!');
+                    loadKnowledgeList();
+                } else {
+                    showBanner(json.message || 'Update failed', true);
+                }
+            } catch (err) {
+                showBanner('Error: ' + err.message, true);
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function refreshKbUrl(id) {
+            try {
+                const res = await fetch(`/v1/superadmin/system-bot/knowledge/${id}/refresh`, {
+                    method: 'POST',
+                    headers: getAuthHeaders()
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showBanner(json.message || 'URL refreshed!');
+                    loadKnowledgeList();
+                } else {
+                    showBanner(json.message || 'Refresh failed', true);
+                }
+            } catch (e) {
+                showBanner('Error: ' + e.message, true);
+            }
+        }
+
+        async function deleteKbSource(id) {
+            if (!confirm('Delete this knowledge source and purge its vector embeddings?')) return;
+            try {
+                const res = await fetch(`/v1/superadmin/system-bot/knowledge/${id}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showBanner('Knowledge source deleted.');
+                    loadKnowledgeList();
+                } else {
+                    showBanner(json.message || 'Delete failed', true);
+                }
+            } catch (e) {
+                showBanner('Error: ' + e.message, true);
+            }
+        }
+
+        // ==========================================
+        // PROMPT & LIVE PLANS SYNC
+        // ==========================================
+        async function saveBotPrompt() {
+            const btn = document.getElementById('btnSavePrompt');
+            btn.disabled = true;
+            try {
+                const res = await fetch('/v1/superadmin/system-bot/prompt', {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({
+                        system_prompt: document.getElementById('systemPromptTextarea').value.trim()
+                    })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showBanner('System bot instructions updated!');
+                } else {
+                    showBanner(json.message || 'Failed to save prompt', true);
+                }
+            } catch (e) {
+                showBanner('Error: ' + e.message, true);
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function resetDefaultPrompt() {
+            if (systemBotState.default_prompt) {
+                document.getElementById('systemPromptTextarea').value = systemBotState.default_prompt;
+                showBanner('Default prompt restored in editor. Click Save Instructions to apply.');
+            }
+        }
+
+        // ==========================================
+        // TELEMETRY & CHAT TRANSCRIPTS
+        // ==========================================
+        function debounceTelemetrySearch() {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(loadTelemetry, 350);
+        }
+
+        async function loadTelemetry() {
+            const days = document.getElementById('telemetryDays').value || 30;
+            const search = encodeURIComponent(document.getElementById('telemetrySearch').value.trim());
+            const tbody = document.getElementById('conversationsTableBody');
+
+            try {
+                const res = await fetch(`/v1/superadmin/system-bot/telemetry?days=${days}&search=${search}`, {
+                    headers: getAuthHeaders()
+                });
+                const json = await res.json();
+                if (json.status !== 'success') {
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#f87171;">${json.message || 'Error loading telemetry'}</td></tr>`;
+                    return;
+                }
+
+                const s = json.data.summary || {};
+                document.getElementById('kpiConvs').innerText = (s.total_conversations || 0).toLocaleString();
+                document.getElementById('kpiQuestions').innerText = `${(s.user_questions || 0).toLocaleString()} visitor questions asked`;
+                document.getElementById('kpiSessions').innerText = (s.total_sessions || 0).toLocaleString();
+                document.getElementById('kpiDwell').innerText = `Avg dwell: ${s.avg_dwell_seconds || 0}s • ${s.avg_pages_per_session || 0} pages/session`;
+                document.getElementById('kpiMessages').innerText = (s.total_messages || 0).toLocaleString();
+                document.getElementById('kpiEngaged').innerText = `${(s.chat_engaged_sessions || 0).toLocaleString()} chat-engaged sessions`;
+                document.getElementById('kpiTokens').innerText = (s.total_tokens || 0).toLocaleString();
+                document.getElementById('kpiCost').innerText = `$${(s.total_cost_usd || 0).toFixed(4)} est • ${s.avg_latency_ms || 0}ms avg latency`;
+
+                const convs = json.data.conversations || [];
+                if (convs.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#9ca3af;padding:24px;">No conversations recorded for this time period yet.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = convs.map(c => {
+                    const testBadge = Number(c.is_test) === 1
+                        ? `<span style="background:rgba(245,158,11,0.15);color:#fbbf24;padding:1px 6px;border-radius:4px;font-size:10px;margin-left:6px;">TEST</span>`
+                        : '';
+                    const pageUrl = c.page_url ? `<div style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#9ca3af;font-size:11px;" title="${escapeHtml(c.page_url)}">${escapeHtml(c.page_title || c.page_url)}</div>` : '<span style="color:#6b7280;">Direct / Test</span>';
+                    const firstQ = c.first_user_message ? escapeHtml(c.first_user_message.substring(0, 90)) : '—';
+                    return `
+                        <tr>
+                            <td style="font-family:'JetBrains Mono',monospace;color:#818cf8;font-weight:600;">#${c.id}</td>
+                            <td>
+                                <span style="font-family:'JetBrains Mono',monospace;font-size:11px;">${escapeHtml((c.visitor_id || '').substring(0, 14))}</span>
+                                ${testBadge}
+                            </td>
+                            <td>${pageUrl}</td>
+                            <td style="max-width:280px;color:#fff;">${firstQ}</td>
+                            <td style="font-family:'JetBrains Mono',monospace;">${c.message_count || 0} <span style="color:#6b7280;font-size:10.5px;">(${(c.tokens_used || 0).toLocaleString()} tok)</span></td>
+                            <td>
+                                <span style="text-transform:capitalize;">${escapeHtml(c.latest_sentiment || 'neutral')}</span> •
+                                <span style="color:#9ca3af;text-transform:capitalize;">${escapeHtml(c.latest_conversation_stage || 'discovery')}</span>
+                            </td>
+                            <td style="color:#9ca3af;font-size:11px;">${c.last_message_at || c.started_at || ''}</td>
+                            <td style="text-align:right;">
+                                <button onclick="openTranscript(${c.id})" class="brand-btn brand-btn-primary brand-btn-sm">📜 View Transcript</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#f87171;">Error: ${escapeHtml(e.message)}</td></tr>`;
+            }
+        }
+
+        async function openTranscript(convId) {
+            const modal = document.getElementById('transcriptModal');
+            const body = document.getElementById('transcriptModalBody');
+            document.getElementById('transcriptModalTitle').innerText = `💬 Conversation Transcript #${convId}`;
+            body.innerHTML = `<div style="color:#9ca3af;text-align:center;padding:24px;">Loading conversation #${convId}...</div>`;
+            modal.style.display = 'flex';
+
+            try {
+                const res = await fetch(`/v1/superadmin/system-bot/conversations/${convId}`, { headers: getAuthHeaders() });
+                const json = await res.json();
+                if (json.status !== 'success') {
+                    body.innerHTML = `<div style="color:#f87171;">${escapeHtml(json.message || 'Failed to load transcript')}</div>`;
+                    return;
+                }
+
+                const conv = json.data.conversation || {};
+                const msgs = json.data.messages || [];
+                const steps = json.data.session_steps || [];
+
+                let html = `
+                    <div style="background:#080c14;border:1px solid #1f2937;border-radius:6px;padding:12px;margin-bottom:16px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:11.5px;">
+                        <div><strong>Visitor ID:</strong> <code>${escapeHtml(conv.visitor_id || '')}</code></div>
+                        <div><strong>Entry Page:</strong> ${escapeHtml(conv.page_url || 'N/A')}</div>
+                        <div><strong>Started:</strong> ${escapeHtml(conv.started_at || '')}</div>
+                    </div>
+                `;
+
+                if (steps.length > 0) {
+                    html += `<div style="margin-bottom:16px;"><div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:6px;">🧭 Visitor Page Journey (${steps.length} steps)</div><div style="display:flex;flex-wrap:wrap;gap:6px;">`;
+                    steps.forEach(st => {
+                        html += `<span style="background:#1f2937;padding:4px 8px;border-radius:4px;font-size:11px;">${st.view_order}. ${escapeHtml(st.page_title || st.url)} (${st.time_spent_seconds || 0}s)</span>`;
+                    });
+                    html += `</div></div>`;
+                }
+
+                html += `<div>`;
+                msgs.forEach(m => {
+                    const roleClass = m.role === 'user' ? 'user' : 'assistant';
+                    const roleLabel = m.role === 'user' ? 'Visitor' : 'Edvora AI';
+                    const metaParts = [roleLabel, m.created_at];
+                    if (m.role === 'assistant') {
+                        if (m.intent_label) metaParts.push(`Intent: ${m.intent_label}`);
+                        if (m.tokens_used) metaParts.push(`${m.tokens_used} tokens`);
+                        if (m.sources_resolved && m.sources_resolved.length > 0) {
+                            metaParts.push(`Sources: ${m.sources_resolved.map(s => s.title).join(', ')}`);
+                        }
+                    }
+                    html += `
+                        <div class="chat-transcript-msg ${roleClass}">
+                            <div class="chat-bubble">${escapeHtml(m.content || '')}</div>
+                            <div class="chat-meta">${escapeHtml(metaParts.join(' • '))}</div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+
+                body.innerHTML = html;
+            } catch (e) {
+                body.innerHTML = `<div style="color:#f87171;">Error: ${escapeHtml(e.message)}</div>`;
+            }
+        }
+
+        function closeTranscriptModal() {
+            document.getElementById('transcriptModal').style.display = 'none';
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function reloadAll() {
+            loadSystemBotConfig();
+            const activeSec = document.querySelector('.sidebar-nav .nav-link.active')?.getAttribute('data-section');
+            if (activeSec === 'knowledge') loadKnowledgeList();
+            if (activeSec === 'telemetry') loadTelemetry();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSystemBotConfig();
+        });
+    </script>
+</body>
+</html>

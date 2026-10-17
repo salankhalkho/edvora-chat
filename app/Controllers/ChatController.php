@@ -6,6 +6,7 @@ use App\Config\Database;
 use App\Core\Request;
 use App\Core\Response;
 use App\Services\ContentEngine;
+use App\Services\InformationalPromptBuilder;
 use App\Services\IntentClassifier;
 use App\Services\LeadExtractorService;
 use App\Services\LlmService;
@@ -45,6 +46,8 @@ class ChatController
             Response::error('This domain is not authorized to embed this chatbot.', 403);
         }
 
+        $isInformational = (($bot['chat_mode'] ?? 'admissions') === 'informational');
+
         // Load widget customization with cascade: org → defaults
         $customization = \App\Controllers\WidgetCustomizationController::cascadeLookup(
             $db,
@@ -55,42 +58,53 @@ class ChatController
         $botDisplayName = !empty($customization['header_bot_name']) ? $customization['header_bot_name'] : ($bot['name'] ?: $bot['org_name']);
         $welcomeMsg = !empty($customization['welcome_message']) ? $customization['welcome_message'] : ($bot['welcome_message'] ?: "Hi there! 👋 Welcome to {$bot['org_name']}. Ask me anything about degree programs, admissions, eligibility, fees, or campus life!");
 
-        // Check authoritative counts for passive lead capture action badges
-        $hasAssets = (int)$db->query("SELECT COUNT(*) FROM lead_assets WHERE organization_id = " . (int)$bot['organization_id'] . " AND is_active = 1")->fetchColumn() > 0;
-        $hasCampuses = (int)$db->query("SELECT COUNT(*) FROM campuses WHERE organization_id = " . (int)$bot['organization_id'] . " AND status = 'active'")->fetchColumn() > 0;
-        // Check if callbacks are actually configured: has staff users
-        $orgIdInt = (int)$bot['organization_id'];
-        $hasStaff = (int)$db->query("SELECT COUNT(*) FROM users WHERE organization_id = {$orgIdInt} AND role IN ('admin', 'staff')")->fetchColumn() > 0;
-        $hasCallbacks = ((bool)$bot['lead_capture_enabled']) && $hasStaff;
+        if ($isInformational) {
+            $hasAssets = false;
+            $hasCampuses = false;
+            $hasCallbacks = false;
+            $quickChips = [];
+            $customization['show_action_brochure'] = false;
+            $customization['show_action_callback'] = false;
+            $customization['show_action_tour'] = false;
+            $customization['quick_chips'] = '';
+        } else {
+            // Check authoritative counts for passive lead capture action badges
+            $hasAssets = (int)$db->query("SELECT COUNT(*) FROM lead_assets WHERE organization_id = " . (int)$bot['organization_id'] . " AND is_active = 1")->fetchColumn() > 0;
+            $hasCampuses = (int)$db->query("SELECT COUNT(*) FROM campuses WHERE organization_id = " . (int)$bot['organization_id'] . " AND status = 'active'")->fetchColumn() > 0;
+            // Check if callbacks are actually configured: has staff users
+            $orgIdInt = (int)$bot['organization_id'];
+            $hasStaff = (int)$db->query("SELECT COUNT(*) FROM users WHERE organization_id = {$orgIdInt} AND role IN ('admin', 'staff')")->fetchColumn() > 0;
+            $hasCallbacks = ((bool)$bot['lead_capture_enabled']) && $hasStaff;
 
-        $quickChips = [];
-        if (isset($customization['quick_chips'])) {
-            $rawCustChips = $customization['quick_chips'];
-            if (is_array($rawCustChips) && !empty($rawCustChips)) {
-                $quickChips = array_map(function($c) {
-                    $lbl = is_array($c) ? ($c['label'] ?? $c['message'] ?? '') : (string)$c;
-                    return ['label' => $lbl, 'message' => $lbl];
-                }, $rawCustChips);
-            } else if (is_string($rawCustChips) && trim($rawCustChips) !== '') {
-                $chipsParts = array_filter(array_map('trim', explode(',', $rawCustChips)));
-                $quickChips = array_map(function($c) {
-                    return ['label' => $c, 'message' => $c];
-                }, $chipsParts);
-            } else {
-                $quickChips = [];
-            }
-        } else if (!empty($bot['quick_chips'])) {
-            $rawBotChips = is_string($bot['quick_chips']) ? (json_decode($bot['quick_chips'], true) ?: []) : $bot['quick_chips'];
-            if (is_array($rawBotChips)) {
-                $quickChips = array_map(function($c) {
-                    if (is_array($c)) {
-                        return [
-                            'label' => $c['label'] ?? $c['message'] ?? '',
-                            'message' => $c['message'] ?? $c['label'] ?? ''
-                        ];
-                    }
-                    return ['label' => (string)$c, 'message' => (string)$c];
-                }, $rawBotChips);
+            $quickChips = [];
+            if (isset($customization['quick_chips'])) {
+                $rawCustChips = $customization['quick_chips'];
+                if (is_array($rawCustChips) && !empty($rawCustChips)) {
+                    $quickChips = array_map(function($c) {
+                        $lbl = is_array($c) ? ($c['label'] ?? $c['message'] ?? '') : (string)$c;
+                        return ['label' => $lbl, 'message' => $lbl];
+                    }, $rawCustChips);
+                } else if (is_string($rawCustChips) && trim($rawCustChips) !== '') {
+                    $chipsParts = array_filter(array_map('trim', explode(',', $rawCustChips)));
+                    $quickChips = array_map(function($c) {
+                        return ['label' => $c, 'message' => $c];
+                    }, $chipsParts);
+                } else {
+                    $quickChips = [];
+                }
+            } else if (!empty($bot['quick_chips'])) {
+                $rawBotChips = is_string($bot['quick_chips']) ? (json_decode($bot['quick_chips'], true) ?: []) : $bot['quick_chips'];
+                if (is_array($rawBotChips)) {
+                    $quickChips = array_map(function($c) {
+                        if (is_array($c)) {
+                            return [
+                                'label' => $c['label'] ?? $c['message'] ?? '',
+                                'message' => $c['message'] ?? $c['label'] ?? ''
+                            ];
+                        }
+                        return ['label' => (string)$c, 'message' => (string)$c];
+                    }, $rawBotChips);
+                }
             }
         }
 
@@ -102,7 +116,8 @@ class ChatController
             'primary_color' => $customization['header_bg'] ?? ($bot['primary_color'] ?: ($bot['org_color'] ?: '#6366F1')),
             'secondary_color' => $bot['secondary_color'] ?? '#38BDF8',
             'bot_avatar' => $customization['avatar_url'] ?? ($bot['bot_avatar_url'] ?: ($bot['org_logo'] ?: null)),
-            'lead_capture_enabled' => (bool)$bot['lead_capture_enabled'],
+            'lead_capture_enabled' => $isInformational ? false : (bool)$bot['lead_capture_enabled'],
+            'chat_mode' => $bot['chat_mode'] ?? 'admissions',
             'widget_style' => $bot['widget_style'] ?? 'glassmorphism',
             'theme_mode' => $customization['theme'] ?? ($bot['theme_mode'] ?? 'dark'),
             'header_subtitle' => $customization['header_subtitle'] ?? ($bot['header_subtitle'] ?? 'Online • Replies instantly'),
@@ -233,6 +248,12 @@ class ChatController
             ':org_id' => $orgId,
             ':content' => $userMessage
         ]);
+
+        // Branch for 'informational' chat_mode (Edvora.chat Website Chatbot — Zero disturbance to Admissions flow)
+        if (($bot['chat_mode'] ?? 'admissions') === 'informational') {
+            $this->completeInformationalTurn($db, $bot, $orgId, $botId, $convId, $userMessage, $isTest);
+            return;
+        }
 
         // 3b. Proactively Scan User Message for Contact Information (Email, Phone, Name) & Capture to Leads DB
         $extractedContact = LeadExtractorService::extract($userMessage);
@@ -802,6 +823,195 @@ class ChatController
                 'active_phase_key'     => $activePhaseKey,
             ]);
 
+        } catch (Throwable $e) {
+            Response::error("Failed to generate AI response: " . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Handle 'informational' chat_mode turns (e.g. Edvora.chat Website Chatbot).
+     * Skips admissions intent classification, program catalog, and lead forms.
+     * Uses InformationalPromptBuilder with live database plans & pricing sync.
+     */
+    private function completeInformationalTurn(
+        PDO    $db,
+        array  $bot,
+        int    $orgId,
+        int    $botId,
+        int    $convId,
+        string $userMessage,
+        int    $isTest
+    ): void {
+        // 1. Fetch Recent Conversation History (past 6 messages including current user message)
+        $stmtHistory = $db->prepare("
+            SELECT role, content FROM messages
+            WHERE conversation_id = :conv_id
+            ORDER BY id DESC LIMIT 6
+        ");
+        $stmtHistory->execute([':conv_id' => $convId]);
+        $history = array_reverse($stmtHistory->fetchAll(PDO::FETCH_ASSOC));
+        $prevHistory = array_slice($history, 0, -1);
+
+        // 2. Vector & Fulltext Knowledge Retrieval
+        $englishQuery = QueryTranslator::translateToEnglish($userMessage);
+        $contextSources = ContentEngine::selectContext($orgId, $englishQuery, $botId, null);
+
+        // 3. Turn count
+        $stmtTurns = $db->prepare("SELECT COUNT(*) FROM messages WHERE conversation_id = :cid AND role = 'user'");
+        $stmtTurns->execute([':cid' => $convId]);
+        $turnCount = (int)$stmtTurns->fetchColumn();
+
+        if (!headers_sent()) {
+            header("X-Chatbot-Phase: Informational Product Advisor");
+        }
+
+        // 4. Build Informational System Prompt (includes Live Plans & Pricing from DB + Knowledge Base)
+        $systemPrompt = InformationalPromptBuilder::build(
+            $db,
+            $orgId,
+            $contextSources,
+            $bot['system_prompt_override'] ?? null
+        );
+
+        $llmContext = [
+            'organization_id'          => $orgId,
+            'chatbot_id'               => $botId,
+            'activity_type'            => 'chat_completion',
+            'reference_type'           => 'conversation',
+            'reference_id'             => $convId,
+            'description'              => "Turn #{$turnCount} [Informational Mode]",
+            'response_format_override' => InformationalPromptBuilder::getResponseSchema(),
+        ];
+
+        try {
+            $llmResult = LlmService::complete($systemPrompt, $userMessage, $prevHistory, $llmContext);
+            $rawAiResponse = $llmResult['text'];
+            $tokensUsed = (int)($llmResult['tokens_used'] ?? 0);
+
+            $cleanedRaw = trim(preg_replace('/^```(?:json)?\s*/i', '', preg_replace('/\s*```\s*$/i', '', $rawAiResponse)));
+            $parsed = json_decode($cleanedRaw, true);
+
+            $aiResponseText = null;
+            $analytics = [
+                'sentiment'          => 'neutral',
+                'emotion'            => 'neutral',
+                'frustration'        => 0.0,
+                'conversation_trend' => 'stable',
+                'intent_label'       => 'general_inquiry',
+                'conversation_stage' => 'discovery',
+            ];
+
+            if (is_array($parsed)) {
+                $aiResponseText = trim((string)($parsed['response'] ?? $parsed['bubble_1'] ?? ''));
+                $analytics['sentiment'] = in_array($parsed['sentiment'] ?? '', ['positive', 'neutral', 'negative']) ? $parsed['sentiment'] : 'neutral';
+                $analytics['emotion'] = !empty($parsed['emotion']) ? substr(trim((string)$parsed['emotion']), 0, 50) : 'neutral';
+                $analytics['frustration'] = isset($parsed['frustration']) ? max(0.0, min(1.0, (float)$parsed['frustration'])) : 0.0;
+                $analytics['conversation_trend'] = in_array($parsed['conversation_trend'] ?? '', ['improving', 'stable', 'declining']) ? $parsed['conversation_trend'] : 'stable';
+                $analytics['intent_label'] = !empty($parsed['intent_label']) ? substr(trim((string)$parsed['intent_label']), 0, 50) : 'general_inquiry';
+                $analytics['conversation_stage'] = in_array($parsed['conversation_stage'] ?? '', ['discovery', 'consideration', 'decision']) ? $parsed['conversation_stage'] : 'discovery';
+            } else {
+                $aiResponseText = trim($rawAiResponse);
+            }
+
+            if (empty($aiResponseText)) {
+                $aiResponseText = "I'm here to help you explore Edvora.chat! Ask me about our AI Admissions Chatbot features, setup process, or pricing plans.";
+            }
+
+            $sourceIdsUsed = array_map(fn($s) => $s['id'], $contextSources);
+            $isFallback = !empty($llmResult['is_fallback']) ? 1 : 0;
+            $msgSource = $llmResult['source'] ?? 'llm';
+
+            // 5. Save AI response to messages table
+            $stmtAiMsg = $db->prepare("
+                INSERT INTO messages (
+                    conversation_id, organization_id, role, content,
+                    knowledge_sources_used, tokens_used,
+                    sentiment, emotion, frustration, conversation_trend,
+                    intent_label, intent_explanation, conversation_stage, lead_intent, needs_human,
+                    is_fallback, source,
+                    created_at
+                ) VALUES (
+                    :conv_id, :org_id, 'assistant', :content,
+                    :sources, :tokens,
+                    :sentiment, :emotion, :frustration, :conv_trend,
+                    :intent_label, NULL, :conv_stage, 'medium', 0,
+                    :is_fallback, :source,
+                    NOW()
+                )
+            ");
+            $stmtAiMsg->execute([
+                ':conv_id'      => $convId,
+                ':org_id'       => $orgId,
+                ':content'      => $aiResponseText,
+                ':sources'      => json_encode($sourceIdsUsed),
+                ':tokens'       => $tokensUsed,
+                ':sentiment'    => $analytics['sentiment'],
+                ':emotion'      => $analytics['emotion'],
+                ':frustration'  => $analytics['frustration'],
+                ':conv_trend'   => $analytics['conversation_trend'],
+                ':intent_label' => $analytics['intent_label'],
+                ':conv_stage'   => $analytics['conversation_stage'],
+                ':is_fallback'  => $isFallback,
+                ':source'       => $msgSource,
+            ]);
+
+            // 6. Update conversation-level analytics
+            $stmtUpdConv = $db->prepare("
+                UPDATE conversations SET
+                    latest_sentiment          = :sentiment,
+                    latest_frustration        = :frust,
+                    latest_lead_intent        = 'medium',
+                    latest_conversation_stage = :stage,
+                    needs_human               = 0
+                WHERE id = :cid
+            ");
+            $stmtUpdConv->execute([
+                ':sentiment' => $analytics['sentiment'],
+                ':frust'     => $analytics['frustration'],
+                ':stage'     => $analytics['conversation_stage'],
+                ':cid'       => $convId,
+            ]);
+
+            // 7. Update Monthly Usage Logs
+            if ($isTest === 0) {
+                $period = date('Y-m');
+                $db->exec("
+                    INSERT INTO usage_logs (organization_id, period, messages_count, tokens_used)
+                    VALUES ({$orgId}, '{$period}', 1, {$tokensUsed})
+                    ON DUPLICATE KEY UPDATE
+                    messages_count = messages_count + 1,
+                    tokens_used = tokens_used + {$tokensUsed}
+                ");
+            }
+
+            Response::success([
+                'conversation_id'      => $convId,
+                'is_test'              => $isTest,
+                'response'             => $aiResponseText,
+                'follow_up_message'    => null,
+                'sources_used'         => array_map(fn($s) => ['id' => $s['id'], 'title' => $s['title']], $contextSources),
+                'lead_capture_trigger' => null,
+                'program_catalog'      => null,
+                'intent_tier'          => $analytics['intent_label'],
+                'turn_count'           => $turnCount,
+                'user_message_count'   => $turnCount,
+                'lead_captured'        => false,
+                'visitor_name'         => null,
+                'visitor_email'        => null,
+                'contact_captured'     => null,
+                'lead_forms_shown'     => [],
+                'active_program'       => null,
+                'masked_email'         => null,
+                'sentiment'            => $analytics['sentiment'],
+                'frustration'          => $analytics['frustration'],
+                'lead_intent'          => 'medium',
+                'conversation_stage'   => $analytics['conversation_stage'],
+                'needs_human'          => false,
+                'is_fallback'          => (bool)$isFallback,
+                'source'               => $msgSource,
+                'active_phase'         => 'Informational Product Advisor',
+                'active_phase_key'     => 'informational',
+            ]);
         } catch (Throwable $e) {
             Response::error("Failed to generate AI response: " . $e->getMessage(), 500);
         }

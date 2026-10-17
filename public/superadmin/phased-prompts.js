@@ -225,7 +225,23 @@ function setupPhasedPromptsListeners() {
     });
 }
 
+function injectSystemBotSidebarLink() {
+    const nav = document.querySelector('.brand-sidebar .sidebar-nav');
+    if (!nav || document.getElementById('navSystemBotLink')) return;
+
+    const link = document.createElement('a');
+    link.id = 'navSystemBotLink';
+    link.className = 'nav-link';
+    link.href = '/system-bot';
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.style.cssText = 'padding-left: 28px; font-size: 11px; color: #a78bfa; font-weight: 600;';
+    link.innerHTML = '<span>💬</span> Edvora Website Bot ↗';
+    nav.appendChild(link);
+}
+
 function initPhasedPrompts() {
+    injectSystemBotSidebarLink();
     setupPhasedPromptsListeners();
     loadPhasedPrompts();
 }

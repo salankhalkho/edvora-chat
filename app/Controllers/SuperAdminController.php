@@ -326,6 +326,7 @@ class SuperAdminController
                    (SELECT COUNT(*) FROM leads WHERE organization_id = o.id) as total_leads
             FROM organizations o
             LEFT JOIN plans p ON o.plan_id = p.id
+            WHERE COALESCE(o.is_system, 0) = 0
             ORDER BY o.id DESC
         ");
         $orgs = $stmt->fetchAll();
@@ -617,7 +618,7 @@ class SuperAdminController
 
         // 1. Compute Platform-Wide Totals
         $stats = [
-            'total_organizations' => (int)($db->query("SELECT COUNT(*) FROM organizations")->fetchColumn() ?: 0),
+            'total_organizations' => (int)($db->query("SELECT COUNT(*) FROM organizations WHERE COALESCE(is_system, 0) = 0")->fetchColumn() ?: 0),
             'total_leads' => (int)($db->query("SELECT COUNT(*) FROM leads")->fetchColumn() ?: 0),
             'total_callbacks' => (int)($db->query("SELECT COUNT(*) FROM counselor_callbacks")->fetchColumn() ?: 0),
             'total_campus_tours' => (int)($db->query("SELECT COUNT(*) FROM campus_tour_bookings")->fetchColumn() ?: 0),
@@ -639,6 +640,7 @@ class SuperAdminController
                    (SELECT MAX(created_at) FROM leads WHERE organization_id = o.id) as last_lead_at
             FROM organizations o
             LEFT JOIN plans p ON o.plan_id = p.id
+            WHERE COALESCE(o.is_system, 0) = 0
             ORDER BY leads_count DESC, o.id DESC
         ");
         $tenantAudits = $stmtTenants->fetchAll();

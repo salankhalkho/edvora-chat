@@ -39,7 +39,7 @@ class ProactiveTriggerController
 
         // 1. Fetch chatbot and organization
         $stmt = $db->prepare("
-            SELECT c.id as chatbot_id, c.organization_id, c.name as bot_name,
+            SELECT c.id as chatbot_id, c.organization_id, c.name as bot_name, c.chat_mode,
                    o.name as org_name
             FROM chatbots c
             JOIN organizations o ON c.organization_id = o.id
@@ -57,7 +57,8 @@ class ProactiveTriggerController
         $orgId = (int)$bot['organization_id'];
         $chatbotId = (int)$bot['chatbot_id'];
         $orgName = $bot['org_name'];
-        $botName = !empty($bot['bot_name']) ? $bot['bot_name'] : 'Admissions Counselor';
+        $isInformational = (($bot['chat_mode'] ?? 'admissions') === 'informational');
+        $botName = !empty($bot['bot_name']) ? $bot['bot_name'] : ($isInformational ? 'Edvora Product Assistant' : 'Admissions Counselor');
 
         // Load widget customization for bot display name if customized
         $custStmt = $db->prepare("SELECT config FROM widget_customizations WHERE chatbot_id = :bot_id LIMIT 1");
@@ -182,18 +183,32 @@ class ProactiveTriggerController
             default => 'High-intent visitor: spent 90+ seconds and scrolled deep into the page content'
         };
 
-        $greetingPrompt = "You are {$botName}, the consultative AI Admissions Counselor for {$orgName}.\n"
-            . "A prospective student is actively browsing the following webpage:\n"
-            . "- Active Page Title: \"{$pageTitle}\"\n"
-            . "- Active Page URL: {$url}\n"
-            . "- Page Category: {$pageType}\n"
-            . "- What this page covers: {$pageSummary}\n"
-            . "- Visitor Context: {$triggerDesc}\n\n"
-            . "CRITICAL RULES:\n"
-            . "1. Speak directly about what they are viewing right now on this active page (e.g. curriculum, eligibility, tuition fees, scholarships, or application deadlines).\n"
-            . "2. Generate exactly ONE warm, natural, consultative sentence (maximum 30 words).\n"
-            . "3. Do NOT ask for contact info (name, email, or phone) yet.\n"
-            . "4. Output ONLY the single conversational message string. No quotes, no markdown, no filler.";
+        if ($isInformational) {
+            $greetingPrompt = "You are {$botName}, the AI Product Specialist for Edvora.chat (an AI Admissions Chatbot SaaS platform for colleges & universities).\n"
+                . "A website visitor is browsing the following page on Edvora.chat:\n"
+                . "- Active Page Title: \"{$pageTitle}\"\n"
+                . "- Active Page URL: {$url}\n"
+                . "- What this page covers: {$pageSummary}\n"
+                . "- Visitor Context: {$triggerDesc}\n\n"
+                . "CRITICAL RULES:\n"
+                . "1. Speak directly about what they are viewing right now on Edvora.chat (e.g. AI admissions chatbot features, pricing plans, knowledge hub, attribution tracking, or interactive demo).\n"
+                . "2. Generate exactly ONE warm, helpful, consultative sentence (maximum 28 words).\n"
+                . "3. Do NOT ask for contact info.\n"
+                . "4. Output ONLY the single conversational message string. No quotes, no markdown, no filler.";
+        } else {
+            $greetingPrompt = "You are {$botName}, the consultative AI Admissions Counselor for {$orgName}.\n"
+                . "A prospective student is actively browsing the following webpage:\n"
+                . "- Active Page Title: \"{$pageTitle}\"\n"
+                . "- Active Page URL: {$url}\n"
+                . "- Page Category: {$pageType}\n"
+                . "- What this page covers: {$pageSummary}\n"
+                . "- Visitor Context: {$triggerDesc}\n\n"
+                . "CRITICAL RULES:\n"
+                . "1. Speak directly about what they are viewing right now on this active page (e.g. curriculum, eligibility, tuition fees, scholarships, or application deadlines).\n"
+                . "2. Generate exactly ONE warm, natural, consultative sentence (maximum 30 words).\n"
+                . "3. Do NOT ask for contact info (name, email, or phone) yet.\n"
+                . "4. Output ONLY the single conversational message string. No quotes, no markdown, no filler.";
+        }
 
         try {
             $greetingResult = LlmService::complete(
@@ -216,15 +231,19 @@ class ProactiveTriggerController
         }
 
         if (empty($openingMessage)) {
-            $openingMessage = match ($pageType) {
-                'program' => "Are you exploring {$pageTitle}? I can help you with eligibility, fees, curriculum, or career opportunities.",
-                'fees' => "I see you're looking at tuition information. Would you like me to explain scholarships or installment payment options?",
-                'admissions' => "Planning to apply? I can walk you through the admission requirements and application process step by step.",
-                'scholarship' => "Looking for ways to reduce tuition? I can help you explore merit scholarships available for our programs.",
-                'campus' => "Interested in the campus? I can tell you about facilities, accommodation, or help arrange a visit.",
-                'contact' => "Would you like help finding the right counselor, or would you prefer to schedule a callback?",
-                default => "Hi! I see you're exploring {$orgName}. Ask me anything about programs, admissions, fees, or student life!"
-            };
+            if ($isInformational) {
+                $openingMessage = "Hi! Exploring Edvora.chat for your institution? Ask me anything about our AI Admissions Chatbot features, setup, or pricing plans!";
+            } else {
+                $openingMessage = match ($pageType) {
+                    'program' => "Are you exploring {$pageTitle}? I can help you with eligibility, fees, curriculum, or career opportunities.",
+                    'fees' => "I see you're looking at tuition information. Would you like me to explain scholarships or installment payment options?",
+                    'admissions' => "Planning to apply? I can walk you through the admission requirements and application process step by step.",
+                    'scholarship' => "Looking for ways to reduce tuition? I can help you explore merit scholarships available for our programs.",
+                    'campus' => "Interested in the campus? I can tell you about facilities, accommodation, or help arrange a visit.",
+                    'contact' => "Would you like help finding the right counselor, or would you prefer to schedule a callback?",
+                    default => "Hi! I see you're exploring {$orgName}. Ask me anything about programs, admissions, fees, or student life!"
+                };
+            }
         }
 
         // 4. Record the proactive session in conversations table
