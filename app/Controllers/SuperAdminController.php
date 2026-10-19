@@ -461,18 +461,19 @@ class SuperAdminController
         $stmt = $db->query("
             SELECT o.id, o.name, o.slug, o.website_url, o.primary_color, o.subscription_status, o.is_demo, o.created_at, o.updated_at,
                    p.name as plan_name,
-                   u.id as owner_user_id, u.name as owner_name, u.email as owner_email,
-                   cb.id as primary_chatbot_id, cb.bot_token, cb.name as chatbot_name,
+                   (SELECT u.id FROM users u WHERE u.organization_id = o.id AND u.role IN ('owner', 'admin') ORDER BY u.id ASC LIMIT 1) as owner_user_id,
+                   (SELECT u.name FROM users u WHERE u.organization_id = o.id AND u.role IN ('owner', 'admin') ORDER BY u.id ASC LIMIT 1) as owner_name,
+                   (SELECT u.email FROM users u WHERE u.organization_id = o.id AND u.role IN ('owner', 'admin') ORDER BY u.id ASC LIMIT 1) as owner_email,
+                   (SELECT cb.id FROM chatbots cb WHERE cb.organization_id = o.id AND cb.is_active = 1 ORDER BY cb.id ASC LIMIT 1) as primary_chatbot_id,
+                   (SELECT cb.bot_token FROM chatbots cb WHERE cb.organization_id = o.id AND cb.is_active = 1 ORDER BY cb.id ASC LIMIT 1) as bot_token,
+                   (SELECT cb.name FROM chatbots cb WHERE cb.organization_id = o.id AND cb.is_active = 1 ORDER BY cb.id ASC LIMIT 1) as chatbot_name,
                    (SELECT COUNT(*) FROM users WHERE organization_id = o.id) as total_users,
                    (SELECT COUNT(*) FROM chatbots WHERE organization_id = o.id) as total_chatbots,
                    (SELECT COUNT(*) FROM knowledge_sources WHERE organization_id = o.id) as total_knowledge_sources,
                    (SELECT COUNT(*) FROM leads WHERE organization_id = o.id) as total_leads
             FROM organizations o
             LEFT JOIN plans p ON o.plan_id = p.id
-            LEFT JOIN users u ON u.organization_id = o.id AND u.role IN ('owner', 'admin')
-            LEFT JOIN chatbots cb ON cb.organization_id = o.id AND cb.is_active = 1
             WHERE COALESCE(o.is_system, 0) = 0 AND COALESCE(o.is_demo, 0) = 1
-            GROUP BY o.id
             ORDER BY o.id DESC
         ");
         $demos = $stmt->fetchAll();
