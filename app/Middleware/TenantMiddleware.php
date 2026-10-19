@@ -66,11 +66,16 @@ class TenantMiddleware
             return;
         }
 
-        // Check if organization has an active commercial subscription
+        // Check if organization has an active commercial subscription or is a demo tenant
         $db = \App\Config\Database::getConnection();
-        $stmtSub = $db->prepare("SELECT subscription_status FROM organizations WHERE id = :id LIMIT 1");
+        $stmtSub = $db->prepare("SELECT subscription_status, COALESCE(is_demo, 0) as is_demo FROM organizations WHERE id = :id LIMIT 1");
         $stmtSub->execute([':id' => $orgId]);
         $orgRow = $stmtSub->fetch();
+
+        // Demo accounts bypass commercial payment requirement
+        if ($orgRow && !empty($orgRow['is_demo'])) {
+            return;
+        }
 
         if (!$orgRow || $orgRow['subscription_status'] !== 'active') {
             Response::error('Active commercial subscription required. Please complete payment to access console.', 402, [

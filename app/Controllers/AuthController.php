@@ -313,6 +313,7 @@ class AuthController
 
         $stmt = $db->prepare("
             SELECT u.*, o.institute_id, o.name as org_name, o.slug as org_slug, o.subscription_status,
+                   COALESCE(o.is_demo, 0) as is_demo,
                    COALESCE(o.onboarding_completed, 0) as onboarding_completed,
                    COALESCE(o.onboarding_step, 1) as onboarding_step
             FROM users u
@@ -367,8 +368,9 @@ class AuthController
         $userDepartments = [];
 
         $isSuperAdmin = ($user['role'] === 'superadmin' || $user['role'] === 'super_admin');
-        $subStatus = $isSuperAdmin ? 'active' : ($user['subscription_status'] ?? 'pending_payment');
-        $paymentRequired = (!$isSuperAdmin && $subStatus !== 'active');
+        $isDemo = !empty($user['is_demo']);
+        $subStatus = ($isSuperAdmin || $isDemo) ? 'active' : ($user['subscription_status'] ?? 'pending_payment');
+        $paymentRequired = (!$isSuperAdmin && !$isDemo && $subStatus !== 'active');
 
         $userCurrency = 'INR';
         $userBillingCycle = 'monthly';
@@ -397,6 +399,7 @@ class AuthController
             'expires_in' => $ttl,
             'subscription_status' => $subStatus,
             'payment_required' => $paymentRequired,
+            'is_demo' => $isDemo,
             'plan_id' => $userPlanId,
             'plan_name' => $userPlanName,
             'billing_cycle' => $userBillingCycle,
@@ -414,6 +417,7 @@ class AuthController
                 'institute_id' => $user['institute_id'] ?? md5((string)$user['organization_id']),
                 'name' => $user['org_name'],
                 'slug' => $user['org_slug'],
+                'is_demo' => $isDemo ? 1 : 0,
                 'plan_id' => $userPlanId,
                 'plan_name' => $userPlanName,
                 'billing_cycle' => $userBillingCycle,
@@ -446,6 +450,7 @@ class AuthController
         $stmt = $db->prepare("
             SELECT u.id, u.name, u.email, u.role, COALESCE(u.can_manage_structure, 1) as can_manage_structure, u.email_verified_at, u.created_at, u.organization_id,
                    o.institute_id, o.name as org_name, o.slug as org_slug, o.logo_url, o.website_url, o.primary_color, o.subscription_status,
+                   COALESCE(o.is_demo, 0) as is_demo,
                    COALESCE(o.onboarding_completed, 0) as onboarding_completed,
                    COALESCE(o.onboarding_step, 1) as onboarding_step,
                    p.name as plan_name
@@ -528,10 +533,11 @@ class AuthController
                 'institute_id' => $user['institute_id'] ?? md5((string)$user['organization_id']),
                 'name' => $user['org_name'],
                 'slug' => $user['org_slug'],
+                'is_demo' => (int)($user['is_demo'] ?? 0),
                 'logo_url' => $user['logo_url'],
                 'website_url' => $user['website_url'] ?? null,
                 'primary_color' => $user['primary_color'],
-                'subscription_status' => $user['subscription_status'],
+                'subscription_status' => !empty($user['is_demo']) ? 'active' : $user['subscription_status'],
                 'onboarding_completed' => (int)$user['onboarding_completed'],
                 'onboarding_step' => (int)$user['onboarding_step'],
                 'plan_name' => $user['plan_name'] ?? 'Starter',

@@ -318,6 +318,12 @@ class SuperAdminController
     public function getOrganizations(Request $request, array $params = []): void
     {
         $db = Database::getConnection();
+        $isDemo = $request->get('is_demo');
+        $demoFilter = "AND COALESCE(o.is_demo, 0) = 0";
+        if ($isDemo !== null && $isDemo !== '') {
+            $demoFilter = ($isDemo === 'all') ? "" : "AND COALESCE(o.is_demo, 0) = " . (int)$isDemo;
+        }
+
         $stmt = $db->query("
             SELECT o.*, p.name as plan_name,
                    (SELECT COUNT(*) FROM users WHERE organization_id = o.id) as total_users,
@@ -326,7 +332,7 @@ class SuperAdminController
                    (SELECT COUNT(*) FROM leads WHERE organization_id = o.id) as total_leads
             FROM organizations o
             LEFT JOIN plans p ON o.plan_id = p.id
-            WHERE COALESCE(o.is_system, 0) = 0
+            WHERE COALESCE(o.is_system, 0) = 0 {$demoFilter}
             ORDER BY o.id DESC
         ");
         $orgs = $stmt->fetchAll();
@@ -443,6 +449,326 @@ class SuperAdminController
                 $db->rollBack();
             }
             Response::error("Failed to delete organization: " . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * GET /v1/superadmin/demo-accounts — List dedicated demo tenant accounts
+     */
+    public function getDemoAccounts(Request $request, array $params = []): void
+    {
+        $db = Database::getConnection();
+        $stmt = $db->query("
+            SELECT o.id, o.name, o.slug, o.website_url, o.primary_color, o.subscription_status, o.is_demo, o.created_at, o.updated_at,
+                   p.name as plan_name,
+                   u.id as owner_user_id, u.name as owner_name, u.email as owner_email,
+                   cb.id as primary_chatbot_id, cb.bot_token, cb.name as chatbot_name,
+                   (SELECT COUNT(*) FROM users WHERE organization_id = o.id) as total_users,
+                   (SELECT COUNT(*) FROM chatbots WHERE organization_id = o.id) as total_chatbots,
+                   (SELECT COUNT(*) FROM knowledge_sources WHERE organization_id = o.id) as total_knowledge_sources,
+                   (SELECT COUNT(*) FROM leads WHERE organization_id = o.id) as total_leads
+            FROM organizations o
+            LEFT JOIN plans p ON o.plan_id = p.id
+            LEFT JOIN users u ON u.organization_id = o.id AND u.role IN ('owner', 'admin')
+            LEFT JOIN chatbots cb ON cb.organization_id = o.id AND cb.is_active = 1
+            WHERE COALESCE(o.is_system, 0) = 0 AND COALESCE(o.is_demo, 0) = 1
+            GROUP BY o.id
+            ORDER BY o.id DESC
+        ");
+        $demos = $stmt->fetchAll();
+
+        // Enrich with direct shareable test link
+        foreach ($demos as &$d) {
+            $d['test_url'] = !empty($d['bot_token']) ? 'https://edvora.chat/widget/' . $d['bot_token'] : null;
+        }
+
+        Response::success($demos);
+    }
+
+    /**
+     * POST /v1/superadmin/demo-accounts — Create a new custom demo tenant on real infrastructure
+     */
+    public function createDemoAccount(Request $request, array $params = []): void
+    {
+        $collegeName = trim((string)$request->get('college_name'));
+        $rawWebsite = trim((string)$request->get('website_url'));
+        $adminName = trim((string)$request->get('admin_name', 'Demo Admin'));
+        $adminEmail = strtolower(trim((string)$request->get('admin_email')));
+        $password = (string)$request->get('password');
+
+        if (empty($collegeName)) {
+            Response::error('College or institution name is required.', 422);
+            return;
+        }
+        if (empty($rawWebsite)) {
+            Response::error('Website URL is required.', 422);
+            return;
+        }
+        if (empty($adminEmail) || !filter_var($adminEmail, FILTER_VALIDATE_EMAIL)) {
+            Response::error('A valid admin email address is required.', 422);
+            return;
+        }
+        if (empty($password) || strlen($password) < 6) {
+            Response::error('Password must be at least 6 characters long.', 422);
+            return;
+        }
+
+        $db = Database::getConnection();
+
+        // Check email uniqueness
+        $stmtEmail = $db->prepare("SELECT id FROM users WHERE email = :email LIMIT 1");
+        $stmtEmail->execute([':email' => $adminEmail]);
+        if ($stmtEmail->fetch()) {
+            Response::error('A user with this email address already exists. Please choose a different demo email.', 409);
+            return;
+        }
+
+        // Normalize website URL & extract domain for chatbot domain whitelisting
+        if (!preg_match('#^https?://#i', $rawWebsite)) {
+            $rawWebsite = 'https://' . $rawWebsite;
+        }
+        $parts = parse_url($rawWebsite);
+        $domain = strtolower($parts['host'] ?? 'demo-college.edu');
+        $domain = preg_replace('/^www\./', '', $domain);
+        $normalizedWebsite = ($parts['scheme'] ?? 'https') . '://' . ($parts['host'] ?? $domain) . (isset($parts['path']) ? rtrim($parts['path'], '/') : '');
+
+        // Generate college slug
+        $slugBase = strtolower(trim(preg_replace('/[^a-zA-Z0-9]+/', '-', $collegeName), '-'));
+        if (empty($slugBase)) {
+            $slugBase = 'demo-' . substr(bin2hex(random_bytes(4)), 0, 8);
+        }
+        $slug = $slugBase . '-demo';
+        $stmtSlug = $db->prepare("SELECT id FROM organizations WHERE slug = :slug LIMIT 1");
+        $stmtSlug->execute([':slug' => $slug]);
+        if ($stmtSlug->fetch()) {
+            $slug .= '-' . substr(bin2hex(random_bytes(2)), 0, 4);
+        }
+
+        // Pro Plan by default
+        $stmtPro = $db->query("SELECT id FROM plans WHERE LOWER(name) = 'pro' AND is_active = 1 LIMIT 1");
+        $proPlan = $stmtPro->fetch();
+        $proPlanId = $proPlan ? (int)$proPlan['id'] : 3;
+
+        try {
+            $db->beginTransaction();
+
+            // 1. Create Organization with is_demo = 1 & subscription_status = 'active'
+            $stmtOrg = $db->prepare("
+                INSERT INTO organizations (name, slug, website_url, primary_color, plan_id, subscription_status, is_demo, onboarding_completed, onboarding_step, created_at, updated_at)
+                VALUES (:name, :slug, :website_url, '#2563EB', :plan_id, 'active', 1, 1, 1, NOW(), NOW())
+            ");
+            $stmtOrg->execute([
+                ':name' => $collegeName,
+                ':slug' => $slug,
+                ':website_url' => $normalizedWebsite,
+                ':plan_id' => $proPlanId
+            ]);
+            $orgId = (int)$db->lastInsertId();
+            $instituteId = md5((string)$orgId);
+            $db->prepare("UPDATE organizations SET institute_id = :inst_id WHERE id = :id")->execute([
+                ':inst_id' => $instituteId,
+                ':id' => $orgId
+            ]);
+
+            // 2. Create Owner User
+            $passwordHash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
+            $stmtUser = $db->prepare("
+                INSERT INTO users (organization_id, name, email, password_hash, role, email_verified_at, created_at, updated_at)
+                VALUES (:org_id, :name, :email, :pass_hash, 'owner', NOW(), NOW(), NOW())
+            ");
+            $stmtUser->execute([
+                ':org_id' => $orgId,
+                ':name' => empty($adminName) ? 'Demo Admin' : $adminName,
+                ':email' => $adminEmail,
+                ':pass_hash' => $passwordHash
+            ]);
+            $userId = (int)$db->lastInsertId();
+
+            // 3. Create Fresh Clean Slate Chatbot with Whitelisted Domain
+            $botToken = bin2hex(random_bytes(16));
+            $welcomeMsg = "Hi there! 👋 Welcome to {$collegeName}. Ask me anything about admissions, degree programs, eligibility, fee structure, or campus facilities!";
+            $allowedDomains = json_encode([$domain, 'edvora.chat', '*.edvora.chat', 'localhost']);
+
+            $stmtBot = $db->prepare("
+                INSERT INTO chatbots (organization_id, name, welcome_message, primary_color, bot_token, allowed_domains, is_active, lead_capture_enabled, created_at, updated_at)
+                VALUES (:org_id, 'AI Admissions Assistant', :welcome_msg, '#2563EB', :token, :allowed_domains, 1, 1, NOW(), NOW())
+            ");
+            $stmtBot->execute([
+                ':org_id' => $orgId,
+                ':welcome_msg' => $welcomeMsg,
+                ':token' => $botToken,
+                ':allowed_domains' => $allowedDomains
+            ]);
+            $chatbotId = (int)$db->lastInsertId();
+
+            // 4. Create Active Subscription Row
+            $stmtSub = $db->prepare("
+                INSERT INTO subscriptions (organization_id, plan_id, billing_cycle, status, currency, current_period_start, current_period_end, created_at, updated_at)
+                VALUES (:org_id, :plan_id, 'monthly', 'active', 'INR', NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), NOW(), NOW())
+            ");
+            $stmtSub->execute([
+                ':org_id' => $orgId,
+                ':plan_id' => $proPlanId
+            ]);
+
+            // 5. Initialize Usage Log
+            $period = date('Y-m');
+            $stmtUsage = $db->prepare("
+                INSERT INTO usage_logs (organization_id, period, chatbots_count, created_at, updated_at)
+                VALUES (:org_id, :period, 1, NOW(), NOW())
+            ");
+            $stmtUsage->execute([
+                ':org_id' => $orgId,
+                ':period' => $period
+            ]);
+
+            $db->commit();
+
+            AuditLogger::log('demo_account_created', 'organization', $orgId, [
+                'college_name' => $collegeName,
+                'email' => $adminEmail
+            ]);
+
+            Response::success([
+                'organization_id' => $orgId,
+                'college_name' => $collegeName,
+                'slug' => $slug,
+                'website_url' => $normalizedWebsite,
+                'admin_email' => $adminEmail,
+                'password' => $password,
+                'plan_name' => 'Pro',
+                'bot_token' => $botToken,
+                'test_url' => 'https://edvora.chat/widget/' . $botToken,
+                'console_url' => 'https://edvora.chat/app/'
+            ], 'Demo tenant created successfully.', 201);
+
+        } catch (Throwable $e) {
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+            Response::error('Failed to create demo tenant: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * POST /v1/superadmin/demo-accounts/{id}/impersonate-token
+     * Generate 1-click login token for Super Admin to access demo tenant console
+     */
+    public function getDemoImpersonationToken(Request $request, array $params = []): void
+    {
+        $orgId = (int)($params['id'] ?? 0);
+        if (!$orgId) {
+            Response::error('Invalid organization ID.', 400);
+            return;
+        }
+
+        $db = Database::getConnection();
+        $stmt = $db->prepare("
+            SELECT u.id, u.email, u.role, o.name as org_name
+            FROM users u
+            JOIN organizations o ON u.organization_id = o.id
+            WHERE o.id = :org_id AND o.is_demo = 1
+            ORDER BY u.id ASC LIMIT 1
+        ");
+        $stmt->execute([':org_id' => $orgId]);
+        $owner = $stmt->fetch();
+
+        if (!$owner) {
+            Response::error('Demo tenant owner account not found.', 404);
+            return;
+        }
+
+        $payload = [
+            'user_id' => (int)$owner['id'],
+            'organization_id' => $orgId,
+            'role' => $owner['role'],
+            'email' => $owner['email'],
+            'type' => 'access',
+            'impersonated_by' => 'superadmin'
+        ];
+
+        $token = \App\Core\Jwt::encode($payload, 86400); // 24 hours access
+
+        AuditLogger::log('superadmin_impersonate_demo', 'organization', $orgId, [
+            'demo_email' => $owner['email']
+        ]);
+
+        Response::success([
+            'token' => $token,
+            'redirect_url' => '/app/?demo_token=' . urlencode($token),
+            'org_name' => $owner['org_name'],
+            'email' => $owner['email']
+        ]);
+    }
+
+    /**
+     * POST /v1/superadmin/demo-accounts/{id}/convert
+     * Convert demo tenant into standard college tenant
+     */
+    public function convertDemoToStandard(Request $request, array $params = []): void
+    {
+        $orgId = (int)($params['id'] ?? 0);
+        if (!$orgId) {
+            Response::error('Invalid organization ID.', 400);
+            return;
+        }
+
+        $db = Database::getConnection();
+        $stmt = $db->prepare("UPDATE organizations SET is_demo = 0, updated_at = NOW() WHERE id = :id AND is_demo = 1");
+        $stmt->execute([':id' => $orgId]);
+
+        if ($stmt->rowCount() === 0) {
+            Response::error('Demo organization not found or already converted.', 404);
+            return;
+        }
+
+        AuditLogger::log('demo_converted_to_standard', 'organization', $orgId);
+
+        Response::success(['organization_id' => $orgId], 'Demo account converted to standard College Tenant successfully.');
+    }
+
+    /**
+     * DELETE /v1/superadmin/demo-accounts/{id}
+     * Delete demo tenant and all isolated child records
+     */
+    public function deleteDemoAccount(Request $request, array $params = []): void
+    {
+        $orgId = (int)($params['id'] ?? 0);
+        if (!$orgId) {
+            Response::error('Invalid organization ID.', 400);
+            return;
+        }
+
+        $db = Database::getConnection();
+        // Verify it is a demo account before deleting
+        $stmtCheck = $db->prepare("SELECT id, name FROM organizations WHERE id = :id AND is_demo = 1 LIMIT 1");
+        $stmtCheck->execute([':id' => $orgId]);
+        $org = $stmtCheck->fetch();
+
+        if (!$org) {
+            Response::error('Demo organization not found or is not a demo account.', 404);
+            return;
+        }
+
+        try {
+            $db->beginTransaction();
+
+            // Cascade deletes handles chatbots, users, knowledge_sources, leads, conversations, etc.
+            // Also explicitly clean up subscriptions & usage logs if foreign keys don't cascade
+            $db->prepare("DELETE FROM subscriptions WHERE organization_id = :id")->execute([':id' => $orgId]);
+            $db->prepare("DELETE FROM usage_logs WHERE organization_id = :id")->execute([':id' => $orgId]);
+            $db->prepare("DELETE FROM organizations WHERE id = :id")->execute([':id' => $orgId]);
+
+            $db->commit();
+
+            AuditLogger::log('demo_account_deleted', 'organization', $orgId, ['name' => $org['name']]);
+
+            Response::success(['deleted_id' => $orgId], 'Demo tenant deleted successfully.');
+        } catch (Throwable $e) {
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+            Response::error('Failed to delete demo tenant: ' . $e->getMessage(), 500);
         }
     }
 

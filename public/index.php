@@ -519,6 +519,19 @@ $router->get('/system-bot', function (Request $req) {
 $router->get('/superadmin/system-bot', function (Request $req) {
     require dirname(__DIR__) . '/public/superadmin/system-bot.html';
 });
+
+// Dedicated Standalone Demo Tenants & Accounts Manager (No Bloat in index.html)
+$router->get('/demo-accounts', function (Request $req) {
+    require dirname(__DIR__) . '/public/superadmin/demo-accounts.html';
+});
+$router->get('/superadmin/demo-accounts', function (Request $req) {
+    require dirname(__DIR__) . '/public/superadmin/demo-accounts.html';
+});
+$router->get('/v1/superadmin/demo-accounts', [SuperAdminController::class, 'getDemoAccounts'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->post('/v1/superadmin/demo-accounts', [SuperAdminController::class, 'createDemoAccount'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->delete('/v1/superadmin/demo-accounts/{id}', [SuperAdminController::class, 'deleteDemoAccount'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->post('/v1/superadmin/demo-accounts/{id}/convert', [SuperAdminController::class, 'convertDemoToStandard'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->post('/v1/superadmin/demo-accounts/{id}/impersonate-token', [SuperAdminController::class, 'getDemoImpersonationToken'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
 $router->get('/v1/superadmin/system-bot/config', [SystemBotController::class, 'getConfig'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
 $router->put('/v1/superadmin/system-bot/customization', [SystemBotController::class, 'updateCustomization'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
 $router->post('/v1/superadmin/system-bot/avatar', [SystemBotController::class, 'uploadAvatar'], [AuthMiddleware::class, SuperAdminMiddleware::class]);

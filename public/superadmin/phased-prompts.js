@@ -240,8 +240,36 @@ function injectSystemBotSidebarLink() {
     nav.appendChild(link);
 }
 
+function injectDemoAccountsSidebarLink() {
+    const tenantsLink = document.querySelector('.brand-sidebar .sidebar-nav .nav-link[data-tab="tenants"]');
+    if (!tenantsLink || document.getElementById('navDemoAccountsLink')) return;
+
+    const link = document.createElement('a');
+    link.id = 'navDemoAccountsLink';
+    link.className = 'nav-link';
+    link.href = '/superadmin/demo-accounts';
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.style.cssText = 'color: #38bdf8; font-weight: 600; display: flex; align-items: center; gap: 10px;';
+    link.innerHTML = '<span>🧪</span> Demo Tenants ↗';
+    tenantsLink.insertAdjacentElement('afterend', link);
+
+    const panelHeader = document.querySelector('#tab-tenants .brand-panel-header');
+    if (panelHeader && !document.getElementById('tenantsHeaderToggleGroup')) {
+        const group = document.createElement('div');
+        group.id = 'tenantsHeaderToggleGroup';
+        group.style.cssText = 'display: inline-flex; align-items: center; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--brand-border-color, #1f2937); border-radius: 6px; padding: 2px; margin-left: 12px;';
+        group.innerHTML = `
+            <span style="padding: 3px 10px; font-size: 11px; font-weight: 600; border-radius: 4px; background: var(--brand-primary, #6366f1); color: #fff;">🏫 College Tenants</span>
+            <a href="/superadmin/demo-accounts" target="_blank" rel="noopener noreferrer" style="padding: 3px 10px; font-size: 11px; font-weight: 600; border-radius: 4px; color: #38bdf8; text-decoration: none; display: flex; align-items: center; gap: 4px;">🧪 Demo Tenants ↗</a>
+        `;
+        panelHeader.appendChild(group);
+    }
+}
+
 function initPhasedPrompts() {
     injectSystemBotSidebarLink();
+    injectDemoAccountsSidebarLink();
     setupPhasedPromptsListeners();
     loadPhasedPrompts();
 }

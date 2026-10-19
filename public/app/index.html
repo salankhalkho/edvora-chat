@@ -24,6 +24,12 @@
     <script>
         (function() {
             try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const demoToken = urlParams.get('demo_token') || urlParams.get('impersonate_token');
+                if (demoToken) {
+                    localStorage.setItem('edvora_token', demoToken);
+                    window.history.replaceState(null, '', window.location.pathname + (window.location.hash || ''));
+                }
                 const storedToken = localStorage.getItem('edvora_token');
                 const storedRefresh = localStorage.getItem('edvora_refresh_token');
                 if (storedToken || storedRefresh) {
@@ -8572,8 +8578,8 @@ echo $response['reply'];
                         localStorage.setItem('edvora_refresh_token', data.data.refresh_token);
                     }
 
-                    // Strict Payment Gate: check if commercial subscription is pending
-                    const isPaymentPending = Boolean(data.data.payment_required || (data.data.subscription_status && data.data.subscription_status !== 'active' && data.data.user?.role !== 'superadmin'));
+                    // Strict Payment Gate: check if commercial subscription is pending (demo accounts bypass)
+                    const isPaymentPending = Boolean((data.data.payment_required || (data.data.subscription_status && data.data.subscription_status !== 'active')) && data.data.user?.role !== 'superadmin' && !data.data.is_demo && !data.data.organization?.is_demo);
                     if (isPaymentPending) {
                         const chkState = window.edvoraCheckoutState || {};
                         chkState.orgId = data.data.organization?.id;
@@ -11268,8 +11274,8 @@ echo $response['reply'];
                 const user = meData.data.user || {};
                 const org = meData.data.organization || {};
 
-                // Strict Commercial Gate: check if subscription is pending
-                if (org && org.subscription_status !== 'active' && user.role !== 'superadmin') {
+                // Strict Commercial Gate: check if subscription is pending (demo accounts bypass)
+                if (org && org.subscription_status !== 'active' && user.role !== 'superadmin' && !org.is_demo) {
                     document.documentElement.classList.remove('has-auth-token');
                     document.getElementById('appContainer').style.display = 'none';
                     document.getElementById('authContainer').style.display = 'flex';

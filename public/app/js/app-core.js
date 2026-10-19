@@ -11,6 +11,15 @@
 //   Toast notifications    -> showToast()
 // LOADED BY: index.html via <script src="js/app-core.js">
 // ═══════════════════════════════════════════════════════════════════
+        try {
+            const _urlQ = new URLSearchParams(window.location.search);
+            const _qToken = _urlQ.get('demo_token') || _urlQ.get('impersonate_token');
+            if (_qToken) {
+                localStorage.setItem('edvora_token', _qToken);
+                document.documentElement.classList.add('has-auth-token');
+                window.history.replaceState(null, '', window.location.pathname + (window.location.hash || ''));
+            }
+        } catch (_) {}
         let token = localStorage.getItem('edvora_token');
         let currentUser = null;
         let currentWidgetBot = {

@@ -2131,6 +2131,16 @@ class Migrations
         } catch (Throwable $e) {
             error_log('[Migrations] system organization & informational mode: ' . $e->getMessage());
         }
+
+        // 37. DEMO TENANT IDENTIFIER COLUMN
+        try {
+            $checkIsDemo = $this->db->query("SHOW COLUMNS FROM organizations LIKE 'is_demo'");
+            if (!$checkIsDemo->fetch()) {
+                $this->db->exec("ALTER TABLE organizations ADD COLUMN is_demo TINYINT(1) NOT NULL DEFAULT 0 AFTER is_system, ADD INDEX idx_org_is_demo (is_demo);");
+            }
+        } catch (Throwable $e) {
+            error_log('[Migrations] demo tenant column: ' . $e->getMessage());
+        }
     }
 }
 
