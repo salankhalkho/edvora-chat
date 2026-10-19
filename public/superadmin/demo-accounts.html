@@ -11,8 +11,8 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            background-color: var(--brand-bg-dark, #0b0f19);
-            color: #f3f4f6;
+            background-color: var(--brand-bg-dark, #0b0f19) !important;
+            color: #f3f4f6 !important;
             font-family: 'Plus Jakarta Sans', sans-serif;
             font-size: 12px;
             overflow: hidden;
@@ -23,33 +23,42 @@
             width: 100vw;
             height: 100vh;
             display: flex;
+            background: #0b0f19 !important;
         }
+
+        /* Custom Dark Scrollbars */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0b0f19 !important; }
+        ::-webkit-scrollbar-thumb { background: #1f2937 !important; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #374151 !important; }
 
         /* Sidebar Navigation */
         .brand-sidebar {
-            width: 220px;
-            min-width: 220px;
-            background: var(--brand-bg-sidebar, #0e1320);
-            border-right: 1px solid var(--brand-border-color, #1f2937);
+            width: 220px !important;
+            min-width: 220px !important;
+            background: #0e1320 !important;
+            border-right: 1px solid #1f2937 !important;
             display: flex;
             flex-direction: column;
             user-select: none;
+            height: 100vh;
         }
         .sidebar-header {
-            height: 48px;
+            height: 48px !important;
             padding: 0 16px;
             display: flex;
             align-items: center;
             gap: 10px;
-            border-bottom: 1px solid var(--brand-border-color, #1f2937);
+            border-bottom: 1px solid #1f2937 !important;
             font-weight: 700;
             font-size: 14px;
-            color: #fff;
+            color: #fff !important;
+            background: #0e1320 !important;
         }
         .sidebar-header .badge-super {
-            background: rgba(99, 102, 241, 0.2);
-            color: #818cf8;
-            border: 1px solid rgba(99, 102, 241, 0.4);
+            background: rgba(99, 102, 241, 0.2) !important;
+            color: #818cf8 !important;
+            border: 1px solid rgba(99, 102, 241, 0.4) !important;
             padding: 2px 6px;
             border-radius: 4px;
             font-size: 10px;
@@ -70,8 +79,8 @@
             align-items: center;
             gap: 10px;
             padding: 8px 12px;
-            border-radius: var(--brand-radius-sm, 6px);
-            color: var(--brand-text-muted, #9ca3af);
+            border-radius: 6px;
+            color: #9ca3af !important;
             font-size: 12px;
             font-weight: 500;
             cursor: pointer;
@@ -79,20 +88,21 @@
             text-decoration: none;
         }
         .nav-link:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
+            background: rgba(255, 255, 255, 0.05) !important;
+            color: #fff !important;
         }
         .nav-link.active {
-            background: var(--brand-primary, #6366f1);
-            color: #fff;
+            background: #6366f1 !important;
+            color: #fff !important;
             font-weight: 600;
         }
         .sidebar-footer {
             padding: 12px;
-            border-top: 1px solid var(--brand-border-color, #1f2937);
+            border-top: 1px solid #1f2937 !important;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            background: #0e1320 !important;
         }
 
         /* Main Content */
@@ -101,13 +111,13 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            background: var(--brand-bg-dark, #0b0f19);
+            background: #0b0f19 !important;
         }
         .brand-header {
-            height: 48px;
+            height: 48px !important;
             padding: 0 20px;
-            background: var(--brand-bg-sidebar, #0e1320);
-            border-bottom: 1px solid var(--brand-border-color, #1f2937);
+            background: #0e1320 !important;
+            border-bottom: 1px solid #1f2937 !important;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -118,7 +128,7 @@
             gap: 10px;
             font-size: 14px;
             font-weight: 700;
-            color: #fff;
+            color: #fff !important;
         }
 
         .scrollable-body {
@@ -137,18 +147,22 @@
             gap: 14px;
         }
         .stat-card {
-            background: var(--brand-bg-sidebar, #0e1320);
-            border: 1px solid var(--brand-border-color, #1f2937);
-            border-radius: var(--brand-radius, 8px);
+            background: #111827 !important;
+            border: 1px solid #1f2937 !important;
+            border-radius: 8px !important;
             padding: 14px 16px;
             display: flex;
             flex-direction: column;
             gap: 6px;
+            transition: border-color 0.15s ease;
+        }
+        .stat-card:hover {
+            border-color: rgba(99, 102, 241, 0.4) !important;
         }
         .stat-card-label {
             font-size: 11px;
             font-weight: 600;
-            color: var(--brand-text-muted, #9ca3af);
+            color: #9ca3af !important;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             display: flex;
@@ -158,16 +172,17 @@
         .stat-card-value {
             font-size: 22px;
             font-weight: 800;
-            color: #fff;
+            color: #fff !important;
             letter-spacing: -0.5px;
         }
 
         /* Panels */
         .brand-panel {
-            background: var(--brand-bg-sidebar, #0e1320);
-            border: 1px solid var(--brand-border-color, #1f2937);
-            border-radius: var(--brand-radius, 8px);
-            padding: 18px 20px;
+            background: #111827 !important;
+            border: 1px solid #1f2937 !important;
+            border-radius: 8px !important;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
         }
         .brand-panel-header {
             display: flex;
@@ -175,7 +190,11 @@
             justify-content: space-between;
             margin-bottom: 16px;
             padding-bottom: 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+            background: transparent !important;
+            height: auto !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
         }
         .panel-heading {
             display: flex;
@@ -183,7 +202,7 @@
             gap: 8px;
             font-size: 13px;
             font-weight: 700;
-            color: #fff;
+            color: #fff !important;
         }
 
         /* Buttons */
@@ -192,10 +211,10 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
-            padding: 6px 12px;
-            font-size: 11.5px;
+            padding: 6px 14px;
+            font-size: 12px;
             font-weight: 600;
-            border-radius: var(--brand-radius-sm, 6px);
+            border-radius: 6px;
             border: 1px solid transparent;
             cursor: pointer;
             transition: all 0.15s ease;
@@ -203,52 +222,54 @@
             white-space: nowrap;
         }
         .brand-btn-primary {
-            background: var(--brand-primary, #6366f1);
-            color: #fff;
+            background: #6366f1 !important;
+            color: #fff !important;
+            border-color: transparent !important;
         }
         .brand-btn-primary:hover {
-            background: #4f46e5;
+            background: #4f46e5 !important;
+            color: #fff !important;
         }
         .brand-btn-secondary {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: var(--brand-border-color, #1f2937);
-            color: #e5e7eb;
+            background: rgba(255, 255, 255, 0.08) !important;
+            border: 1px solid #1f2937 !important;
+            color: #fff !important;
         }
         .brand-btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
+            background: rgba(255, 255, 255, 0.14) !important;
+            color: #fff !important;
         }
         .brand-btn-sm {
-            padding: 4px 8px;
-            font-size: 11px;
-            height: 26px;
+            padding: 4px 10px !important;
+            font-size: 11px !important;
+            height: 26px !important;
         }
         .brand-btn-danger {
-            background: rgba(239, 68, 68, 0.15);
-            border-color: rgba(239, 68, 68, 0.3);
-            color: #f87171;
+            background: rgba(239, 68, 68, 0.15) !important;
+            border: 1px solid rgba(239, 68, 68, 0.3) !important;
+            color: #f87171 !important;
         }
         .brand-btn-danger:hover {
-            background: rgba(239, 68, 68, 0.25);
-            color: #fca5a5;
+            background: rgba(239, 68, 68, 0.25) !important;
+            color: #fca5a5 !important;
         }
         .brand-btn-success {
-            background: rgba(16, 185, 129, 0.15);
-            border-color: rgba(16, 185, 129, 0.3);
-            color: #34d399;
+            background: rgba(16, 185, 129, 0.15) !important;
+            border: 1px solid rgba(16, 185, 129, 0.3) !important;
+            color: #34d399 !important;
         }
         .brand-btn-success:hover {
-            background: rgba(16, 185, 129, 0.25);
-            color: #6ee7b7;
+            background: rgba(16, 185, 129, 0.25) !important;
+            color: #6ee7b7 !important;
         }
         .brand-btn-cyan {
-            background: rgba(6, 182, 212, 0.15);
-            border-color: rgba(6, 182, 212, 0.3);
-            color: #38bdf8;
+            background: rgba(6, 182, 212, 0.15) !important;
+            border: 1px solid rgba(6, 182, 212, 0.3) !important;
+            color: #38bdf8 !important;
         }
         .brand-btn-cyan:hover {
-            background: rgba(6, 182, 212, 0.25);
-            color: #7dd3fc;
+            background: rgba(6, 182, 212, 0.25) !important;
+            color: #7dd3fc !important;
         }
 
         /* Table */
@@ -256,26 +277,30 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 12px;
+            background: #111827 !important;
+            color: #f3f4f6 !important;
         }
         .brand-table th {
             text-align: left;
-            padding: 10px 12px;
-            background: rgba(0, 0, 0, 0.2);
-            color: var(--brand-text-muted, #9ca3af);
-            font-weight: 600;
-            font-size: 10.5px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 1px solid var(--brand-border-color, #1f2937);
+            padding: 10px 14px !important;
+            background: #080c14 !important;
+            color: #9ca3af !important;
+            font-weight: 600 !important;
+            font-size: 10.5px !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            border-bottom: 1px solid #1f2937 !important;
+            white-space: nowrap !important;
         }
         .brand-table td {
-            padding: 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-            color: #e5e7eb;
+            padding: 12px 14px !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+            color: #f3f4f6 !important;
+            background: transparent !important;
             vertical-align: middle;
         }
         .brand-table tr:hover td {
-            background: rgba(255, 255, 255, 0.02);
+            background: rgba(255, 255, 255, 0.03) !important;
         }
 
         /* Badges */
@@ -291,19 +316,24 @@
             letter-spacing: 0.3px;
         }
         .badge-demo {
-            background: rgba(56, 189, 248, 0.15);
-            color: #38bdf8;
-            border: 1px solid rgba(56, 189, 248, 0.35);
+            background: rgba(56, 189, 248, 0.15) !important;
+            color: #38bdf8 !important;
+            border: 1px solid rgba(56, 189, 248, 0.35) !important;
         }
         .badge-pro {
-            background: rgba(99, 102, 241, 0.2);
-            color: #a5b4fc;
-            border: 1px solid rgba(99, 102, 241, 0.35);
+            background: rgba(99, 102, 241, 0.2) !important;
+            color: #a5b4fc !important;
+            border: 1px solid rgba(99, 102, 241, 0.35) !important;
         }
         .badge-active {
-            background: rgba(16, 185, 129, 0.15);
-            color: #34d399;
-            border: 1px solid rgba(16, 185, 129, 0.3);
+            background: rgba(16, 185, 129, 0.15) !important;
+            color: #34d399 !important;
+            border: 1px solid rgba(16, 185, 129, 0.3) !important;
+        }
+        .badge-primary {
+            background: rgba(99, 102, 241, 0.2) !important;
+            color: #a5b4fc !important;
+            border: 1px solid rgba(99, 102, 241, 0.4) !important;
         }
 
         /* Form elements */
@@ -323,21 +353,27 @@
         .form-label {
             font-size: 11px;
             font-weight: 600;
-            color: #d1d5db;
+            color: #9ca3af !important;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
         }
         .form-input {
-            background: #0b0f19;
-            border: 1px solid #1f2937;
+            background: #080c14 !important;
+            border: 1px solid #1f2937 !important;
             border-radius: 6px;
-            color: #fff;
-            padding: 8px 10px;
+            color: #fff !important;
+            padding: 8px 12px;
             font-size: 12px;
             font-family: inherit;
             outline: none;
-            transition: border-color 0.15s ease;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
         .form-input:focus {
-            border-color: #6366f1;
+            border-color: #6366f1 !important;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+        .form-input::placeholder {
+            color: #6b7280;
         }
 
         /* Modal */
@@ -352,13 +388,14 @@
             justify-content: center;
         }
         .modal-box {
-            background: #111827;
-            border: 1px solid #1f2937;
+            background: #111827 !important;
+            border: 1px solid #1f2937 !important;
             border-radius: 10px;
             width: 580px;
             max-width: 95vw;
             padding: 22px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            color: #f3f4f6 !important;
         }
 
         /* Toast */
@@ -373,9 +410,9 @@
             pointer-events: none;
         }
         .toast {
-            background: #1f2937;
-            color: #fff;
-            border: 1px solid #374151;
+            background: #1f2937 !important;
+            color: #fff !important;
+            border: 1px solid #374151 !important;
             border-radius: 6px;
             padding: 10px 14px;
             font-size: 11.5px;
@@ -386,8 +423,8 @@
             align-items: center;
             gap: 8px;
         }
-        .toast-success { border-color: rgba(16, 185, 129, 0.5); background: #064e3b; }
-        .toast-error { border-color: rgba(239, 68, 68, 0.5); background: #7f1d1d; }
+        .toast-success { border-color: rgba(16, 185, 129, 0.5) !important; background: #064e3b !important; }
+        .toast-error { border-color: rgba(239, 68, 68, 0.5) !important; background: #7f1d1d !important; }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(6px); }
@@ -413,7 +450,7 @@
                 <a class="nav-link" href="/superadmin/#tenants">
                     <span>🏫</span> College Tenants
                 </a>
-                <a class="nav-link active" href="/superadmin/demo-accounts" style="color: #38bdf8;">
+                <a class="nav-link active" href="/superadmin/demo-accounts">
                     <span>🧪</span> Demo Tenants
                 </a>
                 <a class="nav-link" href="/superadmin/#plans">
@@ -425,7 +462,7 @@
                 <a class="nav-link" href="/superadmin/#database">
                     <span>🗄️</span> Database
                 </a>
-                <a class="nav-link" href="/db-info" target="_blank" rel="noopener noreferrer" style="padding-left: 28px; font-size: 11px; color: var(--brand-text-muted);">
+                <a class="nav-link" href="/db-info" target="_blank" rel="noopener noreferrer" style="padding-left: 28px; font-size: 11px; color: #9ca3af;">
                     <span>📋</span> DB Info ↗
                 </a>
                 <a class="nav-link" href="/superadmin/#demos">
@@ -454,7 +491,7 @@
                 </a>
             </nav>
             <div class="sidebar-footer">
-                <span style="color: var(--brand-text-muted); font-size: 11px;">v1.2.0 • VPS Live</span>
+                <span style="color: #9ca3af; font-size: 11px;">v1.2.0 • VPS Live</span>
                 <a href="/superadmin/" class="brand-btn brand-btn-secondary brand-btn-sm">Return Home</a>
             </div>
         </aside>
@@ -528,15 +565,15 @@
                             <span id="demosCountBadge" class="badge badge-demo" style="margin-left: 6px;">0 DEMOS</span>
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <input type="text" id="searchInput" placeholder="Search by college name, email, bot token..." oninput="filterTable()" class="form-input" style="width: 280px; padding: 5px 10px; font-size: 11px;" />
+                            <input type="text" id="searchInput" placeholder="Search by college name, email, bot token..." oninput="filterTable()" class="form-input" style="width: 280px; height: 32px; padding: 0 12px; font-size: 11px;" />
                         </div>
                     </div>
 
-                    <p style="font-size: 11.5px; color: var(--brand-text-muted); margin-bottom: 14px;">
-                        These accounts use real multi-tenant infrastructure on the <strong>Pro Plan</strong> with commercial payment gates bypassed. Use <strong>Open Console</strong> to log in and upload prospectus docs or tune prompts, then send prospective customers their <strong>Chatbot Test Link</strong> to test.
+                    <p style="font-size: 11.5px; color: #9ca3af; margin-bottom: 16px; line-height: 1.5;">
+                        These accounts use real multi-tenant infrastructure on the <strong style="color: #f3f4f6;">Pro Plan</strong> with commercial payment gates bypassed. Use <strong style="color: #f3f4f6;">Open Console</strong> to log in and upload prospectus docs or tune prompts, then send prospective customers their <strong style="color: #f3f4f6;">Chatbot Test Link</strong> to test.
                     </p>
 
-                    <div style="overflow-x: auto;">
+                    <div style="overflow-x: auto; border: 1px solid #1f2937; border-radius: 6px;">
                         <table class="brand-table">
                             <thead>
                                 <tr>
@@ -551,7 +588,7 @@
                                 </tr>
                             </thead>
                             <tbody id="demoTableBody">
-                                <tr><td colspan="8" style="text-align: center; color: var(--brand-text-muted); padding: 24px;">Loading demo accounts...</td></tr>
+                                <tr><td colspan="8" style="text-align: center; color: #9ca3af; padding: 28px;">Loading demo accounts...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -570,8 +607,8 @@
                 <button type="button" onclick="closeCreateModal()" style="background: none; border: none; color: #9ca3af; font-size: 18px; cursor: pointer;">&times;</button>
             </div>
 
-            <p style="font-size: 11.5px; color: var(--brand-text-muted); margin-bottom: 16px;">
-                Creates an isolated organization on real production infrastructure assigned to the <strong>Pro Plan</strong> by default. Bypasses payment requirements so you can configure admissions knowledge and provide prospective clients with a live preview widget.
+            <p style="font-size: 11.5px; color: #9ca3af; margin-bottom: 16px;">
+                Creates an isolated organization on real production infrastructure assigned to the <strong style="color: #f3f4f6;">Pro Plan</strong> by default. Bypasses payment requirements so you can configure admissions knowledge and provide prospective clients with a live preview widget.
             </p>
 
             <form onsubmit="handleCreateDemo(event)">
@@ -584,7 +621,7 @@
                     <div class="form-group full-width">
                         <label class="form-label">College Website URL *</label>
                         <input type="url" id="demoWebsiteUrl" class="form-input" placeholder="https://oxfordinstitute.edu" required />
-                        <span style="font-size: 10px; color: var(--brand-text-muted);">Website domain will be automatically whitelisted for the chatbot.</span>
+                        <span style="font-size: 10px; color: #9ca3af;">Website domain will be automatically whitelisted for the chatbot.</span>
                     </div>
 
                     <div class="form-group">
@@ -610,7 +647,7 @@
 
                 <div style="margin-top: 16px; padding: 10px 12px; background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 6px; font-size: 11px; color: #c7d2fe; display: flex; align-items: center; gap: 8px;">
                     <span>ℹ️</span>
-                    <span>Assigned Plan: <strong>Pro Plan (Commercial Gate Bypassed)</strong>. Clean slate with fresh chatbot.</span>
+                    <span>Assigned Plan: <strong style="color: #fff;">Pro Plan (Commercial Gate Bypassed)</strong>. Clean slate with fresh chatbot.</span>
                 </div>
 
                 <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px;">
@@ -629,24 +666,24 @@
             <div style="text-align: center; margin-bottom: 16px;">
                 <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); color: #34d399; font-size: 24px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 10px;">✓</div>
                 <h3 style="font-size: 15px; font-weight: 700; color: #fff;">Demo Tenant Created Successfully!</h3>
-                <p style="font-size: 11.5px; color: var(--brand-text-muted); margin-top: 4px;" id="successSubtitle"></p>
+                <p style="font-size: 11.5px; color: #9ca3af; margin-top: 4px;" id="successSubtitle"></p>
             </div>
 
             <div style="background: #0b0f19; border: 1px solid #1f2937; border-radius: 6px; padding: 12px; margin-bottom: 16px; font-size: 11.5px; display: flex; flex-direction: column; gap: 8px;">
                 <div>
-                    <span style="color: var(--brand-text-muted);">College:</span>
+                    <span style="color: #9ca3af;">College:</span>
                     <strong style="color: #fff; margin-left: 6px;" id="succCollegeName"></strong>
                 </div>
                 <div>
-                    <span style="color: var(--brand-text-muted);">Login Email:</span>
+                    <span style="color: #9ca3af;">Login Email:</span>
                     <code style="color: #93c5fd; font-family: 'JetBrains Mono', monospace; margin-left: 6px;" id="succEmail"></code>
                 </div>
                 <div>
-                    <span style="color: var(--brand-text-muted);">Password:</span>
+                    <span style="color: #9ca3af;">Password:</span>
                     <code style="color: #93c5fd; font-family: 'JetBrains Mono', monospace; margin-left: 6px;" id="succPassword"></code>
                 </div>
                 <div>
-                    <span style="color: var(--brand-text-muted);">Shareable Test Link:</span>
+                    <span style="color: #9ca3af;">Shareable Test Link:</span>
                     <a id="succTestLink" href="#" target="_blank" style="color: #38bdf8; text-decoration: underline; margin-left: 6px; word-break: break-all; font-family: 'JetBrains Mono', monospace; font-size: 11px;"></a>
                 </div>
             </div>
@@ -735,7 +772,7 @@
 
         async function loadDemoAccounts() {
             const tbody = document.getElementById('demoTableBody');
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--brand-text-muted); padding: 24px;">Loading demo accounts...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #9ca3af; padding: 24px;">Loading demo accounts...</td></tr>';
 
             try {
                 const res = await fetch('/v1/superadmin/demo-accounts', {
@@ -779,10 +816,10 @@
             if (!list.length) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="8" style="text-align: center; color: var(--brand-text-muted); padding: 40px 20px;">
-                            <div style="font-size: 28px; margin-bottom: 8px;">🧪</div>
-                            <div style="font-size: 13px; font-weight: 600; color: #fff;">No Demo Accounts Found</div>
-                            <div style="font-size: 11.5px; margin-top: 4px;">Click <strong>+ Create Demo Tenant</strong> above to spin up a custom university demo.</div>
+                        <td colspan="8" style="text-align: center; color: #9ca3af; padding: 48px 20px; background: transparent !important;">
+                            <div style="font-size: 32px; margin-bottom: 10px; filter: drop-shadow(0 2px 8px rgba(56, 189, 248, 0.3));">🧪</div>
+                            <div style="font-size: 14px; font-weight: 700; color: #f3f4f6; margin-bottom: 6px;">No Demo Accounts Found</div>
+                            <div style="font-size: 12px; color: #9ca3af;">Click <strong style="color: #38bdf8; cursor: pointer; text-decoration: underline;" onclick="openCreateModal()">+ Create Demo Tenant</strong> above to spin up a custom university demo.</div>
                         </td>
                     </tr>
                 `;
@@ -795,43 +832,43 @@
 
                 return `
                     <tr>
-                        <td style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--brand-text-muted);">
-                            #${d.id}
+                        <td>
+                            <span class="badge" style="background: rgba(56, 189, 248, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-weight: 700; font-size: 11px; font-family: 'JetBrains Mono', monospace; padding: 2px 7px; border-radius: 4px;">#${d.id}</span>
                         </td>
                         <td>
                             <div style="display: flex; align-items: center; gap: 6px;">
-                                <strong style="color: #fff; font-size: 12.5px;">${escapeHtml(d.name)}</strong>
+                                <strong style="color: #f8fafc; font-size: 13px;">${escapeHtml(d.name)}</strong>
                                 <span class="badge badge-demo">DEMO</span>
                             </div>
-                            ${d.website_url ? `<a href="${escapeHtml(d.website_url)}" target="_blank" rel="noopener noreferrer" style="font-size: 11px; color: #9ca3af; text-decoration: underline;">${escapeHtml(d.website_url)}</a>` : ''}
+                            ${d.website_url ? `<a href="${escapeHtml(d.website_url)}" target="_blank" rel="noopener noreferrer" style="font-size: 11px; color: #9ca3af; text-decoration: underline; margin-top: 2px; display: inline-block;">${escapeHtml(d.website_url)}</a>` : ''}
                         </td>
                         <td>
                             <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #93c5fd;">${escapeHtml(d.owner_email || 'No email')}</div>
-                            <div style="font-size: 10px; color: var(--brand-text-muted);">${escapeHtml(d.owner_name || 'Admin')}</div>
+                            <div style="font-size: 10px; color: #9ca3af; margin-top: 2px;">${escapeHtml(d.owner_name || 'Admin')}</div>
                         </td>
                         <td>
                             ${d.bot_token ? `
                                 <div style="display: flex; align-items: center; gap: 6px;">
-                                    <code style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: #a78bfa; background: rgba(167, 139, 250, 0.1); padding: 2px 6px; border-radius: 4px;">
+                                    <code style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: #c084fc; background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.25); padding: 2px 6px; border-radius: 4px;">
                                         ${escapeHtml(d.bot_token.substring(0, 12))}...
                                     </code>
                                     <button onclick="copyToClipboard('${escapeHtml(testUrl)}', 'Chatbot Test URL copied to clipboard!')" class="brand-btn brand-btn-secondary brand-btn-sm" title="Copy Live Test Link">
                                         🔗 Test URL
                                     </button>
                                 </div>
-                            ` : '<span style="color: var(--brand-text-muted);">No Bot</span>'}
+                            ` : '<span style="color: #9ca3af;">No Bot</span>'}
                         </td>
                         <td>
                             <span class="badge badge-pro">PRO PLAN</span>
                             <span class="badge badge-active" style="margin-left: 4px;">ACTIVE</span>
                         </td>
-                        <td style="font-size: 11px; color: var(--brand-text-muted);">
+                        <td style="font-size: 11px; color: #9ca3af;">
                             <span>👥 ${d.total_users || 1}</span> &bull; 
                             <span>🤖 ${d.total_chatbots || 1}</span> &bull; 
                             <span>📚 ${d.total_knowledge_sources || 0}</span> &bull; 
                             <strong style="color: #34d399;">🎯 ${d.total_leads || 0}</strong>
                         </td>
-                        <td style="font-size: 11px; color: var(--brand-text-muted); white-space: nowrap;">
+                        <td style="font-size: 11px; color: #9ca3af; white-space: nowrap;">
                             ${createdDate}
                         </td>
                         <td style="text-align: right; white-space: nowrap;">
