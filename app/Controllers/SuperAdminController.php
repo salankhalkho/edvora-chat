@@ -614,8 +614,8 @@ class SuperAdminController
             // 5. Initialize Usage Log
             $period = date('Y-m');
             $stmtUsage = $db->prepare("
-                INSERT INTO usage_logs (organization_id, period, chatbots_count, created_at, updated_at)
-                VALUES (:org_id, :period, 1, NOW(), NOW())
+                INSERT INTO usage_logs (organization_id, period, chatbots_count)
+                VALUES (:org_id, :period, 1)
             ");
             $stmtUsage->execute([
                 ':org_id' => $orgId,
