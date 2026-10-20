@@ -573,7 +573,7 @@
                     </div>
 
                     <p style="font-size: 11.5px; color: #9ca3af; margin-bottom: 16px; line-height: 1.5;">
-                        These accounts use real multi-tenant infrastructure on the <strong style="color: #f3f4f6;">Pro Plan</strong> with commercial payment gates bypassed. Use <strong style="color: #f3f4f6;">Open Console</strong> to log in and upload prospectus docs or tune prompts, then send prospective customers their <strong style="color: #f3f4f6;">Chatbot Test Link</strong> to test.
+                        These accounts use real multi-tenant infrastructure on the <strong style="color: #f3f4f6;">Pro Plan</strong> with commercial payment gates bypassed. Use <strong style="color: #f3f4f6;">User Dashboard</strong> to log in and upload prospectus docs or tune prompts, then send prospective customers their <strong style="color: #f3f4f6;">Chatbot Test Link</strong> to test.
                     </p>
 
                     <div style="overflow-x: auto; border: 1px solid #1f2937; border-radius: 6px;">
@@ -693,7 +693,7 @@
 
             <div style="display: flex; flex-direction: column; gap: 8px;">
                 <button type="button" id="btnSuccOpenConsole" class="brand-btn brand-btn-primary" style="width: 100%; padding: 8px;">
-                    <span>🚀</span> Open Demo Console Now (1-Click Login)
+                    <span>🚀</span> Open User Dashboard Now (1-Click Login)
                 </button>
                 <div style="display: flex; gap: 8px;">
                     <button type="button" id="btnSuccCopyLink" class="brand-btn brand-btn-cyan" style="flex: 1;">
@@ -1039,8 +1039,8 @@
                         </td>
                         <td style="text-align: right; white-space: nowrap;">
                             <div style="display: inline-flex; align-items: center; gap: 5px;">
-                                <button onclick="impersonateDemo(${d.id})" class="brand-btn brand-btn-primary brand-btn-sm" title="1-Click Login to Demo Console in a new tab">
-                                    🚀 Open Console
+                                <button onclick="impersonateDemo(${d.id})" class="brand-btn brand-btn-primary brand-btn-sm" title="1-Click Login to User Dashboard in a new tab">
+                                    🚀 User Dashboard
                                 </button>
                                 <button onclick="copyToClipboard('${escapeHtml(testUrl)}', 'Customer test link copied!')" class="brand-btn brand-btn-cyan brand-btn-sm" title="Copy shareable customer test link">
                                     🔗 Link
@@ -1119,7 +1119,7 @@
                         copyToClipboard(d.test_url, 'Customer Test URL copied to clipboard!');
                     };
                     document.getElementById('btnSuccCopyCreds').onclick = () => {
-                        const credsText = `Edvora Chatbot Demo Console Credentials\nCollege: ${d.college_name}\nConsole URL: https://edvora.chat/app/\nEmail: ${d.admin_email}\nPassword: ${d.password}\nCustomer Test Widget: ${d.test_url}`;
+                        const credsText = `Edvora Chatbot Demo User Dashboard Credentials\nCollege: ${d.college_name}\nDashboard URL: https://edvora.chat/app/\nEmail: ${d.admin_email}\nPassword: ${d.password}\nCustomer Test Widget: ${d.test_url}`;
                         copyToClipboard(credsText, 'Full credentials block copied to clipboard!');
                     };
 
@@ -1137,14 +1137,14 @@
         }
 
         async function impersonateDemo(orgId) {
-            showToast('Generating secure 1-click console session...', 'info');
+            showToast('Generating secure 1-click dashboard session...', 'info');
             try {
                 const data = await apiFetch(`/v1/superadmin/demo-accounts/${orgId}/impersonate-token`, {
                     method: 'POST'
                 });
 
                 if (data.status === 'success' && data.data && data.data.redirect_url) {
-                    showToast(`Opening console as ${data.data.email}...`, 'success');
+                    showToast(`Opening User Dashboard as ${data.data.email}...`, 'success');
                     window.open(data.data.redirect_url, '_blank');
                 } else {
                     showToast(data.message || 'Could not generate impersonation token.', 'error');
@@ -1155,7 +1155,7 @@
         }
 
         function copyDemoCredentials(collegeName, email) {
-            const text = `College: ${collegeName}\nLogin Email: ${email}\nConsole URL: https://edvora.chat/app/`;
+            const text = `College: ${collegeName}\nLogin Email: ${email}\nDashboard URL: https://edvora.chat/app/`;
             copyToClipboard(text, 'Login email and details copied to clipboard!');
         }
 
