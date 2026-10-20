@@ -573,7 +573,7 @@
                     </div>
 
                     <p style="font-size: 11.5px; color: #9ca3af; margin-bottom: 16px; line-height: 1.5;">
-                        These accounts use real multi-tenant infrastructure on the <strong style="color: #f3f4f6;">Pro Plan</strong> with commercial payment gates bypassed. Use <strong style="color: #f3f4f6;">User Dashboard</strong> to log in and upload prospectus docs or tune prompts, then send prospective customers their <strong style="color: #f3f4f6;">Chatbot Test Link</strong> to test.
+                        These accounts use real multi-tenant infrastructure on the <strong style="color: #f3f4f6;">Pro Plan</strong> with commercial payment gates bypassed. Use <strong style="color: #f3f4f6;">User Dashboard</strong> to log in and upload prospectus docs or tune prompts, then send prospective customers their <strong style="color: #f3f4f6;">Custom Demo Link</strong> to test.
                     </p>
 
                     <div style="overflow-x: auto; border: 1px solid #1f2937; border-radius: 6px;">
@@ -583,7 +583,7 @@
                                     <th>ID</th>
                                     <th>College / Institution</th>
                                     <th>Admin Email</th>
-                                    <th>Chatbot Token &amp; Test URL</th>
+                                    <th>Chatbot Token &amp; Demo Link</th>
                                     <th>Plan / Status</th>
                                     <th>Data Counters</th>
                                     <th>Created</th>
@@ -686,7 +686,7 @@
                     <code style="color: #93c5fd; font-family: 'JetBrains Mono', monospace; margin-left: 6px;" id="succPassword"></code>
                 </div>
                 <div>
-                    <span style="color: #9ca3af;">Shareable Test Link:</span>
+                    <span style="color: #9ca3af;">Customer Demo Link:</span>
                     <a id="succTestLink" href="#" target="_blank" style="color: #38bdf8; text-decoration: underline; margin-left: 6px; word-break: break-all; font-family: 'JetBrains Mono', monospace; font-size: 11px;"></a>
                 </div>
             </div>
@@ -697,7 +697,7 @@
                 </button>
                 <div style="display: flex; gap: 8px;">
                     <button type="button" id="btnSuccCopyLink" class="brand-btn brand-btn-cyan" style="flex: 1;">
-                        <span>🔗</span> Copy Test Widget Link
+                        <span>🔗</span> Copy Customer Demo Link
                     </button>
                     <button type="button" id="btnSuccCopyCreds" class="brand-btn brand-btn-secondary" style="flex: 1;">
                         <span>📋</span> Copy Credentials
@@ -993,7 +993,7 @@
             }
 
             tbody.innerHTML = list.map(d => {
-                const testUrl = d.test_url || (d.bot_token ? `https://edvora.chat/widget/${d.bot_token}` : '#');
+                const testUrl = d.test_url || (d.bot_token ? `https://edvora.chat/demo/${d.bot_token}` : '#');
                 const createdDate = d.created_at ? new Date(d.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-';
 
                 return `
@@ -1018,8 +1018,8 @@
                                     <code style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: #c084fc; background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.25); padding: 2px 6px; border-radius: 4px;">
                                         ${escapeHtml(d.bot_token.substring(0, 12))}...
                                     </code>
-                                    <button onclick="copyToClipboard('${escapeHtml(testUrl)}', 'Chatbot Test URL copied to clipboard!')" class="brand-btn brand-btn-secondary brand-btn-sm" title="Copy Live Test Link">
-                                        🔗 Test URL
+                                    <button onclick="copyToClipboard('${escapeHtml(testUrl)}', 'Customer Demo URL copied to clipboard!')" class="brand-btn brand-btn-secondary brand-btn-sm" title="Copy Customer Demo Link">
+                                        🔗 Demo Link
                                     </button>
                                 </div>
                             ` : '<span style="color: #9ca3af;">No Bot</span>'}
@@ -1042,7 +1042,7 @@
                                 <button onclick="impersonateDemo(${d.id})" class="brand-btn brand-btn-primary brand-btn-sm" title="1-Click Login to User Dashboard in a new tab">
                                     🚀 User Dashboard
                                 </button>
-                                <button onclick="copyToClipboard('${escapeHtml(testUrl)}', 'Customer test link copied!')" class="brand-btn brand-btn-cyan brand-btn-sm" title="Copy shareable customer test link">
+                                <button onclick="copyToClipboard('${escapeHtml(testUrl)}', 'Customer demo link copied!')" class="brand-btn brand-btn-cyan brand-btn-sm" title="Copy customer demo link">
                                     🔗 Link
                                 </button>
                                 <button onclick="copyDemoCredentials('${escapeHtml(d.name)}', '${escapeHtml(d.owner_email || '')}')" class="brand-btn brand-btn-secondary brand-btn-sm" title="Copy login email">
@@ -1116,10 +1116,10 @@
                         impersonateDemo(d.organization_id);
                     };
                     document.getElementById('btnSuccCopyLink').onclick = () => {
-                        copyToClipboard(d.test_url, 'Customer Test URL copied to clipboard!');
+                        copyToClipboard(d.test_url, 'Customer Demo URL copied to clipboard!');
                     };
                     document.getElementById('btnSuccCopyCreds').onclick = () => {
-                        const credsText = `Edvora Chatbot Demo User Dashboard Credentials\nCollege: ${d.college_name}\nDashboard URL: https://edvora.chat/app/\nEmail: ${d.admin_email}\nPassword: ${d.password}\nCustomer Test Widget: ${d.test_url}`;
+                        const credsText = `Edvora Chatbot Demo User Dashboard Credentials\nCollege: ${d.college_name}\nDashboard URL: https://edvora.chat/app/\nEmail: ${d.admin_email}\nPassword: ${d.password}\nCustomer Demo Page: ${d.test_url}`;
                         copyToClipboard(credsText, 'Full credentials block copied to clipboard!');
                     };
 

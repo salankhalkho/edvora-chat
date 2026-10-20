@@ -480,7 +480,7 @@ class SuperAdminController
 
         // Enrich with direct shareable test link
         foreach ($demos as &$d) {
-            $d['test_url'] = !empty($d['bot_token']) ? 'https://edvora.chat/widget/' . $d['bot_token'] : null;
+            $d['test_url'] = !empty($d['bot_token']) ? 'https://edvora.chat/demo/' . $d['bot_token'] : null;
         }
 
         Response::success($demos);
@@ -639,7 +639,7 @@ class SuperAdminController
                 'password' => $password,
                 'plan_name' => 'Pro',
                 'bot_token' => $botToken,
-                'test_url' => 'https://edvora.chat/widget/' . $botToken,
+                'test_url' => 'https://edvora.chat/demo/' . $botToken,
                 'console_url' => 'https://edvora.chat/app/'
             ], 'Demo tenant created successfully.', 201);
 

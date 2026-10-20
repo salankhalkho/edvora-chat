@@ -216,6 +216,12 @@ $router->get('/test', function (Request $req, array $params = []) {
 $router->get('/widget/{bot_token}', function (Request $req, array $params = []) {
     require dirname(__DIR__) . '/public/test_chat.html';
 });
+$router->get('/demo/{bot_token}', function (Request $req, array $params = []) {
+    require dirname(__DIR__) . '/public/demo.html';
+});
+$router->get('/demo', function (Request $req, array $params = []) {
+    require dirname(__DIR__) . '/public/demo.html';
+});
 
 // Dedicated Mobile App Integration Resource Route
 $router->get('/mobile-integration', function (Request $req) {

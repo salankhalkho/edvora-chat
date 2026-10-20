@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Admissions Assistant Demo — edvora.chat</title>
+    <link rel="stylesheet" href="/theme-branding.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-canvas: #F1F7F4;
+            --card-bg: #FFFFFF;
+            --card-border: #DCE9E5;
+            --text-main: #092F2E;
+            --text-muted: #527972;
+            --accent-primary: #063D3B;
+            --accent-hover: #0A524F;
+            --accent-soft: #E6F7D2;
+            --accent-pistachio: #C8FF63;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-canvas);
+            background-image: 
+                radial-gradient(at 15% 15%, rgba(6, 61, 59, 0.06) 0px, transparent 60%),
+                radial-gradient(at 85% 85%, rgba(200, 255, 99, 0.18) 0px, transparent 55%),
+                radial-gradient(at 50% 10%, rgba(185, 215, 199, 0.28) 0px, transparent 70%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 20px;
+            overflow-x: hidden;
+        }
+        .demo-card {
+            background: var(--card-bg);
+            border: 1.5px solid var(--card-border);
+            border-radius: 24px;
+            max-width: 680px;
+            width: 100%;
+            padding: 40px 38px 32px;
+            box-shadow: 0 24px 50px -12px rgba(6, 61, 59, 0.1), 0 2px 4px rgba(6, 61, 59, 0.04);
+            text-align: center;
+            position: relative;
+            animation: fadeInCard 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes fadeInCard {
+            from { opacity: 0; transform: translateY(14px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .demo-pill-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 4px 14px;
+            border-radius: 20px;
+            background: #E8F8EE;
+            color: #047857;
+            border: 1px solid #A7F3D0;
+            margin-bottom: 16px;
+        }
+
+        .demo-logo-badge {
+            width: 76px;
+            height: 76px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #E6F7D2 0%, #D4F3EA 100%);
+            border: 1.5px solid #B9D7C7;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            box-shadow: 0 10px 22px -6px rgba(6, 61, 59, 0.12);
+            overflow: hidden;
+        }
+        .demo-logo-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .demo-logo-icon {
+            font-size: 36px;
+        }
+
+        .demo-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.03em;
+            margin-bottom: 6px;
+            line-height: 1.25;
+        }
+        .demo-subtitle-institution {
+            font-size: 14.5px;
+            font-weight: 600;
+            color: #047857;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        /* Message Box */
+        .demo-message-box {
+            background: #F8FBFA;
+            border: 1.5px solid #DDE9E3;
+            border-radius: 16px;
+            padding: 22px 22px 18px;
+            margin-bottom: 22px;
+            text-align: left;
+        }
+        .demo-lead-text {
+            font-size: 13.5px;
+            color: #1e3a38;
+            line-height: 1.6;
+            margin-bottom: 18px;
+        }
+        .demo-lead-text strong {
+            color: #063D3B;
+            font-weight: 700;
+        }
+
+        /* Feature Highlights Grid */
+        .demo-features-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .demo-feature-item {
+            background: #FFFFFF;
+            border: 1px solid #E2EBE6;
+            border-radius: 10px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .demo-feature-icon {
+            font-size: 16px;
+            line-height: 1.2;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .demo-feature-text {
+            font-size: 12px;
+            color: #3b5550;
+            line-height: 1.45;
+        }
+        .demo-feature-text strong {
+            color: #063D3B;
+            font-weight: 600;
+        }
+
+        /* Interactive Callout */
+        .demo-callout-box {
+            background: linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%);
+            border: 1px dashed #A7F3D0;
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 12px;
+            color: #065F46;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .demo-callout-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        /* Footer Link to Edvora Homepage */
+        .demo-footer-bar {
+            padding-top: 18px;
+            border-top: 1px solid #E8EFEA;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .demo-powered-by {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+            text-align: left;
+        }
+        .demo-powered-by strong {
+            color: #063D3B;
+        }
+        .btn-visit-edvora {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #063D3B;
+            color: #FFFFFF !important;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(6, 61, 59, 0.15);
+        }
+        .btn-visit-edvora:hover {
+            background: #0A524F;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(6, 61, 59, 0.22);
+        }
+
+        /* Funky Red Arrow Chatbot Pointer Guide */
+        .chat-pointer-guide {
+            position: fixed;
+            bottom: 85px;
+            right: 78px;
+            z-index: 999990;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            cursor: pointer;
+            user-select: none;
+            transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: funkyBounce 2.4s ease-in-out infinite;
+        }
+        .chat-pointer-guide.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.8) translateY(16px);
+        }
+        @keyframes funkyBounce {
+            0%, 100% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(8px) translateX(4px) rotate(2deg);
+            }
+        }
+        .guide-speech-text {
+            color: #DC2626;
+            font-size: 13.5px;
+            font-weight: 700;
+            padding: 4px 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            letter-spacing: -0.01em;
+            margin-bottom: 2px;
+            margin-right: 12px;
+            text-shadow: 0 1px 2px rgba(220, 38, 38, 0.15);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .guide-speech-text span.guide-arrow-icon {
+            display: inline-block;
+            animation: iconWiggle 1.5s ease-in-out infinite;
+        }
+        @keyframes iconWiggle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2) rotate(-8deg); }
+        }
+        .chat-pointer-guide:hover .guide-speech-text {
+            transform: scale(1.05);
+            color: #B91C1C;
+        }
+        .funky-arrow-wrapper {
+            width: 82px;
+            height: 82px;
+            margin-right: 8px;
+            transform: rotate(-20deg);
+            transform-origin: center center;
+        }
+        .funky-arrow-svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 6px 14px rgba(220, 38, 38, 0.35));
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .chat-pointer-guide:hover .funky-arrow-svg {
+            transform: scale(1.1) translate(2px, 3px);
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 16px 12px; }
+            .demo-card { padding: 28px 20px 22px; }
+            .demo-title { font-size: 21px; }
+            .demo-footer-bar { flex-direction: column; align-items: stretch; text-align: center; }
+            .btn-visit-edvora { justify-content: center; }
+            .chat-pointer-guide {
+                bottom: 85px;
+                right: 25px;
+            }
+            .guide-speech-text {
+                font-size: 12px;
+                margin-right: 4px;
+            }
+            .funky-arrow-wrapper {
+                width: 68px;
+                height: 68px;
+                margin-right: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="demo-card" id="demoCard">
+        <div class="demo-pill-badge">
+            <span>✨</span> Interactive AI Assistant Demo
+        </div>
+
+        <div>
+            <div class="demo-logo-badge" id="logoBadge">
+                <span class="demo-logo-icon" id="logoIcon">🎓</span>
+            </div>
+        </div>
+
+        <h1 class="demo-title" id="demoTitle">AI Admissions Assistant</h1>
+        <div class="demo-subtitle-institution" id="demoSubtitle">
+            <span>🏛️</span> <span id="instNameHeader">Prepared exclusively for your institution</span>
+        </div>
+
+        <!-- Personalized Center Message Box -->
+        <div class="demo-message-box">
+            <p class="demo-lead-text">
+                Welcome to your interactive AI Admissions Assistant preview. This demo was custom-crafted specifically for <strong id="instNameLead">your institution</strong> to showcase how an autonomous conversational assistant engages prospective students, answers catalog and curriculum queries, guides campus tour bookings, and captures qualified student inquiries 24/7.
+            </p>
+
+            <div class="demo-features-grid">
+                <div class="demo-feature-item">
+                    <span class="demo-feature-icon">⚡</span>
+                    <div class="demo-feature-text">
+                        <strong>24/7 Instant Student Guidance:</strong> Delivers instant, accurate answers on degree programs, admission criteria, fee structures, and deadlines.
+                    </div>
+                </div>
+                <div class="demo-feature-item">
+                    <span class="demo-feature-icon">🎯</span>
+                    <div class="demo-feature-text">
+                        <strong>Conversational Lead Capture:</strong> Seamlessly captures student contact details, prospectus downloads, and counselor callback requests.
+                    </div>
+                </div>
+                <div class="demo-feature-item">
+                    <span class="demo-feature-icon">🏛️</span>
+                    <div class="demo-feature-text">
+                        <strong>Institutional Knowledge:</strong> Ready to ingest your university brochures, FAQs, and course catalogs for grounded responses.
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-callout-box">
+                <span class="demo-callout-icon">👉</span>
+                <div>
+                    <strong>Experience the Live Assistant:</strong> Click the chat window at the bottom right corner to test real questions as a prospective student (e.g., degree requirements, admissions, or campus visits).
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer with Homepage Link -->
+        <div class="demo-footer-bar">
+            <div class="demo-powered-by">
+                <span>🤖</span>
+                <span>Powered by <strong>Edvora.chat</strong> — AI-Powered Conversational Platform for Higher Education</span>
+            </div>
+            <a href="https://edvora.chat" target="_blank" rel="noopener noreferrer" class="btn-visit-edvora">
+                <span>Visit edvora.chat</span>
+                <span>↗</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Funky Red Arrow Chatbot Pointer Guide -->
+    <div class="chat-pointer-guide" id="chatPointerGuide" onclick="triggerChatbotOpen()" title="Click to test chatbot">
+        <div class="guide-speech-text">
+            <span class="guide-arrow-icon">👇</span>
+            <span>Click to test chatbot</span>
+        </div>
+        <div class="funky-arrow-wrapper">
+            <svg class="funky-arrow-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="funkyRedGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#FF3838" />
+                        <stop offset="60%" stop-color="#E11D48" />
+                        <stop offset="100%" stop-color="#9F1239" />
+                    </linearGradient>
+                </defs>
+                <path d="M 18,12 
+                         C 11,18 10,27 16,33 
+                         C 26,44 42,48 50,56 
+                         L 41,54 
+                         C 37,53 35,58 38,61 
+                         L 63,89 
+                         C 66,93 72,92 74,88 
+                         L 91,62 
+                         C 94,58 90,54 86,56 
+                         L 77,60 
+                         C 74,48 63,33 48,22 
+                         C 37,14 25,9 19,11 
+                         C 18,11 18,12 18,12 Z" 
+                      fill="url(#funkyRedGrad)" 
+                      stroke="#FFE4E6" 
+                      stroke-width="1.6" 
+                      stroke-linejoin="round" 
+                      stroke-linecap="round" />
+            </svg>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // Extract token from path /demo/{bot_token} or /widget/{bot_token} or query param
+            const pathParts = window.location.pathname.split('/').filter(Boolean);
+            let token = null;
+            if ((pathParts[0] === 'demo' || pathParts[0] === 'test' || pathParts[0] === 'widget') && pathParts[1]) {
+                token = pathParts[1];
+            }
+            const urlParams = new URLSearchParams(window.location.search);
+            if (!token) {
+                token = urlParams.get('token') || urlParams.get('bot_token');
+            }
+
+            if (!token) {
+                document.getElementById('demoTitle').innerText = 'No Demo Token Specified';
+                document.getElementById('instNameHeader').innerText = 'Please access this page using your dedicated institutional demo link.';
+                return;
+            }
+
+            // Fetch bot and organization config
+            const configUrl = '/v1/widget/config/' + encodeURIComponent(token);
+            fetch(configUrl)
+                .then(res => res.json())
+                .then(res => {
+                    if (res.status === 'success' && res.data) {
+                        const data = res.data;
+                        const cust = data.customization || {};
+                        
+                        const orgName = data.organization_name || 'Institution';
+                        const botName = cust.header_bot_name || data.name || (orgName + ' Admissions Assistant');
+                        
+                        document.title = `${orgName} — AI Admissions Assistant Demo`;
+                        document.getElementById('demoTitle').innerText = botName;
+                        document.getElementById('instNameHeader').innerText = `Prepared exclusively for ${orgName}`;
+                        document.getElementById('instNameLead').innerText = orgName;
+
+                        // Logo / Avatar
+                        const logoUrl = cust.header_logo_url || data.bot_avatar || (cust.avatar_type === 'upload' && cust.avatar_url ? cust.avatar_url : (cust.avatar_preset ? ('/avatars/avatar' + cust.avatar_preset + '.png') : null));
+                        const logoBadge = document.getElementById('logoBadge');
+                        if (logoUrl) {
+                            logoBadge.innerHTML = '<img src="' + logoUrl + '" alt="' + orgName + ' Logo" class="demo-logo-img">';
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.warn('Config fetch warning:', err);
+                });
+
+            // Dynamically inject widget.js with is_test=1 and cache-busting timestamp
+            const script = document.createElement('script');
+            script.src = '/widget.js?v=' + Date.now();
+            script.setAttribute('data-bot-token', token);
+            script.setAttribute('data-is-test', '1');
+            script.async = true;
+            script.onload = function() {
+                // Auto-open chatbot window in demo environment so it greets the visitor
+                setTimeout(function() {
+                    const chatWin = document.getElementById('edvoraWindow');
+                    if (chatWin && !chatWin.classList.contains('open')) {
+                        chatWin.classList.add('open');
+                    }
+                    updateGuideVisibility();
+                }, 150);
+            };
+            document.body.appendChild(script);
+        })();
+
+        function triggerChatbotOpen() {
+            const trigger = document.getElementById('edvoraTrigger');
+            if (trigger) {
+                trigger.click();
+            } else {
+                const chatWin = document.getElementById('edvoraWindow');
+                if (chatWin) chatWin.classList.add('open');
+            }
+            setTimeout(updateGuideVisibility, 60);
+        }
+
+        function updateGuideVisibility() {
+            const guide = document.getElementById('chatPointerGuide');
+            if (!guide) return;
+            const chatWin = document.getElementById('edvoraWindow');
+            const isOpen = chatWin && chatWin.classList.contains('open');
+            if (isOpen) {
+                if (!guide.classList.contains('hidden')) {
+                    guide.classList.add('hidden');
+                }
+            } else {
+                if (guide.classList.contains('hidden')) {
+                    guide.classList.remove('hidden');
+                }
+            }
+        }
+
+        // Listen for user interactions with chatbot or guide
+        document.addEventListener('click', function(e) {
+            if (e.target && (e.target.closest('#edvoraTrigger') || e.target.closest('#edvoraClose') || e.target.closest('#chatPointerGuide'))) {
+                setTimeout(updateGuideVisibility, 80);
+            }
+        });
+    </script>
+</body>
+</html>
