@@ -520,6 +520,9 @@
                     <button onclick="loadDemoAccounts()" class="brand-btn brand-btn-secondary">
                         <span>🔄</span> Refresh
                     </button>
+                    <button onclick="openAuthModalManually()" class="brand-btn brand-btn-secondary" title="Re-authenticate SuperAdmin session">
+                        <span>🔐</span> Re-auth
+                    </button>
                 </div>
             </header>
 
@@ -707,21 +710,187 @@
         </div>
     </div>
 
+    <!-- Auth / Re-Authentication Modal -->
+    <div id="authOverlay" style="display: none; position: fixed; inset: 0; background: rgba(8, 11, 20, 0.95); backdrop-filter: blur(8px); z-index: 99999; align-items: center; justify-content: center;">
+        <div class="modal-box" style="width: 420px; max-width: 92vw; padding: 28px; background: #111827 !important; border: 1px solid #1f2937 !important; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);">
+            <div style="margin-bottom: 20px; text-align: center;">
+                <div style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 10px; background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); margin-bottom: 12px; font-size: 22px;">🔐</div>
+                <div style="font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 4px;">SuperAdmin Authentication</div>
+                <div style="font-size: 12px; color: #9ca3af;" id="authOverlaySubtitle">Session expired or verification required for Demo Tenants Console</div>
+            </div>
+            <form id="superadminLoginForm" onsubmit="handleSuperadminLogin(event)">
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label class="form-label" style="font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase;">Admin Email</label>
+                    <input type="email" id="loginEmail" class="form-input" required value="superadmin@edvora.chat" placeholder="superadmin@edvora.chat" style="width: 100%;" />
+                </div>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label class="form-label" style="font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase;">Master Password</label>
+                    <input type="password" id="loginPassword" class="form-input" required placeholder="••••••••••••••••" style="width: 100%;" />
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button type="submit" id="btnLoginSubmit" class="brand-btn brand-btn-primary" style="flex: 1; justify-content: center; height: 36px;">
+                        Authenticate &amp; Continue
+                    </button>
+                    <button type="button" id="btnAuthCancel" onclick="closeAuthOverlay()" class="brand-btn brand-btn-secondary" style="display: none; height: 36px;">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Toast Container -->
     <div id="toastContainer"></div>
 
     <script>
         let demoAccountsList = [];
+        let isRefreshing = false;
+        let refreshWaiters = [];
 
-        function getAuthHeaders() {
-            const token = localStorage.getItem('edvora_super_token') 
-                       || localStorage.getItem('edvora_superadmin_token') 
-                       || localStorage.getItem('edvora_token') 
-                       || '';
-            return {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            };
+        function promptReAuth(reason = 'Session expired or required for Demo Tenants Console', allowCancel = false) {
+            const sub = document.getElementById('authOverlaySubtitle');
+            if (sub) sub.innerText = reason;
+            const cancelBtn = document.getElementById('btnAuthCancel');
+            if (cancelBtn) cancelBtn.style.display = allowCancel ? 'block' : 'none';
+            document.getElementById('authOverlay').style.display = 'flex';
+            setTimeout(() => {
+                const passInput = document.getElementById('loginPassword');
+                if (passInput) passInput.focus();
+            }, 100);
+        }
+
+        function closeAuthOverlay() {
+            document.getElementById('authOverlay').style.display = 'none';
+        }
+
+        function openAuthModalManually() {
+            promptReAuth('Re-authenticate or switch SuperAdmin session', true);
+        }
+
+        async function attemptTokenRefresh() {
+            const refreshToken = localStorage.getItem('edvora_super_refresh_token');
+            if (!refreshToken) return null;
+
+            try {
+                const res = await fetch('/v1/auth/refresh', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refresh_token: refreshToken })
+                });
+                const data = await res.json();
+                if (data.status === 'success' && data.data && data.data.access_token) {
+                    const newToken = data.data.access_token;
+                    localStorage.setItem('edvora_super_token', newToken);
+                    return newToken;
+                }
+            } catch (e) {
+                console.error('Refresh token failed:', e);
+            }
+            return null;
+        }
+
+        async function apiFetch(url, options = {}) {
+            options.headers = options.headers || {};
+            if (!options.headers['Content-Type'] && !(options.body instanceof FormData)) {
+                options.headers['Content-Type'] = 'application/json';
+            }
+
+            let token = localStorage.getItem('edvora_super_token') 
+                     || localStorage.getItem('edvora_superadmin_token') 
+                     || localStorage.getItem('edvora_token') 
+                     || '';
+
+            if (token) {
+                options.headers['Authorization'] = 'Bearer ' + token;
+            }
+
+            try {
+                let res = await fetch(url, options);
+
+                // Handle 401 Unauthorized / Token Expiry
+                if (res.status === 401) {
+                    const refreshToken = localStorage.getItem('edvora_super_refresh_token');
+                    if (refreshToken) {
+                        if (!isRefreshing) {
+                            isRefreshing = true;
+                            const newToken = await attemptTokenRefresh();
+                            isRefreshing = false;
+
+                            if (newToken) {
+                                refreshWaiters.forEach(resolve => resolve(newToken));
+                                refreshWaiters = [];
+                                options.headers['Authorization'] = 'Bearer ' + newToken;
+                                const retryRes = await fetch(url, options);
+                                return await retryRes.json();
+                            } else {
+                                refreshWaiters.forEach(resolve => resolve(null));
+                                refreshWaiters = [];
+                                promptReAuth('Your SuperAdmin session has expired. Please enter your master password.');
+                                return { status: 'error', message: 'Session expired. Please re-authenticate.' };
+                            }
+                        } else {
+                            // Another request is already refreshing the token, wait for it
+                            return new Promise((resolve) => {
+                                refreshWaiters.push(async (newToken) => {
+                                    if (newToken) {
+                                        options.headers['Authorization'] = 'Bearer ' + newToken;
+                                        const retryRes = await fetch(url, options);
+                                        resolve(await retryRes.json());
+                                    } else {
+                                        resolve({ status: 'error', message: 'Session expired. Please re-authenticate.' });
+                                    }
+                                });
+                            });
+                        }
+                    } else {
+                        promptReAuth('SuperAdmin authentication required.');
+                        return { status: 'error', message: 'Authentication required.' };
+                    }
+                }
+
+                const data = await res.json();
+                return data;
+            } catch (err) {
+                console.error('apiFetch error:', err);
+                return { status: 'error', message: err.message || 'Network request failed.' };
+            }
+        }
+
+        async function handleSuperadminLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnLoginSubmit');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳</span> Authenticating...';
+
+            try {
+                const email = document.getElementById('loginEmail').value.trim();
+                const password = document.getElementById('loginPassword').value;
+
+                const res = await fetch('/v1/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (data.status === 'success' && data.data && data.data.user && data.data.user.role === 'superadmin') {
+                    localStorage.setItem('edvora_super_token', data.data.access_token);
+                    if (data.data.refresh_token) {
+                        localStorage.setItem('edvora_super_refresh_token', data.data.refresh_token);
+                    }
+                    document.getElementById('authOverlay').style.display = 'none';
+                    showToast('SuperAdmin session authorized.', 'success');
+                    loadDemoAccounts();
+                } else {
+                    showToast(data.message || 'Invalid Super Admin credentials or insufficient privileges.', 'error');
+                }
+            } catch (err) {
+                showToast('Authentication failure: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
         }
 
         function showToast(message, type = 'info') {
@@ -775,10 +944,7 @@
             tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #9ca3af; padding: 24px;">Loading demo accounts...</td></tr>';
 
             try {
-                const res = await fetch('/v1/superadmin/demo-accounts', {
-                    headers: getAuthHeaders()
-                });
-                const data = await res.json();
+                const data = await apiFetch('/v1/superadmin/demo-accounts');
 
                 if (data.status === 'success' && Array.isArray(data.data)) {
                     demoAccountsList = data.data;
@@ -926,12 +1092,10 @@
             };
 
             try {
-                const res = await fetch('/v1/superadmin/demo-accounts', {
+                const data = await apiFetch('/v1/superadmin/demo-accounts', {
                     method: 'POST',
-                    headers: getAuthHeaders(),
                     body: JSON.stringify(payload)
                 });
-                const data = await res.json();
 
                 if (data.status === 'success' && data.data) {
                     closeCreateModal();
@@ -975,11 +1139,9 @@
         async function impersonateDemo(orgId) {
             showToast('Generating secure 1-click console session...', 'info');
             try {
-                const res = await fetch(`/v1/superadmin/demo-accounts/${orgId}/impersonate-token`, {
-                    method: 'POST',
-                    headers: getAuthHeaders()
+                const data = await apiFetch(`/v1/superadmin/demo-accounts/${orgId}/impersonate-token`, {
+                    method: 'POST'
                 });
-                const data = await res.json();
 
                 if (data.status === 'success' && data.data && data.data.redirect_url) {
                     showToast(`Opening console as ${data.data.email}...`, 'success');
@@ -1012,11 +1174,9 @@
             }
 
             try {
-                const res = await fetch(`/v1/superadmin/demo-accounts/${orgId}/convert`, {
-                    method: 'POST',
-                    headers: getAuthHeaders()
+                const data = await apiFetch(`/v1/superadmin/demo-accounts/${orgId}/convert`, {
+                    method: 'POST'
                 });
-                const data = await res.json();
 
                 if (data.status === 'success') {
                     showToast(`"${name}" converted to standard College Tenant!`, 'success');
@@ -1035,11 +1195,9 @@
             }
 
             try {
-                const res = await fetch(`/v1/superadmin/demo-accounts/${orgId}`, {
-                    method: 'DELETE',
-                    headers: getAuthHeaders()
+                const data = await apiFetch(`/v1/superadmin/demo-accounts/${orgId}`, {
+                    method: 'DELETE'
                 });
-                const data = await res.json();
 
                 if (data.status === 'success') {
                     showToast(`Demo tenant "${name}" deleted.`, 'success');
@@ -1052,8 +1210,26 @@
             }
         }
 
-        // Auto load on page load
-        document.addEventListener('DOMContentLoaded', () => {
+        // Auto load on page load with token refresh check
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('edvora_super_token') 
+                       || localStorage.getItem('edvora_superadmin_token') 
+                       || localStorage.getItem('edvora_token');
+            const refreshToken = localStorage.getItem('edvora_super_refresh_token');
+
+            if (!token && !refreshToken) {
+                promptReAuth('Please authenticate as SuperAdmin to access Demo Tenants.');
+                return;
+            }
+
+            if (!token && refreshToken) {
+                const newToken = await attemptTokenRefresh();
+                if (!newToken) {
+                    promptReAuth('SuperAdmin session expired. Please authenticate.');
+                    return;
+                }
+            }
+
             loadDemoAccounts();
         });
     </script>
