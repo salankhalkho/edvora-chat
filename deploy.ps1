@@ -36,7 +36,7 @@ Write-Host "Remote extraction, migration, and Apache reload complete." -Foregrou
 
 Write-Host "
 [5/6] Verifying Live Production Response..." -ForegroundColor Cyan
-ssh -i "C:/Users/Salan Khalkho/.ssh/id_ed25519" -o BatchMode=yes -o StrictHostKeyChecking=no root@62.171.145.160 "curl -s -k -I https://edvora.chat/ | head -n 5"
+ssh -i "C:/Users/Salan Khalkho/.ssh/id_ed25519" -o BatchMode=yes -o StrictHostKeyChecking=no root@62.171.145.160 "curl --max-time 10 -s -k -I https://edvora.chat/ | head -n 5"
 Write-Host "Production web server is responding healthy." -ForegroundColor Green
 
 Write-Host "
