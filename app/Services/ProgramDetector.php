@@ -190,11 +190,17 @@ class ProgramDetector
                 continue;
             }
 
+            $genericPartStopwords = [
+                'business', 'management', 'administration', 'studies', 'science', 'sciences',
+                'foundation', 'foundations', 'university', 'college', 'school', 'program', 'programs',
+                'course', 'courses', 'degree', 'degrees', 'master', 'masters', 'bachelor', 'bachelors',
+                'certificate', 'certificates', 'diploma', 'doctoral', 'doctorate', 'accelerated', 'online'
+            ];
             $parts = preg_split('/\s*(&|and|:|,|\(|\))\s*/i', $subName);
             $partMatched = false;
             foreach ($parts as $part) {
                 $part = trim($part);
-                if (strlen($part) >= 4 && str_contains($cleanQuery, $part)) {
+                if (strlen($part) >= 4 && !in_array($part, $genericPartStopwords, true) && preg_match('/\b' . preg_quote($part, '/') . '\b/i', $cleanQuery)) {
                     $partialMatches[] = $prog;
                     $partMatched = true;
                     break;

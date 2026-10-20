@@ -314,8 +314,9 @@ class ChatController
 
         // 6. Proactive Program Interest Detection & Early Lead Sync to DB
         $detectedProgram = ProgramDetector::detect($db, $orgId, $userMessage, $contextSources);
-        if (!$detectedProgram && empty($currentProgramInterest) && !empty($prevHistory)) {
-            // If user refers to "this program" / follow-up question, inspect immediate prior assistant message
+        $isAnaphoricProgramRef = (bool)preg_match('/\b(this|that|the)\s+(program|course|degree|certificate|track|option)\b/i', $userMessage);
+        if (!$detectedProgram && empty($currentProgramInterest) && $isAnaphoricProgramRef && !empty($prevHistory)) {
+            // Only if user explicitly refers to "this program" / "that course", inspect immediate prior assistant message
             for ($hIdx = count($prevHistory) - 1; $hIdx >= 0; $hIdx--) {
                 if (($prevHistory[$hIdx]['role'] ?? '') === 'assistant') {
                     $priorAssistantText = $prevHistory[$hIdx]['content'] ?? '';
