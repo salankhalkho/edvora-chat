@@ -117,7 +117,7 @@ class PromptBuilder
         $prompt .= "AVAILABLE_PROGRAMS: {$availableProgramsStr}\n";
         $prompt .= "CURRENT_DETECTED_PROGRAM_ID: {$currentProgIdStr}\n";
         $prompt .= "• In your JSON output, set \"detected_program_id\" to the integer ID from AVAILABLE_PROGRAMS whenever the student's question or your answer focuses on ONE specific program (whether mentioned by full name, shorthand, acronym, pronoun like \"this program\", or when only 1 program in AVAILABLE_PROGRAMS matches the degree level asked about, e.g. PhD).\n";
-        $prompt .= "• If multiple programs are being compared or no specific program is identified yet, set \"detected_program_id\": null.\n";
+        $prompt .= "• If the student asks about a degree type or subject that matches MULTIPLE programs in AVAILABLE_PROGRAMS (e.g. \"do you offer MBA?\" when multiple MBA programs exist), set intent=\"INFORMATION_SEEKING\", program_trigger=null, detected_program_id=null (NEVER use SEEKING_CATALOGUE), and in bubble_1 warmly compare ONLY those matching programs from AVAILABLE_PROGRAMS (do NOT list unrelated programs).\n";
 
         if (!empty($chatbotPromptOverride)) {
             $prompt .= "\n\n================================================================================\n";

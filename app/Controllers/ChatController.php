@@ -605,24 +605,19 @@ class ChatController
                 }
             }
 
-            // [c] SEEKING_CATALOGUE: Interactive catalog triggers with clean intro bubble and enriched transcript
-            // Guard: Trigger if intent is genuinely seeking_catalogue, or if user asked broad catalog question without mentioning a specific major
-            $isBroadCatalogRequest = (bool)preg_match('/\b(all courses|course list|courses available|courses do you offer|courses do you have|program list|programs do you offer|all programs|list of (courses|programs)|show catalog|course catalog|program catalog|what courses|what programs)\b/i', $userMessage);
-            $hasSpecificSubject = (bool)preg_match('/\b(mba|executive mba|computer science|cs|nursing|engineering|finance|accounting|biology|chemistry|psychology|law)\b/i', $userMessage);
-
-            if ($parsedIntent === 'seeking_catalogue' || $parsedIntent === 'c' || ($rawProgramTrigger === 'all' && $isBroadCatalogRequest && !$hasSpecificSubject)) {
+            // [c] SEEKING_CATALOGUE: Interactive catalog triggers ONLY when the LLM explicitly classifies as seeking_catalogue with no custom bubble_1 answer
+            if (($parsedIntent === 'seeking_catalogue' || $parsedIntent === 'c') && empty($aiResponseText)) {
                 $parsedIntent = 'seeking_catalogue';
                 $followUpMessage = null;
 
                 $catalogFilter = 'all';
-                $cleanUserMsg = strtolower($userMessage);
-                if (preg_match('/\b(undergrad|undergraduate|bachelor|bachelors|ug)\b/i', $cleanUserMsg) || $rawProgramTrigger === 'undergraduate') {
+                if ($rawProgramTrigger === 'undergraduate') {
                     $catalogFilter = 'undergraduate';
-                } elseif (preg_match('/\b(postgrad|postgraduate|graduate|master|masters|pg)\b/i', $cleanUserMsg) || in_array($rawProgramTrigger, ['graduate', 'postgraduate'], true)) {
+                } elseif (in_array($rawProgramTrigger, ['graduate', 'postgraduate'], true)) {
                     $catalogFilter = 'graduate';
-                } elseif (preg_match('/\b(phd|ph\.d|doctor|doctoral|doctorate)\b/i', $cleanUserMsg) || $rawProgramTrigger === 'doctoral') {
+                } elseif ($rawProgramTrigger === 'doctoral') {
                     $catalogFilter = 'doctoral';
-                } elseif (preg_match('/\b(certificate|diploma|executive)\b/i', $cleanUserMsg) || in_array($rawProgramTrigger, ['certificate', 'certificates', 'executive'], true)) {
+                } elseif (in_array($rawProgramTrigger, ['certificate', 'certificates', 'executive'], true)) {
                     $catalogFilter = 'certificates';
                 }
                 $programCatalogPayload = self::resolveProgramCatalog($db, $orgId, $catalogFilter);
