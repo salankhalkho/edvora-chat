@@ -57,7 +57,7 @@ class Seeders
             $stmt->execute([':k' => $phaseKey]);
             $existing = $stmt->fetch(\PDO::FETCH_ASSOC);
             $val = trim($existing['value_text'] ?? '');
-            if ((!$existing || empty($val) || $val === 'salan') && file_exists("{$promptsDir}/{$phaseFile}")) {
+            if ((!$existing || empty($val) || $val === 'salan' || !str_contains($val, 'detected_program_id')) && file_exists("{$promptsDir}/{$phaseFile}")) {
                 $content = trim(file_get_contents("{$promptsDir}/{$phaseFile}"));
                 $stmtInsert = $this->db->prepare("
                     INSERT INTO platform_config (key_name, value_text, updated_at) 

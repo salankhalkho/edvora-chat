@@ -103,11 +103,10 @@ class ProgramDetector
 
     public static function detect(PDO $db, int $orgId, string $query, array $contextSources = []): ?array
     {
-        if (self::isGenericCatalogQuery($query)) {
+        $cleanQuery = trim(mb_strtolower($query, 'UTF-8'));
+        if ($cleanQuery === '') {
             return null;
         }
-
-        $cleanQuery = trim(mb_strtolower($query, 'UTF-8'));
 
         $stmtProgs = $db->prepare("
             SELECT id, course_name, course_code, program_type
@@ -122,34 +121,76 @@ class ProgramDetector
             return null;
         }
 
-        $exactMatches = [];
+        if (self::isGenericCatalogQuery($query)) {
+            // If user asked about a specific degree level (e.g. "what PhD programs do you offer?")
+            // and the institution offers ONLY ONE program in that level, resolve to that single program.
+            $requestedTypes = null;
+            if (preg_match('/\b(phd|ph\.d|doctoral|doctorate)\b/i', $cleanQuery)) {
+                $requestedTypes = ['doctoral', 'phd', 'doctorate'];
+            } elseif (preg_match('/\b(undergraduate|undergrad|bachelor|bachelors)\b/i', $cleanQuery)) {
+                $requestedTypes = ['undergraduate', 'bachelor', 'bachelors', 'ug'];
+            } elseif (preg_match('/\b(certificate|certificates|diploma)\b/i', $cleanQuery)) {
+                $requestedTypes = ['certificate', 'certificates', 'diploma'];
+            }
+
+            if ($requestedTypes !== null) {
+                $typeMatches = array_values(array_filter($programs, function ($p) use ($requestedTypes) {
+                    return in_array(strtolower(trim($p['program_type'] ?? '')), $requestedTypes, true);
+                }));
+                if (count($typeMatches) === 1) {
+                    return $typeMatches[0];
+                }
+            }
+            return null;
+        }
+
+        $normQuery = self::normalizeForMatch($cleanQuery);
+
+        $exactNameMatches = [];
+        $exactCodeMatches = [];
         $partialMatches = [];
 
         foreach ($programs as $prog) {
             $name = mb_strtolower($prog['course_name'], 'UTF-8');
-            $code = !empty($prog['course_code']) ? mb_strtolower($prog['course_code'], 'UTF-8') : null;
+            $normName = self::normalizeForMatch($name);
+            $code = !empty($prog['course_code']) ? mb_strtolower(trim($prog['course_code']), 'UTF-8') : null;
 
-            // Direct exact name match (e.g. user typed "Executive MBA" or full course name)
-            if (str_contains($cleanQuery, $name)) {
-                $exactMatches[] = $prog;
+            // 1. Direct exact name match (or normalized '&' <-> 'and' / punctuation match)
+            if (str_contains($cleanQuery, $name) || ($normName !== '' && str_contains($normQuery, $normName))) {
+                $exactNameMatches[] = $prog;
                 continue;
             }
 
-            // Direct course code match (e.g. "MBA-610")
+            // 2. Direct course code match (e.g. "WEMBA", "MQM-BA", "MBCS")
             if ($code && strlen($code) >= 3 && preg_match('/\b' . preg_quote($code, '/') . '\b/i', $cleanQuery)) {
-                $exactMatches[] = $prog;
-                continue;
+                // Ensure the code is not a generic degree term shared inside other programs' names
+                $codeSharedInOtherNames = false;
+                foreach ($programs as $otherProg) {
+                    if ((int)$otherProg['id'] === (int)$prog['id']) {
+                        continue;
+                    }
+                    $otherNameLower = mb_strtolower($otherProg['course_name'], 'UTF-8');
+                    if (preg_match('/\b' . preg_quote($code, '/') . '\b/i', $otherNameLower)) {
+                        $codeSharedInOtherNames = true;
+                        break;
+                    }
+                }
+                if (!$codeSharedInOtherNames) {
+                    $exactCodeMatches[] = $prog;
+                    continue;
+                }
             }
 
-            // Sub-name match without generic degree prefixes (e.g. "Computer Science", "Finance")
-            $subName = preg_replace('/^(b\.?s\.?|b\.?tech\.?|m\.?s\.?|m\.?tech\.?|b\.?b\.?a\.?|m\.?b\.?a\.?|ph\.?d\.?|diploma|certificate)\s+(in|of)?\s*/i', '', $name);
+            // 3. Sub-name match without generic degree prefixes
+            $subName = preg_replace('/^(b\.?s\.?|b\.?a\.?|b\.?tech\.?|m\.?s\.?|m\.?a\.?|m\.?tech\.?|b\.?b\.?a\.?|m\.?b\.?a\.?|ph\.?d\.?|diploma|certificate|master|bachelor)\s+(in|of)?\s*/i', '', $name);
             $subName = trim($subName);
-            if (!empty($subName) && strlen($subName) >= 5 && str_contains($cleanQuery, $subName)) {
+            $normSubName = self::normalizeForMatch($subName);
+            if (!empty($subName) && strlen($subName) >= 5 && (str_contains($cleanQuery, $subName) || ($normSubName !== '' && str_contains($normQuery, $normSubName)))) {
                 $partialMatches[] = $prog;
                 continue;
             }
 
-            $parts = preg_split('/\s*(&|and)\s*/i', $subName);
+            $parts = preg_split('/\s*(&|and|:|,|\(|\))\s*/i', $subName);
             $partMatched = false;
             foreach ($parts as $part) {
                 $part = trim($part);
@@ -163,7 +204,7 @@ class ProgramDetector
                 continue;
             }
 
-            // Alias match
+            // 4. Dynamic self-derived acronym / abbreviation match
             $aliases = self::getProgramAliases($name);
             foreach ($aliases as $alias) {
                 if (preg_match('/\b' . preg_quote($alias, '/') . '\b/i', $cleanQuery)) {
@@ -173,46 +214,77 @@ class ProgramDetector
             }
         }
 
-        // Deduplicate matches by program ID
-        $uniqueExact = [];
-        foreach ($exactMatches as $p) {
-            $uniqueExact[$p['id']] = $p;
+        // Deduplicate exact name matches and resolve substring shadowing
+        // (e.g. "Accelerated Daytime MBA" shadows "Daytime MBA")
+        $uniqueExactName = [];
+        foreach ($exactNameMatches as $p) {
+            $uniqueExactName[(int)$p['id']] = $p;
         }
-        $uniquePartial = [];
-        foreach ($partialMatches as $p) {
-            $uniquePartial[$p['id']] = $p;
+        if (count($uniqueExactName) > 1) {
+            $filteredExact = [];
+            foreach ($uniqueExactName as $idA => $progA) {
+                $normA = self::normalizeForMatch(mb_strtolower($progA['course_name'], 'UTF-8'));
+                $isShadowed = false;
+                foreach ($uniqueExactName as $idB => $progB) {
+                    if ($idA === $idB) continue;
+                    $normB = self::normalizeForMatch(mb_strtolower($progB['course_name'], 'UTF-8'));
+                    if ($normA !== $normB && str_contains($normB, $normA)) {
+                        $isShadowed = true;
+                        break;
+                    }
+                }
+                if (!$isShadowed) {
+                    $filteredExact[$idA] = $progA;
+                }
+            }
+            $uniqueExactName = $filteredExact;
         }
 
-        // 1. If exactly one course has an exact name or code match, return it
-        if (count($uniqueExact) === 1) {
-            return reset($uniqueExact);
+        // 1a. If exactly one course has an exact name match, return it
+        if (count($uniqueExactName) === 1) {
+            return reset($uniqueExactName);
         }
-        // If multiple exact matches exist, it is ambiguous
-        if (count($uniqueExact) > 1) {
+        if (count($uniqueExactName) > 1) {
             return null;
+        }
+
+        // 1b. If exactly one course has an unambiguous course code match, return it
+        $uniqueExactCode = [];
+        foreach ($exactCodeMatches as $p) {
+            $uniqueExactCode[(int)$p['id']] = $p;
+        }
+        if (count($uniqueExactCode) === 1) {
+            return reset($uniqueExactCode);
+        }
+        if (count($uniqueExactCode) > 1) {
+            return null;
+        }
+
+        $uniquePartial = [];
+        foreach ($partialMatches as $p) {
+            $uniquePartial[(int)$p['id']] = $p;
         }
 
         // 2. If exactly one course matched via partial/alias, return it
         if (count($uniquePartial) === 1) {
             return reset($uniquePartial);
         }
-        // If multiple partial matches exist (e.g. "MBA" matching both Manderson MBA and Executive MBA):
+        // If multiple partial matches exist (e.g. "MBA" matching both Daytime MBA and Weekend Executive MBA):
         if (count($uniquePartial) > 1) {
-            // Check if user specified a distinguishing keyword (length >= 4) that belongs to ONLY one of the candidates
+            // Check if user specified a distinguishing keyword (length >= 3) that belongs to ONLY one of the candidates
             $candidateScores = [];
-            $queryTokens = preg_split('/[\s,\.\?\!\-\(\)\/]+/', $cleanQuery);
-            $queryTokens = array_filter($queryTokens, fn($t) => strlen($t) >= 4);
+            $queryTokens = preg_split('/[\s,\.\?\!\-\(\)\/:]+/', $cleanQuery);
+            $queryTokens = array_filter($queryTokens, fn($t) => strlen($t) >= 3);
 
             foreach ($uniquePartial as $pId => $prog) {
-                $pNameTokens = preg_split('/[\s,\.\?\!\-\(\)\/]+/', mb_strtolower($prog['course_name'], 'UTF-8'));
+                $pNameTokens = preg_split('/[\s,\.\?\!\-\(\)\/:]+/', mb_strtolower($prog['course_name'], 'UTF-8'));
                 $matchingUniqueTokens = 0;
                 foreach ($queryTokens as $qTok) {
                     if (in_array($qTok, $pNameTokens, true)) {
-                        // Check if this token is shared with any other candidate
                         $sharedWithOther = false;
                         foreach ($uniquePartial as $otherId => $otherProg) {
                             if ($otherId === $pId) continue;
-                            $otherTokens = preg_split('/[\s,\.\?\!\-\(\)\/]+/', mb_strtolower($otherProg['course_name'], 'UTF-8'));
+                            $otherTokens = preg_split('/[\s,\.\?\!\-\(\)\/:]+/', mb_strtolower($otherProg['course_name'], 'UTF-8'));
                             if (in_array($qTok, $otherTokens, true)) {
                                 $sharedWithOther = true;
                                 break;
@@ -268,33 +340,45 @@ class ProgramDetector
         return null;
     }
 
+    private static function normalizeForMatch(string $text): string
+    {
+        $norm = str_replace('&', ' and ', $text);
+        $norm = preg_replace('/[^a-z0-9\s]/i', ' ', $norm);
+        $norm = preg_replace('/\s+/', ' ', $norm);
+        return trim($norm);
+    }
+
+    /**
+     * Dynamically derive acronyms and natural abbreviations strictly from the program's own name.
+     */
     private static function getProgramAliases(string $courseName): array
     {
         $aliases = [];
         $lower = strtolower($courseName);
 
-        if (str_contains($lower, 'computer science')) {
-            $aliases = array_merge($aliases, ['computer science', 'comp sci', 'cs', 'cse', 'ai', 'artificial intelligence']);
+        // Extract parenthetical acronyms e.g. "(MBCS)" -> "mbcs"
+        if (preg_match_all('/\(([a-z0-9\-]{2,10})\)/i', $lower, $matches)) {
+            foreach ($matches[1] as $acr) {
+                $aliases[] = strtolower($acr);
+            }
         }
-        if (str_contains($lower, 'finance') || str_contains($lower, 'bba')) {
-            $aliases = array_merge($aliases, ['bba', 'finance', 'business administration', 'international finance', 'analytics']);
+
+        // Extract colon prefix acronym e.g. "MQM: Business Analytics" -> "mqm"
+        if (preg_match('/^([a-z]{2,8}):/i', $lower, $m)) {
+            $aliases[] = strtolower($m[1]);
         }
-        if (str_contains($lower, 'data science') || str_contains($lower, 'machine learning')) {
-            $aliases = array_merge($aliases, ['data science', 'ds', 'machine learning', 'ml']);
-        }
+
         if (str_contains($lower, 'executive mba') || str_contains($lower, 'emba')) {
             $aliases = array_merge($aliases, ['executive mba', 'emba', 'mba']);
         } elseif (str_contains($lower, 'mba')) {
             $aliases = array_merge($aliases, ['mba', 'master of business administration']);
         }
-        if (str_contains($lower, 'biomedical')) {
-            $aliases = array_merge($aliases, ['biomedical', 'biomedical engineering', 'bme']);
-        }
-        if (str_contains($lower, 'cyber security') || str_contains($lower, 'cybersecurity')) {
-            $aliases = array_merge($aliases, ['cyber security', 'cybersecurity', 'infosec']);
+
+        if (str_contains($lower, 'phd') || str_contains($lower, 'ph.d')) {
+            $aliases = array_merge($aliases, ['phd', 'ph.d', 'doctorate', 'doctoral']);
         }
 
-        return $aliases;
+        return array_values(array_unique($aliases));
     }
 
     public static function syncProgramLead(PDO $db, int $orgId, int $botId, int $convId, array $program): void

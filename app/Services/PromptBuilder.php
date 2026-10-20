@@ -78,7 +78,24 @@ class PromptBuilder
         // 9. Retrieve Prompt Template from platform_config or disk fallbacks
         $rawTemplate = self::getPhasePromptTemplate($db, $activePhaseKey);
 
-        // 10. Replace Dynamic Session Placeholders
+        // 10. Fetch active programs for semantic program ID resolution
+        $stmtProgs = $db->prepare("
+            SELECT id, course_name, course_code
+            FROM programs
+            WHERE organization_id = :oid AND is_admissions_open = 1
+            ORDER BY id ASC
+        ");
+        $stmtProgs->execute([':oid' => $organizationId]);
+        $orgPrograms = $stmtProgs->fetchAll(PDO::FETCH_ASSOC);
+        $progLines = [];
+        foreach ($orgPrograms as $op) {
+            $codeSuffix = !empty($op['course_code']) ? " ({$op['course_code']})" : "";
+            $progLines[] = "[{$op['id']}] {$op['course_name']}{$codeSuffix}";
+        }
+        $availableProgramsStr = !empty($progLines) ? implode(" | ", $progLines) : "None configured";
+        $currentProgIdStr = !empty($activeProgram['id']) ? (string)(int)$activeProgram['id'] : 'null';
+
+        // 11. Replace Dynamic Session Placeholders
         $replacements = [
             '{{COLLEGE_NAME}}'       => $collegeName,
             '{{KNOWLEDGE_CONTEXT}}'  => $contextBlock,
@@ -95,12 +112,50 @@ class PromptBuilder
         ];
         $prompt = str_replace(array_keys($replacements), array_values($replacements), $rawTemplate);
 
+        $prompt .= "\n\n================================================================================\n";
+        $prompt .= "AVAILABLE_PROGRAMS & PROGRAM ID RESOLUTION (detected_program_id):\n";
+        $prompt .= "AVAILABLE_PROGRAMS: {$availableProgramsStr}\n";
+        $prompt .= "CURRENT_DETECTED_PROGRAM_ID: {$currentProgIdStr}\n";
+        $prompt .= "• In your JSON output, set \"detected_program_id\" to the integer ID from AVAILABLE_PROGRAMS whenever the student's question or your answer focuses on ONE specific program (whether mentioned by full name, shorthand, acronym, pronoun like \"this program\", or when only 1 program in AVAILABLE_PROGRAMS matches the degree level asked about, e.g. PhD).\n";
+        $prompt .= "• If multiple programs are being compared or no specific program is identified yet, set \"detected_program_id\": null.\n";
+
         if (!empty($chatbotPromptOverride)) {
             $prompt .= "\n\n================================================================================\n";
             $prompt .= "INSTITUTION SPECIFIC INSTRUCTIONS:\n" . trim($chatbotPromptOverride) . "\n";
         }
 
         return $prompt;
+    }
+
+    /**
+     * Check if user message is a financial aid, fee, cost, or scholarship inquiry.
+     */
+    public static function isFinancialAidQuery(string $userMessage): bool
+    {
+        $cleanMsg = strtolower(trim($userMessage));
+        return (bool)preg_match('/\b(scholarship|scholarships|financial aid|tuition|fees?|costs?|waivers?|installments?|afford|grants?)\b/i', $cleanMsg);
+    }
+
+    /**
+     * Return the canonical bubble_2 offer sentence for a given offer type and program name.
+     */
+    public static function getOfferSentence(string $offerType, string $programName = ''): ?string
+    {
+        $progDisplay = trim($programName) !== '' ? trim($programName) : 'program';
+        switch ($offerType) {
+            case 'brochure':
+            case 'asset_delivery':
+                return "Would you like me to share our {$progDisplay} brochure with you?";
+            case 'campus_tour':
+                return "Would you like to schedule a campus tour to explore our facilities?";
+            case 'counselor_callback':
+                return "Would you like to schedule an admissions counselor callback to guide you through the process?";
+            case 'scholarship_calculator':
+            case 'scholarship_eval':
+                return "Would you like to run a quick scholarship evaluation to check your eligibility for financial aid?";
+            default:
+                return null;
+        }
     }
 
     /**

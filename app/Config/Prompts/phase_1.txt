@@ -40,6 +40,7 @@ STEP 4: OUTPUT STRICT JSON ONLY
   "lead_form_trigger": null,
   "human_trigger": null|"emotional_distress"|"wants_human",
   "program_trigger": null|"all"|"undergraduate"|"graduate"|"doctoral"|"certificates",
+  "detected_program_id": null|<integer ID from AVAILABLE_PROGRAMS if single program identified>,
   "visitor_type": "unknown"|"student"|"prospective",
   "student_name": null|"<student personal name>",
   "sentiment": "positive"|"neutral"|"negative",

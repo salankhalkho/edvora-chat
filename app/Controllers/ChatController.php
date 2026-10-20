@@ -314,6 +314,18 @@ class ChatController
 
         // 6. Proactive Program Interest Detection & Early Lead Sync to DB
         $detectedProgram = ProgramDetector::detect($db, $orgId, $userMessage, $contextSources);
+        if (!$detectedProgram && empty($currentProgramInterest) && !empty($prevHistory)) {
+            // If user refers to "this program" / follow-up question, inspect immediate prior assistant message
+            for ($hIdx = count($prevHistory) - 1; $hIdx >= 0; $hIdx--) {
+                if (($prevHistory[$hIdx]['role'] ?? '') === 'assistant') {
+                    $priorAssistantText = $prevHistory[$hIdx]['content'] ?? '';
+                    if ($priorAssistantText !== '' && !str_contains($priorAssistantText, "\n• ")) {
+                        $detectedProgram = ProgramDetector::detect($db, $orgId, $priorAssistantText, []);
+                    }
+                    break;
+                }
+            }
+        }
         if ($detectedProgram) {
             $currentProgramInterest = $detectedProgram['course_name'];
             $currentProgramId = (int)$detectedProgram['id'];
@@ -466,9 +478,47 @@ class ChatController
                         $visitorId ?? null
                     );
                 }
+
+                // Layer 2: LLM-Native Semantic Program ID Resolution (detected_program_id)
+                $llmDetectedProgramId = !empty($parsed['detected_program_id']) ? (int)$parsed['detected_program_id'] : null;
+                if ($llmDetectedProgramId !== null && $llmDetectedProgramId > 0 && !in_array($parsedIntent, ['seeking_catalogue', 'c'], true)) {
+                    if (empty($activeProgramData['id']) || (int)$activeProgramData['id'] !== $llmDetectedProgramId) {
+                        $stmtVerifyProg = $db->prepare("
+                            SELECT id, course_name, course_code, program_type
+                            FROM programs
+                            WHERE id = :pid AND organization_id = :oid AND is_admissions_open = 1
+                            LIMIT 1
+                        ");
+                        $stmtVerifyProg->execute([':pid' => $llmDetectedProgramId, ':oid' => $orgId]);
+                        $verifiedProg = $stmtVerifyProg->fetch(PDO::FETCH_ASSOC);
+                        if ($verifiedProg) {
+                            $currentProgramId = (int)$verifiedProg['id'];
+                            $currentProgramInterest = $verifiedProg['course_name'];
+                            $activeProgramData = [
+                                'id' => $currentProgramId,
+                                'course_name' => $currentProgramInterest
+                            ];
+                            ProgramDetector::syncProgramLead($db, $orgId, $botId, $convId, $verifiedProg);
+                        }
+                    }
+                }
             } else {
                 error_log("[ChatController] LLM JSON parse failed. Raw: " . substr($rawAiResponse, 0, 300));
                 $aiResponseText = trim($rawAiResponse);
+            }
+
+            // Secondary Fallback: If program is still unknown on an INFORMATION_SEEKING answer, inspect assistant's bubble_1 text
+            if (empty($activeProgramData['course_name']) && !empty($aiResponseText) && in_array($parsedIntent, ['information_seeking', 'b', 'd'], true)) {
+                $assistantDetectedProg = ProgramDetector::detect($db, $orgId, $aiResponseText, []);
+                if ($assistantDetectedProg) {
+                    $currentProgramId = (int)$assistantDetectedProg['id'];
+                    $currentProgramInterest = $assistantDetectedProg['course_name'];
+                    $activeProgramData = [
+                        'id' => $currentProgramId,
+                        'course_name' => $currentProgramInterest
+                    ];
+                    ProgramDetector::syncProgramLead($db, $orgId, $botId, $convId, $assistantDetectedProg);
+                }
             }
 
             // 11. Intent-Specific Action Handlers
@@ -630,6 +680,35 @@ class ChatController
                 $leadTriggerPayload = null;
             }
 
+            // Layer 3: Deterministic PHP Offer Injection when program is known and LLM omitted bubble_2
+            $programKnown = !empty($activeProgramData['course_name']);
+            $isInfoSeekingTurn = in_array($parsedIntent, ['information_seeking', 'b', 'd'], true);
+            if ($programKnown && !$leadCaptured && $isInfoSeekingTurn && empty($leadTriggerPayload) && empty($programCatalogPayload)) {
+                $isFinAidTurn = PromptBuilder::isFinancialAidQuery($userMessage);
+                $scholarshipAlreadyShown = (in_array('scholarship_calculator', $leadFormsShown, true) || in_array('scholarship_eval', $leadFormsShown, true));
+
+                if ($isFinAidTurn && !$scholarshipAlreadyShown) {
+                    $activePhaseKey = 'master_prompt_scholarship';
+                    $activePhaseLabel = $phaseLabels[$activePhaseKey] ?? $activePhaseLabel;
+                    if (empty($followUpMessage)) {
+                        $followUpMessage = PromptBuilder::getOfferSentence('scholarship_calculator', $activeProgramData['course_name']);
+                        $aiResponseText = self::stripTrailingQuestion($aiResponseText);
+                    }
+                } elseif ($lastOfferTurn === 0 || $userMessageCountSinceLastOffer >= 2) {
+                    $phase2OfferState = PromptBuilder::computePhase2Offer($history, $leadFormsShown, $userMessage);
+                    if (($phase2OfferState['offer_turn'] ?? 'No') === 'Yes' && !empty($phase2OfferState['assigned_offer']) && $phase2OfferState['assigned_offer'] !== 'none') {
+                        if ($activePhaseKey === 'master_prompt_phase_1') {
+                            $activePhaseKey = 'master_prompt_phase_2';
+                            $activePhaseLabel = $phaseLabels[$activePhaseKey] ?? $activePhaseLabel;
+                        }
+                        if (empty($followUpMessage)) {
+                            $followUpMessage = PromptBuilder::getOfferSentence($phase2OfferState['assigned_offer'], $activeProgramData['course_name']);
+                            $aiResponseText = self::stripTrailingQuestion($aiResponseText);
+                        }
+                    }
+                }
+            }
+
             // Cadence Gate & Cardinal Rules on bubble_2 (follow_up_message):
             if (!empty($followUpMessage)) {
                 $programKnown = !empty($activeProgramData['course_name']);
@@ -642,13 +721,13 @@ class ChatController
                 // Cardinal Rule 4: Post-lead capture restriction (only campus_tour allowed)
                 elseif ($leadCaptured) {
                     $isTourOffer = str_contains(strtolower($followUpMessage), 'tour') || str_contains(strtolower($followUpMessage), 'visit');
-                    if (!$isTourOffer || $userMessageCountSinceLastOffer < 3 || in_array('campus_tour', $leadFormsShown, true)) {
+                    if (!$isTourOffer || ($lastOfferTurn > 0 && $userMessageCountSinceLastOffer < 3) || in_array('campus_tour', $leadFormsShown, true)) {
                         $followUpMessage = null;
                     }
                 }
-                // Cadence Gate: user_message_count >= 2 required (except escalation e & f, and scholarship/aid inquiries)
+                // Cadence Gate: user_message_count >= 2 required after first offer (except escalation e & f, and scholarship/aid inquiries)
                 $isScholarshipOffer = (bool)preg_match('/\b(scholarship|financial aid|waiver)\b/i', (string)$followUpMessage);
-                if ($userMessageCountSinceLastOffer < 2 && !$isEscalation && !$isScholarshipOffer) {
+                if ($lastOfferTurn > 0 && $userMessageCountSinceLastOffer < 2 && !$isEscalation && !$isScholarshipOffer) {
                     $followUpMessage = null;
                 }
             }
@@ -1276,5 +1355,22 @@ class ChatController
         }
 
         return false;
+    }
+
+    /**
+     * Strip a trailing question sentence from bubble_1 when bubble_2 is deterministically injected,
+     * preserving all declarative factual sentences.
+     */
+    private static function stripTrailingQuestion(?string $text): ?string
+    {
+        if ($text === null || trim($text) === '') {
+            return $text;
+        }
+        $trimmed = trim($text);
+        if (!str_ends_with($trimmed, '?')) {
+            return $trimmed;
+        }
+        $stripped = preg_replace('/(?<=[.!])\s+[^.!?]*\?\s*$/u', '', $trimmed);
+        return ($stripped !== null && trim($stripped) !== '') ? trim($stripped) : $trimmed;
     }
 }

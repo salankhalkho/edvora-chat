@@ -36,6 +36,7 @@ STEP 4: OUTPUT STRICT JSON ONLY
   "lead_form_trigger": null|"campus_tour",
   "human_trigger": null|"emotional_distress"|"wants_human",
   "program_trigger": null,
+  "detected_program_id": <integer ID from AVAILABLE_PROGRAMS>,
   "visitor_type": "prospective",
   "student_name": null|"<student personal name>",
   "sentiment": "positive"|"neutral"|"negative",
