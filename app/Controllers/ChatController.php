@@ -507,20 +507,6 @@ class ChatController
                 $aiResponseText = trim($rawAiResponse);
             }
 
-            // Secondary Fallback: If program is still unknown on an INFORMATION_SEEKING answer, inspect assistant's bubble_1 text
-            if (empty($activeProgramData['course_name']) && !empty($aiResponseText) && in_array($parsedIntent, ['information_seeking', 'b', 'd'], true)) {
-                $assistantDetectedProg = ProgramDetector::detect($db, $orgId, $aiResponseText, []);
-                if ($assistantDetectedProg) {
-                    $currentProgramId = (int)$assistantDetectedProg['id'];
-                    $currentProgramInterest = $assistantDetectedProg['course_name'];
-                    $activeProgramData = [
-                        'id' => $currentProgramId,
-                        'course_name' => $currentProgramInterest
-                    ];
-                    ProgramDetector::syncProgramLead($db, $orgId, $botId, $convId, $assistantDetectedProg);
-                }
-            }
-
             // 11. Intent-Specific Action Handlers
             $leadTriggerPayload = null;
             $programCatalogPayload = null;
@@ -605,8 +591,8 @@ class ChatController
                 }
             }
 
-            // [c] SEEKING_CATALOGUE: Interactive catalog triggers ONLY when the LLM explicitly classifies as seeking_catalogue with no custom bubble_1 answer
-            if (($parsedIntent === 'seeking_catalogue' || $parsedIntent === 'c') && empty($aiResponseText)) {
+            // [c] SEEKING_CATALOGUE: Interactive catalog triggers when the LLM classifies as seeking_catalogue
+            if ($parsedIntent === 'seeking_catalogue' || $parsedIntent === 'c') {
                 $parsedIntent = 'seeking_catalogue';
                 $followUpMessage = null;
 

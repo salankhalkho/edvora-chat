@@ -116,8 +116,12 @@ class PromptBuilder
         $prompt .= "AVAILABLE_PROGRAMS & PROGRAM ID RESOLUTION (detected_program_id):\n";
         $prompt .= "AVAILABLE_PROGRAMS: {$availableProgramsStr}\n";
         $prompt .= "CURRENT_DETECTED_PROGRAM_ID: {$currentProgIdStr}\n";
-        $prompt .= "• In your JSON output, set \"detected_program_id\" to the integer ID from AVAILABLE_PROGRAMS whenever the student's question or your answer focuses on ONE specific program (whether mentioned by full name, shorthand, acronym, pronoun like \"this program\", or when only 1 program in AVAILABLE_PROGRAMS matches the degree level asked about, e.g. PhD).\n";
-        $prompt .= "• If the student asks about a degree type or subject that matches MULTIPLE programs in AVAILABLE_PROGRAMS (e.g. \"do you offer MBA?\" when multiple MBA programs exist), set intent=\"INFORMATION_SEEKING\", program_trigger=null, detected_program_id=null (NEVER use SEEKING_CATALOGUE), and in bubble_1 warmly compare ONLY those matching programs from AVAILABLE_PROGRAMS (do NOT list unrelated programs).\n";
+        $prompt .= "1. BROAD CATALOG INQUIRY (e.g. \"what programs are available?\", \"what programs are avilable?\", \"what courses do you offer?\", \"show all programs\" — where no specific degree acronym or subject like MBA/analytics is named):\n";
+        $prompt .= "   → Set intent=\"SEEKING_CATALOGUE\", program_trigger=\"all\", detected_program_id=null, bubble_1=null, bubble_2=null.\n";
+        $prompt .= "2. MULTI-PROGRAM DEGREE/SUBJECT INQUIRY (e.g. \"do you offer MBA?\", \"what analytics programs do you have?\" — where the user names a specific degree acronym or subject that matches MULTIPLE programs in AVAILABLE_PROGRAMS):\n";
+        $prompt .= "   → Set intent=\"INFORMATION_SEEKING\", program_trigger=null, detected_program_id=null (NEVER use SEEKING_CATALOGUE), and in bubble_1 warmly compare ONLY those matching programs from AVAILABLE_PROGRAMS (never list unrelated programs).\n";
+        $prompt .= "3. SINGLE PROGRAM INQUIRY (when the student's question or your answer focuses on ONE specific program from AVAILABLE_PROGRAMS by name, shorthand, acronym, pronoun like \"this program\", or when only 1 program in AVAILABLE_PROGRAMS matches the degree level asked about, e.g. PhD):\n";
+        $prompt .= "   → Set intent=\"INFORMATION_SEEKING\" and set \"detected_program_id\" to that program's integer ID from AVAILABLE_PROGRAMS.\n";
 
         if (!empty($chatbotPromptOverride)) {
             $prompt .= "\n\n================================================================================\n";

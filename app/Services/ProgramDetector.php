@@ -310,33 +310,8 @@ class ProgramDetector
             return null;
         }
 
-        // 3. Fallback: Context sources from RAG
-        // Only if ALL identified context sources point to the same single program
-        $contextProgramIds = [];
-        foreach ($contextSources as $src) {
-            if (!empty($src['program_id'])) {
-                $contextProgramIds[(int)$src['program_id']] = true;
-            } else {
-                $srcTitle = mb_strtolower($src['title'] ?? '', 'UTF-8');
-                foreach ($programs as $prog) {
-                    $pName = mb_strtolower($prog['course_name'], 'UTF-8');
-                    if (str_contains($srcTitle, $pName)) {
-                        $contextProgramIds[(int)$prog['id']] = true;
-                    }
-                }
-            }
-        }
-
-        // Only lock if exactly one distinct program is represented in context sources
-        if (count($contextProgramIds) === 1) {
-            $singleProgId = array_key_first($contextProgramIds);
-            foreach ($programs as $prog) {
-                if ((int)$prog['id'] === $singleProgId) {
-                    return $prog;
-                }
-            }
-        }
-
+        // Do NOT guess program interest from RAG context sources when the user's query did not match any program token.
+        // Semantic program detection for informal phrasings is handled by the LLM's detected_program_id output.
         return null;
     }
 
