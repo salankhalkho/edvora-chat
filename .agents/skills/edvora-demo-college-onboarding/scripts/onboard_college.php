@@ -458,6 +458,55 @@ $resultPayload = [
     'total_chunks'      => $totalChunks
 ];
 
+// 11. Auto-sync demo link to Leadmaster Outreach Tracker (kidhealthcenter.com)
+echo "\n[5/5] Checking Leadmaster Outreach Tracker (leadmaster_edvora_project1)...\n";
+$lmUpdatedCount = 0;
+try {
+    $khcDb = new \PDO("mysql:host=localhost;dbname=projects_kidhealthcenter;charset=utf8mb4", "projects_kidhealthcenter", "HqY#DBAP5o", [
+        \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
+    ]);
+
+    // Collect all candidate domains from website_url and ingested urls
+    $candidateDomains = [];
+    if (!empty($domain)) {
+        $candidateDomains[] = $domain;
+    }
+    foreach ($urls as $u) {
+        $h = parse_url($u, PHP_URL_HOST);
+        if ($h) {
+            $h = preg_replace('/^www\./i', '', strtolower($h));
+            $candidateDomains[] = $h;
+        }
+    }
+    $candidateDomains = array_values(array_unique(array_filter($candidateDomains)));
+
+    // Extract college name keywords without institutional prefix
+    $nameClean = preg_replace('/^(Duke University|University of|Columbia University|Harvard University)\s*[-–:]*\s*/i', '', $collegeName);
+    $nameClean = trim($nameClean);
+
+    if (!empty($candidateDomains)) {
+        $inPlaceholders = implode(',', array_fill(0, count($candidateDomains), '?'));
+        $stmtLm = $khcDb->prepare("
+            UPDATE leadmaster_edvora_project1
+            SET demo_link = ?
+            WHERE domain IN ({$inPlaceholders})
+               OR college LIKE ?
+        ");
+        $params = array_merge([$resultPayload['widget_url']], $candidateDomains, ["%{$nameClean}%"]);
+        $stmtLm->execute($params);
+        $lmUpdatedCount = $stmtLm->rowCount();
+    }
+
+    if ($lmUpdatedCount > 0) {
+        echo "      -> Successfully updated {$lmUpdatedCount} row(s) in leadmaster_edvora_project1 with demo link: {$resultPayload['widget_url']}\n";
+    } else {
+        echo "      -> No matching rows in leadmaster_edvora_project1 found for domain/college (0 updated).\n";
+    }
+} catch (\Throwable $e) {
+    echo "      -> Notice: Leadmaster update skipped (" . $e->getMessage() . ")\n";
+}
+$resultPayload['leadmaster_updated_rows'] = $lmUpdatedCount;
+
 echo "\n============================================================\n";
 echo "DEMO COLLEGE ONBOARDING COMPLETE!\n";
 echo "============================================================\n";

@@ -109,7 +109,8 @@ The script will:
 3. Dispatch `chunk_and_embed` jobs to the `jobs` table.
 4. Insert academic degree records into `programs` and dispatch `embed_program` jobs.
 5. Monitor Supervisor worker progress until all embeddings are generated and active.
-6. Print the summary and `RESULT_JSON:{...}`.
+6. Automatically update any matching outreach rows in `projects_kidhealthcenter.leadmaster_edvora_project1` with the new public demo widget URL (`demo_link`).
+7. Print the summary and `RESULT_JSON:{...}`.
 
 Clean up temporary files in `/tmp/`:
 ```powershell
