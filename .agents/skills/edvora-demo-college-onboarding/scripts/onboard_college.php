@@ -346,14 +346,18 @@ if (!empty($programs)) {
 
         // If matched to a scraped URL source, link source and its items to program_id
         if (!empty($sourceUrl)) {
+            $urlWithSlash = rtrim($sourceUrl, '/') . '/';
+            $urlNoSlash   = rtrim($sourceUrl, '/');
+
             $stmtLink = $db->prepare("
                 UPDATE knowledge_sources
                 SET program_id = :prog_id, updated_at = NOW()
-                WHERE source_url = :url AND organization_id = :org_id
+                WHERE (source_url = :url1 OR source_url = :url2) AND organization_id = :org_id
             ");
             $stmtLink->execute([
                 ':prog_id' => $progId,
-                ':url'     => $sourceUrl,
+                ':url1'    => $urlNoSlash,
+                ':url2'    => $urlWithSlash,
                 ':org_id'  => $orgId
             ]);
 
@@ -361,10 +365,11 @@ if (!empty($programs)) {
                 UPDATE knowledge_items ki
                 JOIN knowledge_sources ks ON ki.source_id = ks.id
                 SET ki.program_id = :prog_id, ki.updated_at = NOW()
-                WHERE ks.source_url = :url AND ki.organization_id = :org_id
+                WHERE (ks.source_url = :url1 OR ks.source_url = :url2) AND ki.organization_id = :org_id
             ")->execute([
                 ':prog_id' => $progId,
-                ':url'     => $sourceUrl,
+                ':url1'    => $urlNoSlash,
+                ':url2'    => $urlWithSlash,
                 ':org_id'  => $orgId
             ]);
         }
@@ -418,7 +423,15 @@ while (time() - $startTime < $timeout) {
     sleep(3);
 }
 
-// 9. Fetch Final Summary Metrics
+// 9. Post-worker sync: ensure knowledge_items linked to source inherit program_id
+$db->prepare("
+    UPDATE knowledge_items ki
+    JOIN knowledge_sources ks ON ki.source_id = ks.id
+    SET ki.program_id = ks.program_id
+    WHERE ks.organization_id = :org_id AND ks.program_id IS NOT NULL AND ki.program_id IS NULL
+")->execute([':org_id' => $orgId]);
+
+// 10. Fetch Final Summary Metrics
 $stmtTotalKi = $db->prepare("SELECT COUNT(*) FROM knowledge_items WHERE organization_id = ?");
 $stmtTotalKi->execute([$orgId]);
 $totalChunks = (int)$stmtTotalKi->fetchColumn();
