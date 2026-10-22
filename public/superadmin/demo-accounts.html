@@ -143,8 +143,18 @@
         /* Stats Grid */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 14px;
+        }
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
         }
         .stat-card {
             background: #111827 !important;
@@ -558,6 +568,13 @@
                         </div>
                         <div class="stat-card-value" id="statTotalLeads">0</div>
                     </div>
+                    <div class="stat-card" style="border-color: rgba(56, 189, 248, 0.4) !important;">
+                        <div class="stat-card-label">
+                            <span style="color: #38bdf8;">Demo Link Visits</span>
+                            <span>👁️</span>
+                        </div>
+                        <div class="stat-card-value" style="color: #38bdf8 !important;" id="statTotalVisitors">0</div>
+                    </div>
                 </div>
 
                 <!-- Demo Accounts Table Panel -->
@@ -706,6 +723,101 @@
                 <button type="button" onclick="closeSuccessModal()" class="brand-btn brand-btn-secondary" style="margin-top: 4px;">
                     Done
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Demo Visitors Intelligence Modal -->
+    <div id="visitorsModal" class="modal-backdrop">
+        <div class="modal-box" style="width: 780px; max-width: 95vw; max-height: 90vh; display: flex; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px;">
+                <div style="font-size: 14px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;">
+                    <span>👁️</span>
+                    <span>Demo Link Visitor Log &amp; Counters</span>
+                    <span id="vmBadge" class="badge badge-demo"></span>
+                </div>
+                <button type="button" onclick="closeVisitorsModal()" style="background: none; border: none; color: #9ca3af; font-size: 20px; cursor: pointer;">&times;</button>
+            </div>
+
+            <!-- Scrollable modal content -->
+            <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding-right: 4px;">
+                <!-- Institution and links info -->
+                <div style="background: #0b0f19; border: 1px solid #1f2937; border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                        <div>
+                            <span style="font-size: 10.5px; color: #9ca3af; text-transform: uppercase; font-weight: 600;">Institution</span>
+                            <div style="font-size: 13.5px; font-weight: 700; color: #fff;" id="vmOrgName">Loading...</div>
+                        </div>
+                        <div id="vmDeepLinkContainer">
+                            <!-- Link to session journeys -->
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px;">
+                        <div style="background: rgba(255,255,255,0.03); border: 1px solid #1f2937; border-radius: 6px; padding: 8px 10px; display: flex; flex-direction: column; gap: 4px;">
+                            <div style="font-size: 10.5px; color: #9ca3af; display: flex; justify-content: space-between;">
+                                <span>🔗 Widget Link (/widget)</span>
+                                <span style="color: #60a5fa; cursor: pointer; text-decoration: underline;" id="btnCopyVmWidget">Copy</span>
+                            </div>
+                            <input type="text" id="vmWidgetUrl" readonly class="form-input" style="height: 26px; padding: 2px 8px; font-size: 11px; font-family: 'JetBrains Mono', monospace;" />
+                        </div>
+                        <div style="background: rgba(255,255,255,0.03); border: 1px solid #1f2937; border-radius: 6px; padding: 8px 10px; display: flex; flex-direction: column; gap: 4px;">
+                            <div style="font-size: 10.5px; color: #9ca3af; display: flex; justify-content: space-between;">
+                                <span>🎯 Executive Demo (/demo)</span>
+                                <span style="color: #38bdf8; cursor: pointer; text-decoration: underline;" id="btnCopyVmDemo">Copy</span>
+                            </div>
+                            <input type="text" id="vmDemoUrl" readonly class="form-input" style="height: 26px; padding: 2px 8px; font-size: 11px; font-family: 'JetBrains Mono', monospace;" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KPI mini cards -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;" id="vmStatsGrid">
+                    <div class="stat-card" style="padding: 10px 12px;">
+                        <div class="stat-card-label" style="font-size: 10px;">Total Visits</div>
+                        <div class="stat-card-value" style="font-size: 18px;" id="vmStatSessions">0</div>
+                    </div>
+                    <div class="stat-card" style="padding: 10px 12px;">
+                        <div class="stat-card-label" style="font-size: 10px;">Unique Visitors</div>
+                        <div class="stat-card-value" style="font-size: 18px; color: #38bdf8 !important;" id="vmStatUnique">0</div>
+                    </div>
+                    <div class="stat-card" style="padding: 10px 12px;">
+                        <div class="stat-card-label" style="font-size: 10px;">Avg Dwell Time</div>
+                        <div class="stat-card-value" style="font-size: 18px; color: #818cf8 !important;" id="vmStatDwell">0s</div>
+                    </div>
+                    <div class="stat-card" style="padding: 10px 12px;">
+                        <div class="stat-card-label" style="font-size: 10px;">Chat / Leads</div>
+                        <div class="stat-card-value" style="font-size: 18px; color: #34d399 !important;" id="vmStatConversions">0</div>
+                    </div>
+                </div>
+
+                <!-- Sessions Table -->
+                <div style="border: 1px solid #1f2937; border-radius: 6px; overflow: hidden;">
+                    <div style="padding: 8px 12px; background: #080c14; border-bottom: 1px solid #1f2937; font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase;">
+                        Individual Visitor Log (Latest Visits)
+                    </div>
+                    <div style="max-height: 260px; overflow-y: auto;">
+                        <table class="brand-table" style="font-size: 11px;">
+                            <thead>
+                                <tr>
+                                    <th>Date &amp; Time</th>
+                                    <th>Visitor / Session</th>
+                                    <th>Dwell Time</th>
+                                    <th>Status / Outcome</th>
+                                    <th>Entry Link</th>
+                                </tr>
+                            </thead>
+                            <tbody id="vmSessionsBody">
+                                <tr><td colspan="5" style="text-align: center; color: #9ca3af; padding: 20px;">Loading visitors...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px;">
+                <span style="font-size: 11px; color: #9ca3af;">Telemetry captures real-time dwell and interaction for prospective demo links.</span>
+                <button type="button" onclick="closeVisitorsModal()" class="brand-btn brand-btn-secondary">Close</button>
             </div>
         </div>
     </div>
@@ -965,16 +1077,20 @@
             let totalBots = 0;
             let totalKnowledge = 0;
             let totalLeads = 0;
+            let totalVisitors = 0;
 
             list.forEach(item => {
                 totalBots += parseInt(item.total_chatbots || 0, 10);
                 totalKnowledge += parseInt(item.total_knowledge_sources || 0, 10);
                 totalLeads += parseInt(item.total_leads || 0, 10);
+                totalVisitors += parseInt(item.total_visitors || 0, 10);
             });
 
             document.getElementById('statTotalBots').innerText = totalBots;
             document.getElementById('statTotalKnowledge').innerText = totalKnowledge;
             document.getElementById('statTotalLeads').innerText = totalLeads;
+            const visEl = document.getElementById('statTotalVisitors');
+            if (visEl) visEl.innerText = totalVisitors;
         }
 
         function renderTable(list) {
@@ -993,8 +1109,11 @@
             }
 
             tbody.innerHTML = list.map(d => {
-                const testUrl = d.test_url || (d.bot_token ? `https://edvora.chat/demo/${d.bot_token}` : '#');
+                const widgetUrl = d.widget_url || (d.bot_token ? `https://edvora.chat/widget/${d.bot_token}` : '#');
+                const demoUrl = d.demo_url || d.test_url || (d.bot_token ? `https://edvora.chat/demo/${d.bot_token}` : '#');
                 const createdDate = d.created_at ? new Date(d.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-';
+                const totalVis = parseInt(d.total_visitors || 0, 10);
+                const uniqueVis = parseInt(d.unique_visitors || 0, 10);
 
                 return `
                     <tr>
@@ -1014,13 +1133,23 @@
                         </td>
                         <td>
                             ${d.bot_token ? `
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <code style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: #c084fc; background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.25); padding: 2px 6px; border-radius: 4px;">
-                                        ${escapeHtml(d.bot_token.substring(0, 12))}...
-                                    </code>
-                                    <button onclick="copyToClipboard('${escapeHtml(testUrl)}', 'Customer Demo URL copied to clipboard!')" class="brand-btn brand-btn-secondary brand-btn-sm" title="Copy Customer Demo Link">
-                                        🔗 Demo Link
-                                    </button>
+                                <div style="display: flex; flex-direction: column; gap: 5px;">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <code style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: #c084fc; background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.25); padding: 2px 6px; border-radius: 4px;">
+                                            ${escapeHtml(d.bot_token.substring(0, 12))}...
+                                        </code>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 4px;">
+                                        <button onclick="copyToClipboard('${escapeHtml(widgetUrl)}', 'Widget Test Link copied (/widget)!')" class="brand-btn brand-btn-secondary brand-btn-sm" style="font-size: 10.5px !important; height: 22px !important; padding: 2px 6px !important;" title="Copy Widget Test Link: ${escapeHtml(widgetUrl)}">
+                                            🔗 /widget
+                                        </button>
+                                        <button onclick="copyToClipboard('${escapeHtml(demoUrl)}', 'Executive Demo Page Link copied (/demo)!')" class="brand-btn brand-btn-cyan brand-btn-sm" style="font-size: 10.5px !important; height: 22px !important; padding: 2px 6px !important;" title="Copy Executive Demo Link: ${escapeHtml(demoUrl)}">
+                                            🎯 /demo
+                                        </button>
+                                        <a href="${escapeHtml(widgetUrl)}" target="_blank" rel="noopener noreferrer" class="brand-btn brand-btn-secondary brand-btn-sm" style="font-size: 10.5px !important; height: 22px !important; padding: 2px 6px !important;" title="Open Widget Test Page in new tab">
+                                            ↗
+                                        </a>
+                                    </div>
                                 </div>
                             ` : '<span style="color: #9ca3af;">No Bot</span>'}
                         </td>
@@ -1029,24 +1158,40 @@
                             <span class="badge badge-active" style="margin-left: 4px;">ACTIVE</span>
                         </td>
                         <td style="font-size: 11px; color: #9ca3af;">
-                            <span>👥 ${d.total_users || 1}</span> &bull; 
-                            <span>🤖 ${d.total_chatbots || 1}</span> &bull; 
-                            <span>📚 ${d.total_knowledge_sources || 0}</span> &bull; 
-                            <strong style="color: #34d399;">🎯 ${d.total_leads || 0}</strong>
+                            <div style="margin-bottom: 5px;">
+                                <span>👥 ${d.total_users || 1}</span> &bull; 
+                                <span>🤖 ${d.total_chatbots || 1}</span> &bull; 
+                                <span>📚 ${d.total_knowledge_sources || 0}</span> &bull; 
+                                <strong style="color: #34d399;">🎯 ${d.total_leads || 0}</strong>
+                            </div>
+                            <div>
+                                ${totalVis > 0 ? `
+                                    <button onclick="openVisitorsModal(${d.id}, '${escapeHtml(d.name)}')" class="brand-btn brand-btn-cyan brand-btn-sm" style="height: 22px !important; padding: 2px 8px !important; font-size: 10.5px !important; font-weight: 700;" title="Click to view all visitor timestamps, dwell duration, and pages">
+                                        👁️ ${totalVis} ${totalVis === 1 ? 'visit' : 'visits'} (${uniqueVis} unique)
+                                    </button>
+                                ` : `
+                                    <span class="badge" style="background: rgba(107, 114, 128, 0.15); color: #9ca3af; border: 1px solid rgba(107, 114, 128, 0.3); font-size: 10px;">
+                                        👁️ 0 visits
+                                    </span>
+                                `}
+                            </div>
                         </td>
                         <td style="font-size: 11px; color: #9ca3af; white-space: nowrap;">
                             ${createdDate}
                         </td>
                         <td style="text-align: right; white-space: nowrap;">
                             <div style="display: inline-flex; align-items: center; gap: 5px;">
+                                <button onclick="openVisitorsModal(${d.id}, '${escapeHtml(d.name)}')" class="brand-btn brand-btn-cyan brand-btn-sm" title="View Demo Link Visitor Counter &amp; Activity Log">
+                                    👁️ Visitors (${totalVis})
+                                </button>
                                 <button onclick="impersonateDemo(${d.id})" class="brand-btn brand-btn-primary brand-btn-sm" title="1-Click Login to User Dashboard in a new tab">
                                     🚀 User Dashboard
                                 </button>
-                                <button onclick="copyToClipboard('${escapeHtml(testUrl)}', 'Customer demo link copied!')" class="brand-btn brand-btn-cyan brand-btn-sm" title="Copy customer demo link">
+                                <button onclick="copyToClipboard('${escapeHtml(widgetUrl)}', 'Widget link copied!')" class="brand-btn brand-btn-secondary brand-btn-sm" title="Copy /widget link">
                                     🔗 Link
                                 </button>
                                 <button onclick="copyDemoCredentials('${escapeHtml(d.name)}', '${escapeHtml(d.owner_email || '')}')" class="brand-btn brand-btn-secondary brand-btn-sm" title="Copy login email">
-                                    📋 Copy Login
+                                    📋 Credentials
                                 </button>
                                 <button onclick="confirmConvertDemo(${d.id}, '${escapeHtml(d.name)}')" class="brand-btn brand-btn-success brand-btn-sm" title="Convert to Standard College Tenant">
                                     ⭐ Convert
@@ -1207,6 +1352,124 @@
                 }
             } catch (err) {
                 showToast(err.message || 'Connection error.', 'error');
+            }
+        }
+
+        async function openVisitorsModal(orgId, orgName) {
+            const modal = document.getElementById('visitorsModal');
+            document.getElementById('vmOrgName').innerText = orgName || `Organization #${orgId}`;
+            document.getElementById('vmBadge').innerText = `ID #${orgId}`;
+            document.getElementById('vmSessionsBody').innerHTML = '<tr><td colspan="5" style="text-align: center; color: #9ca3af; padding: 20px;">Loading visitor sessions...</td></tr>';
+            modal.style.display = 'flex';
+
+            const deepLinkContainer = document.getElementById('vmDeepLinkContainer');
+            deepLinkContainer.innerHTML = `
+                <a href="/session-journeys?org_id=${orgId}" target="_blank" rel="noopener noreferrer" class="brand-btn brand-btn-secondary brand-btn-sm" style="font-size: 11px;">
+                    🧭 Open in Session Journeys ↗
+                </a>
+            `;
+
+            try {
+                const data = await apiFetch(`/v1/superadmin/demo-accounts/${orgId}/visitors`);
+                if (data.status === 'success' && data.data) {
+                    const d = data.data;
+                    const sum = d.summary || {};
+                    const widgetInput = document.getElementById('vmWidgetUrl');
+                    const demoInput = document.getElementById('vmDemoUrl');
+                    widgetInput.value = d.widget_url || '';
+                    demoInput.value = d.demo_url || '';
+
+                    document.getElementById('btnCopyVmWidget').onclick = () => {
+                        copyToClipboard(d.widget_url, 'Widget Link copied (/widget)!');
+                    };
+                    document.getElementById('btnCopyVmDemo').onclick = () => {
+                        copyToClipboard(d.demo_url, 'Executive Demo Link copied (/demo)!');
+                    };
+
+                    document.getElementById('vmStatSessions').innerText = sum.total_sessions || 0;
+                    document.getElementById('vmStatUnique').innerText = sum.unique_visitors || 0;
+                    
+                    const avgSec = parseInt(sum.avg_dwell_seconds || 0, 10);
+                    document.getElementById('vmStatDwell').innerText = avgSec < 60 ? `${avgSec}s` : `${Math.floor(avgSec/60)}m ${avgSec%60}s`;
+
+                    const chats = parseInt(sum.chat_engaged_count || 0, 10);
+                    const leads = parseInt(sum.lead_converted_count || 0, 10);
+                    document.getElementById('vmStatConversions').innerText = `${chats} chats / ${leads} leads`;
+
+                    const tbody = document.getElementById('vmSessionsBody');
+                    const sessions = d.sessions || [];
+                    if (!sessions.length) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: #9ca3af; padding: 28px 16px;">
+                                    <div style="font-size: 24px; margin-bottom: 6px;">👁️</div>
+                                    <div style="font-size: 12px; font-weight: 600; color: #f3f4f6;">No visitors have opened this demo link yet.</div>
+                                    <div style="font-size: 11px; color: #9ca3af; margin-top: 4px;">Share either the Widget Link or Executive Demo Link with college stakeholders.</div>
+                                </td>
+                            </tr>
+                        `;
+                        return;
+                    }
+
+                    tbody.innerHTML = sessions.map(s => {
+                        const dateFormatted = s.started_at ? new Date(s.started_at.replace(' ', 'T') + 'Z').toLocaleString('en-US', {
+                            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                        }) : '-';
+
+                        let statusBadge = '<span class="badge" style="background: rgba(156, 163, 175, 0.15); color: #9ca3af;">Browsing</span>';
+                        if (s.conversion_status === 'lead_converted' || s.lead_name || s.lead_email) {
+                            statusBadge = `<span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4);">🎯 Lead: ${escapeHtml(s.lead_name || s.lead_email || 'Captured')}</span>`;
+                        } else if (s.conversion_status === 'chat_engaged' || parseInt(s.conversations_count || 0, 10) > 0) {
+                            statusBadge = '<span class="badge" style="background: rgba(99, 102, 241, 0.2); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.4);">💬 Chat Engaged</span>';
+                        }
+
+                        const path = formatShortUrl(s.entry_page);
+
+                        return `
+                            <tr>
+                                <td style="white-space: nowrap; color: #f3f4f6; font-weight: 500;">
+                                    ${dateFormatted}
+                                </td>
+                                <td>
+                                    <code style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #93c5fd;">
+                                        ${escapeHtml((s.visitor_id || s.session_id || '').substring(0, 18))}...
+                                    </code>
+                                </td>
+                                <td>
+                                    <span style="font-family: 'JetBrains Mono', monospace; color: #67e8f9; font-weight: 600;">
+                                        ${escapeHtml(s.total_dwell_formatted || s.total_dwell_seconds + 's')}
+                                    </span>
+                                </td>
+                                <td>
+                                    ${statusBadge}
+                                </td>
+                                <td>
+                                    <a href="${escapeHtml(s.entry_page || '#')}" target="_blank" rel="noopener noreferrer" style="color: #9ca3af; text-decoration: underline; font-size: 10.5px;">
+                                        ${escapeHtml(path)}
+                                    </a>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                } else {
+                    document.getElementById('vmSessionsBody').innerHTML = `<tr><td colspan="5" style="text-align: center; color: #f87171; padding: 16px;">Failed to load visitor details: ${escapeHtml(data.message || 'Error')}</td></tr>`;
+                }
+            } catch(e) {
+                document.getElementById('vmSessionsBody').innerHTML = `<tr><td colspan="5" style="text-align: center; color: #f87171; padding: 16px;">Network error: ${escapeHtml(e.message)}</td></tr>`;
+            }
+        }
+
+        function closeVisitorsModal() {
+            document.getElementById('visitorsModal').style.display = 'none';
+        }
+
+        function formatShortUrl(fullUrl) {
+            if (!fullUrl) return '-';
+            try {
+                const u = new URL(fullUrl);
+                return u.pathname;
+            } catch(e) {
+                return fullUrl.substring(0, 30);
             }
         }
 

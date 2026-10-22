@@ -470,7 +470,10 @@ class SuperAdminController
                    (SELECT COUNT(*) FROM users WHERE organization_id = o.id) as total_users,
                    (SELECT COUNT(*) FROM chatbots WHERE organization_id = o.id) as total_chatbots,
                    (SELECT COUNT(*) FROM knowledge_sources WHERE organization_id = o.id) as total_knowledge_sources,
-                   (SELECT COUNT(*) FROM leads WHERE organization_id = o.id) as total_leads
+                   (SELECT COUNT(*) FROM leads WHERE organization_id = o.id) as total_leads,
+                   (SELECT COUNT(*) FROM visitor_sessions WHERE organization_id = o.id) as total_visitors,
+                   (SELECT COUNT(DISTINCT visitor_id) FROM visitor_sessions WHERE organization_id = o.id) as unique_visitors,
+                   (SELECT MAX(last_active_at) FROM visitor_sessions WHERE organization_id = o.id) as last_visited_at
             FROM organizations o
             LEFT JOIN plans p ON o.plan_id = p.id
             WHERE COALESCE(o.is_system, 0) = 0 AND COALESCE(o.is_demo, 0) = 1
@@ -478,12 +481,122 @@ class SuperAdminController
         ");
         $demos = $stmt->fetchAll();
 
-        // Enrich with direct shareable test link
+        // Enrich with direct shareable test and widget links
         foreach ($demos as &$d) {
             $d['test_url'] = !empty($d['bot_token']) ? 'https://edvora.chat/demo/' . $d['bot_token'] : null;
+            $d['demo_url'] = !empty($d['bot_token']) ? 'https://edvora.chat/demo/' . $d['bot_token'] : null;
+            $d['widget_url'] = !empty($d['bot_token']) ? 'https://edvora.chat/widget/' . $d['bot_token'] : null;
         }
 
         Response::success($demos);
+    }
+
+    /**
+     * GET /v1/superadmin/demo-accounts/{id}/visitors
+     * Retrieve detailed visitor sessions, dwell times, and conversion status for a demo tenant link
+     */
+    public function getDemoVisitors(Request $request, array $params = []): void
+    {
+        $orgId = (int)($params['id'] ?? 0);
+        if (!$orgId) {
+            Response::error('Invalid organization ID.', 400);
+            return;
+        }
+
+        $db = Database::getConnection();
+
+        // 1. Verify demo tenant
+        $orgStmt = $db->prepare("
+            SELECT o.id, o.name, o.slug, o.website_url,
+                   (SELECT cb.bot_token FROM chatbots cb WHERE cb.organization_id = o.id AND cb.is_active = 1 ORDER BY cb.id ASC LIMIT 1) as bot_token
+            FROM organizations o
+            WHERE o.id = :id AND COALESCE(o.is_demo, 0) = 1
+            LIMIT 1
+        ");
+        $orgStmt->execute([':id' => $orgId]);
+        $org = $orgStmt->fetch();
+
+        if (!$org) {
+            Response::error('Demo tenant not found.', 404);
+            return;
+        }
+
+        $botToken = $org['bot_token'] ?? '';
+        $widgetUrl = !empty($botToken) ? 'https://edvora.chat/widget/' . $botToken : null;
+        $demoUrl = !empty($botToken) ? 'https://edvora.chat/demo/' . $botToken : null;
+
+        // 2. Aggregate statistics
+        $statsStmt = $db->prepare("
+            SELECT 
+                COUNT(*) as total_sessions,
+                COUNT(DISTINCT visitor_id) as unique_visitors,
+                COALESCE(SUM(total_dwell_seconds), 0) as total_dwell_seconds,
+                COALESCE(ROUND(AVG(total_dwell_seconds)), 0) as avg_dwell_seconds,
+                SUM(CASE WHEN conversion_status = 'chat_engaged' THEN 1 ELSE 0 END) as chat_engaged_count,
+                SUM(CASE WHEN conversion_status = 'lead_converted' THEN 1 ELSE 0 END) as lead_converted_count,
+                MAX(last_active_at) as last_visited_at
+            FROM visitor_sessions
+            WHERE organization_id = :id
+        ");
+        $statsStmt->execute([':id' => $orgId]);
+        $stats = $statsStmt->fetch() ?: [
+            'total_sessions' => 0,
+            'unique_visitors' => 0,
+            'total_dwell_seconds' => 0,
+            'avg_dwell_seconds' => 0,
+            'chat_engaged_count' => 0,
+            'lead_converted_count' => 0,
+            'last_visited_at' => null
+        ];
+
+        // 3. Fetch detailed visitor sessions list (latest 50)
+        $sessionsStmt = $db->prepare("
+            SELECT 
+                vs.id,
+                vs.session_id,
+                vs.visitor_id,
+                vs.entry_page,
+                vs.exit_page,
+                vs.total_pages,
+                vs.total_dwell_seconds,
+                vs.conversion_status,
+                vs.referrer,
+                vs.utm_source,
+                vs.utm_medium,
+                vs.utm_campaign,
+                vs.started_at,
+                vs.last_active_at,
+                (SELECT COUNT(*) FROM conversations c WHERE c.session_id = vs.session_id OR (c.visitor_id = vs.visitor_id AND c.organization_id = vs.organization_id)) as conversations_count,
+                (SELECT l.name FROM leads l WHERE l.session_id = vs.session_id OR (l.conversation_id IN (SELECT c2.id FROM conversations c2 WHERE c2.visitor_id = vs.visitor_id AND c2.organization_id = vs.organization_id)) ORDER BY l.id DESC LIMIT 1) as lead_name,
+                (SELECT l.email FROM leads l WHERE l.session_id = vs.session_id OR (l.conversation_id IN (SELECT c2.id FROM conversations c2 WHERE c2.visitor_id = vs.visitor_id AND c2.organization_id = vs.organization_id)) ORDER BY l.id DESC LIMIT 1) as lead_email
+            FROM visitor_sessions vs
+            WHERE vs.organization_id = :id
+            ORDER BY vs.id DESC
+            LIMIT 50
+        ");
+        $sessionsStmt->execute([':id' => $orgId]);
+        $sessions = $sessionsStmt->fetchAll();
+
+        foreach ($sessions as &$s) {
+            $dwell = (int)($s['total_dwell_seconds'] ?? 0);
+            if ($dwell < 60) {
+                $s['total_dwell_formatted'] = $dwell . 's';
+            } else {
+                $mins = floor($dwell / 60);
+                $secs = $dwell % 60;
+                $s['total_dwell_formatted'] = $mins . 'm ' . $secs . 's';
+            }
+        }
+
+        Response::success([
+            'organization_id' => $orgId,
+            'name' => $org['name'],
+            'bot_token' => $botToken,
+            'widget_url' => $widgetUrl,
+            'demo_url' => $demoUrl,
+            'summary' => $stats,
+            'sessions' => $sessions
+        ]);
     }
 
     /**

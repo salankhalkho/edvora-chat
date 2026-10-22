@@ -534,6 +534,7 @@ $router->get('/superadmin/demo-accounts', function (Request $req) {
     require dirname(__DIR__) . '/public/superadmin/demo-accounts.html';
 });
 $router->get('/v1/superadmin/demo-accounts', [SuperAdminController::class, 'getDemoAccounts'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
+$router->get('/v1/superadmin/demo-accounts/{id}/visitors', [SuperAdminController::class, 'getDemoVisitors'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
 $router->post('/v1/superadmin/demo-accounts', [SuperAdminController::class, 'createDemoAccount'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
 $router->delete('/v1/superadmin/demo-accounts/{id}', [SuperAdminController::class, 'deleteDemoAccount'], [AuthMiddleware::class, SuperAdminMiddleware::class]);
 $router->post('/v1/superadmin/demo-accounts/{id}/convert', [SuperAdminController::class, 'convertDemoToStandard'], [AuthMiddleware::class, SuperAdminMiddleware::class]);

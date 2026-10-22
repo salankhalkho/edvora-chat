@@ -38,9 +38,17 @@ class TrackingController
             return;
         }
 
-        // Minimum Dwell Filter: Require at least 5 seconds dwell time
-        // Unless it's an ongoing incremental heartbeat (which is already tracking a validated session)
-        if ($dwellSeconds < 5 && !$isHeartbeat) {
+        // Minimum Dwell Filter: Require at least 5 seconds dwell time for normal website traffic,
+        // but capture immediate 1s visits for demo/test links so sales prospects are never missed.
+        $isDemoOrTest = !empty($body['is_test'])
+            || str_contains($url, '/widget/')
+            || str_contains($url, '/demo/')
+            || str_contains($url, '/test/')
+            || str_starts_with($sessionId, 'test_')
+            || str_starts_with($visitorId, 'test_');
+
+        $minThreshold = $isDemoOrTest ? 1 : 5;
+        if ($dwellSeconds < $minThreshold && !$isHeartbeat) {
             Response::json(['status' => 'ignored', 'reason' => 'dwell_time_below_threshold'], 200);
             return;
         }

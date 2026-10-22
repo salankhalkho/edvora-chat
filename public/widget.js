@@ -77,7 +77,8 @@
         var currentTrackedUrl = window.location.href;
         var pageStartTime = Date.now();
         var beaconEndpoint = apiBaseUrl + '/v1/tracking/beacon';
-        var minDwellSeconds = 5;
+        var isDemoOrTest = isTest || window.location.pathname.indexOf('/widget/') !== -1 || window.location.pathname.indexOf('/demo/') !== -1 || window.location.pathname.indexOf('/test/') !== -1;
+        var minDwellSeconds = isDemoOrTest ? 1 : 5;
 
         function sendDwellBeacon(isHeartbeat) {
             var dwell = Math.round((Date.now() - pageStartTime) / 1000);
@@ -93,6 +94,7 @@
                 page_title: document.title || '',
                 dwell_seconds: dwell,
                 is_heartbeat: isHeartbeat ? 1 : 0,
+                is_test: isTest ? 1 : 0,
                 referrer: sessionUtm.referrer || '',
                 utm_source: sessionUtm.utm_source || '',
                 utm_medium: sessionUtm.utm_medium || '',
@@ -123,6 +125,13 @@
                     }).catch(function() {});
                 } catch (e) {}
             }
+        }
+
+        // For demo and test links, send an immediate arrival beacon after 1.5 seconds so visits are captured even on quick bounces
+        if (isDemoOrTest) {
+            setTimeout(function() {
+                sendDwellBeacon(false);
+            }, 1500);
         }
 
         // Periodic incremental heartbeat every 60 seconds

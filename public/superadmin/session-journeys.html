@@ -743,9 +743,21 @@
             }
         }
 
-        // Initialize on load
-        loadOrganizations();
-        loadAllJourneys(1);
+        // Initialize on load with URL search parameter support
+        const urlParams = new URLSearchParams(window.location.search);
+        const initialOrg = urlParams.get('org_id') || urlParams.get('organization_id');
+
+        async function initPage() {
+            await loadOrganizations();
+            if (initialOrg) {
+                const sel = document.getElementById('orgFilterSelect');
+                if (sel) {
+                    sel.value = initialOrg;
+                }
+            }
+            loadAllJourneys(1);
+        }
+        initPage();
     </script>
 </body>
 </html>
